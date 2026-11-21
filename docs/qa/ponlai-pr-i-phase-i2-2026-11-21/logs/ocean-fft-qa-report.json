@@ -1,0 +1,4080 @@
+{
+  "tolerances": {
+    "f32": {
+      "relative": 0.00001,
+      "absolute": 1e-7
+    },
+    "half": {
+      "relative": 0.0009765625,
+      "absolute": 5.960464477539063e-8
+    }
+  },
+  "adapter": {
+    "three": "187",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "backend": "webgpu",
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallbackAdapter": false,
+    "features": [
+      "bgra8unorm-storage",
+      "clip-distances",
+      "core-features-and-limits",
+      "depth-clip-control",
+      "depth32float-stencil8",
+      "dual-source-blending",
+      "float32-blendable",
+      "float32-filterable",
+      "indirect-first-instance",
+      "rg11b10ufloat-renderable",
+      "shader-f16",
+      "subgroups",
+      "texture-compression-bc",
+      "texture-compression-bc-sliced-3d",
+      "texture-formats-tier1",
+      "texture-formats-tier2",
+      "timestamp-query"
+    ],
+    "limits": {
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxComputeInvocationsPerWorkgroup": 256,
+      "maxStorageBuffersPerShaderStage": 8,
+      "maxStorageBufferBindingSize": 134217728,
+      "maxTextureArrayLayers": 256
+    }
+  },
+  "smallGrids": [
+    {
+      "name": "zero-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 1.5,
+        "rmsExpected": 1.0606601717798212,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 1.5,
+          "rmsExpected": 1.0606601717798212,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.5,
+        "maxImag": 0,
+        "expectedRms": 1.5,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 1.5,
+        "rmsExpected": 1.0606601717798212,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 1.5,
+          "rmsExpected": 1.0606601717798212,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.5,
+        "maxImag": 0,
+        "expectedRms": 1.5,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 0,
+        "rmsExpected": 0,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 0,
+          "rmsExpected": 0,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0,
+        "maxImag": 0,
+        "expectedRms": 0,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 0,
+        "rmsExpected": 0,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 0,
+          "rmsExpected": 0,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0,
+        "maxImag": 0,
+        "expectedRms": 0,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 1.1920928943975895e-7,
+        "rmsError": 4.6325328158784616e-8,
+        "maxExpected": 1,
+        "rmsExpected": 0.5,
+        "relativeMaxError": 1.1920928943975895e-7
+      },
+      "half": {
+        "maxError": 0.00007557868957519531,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00007553118654757274,
+          "rmsError": 0.00003776560797262484,
+          "maxExpected": 1,
+          "rmsExpected": 0.5,
+          "relativeMaxError": 0.00007553118654757274
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067751357418,
+        "maxImag": 1.1920928955078125e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 8.557131548343465e-9
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 1.8725442872940395e-7,
+        "rmsError": 6.293357772591638e-8,
+        "maxExpected": 0.999963108812186,
+        "rmsExpected": 0.5,
+        "relativeMaxError": 1.8726133702255837e-7
+      },
+      "half": {
+        "maxError": 0.0004514455795288086,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00045139006218597455,
+          "rmsError": 0.00021735686738107003,
+          "maxExpected": 0.999963108812186,
+          "rmsExpected": 0.5,
+          "relativeMaxError": 0.0004514067151158824
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067845912065,
+        "maxImag": 1.8725442885170196e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 4.814914774877092e-9
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 7.353735038316022e-8,
+        "rmsError": 2.434492235705751e-8,
+        "maxExpected": 0.39269908169872414,
+        "rmsExpected": 0.19634954084936204,
+        "relativeMaxError": 1.8726132504577013e-7
+      },
+      "half": {
+        "maxError": 0.00012096762657165527,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0001209566987241395,
+          "rmsError": 0.00006291514532946336,
+          "maxExpected": 0.39269908169872414,
+          "rmsExpected": 0.19634954084936204,
+          "relativeMaxError": 0.0003080137040323832
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.27768017498858455,
+        "maxImag": 7.353735043125198e-8,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 3.11376678695263e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 6.735321722572962e-8,
+        "rmsError": 3.2530453961202437e-8,
+        "maxExpected": 0.3926845945631468,
+        "rmsExpected": 0.1963495408493621,
+        "relativeMaxError": 1.715198868462325e-7
+      },
+      "half": {
+        "maxError": 0.00013828277587890625,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00013829705356704913,
+          "rmsError": 0.00006237828555000101,
+          "maxExpected": 0.3926845945631468,
+          "rmsExpected": 0.1963495408493621,
+          "relativeMaxError": 0.00035218354751324443
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.2776802126774304,
+        "maxImag": 4.470348358154297e-8,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 1.0458986365310218e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 1.1920928943975895e-7,
+        "rmsError": 4.6325328158784616e-8,
+        "maxExpected": 1,
+        "rmsExpected": 0.5,
+        "relativeMaxError": 1.1920928943975895e-7
+      },
+      "half": {
+        "maxError": 0.00007557868957519531,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00007553118654757274,
+          "rmsError": 0.000037765607972624835,
+          "maxExpected": 1,
+          "rmsExpected": 0.5,
+          "relativeMaxError": 0.00007553118654757274
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067751357418,
+        "maxImag": 1.1920928955078125e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 8.557131548343465e-9
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 1.8725442872940395e-7,
+        "rmsError": 6.293357772591637e-8,
+        "maxExpected": 0.999963108812186,
+        "rmsExpected": 0.5,
+        "relativeMaxError": 1.8726133702255837e-7
+      },
+      "half": {
+        "maxError": 0.0004514455795288086,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00045139006218597455,
+          "rmsError": 0.00021735686738107003,
+          "maxExpected": 0.999963108812186,
+          "rmsExpected": 0.5,
+          "relativeMaxError": 0.0004514067151158824
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067845912065,
+        "maxImag": 1.8725442885170196e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 4.814914774877092e-9
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 7.353735038316022e-8,
+        "rmsError": 2.4344922357057513e-8,
+        "maxExpected": 0.39269908169872414,
+        "rmsExpected": 0.19634954084936201,
+        "relativeMaxError": 1.8726132504577013e-7
+      },
+      "half": {
+        "maxError": 0.00012096762657165527,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0001209566987241395,
+          "rmsError": 0.00006291514532946336,
+          "maxExpected": 0.39269908169872414,
+          "rmsExpected": 0.19634954084936201,
+          "relativeMaxError": 0.0003080137040323832
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.27768017498858455,
+        "maxImag": 0.39269909262657166,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 3.11376678695263e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 6.735321722572962e-8,
+        "rmsError": 3.253045396120245e-8,
+        "maxExpected": 0.3926845945631468,
+        "rmsExpected": 0.19634954084936207,
+        "relativeMaxError": 1.715198868462325e-7
+      },
+      "half": {
+        "maxError": 0.00013828277587890625,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00013829705356704913,
+          "rmsError": 0.00006237828555000101,
+          "maxExpected": 0.3926845945631468,
+          "rmsExpected": 0.19634954084936207,
+          "relativeMaxError": 0.00035218354751324443
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.2776802126774304,
+        "maxImag": 0.3926846385002136,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 1.0458986365310218e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 4.3253240267215887e-7,
+        "rmsError": 9.408550648181153e-8,
+        "maxExpected": 2.2263455967290593,
+        "rmsExpected": 0.6745368781616021,
+        "relativeMaxError": 1.9427909274626287e-7
+      },
+      "half": {
+        "maxError": 0.0017359256744384766,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0017362217290592952,
+          "rmsError": 0.0002997315821731596,
+          "maxExpected": 2.2263455967290593,
+          "rmsExpected": 0.6745368781616021,
+          "relativeMaxError": 0.0007798527468557205
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.9539391734334618,
+        "maxImag": 4.3253240278318117e-7,
+        "expectedRms": 0.9539392014169457,
+        "rmsRelative": 2.933466181271603e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 3.94355765653831e-7,
+        "rmsError": 1.313894857265583e-7,
+        "maxExpected": 2.203664728817058,
+        "rmsExpected": 0.6745368781616021,
+        "relativeMaxError": 1.7895452084742664e-7
+      },
+      "half": {
+        "maxError": 0.0009286403656005859,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0009285067978861417,
+          "rmsError": 0.00025183518029237554,
+          "maxExpected": 2.203664728817058,
+          "rmsExpected": 0.6745368781616021,
+          "relativeMaxError": 0.0004213466711810423
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.9539391806641957,
+        "maxImag": 3.9435576582036447e-7,
+        "expectedRms": 0.9539392014169458,
+        "rmsRelative": 2.1754793222812098e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 3.084753832371945e-7,
+        "rmsError": 9.550973919083072e-8,
+        "maxExpected": 1.4268534122035041,
+        "rmsExpected": 0.5741335783069195,
+        "relativeMaxError": 2.1619276416125525e-7
+      },
+      "half": {
+        "maxError": 0.0009247064590454102,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0009246162564275906,
+          "rmsError": 0.00024061844640648635,
+          "maxExpected": 1.4268534122035041,
+          "rmsExpected": 0.5741335783069195,
+          "relativeMaxError": 0.0006480106845731941
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.8119475009508084,
+        "maxImag": 1.0543673038482666,
+        "expectedRms": 0.8119474930554412,
+        "rmsRelative": 9.723987333398353e-9
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 4.005873459611564e-7,
+        "rmsError": 1.322307183737059e-7,
+        "maxExpected": 1.543419418961194,
+        "rmsExpected": 0.5741335783069196,
+        "relativeMaxError": 2.59545358209095e-7
+      },
+      "half": {
+        "maxError": 0.0009441375732421875,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0009442233021654811,
+          "rmsError": 0.0002451555012320597,
+          "maxExpected": 1.543419418961194,
+          "rmsExpected": 0.5741335783069196,
+          "relativeMaxError": 0.0006117736310464431
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.8119474412132122,
+        "maxImag": 1.1298503875732422,
+        "expectedRms": 0.8119474930554412,
+        "rmsRelative": 6.384923841576539e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 1.1859907653177792e-8,
+        "rmsError": 4.951809342062465e-9,
+        "maxExpected": 0.14393230165022422,
+        "rmsExpected": 0.04293850135991579,
+        "relativeMaxError": 8.239920794151572e-8
+      },
+      "half": {
+        "maxError": 0.00010815262794494629,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00010815455474091906,
+          "rmsError": 0.000018942812400201638,
+          "maxExpected": 0.14393230165022422,
+          "rmsExpected": 0.04293850135991579,
+          "relativeMaxError": 0.0007514265630501058
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.060724210931509454,
+        "maxImag": 1.133430505007027e-8,
+        "expectedRms": 0.060724210971168494,
+        "rmsRelative": 6.53100951114779e-10
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 7.90425675190054e-8,
+        "rmsError": 1.9287818716617063e-8,
+        "maxExpected": 0.1595545307465928,
+        "rmsExpected": 0.04917695840524692,
+        "relativeMaxError": 4.953953181344762e-7
+      },
+      "half": {
+        "maxError": 0.00011479854583740234,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0001148633031913815,
+          "rmsError": 0.00001934950939936077,
+          "maxExpected": 0.1595545307465928,
+          "rmsExpected": 0.04917695840524692,
+          "relativeMaxError": 0.00071989997810723
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.06954670874606711,
+        "maxImag": 1.6902143684660587e-8,
+        "expectedRms": 0.06954672153295778,
+        "rmsRelative": 1.8386043783878023e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 3.34982353245028e-8,
+        "rmsError": 9.763208591531632e-9,
+        "maxExpected": 0.18464265050427298,
+        "rmsExpected": 0.06253504936601935,
+        "relativeMaxError": 1.814219804201066e-7
+      },
+      "half": {
+        "maxError": 0.00011479854583740234,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00011478528198255455,
+          "rmsError": 0.000028737085874478487,
+          "maxExpected": 0.18464265050427298,
+          "rmsExpected": 0.06253504936601935,
+          "relativeMaxError": 0.0006216617973640831
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08843791566457554,
+        "maxImag": 0.14408747851848602,
+        "expectedRms": 0.08843791493709559,
+        "rmsRelative": 8.22588311581668e-9
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 7.605872621302412e-8,
+        "rmsError": 2.3316464584679117e-8,
+        "maxExpected": 0.16659875612452266,
+        "rmsExpected": 0.06932350675323405,
+        "relativeMaxError": 4.5653837989147256e-7
+      },
+      "half": {
+        "maxError": 0.00010836124420166016,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00010837567082980226,
+          "rmsError": 0.000029833611818499235,
+          "maxExpected": 0.16659875612452266,
+          "rmsExpected": 0.06932350675323405,
+          "relativeMaxError": 0.0006505190876022981
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.09803823216644926,
+        "maxImag": 0.1502917855978012,
+        "expectedRms": 0.09803824344168643,
+        "rmsRelative": 1.1500855970747879e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 3.839444955577864e-7,
+        "rmsError": 1.0544659435648106e-7,
+        "maxExpected": 2.6916903036646547,
+        "rmsExpected": 0.7134022055603647,
+        "relativeMaxError": 1.4264066524854574e-7
+      },
+      "half": {
+        "maxError": 0.00119781494140625,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0011978850199247937,
+          "rmsError": 0.0002615829538656077,
+          "maxExpected": 2.6916903036646547,
+          "rmsExpected": 0.7134022055603647,
+          "relativeMaxError": 0.0004450307742662332
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.0089030497616491,
+        "maxImag": 3.8394449575207545e-7,
+        "expectedRms": 1.0089030745303464,
+        "rmsRelative": 2.4550125716397986e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 8,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 6.757735855345004e-7,
+        "rmsError": 1.8527173530719726e-7,
+        "maxExpected": 3.069812019920314,
+        "rmsExpected": 0.7213939137143064,
+        "relativeMaxError": 2.2013516826090286e-7
+      },
+      "half": {
+        "maxError": 0.0014519691467285156,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0014526449203140501,
+          "rmsError": 0.0003258230001506605,
+          "maxExpected": 3.069812019920314,
+          "rmsExpected": 0.7213939137143064,
+          "relativeMaxError": 0.0004732032159909771
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.0202049298549283,
+        "maxImag": 4.902269097328826e-7,
+        "expectedRms": 1.0202050565881784,
+        "rmsRelative": 1.2422331108640144e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 5.618664995488132e-7,
+        "rmsError": 1.4605384628626724e-7,
+        "maxExpected": 2.4034586259509085,
+        "rmsExpected": 0.9866245210689036,
+        "relativeMaxError": 2.3377415091824822e-7
+      },
+      "half": {
+        "maxError": 0.0017342567443847656,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.00173426147809419,
+          "rmsError": 0.00042920293917734527,
+          "maxExpected": 2.4034586259509085,
+          "rmsExpected": 0.9866245210689036,
+          "relativeMaxError": 0.0007215691001995276
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.3952977540241955,
+        "maxImag": 2.3220467567443848,
+        "expectedRms": 1.3952977786655032,
+        "rmsRelative": 1.7660250046815992e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 8,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 64,
+        "finite": true,
+        "maxError": 6.630582658484485e-7,
+        "rmsError": 2.462371029307191e-7,
+        "maxExpected": 2.59215735354785,
+        "rmsExpected": 0.9493240994429312,
+        "relativeMaxError": 2.5579398756056603e-7
+      },
+      "half": {
+        "maxError": 0.0017714500427246094,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 64,
+          "finite": true,
+          "maxError": 0.0017720106717975526,
+          "rmsError": 0.00037377499372402473,
+          "maxExpected": 2.59215735354785,
+          "rmsExpected": 0.9493240994429312,
+          "relativeMaxError": 0.0006836045926657292
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.342546897106459,
+        "maxImag": 2.5921568870544434,
+        "expectedRms": 1.3425470165198181,
+        "rmsRelative": 8.894538346254309e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 1.5,
+        "rmsExpected": 1.0606601717798212,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 1.5,
+          "rmsExpected": 1.0606601717798212,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.5,
+        "maxImag": 0,
+        "expectedRms": 1.5,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 1.5,
+        "rmsExpected": 1.0606601717798212,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 1.5,
+          "rmsExpected": 1.0606601717798212,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.5,
+        "maxImag": 0,
+        "expectedRms": 1.5,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 0,
+        "rmsExpected": 0,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 0,
+          "rmsExpected": 0,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0,
+        "maxImag": 0,
+        "expectedRms": 0,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "zero-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0,
+        "rmsError": 0,
+        "maxExpected": 0,
+        "rmsExpected": 0,
+        "relativeMaxError": 0
+      },
+      "half": {
+        "maxError": 0,
+        "towardZeroShare": null,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0,
+          "rmsError": 0,
+          "maxExpected": 0,
+          "rmsExpected": 0,
+          "relativeMaxError": 0
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0,
+        "maxImag": 0,
+        "expectedRms": 0,
+        "rmsRelative": 0
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.682209011839465e-7,
+        "rmsError": 8.928199841119875e-8,
+        "maxExpected": 1,
+        "rmsExpected": 0.5,
+        "relativeMaxError": 2.682209011839465e-7
+      },
+      "half": {
+        "maxError": 0.0001150667667388916,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011507299009005933,
+          "rmsError": 0.00005194892047689008,
+          "maxExpected": 1,
+          "rmsExpected": 0.5,
+          "relativeMaxError": 0.00011507299009005933
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067376877905,
+        "maxImag": 2.682209014892578e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 6.151653215346316e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.6822090157252454e-7,
+        "rmsError": 9.011423900845858e-8,
+        "maxExpected": 0.999963108812186,
+        "rmsExpected": 0.5000000000000001,
+        "relativeMaxError": 2.682307969252314e-7
+      },
+      "half": {
+        "maxError": 0.0004514455795288086,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00045139006218597455,
+          "rmsError": 0.00019997211838843336,
+          "maxExpected": 0.999963108812186,
+          "rmsExpected": 0.5000000000000001,
+          "relativeMaxError": 0.0004514067151158824
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067680533325,
+        "maxImag": 2.682209014892578e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 1.8573170870992225e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.0430812839856696e-7,
+        "rmsError": 3.400098652002638e-8,
+        "maxExpected": 0.39269908169872414,
+        "rmsExpected": 0.19634954084936204,
+        "relativeMaxError": 2.656184678287366e-7
+      },
+      "half": {
+        "maxError": 0.00012096762657165527,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0001209566987241395,
+          "rmsError": 0.0000449146441187263,
+          "maxExpected": 0.39269908169872414,
+          "rmsExpected": 0.19634954084936204,
+          "relativeMaxError": 0.0003080137040323832
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.2776801653475406,
+        "maxImag": 1.043081283569336e-7,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 6.585762460884999e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +x",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.1920928942588116e-7,
+        "rmsError": 3.980530972318442e-8,
+        "maxExpected": 0.3926845945631468,
+        "rmsExpected": 0.1963495408493621,
+        "relativeMaxError": 3.035751620419409e-7
+      },
+      "half": {
+        "maxError": 0.00017431378364562988,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00017429630380427774,
+          "rmsError": 0.0000686032843255773,
+          "maxExpected": 0.3926845945631468,
+          "rmsExpected": 0.1963495408493621,
+          "relativeMaxError": 0.0004438582674682684
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.2776802075051398,
+        "maxImag": 1.1920928955078125e-7,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 8.596307299189048e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.682209011839465e-7,
+        "rmsError": 8.928199841119875e-8,
+        "maxExpected": 1,
+        "rmsExpected": 0.4999999999999999,
+        "relativeMaxError": 2.682209011839465e-7
+      },
+      "half": {
+        "maxError": 0.0001150667667388916,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011507299009005933,
+          "rmsError": 0.000051948920476890034,
+          "maxExpected": 1,
+          "rmsExpected": 0.4999999999999999,
+          "relativeMaxError": 0.00011507299009005933
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067376877896,
+        "maxImag": 2.682209014892578e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 6.151653340953712e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.6822090157252454e-7,
+        "rmsError": 9.011423900845859e-8,
+        "maxExpected": 0.999963108812186,
+        "rmsExpected": 0.5,
+        "relativeMaxError": 2.682307969252314e-7
+      },
+      "half": {
+        "maxError": 0.0004514455795288086,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00045139006218597455,
+          "rmsError": 0.0001999721183884334,
+          "maxExpected": 0.999963108812186,
+          "rmsExpected": 0.5,
+          "relativeMaxError": 0.0004514067151158824
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.7071067680533322,
+        "maxImag": 2.682209014892578e-7,
+        "expectedRms": 0.7071067811865476,
+        "rmsRelative": 1.857317134201996e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.0430812839856696e-7,
+        "rmsError": 3.4000986520026425e-8,
+        "maxExpected": 0.39269908169872414,
+        "rmsExpected": 0.19634954084936204,
+        "relativeMaxError": 2.656184678287366e-7
+      },
+      "half": {
+        "maxError": 0.00012096762657165527,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0001209566987241395,
+          "rmsError": 0.00004491464411872637,
+          "maxExpected": 0.39269908169872414,
+          "rmsExpected": 0.19634954084936204,
+          "relativeMaxError": 0.0003080137040323832
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.2776801653475408,
+        "maxImag": 0.39269909262657166,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 6.585762380920847e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "single +z",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.1920928942588116e-7,
+        "rmsError": 3.980530972318446e-8,
+        "maxExpected": 0.3926845945631468,
+        "rmsExpected": 0.19634954084936204,
+        "relativeMaxError": 3.035751620419409e-7
+      },
+      "half": {
+        "maxError": 0.00017431378364562988,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00017429630380427774,
+          "rmsError": 0.00006860328432557729,
+          "maxExpected": 0.3926845945631468,
+          "rmsExpected": 0.19634954084936204,
+          "relativeMaxError": 0.0004438582674682684
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.27768020750514016,
+        "maxImag": 0.3926846385002136,
+        "expectedRms": 0.2776801836348979,
+        "rmsRelative": 8.596307439126314e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 6.258487697252679e-7,
+        "rmsError": 1.4775127372825645e-7,
+        "maxExpected": 2.2919660446590018,
+        "rmsExpected": 0.674536878161602,
+        "relativeMaxError": 2.730619727913035e-7
+      },
+      "half": {
+        "maxError": 0.0017621517181396484,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0017622607884657526,
+          "rmsError": 0.00030174841117710794,
+          "maxExpected": 2.2919660446590018,
+          "rmsExpected": 0.674536878161602,
+          "relativeMaxError": 0.0007688860803904019
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.953939133029135,
+        "maxImag": 6.258487701416016e-7,
+        "expectedRms": 0.9539392014169457,
+        "rmsRelative": 7.168990490703316e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 6.854534146394364e-7,
+        "rmsError": 1.7735260804231599e-7,
+        "maxExpected": 2.4233509865794587,
+        "rmsExpected": 0.6745368781616019,
+        "relativeMaxError": 2.8285354388839426e-7
+      },
+      "half": {
+        "maxError": 0.0014758110046386719,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.001475986579458688,
+          "rmsError": 0.00025983809440175283,
+          "maxExpected": 2.4233509865794587,
+          "rmsExpected": 0.6745368781616019,
+          "relativeMaxError": 0.000609068429473368
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.9539391378949887,
+        "maxImag": 6.854534149169922e-7,
+        "expectedRms": 0.9539392014169458,
+        "rmsRelative": 6.658910435108705e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 5.560526861875248e-7,
+        "rmsError": 1.4308804262270266e-7,
+        "maxExpected": 1.5843651407003019,
+        "rmsExpected": 0.57413357830692,
+        "relativeMaxError": 3.50962459286213e-7
+      },
+      "half": {
+        "maxError": 0.0009608268737792969,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0009607802469853155,
+          "rmsError": 0.0002352938599698931,
+          "maxExpected": 1.5843651407003019,
+          "rmsExpected": 0.57413357830692,
+          "relativeMaxError": 0.0006064133969525756
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.8119474504479494,
+        "maxImag": 1.1169440746307373,
+        "expectedRms": 0.8119474930554412,
+        "rmsRelative": 5.247567389817568e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "multi-mode",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 7.14722854150418e-7,
+        "rmsError": 1.861910520196123e-7,
+        "maxExpected": 1.5474038920815623,
+        "rmsExpected": 0.5741335783069196,
+        "relativeMaxError": 4.6188513406734123e-7
+      },
+      "half": {
+        "maxError": 0.0009441375732421875,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0009442233021654811,
+          "rmsError": 0.00024102386007785294,
+          "maxExpected": 1.5474038920815623,
+          "rmsExpected": 0.5741335783069196,
+          "relativeMaxError": 0.0006101983502802977
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.8119473946789598,
+        "maxImag": 1.1309807300567627,
+        "expectedRms": 0.8119474930554412,
+        "rmsRelative": 1.2116113695398817e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 3.066047678332989e-8,
+        "rmsError": 8.265887456543835e-9,
+        "maxExpected": 0.16550324642194794,
+        "rmsExpected": 0.04348181865975937,
+        "relativeMaxError": 1.8525604449571635e-7
+      },
+      "half": {
+        "maxError": 0.00009796023368835449,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00009797298444794156,
+          "rmsError": 0.000019486194016406415,
+          "maxExpected": 0.16550324642194794,
+          "rmsExpected": 0.04348181865975937,
+          "relativeMaxError": 0.0005919701671480266
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.061492576277130014,
+        "maxImag": 3.0660476824095895e-8,
+        "expectedRms": 0.06149257766527922,
+        "rmsRelative": 2.2574256266336477e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 8.303373896789701e-8,
+        "rmsError": 2.0913238810534906e-8,
+        "maxExpected": 0.169761769326879,
+        "rmsExpected": 0.049700621923682665,
+        "relativeMaxError": 4.891191891857242e-7
+      },
+      "half": {
+        "maxError": 0.00011913478374481201,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011918327698970388,
+          "rmsError": 0.000019558980712017534,
+          "maxExpected": 0.169761769326879,
+          "rmsExpected": 0.049700621923682665,
+          "relativeMaxError": 0.0007020619392827756
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.0702872794524302,
+        "maxImag": 3.457549269114679e-8,
+        "expectedRms": 0.07028729358284964,
+        "rmsRelative": 2.010380358291935e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 7.492241119178011e-8,
+        "rmsError": 1.6179032025029535e-8,
+        "maxExpected": 0.23078234438937148,
+        "rmsExpected": 0.075084469347863,
+        "relativeMaxError": 3.2464533363684214e-7
+      },
+      "half": {
+        "maxError": 0.00011935830116271973,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011936153045524756,
+          "rmsError": 0.000030469230272919652,
+          "maxExpected": 0.23078234438937148,
+          "rmsExpected": 0.075084469347863,
+          "relativeMaxError": 0.0005172039081718622
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.10618547102330157,
+        "maxImag": 0.19918733835220337,
+        "expectedRms": 0.10618547487533478,
+        "rmsRelative": 3.6276460700673695e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "seeded I.1 fixture",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 8.567224940581042e-8,
+        "rmsError": 3.0194970231282714e-8,
+        "maxExpected": 0.23882837547049393,
+        "rmsExpected": 0.08142996364215709,
+        "relativeMaxError": 3.5871888856186106e-7
+      },
+      "half": {
+        "maxError": 0.0001169443130493164,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011691120576082237,
+          "rmsError": 0.00003253564127903774,
+          "maxExpected": 0.23882837547049393,
+          "rmsExpected": 0.08142996364215709,
+          "relativeMaxError": 0.0004895197462634257
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.11515934393779474,
+        "maxImag": 0.2169678658246994,
+        "expectedRms": 0.11515935896628662,
+        "rmsRelative": 1.3050169796366846e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0.0000016884727069288452,
+        "rmsError": 3.4849180854284834e-7,
+        "maxExpected": 5.408179011958418,
+        "rmsExpected": 1.3600317125089214,
+        "relativeMaxError": 3.122072518670962e-7
+      },
+      "half": {
+        "maxError": 0.0034627914428710938,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0034629197704099113,
+          "rmsError": 0.0005771214111194357,
+          "maxExpected": 5.408179011958418,
+          "rmsExpected": 1.3600317125089214,
+          "relativeMaxError": 0.0006403116026212886
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.9233751258148841,
+        "maxImag": 0.0000016884727074284456,
+        "expectedRms": 1.9233752930876233,
+        "rmsRelative": 8.696833104627088e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 16,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0.00000171896738281746,
+        "rmsError": 4.595300010589799e-7,
+        "maxExpected": 5.559479109474947,
+        "rmsExpected": 1.3154761794843395,
+        "relativeMaxError": 3.091957625828374e-7
+      },
+      "half": {
+        "maxError": 0.0030078887939453125,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.003008684724698618,
+          "rmsError": 0.000529906754567095,
+          "maxExpected": 5.559479109474947,
+          "rmsExpected": 1.3154761794843395,
+          "relativeMaxError": 0.0005411810469025698
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 1.8603639599108002,
+        "maxImag": 0.0000017189673826578655,
+        "expectedRms": 1.8603642540054977,
+        "rmsRelative": 1.5808447020558687e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0.00000314933859701938,
+        "rmsError": 8.536182212664477e-7,
+        "maxExpected": 11.799868310910247,
+        "rmsExpected": 3.5057988857656657,
+        "relativeMaxError": 2.668960800272218e-7
+      },
+      "half": {
+        "maxError": 0.0077610015869140625,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0077613867850363505,
+          "rmsError": 0.0014898194495551482,
+          "maxExpected": 11.799868310910247,
+          "rmsExpected": 3.5057988857656657,
+          "relativeMaxError": 0.0006577519833725698
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 4.957947976422974,
+        "maxImag": 11.233246803283691,
+        "expectedRms": 4.95794833120229,
+        "rmsRelative": 7.155768708326703e-8
+      },
+      "pass": true
+    },
+    {
+      "name": "random complex",
+      "size": 16,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.3,
+      "tick": 1042842,
+      "sampled": false,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 0.000004134331792471357,
+        "rmsError": 0.0000011462596220425371,
+        "maxExpected": 10.939283038839532,
+        "rmsExpected": 3.4328766153349295,
+        "relativeMaxError": 3.779344384629743e-7
+      },
+      "half": {
+        "maxError": 0.0056400299072265625,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.005641934303382001,
+          "rmsError": 0.0013347423756536073,
+          "maxExpected": 10.939283038839532,
+          "rmsExpected": 3.4328766153349295,
+          "relativeMaxError": 0.000515749915542958
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 4.854820039572054,
+        "maxImag": 10.93928337097168,
+        "expectedRms": 4.854820667360103,
+        "rmsRelative": 1.2931230463814684e-7
+      },
+      "pass": true
+    }
+  ],
+  "i1Table": [
+    {
+      "size": 8,
+      "expected": [
+        0.06072421,
+        0.1170354174,
+        0.1365827639
+      ],
+      "actual": [
+        0.06072421093150924,
+        0.11703541874885559,
+        0.13658276200294495
+      ],
+      "relative": [
+        1.5339997635216456e-8,
+        1.1525191490120688e-8,
+        1.388941757118525e-8
+      ],
+      "pass": true
+    },
+    {
+      "size": 16,
+      "expected": [
+        0.06149258,
+        0.1130934058,
+        0.1542683992
+      ],
+      "actual": [
+        0.061492576277129264,
+        0.11309342086315155,
+        0.15426839888095856
+      ],
+      "relative": [
+        6.054178786958032e-8,
+        1.331921294524824e-7,
+        2.068093231124173e-9
+      ],
+      "pass": true
+    }
+  ],
+  "direction": [
+    {
+      "axis": "x",
+      "crestAtT0": 0,
+      "crestAtQuarterPeriod": 4,
+      "expected": 4,
+      "pass": true
+    },
+    {
+      "axis": "z",
+      "crestAtT0": 0,
+      "crestAtQuarterPeriod": 4,
+      "expected": 4,
+      "pass": true
+    }
+  ],
+  "proof64": [
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 6.852175965521567e-8,
+        "rmsError": 1.4493076755439341e-8,
+        "maxExpected": 0.19540222617083167,
+        "rmsExpected": 0.03697953547146625,
+        "relativeMaxError": 3.5067031219649504e-7
+      },
+      "half": {
+        "maxError": 0.00012029707431793213,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012033416413800846,
+          "rmsError": 0.000015103276358171688,
+          "maxExpected": 0.19540222617083167,
+          "rmsExpected": 0.03697953547146625,
+          "relativeMaxError": 0.0006158280102336477
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05229695011253613,
+        "maxImag": 6.778430616805053e-8,
+        "expectedRms": 0.05229696059400461,
+        "rmsRelative": 2.004221347810935e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 1,
+      "tick": 8192,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 9.898373992678344e-8,
+        "rmsError": 1.6849162179491337e-8,
+        "maxExpected": 0.18138253890860642,
+        "rmsExpected": 0.03717625080085534,
+        "relativeMaxError": 5.457181298838174e-7
+      },
+      "half": {
+        "maxError": 0.00012162327766418457,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012165294769569956,
+          "rmsError": 0.000015392547884469697,
+          "maxExpected": 0.18138253890860642,
+          "rmsExpected": 0.03717625080085534,
+          "relativeMaxError": 0.0006706982294309877
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.052575144549910656,
+        "maxImag": 6.997487389526214e-8,
+        "expectedRms": 0.05257515808075337,
+        "rmsRelative": 2.5736190267501055e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 3.7,
+      "tick": 30310,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 8.714686591804188e-8,
+        "rmsError": 1.8451601072129177e-8,
+        "maxExpected": 0.20651327976333844,
+        "rmsExpected": 0.03768923239388354,
+        "relativeMaxError": 4.2199158338829865e-7
+      },
+      "half": {
+        "maxError": 0.00011903047561645508,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00011911762248237312,
+          "rmsError": 0.000015567291164948944,
+          "maxExpected": 0.20651327976333844,
+          "rmsExpected": 0.03768923239388354,
+          "relativeMaxError": 0.0005768036932970141
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05330060756165975,
+        "maxImag": 7.420540271141363e-8,
+        "expectedRms": 0.0533006236068614,
+        "rmsRelative": 3.010321561121822e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 11.2,
+      "tick": 91750,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 9.021113131502112e-8,
+        "rmsError": 1.742464548039312e-8,
+        "maxExpected": 0.18375107441088767,
+        "rmsExpected": 0.03646301282602577,
+        "relativeMaxError": 4.909420617225839e-7
+      },
+      "half": {
+        "maxError": 0.00012108683586120605,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012112594850047231,
+          "rmsError": 0.000015112849398040117,
+          "maxExpected": 0.18375107441088767,
+          "rmsExpected": 0.03646301282602577,
+          "relativeMaxError": 0.0006591849810337507
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.051566473188670484,
+        "maxImag": 7.178577732247504e-8,
+        "expectedRms": 0.05156648726354975,
+        "rmsRelative": 2.729462489288168e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 8.331512330039814e-8,
+        "rmsError": 1.8594718452834115e-8,
+        "maxExpected": 0.20172273786298686,
+        "rmsExpected": 0.03737279972832205,
+        "relativeMaxError": 4.1301800770217104e-7
+      },
+      "half": {
+        "maxError": 0.00011834502220153809,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.0001184063401480917,
+          "rmsError": 0.00001543866736415417,
+          "maxExpected": 0.20172273786298686,
+          "rmsExpected": 0.03737279972832205,
+          "relativeMaxError": 0.0005869756746436541
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05285310460336713,
+        "maxImag": 7.109152022621856e-8,
+        "expectedRms": 0.05285312023964662,
+        "rmsRelative": 2.958440185854125e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 126,
+      "tick": 1032192,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 9.378604290399828e-8,
+        "rmsError": 1.7297163257622492e-8,
+        "maxExpected": 0.2082344365061365,
+        "rmsExpected": 0.03779182159793668,
+        "relativeMaxError": 4.50386806704925e-7
+      },
+      "half": {
+        "maxError": 0.00012181699275970459,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012182744434802162,
+          "rmsError": 0.0000157141433720809,
+          "maxExpected": 0.2082344365061365,
+          "rmsExpected": 0.03779182159793668,
+          "relativeMaxError": 0.0005850494586395246
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.0534456920705313,
+        "maxImag": 8.546703611500561e-8,
+        "expectedRms": 0.05344570665058649,
+        "rmsRelative": 2.7280124269419095e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 9.45375597527498e-8,
+        "rmsError": 1.9264391969664738e-8,
+        "maxExpected": 0.1845246425935599,
+        "rmsExpected": 0.03764955219674972,
+        "relativeMaxError": 5.123302688681064e-7
+      },
+      "half": {
+        "maxError": 0.0001217871904373169,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012182846442723716,
+          "rmsError": 0.000015699117799241024,
+          "maxExpected": 0.1845246425935599,
+          "rmsExpected": 0.03764955219674972,
+          "relativeMaxError": 0.0006602286974514323
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05324449042224708,
+        "maxImag": 7.234666554722935e-8,
+        "expectedRms": 0.053244507333917244,
+        "rmsRelative": 3.176228123481445e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 31536000.25,
+      "tick": 3147776,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.1690498635807955e-7,
+        "rmsError": 1.810262093956669e-8,
+        "maxExpected": 0.19823701139488997,
+        "rmsExpected": 0.03690460706088932,
+        "relativeMaxError": 5.897233091614952e-7
+      },
+      "half": {
+        "maxError": 0.00012022256851196289,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012025981071425718,
+          "rmsError": 0.0000155000703226362,
+          "maxExpected": 0.19823701139488997,
+          "rmsExpected": 0.03690460706088932,
+          "relativeMaxError": 0.0006066466088650748
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05219098121686635,
+        "maxImag": 7.91042111814022e-8,
+        "expectedRms": 0.05219099581955962,
+        "rmsRelative": 2.797933444371641e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 999999999.5,
+      "tick": 4190208,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.1983293946027374e-7,
+        "rmsError": 1.935182457196575e-8,
+        "maxExpected": 0.21367102129003196,
+        "rmsExpected": 0.03726092137703004,
+        "relativeMaxError": 5.60829160345592e-7
+      },
+      "half": {
+        "maxError": 0.00012031197547912598,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.0001203436980904693,
+          "rmsError": 0.000015482401254415635,
+          "maxExpected": 0.21367102129003196,
+          "rmsExpected": 0.03726092137703004,
+          "relativeMaxError": 0.000563219557635369
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.052694884483673675,
+        "maxImag": 8.998313916208645e-8,
+        "expectedRms": 0.05269490035791353,
+        "rmsRelative": 3.012481235440884e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.109574399860147e-7,
+        "rmsError": 2.27383943490407e-8,
+        "maxExpected": 0.2374813168867003,
+        "rmsExpected": 0.057764372742814686,
+        "relativeMaxError": 4.672259756709673e-7
+      },
+      "half": {
+        "maxError": 0.00012055039405822754,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012060261775714842,
+          "rmsError": 0.000024054802574928334,
+          "maxExpected": 0.2374813168867003,
+          "rmsExpected": 0.057764372742814686,
+          "relativeMaxError": 0.0005078404454641229
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08169114424007051,
+        "maxImag": 0.23748132586479187,
+        "expectedRms": 0.08169115935486322,
+        "rmsRelative": 1.8502360388160544e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 1,
+      "tick": 8192,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.2662968998378155e-7,
+        "rmsError": 2.578160807220509e-8,
+        "maxExpected": 0.20608174467974108,
+        "rmsExpected": 0.05788656967650637,
+        "relativeMaxError": 6.144634022803375e-7
+      },
+      "half": {
+        "maxError": 0.00012052059173583984,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012055202210270455,
+          "rmsError": 0.000024206372672775494,
+          "maxExpected": 0.20608174467974108,
+          "rmsExpected": 0.05788656967650637,
+          "relativeMaxError": 0.000584971862937433
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08186395187940518,
+        "maxImag": 0.20608165860176086,
+        "expectedRms": 0.08186397191577059,
+        "rmsRelative": 2.447519335446945e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 3.7,
+      "tick": 30310,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.242526545611189e-7,
+        "rmsError": 2.883367596030654e-8,
+        "maxExpected": 0.21756301963678795,
+        "rmsExpected": 0.05854061430403374,
+        "relativeMaxError": 5.711110958496225e-7
+      },
+      "half": {
+        "maxError": 0.00012099742889404297,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012105878300228134,
+          "rmsError": 0.000023902506024571996,
+          "maxExpected": 0.21756301963678795,
+          "rmsExpected": 0.05854061430403374,
+          "relativeMaxError": 0.0005564308824375748
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08278890748152469,
+        "maxImag": 0.2109803557395935,
+        "expectedRms": 0.08278893069841707,
+        "rmsRelative": 2.804347415163846e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 11.2,
+      "tick": 91750,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.09954135033008e-7,
+        "rmsError": 2.776166660803498e-8,
+        "maxExpected": 0.25087489473674124,
+        "rmsExpected": 0.057758062120571996,
+        "relativeMaxError": 4.3828273509945967e-7
+      },
+      "half": {
+        "maxError": 0.0001424252986907959,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00014247286174123852,
+          "rmsError": 0.00002386461505479447,
+          "maxExpected": 0.25087489473674124,
+          "rmsExpected": 0.057758062120571996,
+          "relativeMaxError": 0.0005679040220056464
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08168221355350667,
+        "maxImag": 0.21263152360916138,
+        "expectedRms": 0.0816822347873006,
+        "rmsRelative": 2.5995608453634993e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.2073038596627228e-7,
+        "rmsError": 2.8632456980290706e-8,
+        "maxExpected": 0.19816574565957,
+        "rmsExpected": 0.058500793852736134,
+        "relativeMaxError": 6.092394301771794e-7
+      },
+      "half": {
+        "maxError": 0.0001214146614074707,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012143130648092915,
+          "rmsError": 0.000024318245102821408,
+          "maxExpected": 0.19816574565957,
+          "rmsExpected": 0.058500793852736134,
+          "relativeMaxError": 0.0006127764719213211
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08273259360796148,
+        "maxImag": 0.19741764664649963,
+        "expectedRms": 0.08273261607613201,
+        "rmsRelative": 2.7157572911442353e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 126,
+      "tick": 1032192,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.360798134036889e-7,
+        "rmsError": 2.6986128749081305e-8,
+        "maxExpected": 0.21535234838056783,
+        "rmsExpected": 0.0589371241801162,
+        "relativeMaxError": 6.318937983588201e-7
+      },
+      "half": {
+        "maxError": 0.00012189149856567383,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012189790584604676,
+          "rmsError": 0.000024656015244846945,
+          "maxExpected": 0.21535234838056783,
+          "rmsExpected": 0.0589371241801162,
+          "relativeMaxError": 0.0005660393618305494
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.0833496589485135,
+        "maxImag": 0.21241292357444763,
+        "expectedRms": 0.08334968034278742,
+        "rmsRelative": 2.566809354745703e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.1929746715488854e-7,
+        "rmsError": 2.9127967044918906e-8,
+        "maxExpected": 0.21633570104370353,
+        "rmsExpected": 0.05820798764124619,
+        "relativeMaxError": 5.514460469508378e-7
+      },
+      "half": {
+        "maxError": 0.00012183189392089844,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012190054220503899,
+          "rmsError": 0.000024625753032617076,
+          "maxExpected": 0.21633570104370353,
+          "rmsExpected": 0.05820798764124619,
+          "relativeMaxError": 0.0005634786196496203
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08231850153904545,
+        "maxImag": 0.17928336560726166,
+        "expectedRms": 0.0823185255606958,
+        "rmsRelative": 2.918134184961113e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 31536000.25,
+      "tick": 3147776,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.254899754943306e-7,
+        "rmsError": 2.860397327863835e-8,
+        "maxExpected": 0.19795577809761655,
+        "rmsExpected": 0.05802294437767391,
+        "relativeMaxError": 6.339293386649649e-7
+      },
+      "half": {
+        "maxError": 0.0001214742660522461,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012149795017366016,
+          "rmsError": 0.00002396919059986671,
+          "maxExpected": 0.19795577809761655,
+          "rmsExpected": 0.05802294437767391,
+          "relativeMaxError": 0.0006137630906320235
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.0820568123721527,
+        "maxImag": 0.19795574247837067,
+        "expectedRms": 0.08205683486772608,
+        "rmsRelative": 2.7414624768996445e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² cascade 0 (48 m)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 999999999.5,
+      "tick": 4190208,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.299195562520783e-7,
+        "rmsError": 2.96892801185637e-8,
+        "maxExpected": 0.22014441304778834,
+        "rmsExpected": 0.05807878620442122,
+        "relativeMaxError": 5.901560455403231e-7
+      },
+      "half": {
+        "maxError": 0.00012193620204925537,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012196326866761864,
+          "rmsError": 0.000023883821683086892,
+          "maxExpected": 0.22014441304778834,
+          "rmsExpected": 0.05807878620442122,
+          "relativeMaxError": 0.000554014825900411
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08213578577569733,
+        "maxImag": 0.21213486790657043,
+        "expectedRms": 0.08213580713645992,
+        "rmsRelative": 2.6006638680504684e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² I.1 fixture (6 m, full band)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 4.5734839262956406e-8,
+        "rmsError": 1.3367507465463331e-8,
+        "maxExpected": 0.1819332872565618,
+        "rmsExpected": 0.04367801248019128,
+        "relativeMaxError": 2.513824707540257e-7
+      },
+      "half": {
+        "maxError": 0.00011536478996276855,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00011538647617798103,
+          "rmsError": 0.000017995598950095544,
+          "maxExpected": 0.1819332872565618,
+          "rmsExpected": 0.04367801248019128,
+          "relativeMaxError": 0.0006342241044392463
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.06177002981274829,
+        "maxImag": 4.532742536866863e-8,
+        "expectedRms": 0.06177003762698783,
+        "rmsRelative": 1.2650533883997922e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² I.1 fixture (6 m, full band)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 8.307133106399966e-8,
+        "rmsError": 2.267797026039011e-8,
+        "maxExpected": 0.17147897600581774,
+        "rmsExpected": 0.04607471509283217,
+        "relativeMaxError": 4.844403261492611e-7
+      },
+      "half": {
+        "maxError": 0.00012135505676269531,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012138699524805174,
+          "rmsError": 0.000019119078306737072,
+          "maxExpected": 0.17147897600581774,
+          "rmsExpected": 0.04607471509283217,
+          "relativeMaxError": 0.0007078826692079936
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.0651594687379482,
+        "maxImag": 5.7791112340055406e-8,
+        "expectedRms": 0.06515948696675963,
+        "rmsRelative": 2.797568286846781e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² I.1 fixture (6 m, full band)",
+      "size": 64,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 9.191789190898803e-8,
+        "rmsError": 2.1368818832948062e-8,
+        "maxExpected": 0.18450684349754426,
+        "rmsExpected": 0.0497502994055615,
+        "relativeMaxError": 4.981814775353383e-7
+      },
+      "half": {
+        "maxError": 0.00012093782424926758,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00012099016937386353,
+          "rmsError": 0.000020502679967339383,
+          "maxExpected": 0.18450684349754426,
+          "rmsExpected": 0.0497502994055615,
+          "relativeMaxError": 0.0006557489526152665
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.07035752866300429,
+        "maxImag": 6.077243597246706e-8,
+        "expectedRms": 0.0703575481514672,
+        "rmsRelative": 2.7699178588388937e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² I.1 fixture (6 m, full band)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.798875683550749e-7,
+        "rmsError": 3.561734945881739e-8,
+        "maxExpected": 0.3409940897312151,
+        "rmsExpected": 0.09588871407081483,
+        "relativeMaxError": 5.275386693560271e-7
+      },
+      "half": {
+        "maxError": 0.00023478269577026367,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.0002348592084291945,
+          "rmsError": 0.000039589068447410835,
+          "maxExpected": 0.3409940897312151,
+          "rmsExpected": 0.09588871407081483,
+          "relativeMaxError": 0.0006887486191163012
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.13560709856501196,
+        "maxImag": 0.3278661072254181,
+        "expectedRms": 0.13560711991746222,
+        "rmsRelative": 1.574581796690445e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² I.1 fixture (6 m, full band)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.9941453469063397e-7,
+        "rmsError": 4.8015148398532315e-8,
+        "maxExpected": 0.38070852106989195,
+        "rmsExpected": 0.10089462606218746,
+        "relativeMaxError": 5.237984538150768e-7
+      },
+      "half": {
+        "maxError": 0.0002435445785522461,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00024359584553457214,
+          "rmsError": 0.00004152464469149815,
+          "maxExpected": 0.38070852106989195,
+          "rmsExpected": 0.10089462606218746,
+          "relativeMaxError": 0.0006398486822674817
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.1426865126811867,
+        "maxImag": 0.36267489194869995,
+        "expectedRms": 0.1426865485477074,
+        "rmsRelative": 2.5136581592957384e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "64² I.1 fixture (6 m, full band)",
+      "size": 64,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": false,
+      "f32": {
+        "samples": 4096,
+        "finite": true,
+        "maxError": 1.992168603415223e-7,
+        "rmsError": 4.5208025018652104e-8,
+        "maxExpected": 0.34017823659937213,
+        "rmsExpected": 0.09776771532510035,
+        "relativeMaxError": 5.85624942774161e-7
+      },
+      "half": {
+        "maxError": 0.00023949146270751953,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 4096,
+          "finite": true,
+          "maxError": 0.00023954565289124874,
+          "rmsError": 0.00004067196807387056,
+          "maxExpected": 0.34017823659937213,
+          "rmsExpected": 0.09776771532510035,
+          "relativeMaxError": 0.0007041768905791632
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.13826439359565942,
+        "maxImag": 0.3401782810688019,
+        "expectedRms": 0.13826442897498872,
+        "rmsRelative": 2.558816433251539e-7
+      },
+      "pass": true
+    }
+  ],
+  "candidate128": [
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 8.456663635027575e-8,
+        "rmsError": 1.8026876918840645e-8,
+        "maxExpected": 0.1573313401783331,
+        "rmsExpected": 0.037191640536745445,
+        "relativeMaxError": 5.375066166373497e-7
+      },
+      "half": {
+        "maxError": 0.00012166798114776611,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00010477767833311225,
+          "rmsError": 0.000015029692206707126,
+          "maxExpected": 0.1573313401783331,
+          "rmsExpected": 0.037191640536745445,
+          "relativeMaxError": 0.0006659682566381755
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.052296946548395354,
+        "maxImag": 9.759014574228786e-8,
+        "expectedRms": 0.05229696059400461,
+        "rmsRelative": 2.685741025761424e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "height",
+      "time": 0,
+      "tick": 0,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.2483048797705685e-8,
+        "rmsError": 5.317039987477008e-9,
+        "maxExpected": 0.05946989370602167,
+        "rmsExpected": 0.01148360560807154,
+        "relativeMaxError": 3.7805765903746937e-7
+      },
+      "half": {
+        "maxError": 0.00005809962749481201,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.000028548478253100085,
+          "rmsError": 0.000004758401970052284,
+          "maxExpected": 0.05946989370602167,
+          "rmsExpected": 0.01148360560807154,
+          "relativeMaxError": 0.0004800492564224877
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.016758385234979793,
+        "maxImag": 2.9656803235411644e-8,
+        "expectedRms": 0.016758389979176433,
+        "rmsRelative": 2.8309382020590954e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "height",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 8.077024203113903e-8,
+        "rmsError": 2.1156582348642997e-8,
+        "maxExpected": 0.175280451622651,
+        "rmsExpected": 0.038751397879204647,
+        "relativeMaxError": 4.608057617572987e-7
+      },
+      "half": {
+        "maxError": 0.00012077391147613525,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.0001095531851509901,
+          "rmsError": 0.00001659019641867569,
+          "maxExpected": 0.175280451622651,
+          "rmsExpected": 0.038751397879204647,
+          "relativeMaxError": 0.0006250165613838073
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05285310133473855,
+        "maxImag": 1.0186340659856796e-7,
+        "expectedRms": 0.05285312023964662,
+        "rmsRelative": 3.576876442456305e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "height",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.335731784668029e-8,
+        "rmsError": 6.2094925479782715e-9,
+        "maxExpected": 0.051003439810476274,
+        "rmsExpected": 0.011653123483349476,
+        "relativeMaxError": 4.5795573658313575e-7
+      },
+      "half": {
+        "maxError": 0.000030491501092910767,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00002962612244131191,
+          "rmsError": 0.000005263948550897345,
+          "maxExpected": 0.051003439810476274,
+          "rmsExpected": 0.011653123483349476,
+          "relativeMaxError": 0.0005808651838268094
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.01660202445281984,
+        "maxImag": 4.068260750500485e-8,
+        "expectedRms": 0.016602030411046898,
+        "rmsRelative": 3.5888544413236186e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "height",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 8.813101003190063e-8,
+        "rmsError": 2.215660795009428e-8,
+        "maxExpected": 0.18900560158473992,
+        "rmsExpected": 0.03808501643656971,
+        "relativeMaxError": 4.662878205352419e-7
+      },
+      "half": {
+        "maxError": 0.0001217871904373169,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00010277012662071594,
+          "rmsError": 0.000015234343892886578,
+          "maxExpected": 0.18900560158473992,
+          "rmsExpected": 0.03808501643656971,
+          "relativeMaxError": 0.0005437411682988632
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05324448675565445,
+        "maxImag": 9.73232090473175e-8,
+        "expectedRms": 0.053244507333917244,
+        "rmsRelative": 3.8648611519895296e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "height",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 2.4803864830114097e-8,
+        "rmsError": 6.5792407371348644e-9,
+        "maxExpected": 0.04557785473570488,
+        "rmsExpected": 0.011400014544730646,
+        "relativeMaxError": 5.44208694637907e-7
+      },
+      "half": {
+        "maxError": 0.000060714781284332275,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00002735144844927956,
+          "rmsError": 0.000004558656233436963,
+          "maxExpected": 0.04557785473570488,
+          "rmsExpected": 0.011400014544730646,
+          "relativeMaxError": 0.000600103901508399
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.016992545676119686,
+        "maxImag": 4.510366125032306e-8,
+        "expectedRms": 0.016992551494409477,
+        "rmsRelative": 3.4240236334409384e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "height",
+      "time": 999999999.5,
+      "tick": 4190208,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 7.596631221296057e-8,
+        "rmsError": 2.1235931955887845e-8,
+        "maxExpected": 0.15624338534493618,
+        "rmsExpected": 0.03516608207098612,
+        "relativeMaxError": 4.86204981063684e-7
+      },
+      "half": {
+        "maxError": 0.0001220405101776123,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011545565743617536,
+          "rmsError": 0.000014946840019332997,
+          "maxExpected": 0.15624338534493618,
+          "rmsExpected": 0.03516608207098612,
+          "relativeMaxError": 0.0007389474900411665
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.05269488122320069,
+        "maxImag": 1.0697840480133891e-7,
+        "expectedRms": 0.05269490035791353,
+        "rmsRelative": 3.6312266851400154e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "height",
+      "time": 999999999.5,
+      "tick": 4190208,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 3.009884754628933e-8,
+        "rmsError": 5.970300139522321e-9,
+        "maxExpected": 0.04333633999035077,
+        "rmsExpected": 0.010500731553600862,
+        "relativeMaxError": 6.945405992520623e-7
+      },
+      "half": {
+        "maxError": 0.00003046169877052307,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.000022132041401480562,
+          "rmsError": 0.000004136636985418581,
+          "maxExpected": 0.04333633999035077,
+          "rmsExpected": 0.010500731553600862,
+          "relativeMaxError": 0.0005107039820715931
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.016092063744204802,
+        "maxImag": 3.6785422707907856e-8,
+        "expectedRms": 0.016092068506523328,
+        "rmsRelative": 2.959419743777047e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 9.973033099353046e-8,
+        "rmsError": 2.6019144961254883e-8,
+        "maxExpected": 0.2374813168867003,
+        "rmsExpected": 0.057207626514102806,
+        "relativeMaxError": 4.199502188254695e-7
+      },
+      "half": {
+        "maxError": 0.0001220405101776123,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011932907215508881,
+          "rmsError": 0.000023529987005954656,
+          "maxExpected": 0.2374813168867003,
+          "rmsExpected": 0.057207626514102806,
+          "relativeMaxError": 0.0005024777263300228
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08169113888614478,
+        "maxImag": 0.2375854253768921,
+        "expectedRms": 0.08169115935486322,
+        "rmsRelative": 2.5056222244927464e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "slope",
+      "time": 0,
+      "tick": 0,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.547523276745899e-7,
+        "rmsError": 2.991482714717994e-8,
+        "maxExpected": 0.24657180731447004,
+        "rmsExpected": 0.06629990765934561,
+        "relativeMaxError": 6.276156603630828e-7
+      },
+      "half": {
+        "maxError": 0.00023281574249267578,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00012060468441579819,
+          "rmsError": 0.000027599139306150675,
+          "maxExpected": 0.24657180731447004,
+          "rmsExpected": 0.06629990765934561,
+          "relativeMaxError": 0.0004891260105093147
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08879697312805754,
+        "maxImag": 0.2575570344924927,
+        "expectedRms": 0.08879699581779564,
+        "rmsRelative": 2.5552371331146934e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "slope",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.403829035656612e-7,
+        "rmsError": 3.1965238724336676e-8,
+        "maxExpected": 0.1751414930931492,
+        "rmsExpected": 0.058286229910308934,
+        "relativeMaxError": 8.015399497079678e-7
+      },
+      "half": {
+        "maxError": 0.00012201070785522461,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011737333802966377,
+          "rmsError": 0.000023584598270468776,
+          "maxExpected": 0.1751414930931492,
+          "rmsExpected": 0.058286229910308934,
+          "relativeMaxError": 0.0006701629405844944
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08273258824528235,
+        "maxImag": 0.2125650942325592,
+        "expectedRms": 0.08273261607613201,
+        "rmsRelative": 3.3639513636193787e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "slope",
+      "time": 123.4,
+      "tick": 1010893,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.1739443823294282e-7,
+        "rmsError": 3.296192851279179e-8,
+        "maxExpected": 0.18276877617943726,
+        "rmsExpected": 0.058625632749636856,
+        "relativeMaxError": 6.423112343745644e-7
+      },
+      "half": {
+        "maxError": 0.00012180209159851074,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00010315173629954488,
+          "rmsError": 0.000023588661954381834,
+          "maxExpected": 0.18276877617943726,
+          "rmsExpected": 0.058625632749636856,
+          "relativeMaxError": 0.0005643837993327339
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.0883062470239963,
+        "maxImag": 0.22790439426898956,
+        "expectedRms": 0.08830627626703136,
+        "rmsRelative": 3.311546619232417e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "slope",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.2681662099611746e-7,
+        "rmsError": 3.196427059417943e-8,
+        "maxExpected": 0.16709498961592834,
+        "rmsExpected": 0.055927319921776415,
+        "relativeMaxError": 7.589492736293791e-7
+      },
+      "half": {
+        "maxError": 0.00012195110321044922,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00010981413705496434,
+          "rmsError": 0.00002293436802203087,
+          "maxExpected": 0.16709498961592834,
+          "rmsExpected": 0.055927319921776415,
+          "relativeMaxError": 0.0006571958698903818
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08231849573991257,
+        "maxImag": 0.19031491875648499,
+        "expectedRms": 0.0823185255606958,
+        "rmsRelative": 3.6226090091558083e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "slope",
+      "time": 127.6,
+      "tick": 1045299,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.4258475675155147e-7,
+        "rmsError": 3.534198588221477e-8,
+        "maxExpected": 0.228749884770573,
+        "rmsExpected": 0.06112019603807999,
+        "relativeMaxError": 6.233216549794474e-7
+      },
+      "half": {
+        "maxError": 0.00023850798606872559,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00012115611118362901,
+          "rmsError": 0.00002576263552758509,
+          "maxExpected": 0.228749884770573,
+          "rmsExpected": 0.06112019603807999,
+          "relativeMaxError": 0.0005296444686962083
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08882548240978282,
+        "maxImag": 0.29928427934646606,
+        "expectedRms": 0.08882551123910978,
+        "rmsRelative": 3.2456134015085247e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 0,
+      "field": "slope",
+      "time": 999999999.5,
+      "tick": 4190208,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.2607466327169137e-7,
+        "rmsError": 3.276127319634301e-8,
+        "maxExpected": 0.17129131557769256,
+        "rmsExpected": 0.06062710707877363,
+        "relativeMaxError": 7.360248407602878e-7
+      },
+      "half": {
+        "maxError": 0.00012193620204925537,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011520306879567177,
+          "rmsError": 0.000025314549300900418,
+          "maxExpected": 0.17129131557769256,
+          "rmsExpected": 0.06062710707877363,
+          "relativeMaxError": 0.0006725563897220414
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08213578041365019,
+        "maxImag": 0.21364551782608032,
+        "expectedRms": 0.08213580713645992,
+        "rmsRelative": 3.2534908538163493e-7
+      },
+      "pass": true
+    },
+    {
+      "name": "128² × 2 candidate",
+      "size": 128,
+      "cascade": 1,
+      "field": "slope",
+      "time": 999999999.5,
+      "tick": 4190208,
+      "sampled": true,
+      "f32": {
+        "samples": 256,
+        "finite": true,
+        "maxError": 1.3853256151941107e-7,
+        "rmsError": 3.3544718465498215e-8,
+        "maxExpected": 0.22874605241812415,
+        "rmsExpected": 0.061512014311017625,
+        "relativeMaxError": 6.056172775659002e-7
+      },
+      "half": {
+        "maxError": 0.00017210841178894043,
+        "towardZeroShare": 1,
+        "pass": true,
+        "vsOracle": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 0.00011071839007398276,
+          "rmsError": 0.000025662082284373938,
+          "maxExpected": 0.22874605241812415,
+          "rmsExpected": 0.061512014311017625,
+          "relativeMaxError": 0.00048402317287469946
+        }
+      },
+      "grid": {
+        "finite": true,
+        "rms": 0.08641833137303664,
+        "maxImag": 0.229811429977417,
+        "expectedRms": 0.08641835792939692,
+        "rmsRelative": 3.07299987106695e-7
+      },
+      "pass": true
+    }
+  ],
+  "timeContract": {
+    "seekBackBitIdentical": true,
+    "repeatedTimeDispatched": false,
+    "aliasedTimeDispatched": false,
+    "aliasedBitIdentical": true,
+    "transformsDuringRepeat": 0,
+    "pass": true
+  },
+  "cascadeIsolation": {
+    "layer0BitIdentical": true,
+    "layer1ExactlyZero": true,
+    "pass": true
+  },
+  "spectrumRebuild": {
+    "created": {
+      "computePipelines": 0,
+      "renderPipelines": 0,
+      "shaderModules": 0,
+      "buffers": 0
+    },
+    "uploadMs": 1.199999999254942,
+    "results": [
+      {
+        "name": "spectrum rebuild (U=18, seed 777)",
+        "size": 128,
+        "cascade": 0,
+        "field": "slope",
+        "time": 10,
+        "tick": 81920,
+        "sampled": true,
+        "f32": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 1.3213631477188015e-7,
+          "rmsError": 2.8619842123724475e-8,
+          "maxExpected": 0.17248280017867004,
+          "rmsExpected": 0.056141541042611647,
+          "relativeMaxError": 7.660840074198928e-7
+        },
+        "half": {
+          "maxError": 0.00012181699275970459,
+          "towardZeroShare": 1,
+          "pass": true,
+          "vsOracle": {
+            "samples": 256,
+            "finite": true,
+            "maxError": 0.00012063098259129656,
+            "rmsError": 0.00002438132119917736,
+            "maxExpected": 0.17248280017867004,
+            "rmsExpected": 0.056141541042611647,
+            "relativeMaxError": 0.0006993797785421987
+          }
+        },
+        "grid": {
+          "finite": true,
+          "rms": 0.0773956870730235,
+          "maxImag": 0.23709647357463837,
+          "expectedRms": 0.07739571181236624,
+          "rmsRelative": 3.196474605858043e-7
+        },
+        "pass": true
+      },
+      {
+        "name": "spectrum rebuild (U=18, seed 777)",
+        "size": 128,
+        "cascade": 1,
+        "field": "slope",
+        "time": 10,
+        "tick": 81920,
+        "sampled": true,
+        "f32": {
+          "samples": 256,
+          "finite": true,
+          "maxError": 1.523615100196274e-7,
+          "rmsError": 3.210197771132366e-8,
+          "maxExpected": 0.21534628338318182,
+          "rmsExpected": 0.0633507376279298,
+          "relativeMaxError": 7.075186421885866e-7
+        },
+        "half": {
+          "maxError": 0.0001220405101776123,
+          "towardZeroShare": 1,
+          "pass": true,
+          "vsOracle": {
+            "samples": 256,
+            "finite": true,
+            "maxError": 0.00011996080153955924,
+            "rmsError": 0.000026606501610484644,
+            "maxExpected": 0.21534628338318182,
+            "rmsExpected": 0.0633507376279298,
+            "relativeMaxError": 0.0005570600042634772
+          }
+        },
+        "grid": {
+          "finite": true,
+          "rms": 0.08713999593501318,
+          "maxImag": 0.22749969363212585,
+          "expectedRms": 0.08714002172599561,
+          "rmsRelative": 2.95971723694847e-7
+        },
+        "pass": true
+      }
+    ],
+    "pass": true
+  },
+  "lifecycle": {
+    "secondRuntimeRejected": true,
+    "webglFallback": {
+      "state": "unsupported",
+      "reason": "requires the WebGPU backend",
+      "configured": false,
+      "prepared": false,
+      "output": null
+    },
+    "deviceLost": {
+      "state": "failed",
+      "output": null,
+      "live": {
+        "buffers": 6,
+        "bufferBytes": 65544,
+        "textures": 0,
+        "textureBytes": 0
+      }
+    },
+    "recovered": {
+      "state": "active",
+      "hasOutput": true
+    },
+    "leak": {
+      "baseline": {
+        "buffers": 6,
+        "bufferBytes": 65544,
+        "textures": 0,
+        "textureBytes": 0
+      },
+      "after": {
+        "buffers": 6,
+        "bufferBytes": 65544,
+        "textures": 0,
+        "textureBytes": 0
+      },
+      "computePipelinesCreated": 336,
+      "pass": true
+    },
+    "pass": true
+  },
+  "disabled": {
+    "state": "disabled",
+    "cpuMsPerCall": 0.00009999999962747097,
+    "submits": 0,
+    "buffersCreated": 0,
+    "computePipelines": 0,
+    "transforms": 0,
+    "pass": true
+  },
+  "clockStates": {
+    "paused": {
+      "label": "paused clock (same time)",
+      "calls": 1000,
+      "cpuMsPerCall": 0.0002999999988824129,
+      "submits": 1,
+      "transforms": 0,
+      "gpuComputeMsTotal": 0.060576
+    },
+    "jump": {
+      "label": "time jump +1000 s",
+      "calls": 1,
+      "cpuMsPerCall": 0.40000000037252903,
+      "submits": 5,
+      "transforms": 1,
+      "gpuComputeMsTotal": 0.055296
+    }
+  },
+  "topologies": {
+    "64²×1": {
+      "size": 64,
+      "cascades": 1,
+      "state": "active",
+      "diagnostics": {
+        "state": "active",
+        "reason": null,
+        "size": 64,
+        "cascades": 1,
+        "bytes": {
+          "h0": 65536,
+          "cycles": 16384,
+          "ping": 32768,
+          "pong": 32768,
+          "output": 21844,
+          "total": 169300
+        },
+        "dispatchesPerTransform": 13,
+        "outputPasses": 1,
+        "spectrumRevision": 2,
+        "configGeneration": 2,
+        "transforms": 153,
+        "skipped": 1000,
+        "outputs": 151
+      },
+      "live": {
+        "buffers": 24,
+        "bufferBytes": 213224,
+        "textures": 1,
+        "textureBytes": 21844
+      },
+      "configureMs": 0.2999999988824129,
+      "firstTransformMs": 6.100000001490116,
+      "phasesMs": {
+        "evolve": {
+          "samples": 120,
+          "median": 0.004096,
+          "mean": 0.0042666666666666625,
+          "min": 0.004096,
+          "max": 0.00512
+        },
+        "rows": {
+          "samples": 120,
+          "median": 0.019456,
+          "mean": 0.019609599999999974,
+          "min": 0.019456,
+          "max": 0.02048
+        },
+        "columns": {
+          "samples": 120,
+          "median": 0.019456,
+          "mean": 0.01986559999999999,
+          "min": 0.019456,
+          "max": 0.02048
+        },
+        "output": {
+          "samples": 120,
+          "median": 0.004096,
+          "mean": 0.004462933333333334,
+          "min": 0.003072,
+          "max": 0.006144
+        }
+      },
+      "computeMs": {
+        "samples": 120,
+        "median": 0.038912,
+        "mean": 0.03878399999999994,
+        "min": 0.037888,
+        "max": 0.038912
+      },
+      "outputPassesMs": {
+        "samples": 120,
+        "median": 0.00512,
+        "mean": 0.004804266666666665,
+        "min": 0.003072,
+        "max": 0.006144
+      },
+      "cpuPrepareMs": {
+        "samples": 120,
+        "median": 0.10000000149011612,
+        "mean": 0.13916666678463419,
+        "min": 0,
+        "max": 0.40000000037252903
+      },
+      "throughputMsPerTransform": 0.18966666666790843
+    },
+    "128²×2": {
+      "size": 128,
+      "cascades": 2,
+      "state": "active",
+      "diagnostics": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 3,
+        "configGeneration": 3,
+        "transforms": 604,
+        "skipped": 1000,
+        "outputs": 151
+      },
+      "live": {
+        "buffers": 26,
+        "bufferBytes": 1245464,
+        "textures": 1,
+        "textureBytes": 174760
+      },
+      "configureMs": 1.400000000372529,
+      "firstTransformMs": 5.799999998882413,
+      "phasesMs": {
+        "evolve": {
+          "samples": 120,
+          "median": 0.00512,
+          "mean": 0.0051712000000000095,
+          "min": 0.00512,
+          "max": 0.006144
+        },
+        "rows": {
+          "samples": 120,
+          "median": 0.026624,
+          "mean": 0.027050666666666664,
+          "min": 0.026624,
+          "max": 0.027648
+        },
+        "columns": {
+          "samples": 120,
+          "median": 0.027648,
+          "mean": 0.028142933333333304,
+          "min": 0.027648,
+          "max": 0.028672
+        },
+        "output": {
+          "samples": 120,
+          "median": 0.009216,
+          "mean": 0.009267199999999996,
+          "min": 0.007168,
+          "max": 0.011264
+        }
+      },
+      "computeMs": {
+        "samples": 120,
+        "median": 0.055296,
+        "mean": 0.05530453333333338,
+        "min": 0.054272,
+        "max": 0.05632
+      },
+      "outputPassesMs": {
+        "samples": 120,
+        "median": 0.008192,
+        "mean": 0.007731199999999986,
+        "min": 0.006144,
+        "max": 0.01024
+      },
+      "cpuPrepareMs": {
+        "samples": 120,
+        "median": 0.09999999962747097,
+        "mean": 0.11416666664493581,
+        "min": 0,
+        "max": 0.40000000037252903
+      },
+      "throughputMsPerTransform": 0.225
+    },
+    "256²×2 (research)": {
+      "size": 256,
+      "cascades": 2,
+      "state": "active",
+      "diagnostics": {
+        "state": "active",
+        "reason": null,
+        "size": 256,
+        "cascades": 2,
+        "bytes": {
+          "h0": 2097152,
+          "cycles": 524288,
+          "ping": 1048576,
+          "pong": 1048576,
+          "output": 699048,
+          "total": 5417640
+        },
+        "dispatchesPerTransform": 17,
+        "outputPasses": 2,
+        "spectrumRevision": 4,
+        "configGeneration": 4,
+        "transforms": 1055,
+        "skipped": 1000,
+        "outputs": 151
+      },
+      "live": {
+        "buffers": 28,
+        "bufferBytes": 4784440,
+        "textures": 1,
+        "textureBytes": 699048
+      },
+      "configureMs": 7,
+      "firstTransformMs": 562.2000000011176,
+      "phasesMs": {
+        "evolve": {
+          "samples": 120,
+          "median": 0.007168,
+          "mean": 0.02977279999999995,
+          "min": 0.00512,
+          "max": 1.19808
+        },
+        "rows": {
+          "samples": 120,
+          "median": 0.048128,
+          "mean": 0.04776960000000008,
+          "min": 0.033792,
+          "max": 0.176128
+        },
+        "columns": {
+          "samples": 120,
+          "median": 0.049152,
+          "mean": 0.04917760000000005,
+          "min": 0.034816,
+          "max": 0.178176
+        },
+        "output": {
+          "samples": 120,
+          "median": 0.01024,
+          "mean": 0.012040533333333324,
+          "min": 0.007168,
+          "max": 0.084992
+        }
+      },
+      "computeMs": {
+        "samples": 120,
+        "median": 0.100352,
+        "mean": 0.10037760000000016,
+        "min": 0.099328,
+        "max": 0.101376
+      },
+      "outputPassesMs": {
+        "samples": 120,
+        "median": 0.01024,
+        "mean": 0.01042773333333333,
+        "min": 0.008192,
+        "max": 0.012288
+      },
+      "cpuPrepareMs": {
+        "samples": 120,
+        "median": 0.09999999962747097,
+        "mean": 0.13916666658284763,
+        "min": 0,
+        "max": 0.900000000372529
+      },
+      "throughputMsPerTransform": 0.24800000000124175
+    }
+  },
+  "restart": {
+    "state": "active",
+    "rendererInitMs": 28.200000001117587,
+    "coldStartMs": 59.40000000037253,
+    "warmReconfigureMs": 12.400000000372529,
+    "errors": []
+  },
+  "validationErrors": [],
+  "pipelines": {
+    "compute": 777,
+    "render": 89,
+    "shaderModules": 933
+  },
+  "pass": true,
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[ocean-fft] device lost: qa-simulated lifecycle check; the authored sea detail stays in use. "
+  ]
+}

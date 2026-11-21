@@ -1100,13 +1100,15 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.2 — Minimal native WebGPU FFT and output buffers
 
-- [ ] Create one isolated 64² FFT GPU proof fixture with a known synthetic mode and compare complete wave/slope output to tiny DFT oracle.
-- [ ] Build 2D Stockham row/column stages with stable ping-pong and explicit normal/derivative output; correctness before optimized shared-memory version.
-- [ ] Verify texture array layer semantics, storage buffer alignment, compute barriers, mip generation and colour space under installed Three.
-- [ ] Implement one renderer-owned runtime and feature states, resource accounting, device-lost fallback, safe shutdown and lazy warmup.
-- [ ] Benchmark 64²×1 and 128²×2, including compute, conversion and mip cost **outside** render pass timings.
-- [ ] Evaluate two-dispatch shared-memory optimization only after reference parity, if measured GPU benefit pays for complexity.
-- [ ] Do not allocate velocity/displacement/Jacobian output textures unless actually used and proved by a feature.
+- [x] Create one isolated 64² FFT GPU proof fixture with a known synthetic mode and compare complete wave/slope output to tiny DFT oracle.
+- [x] Build 2D Stockham row/column stages with stable ping-pong and explicit normal/derivative output; correctness before optimized shared-memory version.
+- [x] Verify texture array layer semantics, storage buffer alignment, compute barriers, mip generation and colour space under installed Three.
+- [x] Implement one renderer-owned runtime and feature states, resource accounting, device-lost fallback, safe shutdown and lazy warmup.
+- [x] Benchmark 64²×1 and 128²×2, including compute, conversion and mip cost **outside** render pass timings.
+- [x] Evaluate two-dispatch shared-memory optimization only after reference parity, if measured GPU benefit pays for complexity.
+- [x] Do not allocate velocity/displacement/Jacobian output textures unless actually used and proved by a feature.
+
+**I.2 result:** [Phase I.2 WebGPU FFT](ponlai-pr-i-phase-i2-webgpu-fft-2026-11-21.md). Isolated GPU runtime (`OceanFftRuntime` + layout/resources/kernels), verified on a native RTX 4080 against the I.1 oracle with a worst relative error of 8.0e-7 (f32). The output is an RG16F array; the hardware's f32→f16 conversion rounds toward zero, so the half tolerance is one ulp. At 128²×2, timestamped GPU time is 0.055 ms of compute plus 0.008 ms of output passes; mips are bounded only by throughput (0.23 ms for all work, CPU-bound). Memory is 1.29 MiB. Time is an exact u32 tick (τ = tick/2²²) in place of f32 `fract(cycles·τ)`. The shared-memory variant was evaluated and not built. Not wired into the scene.
 
 **Stop:** any GPU validation error, unbounded 256² allocation, output NaNs, missing float filter support, render-target restore failure, poor hardware FFT runtime versus existing packed detail or missing compute time evidence.
 
