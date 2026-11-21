@@ -32,7 +32,7 @@ const POSES = [
 // exact for any step, so one call per phase reproduces minutes of weather.
 const STATES = [
   { id: 'dry', weather: 'off', phases: [] },
-  { id: 'mid-rain', weather: 'rain', weatherIntensity: 1, phases: [[75, 1]] },
+  { id: 'mid-rain', weather: 'rain', weatherIntensity: 1, phases: [[35, 1]] },
   { id: 'heavy-rain', weather: 'storm', weatherIntensity: 1, phases: [[1e6, 1]] },
   { id: 'drying', weather: 'off', phases: [[1e6, 1], [150, 0]] },
 ];
@@ -102,8 +102,7 @@ try {
       for (const [material, mesh] of seen) {
         try {
           const { fragmentShader } = await view.renderer.debug.getShaderAsync(view.scene, camera, mesh);
-          rows.push({ name: material.name || material.type, hash: hash(fragmentShader), length: fragmentShader.length,
-            wetnessField: /ground-wetness-field|wetnessField/i.test(fragmentShader) });
+          rows.push({ name: material.name || material.type, hash: hash(fragmentShader), length: fragmentShader.length });
         } catch (error) { rows.push({ name: material.name || material.type, error: String(error) }); }
       }
       return rows.sort((a, b) => `${a.name}${a.hash}`.localeCompare(`${b.name}${b.hash}`));
