@@ -644,3 +644,265 @@ Before passing FFT slope textures into [D12], query actual portable limits and i
 - Use a small pooled immutable data object for FFT output metadata to avoid per-frame JS allocations in the hot loop.
 
 ---
+
+## 9. GPU memory, performance and scheduling acceptance
+
+### 9.1 Memory is more than just one FFT texture
+
+The following are **derived logical byte counts**, *not measured VRAM use*. Driver alignment, staging, backend render targets, compiler, mips, in-flight frames and synchronization increase peak residency. The original [P1] implementation has significant temporary storage:
+
+```text
+N = FFT dimension per side
+C = number of cascades
+M = N*N*C Fourier mode positions
+
+Gaussian paired seed buffer (vec2 float32):  M * 8 bytes
+h0 paired coefficient buffer (vec4 f32):    M * 16 bytes
+IFFT ping-pong, 3 complex-packed vec4:
+       2 pingpong sets * 3 fields * M * 16 bytes
+One RGBA16F array texture:                 M * 8 bytes, before mips
+One RG16F array texture:                   M * 4 bytes, before mips
+Full 2D mip chain ≈ 4/3 base payload per array.
+```
+
+| Configuration | Modes | Seed pairs | h0 pairs | 2×3×vec4 ping-pong | One RG16F slope output | Context |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 64²×1 | 4,096 | 32 KiB | 64 KiB | 384 KiB | 16 KiB | Very small proof only |
+| 128²×2 | 32,768 | 256 KiB | 512 KiB | 3.00 MiB | 128 KiB | Balanced candidate before shader optimization |
+| 256²×2 | 131,072 | 1.00 MiB | 2.00 MiB | 12.00 MiB | 512 KiB | High candidate |
+| 256²×4 | 262,144 | 2.00 MiB | 4.00 MiB | 24.00 MiB | 1.00 MiB | Full upstream-style engine |
+
+For the full upstream 256²×4 outputs, three RGBA16F arrays (displacement, derivatives, velocity) are 3×2 MiB=6 MiB before mips. With mips on the first two only, about **7.33 MiB**. Add the 24MiB ping-pong, 4MiB h0 and 2MiB Gaussian: approximately **37.33 MiB** of counted logical payload, **before** other resources/driver memory. The simpler 128²×2 one-output version can be much smaller, and can potentially use **fewer than three packed complex fields** if generating slope only.
+
+If a 128²×2 implementation simply copies the entire source three-field compute pipeline but publishes only two useful channels, its temp budget still includes the 3 MiB ping-pong. Refactor to compute only the genuinely required fields, then re-measure. Avoid a large unused velocity output or 12 render-quad passes during normal gameplay.
+
+### 9.2 GPU dispatches, graphics submission and mip cost
+
+[P1] may execute:
+
+- One spectrum rebuild compute on weather changes.
+- One Fourier-time evolution compute every active wave frame.
+- 2 optimized shared-memory FFT dispatches **or** up to 2 log₂N radix-2 stages per field/axis depending design.
+- One output conversion/render per cascade/texture (full Ponlai 12 render quads) plus optional mips.
+- Water shader samples/LOD and extra scalar work per pixel.
+- GPU synchronization and memory barriers between passes.
+
+**Do not use rendering GPU timestamp alone:** [D35] explicitly says its native GPU pass profiler sampled *render passes*; FFT compute and transfers are not included in that number. Require a timestamp-capable compute profiler or a representative GPU-complete measured frame benchmark where isolated timestamp queries cannot be obtained. If unavailable, label compute GPU duration **unavailable**, not 0ms.
+
+No unconditional compute dispatch when there is no ocean water in view, FFT feature off, low tier unsupported or app paused with unchanged time and spectrum. A paused camera plus unchanged time must reuse generated GPU textures, not loop FFT 60 times a second.
+
+### 9.3 Performance budget: hypotheses, not fake results
+
+Benchmarks must use the same machine, backend, pose, weather, water clock, config, resolution, warm state and foreground validation as [D35], with A/A reproducibility before B comparisons.
+
+Provisional candidate targets for **balanced** FFT normal-only offshore mode @native RTX 4080, 1600×900:
+
+- **Off**: truly zero FFT pass work and no new FFT target allocation or shaders; maintain same legacy scene performance.
+- **Balanced on**: aim for **≤0.5ms isolated average FFT compute + output processing** when sea visible, and **≤0.2ms ocean fragment/sampler delta**; these are design targets, not measured achievable values.
+- **Coastal scenes**: target ≤5% additional frame median and ≤10% additional frame p95 **after warmup**, matching recent comparison gates. If the feature exceeds them but offers substantial visible benefit, keep it opt-in and document cost and reason; do not quietly mark it passed.
+- **Open-sea vistas**: may be allotted an explicitly larger cost if the visual improvement is large and FPS frame budget still satisfies the current target; show the before/after image and measured per-pass cost.
+- **No visible ocean**: negligible additional CPU and no FFT GPU dispatch; do not keep drawing unseen wave tiles in forest/town.
+- **Low/mobile**: default fallback to current analytic/packed detail, unless native hardware proves a small 64² system worthwhile.
+- **Wind-change spike**: source spectrum rebuild and shader compile must not introduce main-thread or GPU hitch; throttle/reuse or stage updates, record rare spikes.
+- **Moving camera/streaming**: never allocate extra FFT textures per new water chunk; page gen and worker backlog must remain unchanged.
+- **Underwater**: no new expensive refraction/copy as a side effect of FFT; swimming route, caustics and underwater visibility preserved.
+
+This phase will **not** reduce the existing RTX 4080 numbers into simplistic “GPU render ≤5ms” assumptions: the full application can be CPU-limited, sampling incomplete, or work may be outside the sampled render pass.
+
+### 9.4 Requested metric names and support metadata
+
+```text
+offshoreFft.enabled
+offshoreFft.effectiveState        # disabled, compiling, active, unsupported, failed
+offshoreFft.quality
+offshoreFft.resolutionN
+offshoreFft.cascades
+offshoreFft.outputChannels
+offshoreFft.spectralRevision
+offshoreFft.sourceSeedHash
+offshoreFft.windSpeed, windDirection, fftClockTime
+offshoreFft.cameraFrameToken, waterTimeGeneration
+offshoreFft.bufferBytes, outputBytes, stagingBytes, peakKnownBytes
+offshoreFft.computeEvolveDispatches
+offshoreFft.computeFftDispatches
+offshoreFft.outputDraws, mipBuilds, spectraRebuilds
+offshoreFft.gpuComputeTimeMs       # null when unavailable
+offshoreFft.gpuConvertMipTimeMs    # null when unavailable
+offshoreFft.cpuPrepareMs
+offshoreFft.fragmentSamplersAdded, varyingCount
+offshoreFft.fftSlopeRms, fftRoughnessResidual, detailReplacementRms
+offshoreFft.coastBlendMinMax, activeWaterSlots
+offshoreFft.fallbackReason, lostDeviceCount
+frameMedianMs, frameP95Ms, frameP99Ms
+gpuBackend, adapterName, fallbackAdapter, gpuTimingAvailable
+```
+
+Frame counters may be sampled/gauged to avoid per-frame heap allocation. No logging every frame on GPU success. One warning per failure transition, clear status for unsupported device and QA metadata capturing source revision, config and compiler backend.
+
+---
+
+## 10. Configuration, validation and safe feature switch
+
+### 10.1 Correct owner: water-visual YAML
+
+The real `water.sea` is in [D2] `config/water-visual.yaml`. [D3] clones it into `config.stylizedSurface.water` and [D4/D5] validate. PR I should **not** add a separate parsed JSON or another mutable config state.
+
+Proposed **minimal** opt-in schema:
+
+```yaml
+water:
+  sea:
+    offshoreFft:
+      enabled: false
+      quality: balanced
+      outputMode: normals
+      bandMode: shortResidual
+      seed: 124593
+      windSource: weather
+      geometry: false
+      debugView: off
+```
+
+These are proposed defaults/keys, not existing implementations. Numbers requiring art direction (band cutoff, wind gain, FOV mip bias, shore fade, sampling count, spectral update interval) should live in one well-defined **quality/constant profile** or optional validated advanced nested YAML only when tested. Do not put 30 freely configurable performance-critical knobs into the first user-facing YAML.
+
+**Hard prohibition:** `geometry: true` cannot be enabled in this MVP. Validator should reject it with an actionable message until both the GPU-height/CPU-query contract and water collision QA are proven and merged. Do not accept the flag and silently create a height mismatch.
+
+### 10.2 Quality policy
+
+- `low`: FFT off, old deterministic swell + packed detail.
+- `medium`: default off unless 64/128² measured safe; may opt in explicitly.
+- `high`: opt-in balanced 128²×2 starting candidate, actual supported FFT profile based on benchmark.
+- `ultra`: opt-in high quality, 256²×2 only if worth cost; full 256²×4 still an optional future profile.
+- On mobile/constrained WebGPU: query actual capabilities, prefer analytic fallback; don't force a user-visible disable of water reflections/foam just to pay for FFT.
+- Renderer uses one canonical effective mode after quality/capability decisions. Avoid quick quality oscillation and repeated texture reallocation every frame.
+
+### 10.3 Validate at boundary
+
+Reject:
+
+- Non-boolean `enabled`/`geometry`, unsupported enum `outputMode`/`bandMode`, non-integer/negative seed and invalid quality.
+- FFT N not power of two, outside measured 64/128/256 candidate set, or array-layer count exceeding device limits.
+- Wrong orientation convention, zero/NaN/Inf wave-number cell, negative wave energy, negative depth/fetch, zero/singular spectral peak.
+- Config that adds wave height while water-domain CPU parity is absent, or any force-enable fallback on unsupported WebGPU.
+- Unsupported format filterability, storage binding and sampler budget; these are **runtime state failures** with legacy fallback, not configuration silently rewritten.
+
+On shader compilation failure, avoid leaving water invisible or storing a stale node graph. No catastrophic crash just because a high-tier optional spectrum is unsupported; fail back to original shared material and free partially allocated GPU resources.
+
+### 10.4 Explicit effective states
+
+```text
+disabled
+  legacy water shader and CPU, FFT resources never allocated
+requested
+  validate YAML, quality and renderer capability
+initializing
+  deterministic seed, cached initial spectrum, compile/warm one shader group
+ready
+  known valid FFT output texture for correct water clock/seed/generation
+active
+  shared water material reads FFT slope and preserved analytic height
+paused
+  clock unchanged, reuse result texture, 0 FFT dispatches
+weather-changing
+  controlled spectrum/gain transition without reusing incomplete outputs
+failed / unsupported
+  original SeaDetailShading and five-sine heights, clean device recovery
+disposed
+  no surviving FFT storage buffers, targets or callback registrations
+```
+
+The runtime may be **ready** without being **active** if no ocean water currently draws. A missing future cloud/physical sky PR is **not** an FFT failure: original sky reflection still works.
+
+---
+
+## 11. Proposed small source modules and exact code edit targets
+
+### 11.1 Modules to add, each with one responsibility
+
+| Proposed file | Purpose | Contract |
+| --- | --- | --- |
+| `src/editor/water/fft/OceanFftConfig.js` | Resolve and validate flags/tiers | Pure, no GPU or DOM |
+| `src/editor/water/fft/OceanFftConstants.js` | Spectral units, mode bands, quality constants | Export frozen values, no runtime state |
+| `src/editor/water/fft/OceanSpectrum.js` | Seeded JONSWAP/TMA spectrum, band cut, expectation integrals | Pure CPU counterpart to GPU |
+| `src/editor/water/fft/OceanFourierReference.js` | Tiny pure CPU reference DFT, seeded mode fixtures | QA-only module; not imported by hot path |
+| `src/editor/water/fft/OceanFftCoordinates.js` | Canonical modulo and chunk-local origin data | Pure CPU, plus tiny TSL helper if justified |
+| `src/editor/water/fft/OceanFftKernels.js` | GPU mode evolution/Stockham IFFT and output | TSL, no DOM/weather clocks |
+| `src/editor/water/fft/OceanFftTextures.js` | Target formats, mip lifecycle, resource leases | One renderer owner |
+| `src/editor/water/fft/OceanFftRuntime.js` | Feature state, time, mode generation, prewarm, update/dispose | Small per-renderer coordinator |
+| `src/editor/water/fft/OceanFftBlendNodes.js` | Texture slope read, LOD, marine gate and variance blend | TSL pure node builder |
+| `src/editor/water/fft/OceanFftDiagnostics.js` | Pass timing, counters, status and debug modes | No per-frame debug allocations |
+| `test/ocean-fft-spectrum.test.js` | CPU spectral and DFT invariants, seed, band exclusion | Test only |
+| `test/ocean-fft-coordinates.test.js` | Tile seams, negative world, chunk rebase | Test only |
+| `test/ocean-fft-integration.test.js` | Material/quality/CPU-height invariants | Test only |
+
+Avoid creating all modules if some can be safely combined without a huge file. Keep no 659-line direct port of `OceanFFT.ts` or new general-purpose GPU abstraction for just one effect. Optimize source size after behavior and numerical tests; no premature class hierarchy or 6 extra YAML files.
+
+### 11.2 Current files that should actually change
+
+| Existing source | Minimal extension | Preserve |
+| --- | --- | --- |
+| [D2] `config/water-visual.yaml` | `sea.offshoreFft` under existing `water` | All surf/optics/foam/coast defaults |
+| [D4/D5] `WaterQuality.js` / `SeaConfig.js` | Small normalized profile + strict validation | Four tiers, legacy quality toggle |
+| [D11] `SeaSurfaceShading.js` | Optional spectrum slope replacement in current `detail.slope` composition | Existing analytical height, shader foam and glint |
+| [D12] `StylizedWaterMaterial.js` | Pass coherent FFT sampler/texture metadata only to sea branch | Lake/river kind/flow, optics, refraction, foam, frozen water and positionNode |
+| [D13] `StylizedWaterSlot.js` | Optional per-cascade **double-precision UV origin uniforms** updated on descriptor change | Existing 5 wave phases, upload, bounds, dry skip |
+| [D14] `SharedWaterMaterials.js` | Extend stable per-object bindings if new UV origins needed | One shared shader per refraction variant |
+| [D15] `StylizedSurfaceViewBase.js` | Own and dispose exactly one FFT runtime; one before-draw update | Existing reflection and cascaded shadow callback |
+| [D18] `WaterVisualClock.js` | No new clock; read existing time | QA override for deterministic capture |
+| [D30] `WorldWindPass.js` | Read only its resolved wind/heading if available; avoid new field | Existing global wind simulation |
+| [D31/D42] GPU fixtures / water acceptance | FFT toggles and per-tier photos, timing | Existing negative-world water and swim acceptance |
+| [D43] `GpuPassProfiler.js` | Optional computed FFT stage timings with accurate fallback | Existing render GPU pass timing |
+| [D17] water-domain architecture docs | Record **no geometric FFT initially** and explicit later CPU-query gate | Canonical water/sea-level contract |
+| `docs/rendering/offshore-fft-ocean.md` | Final implementation, provenance, supported tiers, native perf results | New document **on implementation**, not now |
+
+**Do not touch by default:** [D6/D7/D8/D9/D10] actual nearshore wave CPU model, [D19/D20] worker water domain, [D21/D22] global coastal distance fields, [D25–D27] swash/rock spray event physics, [D37] reflection pipeline, terrain masks, edited page history and postprocess scene graph. If a real test uncovers a necessary seam, make that change small and separately review it.
+
+### 11.3 Tiny runtime contract to other renderers
+
+Conceptual (not yet implemented):
+
+```text
+OffshoreFftFrame {
+    clockSeconds, frameToken, spectrumGeneration,
+    seed, windSpeedMps, windDirectionRad, quality,
+    previousTimeSeconds, rendererGeneration
+}
+
+OffshoreFftOutput {
+    status, generation, snapshotTime,
+    spectralBandKMinKMax,
+    slopeMap, cascadeTilesMetres, samplerValid,
+    expectedSlopeVariance, roughnessResidual,
+    bindingStatus, fallbackReason, diagnostics
+}
+
+OffshoreFftRuntime {
+    ensureReady(renderer, config)  # asynchronous/compilation-safe
+    prepare(frame)                # idempotent for same frameToken
+    getOutput()                   # stable completed generation
+    invalidate(reason)
+    dispose()
+}
+```
+
+There is no `heightMap` field in the required output. If a future optional geometric feature genuinely implements CPU parity, define a separate shared wave-height provider and test before extending the runtime output.
+
+### 11.4 Error and lifecycle handling
+
+- Log one contextual error when shader build fails, giving FFT profile, backend and source revision; never print huge console spam every frame.
+- On device lost, dispose FFT handles and mark sampled output invalid before water material can use it. Keep legacy water visible.
+- On invalid YAML configuration, throw clear field path at load time; do not ignore `geometry:true` silently.
+- On spectrum rebuild, keep last valid texture until a new coherent generation is complete, and avoid stale flow/clock data in reflection pass.
+- Use signal/version token to cancel old async compile result after scene changes or renderer restart.
+- Performance counters are bounded/aggregated, debugging is opt-in. Avoid `Date.now` random phases, global mutable unowned GPU singleton or per-water-slot FFT allocation.
+- Startup and current world generation are async and recoverable; a missing optional FFT must never block loading the map or entering water.
+
+---
+
+## 12. Release readiness and performance tradeoff
+
+A correct implementation of PR I may use **just one or two small FFT cascades and improve offshore normals** while preserving the existing five authoritative swell waves. The full Ponlai four-cascade 256² Tessendorf renderer is a **different, larger project**, with extra displacement, velocity, complex slope filtering, depth-aware foam and possibly new collision/query contracts. Do not conflate them.
+
+The user-visible implementation proposal must state exactly which effects are available: short-wave offshore spectral variation, filtered roughness and a subtle wind/sea response. If wave geometry is *not* FFT-driven, explicitly say so; do not market the result as a full geometric FFT ocean. The minimum improvement should still materially beat the current analytic-only image in controlled open-sea captures, otherwise reject and keep the original simpler shader.
+
+---
