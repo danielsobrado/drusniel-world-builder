@@ -414,7 +414,7 @@ Proposed:
 
 ### 5.7 Resource lifetime and lazy initialization
 
-No eager initialization at startup just because sea YAML exists. Create/compile only when H is active, actual ocean water visible and allowed tier is available. (The letter H here means *the higher FFT feature*, not prior PR H clouds; implementation should call it `offshoreFft`.)
+No eager initialization at startup just because sea YAML exists. Create/compile only when `offshoreFft` is enabled, actual ocean water is visible and the requested quality tier is supported.
 
 - Use one owner with lifecycle `disabled → supported → compiling → ready → active → failed/unsupported → disposed`.
 - Reject unsupported formats, storage texture types, mip array textures, sampler limits and workgroup memory with a clear once-per-transition warning; restore old packed sea-detail texture.
@@ -1272,7 +1272,7 @@ Code pointers here are from exact inspected revision [`1ad7a8902517a6926ee79edf9
 - **[D25]** [`src/editor/stylized/CoastSwashShading.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/stylized/CoastSwashShading.js) — existing shoreline wetness and foam.
 - **[D26]** [`src/editor/stylized/CoastSwashForcingNodes.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/stylized/CoastSwashForcingNodes.js) — coastal swash time/directional carrier forcing.
 - **[D27]** [`src/editor/stylized/CoastalRockImpact.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/stylized/CoastalRockImpact.js) — rock impact foam/spray timing from current surf.
-- **[D28]** [`src/editor/water/OceanDistanceField.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/water/OceanDistanceField.js) — same bounded ocean shore field, intentionally no second huge distance atlas.
+- **[D28]** [`src/editor/water/SeaDiffraction.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/water/SeaDiffraction.js) — existing CPU diffraction and marine shelter ray sampler, matching the [D47] shader's shelter contract.
 - **[D29]** [`src/editor/water/WaterAppearance.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/water/WaterAppearance.js) — marine identity, sea exposure, region tint and existing shelter mask.
 - **[D30]** [`src/editor/weather/wind/WorldWindPass.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/weather/wind/WorldWindPass.js#L1-L105) — weather prevailing wind and 128² near-ground gust field.
 - **[D31]** [`src/editor/performance/qa/SeaSurfFixture.js`](https://github.com/danielsobrado/drusniel-world-builder/blob/1ad7a8902517a6926ee79edf9e98bc62d2f404cd/src/editor/performance/qa/SeaSurfFixture.js#L1-L64) — actual 65² GPU sea fixture at canonical [-4226432,278528], time 127.3.
@@ -1347,7 +1347,7 @@ Each Ponlai link points to [`cca905649fe657458697a9e1b179113c97ce5e6e`](https://
 
 ### 17.2 Research, physics and third-party provenance
 
-- [Tessendorf, *Simulating Ocean Water*, SIGGRAPH course](https://www.researchgate.net/publication/242299361_Simulating_Ocean_Water) — spectral ocean method concept; validate publication/provenance independently before copying.
+- [Tessendorf-style spectral ocean as implemented in Ponlai](https://github.com/HuberyLL/ponlai/blob/cca905649fe657458697a9e1b179113c97ce5e6e/packages/render/ocean/OceanFFT.ts#L19-L100) — verified source reference for Fourier/phase equations; consult original scholarly publications independently as appropriate.
 - [Daniel Greenheck, *tidewater*](https://github.com/dgreenheck/tidewater) — credited by [P1–P4/P7] under MIT for FFT and seawater effects; preserve exact copyright/SPDX notices on adapted code.
 - [Ponlai source at pinned commit](https://github.com/HuberyLL/ponlai/tree/cca905649fe657458697a9e1b179113c97ce5e6e) — reference for its own MIT and third-party notices; check actual file headers before transplant.
 - [Cox and Munk slope distribution, cited by OceanSpectrum](https://github.com/HuberyLL/ponlai/blob/cca905649fe657458697a9e1b179113c97ce5e6e/packages/render/ocean/OceanSpectrum.ts#L140-L204) — empirical mean square slope used as an art/energy reference, not an unconditional scene-physic setting.
