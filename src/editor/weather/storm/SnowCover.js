@@ -28,7 +28,7 @@ export function resolveSnowCoverConfig(source = {}) {
 
 export class SnowCover {
   value = 0;
-  /** 0 building or holding … 1 thawing: which pattern the snow field draws (storm-snow-field plan). */
+  /** 0 building or holding â€¦ 1 thawing: which pattern the snow field draws (storm-snow-field plan). */
   melting = 0;
   /** QA: `{ value, melting }` held instead of integrating, for a thaw at fixed time. */
   frozen = null;

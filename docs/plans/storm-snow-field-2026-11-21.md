@@ -137,7 +137,19 @@ itself (`tests/stormSnowField.test.js` asserts this). The terrain adds its
 canopy term only when the field is on. So every off graph is the original
 graph, node for node.
 
-**In the app:** see ยง5.2.
+**In the app, every reader.** `run-snow-field-review.mjs` reads the vertex and
+fragment WGSL from the cached pipeline of every terrain, meadow, rock and tree
+material in view. It does this at the rainforest-slope storm pose, on HEAD
+`8bb0106b` (snapshot server, port 5217) and on `3af7bb12` with `?snowField=0` and `=1`:
+
+- **Off against HEAD: 94 of 94 shaders are identical.** That covers
+  `terrain-slot-0` (fragment `b0c0ec83` on both), the meadow blades (vertex
+  `a07a9cb1` on both), cards, ground detail, flowers, bushes, rocks, crags
+  and trees. Three ground-detail meshes carry different instance numbers in
+  the two runs; matched by material, they are identical too.
+- **On against off: 76 of 94 change.** For example, the terrain fragment
+  becomes `af835dba` and the blade vertex `e721c0e3`. The other 18 do not read
+  storm snow.
 
 **No GPU work when off.** `createSnowFieldPass` returns null. No target is
 allocated, because readers create it lazily and are never asked to. There is no
@@ -145,7 +157,7 @@ pass and no ground patch.
 
 ## 5. Native results
 
-Hardware WebGPU (NVIDIA Lovelace, not a fallback adapter), 1600ื900, headed
+Hardware WebGPU (NVIDIA Lovelace, not a fallback adapter), 1600ร—900, headed
 Playwright. Off and on were served from frozen snapshots:
 `serve-world-visual-snapshot.mjs 3af7bb12` with `?snowField=0|1`, and HEAD `8bb0106b`.
 
@@ -175,7 +187,7 @@ Mean absolute pixel difference, on against off:
 The difference figures include sky and tree-sway noise: cloud animation is not
 frozen by the QA clock (PR I.4 found the same).
 
-**Reading.** Under a full storm, `saturate(cover ื gain)` is 1 almost everywhere,
+**Reading.** Under a full storm, `saturate(cover ร— gain)` is 1 almost everywhere,
 so the field changes little. Only the windward and steep faces and the low parts
 of the drift pattern stay thinner, which is intended. During a thaw the field
 is what you see: off, the whole slope stays an even 55 % white. On, open ground
@@ -191,7 +203,7 @@ out. Follow-up: find which baked input steps across that chunk edge. It is not
 in the field, which is continuous in canonical space.
 
 Captures: `tmp/snow-field-review/orphan/{off,on}/{storm,thaw}/*.png`;
-side-by-side sheets (off | on | ื6 difference) in `tmp/snow-field-review/compare/`.
+side-by-side sheets (off | on | ร—6 difference) in `tmp/snow-field-review/compare/`.
 
 ### 5.2 Field pass cost
 

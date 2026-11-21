@@ -103,7 +103,7 @@ export function canopySnowCap(snow, up = normalWorld.y) {
   return smoothstep(start, start.add(CAP_FULL - CAP_START), up.add(lumps)).mul(snow).max(snow.mul(FROST_SHARE));
 }
 
-/** A tree's own snow plus what a storm has laid where it stands (SnowCover × snow field), before the cap is drawn. */
+/** A tree's own snow plus what a storm has laid where it stands (SnowCover Ã— snow field), before the cap is drawn. */
 export function withStormSnow(snow) {
   return snow.add(stormSnowCoverAt(positionWorld.xz)).min(1);
 }
