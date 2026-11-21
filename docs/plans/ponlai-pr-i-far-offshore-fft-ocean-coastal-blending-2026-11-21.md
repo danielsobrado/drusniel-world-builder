@@ -906,3 +906,337 @@ A correct implementation of PR I may use **just one or two small FFT cascades an
 The user-visible implementation proposal must state exactly which effects are available: short-wave offshore spectral variation, filtered roughness and a subtle wind/sea response. If wave geometry is *not* FFT-driven, explicitly say so; do not market the result as a full geometric FFT ocean. The minimum improvement should still materially beat the current analytic-only image in controlled open-sea captures, otherwise reject and keep the original simpler shader.
 
 ---
+
+## 13. Rigorous testing matrix — CPU, shader, coastal and native hardware
+
+### 13.1 Pure reference and spectrum tests
+
+A GPU FFT screenshot by itself is insufficient; require the following precise independent assertions:
+
+1. **FFT/DFT oracle:** tiny 8² and 16² seeded complex spectra: CPU direct inverse DFT vs GPU Stockham result within a documented float32 tolerance; verify each axis order and inverse normalization.
+2. **Hermitian and realness:** mode `H(-k)` is conjugate of `H(k)` at correct wrapped mirror index; zero/Nyquist handling yields near-zero imaginary spatial output.
+3. **Parseval and RMS:** integrated expected power matches measured spatial variance, factoring inverse normalization and spectral cell area once. Vary seed and N.
+4. **Directional dispersion:** single-mode eastward wave travels in declared direction for `t=0,1,10`; verify Ponlai positive IFFT opposite-`k` sign correction.
+5. **Stable absolute time:** evaluating at `t=123.4,124.6,126.0,127.6` in any call order gives the same FFT slope field for that fixed t; QA freeze repeats hash after reload.
+6. **Deterministic seeded input:** same seed, N, spectra and wind = same Gaussian pairs, h0 and final texture; different seed changes positions but comparable statistical energy, not scale.
+7. **Zero energy guard:** no Fourier energy at DC, invalid directions, negative wave energy, zero wind under the chosen physical cut, excluded wavelengths ≥7.5m, out-of-band cascade cells.
+8. **Band closure:** sum over all cascade masks and expected power equals the intended high-pass residual, with no mode included twice or silently dropped at band borders.
+9. **Finite dispersion:** as `kd→0` shallow formula agrees; as `kd→∞` deep formula agrees; zero/small k does not generate NaN.
+10. **Derivative parity:** FFT slope sample equals finite-difference derivative of FFT height in the small synthetic oracle. Unit checks prevent radians-vs-degrees wind drift.
+11. **Shader norm after filtering:** reconstructed normal length 1, finite even with zero amplitude, grazing camera, massive pixel footprint and texture seam.
+12. **Filtered energy:** at increasingly distant footprint, pointwise slope variance falls and mean *unresolved* variance is transferred to bounded roughness; it must not vanish mysteriously or double.
+13. **Climate/weather:** a storm increases short-wind response smoothly without multiplying its existing analytic long-swell height again; wind rotates based on correct convention.
+14. **Ocean-kind isolation:** FFT output contributes **exact zero** for lakes at sea level, rivers with zero flow, frozen water, dry pages, and when `sea.enabled=false`.
+15. **Legacy identity:** flag off means no new compile shader branches, FFT resource allocs or changes in `SeaSwell` canonical CPU or TSL values.
+16. **No height mismatch:** with FFT **on** in normal-only mode, canonical CPU water surface height equals original rendered height at tested positions to preexisting tolerance.
+17. **Chunk seams and rebase:** same world point sampled from two adjacent 128m water slots and across −4,226,432m canonical positions gives same FFT UV/sample/normal within precision.
+18. **Seam at FFT wrap:** at repeat tile left/right/top/bottom and mips, no high-contrast visible line; compare fractional phase under negative modulo.
+19. **Random scene transition:** camera/water slot reassignment does not reseed FFT, restart phases, allocate new FFT instance or change measured world wave.
+20. **No texel alias:** high frequencies shorter than 2m mesh spacing are never converted to new vertex vertical displacement; normals are footprint-filtered.
+21. **Capability fallback:** missing WebGPU/texture2DArray, insufficient workgroup memory, RG16F format limit, low binding count and shader failure leave existing sea and gameplay intact.
+22. **Device recovery:** after simulated lost/reinit, same seeded sea at same water time reconstructs expected wave field and old GPU buffers are not sampled.
+23. **Disposal:** repeated quality change, world unload/reload, body diving/surfacing and renderer recreation leaves one owned FFT resource set or zero when off.
+24. **No readback:** the normal running route never calls synchronous GPU texture read or `mapAsync` to update water heights; CPU queries remain bounded and deterministic.
+25. **Reflection:** reflection render uses identical completed FFT generation and no second compute; no recurrent mip build caused by reflection capture.
+
+### 13.2 Shader build and binding tests
+
+Test the real [D12] `StylizedWaterMaterial` generated by both [D14] shared variants, not a synthetic isolated FFT quad alone. Validate:
+
+- All four existing `water.qualityTier` values, FFT off and effective on where permitted.
+- High/ultra with refraction enabled/disabled; the near refractive branch still lazy-compiled only when a near wet chunk is visible.
+- 16 sampled texture binding and 16 shader interstage varying limits; backend negotiated device limit and actual adapter must be recorded.
+- 1, 7 and 49 visible resident water slots: one FFT resource and stable material program count, not linear N slots FFT shader creation.
+- Water source and terrain page RGBA field are **unchanged** by FFT toggle; no new pages committed, water worker CPU unaffected.
+- Texture mip LOD generated once per completed FFT output, no stale layer when a cascade is off, no wrong orientation on water mesh rotation.
+- First-offshore animation after startup does not block for a multi-second shader compilation.
+- Existing shader wave/CPU tests continue to pass at off; addition of FFT must not alter old regression constants, source data or snapshots.
+
+### 13.3 Synthetic visual fixtures
+
+| Fixture | Specific acceptance |
+| --- | --- |
+| Flat synthetic ocean, no existing waves, known one FFT mode | Displacement disabled in MVP; normal stripes travel correct way, finite and smooth |
+| Pure analytic five-wave ocean control | Exactly old look/height with FFT off |
+| Shore at 0–3m water depth | FFT amplitude exactly zero, no waterline shift, normal/foam from current surf |
+| Surf blend at 2.5–7m | No FFT contribution while nearshore carriers hand off to authored five-sine swell |
+| Mid shelf 7–15m | FFT slope smoothly ramps, no rim of higher glint, no hard band at 17m |
+| Deep ocean beyond capped shore distance | FFT enabled only if real marine-kind/depth tests pass; not permanently stuck in fade |
+| Sheltered cove behind a headland | Short chop attenuated by existing exposure; long swell and breakers remain |
+| Open windy headland | More statistically irregular high-frequency glint than current five-wave, no noisy salt shimmer |
+| Storm sea | Correct fine-wave broadening/whitecaps without extra sharpness/height blackout |
+| Twilight and moonlit water | Sky light/glint uses existing resolved look; no permanently white Fresnel spray |
+| Lake at sea level / river with zero flow | No FFT wave/sampler work on those surfaces beyond shared material compile |
+| Frozen water | No FFT normals on ice, no new water animation through ice |
+| Negative canonical X/Z and distant island | No f32 swimming, no wave tile seam at rebase/chunk boundary |
+| Camera turn from cliff down to offshore | Stable filtered specular response; no screen-space repetitive diagonal bands |
+| Fast camera travel/teleport | FFT world field stays fixed, only visible region changes; same t repeated image unchanged |
+| Paused water clock plus live world clock | Water FFT and current swash both frozen by WaterVisualClock override |
+| Wake/rain ripple over sea | Existing interaction/rain effects still visible once; not double-calculated |
+| Underwater looking up | Valid water mesh, correct surface height, no new copied framebuffer or FFT per camera |
+
+### 13.4 Real world screenshots: use existing 2026-11-20/21 coastal QA poses
+
+The best verified reference is the recent actual coast QA data, **not an invented list of coordinates**. Load the manifests and poses from [D33–D35], preserving their exact source/seed/time and currently measured setup:
+
+- `docs/qa/coastal-review-2026-11-20/poses.json` and `manifest.json`: exposed beach, curved coast, cove/lee, headland, rocky shore, medium/high/ultra/low variants and surf shelter control.
+- `docs/qa/coastal-fix-review-2026-11-21/poses.json` and `manifest.json`: shoreline, wire, raw depth, seabed wetness and GPU comparison, includes fixed original repro.
+- `docs/qa/coastal-fix-review-2026-11-21/logs/water-acceptance-headed.json`: true GPU water navigation route; don't claim pass based on an unrelated static ocean screenshot.
+- [D31] `SeaSurfFixture` fixed `clock=127.3` and canonical world centre `[-4,226,432, 278,528]`, plus `surf-moving` and rebased shots.
+
+**Minimum A/A/FFT-on** image set:
+
+1. Calm sunny offshore from high cliff, source visual no FFT vs FFT.
+2. Moving sea from the same camera at clocks 123.4/124.6/126/127.6s.
+3. Exposed gentle beach at eye level with foreground foam and far sea visible in one image.
+4. Curved shore with 10–17m shelf and original visual angular-band region.
+5. Sheltered cove onshore and offshore view showing lee difference in short chop.
+6. Headland looking down at water normals, both with high and ultra.
+7. Rocky coast waves and spray events (preserve previously measured particle lifetime).
+8. Deep ocean/clear horizon at low sun; no repeated FFT tiles or bright horizon.
+9. Storm and nighttime moon/town coast with existing water tint.
+10. Underwater and surfacing from acceptance route, preserving opacity, refraction and seam.
+
+For every capture: log exact git SHA, seeded mode coefficients hash, water clock, camera canonical pose, FOV, quality, FFT N/cascades/bands, device backend, resource generation, screenshot and diagnostic render modes. Control weather, wind, day/night and all reflections consistently. A screenshot with a low FFT blend of zero is **not proof that FFT works**; include at least one explicitly deep offshore probe where blend=1 and the FFT output is actually sampled.
+
+### 13.5 Required visual debug output
+
+Support a bounded QA-only debug view for:
+
+```text
+fft-spectrum-density-k-space
+fft-initial-gaussian-phases
+fft-after-ifft-height-oracle
+fft-derivative-x-and-z
+fft-filtered-slope
+fft-footprint-mip
+fft-expected-slope-variance
+fft-unresolved-roughness
+fft-offshore-depth-mask
+fft-shore-distance-mask
+fft-shelter-exposure-mask
+fft-water-kind-mask
+fft-effective-contribution
+fft-cascade-bands
+fft-seed-and-generation
+fft-compute-timing-availability
+```
+
+Never leave these expensive debug samplers compiled into production material when off. Use one debug-mode enum to compile optional QA views.
+
+### 13.6 Actual test commands available in package.json
+
+```bash
+git branch --show-current
+git status --short
+git log -15 --oneline
+
+npm test
+npm run lint
+npm run build
+
+npm run qa:water:acceptance
+npm run qa:world:visual
+npm run qa:look
+
+npm run qa:perf -- --headed
+npm run qa:perf:windows -- --qa chunk-cross --warmup 8 --duration 12 --settle
+```
+
+These are verified package script names. The exact supported flags on QA runners must be rechecked in `--help` before using a nonstandard option. Water acceptance should use native headed Windows Chromium when available: [D34] documents the headless runtime sometimes failing with `dxil.dll` and only full Chromium selecting the NVIDIA native WebGPU device correctly. Record whether the test was foreground/headed, GPU adapter, focus and fallback status.
+
+### 13.7 Numeric acceptance gates
+
+- FFT off: pixel-identical legacy screenshot where deterministic fixture permits; zero new FFT GPU work/allocations.
+- No height changes from FFT normals: zero added displacement; original CPU-vs-GPU surf height/shoreline tolerance remains.
+- At any shared vertex, FFT slope sampling is continuous across chunks; numerical discontinuity tolerance explicitly determined by RG16F/mip precision.
+- GPU-FFT vs CPU tiny DFT passes tolerance tests; no data-dependent holes, NaN or abnormal Fourier imaginary component.
+- Visible improvement at sea: repeated FFT-on still and motion comparisons must show irregular offshore detail **without** introducing bright/hard lines, shimmer, aliased normals or nearshore foam changes.
+- No large source remap on wind or QA clock seek, no texture flicker or extra output conversion render each reflection capture.
+- Shader sampler/varying compile success under portability limits, device failure fallback and release/dispose leak check.
+- Target balanced FFT GPU compute ≤0.5ms average and fragment delta ≤0.2ms on benchmark hardware as provisional aspirations; record real measurements or label unavailable. Explicit on/off frame median/p95 and quality ROI determine release.
+- Water acceptance route and coastal QA must pass with no added waterline/caustic/foam issue or new CPU stall.
+
+---
+
+## 14. Phased implementation plan and stop conditions
+
+### I.0 — New-main audit and deterministic QA baseline
+
+- [ ] Pull latest `main` and review git log since baseline `1ad7a890`. Don't overwrite fixes in coastal swash, water QA, GPU sampler allocation or other commits.
+- [ ] Follow [D1], inspect [D17] water-domain contract, and compare E/F/G/H actual code status. Do not assume planned features are present.
+- [ ] Reconfirm [D2/D3] YAML assembly and [D4/D5] validators; no alternate FFT config loader.
+- [ ] Record native adapter, Three installed/lock version, TSL storage buffer/texture array/computeKernel capabilities and actual sampling limits.
+- [ ] Benchmark on/off baseline **before** any FFT code, using recent native coastal evidence manifests/poses and water acceptance.
+- [ ] Capture current five-wave offshore look, full nearshore/rock/foam and all four quality tiers for A/A repeat.
+- [ ] Verify current CPU `seaSurfaceOffset` and shader height agreement at far and near sea; identify exact coordinate transform from per-slot centre to canonical metre.
+- [ ] Check effective shoreDistance maxima and actual blend source; no planned far shore fade requiring 200m if capped at 48m.
+- [ ] Decide initial 64² proof and 128²×2 production candidate, with device limit test and memory plan.
+
+**Stop:** water-domain/query contract unclear, unsigned canonical transform not reproducible, no native WebGPU reference, source differences from this pinned plan, or existing offshore shader already changed radically.
+
+### I.1 — Pure spectrum model and test oracle
+
+- [ ] Add `OceanSpectrum` pure model, JONSWAP/TMA terms, time dispersion and directional spread, explicit sea-vs-swell units.
+- [ ] Implement seeded normal-pair mode generator, Hermitian index, zero/Nyquist handling and stable same-seed reproducibility.
+- [ ] Implement tiny 8²/16² direct inverse DFT and mathematical invariants `13.1`; confirm normalization, Parseval and travel direction before GPU.
+- [ ] Add high-pass short residual excluding wavelengths ≥7.5m, with a band/taper table and expected slope variance computation.
+- [ ] Compare analytic current five-wave energy and existing detail source variance; choose replacement strategy for overlapping detail.
+- [ ] Test U=0, unusual fetch/depth, extreme storm, signed large canonical coordinate seed, and time seek.
+- [ ] Keep mode constants in separate file; actual tuning in approved quality profile.
+
+**Stop:** inconsistent Fourier sign, seed non-determinism, overlapping energy with five carrier modes, unbounded variance, invalid TMA small-depth behavior or CPU oracle disagreement.
+
+### I.2 — Minimal native WebGPU FFT and output buffers
+
+- [ ] Create one isolated 64² FFT GPU proof fixture with a known synthetic mode and compare complete wave/slope output to tiny DFT oracle.
+- [ ] Build 2D Stockham row/column stages with stable ping-pong and explicit normal/derivative output; correctness before optimized shared-memory version.
+- [ ] Verify texture array layer semantics, storage buffer alignment, compute barriers, mip generation and colour space under installed Three.
+- [ ] Implement one renderer-owned runtime and feature states, resource accounting, device-lost fallback, safe shutdown and lazy warmup.
+- [ ] Benchmark 64²×1 and 128²×2, including compute, conversion and mip cost **outside** render pass timings.
+- [ ] Evaluate two-dispatch shared-memory optimization only after reference parity, if measured GPU benefit pays for complexity.
+- [ ] Do not allocate velocity/displacement/Jacobian output textures unless actually used and proved by a feature.
+
+**Stop:** any GPU validation error, unbounded 256² allocation, output NaNs, missing float filter support, render-target restore failure, poor hardware FFT runtime versus existing packed detail or missing compute time evidence.
+
+### I.3 — Canonical world sampling and stable quality tiers
+
+- [ ] Implement CPU double precision positive modulo for each cascade and per-slot centre, GPU chunk-local UV; verify ±million metres and shared chunk edges.
+- [ ] Extend per-object water material options/shared bindings with **small stable** cascade UV origins; no per-slot FFT/CPU DFT.
+- [ ] Determine 128² candidate cascade tile sizes based on short-wave frequency limits, not blindly Ponlai's [733,157].
+- [ ] Generate derivative mips and footprint LOD, record expected unresolved slope variance and roughness correction.
+- [ ] Test texture repeat seam, nonintegral cascade period, camera movement, origin snap and high-altitude view.
+- [ ] Check sampler and varyings under portable limits; if failed, reduce/reuse bindings before changing tier.
+- [ ] Ensure quality change yields one clean target rebuild and no 49 material re-compiles or lost sea level.
+
+**Stop:** seam at −4.2 million-metre position, floating origin ripple swimming, physical waves moving upwind because inverse sign, thin glitter and repeating diagonals at distant horizon.
+
+### I.4 — Offshore normal-only material integration
+
+- [ ] Add `offshoreFft` YAML/validator but default off, and one optional `OceanFftBlendNodes` call inside [D11]'s sea detail slope composition.
+- [ ] Use marine kind, depth and capped shore distance + exposure to create `B_fft` C1 fade; choose verified shore gate reachable with existing field.
+- [ ] Replace matching medium/fine [D23] donor detail slope contribution rather than stacking wave energy; keep rain, interactions and authored waves.
+- [ ] Preserve `sea.displacement` and all waterline/foam/crest geometric calculations, [D8–D10] nearshore CPU/shader waves.
+- [ ] Make a supported high/ultra shared water shader compile/compileAsync on real WebGPU with 16 sampler/varying profile, refractive and nonrefractive.
+- [ ] Measure slope/roughness before and after; ensure true deep water samples the FFT, and no 7m or 17m shelf band.
+- [ ] Verify existing reflection/glint/optics, underwater refraction, whitecap/rock impact and rain without a second sea shading model.
+- [ ] Feature off or unsupported uses exact old shader nodes and zero FFT work.
+
+**Stop:** water height changes from FFT when geometry=false, new shoreline cutoff, water kind leak into lake/river, double rain/swell energy, memory/sampler overflow, old donor texture still actively sampled twice or foam appears offshore unrelated to waves.
+
+### I.5 — Weather, visual stability and reflection integration
+
+- [ ] Read current resolved weather wind and storm, normalize heading signs, keep existing long-swell authoritative.
+- [ ] Rebuild h0 coefficients only on meaningful weather revisions; smooth gain/direction changes with deterministic seed and bounded transition.
+- [ ] Use absolute water time for deterministic pause, rewind, time seek and replay. Never advance FFT once per reflection capture.
+- [ ] Compare calm/windy/storm across dawn/day/evening/night; no permanently bright offshore sparkle or upwind windrows.
+- [ ] Preserve existing `WaterReflectionController` captures/skyLightTint; test underwater camera and post/cinematic render routing.
+- [ ] Check short-wave spectral content is actually visible and valuable at 1600×900 after appropriate mip filtering.
+- [ ] If ROI poor, stop here and keep existing simpler approach.
+
+**Stop:** 1s spectrum rebuild hitch, flash when wind changes, double compute on reflection, reflection sky disconnected from waves, FPS drop without corresponding quality improvement.
+
+### I.6 — Optional geometric FFT *only after CPU parity* (independently approved)
+
+- [ ] Produce a formal design for authoritative CPU-evaluable low-frequency wave source available at **arbitrary canonical ocean positions**.
+- [ ] Prefer a sparse deterministic Fourier mode field for geometry with O(K) synchronous CPU queries; keep dense FFT for fragment normals.
+- [ ] Compute precise `height(x,z,t)` and `slope(x,z,t)` from identical modes/clock and ensure nearshore/surf blend in both CPU and shader.
+- [ ] Add conservative bounds (waterSlot culling, shadows, collisions, reflection) accounting for max displacement at sea state.
+- [ ] Establish source-frequency energy split with the five existing analytic carriers: either retain them and add disjoint nonoverlapping long modes with CPU twin, or migrate them to a new authoritative set atomically.
+- [ ] Test swimmers, wading, camera crossing waterline, dynamic boats/AI future arbitrary queries and 100km player travel.
+- [ ] Do **not** activate geometry until the full water-domain contract [D17] passes without runtime GPU readbacks, height lag or network-affecting nondeterminism.
+
+**Stop:** any GPU-only geometric FFT with unchanged CPU source. This whole phase may remain unimplemented while first PR I release is valid.
+
+### I.7 — Optional high-end spectral optics after measured benefit
+
+- [ ] Consider [P5] unresolved slope variance table or simplified single-parameter roughness model; inspect current donor packed detail variance first.
+- [ ] Consider [P6] physical glint lobes only when current water reflection specular physically/visually needs them; no second sun.
+- [ ] Consider offshore foam from Jacobian threshold **only if** separate, measured and distinct from existing whitecap, swash and impact foam.
+- [ ] Consider [P7] cat's paws and windrows only if they can reuse current WorldWind and detail noise without extra world-wide noise pass.
+- [ ] Consider [P9] FFT-derived underwater caustics in a **separate follow-on PR**, due current water acceptance/caustics timing sensitivity.
+- [ ] No mandatory 256²×4 FFT, 12 render-quads, motion velocity array or extra SSR pipeline just because Ponlai includes them.
+
+**Stop:** no demonstrated improvement, cost > quality ROI, duplicated foam or second water refraction copy.
+
+### I.8 — Full QA, performance, visual review and rollout
+
+- [ ] Run `13.1` math and `13.2` real shader build tests, plus water-on/off equivalence.
+- [ ] Run package `npm test`, `npm run lint`, `npm run build`, existing water acceptance and world visual QA.
+- [ ] Capture at least ten `13.4` real scenes with matched seed/clock/pose, plus synthetic/negative positions and island/cove control.
+- [ ] Run native hardware A/A/FFT-off/FFT-on timing in water/beach/cove/headland/open sea, across four quality tiers; publish actual compute cost.
+- [ ] Measure full GPU buffer/resource residency and dispatch counts. Confirm no extra per-slot work at 1 vs 49 resident water chunks.
+- [ ] Validate runtime first load, water time freeze, speedup, downgrade, camera rebase and renderer/device recovery.
+- [ ] Perform two code-review rounds for numerical correctness, shader sampler complexity, resource lifecycle and performance. Fix issues then rerun authoritative benchmarks.
+- [ ] Retain rejected measurements and screenshots in report, including focus failures or software/WebGL adapter.
+- [ ] Record source/FFT assets and downstream derivative licensing in THIRD_PARTY_NOTICES only if code is actually adapted.
+- [ ] Keep opt-in default if any functional gate fails or quality delta insufficient.
+
+**Stop:** hardware compute unmeasured, CPU water-height mismatch, invisible quality improvement, scene sampler overflow, nearshore look regression, missing water acceptance route or broken device recovery.
+
+### I.9 — Acceptance decision, direct-main commits and handoff
+
+- [ ] Commit small changes directly to current `main`, without overwriting unrelated concurrent commits, force pushing or GitHub Actions.
+- [ ] Publish final README-style `docs/rendering/offshore-fft-ocean.md` with exact implementation status, pinned source and licenses, measured performance, supported tiers/backend, fallback and optional future geometry.
+- [ ] Confirm `water.sea.offshoreFft.enabled:false` returns exact original five-wave/surf/rock/foam/reflection behavior.
+- [ ] State **precisely** that first release is normal/roughness-only FFT unless the optional full CPU-parity geometry phase was separately implemented.
+- [ ] Provide integration contract to next PR without imposing new global ocean, weather, atmosphere or simulation data models.
+
+Suggested **future code commit** (not this document):
+
+```text
+feat(ocean): add optional band-limited offshore FFT wave detail
+```
+
+---
+
+## 15. Definition of done, stop/go decisions and unacceptable results
+
+### 15.1 Required source/physics correctness
+
+- [ ] Verified spectral Gaussian seed, conjugate symmetry, complex normalisation, energy budget and travel sign.
+- [ ] Normal/roughness FFT band **does not overlap** the five 42–7.5m authoritative height carriers or duplicate existing short-wave slope energy.
+- [ ] FFT spectrum evolves at absolute `WaterVisualClock` time and reproduces frozen/replayed frames exactly.
+- [ ] No vertex FFT height in MVP; water canonical CPU height and player/boat/swim physical contract unchanged.
+- [ ] No water-kind/sea-level/biome data modifications; only actual ocean fragments receive the feature.
+- [ ] Stable double-precision origin/UV across chunk edges, negative planet positions and floating-origin snaps.
+- [ ] Surf, refraction, diffraction, swash and rock impacts remain on original timing and physical height.
+- [ ] No broken coastline contour, foam or roughness bands at old 7m/10–17m depth transitions.
+
+### 15.2 Required renderer and performance
+
+- [ ] Exactly one renderer-level FFT source and bounded buffers; no per-slot FFT, no extra full scene render.
+- [ ] FFT off compiles and behaves exactly as before, without allocations/dispatches/texture binding changes.
+- [ ] Current water shared material/near refraction remain performant and compile under portable 16 sampled texture/interstage varying profile.
+- [ ] Runtime wind/reseed/quality transitions have correct generation management, no shader rebuild storm, no NaN/black/uninitialized wave.
+- [ ] GPU compute and mip/render conversion cost measured **separately** from render-pass GPU time, or honestly reported unavailable.
+- [ ] Native headed RTX/WebGPU A/A/FFT A/B report full CPU/GPU frame p50/p95/p99 and perf/quality ROI.
+- [ ] Water acceptance enter/swim/dive/surface/dry passes, plus all existing unit/regression tests.
+- [ ] No GPU readbacks or expensive CPU full FFT in ordinary water sampling.
+- [ ] Startup/teardown/device loss cleanup and unsupported backend safely recover original sea.
+
+### 15.3 Quality and documentation
+
+- [ ] Clear visual improvement offshore, statistically less repetitive detail, stable reflection/glint in sun and storm with no excessive distant sparkle.
+- [ ] At sea, the short-wave spectrum smoothly fades in and away from authored surf; sheltered cove retains physically calmer detail.
+- [ ] All current water optical colour/refraction/foam and snow/lake/river surfaces unchanged at fixed source/clock.
+- [ ] Exact source SHA/code and third-party MIT notices retained if code/asset adapted, with no made-up license claims.
+- [ ] Optional FFT geometry, velocity and unresolved-slope advanced pipeline clearly marked **not implemented** if not delivered.
+- [ ] User-visible flag off provides immediate rollback and correct water query/scene.
+
+### 15.4 Reject despite attractive screenshots if any of these occur
+
+- Only 2D FBM noise called “FFT” with no actual Fourier spectrum/transform.
+- Four full 256² cascades added without proving workload and shader budget.
+- FFT wave **height** added GPU-only while CPU swimming query still follows five waves.
+- New surf frequency/phase unrelated to shore waves makes front leave foam/rock impact behind.
+- A permanent bright/dark ring between surf and offshore from depth or capped distance thresholds.
+- Additive duplicated wave energy makes storm sea twice as tall/rough or near water glitter aliased.
+- Copying Ponlai water shader disables current real refraction, spectral absorption, swamp/lake rules, or persistent sand swash.
+- Frame time increase explained away because render pass GPU time does not include FFT compute.
+- Per-chunk FFT buffer creation, GPU readbacks in water queries, invalid texture sampled after device loss, or a second scene render per water reflection.
+- Declaring FFT geometry/swimmer parity implemented merely because the plan contains a speculative future phase.
+
+**PR I document completion is not renderer implementation.** Do not merge claims of code passing until the actual source work, named native QA evidence and all required gates are delivered.
+
+---
