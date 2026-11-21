@@ -434,3 +434,41 @@ No third-party shader code is used by the location materials. The ice shader's
 techniques — Beer-Lambert absorption, interior detail sampled along the
 refracted view ray, cell-noise melt scallops — are standard and written for
 this project; the noise functions are three.js's MaterialX nodes (MIT).
+
+## Ponlai offshore FFT ocean
+
+The offshore FFT ocean's Stockham FFT stage scheme and its output-pass pattern
+(`src/editor/water/fft/OceanFftGpuKernels.js`, `OceanFftRuntime.js`) are adapted from:
+
+- Project: `HuberyLL/ponlai`, `packages/render/ocean/OceanFFT.ts`, pinned at
+  `cca905649fe657458697a9e1b179113c97ce5e6e`
+- Author: Hubery
+- License: MIT
+
+The code was rewritten in this project's conventions (see
+`docs/plans/ponlai-pr-i-phase-i2-webgpu-fft-2026-11-21.md` §6–§8 and §17). The
+spectrum mathematics comes from the published literature; no Ponlai code is copied
+verbatim. Ponlai's own source credits earlier work for its FFT; that attribution is
+Ponlai's and is not restated here as a licence claim.
+
+### MIT License
+
+Copyright (c) 2026 Hubery
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

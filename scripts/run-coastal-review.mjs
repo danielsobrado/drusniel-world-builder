@@ -28,6 +28,15 @@ const diagnostic = process.argv.includes('--diagnostics');
 const only = option('--only', '').split(',').filter(Boolean);
 // Extra app query flags, e.g. --query oceanFft=1 (PR I A/B); --ocean-fft-inspect records the FFT scene state.
 const extraQuery = new URLSearchParams(option('--query', ''));
+// --water-patch '{"sea":{"offshoreFft":{"enabled":false}}}': deep-merged into the served water config (A/B a feature off).
+const waterPatch = JSON.parse(option('--water-patch', '{}'));
+const deepMerge = (target, patch) => {
+  for (const [key, value] of Object.entries(patch)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) deepMerge(target[key] ??= {}, value);
+    else target[key] = value;
+  }
+  return target;
+};
 const oceanFftInspect = process.argv.includes('--ocean-fft-inspect');
 const minimumMs = Number(option('--settle-ms', 5000));
 const durationMs = Number(option('--duration-ms', 8000));
@@ -73,7 +82,7 @@ const manifest = { schemaVersion: 1, viewport, sourceRevision: source.sourceSha,
   sourceOverrides: source.sourceSnapshot?.sourceOverrides?.map(file => ({
     file, sha256: source.sourceSnapshot.files[file],
   })) ?? [],
-  screenshots: [], timings: [], timingFailures: [], failures: [], oceanFft: [], query: Object.fromEntries(extraQuery) };
+  screenshots: [], timings: [], timingFailures: [], failures: [], oceanFft: [], query: Object.fromEntries(extraQuery), waterPatch };
 const save = () => writeFile(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
 let browser;
@@ -127,6 +136,7 @@ try {
   assert.ok(baseConfig, 'Expected the Vite compiled water YAML module');
   await page.route(/\/config\/water-visual\.yaml\?.*compiled/, async route => {
     const config = JSON.parse(baseConfig[1]);
+    deepMerge(config.water, waterPatch);
     config.water.qualityTier = job.qualityTier;
     config.water.sea.surf.diffraction.enabled = job.diffraction;
     if (job.waveRefraction === false) config.water.sea.surf.refraction.enabled = false;
