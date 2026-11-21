@@ -117,11 +117,11 @@ export function foliageMaterialClass(Base) {
           let extra = response.mul(fraction).mul(warmTint);
           if (wrapDiffuse) {
             const wrap = foliageWrapDiffuseResponse(normalView, data.lightDirection, wrapDiffuse, visibility).mul(snow.oneMinus());
-            extra = extra.add(mix(vec3(1), tint, 0.3).mul(wrap.mul(0.55)));
+            extra = extra.add(mix(vec3(1), tint, 0.42).mul(wrap.mul(0.68)));
           }
           if (rimGlow) {
             const rim = foliageRimGlowResponse(normalView, data.lightDirection, positionViewDirection, rimGlow, visibility).mul(snow.oneMinus());
-            extra = extra.add(tint.mul(rim.mul(0.45)));
+            extra = extra.add(tint.mul(rim.mul(0.58)));
           }
           data.reflectedLight.directDiffuse.addAssign(
             diffuseColor.rgb.mul(data.lightColor).mul(extra),
@@ -131,9 +131,10 @@ export function foliageMaterialClass(Base) {
         const forward = positionViewDirection.negate().dot(data.lightDirection).max(0).pow(2.2);
         // lightColor already contains shadow-map and cloud attenuation. Reuse it:
         // no additional shadow lookup and no sunlight emitted from shaded leaves.
-        let extra = forward.mul(foliageLight.strength).mul(amount);
-        if (wrapDiffuse) extra = extra.add(foliageWrapDiffuseResponse(normalView, data.lightDirection, wrapDiffuse, visibility).mul(0.5));
-        if (rimGlow) extra = extra.add(foliageRimGlowResponse(normalView, data.lightDirection, positionViewDirection, rimGlow, visibility).mul(0.4));
+        const warmGlow = vec3(1.06, 1.04, 0.88);
+        let extra = vec3(forward.mul(foliageLight.strength).mul(amount));
+        if (wrapDiffuse) extra = extra.add(warmGlow.mul(foliageWrapDiffuseResponse(normalView, data.lightDirection, wrapDiffuse, visibility).mul(0.62)));
+        if (rimGlow) extra = extra.add(warmGlow.mul(foliageRimGlowResponse(normalView, data.lightDirection, positionViewDirection, rimGlow, visibility).mul(0.52)));
         data.reflectedLight.directDiffuse.addAssign(
           diffuseColor.rgb.mul(data.lightColor).mul(extra),
         );

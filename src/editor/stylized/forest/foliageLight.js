@@ -19,33 +19,33 @@ import {
 import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
 import { authoredTexture } from '../AuthoredTextureNode.js';
 
-/** Share of foliage vs woody-stem normals bent to the sky, preserving branch contrast. */
-const SKYWARD_FOLIAGE_NORMAL = 0.52;
-const SKYWARD_WOODY_NORMAL = 0.14;
-/** Strength of a plant's own normal map over the bent normal. */
-const UNDERSTORY_NORMAL_STRENGTH = 0.8;
+/** Share of foliage vs woody-stem normals bent to the sky when puff normals are absent. */
+const SKYWARD_FOLIAGE_NORMAL = 0.28;
+const SKYWARD_WOODY_NORMAL = 0.10;
+/** Strength of a plant's own normal map over the bent/puff normal. */
+const UNDERSTORY_NORMAL_STRENGTH = 0.35;
 /** Crown in-scatter: metres over which it ramps, and its share of the sky fill. */
 const CROWN_AIR_START = 10;
 const CROWN_AIR_END = 220;
-const CROWN_AIR = 0.46;
+const CROWN_AIR = 0.48;
 /** Thicker air pulls the ramp in by the root of its fog scale, up to this factor. */
 const MAX_AIR_REACH = 2.5;
 /** Share of the sky fill a crown's and a trunk's shaded faces take. */
-const CROWN_FILL = 0.78;
-const BARK_FILL = 0.85;
+const CROWN_FILL = 0.86;
+const BARK_FILL = 1.05;
 /** Share of the ground's bounce light a downward/lower face takes. */
-const CROWN_BOUNCE = 1.25;
-const BARK_BOUNCE = 1.05;
+const CROWN_BOUNCE = 1.45;
+const BARK_BOUNCE = 1.3;
 /**
  * Stone takes several times bark's share: under this scene's thin ambient a backlit
  * boulder (atlas albedo ~0.25) otherwise renders as a black lump on bright ground.
  */
 const ROCK_FILL = 3.5;
 const ROCK_BOUNCE = 4;
-// 1.0 since 2026-11-15 (was 1.65): the sky's blue lifted every shrub to a cool grey
-// beside saturated grass, so the understory read as a separate layer.
-const UNDERSTORY_FILL = 1.0;
-const UNDERSTORY_BOUNCE = 2.1;
+// Understory now gets GPU puff normals + wrapped diffuse + rim glow, so keep
+// ambient sky fill restrained to stay right in the meadow's saturation & value.
+const UNDERSTORY_FILL = 0.88;
+const UNDERSTORY_BOUNCE = 1.65;
 const BLOSSOM_FILL = 1.15;
 const BLOSSOM_BOUNCE = 1.4;
 const BUILDING_FILL = 2.2;
@@ -59,7 +59,7 @@ const BOUNCE_REACH = 5;
  */
 export const foliageLight = Object.freeze({
   /** Transmission gain, applied to already-shadowed direct radiance. */
-  strength: uniform(0.24),
+  strength: uniform(0.28),
   /** Sky fill lifting the canopy's shaded interior. */
   fill: uniform(0.3),
   skyColor: uniform(new THREE.Color('#ffffff')),
@@ -94,7 +94,7 @@ export function syncFoliageLight(sky, fogColor = null) {
   foliageLight.airReach.value = airReach(sky?.fogDensityScale);
   foliageLight.fill.value = Math.min(Math.max(hemisphere?.intensity ?? 0, 0) * 0.35, 0.7);
   // Light intensity and colour are already included in the lighting model.
-  foliageLight.strength.value = sky?.directional ? 0.24 : 0;
+  foliageLight.strength.value = sky?.directional ? 0.28 : 0;
   if (sky?.directional) foliageLight.sunDirection.value.copy(sky.directional.position)
     .sub(sky.directional.target.position).normalize();
 }
@@ -118,6 +118,12 @@ export function foliageSkyFill(color, amount) {
  */
 export function applySkywardNormal(material) {
   const authored = material.normalNode ?? normalViewGeometry.mul(faceDirection);
+  // Materials with 3D GPU puff normals already carry smooth volumetric shading;
+  // double-bending them straight up aims every sunlit shrub into the noon sun.
+  if (material.foliageShapeNormalNode) {
+    material.normalNode = withAuthoredNormalMap(material, authored);
+    return material;
+  }
   const up = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz;
   const sample = material.map
     ? authoredTexture(material.map).rgb
@@ -191,13 +197,16 @@ export function rockShadeEmission(stone) {
  * Sky fill, ground-colour bounce and distance air in-scatter for understory plants,
  * shrubs and bush proxies so they sit in the same light and horizon haze as stones.
  */
-export function understoryShadeEmission(plant, { blossom = false } = {}) {
+export function understoryShadeEmission(plant, { blossom = false, airRim = null } = {}) {
   const fill = blossom ? BLOSSOM_FILL : UNDERSTORY_FILL;
   const bounce = blossom ? BLOSSOM_BOUNCE : UNDERSTORY_BOUNCE;
-  const facing = normalWorld.y.negate().mul(0.5).add(0.5);
+  const facing = normalWorld.y.negate().mul(0.5).add(0.5).clamp(0, 1);
+  const edge = airRim ?? float(0);
+  const rimColor = mix(foliageLight.airColor, foliageLight.skyColor, smoothstep(0.1, 0.85, normalWorld.y));
   return foliageSkyFill(plant, fill)
     .add(plant.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounce))
-    .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
+    .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()))
+    .add(rimColor.mul(foliageLight.fill).mul(edge));
 }
 
 /**

@@ -228,6 +228,7 @@ export class StylizedBushView {
           config: this.config,
           motion,
           height: geometry.boundingBox.max.y - geometry.boundingBox.min.y,
+          bounds: { min: geometry.boundingBox.min.toArray(), max: geometry.boundingBox.max.toArray() },
           tileId: rule?.paletteTileId ?? rule?.tileIds?.[0],
           biomeLook: true,
         }),

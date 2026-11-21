@@ -5,21 +5,27 @@ import { resolveTreeFoliageSettings } from './treeSurfaceSettings.js';
 import { setRuntimeUserData } from '../../../render/materials/runtimeUserData.js';
 
 /** Outward multi-lobe puff normal computed on the GPU in prototype space (no extra buffers). */
-function crownPuffNormalNode(bounds, puffStrength) {
+export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.34) {
   const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
   const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
   const rel = positionGeometry.sub(center).div(half);
-  const macro = rel.add(vec3(0, 0.28, 0));
+  const macro = rel.add(vec3(0, upBias, 0));
   const macroDir = macro.div(macro.length().max(0.00001));
   if (!(puffStrength > 0)) return macroDir;
-  // Low-frequency 3D lobe field breaks a large canopy into soft, stacked sub-puffs.
+  // Two-octave smooth 3D lobe field breaks a canopy or shrub into stacked, pillowy puffs.
   const phase = rel.mul(3.4);
   const puff = vec3(
     sin(phase.x).mul(cos(phase.y.add(0.6))).mul(cos(phase.z.sub(0.4))),
-    cos(phase.x.sub(0.5)).mul(sin(phase.y)).mul(cos(phase.z.add(0.3))).add(0.2),
+    cos(phase.x.sub(0.5)).mul(sin(phase.y)).mul(cos(phase.z.add(0.3))).add(0.24),
     cos(phase.x.add(0.4)).mul(cos(phase.y.sub(0.5))).mul(sin(phase.z)),
   );
-  const combined = macroDir.add(puff.mul(puffStrength));
+  const fine = rel.mul(6.2);
+  const subPuff = vec3(
+    cos(fine.x.add(1.1)).mul(sin(fine.y.sub(0.3))),
+    sin(fine.x.sub(0.4)).mul(cos(fine.z.add(0.7))).add(0.15),
+    sin(fine.y.add(0.8)).mul(cos(fine.z.sub(0.6))),
+  ).mul(0.32);
+  const combined = macroDir.add(puff.add(subPuff).mul(puffStrength));
   return combined.div(combined.length().max(0.00001));
 }
 

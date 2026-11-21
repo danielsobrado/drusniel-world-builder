@@ -14,6 +14,8 @@ import { applyUnderstoryPalette, authoredFoliageColor, biomeUnderstoryColor, clo
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
 import { applySkywardNormal, understoryShadeEmission } from './forest/foliageLight.js';
+import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
+import { crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
 import { applyCloudShadow } from './CloudShadow.js';
 
 export const BUSH_CAST_SHADOW = false;
@@ -79,19 +81,20 @@ function usesCutout(material) {
   );
 }
 
-export function cloneBushMaterial(source, { config = null, height = 0, tileId = null, motion = 'woody-shrub', biomeLook = false } = {}) {
+export function cloneBushMaterial(source, { config = null, height = 0, tileId = null, motion = 'woody-shrub', biomeLook = false, bounds = null } = {}) {
   if (!source?.isMaterial) throw new Error('Bush prototypes require an authored material.');
   const material = cloneAuthoredNodeMaterial(source, { lit: true });
   if (material.map?.colorSpace !== undefined) {
     material.map.colorSpace = THREE.SRGBColorSpace;
   }
   material.colorNode = authoredFoliageColor(material);
-  if (config) applyUnderstoryPalette(material, config, tileId, 'auto', { biomeLook });
+  const cutout = usesCutout(material);
+  if (config) applyUnderstoryPalette(material, config, tileId, 'auto', { biomeLook, bounds, softEdges: cutout });
   else material.emissiveNode = understoryShadeEmission(material.colorNode);
   applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
   if (config) applySkywardNormal(material);
   material.side = THREE.DoubleSide;
-  if (usesCutout(material)) {
+  if (cutout) {
     material.alphaTest = Math.max(0.35, material.alphaTest ?? 0);
     material.transparent = false;
   }
@@ -171,6 +174,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   color = DEFAULT_PROXY_COLOR,
   minimumHeight = 0,
   maximumHeight = 1,
+  bounds = null,
   config = null,
   tileId = null,
   motion = 'woody-shrub',
@@ -182,7 +186,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   const top = (palette?.tip ?? value.clone().lerp(new THREE.Color('#c8d48c'), 0.2)).clone();
   const height = Math.max(MIN_PROXY_EXTENT, maximumHeight - minimumHeight);
   const heightMix = clamp(positionGeometry.y.sub(float(minimumHeight)).div(float(height)), 0, 1);
-  const material = new THREE.MeshLambertNodeMaterial({ flatShading: true });
+  const material = new (foliageMaterialClass(THREE.MeshLambertNodeMaterial))({ flatShading: false });
   const ramp = mix(
     vec3(bottom.r, bottom.g, bottom.b),
     vec3(top.r, top.g, top.b),
@@ -192,6 +196,13 @@ export function createBushProxyMaterial(sourceMaterial, {
   const shadedColor = biomeLook ? biomeUnderstoryColor(local) : local;
   material.colorNode = shadedColor;
   material.emissiveNode = understoryShadeEmission(shadedColor);
+  material.foliageTransmissionNode = float(0.2);
+  material.foliageWrapDiffuseNode = float(0.32);
+  material.foliageRimGlowNode = float(0.14);
+  if (bounds) {
+    material.foliageShapeNormalNode = crownPuffNormalNode(bounds, 0.34, 0.12);
+    material.foliageNormalBlendNode = float(0.72);
+  }
   material.transparent = false;
   material.depthWrite = true;
   applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
@@ -216,6 +227,7 @@ export function createBushProxyPrototype(prototype, options = {}) {
       motion: prototype.material.userData.plantMotionProfile,
       minimumHeight: bounds.min.y,
       maximumHeight: bounds.max.y,
+      bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() },
     }),
     kind: 'bush-proxy',
     instanceBiomeLook: Boolean(options.biomeLook),

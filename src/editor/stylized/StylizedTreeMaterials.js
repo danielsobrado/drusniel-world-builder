@@ -140,7 +140,7 @@ export function createStylizedLeafMaterial({
     // noise variation — on a crown of flat cards both key to each card's own
     // facing and paint it in cream and dark-green camouflage patches.
     // Graded crowns also take a gentle bottom-to-top lift so macro volume reads softly.
-    const heightLift = canopyGrade ? mix(float(0.88), float(1.07), normalizedHeight) : float(1);
+    const heightLift = canopyGrade ? mix(float(0.86), float(1.09), normalizedHeight) : float(1);
     const crown = authoredColor.mul(paletteValue(palette, config, 'brightness')).mul(heightLift);
     const edge = crownRadius > 0
       ? crownEdgeNodes(authoredTexture(map).a, {

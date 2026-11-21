@@ -50,3 +50,17 @@ test('authored plants and both bush representations share the optional cloud sha
     }
   }
 });
+
+test('understory bushes and proxies receive GPU puff normals, wrapped diffuse, and soft cutout edges', () => {
+  const map = new THREE.DataTexture(new Uint8Array([90, 160, 75, 255]), 1, 1);
+  const source = new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide, alphaTest: 0.35 });
+  const bounds = { min: [-0.6, 0, -0.6], max: [0.6, 1.8, 0.6] };
+  const bush = cloneBushMaterial(source, { config: {}, height: 1.8, bounds });
+  const proxy = createBushProxyMaterial(source, { config: {}, minimumHeight: 0, maximumHeight: 1.8, bounds });
+  for (const material of [bush, proxy]) {
+    assert.ok(material.foliageShapeNormalNode && material.foliageNormalBlendNode, 'GPU puff normal wired');
+    assert.ok(material.foliageWrapDiffuseNode && material.foliageRimGlowNode, 'wrap diffuse and rim glow wired');
+  }
+  assert.ok(bush.opacityNode, 'cutout bush cards carry GPU grazing fade opacity');
+  assert.equal(proxy.flatShading, false, 'bush proxies shade smoothly as soft puffs');
+});

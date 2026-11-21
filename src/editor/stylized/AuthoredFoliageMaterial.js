@@ -6,6 +6,8 @@ import { authoredTexture } from './AuthoredTextureNode.js';
 import { authoredGreenMask, gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.js';
 import { understoryShadeEmission } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
+import { crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
+import { understoryEdgeNodes } from './forest/crownEdge.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { meadowPatchOnPlant } from './understoryPatch.js';
 import { worldNoiseField } from './worldNoise.js';
@@ -80,7 +82,11 @@ export function biomeUnderstoryColor(color) {
  * `biomeLook` reads the instance's understory look; its mesh must carry
  * `instanceBiomeLook` (a part with `instanceBiomeLook: true`).
  */
-export function applyUnderstoryPalette(material, config, tileId = null, role = 'auto', { biomeLook = false } = {}) {
+export function applyUnderstoryPalette(material, config, tileId = null, role = 'auto', {
+  biomeLook = false,
+  bounds = null,
+  softEdges = false,
+} = {}) {
   const sample = authoredFoliageColor(material);
   const graded = gradePlantPart(sample, resolveFoliagePalette(config, tileId), role);
   // Leaves follow the meadow/canopy patches; non-green stones, stems, and petals stay grounded.
@@ -90,15 +96,35 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const patched = meadowPatchOnPlant(graded, config);
   const local = (role === 'leaf' || role === 'foliage') ? patched : mix(graded, patched, plantGreen);
   const color = biomeLook ? biomeUnderstoryColor(local) : local;
-  material.colorNode = color;
   const blossom = role === 'petal' || role === 'center';
-  const fill = understoryShadeEmission(color, { blossom });
+  // Cutout shrub/understory cards get GPU edge-on grazing fade + soft horizon-air fringe.
+  const edge = softEdges && material.map && !blossom
+    ? understoryEdgeNodes(authoredTexture(material.map).a, {
+      cut: Math.max(0.32, material.alphaTest ?? 0.35),
+      greenMask: plantGreen,
+    })
+    : null;
+  material.colorNode = edge ? color.mul(edge.airRim.oneMinus()) : color;
+  if (edge) {
+    let opacity = edge.opacity;
+    if (material.alphaMap) opacity = opacity.mul(authoredTexture(material.alphaMap).g);
+    if (material.opacity < 1) opacity = opacity.mul(material.opacity);
+    material.opacityNode = opacity;
+  }
+  const fill = understoryShadeEmission(color, { blossom, airRim: edge?.airRim ?? null });
   material.foliageTransmissionNode = blossom
     ? float(0.16)
     : mix(float(0.02), float(0.22), plantGreen);
   if (!blossom) {
-    material.foliageWrapDiffuseNode = mix(float(0.08), float(0.34), plantGreen);
-    material.foliageRimGlowNode = mix(float(0), float(0.16), plantGreen);
+    material.foliageWrapDiffuseNode = mix(float(0.08), float(0.32), plantGreen);
+    material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen);
+    if (bounds) {
+      const spanY = Math.max(0.05, bounds.max[1] - bounds.min[1]);
+      const heightT = positionGeometry.y.sub(bounds.min[1]).div(spanY).clamp(0, 1);
+      // Vertex-safe puff normals: modest upward bias keeps sunlit shrub sides rich at noon.
+      material.foliageShapeNormalNode = crownPuffNormalNode(bounds, 0.34, 0.12);
+      material.foliageNormalBlendNode = mix(float(0.22), float(0.76), smoothstep(0.06, 0.38, heightT));
+    }
   }
   // Retain any authored emission (e.g. flower centres).
   material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(fill) : fill;

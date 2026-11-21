@@ -25,6 +25,7 @@ import { createPathClearanceField } from './TreeManifestStore.js';
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { applyUnderstoryPalette, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { applySkywardNormal } from './forest/foliageLight.js';
+import { assignBushFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { canopyShade } from './forest/ForestFloor.js';
 import { placementTileId } from '../biomes/BiomeLooks.js';
 import { understoryLookAt } from '../biomes/understoryRampLooks.js';
@@ -53,10 +54,17 @@ const DETAIL_SCRATCH = {
   basis: new THREE.Matrix4(),
 };
 
-function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-shrub', foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
+function cloneDetailMaterial(source, { wind = null, height = 0, bounds = null, motion = 'woody-shrub', foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
   const material = cloneAuthoredNodeMaterial(source, { lit: !!foliageConfig });
+  const cutout = Boolean(material.map || material.alphaMap || material.transparent);
   // Foliage parts carry `instanceBiomeLook` (see appendVariants), so they wear each biome's understory look.
-  if (foliageConfig) applyUnderstoryPalette(material, foliageConfig, tileId, role, { biomeLook: true });
+  if (foliageConfig) {
+    applyUnderstoryPalette(material, foliageConfig, tileId, role, {
+      biomeLook: true,
+      bounds,
+      softEdges: cutout,
+    });
+  }
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).
   applyPlantMotion(material, { wind, height, profile: motion });
@@ -66,7 +74,7 @@ function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-
   if (material.map?.colorSpace !== undefined) {
     material.map.colorSpace = THREE.SRGBColorSpace;
   }
-  if (material.map || material.alphaMap || material.transparent) {
+  if (cutout) {
     material.alphaTest = Math.max(0.32, material.alphaTest ?? 0);
     material.transparent = false;
     material.depthWrite = true;
@@ -74,7 +82,7 @@ function cloneDetailMaterial(source, { wind = null, height = 0, motion = 'woody-
   }
   applyJungleMist(material, ambientEffects);
   material.needsUpdate = true;
-  return material;
+  return foliageConfig ? assignBushFoliageMaterialData(material) : material;
 }
 
 /**
@@ -300,6 +308,7 @@ export class StylizedGroundDetailView {
                 ? null
                 : (this.config.wind ?? null),
               height: geometry.boundingBox.max.y - Math.min(0, geometry.boundingBox.min.y),
+              bounds: { min: geometry.boundingBox.min.toArray(), max: geometry.boundingBox.max.toArray() },
               motion: definition.motion,
               role: definition.materialRoles?.[sourceMaterial.name],
               foliageConfig: foliage ? this.config : null,

@@ -24,6 +24,8 @@ import { barkBumpNormal, barkPackedNormal } from '../forest/TreeBarkMaterial.js'
 import { acquireDeadwoodNoise } from '../forest/deadwoodNoise.js';
 import { authoredGreenMask, gradePlantPart, resolveFoliagePalette } from '../forest/foliagePalette.js';
 import { understoryShadeEmission } from '../forest/foliageLight.js';
+import { foliageMaterialClass } from '../forest/FoliageNodeMaterial.js';
+import { assignBushFoliageMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { createProceduralBarkTextures } from '../forest/ProceduralBarkTextures.js';
 import { deadwoodMaterial } from '../forest/forestDebrisPrototypes.js';
 import { acquireIceTextures } from '../ice/iceTextures.js';
@@ -74,30 +76,31 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
   // Smooth ground-contact soil/humus collar + AO so roots & cushions blend seamlessly off terrain.
   const soilWave = microField.g.sub(0.5).mul(0.06);
   const groundTouch = smoothstep(0.09, -0.03, positionGeometry.y.add(soilWave));
-  const contactAO = mix(float(1), float(0.42), groundTouch.mul(0.85));
-  const soilTone = color(environment.soilColor ?? '#5c4a30').mul(mix(0.82, 1.12, grainSample.r));
-  const groundedColor = mix(local, soilTone, groundTouch.mul(0.58)).mul(contactAO);
+  const contactAO = mix(float(1), float(0.58), groundTouch.mul(0.8));
+  const soilTone = color(environment.soilColor ?? '#5c4a30').mul(mix(0.84, 1.12, grainSample.r));
+  const groundedColor = mix(local, soilTone, groundTouch.mul(0.52)).mul(contactAO);
 
   const finalColor = biomeUnderstoryColor(groundedColor);
   const blossom = entry.kind === 'blossom';
   const fill = understoryShadeEmission(finalColor, { blossom });
 
-  // Normal relief from vein height + organic noise texture, blending smoothly toward ground-up at root skirt.
-  const reliefHeight = mix(grainSample.r, veinRib, plantGreen.mul(0.55)).mul(0.014);
+  // Normal relief from vein height + organic noise texture, blending softly upward on green foliage & root skirt.
+  const reliefHeight = mix(grainSample.r, veinRib, plantGreen.mul(0.45)).mul(0.01);
   const bumpNormal = barkBumpNormal(reliefHeight);
   const groundUpView = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
-  const blendedNormal = mix(bumpNormal, groundUpView, groundTouch.mul(0.78)).normalize();
+  const skySoft = groundTouch.mul(0.78).max(plantGreen.mul(0.52));
+  const blendedNormal = mix(bumpNormal, groundUpView, skySoft).normalize();
 
-  // Spatially varying PBR roughness: waxy leaves (0.44..0.58), soft petals (0.68..0.78), matte soil/woody base (0.92).
+  // Spatially varying PBR roughness: soft matte-waxy leaves, matte soil/woody base.
   const baseRoughness = blossom
     ? mix(float(0.66), float(0.78), grainSample.g)
-    : mix(float(0.84), mix(float(0.42), float(0.62), microField.r), plantGreen);
-  const dryRoughness = baseRoughness.max(groundTouch.mul(0.94)).clamp(0.32, 1);
+    : mix(float(0.86), mix(float(0.56), float(0.74), microField.r), plantGreen);
+  const dryRoughness = baseRoughness.max(groundTouch.mul(0.94)).clamp(0.38, 1);
   const roughnessNode = mix(dryRoughness, dryRoughness.min(0.28), surfaceWetnessUniform.mul(0.6));
 
-  const material = new THREE.MeshStandardNodeMaterial({
+  const material = new (foliageMaterialClass(THREE.MeshStandardNodeMaterial))({
     vertexColors: false,
-    roughness: 0.72,
+    roughness: 0.78,
     metalness: 0,
     side: THREE.DoubleSide,
     colorNode: finalColor,
@@ -107,14 +110,18 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
   });
   material.foliageTransmissionNode = blossom
     ? float(0.16)
-    : mix(float(0.02), float(0.24), plantGreen);
+    : mix(float(0.02), float(0.22), plantGreen);
+  if (!blossom) {
+    material.foliageWrapDiffuseNode = mix(float(0.08), float(0.30), plantGreen);
+    material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen);
+  }
 
   applyPlantMotion(material, {
     wind: config?.wind,
     height: entry.height ?? 0.5,
     profile: entry.motionProfile ?? 'woody-shrub',
   });
-  return material;
+  return assignBushFoliageMaterialData(material);
 }
 
 /**

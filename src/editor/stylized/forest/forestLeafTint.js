@@ -64,7 +64,7 @@ const UNTINTED = Object.freeze([1, 1, 1]);
 // keeps the required ratios near 3, so this only guards a near-black palette.
 const MAX_CHANNEL_RATIO = 6;
 /** Exponent on a graded crown's biome ratio: how far its hue follows the biome. */
-const GRADED_BIOME_STRENGTH = 0.52;
+const GRADED_BIOME_STRENGTH = 0.62;
 
 /** Brightest colour the species' crown reaches, which the ratio divides by. */
 function litCrownColor(speciesId, config, palettes) {

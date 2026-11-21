@@ -54,8 +54,10 @@ export function fallingLeafPalette(config = {}, tileId = null) {
 
 function understoryRamp(sample, palette) {
   const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
-  return mix(vec3(...palette.base.toArray()), vec3(...palette.tip.toArray()),
-    smoothstep(0.025, 0.8, luminance.mul(palette.exposure)));
+  // Keep per-card texture contrast soft (0.16..0.72) so puff normals and wrapped
+  // lighting model shrubs and ferns as lush, grounded tufts without chalky highlights.
+  const t = smoothstep(0.025, 0.8, luminance.mul(palette.exposure)).mul(0.56).add(0.16);
+  return mix(vec3(...palette.base.toArray()), vec3(...palette.tip.toArray()), t);
 }
 
 /**
@@ -65,8 +67,8 @@ function understoryRamp(sample, palette) {
 function applyUnderstoryWeathering(color) {
   const skyFacing = smoothstep(0.15, 0.88, normalWorld.y);
   const foot = smoothstep(0, 0.32, positionGeometry.y);
-  const grounded = color.mul(mix(float(0.84), float(1), foot));
-  return mix(grounded, bleached(color), skyFacing.mul(0.06));
+  const grounded = color.mul(mix(float(0.86), float(1.0), foot));
+  return mix(grounded, bleached(color), skyFacing.mul(0.04));
 }
 
 /** Per-pixel green-leaf detector shared between grading and meadow patch tinting. */
@@ -78,13 +80,13 @@ export function authoredGreenMask(sample) {
 export function gradeUnderstory(sample, palette) {
   const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
   const green = authoredGreenMask(sample);
-  const earth = bleached(vec3(...palette.base.toArray()), 0.22, 0.75).mul(vec3(1.12, 0.96, 0.82));
+  const earth = bleached(vec3(...palette.base.toArray()), 0.28, 0.72).mul(vec3(1.16, 1.0, 0.86));
   const mutedAccent = mix(
-    mix(vec3(luminance), sample, 0.82),
-    earth.mul(luminance.mul(1.25).add(0.28)),
-    0.18,
+    mix(vec3(luminance), sample, 0.80),
+    earth.mul(luminance.mul(1.15).add(0.42)),
+    0.34,
   );
-  const graded = mix(mutedAccent, understoryRamp(sample, palette), green.mul(0.9));
+  const graded = mix(mutedAccent, understoryRamp(sample, palette), green.mul(0.92));
   return applyUnderstoryWeathering(graded);
 }
 
