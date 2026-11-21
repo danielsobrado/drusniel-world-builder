@@ -662,3 +662,302 @@ Use accumulated canonical displacement, not `timeSeconds*speed` in an unbounded 
 Ponlai [P3/P14] contains rain curtains and rainbow shader logic. Drusniel already has rain/snow/weather particles and thunder. These are **deferred options**: add only if their geometry, phase/scattering and clock can be driven by existing weather, and if the beauty cost is worthwhile. Do not generate extra screenspace rainfall or a constant perfect rainbow in all showers under H's core feature flag.
 
 ---
+
+## 10. Performance, resource and pipeline budgets
+
+### 10.1 Provisional memory model, not measured VRAM
+
+The minimum system needs a 3D density source, a small weather/type map, a bounded ground cloud-shadow map, and view-trace output. Temporal reconstruction adds full/half-resolution ping-pong histories. The numbers below are arithmetic on **logical raw texel storage**, not driver allocations, row padding, backend texture residency or peak GPU memory.
+
+| Resource | Candidate format/dimensions | Raw calculation | Budget / rationale |
+| --- | --- | --- | --- |
+| Shape noise | 64×64×64 RGBA8 | 64³×4 = **1,048,576 bytes** | ~1.00 MiB without mips, ~1.14 MiB complete 3D pyramid |
+| Weather coverage/type | 256×256 RG8 | 256²×2 = **131,072 bytes** | ~128 KiB, low-frequency source can be smaller/bigger only after QA |
+| Cloud ground shadow | 192×192 RGBA16F | 192²×8 = **294,912 bytes** | ~288 KiB, direct/scattered channels; one shared map |
+| Cloud ground shadow (high) | 256×256 RGBA16F | 256²×8 = **524,288 bytes** | ~512 KiB, must benchmark all material receiver samplers |
+| Half-resolution view at 1280×720 | 640×360 RGBA16F | 640×360×8 = **1,843,200 bytes** | ~1.76 MiB per cloud view target |
+| Two colour histories | 2×640×360 RGBA16F | **3,686,400 bytes** | ~3.52 MiB, optional temporal |
+| Two RGBA16F depth/metadata histories | 2×640×360 RGBA16F | **3,686,400 bytes** | ~3.52 MiB, may be packed more tightly |
+| Quarter-trace | 320×180 RGBA16F | **460,800 bytes** | ~450 KiB if sparse trace genuinely helps |
+| Lightning transient | Quarter-sized texture or one shader term | Quality-dependent | Do not allocate persistent full-resolution flashlight per strike |
+| Panorama | 512×128 RGBA16F | **524,288 bytes** | ~512 KiB optional, excluding PMREM and staging |
+| Accumulation auxiliary | box min/max, motion, depth and texture ping-pong | Multiple surfaces | Must be counted from actual allocated topology, not hidden |
+
+**Architectural priority:** start with **no full temporal ping-pong** unless half-resolution single-frame raymarch is insufficient. After cost has been measured, use [P4] 4×4 temporal only when it improves GPU efficiency without introducing ghosting/resize compile stalls.
+
+### 10.2 Shader samplers are the first hardware gate
+
+[D45] terrain slot bindings already stress the **portable 16 texture-sampler** limit. Before adding a cloud-shadow texture to every material, run an actual WebGPU shader binding audit for terrain, snow, foliage, rock, town kit, grass and water. The available sampler count depends on current material graph, backend and which textures are samplerless. A shared cloud map **does not automatically** mean one free fragment sampler.
+
+If terrain cannot compile with an additional cloud sampler, choose a tested alternative:
+
+1. Replace an existing legacy cloud shadow sampler/analytic branch and free equivalent resources (preferred if bound).
+2. Fold scalar cloud attenuation into an existing generated **shared input field**, but only if its canonical space, lifetime, format and resolution actually match.
+3. Restrict the opt-in volume-shadow feature to supported material classes and retain legacy procedural [D4] for unsupported receivers.
+4. If all fail, keep H volume view **off** or label shadow coherence as incomplete; do not ship a visual cloud whose shadow looks completely unrelated without an explicit scope concession and QA evidence.
+
+Do not add `viewportDepthTexture` or `viewportOpaqueMipTexture` references to a cloud material: [D32] documents a whole-scene texture/depth copy and mip build triggered by even one such reference.
+
+### 10.3 Proposed quality tiers as measured starting candidates
+
+| Tier | View size | Max view steps | Max sun/light taps | Shadow | Temporal | Expected tradeoff |
+| --- | --- | --- | --- | --- | --- | --- |
+| Low | half display, or quarter if needed | 24–32 | 2 | 128², phased | off | Largest/simple clouds, fewer fine edges |
+| Balanced | half display | 48 | 3 | 192², phased | optional | Main target; detail only around cloud edges |
+| High | 0.66× display | 64 | 4 | 256², phased | optional | More stable thin silhouettes, modest rise in cost |
+| Ultra | 0.75× display / sparse 4×4 | 80–96 | 5–6 | 256² or measured higher | required if sparse | User-selectable expensive tier only after evidence |
+
+These are **not proven defaults**. A maximum view step cap does not mean every ray pays it. Every tier should skip clear sky, coarse march through empty regions, and stop when T falls below an agreed threshold. If low/high differences are visually indistinguishable at actual display size, collapse tiers rather than keep a redundant shader variant.
+
+### 10.4 Hardware target and regression policy
+
+[D32] contains historical native NVIDIA WebGPU performance with world p95 and strict normal-stage CPU/GPU budgets, and documents deferred scenery staging, GPU timestamp caveats and expensive god-ray cases. PR H may be a deliberately heavier new feature, but it **must have an explicit measured performance envelope** rather than being hidden inside the old sky stage.
+
+Candidate initial gate at 1280×720 native NVIDIA WebGPU desktop, same scene and quality/seed:
+
+- **Off:** zero H dispatches/targets/asset loads and **pixel-identical** old sky/ground cloud shadows.
+- **Balanced on:** target incremental ≤1.0 ms GPU mean and near p95 total cloud stage for a scene where clouds are substantially visible, excluding existing rendering and without assuming compute timings appear in render stage counters. If >1.0 ms, require visual benefit and explicit opt-in rather than default-on.
+- **Clear sky:** incremental GPU cost as close to zero as feasible; branch/skip and shadow readiness still overhead, so measure, do not assert absolute zero when enabled.
+- **Worker:** no world terrain/scenery worker task or chunk commit backlog may be postponed by cloud data generation.
+- **Movement and hitches:** do not add significant p95/p99 frame spikes or startup shader compile stalls, including first storm, first reflection camera, resize and renderer restart.
+- **Memory:** bounded GPU allocations independent of elapsed travel/world size; retained old textures freed after resize/quality change/device recovery; no unbounded history arrays.
+- **Dynamic sky:** a cloud shadow atlas update should not force a new terrain shader program, redraw the entire sun cascade twice, or rebuild a PMREM per frame.
+- **Cold start:** lazy prewarm only when quality enabled and renderer ready, but first visible transition must not freeze the screen while building multiple 256-step compute kernels.
+- **Low-power devices:** automatic fallback or low tier only after measured safe backend limits. Do not assume all WebGPU adapters share desktop compute limits or fast half-float filters.
+
+### 10.5 Instrumentation names and evidence contract
+
+Suggested GPU passes `cloudNoiseLoad`, `cloudViewTrace`, `cloudViewUpsample`, `cloudViewHistory`, `cloudShadowMap`, `cloudPanorama`, `cloudTotal`. Record presence/absence, not just numeric zero.
+
+Suggested diagnostics:
+
+```text
+cloudEnabled, cloudEffectiveTier, cloudFallbackReason, cloudBackend
+cloudSourceGeneration, weatherGeneration, lookGeneration, cameraFrameToken
+cloudStorageBytes, cloudTransientBytes, cloudHistoryBytes, peakCloudGpuBytes
+viewTraceResolution, viewStepMeanP95, viewEmptySkipShare, viewEarlyExitShare
+shadowMapResolution, shadowSpanMetres, shadowTexelMetres
+shadowGeneration, shadowValidRows, shadowMaxRowAgeFrames, shadowSkippedFrames
+cloudMrtCompatibility, cloudSamplersPerReceiver, cloudShaderProgramCount
+historyValidShare, motionRejectedShare, cameraCutResets
+sourceAssetHash, assetLicenseStatus, currentSkyExposureScale
+gpuCloudTraceMs, gpuCloudShadowMs, gpuCloudResolveMs, gpuTotalCloudMs
+cpuCloudUpdateMs, frameP95P99Ms, gpuBackend, gpuTimingAvailable
+```
+
+When GPU compute dispatch timings are unavailable, report `null/unavailable` instead of “0.000 ms”. Use frame pacing with timestamps off and independent GPU capture when available. Do not conflate a single beauty-pass benchmark with overall device cost.
+
+---
+
+## 11. YAML, validation and safe feature modes
+
+### 11.1 One configuration owner
+
+Extend `editor.config.yaml → stylizedSurface.sky` and validate in [D30]. The existing `godRays.volumetric` means *volumetric god rays*; keep this name unchanged, and add a distinct nested `volumetricClouds`.
+
+Proposed minimal user-visible schema (all proposed, not implemented):
+
+```yaml
+stylizedSurface:
+  sky:
+    volumetricClouds:
+      enabled: false
+      quality: balanced
+      shadowLighting: authored
+      temporal: auto
+      cirrus: false
+      internalLightning: false
+      debugMode: off
+```
+
+Internal tier profiles and numeric clamps go in a **single constants/config normalization module**. Do not hardcode shell heights, weather coverage, extinction, view steps, shadow update budget and all the possible 50 look knobs into `StylizedSkyView`. Expose advanced authoring **only** when there are real validated use cases. Start with all optional effects off.
+
+### 11.2 Validation
+
+Validate exact enums and booleans, finite ranges, positive shell and steps, bounded intensity, conservative upper step limits, power-of-two noise period where algorithm requires it, texture dimensions supported by queried GPU limits, consistent 3D mip lengths, and no incompatible combinations (e.g. sparse temporal without history/depth). Fail invalid YAML at config loading with a clear field path. Renderer support failures are **runtime feature fallbacks**, not silent YAML mutation.
+
+Avoid 0/NaN jitter or rays at horizon yielding infinity. Do not accept a request for an arbitrary 20,000 m cloud-layer thickness or a 4096² shadow map from a user-editable YAML flag without hardware/quality gates.
+
+### 11.3 Feature/runtime states
+
+```text
+disabled
+ -> no H shader/resources; current 2D sky + procedural cloud shadow + mask
+
+waiting-for-renderer
+ -> remain legacy, no invalid TextureNode
+noise-loading
+ -> legacy, asynchronously validate dimensions/mip/provenance
+density-ready
+ -> H view not yet visible until shadow mode coherently chosen
+view-ready / shadow-unavailable
+ -> legacy or explicitly diagnosed view-only development mode
+view+shadow-ready
+ -> atomically enable H sky and same-source shadow for supported receivers
+history-warming
+ -> valid fresh low-resolution current samples; old history not shown
+feature-active
+ -> one scene sky/cloud source, valid shadow generation and optional temporal
+device-lost/unsupported
+ -> switch back to validated legacy; free/rebuild GPU resources lazily
+disposed
+ -> all H resources removed, no stale callback/scene references
+```
+
+**Required semantics:** `enabled:false` is exact legacy rendering. A missing optional high cirrus/PMREM stage should **not** cause H core to fail. Missing *mandatory same-source shadow* means H remains a **development-only** visual experiment rather than claiming full coherent cloud integration.
+
+### 11.4 Authored lighting versus physical atmosphere mode
+
+Until E actually exists, `shadowLighting: authored` means local contrast modulates Drusniel's already weather-dimmed directional light, as `6.4` describes; it is not an absolute optical transfer.
+
+If PR E is implemented and measured, an explicit new mode may use full `exp(-τ)` and remove duplicated weather mean attenuation in the **single sky light authority**. Never enable this mode based on the mere existence of the PR E Markdown plan.
+
+---
+
+## 12. Small-module source plan, explicit ownership
+
+### 12.1 Suggested files (responsibilities, not a demand for 15 scaffolds)
+
+| Proposed file | Purpose | Lifetime/owner |
+| --- | --- | --- |
+| `src/editor/stylized/clouds/CloudConfig.js` | Resolve YAML/default quality profiles, finite validation, capability policy | Pure module |
+| `src/editor/stylized/clouds/CloudConstants.js` | Shell, quality, storage/format and shader constants separate from control flow | Pure module |
+| `src/editor/stylized/clouds/CloudWeather.js` | Map existing [D9–D17] final sky/storm/wind into one immutable weather frame | Pure CPU |
+| `src/editor/stylized/clouds/CloudCoordinates.js` | Canonical-to-GPU local periodic coordinates, wind drift and projection | Pure CPU + TSL helper |
+| `src/editor/stylized/clouds/CloudNoise.js` | One generated/licensed periodic 3D noise + low-res weather map, async load/dispose | GPU resource |
+| `src/editor/stylized/clouds/CloudDensityNodes.js` | Common 3D density, conservative bounds and explicit TSL uniform args | TSL |
+| `src/editor/stylized/clouds/CloudLightingNodes.js` | Beer–Lambert, key optical depth, scattering phase, ambient fill | TSL |
+| `src/editor/stylized/clouds/CloudViewPass.js` | View raymarch and low-res image/depth/T buffers | GPU |
+| `src/editor/stylized/clouds/CloudShadowMap.js` | World-space shadow-map generation, phased update, altitude projection | GPU |
+| `src/editor/stylized/clouds/CloudTemporal.js` | Optional history/reprojection/rejection/resize/flash isolation | GPU |
+| `src/editor/stylized/clouds/CloudSkyAdapter.js` | Compose H cloud into existing [D3] sky and [D19] mask routes | Render node adapter |
+| `src/editor/stylized/clouds/VolumetricCloudRuntime.js` | Own lifecycle, prewarm, readiness, frame updates and disposal | Small runtime coordinator |
+| `src/editor/stylized/clouds/CloudDiagnostics.js` | Bounded counters, source generations, debug modes and QA capture | Diagnostics |
+| `docs/rendering/volumetric-clouds.md` | Actual shipped behavior, algorithms, license, quality/perf data | Documentation |
+
+**KISS requirement:** do not create all these files at once if small responsibilities belong together. At minimum split the pure model/coordinates, noise, view/shadow GPU outputs, and integration/lifecycle. Keep each file reviewably small; no 1500-line port of Ponlai's `Clouds.ts`.
+
+### 12.2 Exact existing source edits
+
+| Current file | Intended minimal change | Preserve |
+| --- | --- | --- |
+| [D3] `StylizedSkyView.js` | Own/inject H adapter and select cloud node **only when ready**; publish same-frame sky/light | Sun/moon/stars, clear horizon, fog/exposure compensation, disposal |
+| [D4] `CloudShadow.js` | One shared cloud factor optionally reading H map, retain legacy analytic mode | Existing shadow-chain, cloned material userData, off compile-out |
+| [D5] `AtmosphereMotion.js` | Reuse conventions, not 2D projection as 3D source | Existing phase/wrap for off |
+| [D8] `sky/cloudLighting.js` | Legacy remains; H uses scattering rather than derivative cloud shading | Sky colour tuning and existing flash |
+| [D9/D10] sky look/controller | Small pure CloudWeather adapter or publisher | Existing region/overcast/cycle easing |
+| [D14–D17] storm/lightning | Read existing storm and per-strike events, no new schedule | Rain/snow, thunder, environment lamps |
+| [D18] `main.js` | Wire current sky/weather/wind state before one H pre-draw hook; lifecycle | Current update ordering and failure handling |
+| [D19] `StylizedGodRaysPostProcess.js` | Use H cloud mask/transmittance when enabled, otherwise old mask scene | Other god-rays techniques, fog, blur and cinematic pipeline |
+| [D21] `InfiniteTerrainView.js` | One shared beforeMainRender stage; renderer route consistency | Current active path/occlusion wrapper, no double scene |
+| [D22–D26] post stack | Subscribe to invalidation events if needed, no extra post graph unless flight requires it | TAA/MRT, DRS, camera, bloom/tonemap |
+| [D28/D29] wind | Read prevailing resolved weather wind, no cloud-specific wind field render | 384 m camera-local foliage gust simulation |
+| [D30] `validateEditorConfig.js` | Validate new sky.volumetricClouds subtree | Original sky/godRays/quality keys |
+| [D31] noise source | Original generated tileable 3D asset and metadata, lazy cached | CC0 source library only/no unverified licensing |
+| [D32–D40] tests/QA | Add H deterministic cases, settings and GPU acceptance report | Existing fixtures, no false success |
+| [D42/D43] heat shimmer and env | Keep existing, optionally consume coherent H sky | No sky double warp, no black IBL |
+| [D44/D45] snow/terrain materials | H factor from existing direct shadow hook and sampler-proof integration | Snow glints and 16-sampler budget |
+| [D27] underwater | Explicit tested H fallback/one pre-draw hook; no duplicate draw | Existing water refraction and underwater volume |
+| [D48/D49] coordinates and stylized view base | Only reuse existing origin and owned resources | No new inconsistent origin singleton |
+
+### 12.3 Stable small public contracts
+
+Recommended *conceptual* (not current implementation) interfaces:
+
+```text
+CloudFrame {
+  frameToken,
+  cameraCanonical,
+  cameraRender,
+  timeSeconds,
+  lookGeneration, weatherGeneration, windGeneration,
+  skyLinearKey, skyLinearAmbient,
+  shell, cloudType, coverage, density,
+  windDisplacementCanonicalXZ, lightningEvents
+}
+
+CloudOutputs {
+  state: legacy | loading | active | unsupported | failed,
+  generation, sourceVersion,
+  view: { inScatteredRGB, transmittance, characteristicDepth },
+  shadow: { texture, mapping, generation, effectiveLightingMode },
+  farPanorama?: { texture, generation },
+  diagnostics
+}
+
+CloudRuntime {
+  prepare(frame) -> output snapshot (no duplicate per same frameToken)
+  invalidate(reason)
+  resize(renderSize, displaySize)
+  prewarm(renderer)
+  dispose()
+}
+```
+
+The implementation should check current Three.js API and GPU target creation semantics before giving these names to real code. Keep GPU consumers on **stable node identity** when textures change, and avoid one shader class per camera or cloud weather mode.
+
+### 12.4 Error handling
+
+- Asset validation failure: capture URL/type/header/mip length and one throttled error, retain legacy sky; do not black out the horizon.
+- GPU device lost: invalidate all H GPU targets and history, cancel stale async asset/shader work by generation; restore legacy until valid reinit.
+- Unsupported sampler/storage format: one clear warning and deterministic fallback state, never unexpected implicit GPU readback.
+- Shader compile failure: fail H feature atomically and preserve prior known-good render graph.
+- Resize/quality change: create new buffers, stage node rebinding and dispose old after GPU-safe usage; no use-after-dispose.
+- Sky look/content update while asset loads: stamp source generation and apply **latest** look on first ready update; do not publish old sunny weather when storm already started.
+- Profiler failure: metrics `unavailable` without failing rendering; don't log every frame.
+- No module-global run-state except existing shared shader uniforms where justified; own lifecycle through sky view/renderer resources.
+
+---
+
+## 13. Frame ordering, invalidations and swap atomicity
+
+```text
+simulation time / camera / floating origin (canonical)
+       |
+weather & StormState + DayNightCycle + regional SkyLookController
+       |
+prevailing wind and lightning event from existing controllers
+       |
+StylizedSkyView.applyLook + skyView.update
+       |
+CloudRuntime.prepare(frameToken, same authoritative state)
+       |
++-------------------+---------------------+
+| H view trace      | H shared shadow map |
+| (optional history)| (phased + complete) |
++-------------------+---------------------+
+       |
+atomic source generation / ready marker
+       |
+sky render material uses H radiance+T  OR legacy cloud mix
+materials use matching H cloud shadow OR legacy analytic cloud shadow
+god rays use H transmission OR legacy cloudMaskScene
+       |
+**one** active render: cinematic / volumetric / post / direct
+       |
+existing scene HDR, fog, TAA/FXAA, output tonemap
+```
+
+**Atomicity:** a view drawn for cloud source generation `G+1` with a ground shadow map still encoding `G` can produce a visibly mismatched cloud and ground. Publish the new source only when shadow map has an acceptably complete current generation and both have matching time/position mapping, or keep old coherent source for a bounded transition. A debug developer mode may show view-only with an explicit marker; production cannot call it coherent.
+
+| Event | Cloud density source | View/hist | Shadow map | Post/scene |
+| --- | --- | --- | --- | --- |
+| Camera small translation/turn | unchanged | reproject/more fresh samples | map recenter strips or same | active render remains |
+| Camera teleport | unchanged | invalidate/warm with fresh sample | full new coverage before active | reset existing post history |
+| Floating-origin rebase, canonical pose unchanged | unchanged | reproject canonical or safe reset | no new world bake, transform only | existing invalidation still applies |
+| Large FOV change | unchanged | reset history/projection | same ground map if camera XZ stable | post reset |
+| Render scale/viewport resize | unchanged | reallocate view size & rebind | unchanged unless quality | post resize |
+| Quality tier change | same density config if only sampling | rebuild targets/history | rebuild map/reschedule | only known topology variant |
+| Weather look coverage/type jump | new density generation | reset/short history | full coherent update | update sky look once |
+| Small weather easing | updated uniforms/generation | adaptive weight | phased/limited refresh | no new material program |
+| Broad wind change | integrated drift | motion reprojection | related shadow rebuild | no terrain worker |
+| Lightning strike | transient only | current flash no history | no static shadow reallocation | existing flash and thunder |
+| Time scrub/sun direction jump | density maybe unchanged | recompute light, invalidate if large | new light optical depth/shadow | existing sky/lighting |
+| Camera high above cloud shell | same volume | depth-aware composite required | high-view shadow fallback | do not claim correct flight without gate |
+| Scene environment/IBL async completion | unchanged | optional new sky source | optional mean light update | current HDR remains |
+| Renderer device loss | retain CPU noise source bytes | dispose/reinit | dispose/reinit | legacy immediate fallback |
+| H disabled | none | release | release | original sky and shadow |
+
+A shadow-map **phase** must store exact generation+age. After teleport/sky jump, unrefreshed rows must be flagged invalid and cannot be sampled as if current. No scanning entire world edits: clouds are world-scale and do not bake into terrain geometry. No worker jobs per terrain chunk.
+
+---
