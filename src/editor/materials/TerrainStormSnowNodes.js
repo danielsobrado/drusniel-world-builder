@@ -1,6 +1,7 @@
-import { clamp, max, oneMinus, smoothstep, vec4 } from 'three/tsl';
+import { clamp, max, oneMinus, positionWorld, smoothstep, vec4 } from 'three/tsl';
 
-import { stormSnowCoverUniform } from '../weather/storm/stormGroundUniforms.js';
+import { snowFieldConfig } from '../weather/storm/snowField/snowFieldConfig.js';
+import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
 
 /**
  * The baked material weights with a storm's snow laid over them
@@ -21,7 +22,12 @@ export function withStormSnow(weights, samples) {
   const open = oneMinus(samples.canopyWater.g);
   const ridge = clamp(samples.terrainShape.g.mul(-8).add(0.5), 0, 1);
   const lateness = clamp(ridge.mul(0.6).add(samples.macroTint.g.mul(0.8)).sub(0.2), 0, 1).mul(0.6);
-  const cover = smoothstep(lateness, lateness.add(0.4), stormSnowCoverUniform).mul(upFacing).mul(open);
+  // The snow field (storm-snow-field plan) varies the storm's cover with lee, sun and drifts;
+  // under a canopy it builds later, though a heavy fall still reaches the floor.
+  const field = snowFieldConfig();
+  let stormCover = stormSnowCoverAt(positionWorld.xz);
+  if (field.enabled) stormCover = stormCover.mul(oneMinus(samples.canopyWater.r.mul(field.canopyShelter)));
+  const cover = smoothstep(lateness, lateness.add(0.4), stormCover).mul(upFacing).mul(open);
   const snow = max(weights.a, cover);
   const rest = oneMinus(snow).div(max(oneMinus(weights.a), 1e-4));
   return vec4(weights.rgb.mul(rest), snow);

@@ -30,7 +30,7 @@ import { mossGrowth } from './surfaceCoatings/MossGrowthMask.js';
 import { snowCoat } from './surfaceCoatings/SnowCoat.js';
 import { surfaceCoatings } from './surfaceCoatings/SurfaceCoatingConfig.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from './snowDeposition.js';
-import { stormSnowCoverUniform } from '../weather/storm/stormGroundUniforms.js';
+import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 
 /**
@@ -309,7 +309,7 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     const tear = mx_noise_float(pattern.mul(SNOW_TEAR_PER_METRE)).mul(0.6).add(macroPatch.sub(0.5).mul(0.3));
     const { cover, skirt } = snowDeposition({
       // A storm's snow settles on any stone; the cold stone stays the biome's.
-      snow: snowGround.max(stormSnowCoverUniform), breakup: tear, ...(ground ?? {}),
+      snow: snowGround.max(stormSnowCoverAt(positionWorld.xz)), breakup: tear, ...(ground ?? {}),
     });
     // Pattern space on both sides: the projection follows the stone, not its placement.
     const snowLayer = snowCoat(pattern, normalGeometry, cover, coatSettings);

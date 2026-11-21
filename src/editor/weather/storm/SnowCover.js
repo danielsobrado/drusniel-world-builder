@@ -12,6 +12,8 @@ export const DEFAULT_SNOW_COVER = Object.freeze({
   meltSeconds: 600,
   /** Snow share (StormState frame) at or above which nothing melts. */
   holdShare: 0.3,
+  /** Seconds to hand the snow field from its build pattern to its melt pattern. */
+  meltPhaseSeconds: 60,
 });
 
 export function resolveSnowCoverConfig(source = {}) {
@@ -26,6 +28,10 @@ export function resolveSnowCoverConfig(source = {}) {
 
 export class SnowCover {
   value = 0;
+  /** 0 building or holding … 1 thawing: which pattern the snow field draws (storm-snow-field plan). */
+  melting = 0;
+  /** QA: `{ value, melting }` held instead of integrating, for a thaw at fixed time. */
+  frozen = null;
 
   constructor(config = DEFAULT_SNOW_COVER) {
     this.config = config;
@@ -37,16 +43,28 @@ export class SnowCover {
    * @param {number} snowShare the climate's share of snow; at `holdShare` and above, snow stays
    */
   update(dt, snow, snowShare = 0) {
+    if (this.frozen) return this.hold();
     if (!(dt > 0) || !Number.isFinite(dt) || !Number.isFinite(snow)) return this.value;
     const goal = Math.max(0, Math.min(1, snow));
+    const thawing = this.value > goal && snowShare < this.config.holdShare;
     if (this.value < goal) this.value = Math.min(goal, this.value + dt / this.config.buildSeconds);
-    else if (snowShare < this.config.holdShare) this.value = Math.max(goal, this.value - dt / this.config.meltSeconds);
+    else if (thawing) this.value = Math.max(goal, this.value - dt / this.config.meltSeconds);
+    const step = dt / this.config.meltPhaseSeconds;
+    this.melting = thawing ? Math.min(1, this.melting + step) : Math.max(0, this.melting - step);
     return this.value;
   }
 
   /** Steady state for this snowfall at once: snapped storms (QA captures). */
   snap(snow) {
+    if (this.frozen) return this.hold();
     if (Number.isFinite(snow)) this.value = Math.max(0, Math.min(1, snow));
+    this.melting = 0;
+    return this.value;
+  }
+
+  hold() {
+    this.value = Math.max(0, Math.min(1, Number(this.frozen.value) || 0));
+    this.melting = Math.max(0, Math.min(1, Number(this.frozen.melting) || 0));
     return this.value;
   }
 }

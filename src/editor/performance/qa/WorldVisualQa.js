@@ -167,7 +167,7 @@ export class WorldVisualQa {
       await frame();const current=staticLightingComponents(this.editor);maximumChange=staticLightingChange(previous,current);
       stableFrames=maximumChange<.001?stableFrames+1:0;previous=current;
       // The offshore FFT spectrum is part of the look: finish its weather transition too.
-      if(stableFrames>=60){this.editor.stylizedSurface?.oceanFft?.settleWeather();return {stableFrames,maximumChange,components:current,wallMs:performance.now()-start};}
+      if(stableFrames>=60){this.editor.stylizedSurface?.oceanFft?.settleWeather();this.editor.snowField?.settle();return {stableFrames,maximumChange,components:current,wallMs:performance.now()-start};}
     }
     throw new Error('Static sky, lights and fog failed to converge.');
   }

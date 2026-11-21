@@ -1,5 +1,5 @@
 import { mix, smoothstep } from 'three/tsl';
-import { stormSnowCoverUniform } from '../../weather/storm/stormGroundUniforms.js';
+import { stormSnowCoverAtCanonical } from '../../weather/storm/snowField/snowFieldState.js';
 import { meadowGroundStyle } from './meadowGroundStyle.js';
 import { meadowMicrohabitatNodes, meadowMicrohabitatShare } from './meadowMicrohabitat.js';
 import { meadowNoise } from './meadowNoise.js';
@@ -44,7 +44,7 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   // than standing as an even speckle of spikes over bare ground.
   const gap=cards?1:mix(1,smoothstep(MEADOW_GAP_RAMP[0],MEADOW_GAP_RAMP[1],tuft.occupancy),uniforms.tufts.gapCut.mul(meadowShortStand(dimensions.y)));
   // Storm snow (SnowCover) weighs a stand down, as biome frost does (applyBiomeLooks SNOW_FLATTEN).
-  const stormSettle=stormSnowCoverUniform.mul(-.4).add(1);
+  const stormSettle=stormSnowCoverAtCanonical(instance.canonical).mul(-.4).add(1);
   return {height:mix(dimensions.x.mul(MEADOW_SHORT_FLOOR),dimensions.y,share).mul(stand).mul(areaHeight).mul(gap).mul(stormSettle),
     tallHeight:dimensions.y,tuft,micro,plant,
     width:dimensions.z.mul(micro.width),density:response.x,

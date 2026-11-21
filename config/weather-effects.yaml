@@ -49,3 +49,21 @@ snowfall:
     - { area: 140, sizeMin: 0.14, sizeMax: 0.3, opacity: 0.32, speedScale: 1, nearFade: 9, softness: 1, brightness: 0.95, sheets: 1, counts: [0, 0, 1500, 3500, 5500] }
   levels:
     driftCap: [3, 3, 5, 9, 15]
+# Storm snow field (docs/plans/storm-snow-field-2026-11-21.md): where a storm's
+# snow builds and melts first, as a gain on the one global SnowCover. Visual
+# only. `enabled: false` compiles every coverage reader as before and runs no
+# GPU pass (`?snowField=0|1` overrides it for QA).
+snowField:
+  enabled: true
+  windowMetres: 512
+  resolution: 128
+  flatGain: 1.15
+  leeGain: 0.6
+  hollowGain: 0.35
+  steepLoss: 0.6
+  driftContrast: 0.7
+  driftAlongMetres: 70
+  driftAcrossMetres: 18
+  driftSpeed: 0.25
+  sunMelt: 0.65
+  canopyShelter: 0.3

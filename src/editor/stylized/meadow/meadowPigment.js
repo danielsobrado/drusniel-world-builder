@@ -1,6 +1,6 @@
 import { cameraPosition, color, dot, float, fract, mix, pow, smoothstep, uv, vec3, vec4 } from 'three/tsl';
 
-import { stormSnowCoverUniform } from '../../weather/storm/stormGroundUniforms.js';
+import { stormSnowCoverAtCanonical } from '../../weather/storm/snowField/snowFieldState.js';
 import { canopySnowColor } from '../forest/canopySnow.js';
 import { stylizedPathWearMask } from '../StylizedNoiseNodes.js';
 import { meadowCanopyColor, meadowCanopyView } from './meadowCanopy.js';
@@ -85,8 +85,9 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   if (marks && uniforms.spellGround) ({ root, tip } = applyGrassMarks(uniforms.spellGround, blade.base, root, tip));
   // A storm's snow settles on the blades as it does on the ground and crowns (SnowCover):
   // tips whiten first, roots keep a little green.
-  root = mix(root, canopySnowColor.mul(0.8), stormSnowCoverUniform.mul(0.6));
-  tip = mix(tip, canopySnowColor, stormSnowCoverUniform.mul(0.9));
+  const stormCover = stormSnowCoverAtCanonical(blade.canonical);
+  root = mix(root, canopySnowColor.mul(0.8), stormCover.mul(0.6));
+  tip = mix(tip, canopySnowColor, stormCover.mul(0.9));
   // Occupancy rides in the root varying's fourth lane: no extra vertex output.
   const rootData = vec4(root, occupancy).toVarying('meadowRootPigment');
   root = rootData.xyz;

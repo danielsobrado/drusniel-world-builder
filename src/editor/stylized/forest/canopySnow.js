@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
-import { float, mix, normalize, normalWorld, positionGeometry, smoothstep, vec3 } from 'three/tsl';
+import { float, mix, normalize, normalWorld, positionGeometry, positionWorld, smoothstep, vec3 } from 'three/tsl';
 import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
-import { stormSnowCoverUniform } from '../../weather/storm/stormGroundUniforms.js';
+import { stormSnowCoverAt } from '../../weather/storm/snowField/snowFieldState.js';
 import { foliageLight } from './foliageLight.js';
 import { blurTileValueAt } from '../../world/BiomeFieldBlur.js';
 
@@ -103,9 +103,9 @@ export function canopySnowCap(snow, up = normalWorld.y) {
   return smoothstep(start, start.add(CAP_FULL - CAP_START), up.add(lumps)).mul(snow).max(snow.mul(FROST_SHARE));
 }
 
-/** A tree's own snow plus what a storm has laid (SnowCover), before the cap is drawn. */
+/** A tree's own snow plus what a storm has laid where it stands (SnowCover × snow field), before the cap is drawn. */
 export function withStormSnow(snow) {
-  return snow.add(stormSnowCoverUniform).min(1);
+  return snow.add(stormSnowCoverAt(positionWorld.xz)).min(1);
 }
 
 /** A crown's sun transmission with snow taking over from the leaf, for frost that glows backlit. */
