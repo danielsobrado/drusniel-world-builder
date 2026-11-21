@@ -1,0 +1,72 @@
+[
+  {
+    "channel": "default headless shell",
+    "browser": "151.0.7922.34",
+    "features": [
+      {
+        "featureLevel": "core",
+        "adapter": {
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "device": null,
+        "error": "Failed to execute 'requestDevice' on 'GPUAdapter': DynamicLib.Open: dxil.dll Windows Error: 87\n    at EnsureDXCLibraries (..\\..\\third_party\\dawn\\src\\dawn\\native\\d3d12\\PlatformFunctionsD3D12.cpp:212)\n"
+      },
+      {
+        "featureLevel": "compatibility",
+        "adapter": {
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "device": null,
+        "error": "Failed to execute 'requestDevice' on 'GPUAdapter': DynamicLib.Open: dxil.dll Windows Error: 87\n    at EnsureDXCLibraries (..\\..\\third_party\\dawn\\src\\dawn\\native\\d3d12\\PlatformFunctionsD3D12.cpp:212)\n"
+      }
+    ],
+    "consoleWarnings": [
+      "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+      "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+      "Device failed at creation.",
+      "Device failed at creation."
+    ]
+  },
+  {
+    "channel": "chromium",
+    "browser": "151.0.7922.34",
+    "features": [
+      {
+        "featureLevel": "core",
+        "adapter": {
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "device": {
+          "interstageVariables": 16
+        },
+        "error": null
+      },
+      {
+        "featureLevel": "compatibility",
+        "adapter": {
+          "vendor": "nvidia",
+          "architecture": "lovelace",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "device": {
+          "interstageVariables": 15
+        },
+        "error": null
+      }
+    ],
+    "consoleWarnings": [
+      "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+      "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127"
+    ]
+  }
+]

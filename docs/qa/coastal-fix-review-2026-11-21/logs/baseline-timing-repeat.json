@@ -1,0 +1,3283 @@
+{
+  "schemaVersion": 1,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "sourceRevision": "ec15cd09c263e1f45bea1c42affc2fd70541c91b",
+  "sourceSnapshotSha256": "c2b57d9aa566ed75adb2e7df4aab0e3b30d068aa1f4f8b063dbd09a0ad1c17c8",
+  "runtimeDiffSha256": null,
+  "sourceOverrides": [],
+  "timingFailures": [],
+  "failures": [],
+  "browser": "151.0.7922.34",
+  "browserErrors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "gpuAndNetworkAlerts": [],
+  "browserWarnings": [
+    "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+    "THREE.MeshPhysicalMaterial: The \"iridescenceThicknessRange\" property has been replaced by \"iridescenceThicknessMinimum\" and \"iridescenceThicknessMaximum\".",
+    "THREE.Source: \"Source\" has been renamed to \"TextureSource\". Please update your code to use \"THREE.TextureSource\" instead.",
+    "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.",
+    "Calling [RenderPassEncoder (unlabeled)].Draw with an index count of 0 is unusual.",
+    "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n3 warning(s) generated while compiling the shader:\n:136:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:193:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:255:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+    "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n1 warning(s) generated while compiling the shader:\n:123:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+    "Compilation log for [ShaderModule \"fragment\"]:\n\n3 warning(s) generated while compiling the shader:\n:306:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:367:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:433:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+    "Calling [RenderPassEncoder (unlabeled)].Draw with a vertex count of 0 is unusual.",
+    "Compilation log for [ShaderModule \"fragment\"]:\n\n1 warning(s) generated while compiling the shader:\n:277:5 warning: code is unreachable\n        break;\n        ^^^^^\n"
+  ],
+  "timings": [
+    {
+      "id": "01-open-beach",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": -9022,
+        "z": -7492,
+        "heightAboveGround": 13,
+        "pitch": -0.43,
+        "yaw": -0.724250000748147
+      },
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 52388,
+          "finalForegroundPid": 52388,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 52388,
+          "samples": 74
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1594,
+          "p50Ms": 4.899999999994179,
+          "p95Ms": 7
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1595,
+          "p50Ms": 4.4000000059604645,
+          "p95Ms": 6.4000000059604645
+        },
+        "renderCpu": {
+          "samples": 1595,
+          "p50Ms": 3.7999999970197678,
+          "p95Ms": 5.5
+        },
+        "swashCpu": {
+          "samples": 1595,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1595,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1595,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1595,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 24576,
+        "swashDispatches": 480,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 87,
+          "avgMs": 4.244574160919541,
+          "p50Ms": 4.178944000000001,
+          "p95Ms": 4.781056000000001,
+          "maxMs": 5.939200000000001
+        }
+      },
+      "preparation": {
+        "groundPreparation": {
+          "waitedMs": 11187.39999999106,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 910.9000000059605,
+            "capacity": 49,
+            "focusChunk": "-71:58|-71:58",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": -8960,
+              "z": -7424
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 823,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 32,
+                "advanced": 32,
+                "blocked": 0,
+                "cancelled": 62
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 2,
+                "blocked": 54,
+                "cancelled": 5
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 37,
+                "blocked": 403,
+                "cancelled": 14
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 18,
+                "advanced": 73,
+                "blocked": 493,
+                "cancelled": 372
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 49,
+                "advanced": 174,
+                "blocked": 1574,
+                "cancelled": 49
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 81,
+                "advanced": 260,
+                "blocked": 2852,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        },
+        "readiness": {
+          "waitedMs": 5288.5999999940395,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 910.9000000059605,
+            "capacity": 49,
+            "focusChunk": "-71:58|-71:58",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": -8960,
+              "z": -7424
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 823,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 32,
+                "advanced": 32,
+                "blocked": 0,
+                "cancelled": 62
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 2,
+                "blocked": 54,
+                "cancelled": 5
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 37,
+                "blocked": 403,
+                "cancelled": 14
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 18,
+                "advanced": 73,
+                "blocked": 493,
+                "cancelled": 372
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 49,
+                "advanced": 174,
+                "blocked": 1574,
+                "cancelled": 49
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 81,
+                "advanced": 260,
+                "blocked": 2852,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "canonicalCamera": {
+        "x": -9022,
+        "z": -7492,
+        "y": 12.982037289989018
+      },
+      "cameraQuaternion": [
+        -0.19951102155489728,
+        -0.3461058238662431,
+        -0.07558093304980268,
+        0.913615692467742
+      ],
+      "renderOrigin": {
+        "x": -8960,
+        "z": -7424
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "heightScale": 24,
+        "seaLevel": -1.5,
+        "waterDomainVersion": 4,
+        "waterDomain": {
+          "version": 4,
+          "cellSizeMeters": 2,
+          "shoreDistanceMeters": 48,
+          "ocean": {
+            "coastalShelfMeters": 20,
+            "shelfDepth": 4,
+            "maximumDepth": 24,
+            "maximumBedSlope": 0.75,
+            "beachHeight": 1.8,
+            "beachWidthMeters": 30
+          },
+          "river": {
+            "minimumDepth": 0.8,
+            "maximumDepth": 8,
+            "widthDepthRatio": 0.18,
+            "bankExponent": 1.8,
+            "minimumGradient": 0.0002,
+            "profileStepMeters": 100,
+            "valleySlope": 0.7,
+            "valleyReachMeters": 1500,
+            "leveeHeight": 1,
+            "leveeWidthMeters": 12
+          },
+          "lake": {
+            "minimumDepth": 1.5,
+            "maximumDepth": 18,
+            "shoreDepthMeters": 300,
+            "bankHeight": 1.5,
+            "bankWidthMeters": 60,
+            "shoreSlope": 0.3,
+            "shoreReachMeters": 3000,
+            "shorelineNoiseMeters": 400,
+            "shorelineNoiseScaleMeters": 2500
+          },
+          "falls": {
+            "enabled": true,
+            "minimumHeight": 4,
+            "maximumHeight": 30,
+            "faceSlope": 1.2,
+            "plungeDecayMeters": 40
+          },
+          "bog": {
+            "enabled": true,
+            "tileIds": [
+              12
+            ],
+            "latticeMeters": 32,
+            "tableDrop": 0.1,
+            "poolScaleMeters": 38,
+            "threshold": 0.14,
+            "shoreWidth": 0.16,
+            "islandHeight": 0.35,
+            "maximumDepth": 0.9,
+            "hummockHeight": 0.12
+          }
+        }
+      },
+      "backend": "webgpu",
+      "qualityTier": "high",
+      "simulationSeconds": 143.4755,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "seaOptics": {
+        "enabled": true,
+        "model": "spectralSingleScatter",
+        "sunny": {
+          "lagoon": "#3caca8",
+          "shallow": "#25858e",
+          "deep": "#123d50"
+        },
+        "storm": {
+          "lagoon": "#2f8a80",
+          "shallow": "#176662",
+          "deep": "#032d48"
+        },
+        "absorptionCoefficients": [
+          0.896,
+          0.182,
+          0.14
+        ],
+        "scatteringCoefficients": [
+          0.025,
+          0.045,
+          0.07
+        ],
+        "scattering": {
+          "ambientStrength": 0.65,
+          "sunlightStrength": 0.35,
+          "anisotropy": 0.35,
+          "stormTurbidityMultiplier": 1.8
+        },
+        "opticalDistance": {
+          "maximumMeters": 43,
+          "refractiveIndex": 1.333,
+          "minimumCosine": 0.15
+        },
+        "seabed": {
+          "visibilityStrength": 1
+        },
+        "quality": {
+          "medium": "absorption",
+          "high": "singleScatter",
+          "ultra": "directionalSingleScatter"
+        },
+        "absorptionDensity": 0.22,
+        "lagoonStart": 0.18,
+        "lagoonEnd": 2.5,
+        "deepStart": 0.71,
+        "deepEnd": 8.6,
+        "maximumOpticalDistance": 43,
+        "fresnelStrength": 0.85
+      },
+      "seaAmplitude": 0.9,
+      "seaStormScale": 2.6,
+      "surf": {
+        "enabled": true,
+        "model": "directionalBreakers",
+        "directional": {
+          "referenceDepthMeters": 2,
+          "obliquity": 0.12,
+          "carrierWeights": [
+            0.55,
+            0.3,
+            0.15
+          ],
+          "packetMinimum": 0.55,
+          "packetMaximum": 1.1,
+          "packetModulation": 1
+        },
+        "refraction": {
+          "enabled": true,
+          "strength": 0.85,
+          "minimumDepthMeters": 0.4,
+          "maximumWaveNumberRatio": 2.2,
+          "fadeStartMeters": 0.5,
+          "fadeEndMeters": 6,
+          "maximumPhaseDistanceMeters": 40
+        },
+        "diffraction": {
+          "enabled": true,
+          "latticeStepMeters": 16,
+          "rayStepMeters": 10,
+          "rayReachMeters": 80,
+          "angularSpreadRadians": 0.42,
+          "minimumTransmission": 0.22,
+          "offshoreFadeStartMeters": 40,
+          "offshoreFadeEndMeters": 90,
+          "phaseLagMeters": 3
+        },
+        "breaking": {
+          "gamma": 0.72,
+          "onsetRatio": 0.78,
+          "fullRatio": 1.12,
+          "shoalingReferenceDepthMeters": 4,
+          "minimumCalculationDepthMeters": 0.25,
+          "maximumShoalingGain": 1.65,
+          "shallowFadeStartMeters": 0.08,
+          "shallowFadeEndMeters": 0.4,
+          "dissipationStrength": 0.1,
+          "minimumCrestSkew": 0.18,
+          "maximumCrestSkew": 0.68,
+          "rollerStrength": 0.75,
+          "trailDecay": 4.5
+        },
+        "fadeStart": 2.5,
+        "fadeEnd": 7,
+        "depthPhaseScale": 0.45,
+        "setDepth": 0.5,
+        "setGroup": 0.29,
+        "alongFrequency": 0.031,
+        "phaseWarp": 0.32,
+        "breakDepthStart": 0.25,
+        "breakDepthFull": 0.7,
+        "breakDepthFade": 2.4,
+        "breakDepthEnd": 4.5,
+        "strength": 0.52,
+        "trail": 7,
+        "laceScale": 0.19
+      },
+      "coast": {
+        "enabled": true,
+        "sand": {
+          "enabled": true,
+          "dryDark": "#b39a72",
+          "dryLight": "#d6be96",
+          "seabedColor": "#efe6cf",
+          "seabedColorWeight": 0.3,
+          "reefColor": "#426356",
+          "reefRockColor": "#6d7b68",
+          "reefStrength": 0.55,
+          "causticStrength": 0.25
+        },
+        "period": 7.5,
+        "runupHeight": 0.5,
+        "runupMeters": 4,
+        "breakDepth": 0.5,
+        "frontBand": 0.22,
+        "foamCore": 0.02,
+        "foamWidth": 0.12,
+        "foamCoreMeters": 0.08,
+        "foamWidthMeters": 0.55,
+        "breakupStrength": 0.8,
+        "washDecay": 4,
+        "dampHeight": 0.9,
+        "wetDarkening": 0.5,
+        "wetRoughness": 0.85,
+        "filmRoughness": 0.8,
+        "filmTint": "#8ccad0",
+        "filmTintStrength": 0.18,
+        "foamColor": "#edf8fb",
+        "foamStrength": 0.3,
+        "rockImpact": {
+          "enabled": true,
+          "activationDistanceMeters": 64,
+          "fullEffectDistanceMeters": 32,
+          "contactReachMeters": 1.5,
+          "exposedHeightThresholdMeters": 0.1,
+          "maximumCandidates": 64,
+          "maximumActiveSites": 24,
+          "minimumImpactIntensity": 0.22,
+          "minimumIntervalSeconds": 0.65,
+          "referenceWaveHeightMeters": 1.4,
+          "foam": {
+            "strength": 0.85,
+            "widthMeters": 0.4,
+            "decaySeconds": 2.2,
+            "wakeStrength": 0.35
+          },
+          "wetness": {
+            "decaySeconds": 18,
+            "runoffSeconds": 3.5,
+            "darkeningStrength": 0.28,
+            "freshRoughness": 0.25,
+            "normalWetReachMeters": 0.55,
+            "strongWetReachMeters": 1.5
+          },
+          "spray": {
+            "enabled": true,
+            "minimumIntensity": 0.22,
+            "highMaxDroplets": 512,
+            "ultraMaxDroplets": 1536,
+            "highMaxMist": 64,
+            "ultraMaxMist": 160,
+            "mistLifetimeMin": 0.8,
+            "mistLifetimeMax": 2.4,
+            "verticalSpeedMin": 1.5,
+            "verticalSpeedMax": 4.5,
+            "horizontalSpeedMin": 0.4,
+            "horizontalSpeedMax": 2.2,
+            "minLifetimeSeconds": 0.35,
+            "maxLifetimeSeconds": 1.1
+          },
+          "field": {
+            "resolution": 256,
+            "spanMeters": 64,
+            "updateHz": 15,
+            "scrollMeters": 8,
+            "boundaryFadeMeters": 4
+          },
+          "quality": {
+            "low": false,
+            "medium": true,
+            "high": true,
+            "ultra": true
+          }
+        },
+        "persistent": {
+          "enabled": true,
+          "fixedHz": 30,
+          "maxStepsPerFrame": 2,
+          "texelMeters": 0.25,
+          "inputTexelMeters": 1,
+          "highResolution": 256,
+          "ultraResolution": 512,
+          "scrollMeters": 8,
+          "boundaryFadeMeters": 4,
+          "activationDistanceMeters": 48,
+          "minSlope": 0.05,
+          "maxUprushSpeed": 1.3,
+          "maxBackwashSpeed": 0.9,
+          "lateralSpeed": 0.08,
+          "foamInjection": 0.85,
+          "foamDeposition": 0.35,
+          "foamWetSeconds": 3.5,
+          "foamWaterSeconds": 4.5,
+          "foamDrySeconds": 1.8,
+          "strandedSeconds": 6.5,
+          "filmSeconds": 3.2,
+          "wetSeconds": 18,
+          "washOff": 0.65,
+          "strandedOpacity": 0.45
+        }
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 910.9000000059605,
+          "capacity": 49,
+          "focusChunk": "-71:58|-71:58",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -8960,
+            "z": -7424
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 25,
+              "advanced": 25,
+              "blocked": 823,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 32,
+              "advanced": 32,
+              "blocked": 0,
+              "cancelled": 62
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 1,
+              "advanced": 2,
+              "blocked": 54,
+              "cancelled": 5
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 2,
+              "advanced": 37,
+              "blocked": 403,
+              "cancelled": 14
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 18,
+              "advanced": 73,
+              "blocked": 493,
+              "cancelled": 372
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 49,
+              "advanced": 174,
+              "blocked": 1574,
+              "cancelled": 49
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 81,
+              "advanced": 260,
+              "blocked": 2852,
+              "cancelled": 0
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 698,
+        "dispatches": 1826,
+        "inputBytes": 32768
+      },
+      "rock": {
+        "sites": 4,
+        "events": 3,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": -9018.621888390742,
+            "z": -7509.408351644408,
+            "radius": 0.2,
+            "exposure": 0.19899345783154077
+          },
+          {
+            "x": -9009.020007159328,
+            "z": -7504.119987811195,
+            "radius": 0.20847217243513186,
+            "exposure": 0.29989298947360005
+          },
+          {
+            "x": -9022.211092686513,
+            "z": -7516.87238510116,
+            "radius": 0.428235563376242,
+            "exposure": 0.2811561817414411
+          },
+          {
+            "x": -8988.636853843695,
+            "z": -7487.153635418275,
+            "radius": 0.2,
+            "exposure": 0.232755374386372
+          }
+        ]
+      },
+      "counters": {
+        "terrainMaterialFamilyAtlasEntries": 1,
+        "terrainMaterialFamilyAtlasBytes": 458752,
+        "rendererWebGPUBackend": 1,
+        "rendererWebGLBackend": 0,
+        "terrainAssignSlots": 98,
+        "waterGenerationMs": 3923.9000000804663,
+        "waterGeneration": 74.90000000596046,
+        "terrainUploadPages": 98,
+        "textureCommitMs": 3.7000000178813934,
+        "textureCommit": 0.10000000894069672,
+        "workerCompleteMs": 33687.90000000596,
+        "workerComplete": 237,
+        "queueWaitMs": 137926.19999994338,
+        "queueWait": 1540.7000000029802,
+        "tilePixelsMs": 6892.799999967217,
+        "tilePixels": 33.599999994039536,
+        "surfaceMaskMs": 6892.799999967217,
+        "surfaceMask": 33.599999994039536,
+        "grassScatterMs": 283.0999999642372,
+        "grassScatter": 0,
+        "flowerScatterMs": 71.1000000089407,
+        "flowerScatter": 0.5999999940395355,
+        "textureBytesUploaded": 11492264,
+        "meadowBufferAllocationBytes": 31444336,
+        "mainProceduralHeightMisses": 78130,
+        "mainProceduralTileMisses": 145196,
+        "collisionTreeProfiles": 40,
+        "collisionTreeChunks": 9,
+        "collisionTreeColliders": 224,
+        "collisionTreeRefreshQueueDepth": 0,
+        "collisionRockChunks": 9,
+        "collisionRockColliders": 178,
+        "collisionRockRefreshQueueDepth": 0,
+        "collisionRockDecorativeInstances": 142,
+        "collisionRockBlockingInstances": 124,
+        "collisionRockWalkableInstances": 54,
+        "collisionRockWalkablePendingInstances": 0,
+        "collisionRockGeneratedProxyInstances": 54,
+        "collisionObjectChunks": 9,
+        "collisionObjectColliders": 0,
+        "collisionObjectRefreshQueueDepth": 0,
+        "collisionConstructionChunks": 9,
+        "collisionConstructionColliders": 0,
+        "collisionConstructionRefreshQueueDepth": 0,
+        "collisionSettlementChunks": 9,
+        "collisionSettlementColliders": 0,
+        "collisionSettlementRefreshQueueDepth": 0,
+        "collisionNaturalRefreshQueueDepth": 0,
+        "collisionNaturalDeferredRetries": 0,
+        "collisionTreeChunkRefreshes": 0,
+        "collisionRockChunkRefreshes": 0,
+        "collisionObjectChunkRefreshes": 0,
+        "collisionConstructionChunkRefreshes": 0,
+        "collisionSettlementChunkRefreshes": 0,
+        "collisionDesiredChunks": 9,
+        "collisionReadyDesiredChunks": 9,
+        "collisionBuildQueueDepth": 0,
+        "collisionBuildDeferredRetries": 0,
+        "collisionFailedChunks": 0,
+        "collisionLoadedOwnerChunks": 9,
+        "collisionBuilds": 9,
+        "collisionBuildMs": 29.200000047683716,
+        "collisionActivePrimitiveColliders": 348,
+        "collisionActiveMeshInstances": 54,
+        "collisionPrototypeBvhs": 7,
+        "treeImpostorAtlasBytes": 69901920,
+        "treeImpostorCompressedAtlases": 40,
+        "streamingTexturesPrewarmed": 686,
+        "grassSlotsPinned": 0,
+        "waterOpticsPlainWaterMeshes": 0,
+        "treeManifestQueueDepth": 0,
+        "treeManifestOldestJobMs": 0,
+        "placementPreparedEntries": 201,
+        "placementPreparedPending": 0,
+        "placementPreparedArrayBytes": 70739042,
+        "placementOldestRequestMs": 0,
+        "rockManifestBuildMs": 519.9999999254942,
+        "rockManifestQueueDepth": 0,
+        "rockManifestCacheEntries": 81,
+        "rockManifestOldestJobMs": 0,
+        "constructionModulesResident": 0,
+        "constructionModulesRebuilt": 0,
+        "constructionModulesSkippedByHash": 0,
+        "constructionQueueDepth": 0,
+        "constructionStones": 0,
+        "constructionBuildMs": 0,
+        "constructionMaxBuildStepMs": 0,
+        "constructionRecordsResident": 0,
+        "constructionRecordsCandidates": 0,
+        "constructionModulesNear": 0,
+        "constructionModulesCoarse": 0,
+        "constructionModulesShell": 0,
+        "constructionLodTransitions": 0,
+        "waterChunksWet": 47,
+        "waterChunksDry": 2,
+        "waterChunksRefractive": 24,
+        "stylizedVariantsPendingLoad": 0,
+        "distantBirdInstances": 0,
+        "meadowRepackBytes": 33712,
+        "meadowBatchCommitMs": 27.80000002682209,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "treeImpostorSubmittedKnown.cpu": 1,
+        "treeImpostorSubmitted.cpu": 0,
+        "treeImpostorSubmittedKnown.gpu": 0,
+        "treeImpostorSubmitted.gpu": 0,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 29,
+        "terrainMaterialBakeEntries": 36,
+        "terrainMaterialBakeResidentBytes": 3244032,
+        "terrainMaterialBakeInFlight": 0,
+        "terrainMaterialBakeActiveLeases": 25,
+        "terrainMaterialBakeHits": 11,
+        "terrainMaterialBakeMisses": 36,
+        "terrainMaterialBakeBuildFailures": 0,
+        "terrainMaterialBakeGpuReadySlots": 25,
+        "terrainMaterialBakeGpuStaleSlots": 0,
+        "terrainMaterialBakeGpuTransitioningSlots": 0,
+        "residentSerpentCount": 0,
+        "creatureGrassPresses": 0,
+        "objectLodNear": 0,
+        "objectLodCoarse": 0,
+        "objectLodShell": 0,
+        "objectLodTransitions": 0,
+        "objectLodSelectionMs": 22.00000001490116,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0.10000000894069672,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "rendererDrawCalls": 172,
+        "rendererTriangles": 25134071,
+        "rendererLines": 0,
+        "rendererPoints": 0,
+        "rendererGeometries": 858,
+        "rendererTextures": 1410,
+        "framePreparationBacklogAgeMs": 0,
+        "frameDeferredPressureFloorMs": 0.25,
+        "frameFixedCpuMs": 4.429723707406258,
+        "frameDeferredCpuMs": 0.20000000298023224,
+        "frameDeferredBudgetMs": 1.8147207340579543,
+        "meadowBuildTurns": 173,
+        "meadowWorkerRequests": 418,
+        "meadowWorkerPostMs": 9.400000005960464,
+        "meadowWorkerClonedBytes": 393768,
+        "meadowDeadlineDeferredResults": 0,
+        "meadowStemsCompacted": 0,
+        "meadowVisibleMissingTiles": 0,
+        "meadowVisibleCapacityLagTiles": 0,
+        "meadowInViewMissingTiles": 0,
+        "meadowInViewCapacityLagTiles": 0,
+        "meadowGrassMs": 254.90000005066395,
+        "distantBirdFlockSpawns": 1,
+        "meadowWorkerRanksPrepared": 1518829,
+        "meadowWorkerCompleteMs": 27323.999999970198,
+        "meadowWorkerExecMs": 833.4999999403954,
+        "treeRebuilds": 32,
+        "stylizedInstanceRowsCompared": 16963,
+        "forestInstancesDroppedByCapacity": 0,
+        "treeImpostorRecordsRequested.cpu": 0,
+        "treeImpostorRecordsAccepted.cpu": 0,
+        "treeImpostorRecordsDropped.cpu": 0,
+        "treeImpostorRecordsRequested.gpu": 651,
+        "treeImpostorRecordsAccepted.gpu": 651,
+        "treeImpostorRecordsDropped.gpu": 0,
+        "treeNearInstances": 224,
+        "treeProxyInstances": 0,
+        "treeImpostorInstances": 651,
+        "treeFallbackImpostorInstances": 21,
+        "treeCanopyClusters": 0,
+        "forestUnderstoryInstances": 7,
+        "groundDetailRebuilds": 7,
+        "aquaticPlantRebuilds": 6,
+        "shoreLifeRebuilds": 7,
+        "forestDebrisRebuilds": 4,
+        "meadowResultPublishWaitMs": 24950.399999916553,
+        "meadowWorkerResultsPublished": 413,
+        "meadowPublications": 321,
+        "meadowPublicationBytes": 4506880,
+        "meadowPublicationPredictedBytes": 4615408,
+        "meadowWorkerIdleGapMs": 32061.699999958277,
+        "meadowOversizedPageBytes": 29709680,
+        "meadowBatchPublicationBytes": 35148928,
+        "attributeBytesUploaded": 5236668,
+        "meadowAttributeBytesUploaded": 4464080,
+        "stylizedVariantApplySlices": 1127,
+        "stylizedVariantApplyMs": 878.6999997794628,
+        "stylizedVariantApplyMaxMs": 12.5,
+        "streamedInitialUploadCpuMs": 19.799999967217445,
+        "meadowInitialGpuUploadMaxFrameBytes": 786432,
+        "streamedDrawsPrepared": 200,
+        "streamedDrawInitialUploadBytes": 18779320,
+        "streamedDrawPreparationMs": 7430.999999910593,
+        "placementPreparedChunks": 201,
+        "placementPreparedLatencyMs": 5290.0999999940395,
+        "meadowPublicationDeferredResults": 1,
+        "placementCancelledRequests": 26,
+        "collisionNotReadyStops": 313,
+        "collisionReadinessMisses": 313,
+        "collisionPrimitiveTests": 0,
+        "collisionTotalMs": 67.49999983608723,
+        "meadowOriginMaintenanceBytes": 247936,
+        "coastalSwashStateBytes": 1048576,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 65536,
+        "placementStaleResults": 24,
+        "commitQueueWaitMs": 352.1999999433756,
+        "commitQueueWait": 0.5,
+        "maxQueuedCommitAgeMs": 910.9000000059605,
+        "treeImpostorAuxiliaryCpuMs": 7.900000050663948,
+        "treeImpostorAuxiliaryUpdates": 3880,
+        "treeImpostorAuxiliaryRecordsTested": 60543,
+        "treeImpostorAuxiliaryMaxCpuMs": 0.19999998807907104,
+        "waterProbeFaces": 84,
+        "waterReflectionCpuMs": 363.39999993145466,
+        "waterReflectionBudgetEstimateMs": 3.8749999937135726,
+        "stylizedVariantsApplied": 83,
+        "meadowPageCommitsDeferred": 10,
+        "rockRebuilds": 2,
+        "meadowInitialGpuAllocationBytes": 18779320,
+        "meadowInitialGpuAllocationMs": 0.29999998211860657,
+        "meadowInitialGpuUploadBytes": 18779320,
+        "meadowInitialGpuUploadSlices": 29,
+        "bushRebuilds": 18,
+        "flowerRebuilds": 25,
+        "flowerBufferUploadMs": 1.0000000149011612,
+        "flowerLastChunkInstances": 68,
+        "rockScatterMs": 261.29999999701977,
+        "rockManifestBuildSlices": 261,
+        "rockRiverbankMs": 0.800000011920929,
+        "rockCoastMs": 120.69999995827675,
+        "rockSeabedMs": 21.90000006556511,
+        "rockFormationsMs": 6.100000023841858,
+        "rockGroundFitMs": 54.8999999165535,
+        "rockManifestBuilds": 81,
+        "rockManifestReadyLatencyMs": 474,
+        "treeManifestBuildSlices": 170,
+        "treeRootsFitted": 896,
+        "treeManifestBuilds": 49,
+        "forestLastChunkCandidatesEvaluated": 704,
+        "forestLastChunkCandidatesRejectedHabitat": 287,
+        "forestLastChunkCandidatesRejectedEdits": 0,
+        "forestLastChunkCandidatesRejectedSpacing": 375,
+        "forestLastChunkTreesAccepted": 42,
+        "forestFieldBuilds": 0,
+        "forestFieldCacheHits": 34163,
+        "forestPatchGridBuilds": 0,
+        "forestPatchGridCacheHits": 0,
+        "forestLastChunkPatchCount": 2,
+        "forestSpecies.broadleaf_round": 1,
+        "forestSpecies.broadleaf_tall": 11,
+        "treeManifestReadyLatencyMs": 8149.5999999940395,
+        "collisionRockProfiles": 11,
+        "collisionRockMeshPrototypes": 7,
+        "collisionRockMeshTriangles": 492,
+        "collisionRockGeneratedPrototypes": 7,
+        "collisionObjectProfiles": 166,
+        "collisionObjectChunkBuilds": 18,
+        "collisionConstructionPlans": 0,
+        "collisionConstructionChunkBuilds": 18,
+        "collisionSettlementChunkBuilds": 18,
+        "collisionActiveChunks": 9,
+        "collisionReadyChunks": 9,
+        "collisionActiveColliders": 402,
+        "collisionActiveBins": 283,
+        "collisionLargeColliders": 0,
+        "collisionTreeChunkBuilds": 9,
+        "collisionRockChunkBuilds": 9,
+        "collisionCandidates": 0,
+        "collisionQueryChunks": 1,
+        "collisionBroadphaseMs": 9.300000011920929,
+        "collisionBroadphaseQueries": 1185,
+        "collisionCandidatesTotal": 0,
+        "collisionNarrowPhaseMs": 0.3999999910593033,
+        "collisionSupportMs": 8.199999928474426,
+        "collisionContacts": 0,
+        "collisionContactsTotal": 0,
+        "collisionSolverIterations": 0,
+        "collisionSubsteps": 0,
+        "shoreLifeRowsChanged": 216,
+        "shoreLifeInstances": 87,
+        "forestSpecies.conifer_wide": 27,
+        "forestSpecies.conifer_narrow": 3,
+        "rockRowsChanged": 2245,
+        "rockNearInstances": 2245,
+        "rockProxyInstances": 0,
+        "rockPlacementInstances": 4067,
+        "coastalRockImpacts": 3,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "treeImpostorAttributeBytesUploaded": 234688,
+        "bushRowsChanged": 3064,
+        "bushNearInstances": 595,
+        "bushProxyInstances": 937,
+        "bushPlacementInstances": 1532,
+        "bushClusterFieldBuilds": 10019,
+        "bushClusterFieldCacheHits": 266013,
+        "tropicalPlantRebuilds": 8,
+        "tropicalPlantRowsChanged": 0,
+        "tropicalPlantInstances": 0,
+        "forestDebrisRowsChanged": 364,
+        "forestDebrisInstances": 300,
+        "aquaticPlantRowsChanged": 13,
+        "aquaticPlantInstances": 13,
+        "groundDetailRowsChanged": 945,
+        "groundDetailInstances": 945,
+        "contactShadeSlotsPainted": 3148,
+        "forestFloorTextureUploads": 49,
+        "terrainMaterialBakeWorkerWallMs": 166.10000002384186,
+        "terrainMaterialBakeGpuUploads": 33,
+        "terrainMaterialBakeGpuUploadBytes": 2973696,
+        "waterPlanarCaptures": 13
+      },
+      "pages": [
+        {
+          "key": "-69:60",
+          "waterGenerationMs": 23.19999998807907,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-69:59",
+          "waterGenerationMs": 67.09999999403954,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:57",
+          "waterGenerationMs": 76,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:59",
+          "waterGenerationMs": 35.900000005960464,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:55",
+          "waterGenerationMs": 49.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:55",
+          "waterGenerationMs": 89.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:60",
+          "waterGenerationMs": 59.8999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:61",
+          "waterGenerationMs": 58,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:60",
+          "waterGenerationMs": 60.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:56",
+          "waterGenerationMs": 93.70000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:55",
+          "waterGenerationMs": 69.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-69:58",
+          "waterGenerationMs": 44.1000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:61",
+          "waterGenerationMs": 53.70000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:60",
+          "waterGenerationMs": 30.399999991059303,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:59",
+          "waterGenerationMs": 38.20000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:57",
+          "waterGenerationMs": 85.1000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:59",
+          "waterGenerationMs": 55.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:60",
+          "waterGenerationMs": 18.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-69:57",
+          "waterGenerationMs": 72.1000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:56",
+          "waterGenerationMs": 71.6000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:55",
+          "waterGenerationMs": 56.400000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:58",
+          "waterGenerationMs": 19.100000008940697,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:59",
+          "waterGenerationMs": 108.79999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-69:61",
+          "waterGenerationMs": 80.90000000596046,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-69:56",
+          "waterGenerationMs": 50.3999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:56",
+          "waterGenerationMs": 62.19999998807907,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:60",
+          "waterGenerationMs": 27.099999994039536,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:57",
+          "waterGenerationMs": 106,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:56",
+          "waterGenerationMs": 79.30000001192093,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:56",
+          "waterGenerationMs": 59.400000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:57",
+          "waterGenerationMs": 91.29999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-69:55",
+          "waterGenerationMs": 56.20000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-70:58",
+          "waterGenerationMs": 102.70000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:55",
+          "waterGenerationMs": 88.90000000596046,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:58",
+          "waterGenerationMs": 9.200000002980232,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:61",
+          "waterGenerationMs": 65.59999999403954,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:59",
+          "waterGenerationMs": 29,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:56",
+          "waterGenerationMs": 51.900000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:58",
+          "waterGenerationMs": 48.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:59",
+          "waterGenerationMs": 55.20000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:57",
+          "waterGenerationMs": 77.79999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-74:61",
+          "waterGenerationMs": 59,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-73:57",
+          "waterGenerationMs": 73.3999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:55",
+          "waterGenerationMs": 74.90000000596046,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:58",
+          "waterGenerationMs": 59.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:61",
+          "waterGenerationMs": 61.1000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-71:58",
+          "waterGenerationMs": 85.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-68:61",
+          "waterGenerationMs": 27.600000008940697,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "-72:60",
+          "waterGenerationMs": 32.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        }
+      ],
+      "samples": [
+        {
+          "x": -8999,
+          "z": -7518,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.3861974192691415,
+            "bedHeight": -5.136951992267953,
+            "depth": 3.7507545729988117,
+            "shoreDistance": 17.8885440826416,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.5811200361261575,
+          "transmission": 1,
+          "appearance": {
+            "cell": {
+              "x": -4499,
+              "z": 3759
+            },
+            "kind": 1,
+            "exposure": 0.611764705882353,
+            "shoreDistance": 18.875,
+            "transmission": 0.9977459489542712
+          }
+        }
+      ]
+    },
+    {
+      "id": "02-curved-coast",
+      "pose": {
+        "mode": "fly",
+        "fov": 65,
+        "x": 2176,
+        "z": -10604,
+        "heightAboveGround": 29,
+        "pitch": -0.52,
+        "yaw": -1.6909050623618096
+      },
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 52388,
+          "finalForegroundPid": 52388,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 52388,
+          "samples": 75
+        },
+        "passed": true
+      },
+      "frames": {
+        "raf": {
+          "samples": 1537,
+          "p50Ms": 5.099999999976717,
+          "p95Ms": 7.100000000005821
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1538,
+          "p50Ms": 4.600000008940697,
+          "p95Ms": 6.399999991059303
+        },
+        "renderCpu": {
+          "samples": 1538,
+          "p50Ms": 4.0999999940395355,
+          "p95Ms": 5.600000008940697
+        },
+        "swashCpu": {
+          "samples": 1538,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000894069672
+        },
+        "rockCpu": {
+          "samples": 1538,
+          "p50Ms": 0,
+          "p95Ms": 0.7999999970197678
+        },
+        "rockRefreshCpu": {
+          "samples": 1538,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayCpu": {
+          "samples": 1538,
+          "p50Ms": 0,
+          "p95Ms": 0
+        },
+        "sprayUploadBytes": 73728,
+        "swashDispatches": 486,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 47,
+          "avgMs": 4.911365446808512,
+          "p50Ms": 4.783104000000001,
+          "p95Ms": 6.299648,
+          "maxMs": 6.622208000000002
+        }
+      },
+      "preparation": {
+        "groundPreparation": {
+          "waitedMs": 9255.40000000596,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 1005.7000000029802,
+            "capacity": 49,
+            "focusChunk": "17:82|17:82",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": 2176,
+              "z": -10496
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 554,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 32,
+                "advanced": 34,
+                "blocked": 1,
+                "cancelled": 58
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 1,
+                "blocked": 49,
+                "cancelled": 5
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 34,
+                "blocked": 358,
+                "cancelled": 14
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 22,
+                "advanced": 76,
+                "blocked": 499,
+                "cancelled": 318
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 49,
+                "advanced": 119,
+                "blocked": 1347,
+                "cancelled": 49
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 81,
+                "advanced": 231,
+                "blocked": 2072,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        },
+        "readiness": {
+          "waitedMs": 5293.0999999940395,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 1005.7000000029802,
+            "capacity": 49,
+            "focusChunk": "17:82|17:82",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": 2176,
+              "z": -10496
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 25,
+                "advanced": 25,
+                "blocked": 554,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 32,
+                "advanced": 34,
+                "blocked": 1,
+                "cancelled": 58
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 1,
+                "advanced": 1,
+                "blocked": 49,
+                "cancelled": 5
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 34,
+                "blocked": 358,
+                "cancelled": 14
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 22,
+                "advanced": 76,
+                "blocked": 499,
+                "cancelled": 318
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 49,
+                "advanced": 119,
+                "blocked": 1347,
+                "cancelled": 49
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 81,
+                "advanced": 231,
+                "blocked": 2072,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "canonicalCamera": {
+        "x": 2176,
+        "z": -10604,
+        "y": 27.917181431126455
+      },
+      "cameraQuaternion": [
+        -0.17054537025170682,
+        -0.7231219767428907,
+        -0.19236602310928844,
+        0.641096089982055
+      ],
+      "renderOrigin": {
+        "x": 2176,
+        "z": -10496
+      },
+      "fov": 65,
+      "world": {
+        "seed": 918273,
+        "version": 1,
+        "heightScale": 24,
+        "seaLevel": -1.5,
+        "waterDomainVersion": 4,
+        "waterDomain": {
+          "version": 4,
+          "cellSizeMeters": 2,
+          "shoreDistanceMeters": 48,
+          "ocean": {
+            "coastalShelfMeters": 20,
+            "shelfDepth": 4,
+            "maximumDepth": 24,
+            "maximumBedSlope": 0.75,
+            "beachHeight": 1.8,
+            "beachWidthMeters": 30
+          },
+          "river": {
+            "minimumDepth": 0.8,
+            "maximumDepth": 8,
+            "widthDepthRatio": 0.18,
+            "bankExponent": 1.8,
+            "minimumGradient": 0.0002,
+            "profileStepMeters": 100,
+            "valleySlope": 0.7,
+            "valleyReachMeters": 1500,
+            "leveeHeight": 1,
+            "leveeWidthMeters": 12
+          },
+          "lake": {
+            "minimumDepth": 1.5,
+            "maximumDepth": 18,
+            "shoreDepthMeters": 300,
+            "bankHeight": 1.5,
+            "bankWidthMeters": 60,
+            "shoreSlope": 0.3,
+            "shoreReachMeters": 3000,
+            "shorelineNoiseMeters": 400,
+            "shorelineNoiseScaleMeters": 2500
+          },
+          "falls": {
+            "enabled": true,
+            "minimumHeight": 4,
+            "maximumHeight": 30,
+            "faceSlope": 1.2,
+            "plungeDecayMeters": 40
+          },
+          "bog": {
+            "enabled": true,
+            "tileIds": [
+              12
+            ],
+            "latticeMeters": 32,
+            "tableDrop": 0.1,
+            "poolScaleMeters": 38,
+            "threshold": 0.14,
+            "shoreWidth": 0.16,
+            "islandHeight": 0.35,
+            "maximumDepth": 0.9,
+            "hummockHeight": 0.12
+          }
+        }
+      },
+      "backend": "webgpu",
+      "qualityTier": "ultra",
+      "simulationSeconds": 141.6491,
+      "dayHour": 12,
+      "weather": {
+        "mode": "off",
+        "intensity": 0,
+        "seaStorm": 0
+      },
+      "opticsRefraction": {
+        "enabled": true,
+        "strength": 0.012,
+        "coarseScale": 0.045,
+        "fineScale": 0.16,
+        "coarseSpeed": 0.05,
+        "fineSpeed": 0.13,
+        "depthFadeStart": 0.08,
+        "depthFadeEnd": 1.8,
+        "depthBiasMeters": 0.15,
+        "mipLevel": 0,
+        "sceneColorStrength": 0.94,
+        "absorptionCoefficients": [
+          0.62,
+          0.24,
+          0.17
+        ]
+      },
+      "seaOptics": {
+        "enabled": true,
+        "model": "spectralSingleScatter",
+        "sunny": {
+          "lagoon": "#3caca8",
+          "shallow": "#25858e",
+          "deep": "#123d50"
+        },
+        "storm": {
+          "lagoon": "#2f8a80",
+          "shallow": "#176662",
+          "deep": "#032d48"
+        },
+        "absorptionCoefficients": [
+          0.896,
+          0.182,
+          0.14
+        ],
+        "scatteringCoefficients": [
+          0.025,
+          0.045,
+          0.07
+        ],
+        "scattering": {
+          "ambientStrength": 0.65,
+          "sunlightStrength": 0.35,
+          "anisotropy": 0.35,
+          "stormTurbidityMultiplier": 1.8
+        },
+        "opticalDistance": {
+          "maximumMeters": 43,
+          "refractiveIndex": 1.333,
+          "minimumCosine": 0.15
+        },
+        "seabed": {
+          "visibilityStrength": 1
+        },
+        "quality": {
+          "medium": "absorption",
+          "high": "singleScatter",
+          "ultra": "directionalSingleScatter"
+        },
+        "absorptionDensity": 0.22,
+        "lagoonStart": 0.18,
+        "lagoonEnd": 2.5,
+        "deepStart": 0.71,
+        "deepEnd": 8.6,
+        "maximumOpticalDistance": 43,
+        "fresnelStrength": 0.85
+      },
+      "seaAmplitude": 0.9,
+      "seaStormScale": 2.6,
+      "surf": {
+        "enabled": true,
+        "model": "directionalBreakers",
+        "directional": {
+          "referenceDepthMeters": 2,
+          "obliquity": 0.12,
+          "carrierWeights": [
+            0.55,
+            0.3,
+            0.15
+          ],
+          "packetMinimum": 0.55,
+          "packetMaximum": 1.1,
+          "packetModulation": 1
+        },
+        "refraction": {
+          "enabled": true,
+          "strength": 0.85,
+          "minimumDepthMeters": 0.4,
+          "maximumWaveNumberRatio": 2.2,
+          "fadeStartMeters": 0.5,
+          "fadeEndMeters": 6,
+          "maximumPhaseDistanceMeters": 40
+        },
+        "diffraction": {
+          "enabled": true,
+          "latticeStepMeters": 16,
+          "rayStepMeters": 10,
+          "rayReachMeters": 80,
+          "angularSpreadRadians": 0.42,
+          "minimumTransmission": 0.22,
+          "offshoreFadeStartMeters": 40,
+          "offshoreFadeEndMeters": 90,
+          "phaseLagMeters": 3
+        },
+        "breaking": {
+          "gamma": 0.72,
+          "onsetRatio": 0.78,
+          "fullRatio": 1.12,
+          "shoalingReferenceDepthMeters": 4,
+          "minimumCalculationDepthMeters": 0.25,
+          "maximumShoalingGain": 1.65,
+          "shallowFadeStartMeters": 0.08,
+          "shallowFadeEndMeters": 0.4,
+          "dissipationStrength": 0.1,
+          "minimumCrestSkew": 0.18,
+          "maximumCrestSkew": 0.68,
+          "rollerStrength": 0.75,
+          "trailDecay": 4.5
+        },
+        "fadeStart": 2.5,
+        "fadeEnd": 7,
+        "depthPhaseScale": 0.45,
+        "setDepth": 0.5,
+        "setGroup": 0.29,
+        "alongFrequency": 0.031,
+        "phaseWarp": 0.32,
+        "breakDepthStart": 0.25,
+        "breakDepthFull": 0.7,
+        "breakDepthFade": 2.4,
+        "breakDepthEnd": 4.5,
+        "strength": 0.52,
+        "trail": 7,
+        "laceScale": 0.19
+      },
+      "coast": {
+        "enabled": true,
+        "sand": {
+          "enabled": true,
+          "dryDark": "#b39a72",
+          "dryLight": "#d6be96",
+          "seabedColor": "#efe6cf",
+          "seabedColorWeight": 0.3,
+          "reefColor": "#426356",
+          "reefRockColor": "#6d7b68",
+          "reefStrength": 0.55,
+          "causticStrength": 0.25
+        },
+        "period": 7.5,
+        "runupHeight": 0.5,
+        "runupMeters": 4,
+        "breakDepth": 0.5,
+        "frontBand": 0.22,
+        "foamCore": 0.02,
+        "foamWidth": 0.12,
+        "foamCoreMeters": 0.08,
+        "foamWidthMeters": 0.55,
+        "breakupStrength": 0.8,
+        "washDecay": 4,
+        "dampHeight": 0.9,
+        "wetDarkening": 0.5,
+        "wetRoughness": 0.85,
+        "filmRoughness": 0.8,
+        "filmTint": "#8ccad0",
+        "filmTintStrength": 0.18,
+        "foamColor": "#edf8fb",
+        "foamStrength": 0.3,
+        "rockImpact": {
+          "enabled": true,
+          "activationDistanceMeters": 64,
+          "fullEffectDistanceMeters": 32,
+          "contactReachMeters": 1.5,
+          "exposedHeightThresholdMeters": 0.1,
+          "maximumCandidates": 64,
+          "maximumActiveSites": 24,
+          "minimumImpactIntensity": 0.22,
+          "minimumIntervalSeconds": 0.65,
+          "referenceWaveHeightMeters": 1.4,
+          "foam": {
+            "strength": 0.85,
+            "widthMeters": 0.4,
+            "decaySeconds": 2.2,
+            "wakeStrength": 0.35
+          },
+          "wetness": {
+            "decaySeconds": 18,
+            "runoffSeconds": 3.5,
+            "darkeningStrength": 0.28,
+            "freshRoughness": 0.25,
+            "normalWetReachMeters": 0.55,
+            "strongWetReachMeters": 1.5
+          },
+          "spray": {
+            "enabled": true,
+            "minimumIntensity": 0.22,
+            "highMaxDroplets": 512,
+            "ultraMaxDroplets": 1536,
+            "highMaxMist": 64,
+            "ultraMaxMist": 160,
+            "mistLifetimeMin": 0.8,
+            "mistLifetimeMax": 2.4,
+            "verticalSpeedMin": 1.5,
+            "verticalSpeedMax": 4.5,
+            "horizontalSpeedMin": 0.4,
+            "horizontalSpeedMax": 2.2,
+            "minLifetimeSeconds": 0.35,
+            "maxLifetimeSeconds": 1.1
+          },
+          "field": {
+            "resolution": 256,
+            "spanMeters": 64,
+            "updateHz": 15,
+            "scrollMeters": 8,
+            "boundaryFadeMeters": 4
+          },
+          "quality": {
+            "low": false,
+            "medium": true,
+            "high": true,
+            "ultra": true
+          }
+        },
+        "persistent": {
+          "enabled": true,
+          "fixedHz": 30,
+          "maxStepsPerFrame": 2,
+          "texelMeters": 0.25,
+          "inputTexelMeters": 1,
+          "highResolution": 256,
+          "ultraResolution": 512,
+          "scrollMeters": 8,
+          "boundaryFadeMeters": 4,
+          "activationDistanceMeters": 48,
+          "minSlope": 0.05,
+          "maxUprushSpeed": 1.3,
+          "maxBackwashSpeed": 0.9,
+          "lateralSpeed": 0.08,
+          "foamInjection": 0.85,
+          "foamDeposition": 0.35,
+          "foamWetSeconds": 3.5,
+          "foamWaterSeconds": 4.5,
+          "foamDrySeconds": 1.8,
+          "strandedSeconds": 6.5,
+          "filmSeconds": 3.2,
+          "wetSeconds": 18,
+          "washOff": 0.65,
+          "strandedOpacity": 0.45
+        }
+      },
+      "finiteDepthRefraction": {
+        "enabled": true,
+        "strength": 0.85,
+        "minimumDepthMeters": 0.4,
+        "maximumWaveNumberRatio": 2.2,
+        "fadeStartMeters": 0.5,
+        "fadeEndMeters": 6,
+        "maximumPhaseDistanceMeters": 40
+      },
+      "diffraction": {
+        "enabled": true,
+        "latticeStepMeters": 16,
+        "rayStepMeters": 10,
+        "rayReachMeters": 80,
+        "angularSpreadRadians": 0.42,
+        "minimumTransmission": 0.22,
+        "offshoreFadeStartMeters": 40,
+        "offshoreFadeEndMeters": 90,
+        "phaseLagMeters": 3
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1005.7000000029802,
+          "capacity": 49,
+          "focusChunk": "17:82|17:82",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": 2176,
+            "z": -10496
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 25,
+              "advanced": 25,
+              "blocked": 554,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 32,
+              "advanced": 34,
+              "blocked": 1,
+              "cancelled": 58
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 1,
+              "advanced": 1,
+              "blocked": 49,
+              "cancelled": 5
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 2,
+              "advanced": 34,
+              "blocked": 358,
+              "cancelled": 14
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 22,
+              "advanced": 76,
+              "blocked": 499,
+              "cancelled": 318
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 49,
+              "advanced": 119,
+              "blocked": 1347,
+              "cancelled": 49
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 81,
+              "advanced": 231,
+              "blocked": 2072,
+              "cancelled": 0
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-42cf8ffd",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "swash": {
+        "supported": true,
+        "initialized": true,
+        "eligible": 2324,
+        "dispatches": 1770,
+        "inputBytes": 131072
+      },
+      "rock": {
+        "sites": 4,
+        "events": 2,
+        "droplets": 0,
+        "closestSites": [
+          {
+            "x": 2183.441898918478,
+            "z": -10607.18118684087,
+            "radius": 0.24424504641247755,
+            "exposure": 0.17371111108634535
+          },
+          {
+            "x": 2196.702304012142,
+            "z": -10602.33937255363,
+            "radius": 0.2,
+            "exposure": 0.2344665014518252
+          },
+          {
+            "x": 2196.678297331324,
+            "z": -10601.86301240581,
+            "radius": 0.2,
+            "exposure": 0.23380032457290356
+          },
+          {
+            "x": 2157.8482391210273,
+            "z": -10637.938766852254,
+            "radius": 0.2,
+            "exposure": 0.29288566431905827
+          }
+        ]
+      },
+      "counters": {
+        "terrainMaterialFamilyAtlasEntries": 1,
+        "terrainMaterialFamilyAtlasBytes": 458752,
+        "rendererWebGPUBackend": 1,
+        "rendererWebGLBackend": 0,
+        "terrainAssignSlots": 98,
+        "waterGenerationMs": 3386.999999985099,
+        "waterGeneration": 25.400000005960464,
+        "terrainUploadPages": 98,
+        "textureCommitMs": 4.899999991059303,
+        "textureCommit": 0,
+        "workerCompleteMs": 32806.09999999404,
+        "workerComplete": 114.19999998807907,
+        "queueWaitMs": 135059.90000003576,
+        "queueWait": 1551,
+        "tilePixelsMs": 7370.199999958277,
+        "tilePixels": 28.899999991059303,
+        "surfaceMaskMs": 7370.199999958277,
+        "surfaceMask": 28.899999991059303,
+        "grassScatterMs": 305.5999999642372,
+        "grassScatter": 0,
+        "flowerScatterMs": 105.70000006258488,
+        "flowerScatter": 0.5,
+        "textureBytesUploaded": 11492264,
+        "meadowBufferAllocationBytes": 22685040,
+        "mainProceduralHeightMisses": 77974,
+        "mainProceduralTileMisses": 118659,
+        "collisionTreeProfiles": 40,
+        "collisionTreeChunks": 9,
+        "collisionTreeColliders": 44,
+        "collisionTreeRefreshQueueDepth": 0,
+        "collisionRockChunks": 9,
+        "collisionRockColliders": 120,
+        "collisionRockRefreshQueueDepth": 0,
+        "collisionRockDecorativeInstances": 90,
+        "collisionRockBlockingInstances": 86,
+        "collisionRockWalkableInstances": 34,
+        "collisionRockWalkablePendingInstances": 0,
+        "collisionRockGeneratedProxyInstances": 34,
+        "collisionObjectChunks": 9,
+        "collisionObjectColliders": 0,
+        "collisionObjectRefreshQueueDepth": 0,
+        "collisionConstructionChunks": 9,
+        "collisionConstructionColliders": 0,
+        "collisionConstructionRefreshQueueDepth": 0,
+        "collisionSettlementChunks": 9,
+        "collisionSettlementColliders": 0,
+        "collisionSettlementRefreshQueueDepth": 0,
+        "collisionNaturalRefreshQueueDepth": 0,
+        "collisionNaturalDeferredRetries": 0,
+        "collisionTreeChunkRefreshes": 0,
+        "collisionRockChunkRefreshes": 0,
+        "collisionObjectChunkRefreshes": 0,
+        "collisionConstructionChunkRefreshes": 0,
+        "collisionSettlementChunkRefreshes": 0,
+        "collisionDesiredChunks": 9,
+        "collisionReadyDesiredChunks": 9,
+        "collisionBuildQueueDepth": 0,
+        "collisionBuildDeferredRetries": 0,
+        "collisionFailedChunks": 0,
+        "collisionLoadedOwnerChunks": 9,
+        "collisionBuilds": 9,
+        "collisionBuildMs": 17.30000002682209,
+        "collisionActivePrimitiveColliders": 130,
+        "collisionActiveMeshInstances": 34,
+        "collisionPrototypeBvhs": 6,
+        "treeImpostorAtlasBytes": 69901920,
+        "treeImpostorCompressedAtlases": 40,
+        "streamingTexturesPrewarmed": 686,
+        "grassSlotsPinned": 0,
+        "waterOpticsPlainWaterMeshes": 0,
+        "treeManifestQueueDepth": 0,
+        "treeManifestOldestJobMs": 0,
+        "placementPreparedEntries": 199,
+        "placementPreparedPending": 0,
+        "placementPreparedArrayBytes": 70453462,
+        "placementOldestRequestMs": 0,
+        "rockManifestBuildMs": 419.19999998807907,
+        "rockManifestQueueDepth": 0,
+        "rockManifestCacheEntries": 81,
+        "rockManifestOldestJobMs": 0,
+        "constructionModulesResident": 0,
+        "constructionModulesRebuilt": 0,
+        "constructionModulesSkippedByHash": 0,
+        "constructionQueueDepth": 0,
+        "constructionStones": 0,
+        "constructionBuildMs": 0,
+        "constructionMaxBuildStepMs": 0,
+        "constructionRecordsResident": 0,
+        "constructionRecordsCandidates": 0,
+        "constructionModulesNear": 0,
+        "constructionModulesCoarse": 0,
+        "constructionModulesShell": 0,
+        "constructionLodTransitions": 0,
+        "waterChunksWet": 40,
+        "waterChunksDry": 9,
+        "waterChunksRefractive": 22,
+        "stylizedVariantsPendingLoad": 0,
+        "distantBirdInstances": 0,
+        "meadowRepackBytes": 61208,
+        "meadowBatchCommitMs": 25.599999979138374,
+        "coastalRockEligible": 4,
+        "coastalRockActiveSites": 4,
+        "treeImpostorSubmittedKnown.cpu": 1,
+        "treeImpostorSubmitted.cpu": 0,
+        "treeImpostorSubmittedKnown.gpu": 0,
+        "treeImpostorSubmitted.gpu": 0,
+        "waterUploadBytes": 6624800,
+        "waterObstaclePending": 0,
+        "waterObstacleCpuMs": 0,
+        "waterRefractionSlotsPrewarmed": 23,
+        "terrainMaterialBakeEntries": 34,
+        "terrainMaterialBakeResidentBytes": 3063808,
+        "terrainMaterialBakeInFlight": 0,
+        "terrainMaterialBakeActiveLeases": 25,
+        "terrainMaterialBakeHits": 9,
+        "terrainMaterialBakeMisses": 34,
+        "terrainMaterialBakeBuildFailures": 0,
+        "terrainMaterialBakeGpuReadySlots": 25,
+        "terrainMaterialBakeGpuStaleSlots": 0,
+        "terrainMaterialBakeGpuTransitioningSlots": 0,
+        "residentSerpentCount": 0,
+        "creatureGrassPresses": 0,
+        "objectLodNear": 0,
+        "objectLodCoarse": 0,
+        "objectLodShell": 0,
+        "objectLodTransitions": 0,
+        "objectLodSelectionMs": 12.000000074505806,
+        "waterInteractionActive": 0,
+        "waterInteractionCpuMs": 0,
+        "coastalSwashActive": 1,
+        "coastalSwashComputeDispatches": 0,
+        "rendererDrawCalls": 210,
+        "rendererTriangles": 22864257,
+        "rendererLines": 0,
+        "rendererPoints": 0,
+        "rendererGeometries": 844,
+        "rendererTextures": 1391,
+        "framePreparationBacklogAgeMs": 0,
+        "frameDeferredPressureFloorMs": 0.25,
+        "frameFixedCpuMs": 4.483103255579565,
+        "frameDeferredCpuMs": 0,
+        "frameDeferredBudgetMs": 1.9613411888648793,
+        "meadowBuildTurns": 191,
+        "meadowWorkerRequests": 428,
+        "meadowWorkerPostMs": 6.200000062584877,
+        "meadowWorkerClonedBytes": 394792,
+        "meadowDeadlineDeferredResults": 2,
+        "meadowStemsCompacted": 0,
+        "meadowVisibleMissingTiles": 0,
+        "meadowVisibleCapacityLagTiles": 0,
+        "meadowInViewMissingTiles": 0,
+        "meadowInViewCapacityLagTiles": 0,
+        "meadowGrassMs": 153.00000002980232,
+        "distantBirdFlockSpawns": 1,
+        "meadowWorkerRanksPrepared": 1556501,
+        "meadowWorkerCompleteMs": 13205.400000169873,
+        "meadowWorkerExecMs": 885.5999997854233,
+        "treeRebuilds": 32,
+        "stylizedInstanceRowsCompared": 6990,
+        "forestInstancesDroppedByCapacity": 0,
+        "treeImpostorRecordsRequested.cpu": 0,
+        "treeImpostorRecordsAccepted.cpu": 0,
+        "treeImpostorRecordsDropped.cpu": 0,
+        "treeImpostorRecordsRequested.gpu": 316,
+        "treeImpostorRecordsAccepted.gpu": 316,
+        "treeImpostorRecordsDropped.gpu": 0,
+        "treeNearInstances": 44,
+        "treeProxyInstances": 0,
+        "treeImpostorInstances": 316,
+        "treeFallbackImpostorInstances": 13,
+        "treeCanopyClusters": 0,
+        "forestUnderstoryInstances": 0,
+        "groundDetailRebuilds": 22,
+        "aquaticPlantRebuilds": 6,
+        "shoreLifeRebuilds": 8,
+        "forestDebrisRebuilds": 6,
+        "meadowResultPublishWaitMs": 49666.89999991655,
+        "meadowWorkerResultsPublished": 424,
+        "meadowPublications": 332,
+        "meadowPublicationBytes": 11674936,
+        "meadowPublicationPredictedBytes": 11792200,
+        "meadowWorkerIdleGapMs": 37690.699999824166,
+        "meadowOversizedPageBytes": 20950384,
+        "meadowBatchPublicationBytes": 33413888,
+        "attributeBytesUploaded": 12914556,
+        "meadowAttributeBytesUploaded": 12405872,
+        "stylizedVariantApplySlices": 1034,
+        "stylizedVariantApplyMs": 837.5000001937151,
+        "stylizedVariantApplyMaxMs": 18.099999994039536,
+        "streamedInitialUploadCpuMs": 32.19999997317791,
+        "meadowInitialGpuUploadMaxFrameBytes": 786432,
+        "streamedDrawsPrepared": 181,
+        "streamedDrawInitialUploadBytes": 10020024,
+        "streamedDrawPreparationMs": 7715.399999946356,
+        "placementPreparedChunks": 199,
+        "placementPreparedLatencyMs": 4778.79999999702,
+        "meadowPublicationDeferredResults": 1,
+        "placementCancelledRequests": 31,
+        "collisionNotReadyStops": 388,
+        "collisionReadinessMisses": 388,
+        "collisionPrimitiveTests": 0,
+        "collisionTotalMs": 60.39999984204769,
+        "meadowOriginMaintenanceBytes": 282608,
+        "coastalSwashStateBytes": 4194304,
+        "coastalSwashWindowResets": 0,
+        "coastalSwashInputRebuilds": 1,
+        "coastalSwashActiveTexels": 262144,
+        "placementStaleResults": 26,
+        "commitQueueWaitMs": 349.30000004172325,
+        "commitQueueWait": 0.30000001192092896,
+        "maxQueuedCommitAgeMs": 1005.7000000029802,
+        "treeImpostorAuxiliaryCpuMs": 6.799999937415123,
+        "treeImpostorAuxiliaryUpdates": 3880,
+        "treeImpostorAuxiliaryRecordsTested": 29072,
+        "treeImpostorAuxiliaryMaxCpuMs": 0.10000000894069672,
+        "waterProbeFaces": 84,
+        "waterReflectionCpuMs": 285.39999990165234,
+        "waterReflectionBudgetEstimateMs": 4.499999992549419,
+        "stylizedVariantsApplied": 77,
+        "rockRebuilds": 2,
+        "flowerRebuilds": 25,
+        "flowerBufferUploadMs": 0.8999999910593033,
+        "flowerLastChunkInstances": 0,
+        "meadowInitialGpuAllocationBytes": 10020024,
+        "meadowInitialGpuAllocationMs": 0.29999998211860657,
+        "meadowInitialGpuUploadBytes": 10020024,
+        "meadowInitialGpuUploadSlices": 16,
+        "rockScatterMs": 262.6999999284744,
+        "rockManifestBuildSlices": 232,
+        "rockRiverbankMs": 0.7999999821186066,
+        "rockCoastMs": 74.90000005066395,
+        "bushRebuilds": 16,
+        "rockSeabedMs": 10.100000068545341,
+        "rockFormationsMs": 6.700000002980232,
+        "rockGroundFitMs": 13.300000011920929,
+        "rockManifestBuilds": 81,
+        "rockManifestReadyLatencyMs": 506.29999999701977,
+        "meadowPageCommitsDeferred": 2,
+        "treeManifestBuildSlices": 120,
+        "treeRootsFitted": 373,
+        "treeManifestBuilds": 49,
+        "forestLastChunkCandidatesEvaluated": 1962,
+        "forestLastChunkCandidatesRejectedHabitat": 979,
+        "forestLastChunkCandidatesRejectedEdits": 0,
+        "forestLastChunkCandidatesRejectedSpacing": 869,
+        "forestLastChunkTreesAccepted": 114,
+        "forestFieldBuilds": 0,
+        "forestFieldCacheHits": 32607,
+        "forestPatchGridBuilds": 0,
+        "forestPatchGridCacheHits": 0,
+        "forestLastChunkPatchCount": 1,
+        "forestSpecies.broadleaf_round": 13,
+        "forestSpecies.broadleaf_tall": 101,
+        "treeManifestReadyLatencyMs": 6256,
+        "collisionRockProfiles": 11,
+        "collisionRockMeshPrototypes": 6,
+        "collisionRockMeshTriangles": 440,
+        "collisionRockGeneratedPrototypes": 6,
+        "collisionObjectProfiles": 166,
+        "collisionObjectChunkBuilds": 18,
+        "collisionConstructionPlans": 0,
+        "collisionConstructionChunkBuilds": 18,
+        "collisionSettlementChunkBuilds": 18,
+        "collisionActiveChunks": 9,
+        "collisionReadyChunks": 9,
+        "collisionActiveColliders": 164,
+        "collisionActiveBins": 108,
+        "collisionLargeColliders": 0,
+        "collisionTreeChunkBuilds": 9,
+        "collisionRockChunkBuilds": 9,
+        "shoreLifeRowsChanged": 145,
+        "shoreLifeInstances": 58,
+        "forestDebrisRowsChanged": 94,
+        "forestDebrisInstances": 21,
+        "collisionCandidates": 0,
+        "collisionQueryChunks": 2,
+        "collisionBroadphaseMs": 7.69999997317791,
+        "collisionBroadphaseQueries": 1010,
+        "collisionCandidatesTotal": 0,
+        "collisionNarrowPhaseMs": 0.6000000089406967,
+        "collisionSupportMs": 3.5999999344348907,
+        "collisionContacts": 0,
+        "collisionContactsTotal": 0,
+        "collisionSolverIterations": 0,
+        "collisionSubsteps": 0,
+        "forestSpecies.conifer_narrow": 1,
+        "treeImpostorAttributeBytesUploaded": 75600,
+        "rockRowsChanged": 815,
+        "rockNearInstances": 815,
+        "rockProxyInstances": 0,
+        "rockPlacementInstances": 1227,
+        "coastalRockImpacts": 2,
+        "coastalRockDroplets": 0,
+        "coastalRockFieldBytes": 262144,
+        "coastalRockSprayEmitted": 0,
+        "bushRowsChanged": 2426,
+        "bushNearInstances": 559,
+        "bushProxyInstances": 654,
+        "bushPlacementInstances": 1213,
+        "bushClusterFieldBuilds": 10701,
+        "bushClusterFieldCacheHits": 281631,
+        "aquaticPlantRowsChanged": 10,
+        "aquaticPlantInstances": 10,
+        "tropicalPlantRebuilds": 7,
+        "tropicalPlantRowsChanged": 0,
+        "tropicalPlantInstances": 0,
+        "groundDetailRowsChanged": 1209,
+        "groundDetailInstances": 1209,
+        "contactShadeSlotsPainted": 1189,
+        "forestFloorTextureUploads": 49,
+        "terrainMaterialBakeWorkerWallMs": 165.10000002384186,
+        "terrainMaterialBakeGpuUploads": 31,
+        "terrainMaterialBakeGpuUploadBytes": 2793472,
+        "waterPlanarCaptures": 13
+      },
+      "pages": [
+        {
+          "key": "19:84",
+          "waterGenerationMs": 80.30000001192093,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:83",
+          "waterGenerationMs": 8.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:84",
+          "waterGenerationMs": 36.099999994039536,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:79",
+          "waterGenerationMs": 53.1000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:81",
+          "waterGenerationMs": 6.799999997019768,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "19:81",
+          "waterGenerationMs": 79,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "19:83",
+          "waterGenerationMs": 37.69999998807907,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:79",
+          "waterGenerationMs": 66.6000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:81",
+          "waterGenerationMs": 54.3999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:82",
+          "waterGenerationMs": 9.700000002980232,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:80",
+          "waterGenerationMs": 9.400000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:82",
+          "waterGenerationMs": 38.099999994039536,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "19:79",
+          "waterGenerationMs": 78.80000001192093,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:80",
+          "waterGenerationMs": 77.70000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "19:82",
+          "waterGenerationMs": 49.8999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:81",
+          "waterGenerationMs": 11.900000005960464,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:84",
+          "waterGenerationMs": 53.80000001192093,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:85",
+          "waterGenerationMs": 33.599999994039536,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:83",
+          "waterGenerationMs": 29.700000002980232,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:79",
+          "waterGenerationMs": 78.20000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:80",
+          "waterGenerationMs": 7.5,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:83",
+          "waterGenerationMs": 94.3999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:80",
+          "waterGenerationMs": 83.3999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:85",
+          "waterGenerationMs": 47,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:84",
+          "waterGenerationMs": 6.100000008940697,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:82",
+          "waterGenerationMs": 87.70000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:84",
+          "waterGenerationMs": 61.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:79",
+          "waterGenerationMs": 94.20000000298023,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:79",
+          "waterGenerationMs": 37.6000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:82",
+          "waterGenerationMs": 16.69999998807907,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:83",
+          "waterGenerationMs": 74.29999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:84",
+          "waterGenerationMs": 30.299999997019768,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "19:80",
+          "waterGenerationMs": 32.400000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:82",
+          "waterGenerationMs": 6.299999997019768,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:85",
+          "waterGenerationMs": 91.29999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "19:85",
+          "waterGenerationMs": 34.79999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:79",
+          "waterGenerationMs": 30.899999991059303,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:81",
+          "waterGenerationMs": 61.400000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:81",
+          "waterGenerationMs": 90.90000000596046,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:81",
+          "waterGenerationMs": 15.5,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "18:80",
+          "waterGenerationMs": 81.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:83",
+          "waterGenerationMs": 5.299999997019768,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "15:85",
+          "waterGenerationMs": 8.099999994039536,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:84",
+          "waterGenerationMs": 61.5,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "14:85",
+          "waterGenerationMs": 5.299999997019768,
+          "wet": false,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "17:82",
+          "waterGenerationMs": 70.3999999910593,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "16:83",
+          "waterGenerationMs": 79.29999999701977,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:80",
+          "waterGenerationMs": 34.6000000089407,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        },
+        {
+          "key": "20:85",
+          "waterGenerationMs": 25.400000005960464,
+          "wet": true,
+          "appearanceBytes": 16900,
+          "fieldBytes": 50700
+        }
+      ],
+      "samples": [
+        {
+          "x": 2234,
+          "z": -10597,
+          "water": {
+            "kind": 1,
+            "bodyId": 1,
+            "coverage": 1,
+            "surfaceHeight": -1.6665330965968148,
+            "bedHeight": -9.635072635519702,
+            "depth": 7.968539538922887,
+            "shoreDistance": 22.627416610717773,
+            "flowX": 0,
+            "flowZ": 0,
+            "fall": 0,
+            "plunge": 0,
+            "flags": 0
+          },
+          "exposure": 0.7187083553941719,
+          "transmission": 0.9772532333375918,
+          "appearance": {
+            "cell": {
+              "x": 1117,
+              "z": 5299
+            },
+            "kind": 1,
+            "exposure": 0.7647058823529411,
+            "shoreDistance": 24.078125,
+            "transmission": 0.9792425077528868
+          }
+        }
+      ]
+    }
+  ]
+}

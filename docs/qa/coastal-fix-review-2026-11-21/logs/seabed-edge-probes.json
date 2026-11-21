@@ -1,0 +1,499 @@
+{
+  "viewport": [
+    1600,
+    900
+  ],
+  "note": "Four-pixel contrast in original PNGs. Bed intersections use the fixed camera and the 2 m source mesh triangles.",
+  "rows": [
+    {
+      "uvPixels": {
+        "x": 279,
+        "y": 820
+      },
+      "leftBed": {
+        "x": 2210.0091581173847,
+        "z": -10636.554191050778,
+        "height": -18.850879146388028,
+        "depth": 17.350879146388028
+      },
+      "rightBed": {
+        "x": 2209.6439709773704,
+        "z": -10635.962592323256,
+        "height": -18.394104919352944,
+        "depth": 16.894104919352944
+      },
+      "contrast": {
+        "seabed": {
+          "left": [
+            152,
+            152,
+            149
+          ],
+          "right": [
+            67,
+            71,
+            73
+          ],
+          "absoluteRgbDifference": 242
+        },
+        "seabed-albedo": {
+          "left": [
+            69,
+            71,
+            72
+          ],
+          "right": [
+            39,
+            41,
+            44
+          ],
+          "absoluteRgbDifference": 88
+        },
+        "seabed-roughness": {
+          "left": [
+            188,
+            187,
+            186
+          ],
+          "right": [
+            228,
+            228,
+            227
+          ],
+          "absoluteRgbDifference": 122
+        },
+        "seabed-matte": {
+          "left": [
+            93,
+            96,
+            95
+          ],
+          "right": [
+            64,
+            68,
+            70
+          ],
+          "absoluteRgbDifference": 82
+        },
+        "seabed-no-swash": {
+          "left": [
+            152,
+            152,
+            149
+          ],
+          "right": [
+            150,
+            150,
+            147
+          ],
+          "absoluteRgbDifference": 6
+        },
+        "seabed-after": {
+          "left": [
+            147,
+            148,
+            146
+          ],
+          "right": [
+            147,
+            148,
+            146
+          ],
+          "absoluteRgbDifference": 0
+        }
+      }
+    },
+    {
+      "uvPixels": {
+        "x": 431,
+        "y": 661
+      },
+      "leftBed": {
+        "x": 2224.3491616189294,
+        "z": -10631.078436817446,
+        "height": -19.123441297216555,
+        "depth": 17.623441297216555
+      },
+      "rightBed": {
+        "x": 2223.528582275062,
+        "z": -10630.29799033683,
+        "height": -18.365479734346824,
+        "depth": 16.865479734346824
+      },
+      "contrast": {
+        "seabed": {
+          "left": [
+            110,
+            115,
+            116
+          ],
+          "right": [
+            75,
+            79,
+            82
+          ],
+          "absoluteRgbDifference": 105
+        },
+        "seabed-albedo": {
+          "left": [
+            73,
+            75,
+            77
+          ],
+          "right": [
+            38,
+            41,
+            44
+          ],
+          "absoluteRgbDifference": 102
+        },
+        "seabed-roughness": {
+          "left": [
+            190,
+            189,
+            188
+          ],
+          "right": [
+            229,
+            229,
+            228
+          ],
+          "absoluteRgbDifference": 119
+        },
+        "seabed-matte": {
+          "left": [
+            95,
+            99,
+            100
+          ],
+          "right": [
+            64,
+            69,
+            72
+          ],
+          "absoluteRgbDifference": 89
+        },
+        "seabed-no-swash": {
+          "left": [
+            110,
+            115,
+            117
+          ],
+          "right": [
+            112,
+            117,
+            118
+          ],
+          "absoluteRgbDifference": 5
+        },
+        "seabed-after": {
+          "left": [
+            108,
+            113,
+            116
+          ],
+          "right": [
+            110,
+            116,
+            118
+          ],
+          "absoluteRgbDifference": 7
+        }
+      }
+    },
+    {
+      "uvPixels": {
+        "x": 656,
+        "y": 530
+      },
+      "leftBed": {
+        "x": 2238.865238790275,
+        "z": -10612.172875647193,
+        "height": -17.136329493959675,
+        "depth": 15.636329493959675
+      },
+      "rightBed": {
+        "x": 2235.356364401099,
+        "z": -10611.32085226512,
+        "height": -14.656415569626294,
+        "depth": 13.156415569626294
+      },
+      "contrast": {
+        "seabed": {
+          "left": [
+            105,
+            105,
+            101
+          ],
+          "right": [
+            149,
+            140,
+            124
+          ],
+          "absoluteRgbDifference": 102
+        },
+        "seabed-albedo": {
+          "left": [
+            67,
+            61,
+            55
+          ],
+          "right": [
+            131,
+            114,
+            88
+          ],
+          "absoluteRgbDifference": 150
+        },
+        "seabed-roughness": {
+          "left": [
+            229,
+            229,
+            228
+          ],
+          "right": [
+            230,
+            229,
+            229
+          ],
+          "absoluteRgbDifference": 2
+        },
+        "seabed-matte": {
+          "left": [
+            99,
+            98,
+            95
+          ],
+          "right": [
+            143,
+            134,
+            117
+          ],
+          "absoluteRgbDifference": 102
+        },
+        "seabed-no-swash": {
+          "left": [
+            118,
+            114,
+            107
+          ],
+          "right": [
+            184,
+            173,
+            152
+          ],
+          "absoluteRgbDifference": 170
+        },
+        "seabed-after": {
+          "left": [
+            96,
+            98,
+            98
+          ],
+          "right": [
+            144,
+            137,
+            122
+          ],
+          "absoluteRgbDifference": 111
+        }
+      }
+    },
+    {
+      "uvPixels": {
+        "x": 864,
+        "y": 390
+      },
+      "leftBed": {
+        "x": 2274.325733857957,
+        "z": -10582.39788431538,
+        "height": -18.67885179070169,
+        "depth": 17.17885179070169
+      },
+      "rightBed": {
+        "x": 2273.46468809547,
+        "z": -10581.95666559534,
+        "height": -18.305930190678904,
+        "depth": 16.805930190678904
+      },
+      "contrast": {
+        "seabed": {
+          "left": [
+            152,
+            148,
+            136
+          ],
+          "right": [
+            107,
+            105,
+            97
+          ],
+          "absoluteRgbDifference": 127
+        },
+        "seabed-albedo": {
+          "left": [
+            96,
+            83,
+            60
+          ],
+          "right": [
+            53,
+            46,
+            36
+          ],
+          "absoluteRgbDifference": 104
+        },
+        "seabed-roughness": {
+          "left": [
+            195,
+            194,
+            193
+          ],
+          "right": [
+            229,
+            229,
+            228
+          ],
+          "absoluteRgbDifference": 104
+        },
+        "seabed-matte": {
+          "left": [
+            122,
+            115,
+            98
+          ],
+          "right": [
+            88,
+            87,
+            80
+          ],
+          "absoluteRgbDifference": 80
+        },
+        "seabed-no-swash": {
+          "left": [
+            150,
+            146,
+            134
+          ],
+          "right": [
+            152,
+            148,
+            137
+          ],
+          "absoluteRgbDifference": 7
+        },
+        "seabed-after": {
+          "left": [
+            149,
+            145,
+            133
+          ],
+          "right": [
+            152,
+            148,
+            137
+          ],
+          "absoluteRgbDifference": 10
+        }
+      }
+    },
+    {
+      "uvPixels": {
+        "x": 850,
+        "y": 340
+      },
+      "leftBed": {
+        "x": 2295.945215092216,
+        "z": -10580.698309081507,
+        "height": -18.724822020169892,
+        "depth": 17.224822020169892
+      },
+      "rightBed": {
+        "x": 2294.8914727929273,
+        "z": -10580.167100575458,
+        "height": -18.348809364166417,
+        "depth": 16.848809364166417
+      },
+      "contrast": {
+        "seabed": {
+          "left": [
+            166,
+            160,
+            145
+          ],
+          "right": [
+            113,
+            109,
+            97
+          ],
+          "absoluteRgbDifference": 152
+        },
+        "seabed-albedo": {
+          "left": [
+            103,
+            86,
+            52
+          ],
+          "right": [
+            58,
+            48,
+            31
+          ],
+          "absoluteRgbDifference": 104
+        },
+        "seabed-roughness": {
+          "left": [
+            195,
+            194,
+            193
+          ],
+          "right": [
+            229,
+            229,
+            228
+          ],
+          "absoluteRgbDifference": 104
+        },
+        "seabed-matte": {
+          "left": [
+            128,
+            118,
+            94
+          ],
+          "right": [
+            94,
+            90,
+            78
+          ],
+          "absoluteRgbDifference": 78
+        },
+        "seabed-no-swash": {
+          "left": [
+            164,
+            158,
+            144
+          ],
+          "right": [
+            164,
+            159,
+            144
+          ],
+          "absoluteRgbDifference": 1
+        },
+        "seabed-after": {
+          "left": [
+            163,
+            158,
+            144
+          ],
+          "right": [
+            164,
+            159,
+            145
+          ],
+          "absoluteRgbDifference": 3
+        }
+      }
+    }
+  ]
+}

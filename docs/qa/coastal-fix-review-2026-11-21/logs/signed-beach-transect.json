@@ -1,0 +1,5257 @@
+[
+  {
+    "name": "signed-open-beach",
+    "samples": [
+      {
+        "x": -9032,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4516,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0743694452403494,
+          "bedHeight": -1.0743694452403494,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.074462890625,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.466552734375,
+              0,
+              0
+            ],
+            [
+              0,
+              0.456298828125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.384521484375,
+              0,
+              0
+            ],
+            [
+              0,
+              0.360107421875,
+              0,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.0743694305419922,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.4140633251045154,
+          0.5585154857299957,
+          0.9969919056662032
+        ]
+      },
+      {
+        "x": -9031,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4515.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0830794283553211,
+          "bedHeight": -1.0830794283553211,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.0831298828125,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.466552734375,
+              0,
+              0
+            ],
+            [
+              0,
+              0.456298828125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.384521484375,
+              0,
+              0
+            ],
+            [
+              0,
+              0.360107421875,
+              0,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.0865942239761353,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.40017132715661446,
+          0.5564669606215888,
+          0.996939473150051
+        ]
+      },
+      {
+        "x": -9030,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4515,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0917894114702924,
+          "bedHeight": -1.0917894114702924,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.091796875,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.456298828125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.49267578125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.360107421875,
+              0,
+              0
+            ],
+            [
+              0,
+              0.382568359375,
+              0,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.091789424419403,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.3857897626157928,
+          0.554346243632532,
+          0.9968851928645293
+        ]
+      },
+      {
+        "x": -9029,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4514.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0771353267420805,
+          "bedHeight": -1.0771353267420805,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.07708740234375,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.456298828125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.49267578125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.360107421875,
+              0,
+              0
+            ],
+            [
+              0,
+              0.382568359375,
+              0,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.0806348323822021,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.3710000567097765,
+          0.5533681617597608,
+          0.996828038176865
+        ]
+      },
+      {
+        "x": -9028,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4514,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0624812420138685,
+          "bedHeight": -1.0624812420138685,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.0623779296875,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.49267578125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.489013671875,
+              0,
+              0
+            ],
+            [
+              0,
+              0.382568359375,
+              0,
+              0
+            ],
+            [
+              0,
+              0.374267578125,
+              0,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.0624812245368958,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.35566103542382427,
+          0.5523537522264554,
+          0.9967687606647736
+        ]
+      },
+      {
+        "x": -9027,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4513.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0653709291763838,
+          "bedHeight": -1.0653709291763838,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.06536865234375,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.49267578125,
+              0,
+              0
+            ],
+            [
+              0,
+              0.489013671875,
+              0,
+              0
+            ],
+            [
+              0,
+              0.382568359375,
+              0,
+              0
+            ],
+            [
+              0,
+              0.374267578125,
+              0,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.0665233135223389,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.3396639581067428,
+          0.5503436585616117,
+          0.9967079960745933
+        ]
+      },
+      {
+        "x": -9026,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4513,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.0682606163388992,
+          "bedHeight": -1.0682606163388992,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.068359375,
+          "depth": 0,
+          "shoreDistance": 0,
+          "exposure": 0,
+          "kind": 0,
+          "corners": [
+            [
+              0,
+              0.489013671875,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.402099609375,
+              0
+            ],
+            [
+              0,
+              0.374267578125,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.28466796875,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.0682606101036072,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.3230575321484326,
+          0.5482569979202423,
+          0.9966449168853314
+        ]
+      },
+      {
+        "x": -9025,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4512.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.1124302111315234,
+          "bedHeight": -1.1124302111315234,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.2841796875,
+          "depth": -0.17169189453125,
+          "shoreDistance": 0,
+          "exposure": 0.12549019607843137,
+          "kind": 1,
+          "corners": [
+            [
+              0,
+              0.489013671875,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.402099609375,
+              0
+            ],
+            [
+              0,
+              0.374267578125,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.28466796875,
+              0
+            ]
+          ]
+        },
+        "triangleHeight": -1.1130934357643127,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.3049367340703493,
+          0.5341805240623299,
+          0.9965891713359567
+        ]
+      },
+      {
+        "x": -9024,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4512,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.1565998059241476,
+          "bedHeight": -1.1565998059241476,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0,
+          "surfaceHeight": -1.5,
+          "depth": -0.3433837890625,
+          "shoreDistance": 0,
+          "exposure": 0.25098039215686274,
+          "kind": 1,
+          "corners": [
+            [
+              0,
+              0,
+              -0.402099609375,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.249267578125,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.28466796875,
+              0
+            ],
+            [
+              1,
+              0,
+              -0.140869140625,
+              2
+            ]
+          ]
+        },
+        "triangleHeight": -1.156599760055542,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.28620728821097247,
+          0.5196312446168747,
+          0.9965315533853335
+        ]
+      },
+      {
+        "x": -9023,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4511.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.2307821085315527,
+          "bedHeight": -1.2307821085315527,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0.25,
+          "surfaceHeight": -1.5,
+          "depth": -0.26922607421875,
+          "shoreDistance": 0.5,
+          "exposure": 0.2529411764705882,
+          "kind": 1,
+          "corners": [
+            [
+              0,
+              0,
+              -0.402099609375,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.249267578125,
+              0
+            ],
+            [
+              0,
+              0,
+              -0.28466796875,
+              0
+            ],
+            [
+              1,
+              0,
+              -0.140869140625,
+              2
+            ]
+          ]
+        },
+        "triangleHeight": -1.2285270690917969,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.2676360596937919,
+          0.5169868287433834,
+          0.9964613556938872
+        ]
+      },
+      {
+        "x": -9022,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4511,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.304964411138958,
+          "bedHeight": -1.304964411138958,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0.5,
+          "surfaceHeight": -1.5,
+          "depth": -0.195068359375,
+          "shoreDistance": 1,
+          "exposure": 0.2549019607843137,
+          "kind": 1,
+          "corners": [
+            [
+              0,
+              0,
+              -0.249267578125,
+              0
+            ],
+            [
+              1,
+              0,
+              -0.07476806640625,
+              2
+            ],
+            [
+              1,
+              0,
+              -0.140869140625,
+              2
+            ],
+            [
+              1,
+              0,
+              0.01383209228515625,
+              2.828125
+            ]
+          ]
+        },
+        "triangleHeight": -1.3049644231796265,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.24830206799232987,
+          0.5142338006114,
+          0.9963882748213629
+        ]
+      },
+      {
+        "x": -9021,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4510.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 0,
+          "bodyId": 0,
+          "coverage": 0,
+          "surfaceHeight": -1.3872547405433209,
+          "bedHeight": -1.3872547405433209,
+          "depth": 0,
+          "shoreDistance": 0,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": null,
+        "field": {
+          "coverage": 0.75,
+          "surfaceHeight": -1.5,
+          "depth": -0.11276817321777344,
+          "shoreDistance": 1.70703125,
+          "exposure": 0.25686274509803925,
+          "kind": 1,
+          "corners": [
+            [
+              0,
+              0,
+              -0.249267578125,
+              0
+            ],
+            [
+              1,
+              0,
+              -0.07476806640625,
+              2
+            ],
+            [
+              1,
+              0,
+              -0.140869140625,
+              2
+            ],
+            [
+              1,
+              0,
+              0.01383209228515625,
+              2.828125
+            ]
+          ]
+        },
+        "triangleHeight": -1.3823035955429077,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.22815733515951858,
+          0.5113653284895348,
+          0.996312129415131
+        ]
+      },
+      {
+        "x": -9020,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4510,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -1.469545069947684,
+          "depth": 0,
+          "shoreDistance": 2,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.25970269775395205,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": -0.030467987060546875,
+          "shoreDistance": 2.4140625,
+          "exposure": 0.25882352941176473,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              -0.07476806640625,
+              2
+            ],
+            [
+              1,
+              0,
+              0.12445068359375,
+              2.828125
+            ],
+            [
+              1,
+              0,
+              0.01383209228515625,
+              2.828125
+            ],
+            [
+              1,
+              0,
+              0.437744140625,
+              4.47265625
+            ]
+          ]
+        },
+        "triangleHeight": -1.469545066356659,
+        "flatNormalReference": {
+          "distance": 0,
+          "transmission": [
+            1,
+            1,
+            1
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.2071497733139418,
+          0.5083739954198677,
+          0.9962327225873541
+        ]
+      },
+      {
+        "x": -9019,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4509.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -1.6253122750108944,
+          "depth": 0.12531227501089437,
+          "shoreDistance": 2,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.2633173284531056,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 0.12531471252441406,
+          "shoreDistance": 3.0322265625,
+          "exposure": 0.2627450980392157,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              -0.07476806640625,
+              2
+            ],
+            [
+              1,
+              0,
+              0.12445068359375,
+              2.828125
+            ],
+            [
+              1,
+              0,
+              0.01383209228515625,
+              2.828125
+            ],
+            [
+              1,
+              0,
+              0.437744140625,
+              4.47265625
+            ]
+          ]
+        },
+        "triangleHeight": -1.6814978122711182,
+        "flatNormalReference": {
+          "distance": 0.18871985475163228,
+          "transmission": [
+            0.8404557403573816,
+            0.9580652362564575,
+            0.9611438729626153
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.18522273492222072,
+          0.5052517351812371,
+          0.9961498402150906
+        ]
+      },
+      {
+        "x": -9018,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4509,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -1.7810794800741048,
+          "depth": 0.28107948007410477,
+          "shoreDistance": 2.8284270763397217,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.26735172271732227,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 0.281097412109375,
+          "shoreDistance": 3.650390625,
+          "exposure": 0.26666666666666666,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              0.12445068359375,
+              2.828125
+            ],
+            [
+              1,
+              0,
+              0.51416015625,
+              4.47265625
+            ],
+            [
+              1,
+              0,
+              0.437744140625,
+              4.47265625
+            ],
+            [
+              1,
+              0,
+              0.71484375,
+              5.65625
+            ]
+          ]
+        },
+        "triangleHeight": -1.7810795307159424,
+        "flatNormalReference": {
+          "distance": 0.4232233675317588,
+          "transmission": [
+            0.6771999371737257,
+            0.9083988775099121,
+            0.9149581914255227
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.1623145027093413,
+          0.5019897596559608,
+          0.9960632490122
+        ]
+      },
+      {
+        "x": -9017,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4508.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -1.947793571645994,
+          "depth": 0.447793571645994,
+          "shoreDistance": 2.8284270763397217,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.2716659593582475,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 0.4477996826171875,
+          "shoreDistance": 4.357421875,
+          "exposure": 0.2725490196078431,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              0.12445068359375,
+              2.828125
+            ],
+            [
+              1,
+              0,
+              0.51416015625,
+              4.47265625
+            ],
+            [
+              1,
+              0,
+              0.437744140625,
+              4.47265625
+            ],
+            [
+              1,
+              0,
+              0.71484375,
+              5.65625
+            ]
+          ]
+        },
+        "triangleHeight": -1.9196869730949402,
+        "flatNormalReference": {
+          "distance": 0.6740429452177782,
+          "transmission": [
+            0.5375177197507526,
+            0.8581230725637113,
+            0.868012625868841
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.1383577095251498,
+          0.4985784762227938,
+          0.9959726943364858
+        ]
+      },
+      {
+        "x": -9016,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4508,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.1145076632178834,
+          "depth": 0.6145076632178834,
+          "shoreDistance": 4.4721360206604,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.2765367346430145,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 0.614501953125,
+          "shoreDistance": 5.064453125,
+          "exposure": 0.2784313725490196,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              0.51416015625,
+              4.47265625
+            ],
+            [
+              1,
+              0,
+              0.86181640625,
+              6.32421875
+            ],
+            [
+              1,
+              0,
+              0.71484375,
+              5.65625
+            ],
+            [
+              1,
+              0,
+              1.029296875,
+              7.2109375
+            ]
+          ]
+        },
+        "triangleHeight": -2.1145076751708984,
+        "flatNormalReference": {
+          "distance": 0.9247230086190266,
+          "transmission": [
+            0.4267017912263799,
+            0.8106554808471246,
+            0.8234999156360909
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.11327867668297231,
+          0.4950073935408753,
+          0.9958778976886714
+        ]
+      },
+      {
+        "x": -9015,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4507.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.280177183832078,
+          "depth": 0.7801771838320781,
+          "shoreDistance": 4.4721360206604,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.2809976130253638,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 0.780029296875,
+          "shoreDistance": 5.916015625,
+          "exposure": 0.28921568627450983,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              0.51416015625,
+              4.47265625
+            ],
+            [
+              1,
+              0,
+              0.86181640625,
+              6.32421875
+            ],
+            [
+              1,
+              0,
+              0.71484375,
+              5.65625
+            ],
+            [
+              1,
+              0,
+              1.029296875,
+              7.2109375
+            ]
+          ]
+        },
+        "triangleHeight": -2.27190625667572,
+        "flatNormalReference": {
+          "distance": 1.1734849098883544,
+          "transmission": [
+            0.3393308794642696,
+            0.7661471127027367,
+            0.7815846395044898
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.08699665708285308,
+          0.491265013775656,
+          0.9957785538514682
+        ]
+      },
+      {
+        "x": -9014,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4507,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.445846704446273,
+          "depth": 0.9458467044462728,
+          "shoreDistance": 6.324555397033691,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.29490220682442286,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 0.945556640625,
+          "shoreDistance": 6.767578125,
+          "exposure": 0.30000000000000004,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              0.86181640625,
+              6.32421875
+            ],
+            [
+              1,
+              0,
+              1.2255859375,
+              8.25
+            ],
+            [
+              1,
+              0,
+              1.029296875,
+              7.2109375
+            ],
+            [
+              1,
+              0,
+              1.3486328125,
+              8.9453125
+            ]
+          ]
+        },
+        "triangleHeight": -2.445846676826477,
+        "flatNormalReference": {
+          "distance": 1.4220865499499722,
+          "transmission": [
+            0.2698897565323923,
+            0.7241087817560983,
+            0.7418277723525531
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.05942296674113754,
+          0.487338708934654,
+          0.9956743276068312
+        ]
+      },
+      {
+        "x": -9013,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4506.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.61656865976258,
+          "depth": 1.1165686597625801,
+          "shoreDistance": 6.324555397033691,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.2990784081208326,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.1163330078125,
+          "shoreDistance": 7.6826171875,
+          "exposure": 0.31470588235294117,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              0.86181640625,
+              6.32421875
+            ],
+            [
+              1,
+              0,
+              1.2255859375,
+              8.25
+            ],
+            [
+              1,
+              0,
+              1.029296875,
+              7.2109375
+            ],
+            [
+              1,
+              0,
+              1.3486328125,
+              8.9453125
+            ]
+          ]
+        },
+        "triangleHeight": -2.605512499809265,
+        "flatNormalReference": {
+          "distance": 1.678410065873047,
+          "transmission": [
+            0.2131379499270855,
+            0.68317851475994,
+            0.7029523897689661
+          ]
+        },
+        "stillSurfaceNdc": [
+          0.030459985047259556,
+          0.4832145785108608,
+          0.9955648499570122
+        ]
+      },
+      {
+        "x": -9012,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4506,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.787290615078888,
+          "depth": 1.2872906150788879,
+          "shoreDistance": 8.246211051940918,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.32540432483455894,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.287109375,
+          "shoreDistance": 8.59765625,
+          "exposure": 0.3294117647058824,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.2255859375,
+              8.25
+            ],
+            [
+              1,
+              0,
+              1.5341796875,
+              10.1953125
+            ],
+            [
+              1,
+              0,
+              1.3486328125,
+              8.9453125
+            ],
+            [
+              1,
+              0,
+              1.6123046875,
+              10.7734375
+            ]
+          ]
+        },
+        "triangleHeight": -2.787290573120117,
+        "flatNormalReference": {
+          "distance": 1.934550157346812,
+          "transmission": [
+            0.16834822197390134,
+            0.6445886705345933,
+            0.6661399249125552
+          ]
+        },
+        "stillSurfaceNdc": [
+          1.4063717229966334e-16,
+          0.4788772850522857,
+          0.9954497137596506
+        ]
+      },
+      {
+        "x": -9011,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4505.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -2.9301742178933057,
+          "depth": 1.4301742178933057,
+          "shoreDistance": 8.246211051940918,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.3288024960038402,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.43017578125,
+          "shoreDistance": 9.541015625,
+          "exposure": 0.3509803921568627,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.2255859375,
+              8.25
+            ],
+            [
+              1,
+              0,
+              1.5341796875,
+              10.1953125
+            ],
+            [
+              1,
+              0,
+              1.3486328125,
+              8.9453125
+            ],
+            [
+              1,
+              0,
+              1.6123046875,
+              10.7734375
+            ]
+          ]
+        },
+        "triangleHeight": -2.9187474250793457,
+        "flatNormalReference": {
+          "distance": 2.148865802878916,
+          "transmission": [
+            0.13819280870094497,
+            0.6139802378570671,
+            0.6368240879551896
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.032076130364554443,
+          0.4743098635584558,
+          0.9953284686680812
+        ]
+      },
+      {
+        "x": -9010,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4505,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.0730578207077235,
+          "depth": 1.5730578207077235,
+          "shoreDistance": 10.198039054870605,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.3660878547016267,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.5732421875,
+          "shoreDistance": 10.484375,
+          "exposure": 0.37254901960784315,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.5341796875,
+              10.1953125
+            ],
+            [
+              1,
+              0,
+              1.8173828125,
+              12
+            ],
+            [
+              1,
+              0,
+              1.6123046875,
+              10.7734375
+            ],
+            [
+              1,
+              0,
+              1.9384765625,
+              12.6484375
+            ]
+          ]
+        },
+        "triangleHeight": -3.073057770729065,
+        "flatNormalReference": {
+          "distance": 2.3630172191130407,
+          "transmission": [
+            0.11345615017243346,
+            0.584847055958343,
+            0.6088193944979755
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.06590053541730537,
+          0.4694934997110056,
+          0.995200615244327
+        ]
+      },
+      {
+        "x": -9009,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4504.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.225379270164882,
+          "depth": 1.7253792701648818,
+          "shoreDistance": 10.198039054870605,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.3679503307496965,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.7255859375,
+          "shoreDistance": 11.404296875,
+          "exposure": 0.39509803921568626,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.5341796875,
+              10.1953125
+            ],
+            [
+              1,
+              0,
+              1.8173828125,
+              12
+            ],
+            [
+              1,
+              0,
+              1.6123046875,
+              10.7734375
+            ],
+            [
+              1,
+              0,
+              1.9384765625,
+              12.6484375
+            ]
+          ]
+        },
+        "triangleHeight": -3.2362829446792603,
+        "flatNormalReference": {
+          "distance": 2.5909362989535376,
+          "transmission": [
+            0.09197372584742765,
+            0.5553578824198048,
+            0.5803658358708986
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.10162015117529086,
+          0.46440727082646893,
+          0.9950655980825254
+        ]
+      },
+      {
+        "x": -9008,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4504,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.37770071962204,
+          "depth": 1.87770071962204,
+          "shoreDistance": 12,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.409375,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.8779296875,
+          "shoreDistance": 12.32421875,
+          "exposure": 0.41764705882352937,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.8173828125,
+              12
+            ],
+            [
+              1,
+              0,
+              1.849609375,
+              12.1640625
+            ],
+            [
+              1,
+              0,
+              1.9384765625,
+              12.6484375
+            ],
+            [
+              1,
+              0,
+              2.2734375,
+              14.140625
+            ]
+          ]
+        },
+        "triangleHeight": -3.377700686454773,
+        "flatNormalReference": {
+          "distance": 2.818690605419893,
+          "transmission": [
+            0.07457021996949892,
+            0.5273753381040805,
+            0.553261216102698
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.13939885415553796,
+          0.4590278420100907,
+          0.9949227977431405
+        ]
+      },
+      {
+        "x": -9007,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4503.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.469742550170379,
+          "depth": 1.9697425501703791,
+          "shoreDistance": 12,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.409375,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 1.9697265625,
+          "shoreDistance": 12.73828125,
+          "exposure": 0.4284313725490196,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.8173828125,
+              12
+            ],
+            [
+              1,
+              0,
+              1.849609375,
+              12.1640625
+            ],
+            [
+              1,
+              0,
+              1.9384765625,
+              12.6484375
+            ],
+            [
+              1,
+              0,
+              2.2734375,
+              14.140625
+            ]
+          ]
+        },
+        "triangleHeight": -3.545257568359375,
+        "flatNormalReference": {
+          "distance": 2.95544667116545,
+          "transmission": [
+            0.06574534662826904,
+            0.511255203156055,
+            0.5375982199171232
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.17941997520430145,
+          0.45332910820374334,
+          0.9947715212508978
+        ]
+      },
+      {
+        "x": -9006,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4503,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.561784380718718,
+          "depth": 2.061784380718718,
+          "shoreDistance": 12.165525436401367,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.41347637811223537,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.0615234375,
+          "shoreDistance": 13.15234375,
+          "exposure": 0.4392156862745098,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.849609375,
+              12.1640625
+            ],
+            [
+              1,
+              0,
+              1.9462890625,
+              12.6484375
+            ],
+            [
+              1,
+              0,
+              2.2734375,
+              14.140625
+            ],
+            [
+              1,
+              0,
+              2.3828125,
+              14.5625
+            ]
+          ]
+        },
+        "triangleHeight": -3.5617843866348267,
+        "flatNormalReference": {
+          "distance": 3.092133154624991,
+          "transmission": [
+            0.057968551244667904,
+            0.4956356364710499,
+            0.5223862811979626
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.22188927465539265,
+          0.4472817705437378,
+          0.9946109908489351
+        ]
+      },
+      {
+        "x": -9005,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4502.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.6132143326117108,
+          "depth": 2.1132143326117108,
+          "shoreDistance": 12.165525436401367,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.41347637811223537,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.113037109375,
+          "shoreDistance": 13.37890625,
+          "exposure": 0.446078431372549,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.849609375,
+              12.1640625
+            ],
+            [
+              1,
+              0,
+              1.9462890625,
+              12.6484375
+            ],
+            [
+              1,
+              0,
+              2.2734375,
+              14.140625
+            ],
+            [
+              1,
+              0,
+              2.3828125,
+              14.5625
+            ]
+          ]
+        },
+        "triangleHeight": -3.6163960695266724,
+        "flatNormalReference": {
+          "distance": 3.1683721072150353,
+          "transmission": [
+            0.05403784142315305,
+            0.48713184268584714,
+            0.514089377469923
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.267038480705694,
+          0.4408528325203605,
+          0.9944403306240379
+        ]
+      },
+      {
+        "x": -9004,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4502,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.6646442845047034,
+          "depth": 2.1646442845047034,
+          "shoreDistance": 12.649110794067383,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.42576956882099076,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.16455078125,
+          "shoreDistance": 13.60546875,
+          "exposure": 0.45294117647058824,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.9462890625,
+              12.6484375
+            ],
+            [
+              1,
+              0,
+              2.11328125,
+              13.4140625
+            ],
+            [
+              1,
+              0,
+              2.3828125,
+              14.5625
+            ],
+            [
+              1,
+              0,
+              2.568359375,
+              15.234375
+            ]
+          ]
+        },
+        "triangleHeight": -3.664644241333008,
+        "flatNormalReference": {
+          "distance": 3.244632266338837,
+          "transmission": [
+            0.050372679852324284,
+            0.47877164670544364,
+            0.5059219978971388
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.3151295194512601,
+          0.43400499764967354,
+          0.994258550517457
+        ]
+      },
+      {
+        "x": -9003,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4501.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.7526594781977893,
+          "depth": 2.2526594781977893,
+          "shoreDistance": 12.649110794067383,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.42576956882099076,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.252685546875,
+          "shoreDistance": 13.96484375,
+          "exposure": 0.4627450980392157,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              1.9462890625,
+              12.6484375
+            ],
+            [
+              1,
+              0,
+              2.11328125,
+              13.4140625
+            ],
+            [
+              1,
+              0,
+              2.3828125,
+              14.5625
+            ],
+            [
+              1,
+              0,
+              2.568359375,
+              15.234375
+            ]
+          ]
+        },
+        "triangleHeight": -3.7575175762176514,
+        "flatNormalReference": {
+          "distance": 3.375822985469776,
+          "transmission": [
+            0.04463964249268048,
+            0.4647238979000628,
+            0.4921740686715813
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.36645959963123254,
+          0.4266959454407733,
+          0.994064527105002
+        ]
+      },
+      {
+        "x": -9002,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4501,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.8406746718908753,
+          "depth": 2.3406746718908753,
+          "shoreDistance": 13.416407585144043,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.44616764805038567,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.3408203125,
+          "shoreDistance": 14.32421875,
+          "exposure": 0.4725490196078431,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              2.11328125,
+              13.4140625
+            ],
+            [
+              1,
+              0,
+              2.357421875,
+              14.421875
+            ],
+            [
+              1,
+              0,
+              2.568359375,
+              15.234375
+            ],
+            [
+              1,
+              0,
+              2.837890625,
+              16.125
+            ]
+          ]
+        },
+        "triangleHeight": -3.840674638748169,
+        "flatNormalReference": {
+          "distance": 3.5070709620020883,
+          "transmission": [
+            0.03955701001880811,
+            0.451082464366644,
+            0.47879396872743635
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.4213673605840357,
+          0.4188774559688937,
+          0.9938569803582802
+        ]
+      },
+      {
+        "x": -9001,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4500.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -3.9694630794895662,
+          "depth": 2.4694630794895662,
+          "shoreDistance": 13.416407585144043,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.44616764805038567,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.46923828125,
+          "shoreDistance": 14.798828125,
+          "exposure": 0.48627450980392156,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              2.11328125,
+              13.4140625
+            ],
+            [
+              1,
+              0,
+              2.357421875,
+              14.421875
+            ],
+            [
+              1,
+              0,
+              2.568359375,
+              15.234375
+            ],
+            [
+              1,
+              0,
+              2.837890625,
+              16.125
+            ]
+          ]
+        },
+        "triangleHeight": -3.9756062030792236,
+        "flatNormalReference": {
+          "distance": 3.6987580433975977,
+          "transmission": [
+            0.033155185210716996,
+            0.4318754355932091,
+            0.4599032263582558
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.4802403521499326,
+          0.41049434478846036,
+          0.9936344453712901
+        ]
+      },
+      {
+        "x": -9000,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4500,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -4.098251487088257,
+          "depth": 2.598251487088257,
+          "shoreDistance": 14.422204971313477,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.4743928254832676,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.59765625,
+          "shoreDistance": 15.2734375,
+          "exposure": 0.5,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              2.357421875,
+              14.421875
+            ],
+            [
+              1,
+              0,
+              2.693359375,
+              15.6171875
+            ],
+            [
+              1,
+              0,
+              2.837890625,
+              16.125
+            ],
+            [
+              1,
+              0,
+              3.201171875,
+              17.203125
+            ]
+          ]
+        },
+        "triangleHeight": -4.098251461982727,
+        "flatNormalReference": {
+          "distance": 3.8905660233138013,
+          "transmission": [
+            0.027786324397426735,
+            0.41347489189534103,
+            0.44174659981316755
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.5435241957898478,
+          0.4014831584524516,
+          0.9933952377321584
+        ]
+      },
+      {
+        "x": -8999,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4499.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -4.272817350767116,
+          "depth": 2.7728173507671157,
+          "shoreDistance": 14.422204971313477,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.4743928254832676,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.7724609375,
+          "shoreDistance": 15.841796875,
+          "exposure": 0.5176470588235295,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              2.357421875,
+              14.421875
+            ],
+            [
+              1,
+              0,
+              2.693359375,
+              15.6171875
+            ],
+            [
+              1,
+              0,
+              2.837890625,
+              16.125
+            ],
+            [
+              1,
+              0,
+              3.201171875,
+              17.203125
+            ]
+          ]
+        },
+        "triangleHeight": -4.279877543449402,
+        "flatNormalReference": {
+          "distance": 4.152011699374287,
+          "transmission": [
+            0.0218402042700759,
+            0.3896498920414834,
+            0.41814690665733356
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.6117338849353134,
+          0.3917705654198855,
+          0.9931374108087622
+        ]
+      },
+      {
+        "x": -8998,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4499,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -4.447383214445974,
+          "depth": 2.947383214445974,
+          "shoreDistance": 15.620499610900879,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.5098864645734789,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 2.947265625,
+          "shoreDistance": 16.41015625,
+          "exposure": 0.5352941176470588,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              2.693359375,
+              15.6171875
+            ],
+            [
+              1,
+              0,
+              3.12890625,
+              16.96875
+            ],
+            [
+              1,
+              0,
+              3.201171875,
+              17.203125
+            ],
+            [
+              1,
+              0,
+              3.66796875,
+              18.4375
+            ]
+          ]
+        },
+        "triangleHeight": -4.447383165359497,
+        "flatNormalReference": {
+          "distance": 4.413667370530299,
+          "transmission": [
+            0.017163201267720404,
+            0.36718021841330595,
+            0.39579053970237427
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.6854678309616581,
+          0.38127135600534295,
+          0.9928587026561224
+        ]
+      },
+      {
+        "x": -8997,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4498.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -4.6731387396313995,
+          "depth": 3.1731387396313995,
+          "shoreDistance": 15.620499610900879,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.5098864645734789,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 3.1728515625,
+          "shoreDistance": 17.056640625,
+          "exposure": 0.5558823529411765,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              2.693359375,
+              15.6171875
+            ],
+            [
+              1,
+              0,
+              3.12890625,
+              16.96875
+            ],
+            [
+              1,
+              0,
+              3.201171875,
+              17.203125
+            ],
+            [
+              1,
+              0,
+              3.66796875,
+              18.4375
+            ]
+          ]
+        },
+        "triangleHeight": -4.680818796157837,
+        "flatNormalReference": {
+          "distance": 4.751632973324079,
+          "transmission": [
+            0.012572367002344716,
+            0.34006425805674156,
+            0.36867384142112114
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.7654254659124264,
+          0.3698859358714513,
+          0.9925564694795798
+        ]
+      },
+      {
+        "x": -8996,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4498,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -4.898894264816823,
+          "depth": 3.398894264816823,
+          "shoreDistance": 16.970561981201172,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.5517844224284342,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 3.3984375,
+          "shoreDistance": 17.703125,
+          "exposure": 0.5764705882352941,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              3.12890625,
+              16.96875
+            ],
+            [
+              1,
+              0,
+              3.677734375,
+              18.4375
+            ],
+            [
+              1,
+              0,
+              3.66796875,
+              18.4375
+            ],
+            [
+              1,
+              0,
+              4.25,
+              19.796875
+            ]
+          ]
+        },
+        "triangleHeight": -4.898894309997559,
+        "flatNormalReference": {
+          "distance": 5.089913444034598,
+          "transmission": [
+            0.009206824449231871,
+            0.31492827899976805,
+            0.3433922760838981
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.8524294990309739,
+          0.35749715685106637,
+          0.992227601506964
+        ]
+      },
+      {
+        "x": -8995,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4497.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -5.181384703405945,
+          "depth": 3.6813847034059446,
+          "shoreDistance": 16.970561981201172,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.5517844224284342,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 3.68115234375,
+          "shoreDistance": 18.41015625,
+          "exposure": 0.5990196078431372,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              3.12890625,
+              16.96875
+            ],
+            [
+              1,
+              0,
+              3.677734375,
+              18.4375
+            ],
+            [
+              1,
+              0,
+              3.66796875,
+              18.4375
+            ],
+            [
+              1,
+              0,
+              4.25,
+              19.796875
+            ]
+          ]
+        },
+        "triangleHeight": -5.189465045928955,
+        "flatNormalReference": {
+          "distance": 5.514126337586412,
+          "transmission": [
+            0.006229181364915143,
+            0.2860162422668193,
+            0.31412429391854524
+          ]
+        },
+        "stillSurfaceNdc": [
+          -0.9474543287002228,
+          0.343966271281451,
+          0.9918684155938359
+        ]
+      },
+      {
+        "x": -8994,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4497,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -5.463875141995066,
+          "depth": 3.963875141995066,
+          "shoreDistance": 18.439088821411133,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.5989450867275323,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 3.9638671875,
+          "shoreDistance": 19.1171875,
+          "exposure": 0.6215686274509804,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              3.677734375,
+              18.4375
+            ],
+            [
+              1,
+              0,
+              4.26171875,
+              19.796875
+            ],
+            [
+              1,
+              0,
+              4.25,
+              19.796875
+            ],
+            [
+              1,
+              0,
+              4.9453125,
+              21.265625
+            ]
+          ]
+        },
+        "triangleHeight": -5.46387505531311,
+        "flatNormalReference": {
+          "distance": 5.938757210999781,
+          "transmission": [
+            0.0042129364037892395,
+            0.25973383421006213,
+            0.2873256566582935
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.0516626918715553,
+          0.32912771337636376,
+          0.9914745166917114
+        ]
+      },
+      {
+        "x": -8993,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4496.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -5.782925982391038,
+          "depth": 4.282925982391038,
+          "shoreDistance": 18.439088821411133,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.5989450867275323,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 4.28369140625,
+          "shoreDistance": 19.82421875,
+          "exposure": 0.6441176470588236,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              3.677734375,
+              18.4375
+            ],
+            [
+              1,
+              0,
+              4.26171875,
+              19.796875
+            ],
+            [
+              1,
+              0,
+              4.25,
+              19.796875
+            ],
+            [
+              1,
+              0,
+              4.9453125,
+              21.265625
+            ]
+          ]
+        },
+        "triangleHeight": -5.811114549636841,
+        "flatNormalReference": {
+          "distance": 6.4194418665929005,
+          "transmission": [
+            0.0027059399006820048,
+            0.23288434926747978,
+            0.25973775489913864
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.1664534788102514,
+          0.31278229073346286,
+          0.9910406171123195
+        ]
+      },
+      {
+        "x": -8992,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4496,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -6.101976822787009,
+          "depth": 4.601976822787009,
+          "shoreDistance": 19.79899024963379,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.6434047145661075,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 4.603515625,
+          "shoreDistance": 20.53125,
+          "exposure": 0.6666666666666667,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              4.26171875,
+              19.796875
+            ],
+            [
+              1,
+              0,
+              4.953125,
+              21.265625
+            ],
+            [
+              1,
+              0,
+              4.9453125,
+              21.265625
+            ],
+            [
+              1,
+              0,
+              5.64453125,
+              22.625
+            ]
+          ]
+        },
+        "triangleHeight": -6.1019768714904785,
+        "flatNormalReference": {
+          "distance": 6.900607490873574,
+          "transmission": [
+            0.0017372367564296024,
+            0.2087875814767843,
+            0.2347750228220115
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.293524893892412,
+          0.29468819066898067,
+          0.9905602977850697
+        ]
+      },
+      {
+        "x": -8991,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4495.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -6.450823235085504,
+          "depth": 4.950823235085504,
+          "shoreDistance": 19.79899024963379,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.6434047145661075,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 4.951171875,
+          "shoreDistance": 21.23828125,
+          "exposure": 0.6901960784313725,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              4.26171875,
+              19.796875
+            ],
+            [
+              1,
+              0,
+              4.953125,
+              21.265625
+            ],
+            [
+              1,
+              0,
+              4.9453125,
+              21.265625
+            ],
+            [
+              1,
+              0,
+              5.64453125,
+              22.625
+            ]
+          ]
+        },
+        "triangleHeight": -6.452224254608154,
+        "flatNormalReference": {
+          "distance": 7.423984556247361,
+          "transmission": [
+            0.0010727929728536496,
+            0.18539909739754284,
+            0.2103385808572789
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.4349590333614113,
+          0.27454893692390037,
+          0.9900256885602021
+        ]
+      },
+      {
+        "x": -8990,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4495,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -6.799669647383998,
+          "depth": 5.299669647383998,
+          "shoreDistance": 21.260292053222656,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.6912678082698382,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 5.298828125,
+          "shoreDistance": 21.9453125,
+          "exposure": 0.7137254901960784,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              4.953125,
+              21.265625
+            ],
+            [
+              1,
+              0,
+              5.515625,
+              22.359375
+            ],
+            [
+              1,
+              0,
+              5.64453125,
+              22.625
+            ],
+            [
+              1,
+              0,
+              6.44140625,
+              24.078125
+            ]
+          ]
+        },
+        "triangleHeight": -6.7996697425842285,
+        "flatNormalReference": {
+          "distance": 7.9478514907603985,
+          "transmission": [
+            0.0006621812665348098,
+            0.1646122964638789,
+            0.18842620897502937
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.5933368601100222,
+          0.2519970180416578,
+          0.9894270336137219
+        ]
+      },
+      {
+        "x": -8989,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4494.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -7.139789415033794,
+          "depth": 5.639789415033794,
+          "shoreDistance": 21.260292053222656,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.6912678082698382,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 5.638671875,
+          "shoreDistance": 22.58203125,
+          "exposure": 0.7333333333333333,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              4.953125,
+              21.265625
+            ],
+            [
+              1,
+              0,
+              5.515625,
+              22.359375
+            ],
+            [
+              1,
+              0,
+              5.64453125,
+              22.625
+            ],
+            [
+              1,
+              0,
+              6.44140625,
+              24.078125
+            ]
+          ]
+        },
+        "triangleHeight": -7.198983192443848,
+        "flatNormalReference": {
+          "distance": 8.4604606243477,
+          "transmission": [
+            0.0004129912155747536,
+            0.14653007789614172,
+            0.1691961254822939
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.7718971329552347,
+          0.22657125692682745,
+          0.9887520907080249
+        ]
+      },
+      {
+        "x": -8988,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4494,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -7.47990918268359,
+          "depth": 5.97990918268359,
+          "shoreDistance": 22.360679626464844,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.7268977317308514,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 5.978515625,
+          "shoreDistance": 23.21875,
+          "exposure": 0.7529411764705882,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              5.515625,
+              22.359375
+            ],
+            [
+              1,
+              0,
+              6.03515625,
+              23.328125
+            ],
+            [
+              1,
+              0,
+              6.44140625,
+              24.078125
+            ],
+            [
+              1,
+              0,
+              7.01171875,
+              25.0625
+            ]
+          ]
+        },
+        "triangleHeight": -7.479909181594849,
+        "flatNormalReference": {
+          "distance": 8.973491360572327,
+          "transmission": [
+            0.00025747561455887537,
+            0.13042166001812583,
+            0.15191514270271506
+          ]
+        },
+        "stillSurfaceNdc": [
+          -1.9747602287916315,
+          0.19768494010190596,
+          0.987985285162868
+        ]
+      },
+      {
+        "x": -8987,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4493.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -7.751855434855066,
+          "depth": 6.251855434855066,
+          "shoreDistance": 22.360679626464844,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.7268977317308514,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 6.2509765625,
+          "shoreDistance": 23.70703125,
+          "exposure": 0.7686274509803922,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              5.515625,
+              22.359375
+            ],
+            [
+              1,
+              0,
+              6.03515625,
+              23.328125
+            ],
+            [
+              1,
+              0,
+              6.44140625,
+              24.078125
+            ],
+            [
+              1,
+              0,
+              7.01171875,
+              25.0625
+            ]
+          ]
+        },
+        "triangleHeight": -7.764502286911011,
+        "flatNormalReference": {
+          "distance": 9.385729060329142,
+          "transmission": [
+            0.00017613558951381518,
+            0.11877070460526623,
+            0.13931703680868843
+          ]
+        },
+        "stillSurfaceNdc": [
+          -2.207250027614702,
+          0.16457998348238476,
+          0.9871064931568849
+        ]
+      },
+      {
+        "x": -8986,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4493,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -8.023801687026541,
+          "depth": 6.523801687026541,
+          "shoreDistance": 23.323806762695312,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.7574935450234173,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 6.5234375,
+          "shoreDistance": 24.1953125,
+          "exposure": 0.7843137254901961,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              6.03515625,
+              23.328125
+            ],
+            [
+              1,
+              0,
+              6.6484375,
+              24.40625
+            ],
+            [
+              1,
+              0,
+              7.01171875,
+              25.0625
+            ],
+            [
+              1,
+              0,
+              7.6328125,
+              26.078125
+            ]
+          ]
+        },
+        "triangleHeight": -8.023801565170288,
+        "flatNormalReference": {
+          "distance": 9.798234030834955,
+          "transmission": [
+            0.00012046232103958219,
+            0.10815400179529518,
+            0.12775650307779907
+          ]
+        },
+        "stillSurfaceNdc": [
+          -2.4763679337570648,
+          0.1262594349960434,
+          0.9860892499669384
+        ]
+      },
+      {
+        "x": -8985,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4492.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -8.33210275498952,
+          "depth": 6.832102754989521,
+          "shoreDistance": 23.323806762695312,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.7574935450234173,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 6.83203125,
+          "shoreDistance": 24.71875,
+          "exposure": 0.7999999999999999,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              6.03515625,
+              23.328125
+            ],
+            [
+              1,
+              0,
+              6.6484375,
+              24.40625
+            ],
+            [
+              1,
+              0,
+              7.01171875,
+              25.0625
+            ],
+            [
+              1,
+              0,
+              7.6328125,
+              26.078125
+            ]
+          ]
+        },
+        "triangleHeight": -8.333120584487915,
+        "flatNormalReference": {
+          "distance": 10.265254460184975,
+          "transmission": [
+            0.00007835197689979268,
+            0.09727504840887015,
+            0.11582168873110826
+          ]
+        },
+        "stillSurfaceNdc": [
+          -2.7915100969421873,
+          0.08138534721224049,
+          0.9848980389324877
+        ]
+      },
+      {
+        "x": -8984,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4492,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -8.640403822952496,
+          "depth": 7.140403822952496,
+          "shoreDistance": 24.413110733032227,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.7911331121986467,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 7.140625,
+          "shoreDistance": 25.2421875,
+          "exposure": 0.8156862745098039,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              6.6484375,
+              24.40625
+            ],
+            [
+              1,
+              0,
+              7.359375,
+              25.609375
+            ],
+            [
+              1,
+              0,
+              7.6328125,
+              26.078125
+            ],
+            [
+              1,
+              0,
+              8.34375,
+              27.203125
+            ]
+          ]
+        },
+        "triangleHeight": -8.640403747558594,
+        "flatNormalReference": {
+          "distance": 10.732496775811752,
+          "transmission": [
+            0.000050951847876539094,
+            0.08748597640596212,
+            0.10499691366529552
+          ]
+        },
+        "stillSurfaceNdc": [
+          -3.165587016001993,
+          0.028119353433033463,
+          0.9834840594471226
+        ]
+      },
+      {
+        "x": -8983,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4491.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -8.997154762890252,
+          "depth": 7.497154762890252,
+          "shoreDistance": 24.413110733032227,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.7911331121986467,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 7.49609375,
+          "shoreDistance": 25.82421875,
+          "exposure": 0.8323529411764706,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              6.6484375,
+              24.40625
+            ],
+            [
+              1,
+              0,
+              7.359375,
+              25.609375
+            ],
+            [
+              1,
+              0,
+              7.6328125,
+              26.078125
+            ],
+            [
+              1,
+              0,
+              8.34375,
+              27.203125
+            ]
+          ]
+        },
+        "triangleHeight": -8.998183727264404,
+        "flatNormalReference": {
+          "distance": 11.270399707504874,
+          "transmission": [
+            0.00003104607611706274,
+            0.07743001881393585,
+            0.09378184999236253
+          ]
+        },
+        "stillSurfaceNdc": [
+          -3.6168360658958965,
+          -0.03613542375272205,
+          0.9817783757579387
+        ]
+      },
+      {
+        "x": -8982,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4491,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -9.353905702828005,
+          "depth": 7.853905702828005,
+          "shoreDistance": 25.612497329711914,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.8266065980362722,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 7.8515625,
+          "shoreDistance": 26.40625,
+          "exposure": 0.8490196078431372,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              7.359375,
+              25.609375
+            ],
+            [
+              1,
+              0,
+              8.125,
+              26.828125
+            ],
+            [
+              1,
+              0,
+              8.34375,
+              27.203125
+            ],
+            [
+              1,
+              0,
+              9.15625,
+              28.421875
+            ]
+          ]
+        },
+        "triangleHeight": -9.35390567779541,
+        "flatNormalReference": {
+          "distance": 11.808495596796051,
+          "transmission": [
+            0.000018913692171892932,
+            0.06852692806849227,
+            0.08376130977312375
+          ]
+        },
+        "stillSurfaceNdc": [
+          -4.171884818044146,
+          -0.11517056832511009,
+          0.979680337870737
+        ]
+      },
+      {
+        "x": -8981,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4490.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -9.74770164234973,
+          "depth": 8.24770164234973,
+          "shoreDistance": 25.612497329711914,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.8266065980362722,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 8.24609375,
+          "shoreDistance": 27.015625,
+          "exposure": 0.8647058823529411,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              7.359375,
+              25.609375
+            ],
+            [
+              1,
+              0,
+              8.125,
+              26.828125
+            ],
+            [
+              1,
+              0,
+              8.34375,
+              27.203125
+            ],
+            [
+              1,
+              0,
+              9.15625,
+              28.421875
+            ]
+          ]
+        },
+        "triangleHeight": -9.76051139831543,
+        "flatNormalReference": {
+          "distance": 12.405516843940239,
+          "transmission": [
+            0.000010913816383658507,
+            0.05984171274952106,
+            0.07389142172777835
+          ]
+        },
+        "stillSurfaceNdc": [
+          -4.871203035080661,
+          -0.21474869758252588,
+          0.9770369734655845
+        ]
+      },
+      {
+        "x": -8980,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4490,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -10.141497581871455,
+          "depth": 8.641497581871455,
+          "shoreDistance": 26.832815170288086,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.8605723357730783,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 8.640625,
+          "shoreDistance": 27.625,
+          "exposure": 0.8803921568627451,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              8.125,
+              26.828125
+            ],
+            [
+              1,
+              0,
+              8.75,
+              27.78125
+            ],
+            [
+              1,
+              0,
+              9.15625,
+              28.421875
+            ],
+            [
+              1,
+              0,
+              9.9296875,
+              29.53125
+            ]
+          ]
+        },
+        "triangleHeight": -10.141497611999512,
+        "flatNormalReference": {
+          "distance": 13.002700326199678,
+          "transmission": [
+            0.000006296686593690321,
+            0.05225535141022198,
+            0.06518231634743188
+          ]
+        },
+        "stillSurfaceNdc": [
+          -5.77944097869768,
+          -0.3440755664423749,
+          0.9736039099573295
+        ]
+      },
+      {
+        "x": -8979,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4489.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -10.489527452676612,
+          "depth": 8.989527452676612,
+          "shoreDistance": 26.832815170288086,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.8605723357730783,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 8.990234375,
+          "shoreDistance": 28.140625,
+          "exposure": 0.8931372549019608,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              8.125,
+              26.828125
+            ],
+            [
+              1,
+              0,
+              8.75,
+              27.78125
+            ],
+            [
+              1,
+              0,
+              9.15625,
+              28.421875
+            ],
+            [
+              1,
+              0,
+              9.9296875,
+              29.53125
+            ]
+          ]
+        },
+        "triangleHeight": -10.52590560913086,
+        "flatNormalReference": {
+          "distance": 13.532399176583347,
+          "transmission": [
+            0.000003865808775145929,
+            0.046335141361770325,
+            0.05832037116128024
+          ]
+        },
+        "stillSurfaceNdc": [
+          -7.006660443975303,
+          -0.5188232214634234,
+          0.9689651229605141
+        ]
+      },
+      {
+        "x": -8978,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4489,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -10.837557323481766,
+          "depth": 9.337557323481766,
+          "shoreDistance": 27.784887313842773,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.8852841881402733,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 9.33984375,
+          "shoreDistance": 28.65625,
+          "exposure": 0.9058823529411765,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              8.75,
+              27.78125
+            ],
+            [
+              1,
+              0,
+              9.46875,
+              28.84375
+            ],
+            [
+              1,
+              0,
+              9.9296875,
+              29.53125
+            ],
+            [
+              1,
+              0,
+              10.6484375,
+              30.53125
+            ]
+          ]
+        },
+        "triangleHeight": -10.837557315826416,
+        "flatNormalReference": {
+          "distance": 14.062171879965229,
+          "transmission": [
+            0.000002373226107987224,
+            0.04108496593425815,
+            0.052179995015811324
+          ]
+        },
+        "stillSurfaceNdc": [
+          -8.75670035044486,
+          -0.7680169300880074,
+          0.9623501183979828
+        ]
+      },
+      {
+        "x": -8977,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4488.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -11.197652597980294,
+          "depth": 9.697652597980294,
+          "shoreDistance": 27.784887313842773,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.8852841881402733,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 9.69921875,
+          "shoreDistance": 29.171875,
+          "exposure": 0.9166666666666666,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              8.75,
+              27.78125
+            ],
+            [
+              1,
+              0,
+              9.46875,
+              28.84375
+            ],
+            [
+              1,
+              0,
+              9.9296875,
+              29.53125
+            ],
+            [
+              1,
+              0,
+              10.6484375,
+              30.53125
+            ]
+          ]
+        },
+        "triangleHeight": -11.197599411010742,
+        "flatNormalReference": {
+          "distance": 14.606705923278557,
+          "transmission": [
+            0.0000014372540776327293,
+            0.036307815981847125,
+            0.046541623214101685
+          ]
+        },
+        "stillSurfaceNdc": [
+          -11.454087407547133,
+          -1.152106391059943,
+          0.9521542207937729
+        ]
+      },
+      {
+        "x": -8976,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4488,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -11.55774787247882,
+          "depth": 10.05774787247882,
+          "shoreDistance": 28.844409942626953,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9106485445730426,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 10.05859375,
+          "shoreDistance": 29.6875,
+          "exposure": 0.9274509803921569,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              9.46875,
+              28.84375
+            ],
+            [
+              1,
+              0,
+              10.28125,
+              30
+            ],
+            [
+              1,
+              0,
+              10.6484375,
+              30.53125
+            ],
+            [
+              1,
+              0,
+              11.4375,
+              31.625
+            ]
+          ]
+        },
+        "triangleHeight": -11.557747840881348,
+        "flatNormalReference": {
+          "distance": 15.151284876887368,
+          "transmission": [
+            8.703822346483713e-7,
+            0.03208580151661216,
+            0.041512120915098906
+          ]
+        },
+        "stillSurfaceNdc": [
+          -16.15353443781608,
+          -1.8212754937919895,
+          0.9343907038409983
+        ]
+      },
+      {
+        "x": -8975,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4487.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -11.960005288617726,
+          "depth": 10.460005288617726,
+          "shoreDistance": 28.844409942626953,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9106485445730426,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 10.458984375,
+          "shoreDistance": 30.25,
+          "exposure": 0.9392156862745098,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              9.46875,
+              28.84375
+            ],
+            [
+              1,
+              0,
+              10.28125,
+              30
+            ],
+            [
+              1,
+              0,
+              10.6484375,
+              30.53125
+            ],
+            [
+              1,
+              0,
+              11.4375,
+              31.625
+            ]
+          ]
+        },
+        "triangleHeight": -11.953298091888428,
+        "flatNormalReference": {
+          "distance": 15.75768937730053,
+          "transmission": [
+            4.979172609011421e-7,
+            0.027959577051420832,
+            0.03654851330610777
+          ]
+        },
+        "stillSurfaceNdc": [
+          -26.399322482503774,
+          -3.2802056080131123,
+          0.8956624814663059
+        ]
+      },
+      {
+        "x": -8974,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4487,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -12.362262704756635,
+          "depth": 10.862262704756635,
+          "shoreDistance": 30,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9354003906249999,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 10.859375,
+          "shoreDistance": 30.8125,
+          "exposure": 0.9509803921568627,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              10.28125,
+              30
+            ],
+            [
+              1,
+              0,
+              11.1796875,
+              31.234375
+            ],
+            [
+              1,
+              0,
+              11.4375,
+              31.625
+            ],
+            [
+              1,
+              0,
+              12.2890625,
+              32.8125
+            ]
+          ]
+        },
+        "triangleHeight": -12.362262725830078,
+        "flatNormalReference": {
+          "distance": 16.36413695036662,
+          "transmission": [
+            2.848309099164779e-7,
+            0.024363745599132406,
+            0.03217811359421359
+          ]
+        },
+        "stillSurfaceNdc": [
+          -66.14587730549026,
+          -8.939843062436301,
+          0.7454238266065034
+        ]
+      },
+      {
+        "x": -8973,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4486.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -12.799469857682762,
+          "depth": 11.299469857682762,
+          "shoreDistance": 30,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9354003906249999,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 11.296875,
+          "shoreDistance": 31.41796875,
+          "exposure": 0.9598039215686274,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              10.28125,
+              30
+            ],
+            [
+              1,
+              0,
+              11.1796875,
+              31.234375
+            ],
+            [
+              1,
+              0,
+              11.4375,
+              31.625
+            ],
+            [
+              1,
+              0,
+              12.2890625,
+              32.8125
+            ]
+          ]
+        },
+        "triangleHeight": -12.78849744796753,
+        "flatNormalReference": {
+          "distance": 17.026546422273793,
+          "transmission": [
+            1.547508775073401e-7,
+            0.020962376614598845,
+            0.027999328571674628
+          ]
+        },
+        "stillSurfaceNdc": [
+          154.4092718892704,
+          22.46570110881998,
+          1.5791038545987788
+        ]
+      },
+      {
+        "x": -8972,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4486,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -13.236677010608892,
+          "depth": 11.736677010608892,
+          "shoreDistance": 31.240999221801758,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9581586803451914,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 11.734375,
+          "shoreDistance": 32.0234375,
+          "exposure": 0.9686274509803922,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              11.1796875,
+              31.234375
+            ],
+            [
+              1,
+              0,
+              12.1328125,
+              32.5625
+            ],
+            [
+              1,
+              0,
+              12.2890625,
+              32.8125
+            ],
+            [
+              1,
+              0,
+              13.203125,
+              34.0625
+            ]
+          ]
+        },
+        "triangleHeight": -13.236677169799805,
+        "flatNormalReference": {
+          "distance": 17.68899604255505,
+          "transmission": [
+            8.407426217170454e-8,
+            0.01803570090722291,
+            0.02436301271936996
+          ]
+        },
+        "stillSurfaceNdc": [
+          37.04942734841908,
+          5.754462241280393,
+          1.1354934522155267
+        ]
+      },
+      {
+        "x": -8971,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4485.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -13.701203326974206,
+          "depth": 12.201203326974206,
+          "shoreDistance": 31.240999221801758,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9581586803451914,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 12.201171875,
+          "shoreDistance": 32.66796875,
+          "exposure": 0.9764705882352942,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              11.1796875,
+              31.234375
+            ],
+            [
+              1,
+              0,
+              12.1328125,
+              32.5625
+            ],
+            [
+              1,
+              0,
+              12.2890625,
+              32.8125
+            ],
+            [
+              1,
+              0,
+              13.203125,
+              34.0625
+            ]
+          ]
+        },
+        "triangleHeight": -13.690413475036621,
+        "flatNormalReference": {
+          "distance": 18.39564627548809,
+          "transmission": [
+            4.385442461821633e-8,
+            0.015362716605928226,
+            0.021003089818817267
+          ]
+        },
+        "stillSurfaceNdc": [
+          21.50309652456304,
+          3.540771102478489,
+          1.0767296212021569
+        ]
+      },
+      {
+        "x": -8970,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4485,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -14.165729643339517,
+          "depth": 12.665729643339517,
+          "shoreDistance": 32.557640075683594,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.977441364036334,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 12.66796875,
+          "shoreDistance": 33.3125,
+          "exposure": 0.9843137254901961,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              12.1328125,
+              32.5625
+            ],
+            [
+              1,
+              0,
+              13.1328125,
+              33.9375
+            ],
+            [
+              1,
+              0,
+              13.203125,
+              34.0625
+            ],
+            [
+              1,
+              0,
+              14.15625,
+              35.375
+            ]
+          ]
+        },
+        "triangleHeight": -14.165729522705078,
+        "flatNormalReference": {
+          "distance": 19.102331074825063,
+          "transmission": [
+            2.287441225434863e-8,
+            0.013085779745489762,
+            0.018106405184505747
+          ]
+        },
+        "stillSurfaceNdc": [
+          15.363424856002261,
+          2.666523865504089,
+          1.0535221755034432
+        ]
+      },
+      {
+        "x": -8969,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4484.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -14.654541364176403,
+          "depth": 13.154541364176403,
+          "shoreDistance": 32.557640075683594,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.977441364036334,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 13.15625,
+          "shoreDistance": 33.984375,
+          "exposure": 0.9901960784313726,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              12.1328125,
+              32.5625
+            ],
+            [
+              1,
+              0,
+              13.1328125,
+              33.9375
+            ],
+            [
+              1,
+              0,
+              13.203125,
+              34.0625
+            ],
+            [
+              1,
+              0,
+              14.15625,
+              35.375
+            ]
+          ]
+        },
+        "triangleHeight": -14.64404821395874,
+        "flatNormalReference": {
+          "distance": 19.841443279720917,
+          "transmission": [
+            1.1580198068082032e-8,
+            0.01106456494362415,
+            0.01550328892677832
+          ]
+        },
+        "stillSurfaceNdc": [
+          12.075840460336467,
+          2.198394341746556,
+          1.0410953812934136
+        ]
+      },
+      {
+        "x": -8968,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4484,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -15.143353085013286,
+          "depth": 13.643353085013286,
+          "shoreDistance": 33.941123962402344,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9916796783643986,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 13.64453125,
+          "shoreDistance": 34.65625,
+          "exposure": 0.996078431372549,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              13.1328125,
+              33.9375
+            ],
+            [
+              1,
+              0,
+              14.171875,
+              35.375
+            ],
+            [
+              1,
+              0,
+              14.15625,
+              35.375
+            ],
+            [
+              1,
+              0,
+              15.15625,
+              36.78125
+            ]
+          ]
+        },
+        "triangleHeight": -15.14335298538208,
+        "flatNormalReference": {
+          "distance": 20.58058285938737,
+          "transmission": [
+            5.862341067893074e-9,
+            0.009355486567841674,
+            0.013274340399993928
+          ]
+        },
+        "stillSurfaceNdc": [
+          10.027593950837183,
+          1.906738053228449,
+          1.033353180698194
+        ]
+      },
+      {
+        "x": -8967,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4483.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -15.653722308331321,
+          "depth": 14.153722308331321,
+          "shoreDistance": 33.941123962402344,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9916796783643986,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 14.154296875,
+          "shoreDistance": 35.3671875,
+          "exposure": 0.9980392156862745,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              13.1328125,
+              33.9375
+            ],
+            [
+              1,
+              0,
+              14.171875,
+              35.375
+            ],
+            [
+              1,
+              0,
+              14.15625,
+              35.375
+            ],
+            [
+              1,
+              0,
+              15.15625,
+              36.78125
+            ]
+          ]
+        },
+        "triangleHeight": -15.643603324890137,
+        "flatNormalReference": {
+          "distance": 21.352152654656084,
+          "transmission": [
+            2.880411719264168e-9,
+            0.007852379653071737,
+            0.011288711244901462
+          ]
+        },
+        "stillSurfaceNdc": [
+          8.629028759479276,
+          1.7075919391887975,
+          1.0280667211793972
+        ]
+      },
+      {
+        "x": -8966,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4483,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -16.164091531649355,
+          "depth": 14.664091531649355,
+          "shoreDistance": 35.38361358642578,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9992308476106446,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 14.6640625,
+          "shoreDistance": 36.078125,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              14.171875,
+              35.375
+            ],
+            [
+              1,
+              0,
+              15.25,
+              36.875
+            ],
+            [
+              1,
+              0,
+              15.15625,
+              36.78125
+            ],
+            [
+              1,
+              0,
+              16.203125,
+              38.21875
+            ]
+          ]
+        },
+        "triangleHeight": -16.16409206390381,
+        "flatNormalReference": {
+          "distance": 22.123744598806187,
+          "transmission": [
+            1.4152370753043554e-9,
+            0.006590737505355212,
+            0.009600055821849142
+          ]
+        },
+        "stillSurfaceNdc": [
+          7.6133494937047885,
+          1.5629661611846648,
+          1.0242275384542896
+        ]
+      },
+      {
+        "x": -8965,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4482.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -16.693587697486045,
+          "depth": 15.193587697486045,
+          "shoreDistance": 35.38361358642578,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 0.9992308476106446,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 15.1953125,
+          "shoreDistance": 36.8125,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              14.171875,
+              35.375
+            ],
+            [
+              1,
+              0,
+              15.25,
+              36.875
+            ],
+            [
+              1,
+              0,
+              15.15625,
+              36.78125
+            ],
+            [
+              1,
+              0,
+              16.203125,
+              38.21875
+            ]
+          ]
+        },
+        "triangleHeight": -16.683892250061035,
+        "flatNormalReference": {
+          "distance": 22.927770161582675,
+          "transmission": [
+            6.748866812239274e-10,
+            0.005491225487087355,
+            0.00810858636305945
+          ]
+        },
+        "stillSurfaceNdc": [
+          6.842253436360412,
+          1.453167358583027,
+          1.0213128598126047
+        ]
+      },
+      {
+        "x": -8964,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4482,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -17.223083863322735,
+          "depth": 15.723083863322735,
+          "shoreDistance": 36.878177642822266,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 15.7265625,
+          "shoreDistance": 37.546875,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              15.25,
+              36.875
+            ],
+            [
+              1,
+              0,
+              16.359375,
+              38.40625
+            ],
+            [
+              1,
+              0,
+              16.203125,
+              38.21875
+            ],
+            [
+              1,
+              0,
+              17.265625,
+              39.6875
+            ]
+          ]
+        },
+        "triangleHeight": -17.22308349609375,
+        "flatNormalReference": {
+          "distance": 23.731814056071237,
+          "transmission": [
+            3.2182900698474453e-10,
+            0.004575122563725359,
+            0.006848805977368408
+          ]
+        },
+        "stillSurfaceNdc": [
+          6.2368884646586995,
+          1.3669675286179546,
+          1.0190246308213686
+        ]
+      },
+      {
+        "x": -8963,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4481.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -17.769560470422697,
+          "depth": 16.269560470422697,
+          "shoreDistance": 36.878177642822266,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 16.26953125,
+          "shoreDistance": 38.296875,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              15.25,
+              36.875
+            ],
+            [
+              1,
+              0,
+              16.359375,
+              38.40625
+            ],
+            [
+              1,
+              0,
+              16.203125,
+              38.21875
+            ],
+            [
+              1,
+              0,
+              17.265625,
+              39.6875
+            ]
+          ]
+        },
+        "triangleHeight": -17.76031494140625,
+        "flatNormalReference": {
+          "distance": 24.553557202648655,
+          "transmission": [
+            1.5098717996085356e-10,
+            0.0037965691132910108,
+            0.005763288698788094
+          ]
+        },
+        "stillSurfaceNdc": [
+          5.749008628062245,
+          1.2974967780395357,
+          1.0171804858203766
+        ]
+      },
+      {
+        "x": -8962,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4481,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -18.316037077522658,
+          "depth": 16.816037077522658,
+          "shoreDistance": 38.41874694824219,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 16.8125,
+          "shoreDistance": 39.046875,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              16.359375,
+              38.40625
+            ],
+            [
+              1,
+              0,
+              17.28125,
+              39.6875
+            ],
+            [
+              1,
+              0,
+              17.265625,
+              39.6875
+            ],
+            [
+              1,
+              0,
+              18.375,
+              41.21875
+            ]
+          ]
+        },
+        "triangleHeight": -18.31603717803955,
+        "flatNormalReference": {
+          "distance": 25.375313173715956,
+          "transmission": [
+            7.083531550721871e-11,
+            0.0031504937561834846,
+            0.004849809920353981
+          ]
+        },
+        "stillSurfaceNdc": [
+          5.347438048821941,
+          1.2403158751667047,
+          1.0156625825976942
+        ]
+      },
+      {
+        "x": -8961,
+        "z": -7515,
+        "page": "-71:58",
+        "cellX": -4480.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -18.82382469721002,
+          "depth": 17.32382469721002,
+          "shoreDistance": 38.41874694824219,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 17.3203125,
+          "shoreDistance": 39.75,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              16.359375,
+              38.40625
+            ],
+            [
+              1,
+              0,
+              17.28125,
+              39.6875
+            ],
+            [
+              1,
+              0,
+              17.265625,
+              39.6875
+            ],
+            [
+              1,
+              0,
+              18.375,
+              41.21875
+            ]
+          ]
+        },
+        "triangleHeight": -18.86881446838379,
+        "flatNormalReference": {
+          "distance": 26.144011920257896,
+          "transmission": [
+            3.4896486031793156e-11,
+            0.0026460410328742945,
+            0.004126843279975485
+          ]
+        },
+        "stillSurfaceNdc": [
+          5.011134906512295,
+          1.1924286087424176,
+          1.0143913848309758
+        ]
+      },
+      {
+        "x": -8960,
+        "z": -7515,
+        "page": "-70:58",
+        "cellX": -4480,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -19.33161231689739,
+          "depth": 17.83161231689739,
+          "shoreDistance": 39.69886779785156,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 17.828125,
+          "shoreDistance": 40.453125,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              17.28125,
+              39.6875
+            ],
+            [
+              1,
+              0,
+              18.25,
+              41.03125
+            ],
+            [
+              1,
+              0,
+              18.375,
+              41.21875
+            ],
+            [
+              1,
+              0,
+              19.3125,
+              42.53125
+            ]
+          ]
+        },
+        "triangleHeight": -19.331612586975098,
+        "flatNormalReference": {
+          "distance": 26.91270798701228,
+          "transmission": [
+            1.7191534112568762e-11,
+            0.002222361937086491,
+            0.003511652069125394
+          ]
+        },
+        "stillSurfaceNdc": [
+          4.725383184919253,
+          1.1517395187471615,
+          1.0133112672090285
+        ]
+      },
+      {
+        "x": -8959,
+        "z": -7515,
+        "page": "-70:58",
+        "cellX": -4479.5,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -19.806437710594643,
+          "depth": 18.306437710594643,
+          "shoreDistance": 39.69886779785156,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 18.3046875,
+          "shoreDistance": 41.1171875,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              17.28125,
+              39.6875
+            ],
+            [
+              1,
+              0,
+              18.25,
+              41.03125
+            ],
+            [
+              1,
+              0,
+              18.375,
+              41.21875
+            ],
+            [
+              1,
+              0,
+              19.3125,
+              42.53125
+            ]
+          ]
+        },
+        "triangleHeight": -19.797813415527344,
+        "flatNormalReference": {
+          "distance": 27.634221904386756,
+          "transmission": [
+            8.845445926401442e-12,
+            0.0018866200724982972,
+            0.0030179224948778754
+          ]
+        },
+        "stillSurfaceNdc": [
+          4.479581685503643,
+          1.116739067044076,
+          1.0123821580875159
+        ]
+      },
+      {
+        "x": -8958,
+        "z": -7515,
+        "page": "-70:58",
+        "cellX": -4479,
+        "cellZ": 3757.5,
+        "cpu": {
+          "kind": 1,
+          "bodyId": 1,
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "bedHeight": -20.281263104291895,
+          "depth": 18.781263104291895,
+          "shoreDistance": 41.03656768798828,
+          "flowX": 0,
+          "flowZ": 0,
+          "fall": 0,
+          "plunge": 0,
+          "flags": 0
+        },
+        "cpuExposure": 1,
+        "field": {
+          "coverage": 1,
+          "surfaceHeight": -1.5,
+          "depth": 18.78125,
+          "shoreDistance": 41.78125,
+          "exposure": 1,
+          "kind": 1,
+          "corners": [
+            [
+              1,
+              0,
+              18.25,
+              41.03125
+            ],
+            [
+              1,
+              0,
+              19.265625,
+              42.4375
+            ],
+            [
+              1,
+              0,
+              19.3125,
+              42.53125
+            ],
+            [
+              1,
+              0,
+              20.28125,
+              43.875
+            ]
+          ]
+        },
+        "triangleHeight": -20.28126335144043,
+        "flatNormalReference": {
+          "distance": 28.35572274348024,
+          "transmission": [
+            4.551243394665253e-12,
+            0.0016016049435595293,
+            0.0025936171978347944
+          ]
+        },
+        "stillSurfaceNdc": [
+          4.265899789156767,
+          1.0863122270504488,
+          1.0115744583807609
+        ]
+      }
+    ]
+  }
+]

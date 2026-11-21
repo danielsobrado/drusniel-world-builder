@@ -1,0 +1,107 @@
+[
+  {
+    "id": "original",
+    "folder": "01-original-defect",
+    "pose": { "x": 2176, "z": -10604, "heightAboveGround": 29, "pitch": -0.52 },
+    "target": [{ "x": 2234, "z": -10597 }],
+    "tiers": ["high"],
+    "diagnostics": ["seabed", "no-grass-cards", "no-grass-blades"]
+  },
+  {
+    "id": "depth-diagnostics",
+    "folder": "02-depth-diagnostics",
+    "pose": { "x": 2176, "z": -10604, "heightAboveGround": 29, "pitch": -0.52 },
+    "target": [{ "x": 2234, "z": -10597 }],
+    "tiers": ["high"],
+    "diagnostics": ["seabed-albedo", "seabed-roughness", "seabed-height", "seabed-normal", "seabed-matte", "seabed-no-swash", "depth", "seabed", "water-wire", "terrain-wire", "coverage", "ocean", "waterline", "transmission", "palette", "opacity", "surface-height", "bed-height", "flat-displacement", "swell-normal", "no-foam", "slope", "shore-distance", "breaker"],
+    "controls": [{ "qualityTier": "high", "label": "optical-refraction-off", "opticalRefraction": false }],
+    "transects": [
+      { "name": "curved-near", "from": [2197, -10630], "to": [2197, -10610], "steps": 40 },
+      { "name": "curved-middle", "from": [2217, -10616], "to": [2217, -10597], "steps": 38 },
+      { "name": "curved-point", "from": [2238, -10606], "to": [2238, -10583], "steps": 46 }
+    ]
+  },
+  {
+    "id": "shallow-close",
+    "folder": "03-shallow-water-fixed",
+    "pose": { "x": 2194, "z": -10603, "heightAboveGround": 14, "pitch": -0.62, "fov": 61 },
+    "target": [{ "x": 2210, "z": -10617 }],
+    "tiers": ["high"]
+  },
+  {
+    "id": "sand-transition",
+    "folder": "03-shallow-water-fixed",
+    "pose": { "x": -8998, "z": -7533, "heightAboveGround": 12, "pitch": -0.40, "fov": 66 },
+    "target": [{ "x": -9012, "z": -7515 }],
+    "tiers": [],
+    "controls": [{ "qualityTier": "high", "label": "sand-transition" }],
+    "transects": [{ "name": "signed-open-beach", "from": [-9032, -7515], "to": [-8958, -7515], "steps": 74 }]
+  },
+  {
+    "id": "curved-coast",
+    "folder": "04-curved-coast",
+    "benchmark": "on",
+    "pose": { "x": 2176, "z": -10604, "heightAboveGround": 29, "pitch": -0.52 },
+    "target": [{ "x": 2234, "z": -10597 }],
+    "tiers": ["high", "ultra", "medium", "low"],
+    "controls": [
+      { "qualityTier": "low", "folder": "07-quality-comparison", "label": "low" },
+      { "qualityTier": "medium", "folder": "07-quality-comparison", "label": "medium" },
+      { "qualityTier": "high", "folder": "07-quality-comparison", "label": "high" },
+      { "qualityTier": "ultra", "folder": "07-quality-comparison", "label": "ultra" }
+    ]
+  },
+  {
+    "id": "headland",
+    "folder": "05-headland-and-cove",
+    "pose": { "x": 2376, "z": -4538, "heightAboveGround": 42, "pitch": -0.47, "fov": 72, "yaw": 0 },
+    "target": [{ "x": 2410, "z": -4610 }, { "x": 2268, "z": -4605 }],
+    "tiers": [],
+    "controls": [{ "qualityTier": "high", "label": "windward-and-lee" }]
+  },
+  {
+    "id": "cove",
+    "folder": "05-headland-and-cove",
+    "benchmark": "on",
+    "pose": { "x": 2270, "z": -4640, "heightAboveGround": 20, "pitch": -0.48, "fov": 70 },
+    "target": [{ "x": 2268, "z": -4604 }, { "x": 2285, "z": -4590 }],
+    "tiers": ["high"],
+    "controls": [
+      { "qualityTier": "high", "label": "diffraction-off", "diffraction": false },
+      { "qualityTier": "high", "folder": "06-surf-and-foam", "label": "cove-normal", "sequence": [124.6, 126.0, 127.6] },
+      { "qualityTier": "high", "folder": "06-surf-and-foam", "label": "cove-calm", "calmScale": 0.3, "sequence": [124.6, 126.0, 127.6] },
+      { "qualityTier": "high", "folder": "06-surf-and-foam", "label": "cove-storm", "weather": "storm", "sequence": [124.6, 126.0, 127.6] }
+    ]
+  },
+  {
+    "id": "exposed",
+    "folder": "06-surf-and-foam",
+    "benchmark": "on",
+    "pose": { "x": -9022, "z": -7492, "heightAboveGround": 13, "pitch": -0.43 },
+    "target": [{ "x": -8999, "z": -7518 }],
+    "tiers": ["high"],
+    "controls": [
+      { "qualityTier": "high", "label": "exposed-normal", "sequence": [124.6, 126.0, 127.6] },
+      { "qualityTier": "high", "label": "exposed-calm", "calmScale": 0.3, "sequence": [124.6, 126.0, 127.6] },
+      { "qualityTier": "high", "label": "exposed-storm", "weather": "storm", "sequence": [124.6, 126.0, 127.6] }
+    ]
+  },
+  {
+    "id": "rocky",
+    "folder": "06-surf-and-foam",
+    "impact": true,
+    "weather": "storm",
+    "pose": { "x": -5397, "z": 13552, "heightAboveGround": 8.5, "pitch": -0.31, "fov": 55, "yaw": 3.076 },
+    "target": [{ "x": -5393, "z": 13569 }],
+    "tiers": [],
+    "controls": [{ "qualityTier": "high", "label": "rocky" }]
+  },
+  {
+    "id": "foliage-overhead",
+    "folder": "08-grass-and-foliage",
+    "pose": { "x": 2376, "z": -4560, "heightAboveGround": 95, "pitch": -1.28, "fov": 75, "yaw": 0 },
+    "target": [{ "x": 2410, "z": -4610 }, { "x": 2268, "z": -4605 }],
+    "tiers": ["high"],
+    "diagnostics": ["no-grass"]
+  }
+]

@@ -1,0 +1,191 @@
+{
+  "before": "ec15cd09c263e1f45bea1c42affc2fd70541c91b",
+  "after": "7e587b3a3c0c40702e5c4727bbb087f6771a824c",
+  "values": [
+    {
+      "scene": "Exposed beach",
+      "tier": "high",
+      "authoritative": true,
+      "frame": "4.80 / 7.00 → 4.80 / 7.90",
+      "delta": "0.0% / 12.9%",
+      "cpu": "3.80 / 5.60 → 3.70 / 6.20",
+      "gpu": "4.12 / 4.51 → 4.07 / 4.38",
+      "generation": "61.70 / 105.00 → 55.50 / 89.10",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        32768,
+        32768
+      ],
+      "medianExceeded": false,
+      "p95Exceeded": true
+    },
+    {
+      "scene": "Curved coast",
+      "tier": "high",
+      "authoritative": true,
+      "frame": "5.00 / 7.30 → 5.00 / 7.40",
+      "delta": "0.0% / 1.4%",
+      "cpu": "4.00 / 5.80 → 4.10 / 5.90",
+      "gpu": "4.73 / 4.93 → 4.80 / 5.41",
+      "generation": "44.50 / 82.50 → 39.20 / 110.20",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        32768,
+        32768
+      ],
+      "medianExceeded": false,
+      "p95Exceeded": false
+    },
+    {
+      "scene": "Sheltered cove",
+      "tier": "high",
+      "authoritative": true,
+      "frame": "5.20 / 7.10 → 5.30 / 7.80",
+      "delta": "1.9% / 9.9%",
+      "cpu": "4.10 / 5.90 → 4.20 / 6.10",
+      "gpu": "4.86 / 5.16 → 5.00 / 5.55",
+      "generation": "56.00 / 111.50 → 53.70 / 97.30",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        32768,
+        32768
+      ],
+      "medianExceeded": false,
+      "p95Exceeded": false
+    },
+    {
+      "scene": "Curved coast",
+      "tier": "ultra",
+      "authoritative": true,
+      "frame": "5.10 / 7.00 → 5.40 / 7.30",
+      "delta": "5.9% / 4.3%",
+      "cpu": "4.10 / 5.50 → 4.40 / 5.80",
+      "gpu": "4.80 / 6.42 → 4.96 / 6.27",
+      "generation": "42.30 / 98.10 → 50.80 / 102.40",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        131072,
+        131072
+      ],
+      "medianExceeded": true,
+      "p95Exceeded": false
+    },
+    {
+      "scene": "Curved coast",
+      "tier": "medium",
+      "authoritative": true,
+      "frame": "5.00 / 7.10 → 5.40 / 7.60",
+      "delta": "8.0% / 7.0%",
+      "cpu": "4.00 / 5.70 → 4.30 / 6.20",
+      "gpu": "4.54 / 4.94 → 4.51 / 4.74",
+      "generation": "52.10 / 118.00 → 45.10 / 113.70",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        0,
+        0
+      ],
+      "medianExceeded": true,
+      "p95Exceeded": false
+    },
+    {
+      "scene": "Curved coast",
+      "tier": "low",
+      "authoritative": true,
+      "frame": "5.20 / 7.60 → 4.80 / 6.60",
+      "delta": "-7.7% / -13.2%",
+      "cpu": "4.20 / 6.20 → 3.90 / 5.30",
+      "gpu": "3.91 / 4.13 → 3.94 / 4.38",
+      "generation": "52.90 / 97.10 → 39.90 / 99.70",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        0,
+        0
+      ],
+      "medianExceeded": false,
+      "p95Exceeded": false
+    }
+  ],
+  "repeats": [
+    {
+      "scene": "Exposed beach",
+      "tier": "high",
+      "authoritative": true,
+      "frame": "4.90 / 7.00 → 4.40 / 6.50",
+      "delta": "-10.2% / -7.1%",
+      "cpu": "3.80 / 5.50 → 3.40 / 5.10",
+      "gpu": "4.18 / 4.78 → 4.05 / 4.53",
+      "generation": "59.50 / 102.70 → 60.50 / 104.40",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        32768,
+        32768
+      ],
+      "medianExceeded": false,
+      "p95Exceeded": false,
+      "freshBaseline": true
+    },
+    {
+      "scene": "Curved coast",
+      "tier": "ultra",
+      "authoritative": true,
+      "frame": "5.10 / 7.10 → 5.10 / 7.60",
+      "delta": "0.0% / 7.0%",
+      "cpu": "4.10 / 5.60 → 4.20 / 5.90",
+      "gpu": "4.78 / 6.30 → 4.81 / 6.32",
+      "generation": "38.10 / 91.30 → 45.00 / 97.60",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        131072,
+        131072
+      ],
+      "medianExceeded": false,
+      "p95Exceeded": false,
+      "freshBaseline": true
+    },
+    {
+      "scene": "Curved coast",
+      "tier": "medium",
+      "authoritative": true,
+      "frame": "4.90 / 7.10 → 5.50 / 7.70",
+      "delta": "12.2% / 8.5%",
+      "cpu": "3.90 / 5.70 → 4.40 / 6.10",
+      "gpu": "4.71 / 6.07 → 4.75 / 5.14",
+      "generation": "43.00 / 91.40 → 48.10 / 112.50",
+      "pageBytes": [
+        3312400,
+        3312400
+      ],
+      "swashInputBytes": [
+        0,
+        0
+      ],
+      "medianExceeded": true,
+      "p95Exceeded": false,
+      "freshBaseline": true
+    }
+  ]
+}
