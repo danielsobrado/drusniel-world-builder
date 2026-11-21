@@ -1157,13 +1157,15 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.6 — Optional geometric FFT *only after CPU parity* (independently approved)
 
-- [ ] Produce a formal design for authoritative CPU-evaluable low-frequency wave source available at **arbitrary canonical ocean positions**.
-- [ ] Prefer a sparse deterministic Fourier mode field for geometry with O(K) synchronous CPU queries; keep dense FFT for fragment normals.
-- [ ] Compute precise `height(x,z,t)` and `slope(x,z,t)` from identical modes/clock and ensure nearshore/surf blend in both CPU and shader.
-- [ ] Add conservative bounds (waterSlot culling, shadows, collisions, reflection) accounting for max displacement at sea state.
-- [ ] Establish source-frequency energy split with the five existing analytic carriers: either retain them and add disjoint nonoverlapping long modes with CPU twin, or migrate them to a new authoritative set atomically.
-- [ ] Test swimmers, wading, camera crossing waterline, dynamic boats/AI future arbitrary queries and 100km player travel.
-- [ ] Do **not** activate geometry until the full water-domain contract [D17] passes without runtime GPU readbacks, height lag or network-affecting nondeterminism.
+- [x] Produce a formal design for authoritative CPU-evaluable low-frequency wave source available at **arbitrary canonical ocean positions**.
+- [x] Prefer a sparse deterministic Fourier mode field for geometry with O(K) synchronous CPU queries; keep dense FFT for fragment normals.
+- [x] Compute precise `height(x,z,t)` and `slope(x,z,t)` from identical modes/clock and ensure nearshore/surf blend in both CPU and shader.
+- [x] Add conservative bounds (waterSlot culling, shadows, collisions, reflection) accounting for max displacement at sea state.
+- [x] Establish source-frequency energy split with the five existing analytic carriers: either retain them and add disjoint nonoverlapping long modes with CPU twin, or migrate them to a new authoritative set atomically. Retained; long modes 48–160 m.
+- [ ] Test swimmers, wading, camera crossing waterline, dynamic boats/AI future arbitrary queries and 100km player travel. **Partly:** water acceptance (enter, swim, dive, surface, exit) passes with the swell on, but its route is coastal, where the swell weight is 0. Arbitrary queries and ±4.2 Mm are covered by exact CPU/GPU parity. No boats exist yet, and no recorded 100 km walk was made.
+- [x] Do **not** activate geometry until the full water-domain contract [D17] passes without runtime GPU readbacks, height lag or network-affecting nondeterminism. No readback, same-frame arrays; network replication of eased amplitudes noted (I.6 §5).
+
+**I.6 result:** [Phase I.6 long swell geometry](ponlai-pr-i-phase-i6-long-swell-geometry-2026-11-21.md). User-approved. 16 seeded Fourier modes at 48–160 m (disjoint from the carriers and the FFT normals); only the amplitudes follow the I.5 wind (JONSWAP band energy, 0.2 %). The CPU `seaSurfaceOffset` and the vertex shader read the same per-frame amplitudes and absolute-clock time phases, with per-chunk f64 origins. GPU vs CPU: 5.8e-7 m. Offshore only (the I.4 blend), never gated on GPU availability. Bounds +3.34 m; 0 new varyings; ≈ +0.05–0.1 ms GPU. Enabled.
 
 **Stop:** any GPU-only geometric FFT with unchanged CPU source. This whole phase may remain unimplemented while first PR I release is valid.
 

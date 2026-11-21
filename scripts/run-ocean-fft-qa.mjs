@@ -47,7 +47,7 @@ const failed = (list) => list.filter((row) => !row.pass).length;
 const lists = ['smallGrids', 'i1Table', 'direction', 'proof64', 'candidate128', 'orientation'];
 console.log(`adapter ${report.adapter.vendor} ${report.adapter.architecture} (${report.adapter.backend}, three r${report.adapter.three})`);
 for (const key of lists) console.log(`${key}: ${report[key].length - failed(report[key])}/${report[key].length} pass`);
-for (const key of ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'seams', 'mips', 'scene', 'blendWeight', 'rippleSplit', 'lifecycle', 'disabled']) console.log(`${key}: ${report[key].pass ? 'pass' : 'FAIL'}`);
+for (const key of ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'seams', 'mips', 'scene', 'blendWeight', 'rippleSplit', 'swellParity', 'lifecycle', 'disabled']) console.log(`${key}: ${report[key].pass ? 'pass' : 'FAIL'}`);
 for (const [label, row] of Object.entries(report.topologies ?? {})) {
   console.log(`${label}: compute ${row.computeMs.median?.toFixed(4)} ms, output ${row.outputPassesMs.median?.toFixed(4)} ms, throughput ${row.throughputMsPerTransform.toFixed(4)} ms/transform`);
 }

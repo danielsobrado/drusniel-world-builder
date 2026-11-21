@@ -19,6 +19,8 @@ import { updateWaterVisualClock } from '../water/WaterVisualClock.js';
 import { REFRACTION_CHUNK_RADIUS } from '../water/WaterRefraction.js';
 import { CASCADE_CANDIDATES } from '../water/fft/OceanFftConstants.js';
 import { writeCascadeUvOrigins } from '../water/fft/OceanFftCoordinates.js';
+import { OCEAN_SWELL_MODES, oceanSwellHeadroom } from '../water/OceanSwellState.js';
+import { oceanSwellSpatialPhase } from '../water/OceanSwellModes.js';
 
 const OCEAN_FFT_TILES = CASCADE_CANDIDATES.map((cascade) => cascade.tileSizeMeters);
 
@@ -39,6 +41,8 @@ export class StylizedWaterSlot {
     this.patternOrigin = uniform(new THREE.Vector2());
     // Offshore FFT cascade UV origins (u0, v0, u1, v1) at this chunk's centre, in double precision.
     this.oceanFftOrigin = uniform(new THREE.Vector4());
+    // Long swell (PR I.6) mode phases at this chunk's centre, four per vec4, in double precision.
+    this.oceanSwellOrigin = Array.from({ length: OCEAN_SWELL_MODES.length / 4 }, () => uniform(new THREE.Vector4()));
     // Every surface pattern's origin at this chunk's centre, in double precision.
     this.surfacePatterns = createWaterPatternOrigins(config.water);
     this.seaPhaseDescriptor = null;
@@ -110,6 +114,7 @@ export class StylizedWaterSlot {
       rippleOrigin: this.rippleOrigin,
       patternOrigin: this.patternOrigin,
       oceanFftOrigin: this.oceanFftOrigin,
+      oceanSwellOrigin: this.oceanSwellOrigin,
       surfacePatterns: this.surfacePatterns,
       sunDirection,
     };
@@ -200,7 +205,8 @@ export class StylizedWaterSlot {
       const origin = page.waterFieldSurfaceOrigin ?? 0;
       fitSlotBoundsToRange(
         this.mesh.geometry, range.min + origin, range.max + origin,
-        this.terrainView.chunkWorldSize, 6,
+        // The long swell's storm-ceiling amplitude rides on top of the authored waves' 6 m.
+        this.terrainView.chunkWorldSize, 6 + oceanSwellHeadroom(),
       );
     }
   }
@@ -257,6 +263,8 @@ export class StylizedWaterSlot {
       this.patternOrigin.value.set(patternX, patternZ);
       const [u0, v0, u1, v1] = writeCascadeUvOrigins(descriptor.centerWorldX, descriptor.centerWorldZ, OCEAN_FFT_TILES, [0, 0, 0, 0]);
       this.oceanFftOrigin.value.set(u0, v0, u1, v1);
+      this.oceanSwellOrigin.forEach((origin, v) => origin.value.set(...[0, 1, 2, 3].map((j) =>
+        oceanSwellSpatialPhase(OCEAN_SWELL_MODES[4 * v + j], descriptor.centerWorldX, descriptor.centerWorldZ))));
       this.surfacePatterns.update(descriptor.centerWorldX, descriptor.centerWorldZ);
     }
   }

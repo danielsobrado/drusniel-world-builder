@@ -1904,6 +1904,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       timeSeconds: frameTimestamp / 1000,
       storm: seaStormForWeather(),
       rain: frameWeatherAudio.rain,
+      weather: oceanWeatherScratch,
       seaLevel: worldStore.generator?.seaLevel,
     });
     const surfaceSeconds = frameTimestamp / 1000;

@@ -24,6 +24,8 @@ import { createSeaSwellNodes } from '../water/SeaSwell.js';
 import { seaStateUniforms } from '../water/seaState.js';
 import { rainRoughness } from './RainRippleShading.js';
 import { composeOffshoreDetail, offshoreFftWeight } from '../water/fft/OceanFftBlendNodes.js';
+import { resolveOffshoreFft } from '../water/fft/OceanFftConfig.js';
+import { createOceanSwellNodes } from './OceanSwellNodes.js';
 
 /** Nearshore normals follow the rendered depth contours and amplitude envelope. */
 function displacedSurfaceSlope() {
@@ -81,6 +83,9 @@ export function createSeaSurfaceNodes({
   // Offshore FFT (PR I.4): { binding, origin, settings } or null. Only with a real
   // ocean mask: lakes at sea level never receive it.
   oceanFft = null,
+  // Long swell (PR I.6): this chunk's four vec4 mode phase origins, or null. Real
+  // wave height; only with a real ocean mask, like the FFT normals.
+  oceanSwellOrigin = null,
 }) {
   const { storm } = seaStateUniforms;
   // Metres from the chunk centre on canonical axes, matching the chunk's world position.
@@ -115,7 +120,16 @@ export function createSeaSurfaceNodes({
     ? createSeaShelterNode(exposure, shoreDistance) : float(1);
   const strength = (surf?.amplitude ?? amplitude).div(offshore.max(1e-4));
   const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
-  const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
+  const geometry = oceanSwellOrigin && oceanMask ? resolveOffshoreFft(config.offshoreFft) : null;
+  const longSwell = geometry?.geometry.enabled ? (() => {
+    const nodes = createOceanSwellNodes({ localXZ, origin: oceanSwellOrigin });
+    // Same geography as the FFT normals, never the GPU's availability: the CPU twin can't see it.
+    const weight = offshoreFftWeight({ waterDepth, shoreDistance, exposure, oceanMask, waterCoverage,
+      available: float(1), blend: geometry.blend });
+    return { height: nodes.height.mul(weight), slope: nodes.slope.mul(weight) };
+  })() : null;
+  const swellSlope = (longSwell ? swell.slope.mul(amplitude).add(longSwell.slope) : swell.slope.mul(amplitude))
+    .toVarying('seaSwellSlope');
   const slope = surf ? mix(displacedSurfaceSlope(), swellSlope, surf.offshore) : swellSlope;
   // Wind chop: a storm roughly doubles the short waves riding the swell.
   const stormGain = storm.mul(1.2).add(1);
@@ -146,7 +160,8 @@ export function createSeaSurfaceNodes({
     .add(sqrt(offshoreDetail?.variance ?? detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
 
   return {
-    displacement: surf?.displacement ?? height.mul(amplitude),
+    displacement: longSwell ? (surf?.displacement ?? height.mul(amplitude)).add(longSwell.height)
+      : surf?.displacement ?? height.mul(amplitude),
     shelter,
     release: detail?.release,
     normal,

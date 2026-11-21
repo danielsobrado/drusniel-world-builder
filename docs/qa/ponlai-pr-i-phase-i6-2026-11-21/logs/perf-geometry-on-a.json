@@ -1,0 +1,240 @@
+{
+  "failures": [],
+  "timingFailures": [],
+  "timings": [
+    {
+      "id": "offshore-calm",
+      "qualityTier": "high",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "focus": true,
+      "frames": {
+        "raf": {
+          "samples": 1861,
+          "p50Ms": 4.199999999982538,
+          "p95Ms": 5.7000000000116415,
+          "p99Ms": 9.60000000000582
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1862,
+          "p50Ms": 3.699999999254942,
+          "p95Ms": 5,
+          "p99Ms": 6.400000002235174
+        },
+        "renderCpu": {
+          "samples": 1862,
+          "p50Ms": 3.199999999254942,
+          "p95Ms": 4.399999998509884,
+          "p99Ms": 5.800000000745058
+        },
+        "swashCpu": {
+          "samples": 1862,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.10000000149011612
+        },
+        "rockCpu": {
+          "samples": 1862,
+          "p50Ms": 0,
+          "p95Ms": 0.6999999992549419,
+          "p99Ms": 0.8000000007450581
+        },
+        "rockRefreshCpu": {
+          "samples": 1862,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.10000000149011612
+        },
+        "sprayCpu": {
+          "samples": 1862,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.09999999776482582
+        },
+        "sprayUploadBytes": 0,
+        "drawsPerFrame": {
+          "samples": 1861,
+          "p50Ms": 157,
+          "p95Ms": 157,
+          "p99Ms": 254
+        },
+        "swashDispatches": 0,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 31,
+          "avgMs": 3.888953806451613,
+          "p50Ms": 3.8041599999999987,
+          "p95Ms": 5.143552,
+          "maxMs": 5.160959999999999
+        }
+      }
+    },
+    {
+      "id": "cove",
+      "qualityTier": "high",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "focus": true,
+      "frames": {
+        "raf": {
+          "samples": 1437,
+          "p50Ms": 5.5,
+          "p95Ms": 7,
+          "p99Ms": 10.099999999976717
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1438,
+          "p50Ms": 5,
+          "p95Ms": 6.400000002235174,
+          "p99Ms": 9.5
+        },
+        "renderCpu": {
+          "samples": 1438,
+          "p50Ms": 4.400000002235174,
+          "p95Ms": 6,
+          "p99Ms": 9.099999997764826
+        },
+        "swashCpu": {
+          "samples": 1438,
+          "p50Ms": 0,
+          "p95Ms": 0.10000000149011612,
+          "p99Ms": 0.10000000149011612
+        },
+        "rockCpu": {
+          "samples": 1438,
+          "p50Ms": 0,
+          "p95Ms": 0.6999999992549419,
+          "p99Ms": 0.8000000007450581
+        },
+        "rockRefreshCpu": {
+          "samples": 1438,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.09999999776482582
+        },
+        "sprayCpu": {
+          "samples": 1438,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0
+        },
+        "sprayUploadBytes": 0,
+        "drawsPerFrame": {
+          "samples": 1437,
+          "p50Ms": 181,
+          "p95Ms": 182,
+          "p99Ms": 298
+        },
+        "swashDispatches": 484,
+        "rockImpacts": 0,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 27,
+          "avgMs": 5.451169185185187,
+          "p50Ms": 5.0647040000000025,
+          "p95Ms": 7.107584000000003,
+          "maxMs": 7.1362559999999995
+        }
+      }
+    },
+    {
+      "id": "offshore-calm",
+      "qualityTier": "ultra",
+      "adapter": {
+        "backend": "webgpu",
+        "device": true,
+        "vendor": "nvidia",
+        "architecture": "lovelace",
+        "description": null,
+        "adapterInterstageVariables": 28,
+        "deviceInterstageVariables": 24,
+        "fallback": false
+      },
+      "focus": true,
+      "frames": {
+        "raf": {
+          "samples": 1871,
+          "p50Ms": 4.099999999976717,
+          "p95Ms": 5.80000000000291,
+          "p99Ms": 9.5
+        },
+        "cpuAfterMovementHook": {
+          "samples": 1872,
+          "p50Ms": 3.5,
+          "p95Ms": 5,
+          "p99Ms": 6.799999997019768
+        },
+        "renderCpu": {
+          "samples": 1872,
+          "p50Ms": 2.900000002235174,
+          "p95Ms": 4.400000002235174,
+          "p99Ms": 6.300000000745058
+        },
+        "swashCpu": {
+          "samples": 1872,
+          "p50Ms": 0,
+          "p95Ms": 0.09999999776482582,
+          "p99Ms": 0.10000000149011612
+        },
+        "rockCpu": {
+          "samples": 1872,
+          "p50Ms": 0,
+          "p95Ms": 0.6000000014901161,
+          "p99Ms": 0.8000000007450581
+        },
+        "rockRefreshCpu": {
+          "samples": 1872,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.10000000149011612
+        },
+        "sprayCpu": {
+          "samples": 1872,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.10000000149011612
+        },
+        "sprayUploadBytes": 0,
+        "drawsPerFrame": {
+          "samples": 1871,
+          "p50Ms": 154,
+          "p95Ms": 154,
+          "p99Ms": 249
+        },
+        "swashDispatches": 486,
+        "rockImpacts": 1,
+        "gpuRender": {
+          "supported": true,
+          "error": null,
+          "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+          "samples": 32,
+          "avgMs": 3.7721279999999995,
+          "p50Ms": 3.774464,
+          "p95Ms": 3.8072319999999995,
+          "maxMs": 3.837951999999999
+        }
+      }
+    }
+  ]
+}

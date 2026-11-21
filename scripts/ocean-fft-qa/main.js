@@ -7,7 +7,7 @@ import {
   proof64Cases, realSpectra, smallGridCases, spectrumRebuildCase, timeContractCases,
 } from './cases.js';
 import { instrumentDevice, liveSummary } from './instrument.js';
-import { rippleSplitCase, weightCase } from './integration.js';
+import { rippleSplitCase, swellParityCase, weightCase } from './integration.js';
 import { captureView, createSamplingScene, mipCase, orientationCase, rebaseCase, samplingCostCase, seamCase, teleportCase } from './sampling.js';
 
 /**
@@ -187,6 +187,7 @@ async function run({ benchmark = true } = {}) {
   await step('scene', () => samplingScene(ctx, report, benchmark));
   await step('blendWeight', () => weightCase(ctx));
   await step('rippleSplit', () => rippleSplitCase(ctx));
+  await step('swellParity', () => swellParityCase(ctx));
   await step('lifecycle', () => lifecycleChecks(ctx));
   await step('disabled', () => benchmarkDisabled(createRenderer));
   if (benchmark) {
@@ -198,7 +199,7 @@ async function run({ benchmark = true } = {}) {
   report.pipelines = { compute: ctx.stats.computePipelines, render: ctx.stats.renderPipelines, shaderModules: ctx.stats.shaderModules };
   const caseLists = ['smallGrids', 'i1Table', 'direction', 'proof64', 'candidate128'].map((key) => report[key]);
   report.pass = caseLists.every((list) => list.every((row) => row.pass))
-    && ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'lifecycle', 'disabled', 'seams', 'mips', 'scene', 'blendWeight', 'rippleSplit'].every((key) => report[key].pass)
+    && ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'lifecycle', 'disabled', 'seams', 'mips', 'scene', 'blendWeight', 'rippleSplit', 'swellParity'].every((key) => report[key].pass)
     && report.orientation.every((row) => row.pass)
     && report.validationErrors.length === 0;
   ctx.runtime.dispose();

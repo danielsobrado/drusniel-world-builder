@@ -124,6 +124,8 @@ export function createStylizedWaterMaterial({
   // UV origins (vec4). Null when the feature is off: the graph is then the original.
   oceanFft = null,
   oceanFftOrigin = null,
+  // Long swell (PR I.6): four vec4 per-chunk mode phase origins (StylizedWaterSlot).
+  oceanSwellOrigin = null,
   sampleTexture = (_name, value, uvNode) => texture(value, uvNode),
   loadTexture = (_name, value, uvNode) => bilinearLoad(value, uvNode),
 }) {
@@ -228,6 +230,7 @@ export function createStylizedWaterMaterial({
       config: water.sea,
       oceanFft: oceanFft && oceanFftOrigin && appearance
         ? { binding: oceanFft, origin: oceanFftOrigin, settings: resolveOffshoreFft(water.sea.offshoreFft) } : null,
+      oceanSwellOrigin: appearance ? oceanSwellOrigin : null,
     })
     : null;
   // Inland water takes grass-test's surface; the sea keeps its own shading.

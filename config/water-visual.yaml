@@ -224,6 +224,11 @@ water:
       weather:
         referenceWindSpeed: 10
         transitionSeconds: 2
+      # Wind-driven long swell (I.6): 16 seeded modes, 48–160 m, beyond the authored
+      # carriers. Real wave height: the CPU water query and the vertex shader evaluate
+      # the same modes, amplitudes and water clock. Offshore only (the blend above).
+      geometry:
+        enabled: true
   # Where the ground meets the sea: a swash film that runs up the sand and back
   # each wave, a foam line on its front, and wet sand behind it. Keyed on height
   # above sea level, so it follows any coast; lakes and rivers get none.

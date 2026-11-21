@@ -29,6 +29,8 @@ export class SharedWaterMaterials {
       }
       bindings.seaPhaseOrigin = options.seaPhaseOrigin?.map((node, index) => uniform(node.value)
         .onObjectUpdate(({ object }) => read(object).seaPhaseOrigin[index].value));
+      bindings.oceanSwellOrigin = options.oceanSwellOrigin?.map((node, index) => uniform(node.value.clone())
+        .onObjectUpdate(({ object }) => read(object).oceanSwellOrigin[index].value));
       bindings.surfacePatterns = options.surfacePatterns.perObject(object => read(object).surfacePatterns);
       bindings.sampleTexture = (name, template, uv) => perObjectTexture(template, uv, object => read(object)[name]);
       bindings.loadTexture = (name, template, uv) => bilinearLoad(template, uv, object => read(object)[name]);

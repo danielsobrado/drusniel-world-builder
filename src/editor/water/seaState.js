@@ -3,6 +3,7 @@ import { frameUniform as uniform } from '../../render/FrameUniforms.js';
 import { resolveSeaSurf, sampleSeaHeightCpu, sampleSeaSurfDisplacementCpu } from './SeaSurf.js';
 import { seaExposure } from './WaterAppearance.js';
 import { updateWaterVisualClock } from './WaterVisualClock.js';
+import { configureOceanSwell, oceanSwellOffset, updateOceanSwell } from './OceanSwellState.js';
 
 /**
  * The sea's shared, per-frame state, read by every water material and by
@@ -29,6 +30,7 @@ let surfSettings = null;
 export function configureSea(config) {
   seaConfig = config?.enabled ? config : null;
   surfSettings = resolveSeaSurf(config?.surf);
+  configureOceanSwell(seaConfig);
 }
 
 export function getSeaDiffractionConfig() {
@@ -36,10 +38,17 @@ export function getSeaDiffractionConfig() {
     ? surfSettings.diffraction : null;
 }
 
-export function updateSeaState({ timeSeconds, storm, seaLevel, rain, water }) {
+/**
+ * `weather` is this frame's resolved world wind (`{ enabled, directionDegrees, intensity }`,
+ * WorldWindPass); it drives the long swell's amplitudes (OceanSwellState, PR I.6).
+ */
+export function updateSeaState({ timeSeconds, storm, seaLevel, rain, water, weather }) {
   if (water) seaStateUniforms.waterTint.value.set(water.tint[0], water.tint[1], water.tint[2], water.desaturate);
   if (Number.isFinite(rain)) seaStateUniforms.rain.value = Math.max(0, Math.min(1, rain));
-  if (Number.isFinite(timeSeconds)) seaTime = updateWaterVisualClock(timeSeconds);
+  if (Number.isFinite(timeSeconds)) {
+    seaTime = updateWaterVisualClock(timeSeconds);
+    updateOceanSwell({ waterTimeSeconds: seaTime, realSeconds: timeSeconds, weather });
+  }
   if (Number.isFinite(storm)) seaStateUniforms.storm.value = Math.max(0, Math.min(1, storm));
   if (Number.isFinite(seaLevel)) seaStateUniforms.seaLevel.value = seaLevel;
 }
@@ -61,6 +70,11 @@ export function seaAmplitude(config, storm, depth) {
 export function seaSurfaceOffset(x, z, depth, shoreDistance = 48,
   exposure = seaExposure(shoreDistance)) {
   if (!seaConfig) return 0;
+  // The long swell (PR I.6) rides offshore on top of the authored waves, as drawn.
+  return authoredSeaOffset(x, z, depth, shoreDistance, exposure) + oceanSwellOffset(x, z, depth, shoreDistance, exposure);
+}
+
+function authoredSeaOffset(x, z, depth, shoreDistance, exposure) {
   const storm = seaStateUniforms.storm.value;
   const amplitude = seaAmplitude(seaConfig, storm, depth) * exposure;
   if (surfSettings?.enabled && surfSettings.model === 'directionalBreakers') {
