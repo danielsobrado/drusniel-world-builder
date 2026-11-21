@@ -9,6 +9,7 @@ import { captureWorldCanvas } from './lib/world-visual-canvas.mjs';
 import { measureCoastalFrame } from './lib/coastal-review-browser.mjs';
 import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
 import { fileHash } from './lib/world-visual-report.mjs';
+import { prepareVisualPose } from './lib/world-visual-prepare-pose.mjs';
 
 // FFT caustics (PR I [P9] follow-on): native underwater captures, FFT caustics off (the
 // caustic web) and on, at fixed poses and a frozen water clock. The player dives to the bed
@@ -57,7 +58,7 @@ try {
   for (const variant of scan ? [variants[1]] : variants) {
     patch = variant.patch;
     await page.goto(new URL(`/?qaVisual=1${perf ? '&gpuTimings=1' : ''}`, url).href, { waitUntil: 'commit' });
-    await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
+    await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 600000 }); // a cold snapshot server pre-bundles first
     await page.evaluate(() => {
       const { backend } = window.__editor.terrainView.renderer;
       window.__coastalTimestampSupported = backend.trackTimestamp === true;
@@ -85,9 +86,11 @@ try {
     for (const pose of poses) {
       const scope = `${pose.id}/${variant.label}`;
       try {
+        // Settle from the air: under water the surface view holds land streaming back by design.
+        await prepareVisualPose(page, { mode: 'fly', fov: 70, ...pose.camera, heightAboveGround: 40 }, { minimumMs: 4000 });
         await page.evaluate((p) => window.__worldVisualQa.cut({ mode: 'player', heightAboveGround: 1.7, fov: 70, ...p }), pose.camera);
         await page.evaluate(() => window.__editor.playerController.setHarnessKeys(['ControlLeft']));
-        await page.evaluate(() => window.__worldVisualQa.settle({ minimumMs: 6000, timeoutMs: 120000 }));
+        await page.waitForTimeout(6000);
         await page.evaluate((t) => window.__worldVisualQa.setWaterTime(t), waterTime);
         const state = await page.evaluate(async () => {
           for (let i = 0; i < 20; i++) await new Promise((resolve) => requestAnimationFrame(resolve));

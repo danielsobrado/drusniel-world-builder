@@ -1176,6 +1176,7 @@ These are verified package script names. The exact supported flags on QA runners
 - [x] Consider offshore foam from Jacobian threshold **only if** separate, measured and distinct from existing whitecap, swash and impact foam.
 - [x] Consider [P7] cat's paws and windrows only if they can reuse current WorldWind and detail noise without extra world-wide noise pass.
 - [x] Consider [P9] FFT-derived underwater caustics in a **separate follow-on PR**, due current water acceptance/caustics timing sensitivity.
+  - Follow-on delivered as an option, off by default: [FFT caustics](ponlai-pr-i-fft-caustics-2026-11-21.md). It is correct, byte-identical when off and has no measurable cost, but it is invisible on the shipped bathymetry, where the FFT owns only the ~24 m floor.
 - [x] No mandatory 256²×4 FFT, 12 render-quads, motion velocity array or extra SSR pipeline just because Ponlai includes them.
 
 **I.7 result:** [Phase I.7 optics evaluation](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md).

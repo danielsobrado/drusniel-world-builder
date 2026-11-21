@@ -1,0 +1,6 @@
+[
+  { "id": "offshore-bed", "note": "Open sea floor, 24 m, shore distance 48 m: FFT weight 1. Looking seaward along the bed.",
+    "camera": { "x": 2320, "z": -10604, "yaw": -1.5708, "pitch": -0.32 } },
+  { "id": "shelf-toe", "note": "Foot of the shelf (~21 m) looking up-slope to 7 m: the per-pixel depth blend runs from FFT to web.",
+    "camera": { "x": 2240, "z": -10626, "yaw": 3.1416, "pitch": -0.18 } }
+]

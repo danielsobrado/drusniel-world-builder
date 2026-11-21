@@ -1,0 +1,132 @@
+{
+  "sourceRevision": "8bb0106b01fa8911f5dac12c8ded809483da401b",
+  "query": {},
+  "waterPatch": {},
+  "failures": [],
+  "gpuAndNetworkAlerts": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "underwaterPost": {
+        "textures": 2,
+        "oceanFftReferenced": false,
+        "length": 14239,
+        "hash": "274b91bb",
+        "status": {
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": -1.8654899795764748,
+          "optics": true
+        }
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ],
+      "oceanFft": {
+        "state": "active",
+        "available": 1
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "underwaterPost": {
+        "textures": 2,
+        "oceanFftReferenced": false,
+        "length": 14239,
+        "hash": "274b91bb",
+        "status": {
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": -2.169598472238256,
+          "optics": true
+        }
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216542,
+          "hash": "a95839db"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230732,
+          "hash": "a48570fb"
+        }
+      ],
+      "oceanFft": {
+        "state": "active",
+        "available": 1
+      }
+    },
+    {
+      "scope": "offshore-calm/ultra (diffraction on)",
+      "underwaterPost": {
+        "textures": 2,
+        "oceanFftReferenced": false,
+        "length": 14463,
+        "hash": "2be89d4b",
+        "status": {
+          "enabled": true,
+          "active": false,
+          "blend": 0,
+          "waterlineBlend": 0,
+          "surfaceHeight": -1.5120916990616136,
+          "optics": true
+        }
+      },
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216728,
+          "hash": "2b90c273"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230934,
+          "hash": "42e2018f"
+        }
+      ],
+      "oceanFft": {
+        "state": "active",
+        "available": 1
+      }
+    }
+  ]
+}
