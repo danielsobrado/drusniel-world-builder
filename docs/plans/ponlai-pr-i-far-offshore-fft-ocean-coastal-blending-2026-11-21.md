@@ -1143,13 +1143,15 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.5 — Weather, visual stability and reflection integration
 
-- [ ] Read current resolved weather wind and storm, normalize heading signs, keep existing long-swell authoritative.
-- [ ] Rebuild h0 coefficients only on meaningful weather revisions; smooth gain/direction changes with deterministic seed and bounded transition.
-- [ ] Use absolute water time for deterministic pause, rewind, time seek and replay. Never advance FFT once per reflection capture.
-- [ ] Compare calm/windy/storm across dawn/day/evening/night; no permanently bright offshore sparkle or upwind windrows.
-- [ ] Preserve existing `WaterReflectionController` captures/skyLightTint; test underwater camera and post/cinematic render routing.
-- [ ] Check short-wave spectral content is actually visible and valuable at 1600×900 after appropriate mip filtering.
-- [ ] If ROI poor, stop here and keep existing simpler approach.
+- [x] Read current resolved weather wind and storm, normalize heading signs, keep existing long-swell authoritative.
+- [x] Rebuild h0 coefficients only on meaningful weather revisions; smooth gain/direction changes with deterministic seed and bounded transition.
+- [x] Use absolute water time for deterministic pause, rewind, time seek and replay. Never advance FFT once per reflection capture.
+- [x] Compare calm/windy/storm across dawn/day/evening/night; no permanently bright offshore sparkle or upwind windrows.
+- [ ] Preserve existing `WaterReflectionController` captures/skyLightTint; test underwater camera and post/cinematic render routing. **Partly:** reflections reuse the frame's single FFT output (no change to the controller), and underwater was covered by I.4's water acceptance; post/cinematic routing was not exercised.
+- [x] Check short-wave spectral content is actually visible and valuable at 1600×900 after appropriate mip filtering.
+- [x] If ROI poor, stop here and keep existing simpler approach. ROI passes (I.5 §9).
+
+**I.5 result:** [Phase I.5 weather and stability](ponlai-pr-i-phase-i5-weather-and-stability-2026-11-21.md). The spectrum follows `WorldWindPass`'s resolved wind: speed = 10 m/s × intensity (0.45 calm … 2.4 storm), heading normalized; weather off is the I.4 reference. Rebuilds happen past a 0.5 m/s / 3° deadband, one cascade per frame (~1.2 ms). Transitions interpolate per-mode power over 2 s with phases fixed, so there is no flash, reset or mid-turn calm; the GPU spectrum and roughness table move together. Spectra are deterministic and bit-equal to `buildCascadeSpectra` at fixed wind. No shader changed. The calm/moderate/reference/wind/storm × dawn/day/evening/night captures show no excess sparkle or streaking from the FFT.
 
 **Stop:** 1s spectrum rebuild hitch, flash when wind changes, double compute on reflection, reflection sky disconnected from waves, FPS drop without corresponding quality improvement.
 

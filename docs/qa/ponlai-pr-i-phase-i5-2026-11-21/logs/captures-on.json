@@ -1,0 +1,230 @@
+{
+  "query": {
+    "oceanFft": "1"
+  },
+  "failures": [],
+  "alerts": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm-ref/calm-ref-dawn (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 10,
+        "windDirection": 0.21655030497608926
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm-ref/calm-ref-day (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 10,
+        "windDirection": 0.21655030497608926
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm-ref/calm-ref-evening (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 10,
+        "windDirection": 0.21655030497608926
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm-ref/calm-ref-night (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 10,
+        "windDirection": 0.21655030497608926
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-dawn (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-day (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-evening (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-night (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-dawn (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-day (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-evening (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-night (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 24,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-dawn (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 6.09931235223142,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-day (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 6.09931235223142,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-evening (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 6.09931235223142,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-night (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 6.09931235223142,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-moderate/moderate-day (diffraction on)",
+      "state": "active",
+      "spectrumWind": {
+        "windSpeed": 11.37935055398268,
+        "windDirection": 2.7367008673047097
+      },
+      "transitioning": false,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    }
+  ]
+}

@@ -1012,6 +1012,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   });
   resources.own(worldWind);
   let lastWindTimestamp = null;
+  const oceanWeatherScratch = { enabled: false, directionDegrees: 0, intensity: 1 };
   const waterVisual = config.stylizedSurface.water;
   configureSea(waterVisual.enabled !== false && resolveWaterQualityFeatures(waterVisual).flow
     ? waterVisual.sea
@@ -1889,6 +1890,11 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       },
     );
     lastWindTimestamp = frameTimestamp;
+    // The offshore FFT follows the same resolved wind (storm curves included).
+    oceanWeatherScratch.enabled = weatherEnabled && weatherSettings.weatherMode !== 'off';
+    oceanWeatherScratch.directionDegrees = worldWind.directionDegrees;
+    oceanWeatherScratch.intensity = worldWind.intensity;
+    stylizedSurface.setOceanWeather(oceanWeatherScratch);
     worldWind.render(terrainView.renderer);
     waterfallMist.update(frameTimestamp / 1000, viewModeController.camera);
     updateGroundDeformation(frameTimestamp / 1000);

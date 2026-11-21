@@ -175,7 +175,7 @@ try {
         console.log(`  ${adapter.vendor} ${adapter.architecture} ${adapter.backend}`);
       }
       await page.evaluate(() => window.__worldVisualQa.setWaterTime(null));
-      const lighting = { hour: job.hour ?? 12, weather: job.weather ?? 'off' };
+      const lighting = { hour: job.hour ?? 12, weather: job.weather ?? 'off', weatherIntensity: job.weatherIntensity ?? 1 };
       await page.evaluate(settings => window.__worldVisualQa.setLighting(settings), lighting);
       const pose = { mode: 'fly', fov: 65, ...job.pose };
       if (pose.yaw === undefined) pose.yaw = Math.atan2(pose.x - job.target[0].x, pose.z - job.target[0].z);

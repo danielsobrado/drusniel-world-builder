@@ -94,12 +94,12 @@ export class WorldVisualQa {
     }
     throw new Error(`Visual scenery did not settle: ${JSON.stringify(last)}`);
   }
-  async setLighting({preset=null,hour=12,weather='off'}={}) {
+  async setLighting({preset=null,hour=12,weather='off',weatherIntensity=1}={}) {
     const e=this.editor;
     e.dayNightCycle?.setPaused(true);e.dayNightCycle?.setHour(hour);
     // Without a named preset the sky takes the hour's blend; a paused clock never writes it.
     if(preset)e.skyLooks?.setPreset(preset);else e.skyLooks?.setTimeBlend(presetWeights(hour));
-    e.weatherSettings.weatherMode=weather;e.weatherSettings.weatherIntensity=weather==='off'?0:1;
+    e.weatherSettings.weatherMode=weather;e.weatherSettings.weatherIntensity=weather==='off'?0:weatherIntensity;
     e.weatherController?.applySettings({ snap: true });
     // A snapped storm shows the ground it leaves at steady state, not after minutes of fall.
     if(e.weatherController)e.snowCover?.snap(e.weatherController.storm.snow);
@@ -166,7 +166,8 @@ export class WorldVisualQa {
     while(performance.now()-start<timeoutMs&&!this.disposed) {
       await frame();const current=staticLightingComponents(this.editor);maximumChange=staticLightingChange(previous,current);
       stableFrames=maximumChange<.001?stableFrames+1:0;previous=current;
-      if(stableFrames>=60)return {stableFrames,maximumChange,components:current,wallMs:performance.now()-start};
+      // The offshore FFT spectrum is part of the look: finish its weather transition too.
+      if(stableFrames>=60){this.editor.stylizedSurface?.oceanFft?.settleWeather();return {stableFrames,maximumChange,components:current,wallMs:performance.now()-start};}
     }
     throw new Error('Static sky, lights and fog failed to converge.');
   }

@@ -32,6 +32,7 @@ import { createBiomeUnderstoryPrototypes } from './flora/biomeUnderstoryPrototyp
 import { collectDebrisGrassZones } from './UnderstoryClearance.js';
 import { createShoreLifePrototypes } from './shoreLifePrototypes.js';
 import { OceanFftController } from '../water/fft/OceanFftController.js';
+import { resolveOffshoreFft } from '../water/fft/OceanFftConfig.js';
 import { waterVisualClock } from '../water/WaterVisualClock.js';
 import { createAquaticFloraPrototypes } from './aquaticFloraPrototypes.js';
 import { advancePlantSway } from './plantSway.js';
@@ -392,6 +393,7 @@ export class StylizedSurfaceView {
         renderer: terrainView.renderer,
         qualityTier: config.water.qualityTier,
         requested: config.water.sea.offshoreFft?.enabled === true || config.enhancements?.oceanFft === true,
+        weather: resolveOffshoreFft(config.water.sea.offshoreFft).weather,
       })
       : null;
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections, this.oceanFft?.binding ?? null);
@@ -654,6 +656,11 @@ export class StylizedSurfaceView {
     ]) {
       if (Number.isFinite(value)) PerfCounters.set(name, value);
     }
+  }
+
+  /** This frame's resolved world wind for the offshore FFT (PR I.5): `{ enabled, directionDegrees, intensity }`. */
+  setOceanWeather(weather) {
+    this.oceanFft?.setWeather(weather);
   }
 
   setViewDistance({ skyRadius, fogDensity } = {}) {

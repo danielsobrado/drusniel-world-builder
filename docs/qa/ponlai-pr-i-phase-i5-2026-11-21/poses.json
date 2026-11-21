@@ -1,0 +1,213 @@
+[
+ {
+  "id": "offshore-calm-ref",
+  "folder": "01-offshore-calm-ref",
+  "weather": "off",
+  "pose": {
+   "x": 2300,
+   "z": -10604,
+   "heightAboveGround": 50,
+   "pitch": -0.2,
+   "fov": 65
+  },
+  "target": [
+   {
+    "x": 2620,
+    "z": -10604
+   },
+   {
+    "x": 2460,
+    "z": -10604
+   }
+  ],
+  "tiers": [],
+  "controls": [
+   {
+    "qualityTier": "high",
+    "label": "calm-ref-dawn",
+    "hour": 6.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "calm-ref-day",
+    "hour": 12
+   },
+   {
+    "qualityTier": "high",
+    "label": "calm-ref-evening",
+    "hour": 18.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "calm-ref-night",
+    "hour": 23
+   }
+  ]
+ },
+ {
+  "id": "offshore-wind",
+  "folder": "01-offshore-wind",
+  "weather": "wind",
+  "pose": {
+   "x": 2300,
+   "z": -10604,
+   "heightAboveGround": 50,
+   "pitch": -0.2,
+   "fov": 65
+  },
+  "target": [
+   {
+    "x": 2620,
+    "z": -10604
+   },
+   {
+    "x": 2460,
+    "z": -10604
+   }
+  ],
+  "tiers": [],
+  "controls": [
+   {
+    "qualityTier": "high",
+    "label": "wind-dawn",
+    "hour": 6.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "wind-day",
+    "hour": 12
+   },
+   {
+    "qualityTier": "high",
+    "label": "wind-evening",
+    "hour": 18.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "wind-night",
+    "hour": 23
+   }
+  ]
+ },
+ {
+  "id": "offshore-storm",
+  "folder": "01-offshore-storm",
+  "weather": "storm",
+  "pose": {
+   "x": 2300,
+   "z": -10604,
+   "heightAboveGround": 50,
+   "pitch": -0.2,
+   "fov": 65
+  },
+  "target": [
+   {
+    "x": 2620,
+    "z": -10604
+   },
+   {
+    "x": 2460,
+    "z": -10604
+   }
+  ],
+  "tiers": [],
+  "controls": [
+   {
+    "qualityTier": "high",
+    "label": "storm-dawn",
+    "hour": 6.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "storm-day",
+    "hour": 12
+   },
+   {
+    "qualityTier": "high",
+    "label": "storm-evening",
+    "hour": 18.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "storm-night",
+    "hour": 23
+   }
+  ]
+ },
+ {
+  "id": "offshore-calm",
+  "folder": "01-offshore-calm",
+  "weather": "meadow",
+  "pose": {
+   "x": 2300,
+   "z": -10604,
+   "heightAboveGround": 50,
+   "pitch": -0.2,
+   "fov": 65
+  },
+  "target": [
+   {
+    "x": 2620,
+    "z": -10604
+   },
+   {
+    "x": 2460,
+    "z": -10604
+   }
+  ],
+  "tiers": [],
+  "controls": [
+   {
+    "qualityTier": "high",
+    "label": "calm-dawn",
+    "hour": 6.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "calm-day",
+    "hour": 12
+   },
+   {
+    "qualityTier": "high",
+    "label": "calm-evening",
+    "hour": 18.5
+   },
+   {
+    "qualityTier": "high",
+    "label": "calm-night",
+    "hour": 23
+   }
+  ]
+ },
+ {
+  "id": "offshore-moderate",
+  "folder": "01-offshore-moderate",
+  "weather": "wind",
+  "pose": {
+   "x": 2300,
+   "z": -10604,
+   "heightAboveGround": 50,
+   "pitch": -0.2,
+   "fov": 65
+  },
+  "target": [
+   {
+    "x": 2620,
+    "z": -10604
+   },
+   {
+    "x": 2460,
+    "z": -10604
+   }
+  ],
+  "tiers": [],
+  "controls": [
+   {
+    "qualityTier": "high",
+    "label": "moderate-day",
+    "hour": 12
+   }
+  ],
+  "weatherIntensity": 0.35
+ }
+]

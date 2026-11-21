@@ -38,7 +38,8 @@ export async function inspectOceanFftScene() {
   }
   const fft = surface.oceanFft;
   return {
-    oceanFft: fft ? { ...fft.runtime.diagnostics(), available: fft.binding.available.value, bindingGeneration: fft.binding.generation, tileSizes: fft.tileSizes } : null,
+    oceanFft: fft ? { ...fft.runtime.diagnostics(), available: fft.binding.available.value, bindingGeneration: fft.binding.generation, tileSizes: fft.tileSizes,
+      spectrumWind: { ...fft.spectrum.wind }, transitioning: fft.spectrum.transitioning } : null,
     slotOrigins: { checked, maxError: worst },
     materialVariants: materials.length,
     shaders,

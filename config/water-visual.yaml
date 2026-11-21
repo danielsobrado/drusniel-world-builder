@@ -217,6 +217,13 @@ water:
         depthEndMeters: 14
         shoreStartMeters: 24
         shoreEndMeters: 40
+      # The spectrum follows the world wind (I.5): speed = referenceWindSpeed ×
+      # the weather's intensity (1 = the authored breeze, 2.4 = a full storm); with
+      # weather off, the reference breeze along the primary swell. A meaningful change
+      # cross-fades mode amplitudes over transitionSeconds, never phases.
+      weather:
+        referenceWindSpeed: 10
+        transitionSeconds: 2
   # Where the ground meets the sea: a swash film that runs up the sand and back
   # each wave, a foam line on its front, and wet sand behind it. Keyed on height
   # above sea level, so it follows any coast; lakes and rivers get none.

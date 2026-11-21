@@ -1,0 +1,177 @@
+{
+  "query": {},
+  "failures": [],
+  "alerts": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm-ref/calm-ref-dawn (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm-ref/calm-ref-day (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm-ref/calm-ref-evening (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm-ref/calm-ref-night (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-dawn (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-day (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-evening (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-wind/wind-night (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-dawn (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-day (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-evening (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-storm/storm-night (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-dawn (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-day (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-evening (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-calm/calm-night (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    },
+    {
+      "scope": "offshore-moderate/moderate-day (diffraction on)",
+      "state": "off",
+      "spectrumWind": null,
+      "transitioning": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      }
+    }
+  ]
+}
