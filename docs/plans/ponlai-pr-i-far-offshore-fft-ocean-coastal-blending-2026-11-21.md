@@ -1171,12 +1171,18 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.7 — Optional high-end spectral optics after measured benefit
 
-- [ ] Consider [P5] unresolved slope variance table or simplified single-parameter roughness model; inspect current donor packed detail variance first.
-- [ ] Consider [P6] physical glint lobes only when current water reflection specular physically/visually needs them; no second sun.
-- [ ] Consider offshore foam from Jacobian threshold **only if** separate, measured and distinct from existing whitecap, swash and impact foam.
-- [ ] Consider [P7] cat's paws and windrows only if they can reuse current WorldWind and detail noise without extra world-wide noise pass.
-- [ ] Consider [P9] FFT-derived underwater caustics in a **separate follow-on PR**, due current water acceptance/caustics timing sensitivity.
-- [ ] No mandatory 256²×4 FFT, 12 render-quads, motion velocity array or extra SSR pipeline just because Ponlai includes them.
+- [x] Consider [P5] unresolved slope variance table or simplified single-parameter roughness model; inspect current donor packed detail variance first.
+- [x] Consider [P6] physical glint lobes only when current water reflection specular physically/visually needs them; no second sun.
+- [x] Consider offshore foam from Jacobian threshold **only if** separate, measured and distinct from existing whitecap, swash and impact foam.
+- [x] Consider [P7] cat's paws and windrows only if they can reuse current WorldWind and detail noise without extra world-wide noise pass.
+- [x] Consider [P9] FFT-derived underwater caustics in a **separate follow-on PR**, due current water acceptance/caustics timing sensitivity.
+- [x] No mandatory 256²×4 FFT, 12 render-quads, motion velocity array or extra SSR pipeline just because Ponlai includes them.
+
+**I.7 result:** [Phase I.7 optics evaluation](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md).
+- **Decisions:** P5 was already delivered (I.3/I.4). P6, Jacobian foam and windrows were declined with reasons, and P9 is deferred to its own PR. P7 cat's paws was prototyped and measured: no patchiness gain at 0.35 or 0.7, so it was removed under the stop rule.
+- **Fixed during review:**
+  - **Contour bands:** the planar reflection was gated on the displaced surface, drawing the swell's height contours as ribbons, and it was captured at the instantaneous swell height. Both now use the still water level.
+  - **Whitecaps:** they reshape about 3× faster.
 
 **Stop:** no demonstrated improvement, cost > quality ROI, duplicated foam or second water refraction copy.
 

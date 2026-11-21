@@ -1,0 +1,1 @@
+[{"id":"bands","folder":"bands","pose":{"x":2300,"z":-10604,"heightAboveGround":50,"pitch":-0.2,"fov":65},"target":[{"x":2620,"z":-10604},{"x":2460,"z":-10604}],"tiers":[],"controls":[{"qualityTier":"high","label":"diag","diagnostics":["opacity","transmission","palette","swell-normal","flat-displacement","no-foam"]}]}]

@@ -6,18 +6,28 @@ import { createSeaRefractionPhaseNode } from './SeaRefractionNodes.js';
 import { createSeaDiffractionPhaseNode } from './SeaDiffractionNodes.js';
 
 /** Depth-following surf on an arbitrary coast; all pattern origins are bounded. */
+/**
+ * Whitecap breakup, lace and storm streaks. The drift stays slow, but the shapes evolve:
+ * the warp cycles in about a minute, and the fine octave drifts against the coarse one,
+ * so a foam patch reshapes within seconds instead of sliding by unchanged for minutes.
+ */
+const FOAM_WARP_RATE = [0.093, 0.069];
+const FOAM_FINE_DRIFT = [-0.06, 0.045];
+
 export function createSeaFoamNoise(patterns, localXZ, time) {
   const point=patterns.latticePoint('surfLace',localXZ)
     .add(vec2(time.mul(0.021).mod(512),time.mul(-0.013).mod(512)));
   // Independent, bounded phases warp the lattice without creating chunk seams.
   // The old sea-normal height channel repeated the same crest stamp every 5 m.
   const warp=vec2(
-    sin(patterns.wavePhase('surfLaceWarpX',localXZ).add(time.mul(0.031).mod(Math.PI*2))),
-    sin(patterns.wavePhase('surfLaceWarpZ',localXZ).sub(time.mul(0.023).mod(Math.PI*2))),
+    sin(patterns.wavePhase('surfLaceWarpX',localXZ).add(time.mul(FOAM_WARP_RATE[0]).mod(Math.PI*2))),
+    sin(patterns.wavePhase('surfLaceWarpZ',localXZ).sub(time.mul(FOAM_WARP_RATE[1]).mod(Math.PI*2))),
   ).mul(0.85);
   const warped = point.add(warp);
+  // Wrapped by the noise's 512-cell period, so the fine octave stays seamless across chunks.
+  const fineDrift = vec2(time.mul(FOAM_FINE_DRIFT[0]).mod(512), time.mul(FOAM_FINE_DRIFT[1]).mod(512));
   return periodicFbm2(warped).mul(.7)
-    .add(periodicFbm2(warped.mul(4).add(vec2(19.3, 7.1))).mul(.3)).toVar('seaFoamField');
+    .add(periodicFbm2(warped.mul(4).add(vec2(19.3, 7.1)).add(fineDrift)).mul(.3)).toVar('seaFoamField');
 }
 
 export function createSeaSurfNodes({

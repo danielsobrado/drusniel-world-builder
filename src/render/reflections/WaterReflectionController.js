@@ -9,6 +9,7 @@ import { PlanarReprojection } from './PlanarReprojection.js';
 import { withAuxiliaryScene } from './ReflectionScene.js';
 import { isLandStreamingSuspended } from '../../editor/water/underwaterState.js';
 import { filteredWaterCube, filteredWaterPlanar } from './WaterReflectionFilter.js';
+import { staticWaterAt } from '../../editor/water/StaticWaterSample.js';
 
 const OVERLAY_REFRESH_CAPTURES = 32;
 
@@ -56,7 +57,12 @@ export class WaterReflectionController {
 
   get captureBudgetMs() { return this.captureSchedule.budgetMs(this.planarPending ? 'planar' : 'cube'); }
 
-  sample(direction, fallback, allowPlanar = float(1), distortion = vec2(0), roughness = float(0)) {
+  /**
+   * `surfaceLevel` is the fragment's still water level (the water field's surface, before
+   * waves): the planar image belongs to one water body, so it is gated by level, never by
+   * the displaced surface. Gating on the waves drew their height contours as bright ribbons.
+   */
+  sample(direction, fallback, allowPlanar = float(1), distortion = vec2(0), roughness = float(0), surfaceLevel = positionWorld.y) {
     const local = this.valid.mul(smoothstep(this.config.reachMeters * 0.7, this.config.reachMeters,
       distance(positionWorld, this.origin)).oneMinus());
     const cube = this.config.roughnessFiltering === false ? this.cube.sample(direction).rgb
@@ -65,7 +71,7 @@ export class WaterReflectionController {
     if (this.planar) {
       const { uv, weight: projectionWeight } = this.reprojection.uvNode();
       const weight = projectionWeight.mul(local).mul(allowPlanar)
-        .mul(smoothstep(0.1, 0.3, abs(positionWorld.y.sub(this.planarHeight))).oneMinus());
+        .mul(smoothstep(0.1, 0.3, abs(surfaceLevel.sub(this.planarHeight))).oneMinus());
       const point = uv.add(distortion);
       const planar = this.config.roughnessFiltering === false ? this.planar.sample(point.clamp(0, 1)).rgb
         : filteredWaterPlanar(this.planar, point, roughness, this.config.resolution);
@@ -247,7 +253,8 @@ export class WaterReflectionController {
     for (let index = 0; index < candidateCount; index += 1) {
       const slot = ordered[index];
       const d = slot.terrainSlot.descriptor;
-      const water = this.view.getCanonicalWater(d.centerWorldX, d.centerWorldZ);
+      // The body's still level: a mirror at the instantaneous swell height bobbed every capture.
+      const water = staticWaterAt(this.view, d.centerWorldX, d.centerWorldZ);
       if (![1, 2].includes(water.kind) || water.coverage < 0.5 || camera.position.y <= water.surfaceHeight + 0.1) continue;
       const virtual = preparePlanarCamera(camera, water.surfaceHeight, this.virtualCamera);
       this.virtualCamera = virtual;

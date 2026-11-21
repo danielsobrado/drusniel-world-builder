@@ -612,6 +612,8 @@ export function createStylizedWaterMaterial({
       .mul(rain.ring.mul(water.rainRipples.strength).mul(waterCoverage).mul(waterlineFade)));
   }
 
+  // The water body's still level, before waves: what the planar reflection is gated on.
+  const stillLevel = waterField.g.add(waterSurfaceOrigin);
   if (quality.fresnelStrength > 0) {
     const reflected = normalize(positionWorld.sub(cameraPosition)).reflect(sea?.normal ?? vec3(0, 1, 0));
     const sky = mix(colorNode('#81a8b4'), colorNode('#38658a'), smoothstep(0, 0.7, reflected.y))
@@ -620,7 +622,7 @@ export function createStylizedWaterMaterial({
     color = mix(
       color,
       reflections ? reflections.sample(reflected, sky, float(0.65),
-        sea ? waterRippleRefraction(sea.normal, vec3(0, 1, 0)).mul(0.014) : vec2(0), sea?.roughness ?? float(.15)) : sky,
+        sea ? waterRippleRefraction(sea.normal, vec3(0, 1, 0)).mul(0.014) : vec2(0), sea?.roughness ?? float(.15), stillLevel) : sky,
       clamp(river ? surfaceReflection.mul(oneMinus(inland)) : surfaceReflection, 0, 1),
     );
   }
@@ -630,7 +632,7 @@ export function createStylizedWaterMaterial({
       color,
       reflections ? reflections.sample(river.reflected, river.sky.mul(skyLightUniforms.reflectionTint),
         oneMinus(smoothstep(0.05, 0.2, currentStrength)).mul(oneMinus(fall)),
-        waterRippleRefraction(river.normal, river.baseNormal).mul(0.014), river.roughness)
+        waterRippleRefraction(river.normal, river.baseNormal).mul(0.014), river.roughness, stillLevel)
         : river.sky.mul(skyLightUniforms.reflectionTint),
       river.fresnel.mul(oneMinus(fall.mul(0.85))).mul(reflectionVisibility).mul(inland),
     );

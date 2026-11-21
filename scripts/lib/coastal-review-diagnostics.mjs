@@ -19,7 +19,8 @@ export async function installCoastalDiagnostics(page) {
   await page.route(/\/(StylizedWaterMaterial|SeaSurfaceShading|terrainMaterial|CoastSwashShading)\.js(?:\?|$)/, async route => {
     const response = await route.fetch();
     const file = new URL(route.request().url()).pathname.split('/').at(-1);
-    let body = await response.text();
+    // Windows checkouts serve CRLF; the multi-line anchors below are written with LF.
+    let body = (await response.text()).replace(/\r\n/g, '\n');
     // Vite has already transformed the source. Reuse its resolved TSL module URL.
     const tsl = /from ["']([^"']*three_tsl[^"']*)["']/.exec(body)?.[1];
     assert.ok(tsl, `Missing TSL module in ${file}`);
