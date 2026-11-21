@@ -7,7 +7,7 @@ export const WATER_SLOT_OPTIONS = 'waterSlotOptions';
 
 /** One graph for each water variant, with exact per-slot inputs at draw time. */
 export class SharedWaterMaterials {
-  /** @param {?OceanFftBinding} oceanFft the view's shared FFT slope binding (PR I); sampled from I.4 */
+  /** @param {?OceanFftBinding} oceanFft the view's shared FFT slope binding (PR I); null when off */
   constructor(reflections = null, oceanFft = null) {
     this.reflections = reflections;
     this.oceanFft = oceanFft;
@@ -34,7 +34,7 @@ export class SharedWaterMaterials {
       bindings.loadTexture = (name, template, uv) => bilinearLoad(template, uv, object => read(object)[name]);
       this.bindings = bindings;
     }
-    const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction, reflections: this.reflections });
+    const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction, reflections: this.reflections, oceanFft: this.oceanFft });
     material.side = DoubleSide;
     this.materials.set(enableRefraction, material);
     return material;

@@ -2,7 +2,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   detailVisibility: false, detailTurnMarginDegrees: 12, shadowCascades: 1, snowRelief: true, roadsideLanterns: false,
   // Near-band tree crowns cast sun shadows. Off: the cost and the crowns' own self-shadowing are unmeasured.
   crownShadows: false,
-  // Offshore FFT slope runtime (PR I). Off: nothing samples it until the I.4 material lands.
+  // QA override of water.sea.offshoreFft.enabled (PR I): `?oceanFft=1` forces the offshore FFT on.
   oceanFft: false,
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({

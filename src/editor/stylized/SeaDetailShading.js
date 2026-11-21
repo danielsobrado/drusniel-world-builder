@@ -21,9 +21,15 @@ export function createSeaDetailNodes({ patternXZ, time, choppiness, strength,
     const variance = sample.a.mul(SEA_DETAIL_MOMENT_SCALE).sub(slope.dot(slope)).max(0);
     return slope.div(variance.mul(4).add(1));
   });
+  const slope = mix(slopes[0], slopes[1], 0.35).mul(0.14).mul(strength);
+  // Both octaves (8 m and 4 m) lie in the medium band the offshore FFT replaces.
   return {
-    slope: mix(slopes[0], slopes[1], 0.35).mul(0.14).mul(strength),
+    slope,
     variance: float(0),
+    mediumSlope: slope,
+    fineSlope: vec2(0),
+    mediumVariance: float(0),
+    fineVariance: float(0),
     release: lease.release,
     map: lease.texture,
   };

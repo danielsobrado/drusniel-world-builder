@@ -1128,14 +1128,16 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.4 — Offshore normal-only material integration
 
-- [ ] Add `offshoreFft` YAML/validator but default off, and one optional `OceanFftBlendNodes` call inside [D11]'s sea detail slope composition.
-- [ ] Use marine kind, depth and capped shore distance + exposure to create `B_fft` C1 fade; choose verified shore gate reachable with existing field.
-- [ ] Replace matching medium/fine [D23] donor detail slope contribution rather than stacking wave energy; keep rain, interactions and authored waves.
-- [ ] Preserve `sea.displacement` and all waterline/foam/crest geometric calculations, [D8–D10] nearshore CPU/shader waves.
-- [ ] Make a supported high/ultra shared water shader compile/compileAsync on real WebGPU with 16 sampler/varying profile, refractive and nonrefractive.
-- [ ] Measure slope/roughness before and after; ensure true deep water samples the FFT, and no 7m or 17m shelf band.
-- [ ] Verify existing reflection/glint/optics, underwater refraction, whitecap/rock impact and rain without a second sea shading model.
-- [ ] Feature off or unsupported uses exact old shader nodes and zero FFT work.
+- [x] Add `offshoreFft` YAML/validator but default off, and one optional `OceanFftBlendNodes` call inside [D11]'s sea detail slope composition.
+- [x] Use marine kind, depth and capped shore distance + exposure to create `B_fft` C1 fade; choose verified shore gate reachable with existing field.
+- [x] Replace matching medium/fine [D23] donor detail slope contribution rather than stacking wave energy; keep rain, interactions and authored waves.
+- [x] Preserve `sea.displacement` and all waterline/foam/crest geometric calculations, [D8–D10] nearshore CPU/shader waves.
+- [x] Make a supported high/ultra shared water shader compile/compileAsync on real WebGPU with 16 sampler/varying profile, refractive and nonrefractive. Plain: 16 textures, 13 samplers, 12 varyings. Refraction: 21 textures, 14 samplers, 12 varyings, within the 32 the app already requests for its 17-texture terrain.
+- [ ] Measure slope/roughness before and after; ensure true deep water samples the FFT, and no 7m or 17m shelf band. **Partly:** deep water samples it, and there is no shelf band (off/on/A-A captures, the weight's continuity); slope and roughness were not measured numerically in-app.
+- [x] Verify existing reflection/glint/optics, underwater refraction, whitecap/rock impact and rain without a second sea shading model.
+- [x] Feature off or unsupported uses exact old shader nodes and zero FFT work.
+
+**I.4 result:** [Phase I.4 offshore normal integration](ponlai-pr-i-phase-i4-offshore-normal-integration-2026-11-21.md). FFT slopes replace ripple groups 0 and 1 (`mix(medium·g, fft, B)`); group 2, swell, surf, rain and wakes are kept. Unresolved FFT variance replaces the medium variance in `0.16·√var`. B = smoothstep(7,14,depth)·smoothstep(24,40,shore)·exposure·ocean·coverage·available. Off: water WGSL byte-identical on all tiers. On: +1 texture, +1 sampler, 0 varyings; about +0.1 ms GPU render p50. The GPU parity check of the ripple split is within 7.5e-9. Water acceptance passes all functional gates with the FFT on. Shipped off until I.5 drives the spectrum from the weather.
 
 **Stop:** water height changes from FFT when geometry=false, new shoreline cutoff, water kind leak into lake/river, double rain/swell energy, memory/sampler overflow, old donor texture still actively sampled twice or foam appears offshore unrelated to waves.
 

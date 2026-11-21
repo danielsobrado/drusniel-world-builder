@@ -49,6 +49,7 @@ import { createSurfaceClassNodes } from './SurfaceMaskNodes.js';
 import { createWaterfallFoamNode } from './WaterfallShading.js';
 import { createSeaSurfaceNodes, seaWaterMask } from './SeaSurfaceShading.js';
 import { createSeaOpticsNodes } from './SeaOpticsShading.js';
+import { resolveOffshoreFft } from '../water/fft/OceanFftConfig.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './CoastSwashShading.js';
 import { acquireWorldNoise } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
@@ -119,6 +120,10 @@ export function createStylizedWaterMaterial({
   // not avoid it. Chunks far from the camera get a variant built without the
   // branch so a player away from water pays nothing.
   enableRefraction = true,
+  // Offshore FFT (PR I.4): the view's shared OceanFftBinding and this chunk's cascade
+  // UV origins (vec4). Null when the feature is off: the graph is then the original.
+  oceanFft = null,
+  oceanFftOrigin = null,
   sampleTexture = (_name, value, uvNode) => texture(value, uvNode),
   loadTexture = (_name, value, uvNode) => bilinearLoad(value, uvNode),
 }) {
@@ -221,6 +226,8 @@ export function createStylizedWaterMaterial({
       exposure: appearance?.exposure,
       ripple,
       config: water.sea,
+      oceanFft: oceanFft && oceanFftOrigin && appearance
+        ? { binding: oceanFft, origin: oceanFftOrigin, settings: resolveOffshoreFft(water.sea.offshoreFft) } : null,
     })
     : null;
   // Inland water takes grass-test's surface; the sea keeps its own shading.

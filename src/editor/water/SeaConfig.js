@@ -4,6 +4,7 @@ import { resolveSeaOptics } from './SeaOptics.js';
 import { resolveCoastSand } from './CoastSandConfig.js';
 import { resolveCoastalSwashConfig } from './CoastalSwashConfig.js';
 import { resolveCoastalRockImpactConfig } from './CoastalRockImpactConfig.js';
+import { resolveOffshoreFft } from './fft/OceanFftConfig.js';
 
 function assertFiniteRange(value, fieldName, minimum, maximum) {
   if (!Number.isFinite(value) || value < minimum || value > maximum) {
@@ -27,6 +28,7 @@ export function validateSeaConfig(config) {
   resolveSeaSurf(config.surf);
   resolveSeaDetail(config.detail);
   resolveSeaOptics(config.optics);
+  resolveOffshoreFft(config.offshoreFft);
   assertFiniteRange(config.amplitude, field('amplitude'), 0, 4);
   assertFiniteRange(config.stormScale, field('stormScale'), 1, 4);
   assertFiniteRange(config.choppiness, field('choppiness'), 0, 6);

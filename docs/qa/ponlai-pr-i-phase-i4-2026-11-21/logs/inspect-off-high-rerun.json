@@ -1,0 +1,64 @@
+{
+  "query": {},
+  "failures": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213727,
+          "hash": "6eb6cc2"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 227926,
+          "hash": "6a9b2b63"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213727,
+          "hash": "6eb6cc2"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 227926,
+          "hash": "6a9b2b63"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "query": {
+    "oceanFft": "1"
+  },
+  "failures": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "oceanFft": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 1,
+        "configGeneration": 1,
+        "transforms": 3553,
+        "skipped": 0,
+        "outputs": 3553,
+        "available": 1,
+        "bindingGeneration": 3553,
+        "tileSizes": [
+          57.3,
+          15.45
+        ]
+      },
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 215926,
+          "hash": "8b0754f7"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230125,
+          "hash": "53d9c750"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "oceanFft": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 1,
+        "configGeneration": 1,
+        "transforms": 4284,
+        "skipped": 242,
+        "outputs": 4284,
+        "available": 1,
+        "bindingGeneration": 4284,
+        "tileSizes": [
+          57.3,
+          15.45
+        ]
+      },
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 215926,
+          "hash": "8b0754f7"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230125,
+          "hash": "53d9c750"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/ultra (diffraction on)",
+      "oceanFft": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 1,
+        "configGeneration": 1,
+        "transforms": 3404,
+        "skipped": 0,
+        "outputs": 3404,
+        "available": 1,
+        "bindingGeneration": 3404,
+        "tileSizes": [
+          57.3,
+          15.45
+        ]
+      },
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 16,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 216112,
+          "hash": "b30d2b5d"
+        },
+        {
+          "refraction": true,
+          "textures": 21,
+          "samplers": 14,
+          "varyings": 12,
+          "oceanFftReferenced": true,
+          "length": 230327,
+          "hash": "6b989acc"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/medium (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        },
+        {
+          "refraction": true,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/low (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        },
+        {
+          "refraction": true,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        }
+      ]
+    }
+  ]
+}

@@ -385,12 +385,13 @@ export class StylizedSurfaceView {
       : [];
     this.reflections = this.enabled && !this.impostorBakeMode && config.enhancements?.waterReflections.enabled
       ? new WaterReflectionController(terrainView, config.enhancements.waterReflections) : null;
-    // Offshore FFT slope (PR I, I.0 Decision C): one per view, opt-in until I.4 samples it.
+    // Offshore FFT normals (PR I, I.0 Decision C): one per view. `water.sea.offshoreFft.enabled`,
+    // or `?oceanFft=1` for QA; the tier and the backend decide the rest (OceanFftQuality).
     this.oceanFft = this.enabled && !this.impostorBakeMode && config.water?.enabled && config.water.sea?.enabled
       ? OceanFftController.create({
         renderer: terrainView.renderer,
         qualityTier: config.water.qualityTier,
-        requested: config.enhancements?.oceanFft === true,
+        requested: config.water.sea.offshoreFft?.enabled === true || config.enhancements?.oceanFft === true,
       })
       : null;
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections, this.oceanFft?.binding ?? null);

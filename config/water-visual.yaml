@@ -205,6 +205,18 @@ water:
       fineStrength: 0.055
       orbitalAdvection: 0.8
       advectionRatio: 0.9
+    # Offshore FFT short-wave normals (PR I.4): replace the medium ripple band
+    # (≈ 2 m and 0.9 m) on open, deep, exposed sea; the fine band stays. Normal
+    # and roughness only; wave heights, foam and CPU water queries never change.
+    # High and ultra water tiers on WebGPU; `?oceanFft=1` forces it on for QA.
+    offshoreFft:
+      enabled: false
+      slopeStrength: 1
+      blend:
+        depthStartMeters: 7
+        depthEndMeters: 14
+        shoreStartMeters: 24
+        shoreEndMeters: 40
   # Where the ground meets the sea: a swash film that runs up the sand and back
   # each wave, a foam line on its front, and wet sand behind it. Keyed on height
   # above sea level, so it follows any coast; lakes and rivers get none.

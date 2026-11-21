@@ -1,0 +1,102 @@
+{
+  "query": {},
+  "failures": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "error": "page.evaluate: Execution context was destroyed, most likely because of a navigation.\n    at prepareVisualPose (F:\\Development\\drusniel-world-builder\\scripts\\lib\\world-visual-prepare-pose.mjs:10:16)\n    at F:\\Development\\drusniel-world-builder\\scripts\\run-coastal-review.mjs:182:33"
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "error": "page.goto: Timeout 120000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:5175/?qaVisual=1\", waiting until \"commit\"\u001b[22m\n\n    at F:\\Development\\drusniel-world-builder\\scripts\\run-coastal-review.mjs:155:20"
+    }
+  ],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/ultra (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213913,
+          "hash": "bd2026a2"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 228128,
+          "hash": "563efbbb"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/medium (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        },
+        {
+          "refraction": true,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/low (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        },
+        {
+          "refraction": true,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        }
+      ]
+    }
+  ]
+}

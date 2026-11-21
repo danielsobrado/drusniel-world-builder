@@ -23,6 +23,7 @@ import {
 import { createSeaSwellNodes } from '../water/SeaSwell.js';
 import { seaStateUniforms } from '../water/seaState.js';
 import { rainRoughness } from './RainRippleShading.js';
+import { composeOffshoreDetail, offshoreFftWeight } from '../water/fft/OceanFftBlendNodes.js';
 
 /** Nearshore normals follow the rendered depth contours and amplitude envelope. */
 function displacedSurfaceSlope() {
@@ -77,6 +78,9 @@ export function createSeaSurfaceNodes({
   exposure = float(1),
   // Slope of the ripple field (water/rippleFieldNode.js), world x/z.
   ripple = null,
+  // Offshore FFT (PR I.4): { binding, origin, settings } or null. Only with a real
+  // ocean mask: lakes at sea level never receive it.
+  oceanFft = null,
 }) {
   const { storm } = seaStateUniforms;
   // Metres from the chunk centre on canonical axes, matching the chunk's world position.
@@ -114,7 +118,14 @@ export function createSeaSurfaceNodes({
   const swellSlope = swell.slope.mul(amplitude).toVarying('seaSwellSlope');
   const slope = surf ? mix(displacedSurfaceSlope(), swellSlope, surf.offshore) : swellSlope;
   // Wind chop: a storm roughly doubles the short waves riding the swell.
-  const detailed = detail ? slope.add(detail.slope.mul(storm.mul(1.2).add(1))) : slope;
+  const stormGain = storm.mul(1.2).add(1);
+  const offshoreDetail = detail && oceanFft && oceanMask ? composeOffshoreDetail({
+    detail, stormGain, fft: { ...oceanFft, localXZ },
+    weight: offshoreFftWeight({ waterDepth, shoreDistance, exposure, oceanMask, waterCoverage,
+      available: oceanFft.binding.available, blend: oceanFft.settings.blend }),
+  }) : null;
+  const detailed = offshoreDetail ? slope.add(offshoreDetail.slope)
+    : detail ? slope.add(detail.slope.mul(stormGain)) : slope;
   const surfaceSlope = ripple ? detailed.add(ripple) : detailed;
   const normal = normalize(vec3(surfaceSlope.x.negate(), 1, surfaceSlope.y.negate()));
   const sun = normalize(sunDirection);
@@ -132,7 +143,7 @@ export function createSeaSurfaceNodes({
     storm,
   );
   const roughness = float(0.055).add(storm.mul(0.09)).add(rainRoughness(seaStateUniforms.rain))
-    .add(sqrt(detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
+    .add(sqrt(offshoreDetail?.variance ?? detail?.variance ?? float(0)).mul(0.16)).clamp(0.05, 0.48);
 
   return {
     displacement: surf?.displacement ?? height.mul(amplitude),
