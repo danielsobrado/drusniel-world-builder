@@ -82,3 +82,10 @@ test('shader integration uses existing sampler-free field only when configured',
   assert.doesNotMatch(context, /new (?:THREE\.)?StorageTexture/);
   assert.doesNotMatch(terrain, /new (?:THREE\.)?(?:DataTexture|StorageTexture)/);
 });
+
+test('terrain swash receives an ocean weight that fades out before the bed sampling cutoff', async () => {
+  const source = await readFile(new URL('../src/editor/stylized/TerrainOceanMask.js', import.meta.url), 'utf8');
+  assert.match(source, /height\.greaterThan\(MIN_BED_HEIGHT_METERS\)/);
+  assert.match(source, /const bedFade = smoothstep\(MIN_BED_HEIGHT_METERS, -10, height\)/);
+  assert.match(source, /identity\.assign\(filtered\.rgb\.mul\(bedFade\)\)/);
+});

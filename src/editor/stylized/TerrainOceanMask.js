@@ -5,6 +5,7 @@ import { createSeaShelterNode } from './SeaDiffractionNodes.js';
 
 const MIN_SHELTER_HEIGHT_METERS = 2.8;
 const SHELTER_HEIGHT_MARGIN_METERS = 1.5;
+const MIN_BED_HEIGHT_METERS = -17;
 
 // Neutral stand-in until the existing water slot is available. Shared by all terrain.
 const empty = new DataTexture(new Uint16Array([0, DataUtils.toHalfFloat(10000), 0, 0]), 1, 1, RGBAFormat, HalfFloatType);
@@ -34,7 +35,7 @@ export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize,
     If(wet.greaterThan(0), () => {
       const field = bilinearLoad(empty, fieldUv, readTexture).toVar();
       const height = groundHeight.sub(field.g.add(origin)).toVar();
-      If(height.greaterThan(-17).and(height.lessThan(shelterHeightLimit)), () => {
+      If(height.greaterThan(MIN_BED_HEIGHT_METERS).and(height.lessThan(shelterHeightLimit)), () => {
         const { texels, blend } = bilinearTexels(emptyAppearance, fieldUv, readAppearance);
         const samples = texels.map(value => value.toVar());
         // Decode IDs before blending. A lake and dry ground cannot blend into ocean.
@@ -42,9 +43,10 @@ export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize,
           const kind = value.r.mul(255).round();
           return vec4(float(kind.equal(1)), value.g, value.b, float(kind.greaterThan(0)));
         })).toVar();
+        const bedFade = smoothstep(MIN_BED_HEIGHT_METERS, -10, height).toVar();
         If(height.lessThan(MIN_SHELTER_HEIGHT_METERS), () => {
-          const bedFade = smoothstep(-17, -10, height);
-          identity.assign(vec3(filtered.r, filtered.gb.mul(bedFade)));
+          // Swash uses the ocean weight for submerged wetness, so it must reach zero at the sampling cutoff.
+          identity.assign(filtered.rgb.mul(bedFade));
           response.x.assign(smoothstep(-.05, .35, height).oneMinus().mul(filtered.a).mul(bedFade));
           // Bog mud keeps its wider damp margin.
           response.y.assign(smoothstep(-.1, .85, height).oneMinus().mul(filtered.a).mul(bedFade));
@@ -54,7 +56,7 @@ export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize,
           const exposed = blend(samples.map(value => value.a));
           const relative = exposed.div(max(filtered.r, 0.0001));
           const transmission = createSeaShelterNode(relative, max(field.a, 0));
-          response.z.assign(mix(float(1), transmission, smoothstep(0, 0.05, filtered.r).mul(smoothstep(-17, -10, height))));
+          response.z.assign(mix(float(1), transmission, smoothstep(0, 0.05, filtered.r).mul(bedFade)));
         }
       });
     });
