@@ -11,7 +11,8 @@ import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
 import { prepareVisualPose } from './lib/world-visual-prepare-pose.mjs';
 import { captureWorldCanvas } from './lib/world-visual-canvas.mjs';
-import { advanceCoastalClock, inspectCoastalScene, measureCoastalFrame } from './lib/coastal-review-browser.mjs';
+import { advanceCoastalClock, inspectCoastalScene, measureCoastalFrame, sampleCoastalTransects } from './lib/coastal-review-browser.mjs';
+import { coastalDiagnostics, coastalLayerControls, installCoastalDiagnostics, setCoastalDiagnostic } from './lib/coastal-review-diagnostics.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const option = (name, fallback) => process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : fallback;
@@ -22,6 +23,7 @@ const fixtures = JSON.parse(await readFile(option('--fixtures',
 const perf = process.argv.includes('--perf');
 const measure = perf || process.argv.includes('--measure');
 const minimumInterstageLimit = process.argv.includes('--minimum-interstage-limit');
+const diagnostic = process.argv.includes('--diagnostics');
 const only = option('--only', '').split(',').filter(Boolean);
 const minimumMs = Number(option('--settle-ms', 5000));
 const durationMs = Number(option('--duration-ms', 8000));
@@ -34,7 +36,8 @@ const jobs = fixtures.flatMap(({ tiers, controls = [], ...fixture }) => {
     ...controls.map(control => ({ diffraction: true, ...control })),
   ];
   const timings = fixture.benchmark && measure
-    ? tiers.flatMap(qualityTier => [true, false].map(diffraction => ({ qualityTier, diffraction }))) : [];
+    ? tiers.flatMap(qualityTier => (fixture.benchmark === 'on' ? [true] : [true, false])
+      .map(diffraction => ({ qualityTier, diffraction }))) : [];
   const captures = perf ? [] : variants;
   for (const timing of timings) {
     const capture = captures.find(variant => variant.qualityTier === timing.qualityTier
@@ -47,12 +50,13 @@ const jobs = fixtures.flatMap(({ tiers, controls = [], ...fixture }) => {
   || only.includes(`${job.id}/${job.qualityTier}`));
 assert.ok(jobs.length, 'No matching coastal jobs.');
 const configKey = job => JSON.stringify([job.qualityTier, job.diffraction,
-  job.waveRefraction !== false, job.opticalRefraction !== false]);
+  job.waveRefraction !== false, job.opticalRefraction !== false, job.calmScale ?? 1]);
 const tiers = ['high', 'ultra', 'medium', 'low'];
 jobs.sort((a, b) => tiers.indexOf(a.qualityTier) - tiers.indexOf(b.qualityTier)
   || Number(b.diffraction) - Number(a.diffraction)
   || Number(b.waveRefraction !== false) - Number(a.waveRefraction !== false)
-  || Number(b.opticalRefraction !== false) - Number(a.opticalRefraction !== false));
+  || Number(b.opticalRefraction !== false) - Number(a.opticalRefraction !== false)
+  || (b.calmScale ?? 1) - (a.calmScale ?? 1));
 
 await mkdir(out, { recursive: true });
 const source = await captureVisualSource(url, root);
@@ -88,11 +92,16 @@ try {
   const alerts = [];
   const warnings = new Set();
   page.on('console', message => {
+    if (message.type() === 'error' || message.text().startsWith('Recovery boot:')) console.error(message.text().slice(0, 1200));
     if (message.type() === 'warning' && warnings.size < 24) warnings.add(message.text().slice(0, 512));
     if (/GPUValidationError|GPUOutOfMemoryError|Uncaptured WebGPU|Error while parsing WGSL|CreateShaderModule.*error/i.test(message.text())) {
       if (alerts.length < 64) alerts.push(message.text().slice(0, 4096));
     }
   });
+  page.on('pageerror', error => console.error(error.message));
+  if (diagnostic && jobs.some(job => job.diagnostics?.some(mode => !coastalLayerControls.includes(mode)))) {
+    await installCoastalDiagnostics(page);
+  }
   page.on('requestfailed', request => {
     if (request.failure()?.errorText !== 'net::ERR_ABORTED' && alerts.length < 64) {
       alerts.push(`${request.failure()?.errorText} ${request.url()}`);
@@ -118,9 +127,15 @@ try {
     config.water.sea.surf.diffraction.enabled = job.diffraction;
     if (job.waveRefraction === false) config.water.sea.surf.refraction.enabled = false;
     if (job.opticalRefraction === false) config.water.refraction.enabled = false;
+    if (job.calmScale !== undefined) {
+      assert.ok(job.calmScale > 0 && job.calmScale < 1, 'Calm scale must be between zero and one.');
+      config.water.sea.amplitude *= job.calmScale;
+      config.water.coast.runupHeight *= job.calmScale;
+    }
     await route.fulfill({ contentType: 'application/javascript', body: `export default ${JSON.stringify(config)};\n` });
   });
   const browserUrl = new URL('/?qaVisual=1', url);
+  if (process.argv.includes('--startup-log')) browserUrl.searchParams.set('qaRecovery', '1');
   if (measure) browserUrl.searchParams.set('gpuTimings', '1');
   let currentConfig, adapter;
   for (job of jobs) {
@@ -131,6 +146,7 @@ try {
     const firstAlert = alerts.length;
     try {
       if (currentConfig !== configKey(job)) {
+        console.log('  loading app');
         await page.goto(browserUrl.href, { waitUntil: 'commit' });
         await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
         adapter = await page.evaluate(async () => {
@@ -199,7 +215,7 @@ try {
         }
       }
       if (!job.timingOnly) {
-        async function capture(label, moment) {
+        async function capture(label, moment, diagnosticMode = null) {
           assert.ok(await page.evaluate(() => {
             const overlay = window.__editor.gameplayOverlayController;
             overlay.closeActive();
@@ -220,7 +236,7 @@ try {
           assert.equal(png.readUInt32BE(20), viewport.height);
           manifest.screenshots.push({ path: file, sha256: await fileHash(path.join(out, file)),
             sourceRevision: source.sourceSha, captureMethod: 'Playwright screenshot of the active game canvas',
-            id: job.id, pose, adapter, moment, preparation, ...state });
+            id: job.id, pose, adapter, moment, diagnosticMode, preparation, ...state });
           console.log(`  captured ${file}`);
           await save();
         }
@@ -234,8 +250,25 @@ try {
           const decay = await page.evaluate(advanceCoastalClock, { end: impact.time + 0.6 });
           await capture(`${name}-decay`, decay);
         } else {
-          const moment = await page.evaluate(advanceCoastalClock, { start: 110, end: job.simulationSeconds ?? 123.4 });
+          let moment = await page.evaluate(advanceCoastalClock, { start: 110, end: job.simulationSeconds ?? 123.4 });
+          if (job.transects) {
+            const transects = await page.evaluate(sampleCoastalTransects, job.transects);
+            await mkdir(path.join(out, 'logs'), { recursive: true });
+            await writeFile(path.join(out, 'logs', `${job.id}-${name}-transects.json`), JSON.stringify(transects, null, 2) + '\n');
+          }
           await capture(name, moment);
+          for (const time of job.sequence ?? []) {
+            moment = await page.evaluate(advanceCoastalClock, { end: time });
+            await capture(`${name}-${time.toFixed(2)}`, moment);
+          }
+          for (const mode of diagnostic ? job.diagnostics ?? [] : []) {
+            await page.evaluate(setCoastalDiagnostic, { mode, index: coastalDiagnostics.indexOf(mode) });
+            await page.evaluate(async () => {
+              for (let i = 0; i < 3; i++) await new Promise(resolve => requestAnimationFrame(resolve));
+            });
+            await capture(`${name}-${mode}`, moment, mode);
+          }
+          if (diagnostic) await page.evaluate(setCoastalDiagnostic, { mode: null, index: -1 });
         }
       }
       health();

@@ -16,6 +16,10 @@ test('water acceptance runner requires hardware WebGPU by default', () => {
   assert.match(source, /performanceAuthoritative/);
 });
 
+test('water acceptance runner launches the local dev server through Node', () => {
+  assert.match(source, /spawn\(\s*process\.execPath,\s*\[\s*join\(ROOT, 'node_modules', 'vite', 'bin', 'vite\.js'\)/);
+});
+
 test('water acceptance runner drives enter, dive, surface and exit phases', () => {
   assert.match(source, /phaseId: 'enter-water'/);
   assert.match(source, /phaseId: 'dive'/);

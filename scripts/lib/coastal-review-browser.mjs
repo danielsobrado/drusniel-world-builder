@@ -43,6 +43,11 @@ export async function inspectCoastalScene(target) {
     weather: { mode: e.weatherSettings.weatherMode, intensity: e.weatherSettings.weatherIntensity,
       seaStorm: seaStateUniforms.storm.value },
     opticsRefraction: water.refraction,
+    seaOptics: water.sea.optics,
+    seaAmplitude: water.sea.amplitude,
+    seaStormScale: water.sea.stormScale,
+    surf: water.sea.surf,
+    coast: water.coast,
     finiteDepthRefraction: water.sea.surf.refraction,
     diffraction: water.sea.surf.diffraction,
     readiness: window.__worldVisualQa.readiness(),
@@ -90,6 +95,53 @@ export async function advanceCoastalClock({ end, start = null, impact = false })
   }
   return { time, impact: visibleSpray, impactEvents: (rock?.eventCount ?? 0) - events,
     droplets: rock?.spray?.live ?? 0 };
+}
+
+export async function sampleCoastalTransects(transects) {
+  const { terrainView, viewModeController, config } = window.__editor;
+  const { worldStore, floatingOrigin, slots } = terrainView;
+  const { halfToFloat } = await import('/src/editor/water/WaterField.js');
+  const { sampleWorldStoreWater, sampleWorldStoreSeaExposure } = await import('/src/editor/water/TerrainWaterQueries.js');
+  const { computeSeaOpticsSample } = await import('/src/editor/water/SeaOpticsMath.js');
+  const { seaStateUniforms } = await import('/src/editor/water/seaState.js');
+  const camera = viewModeController.camera;
+  const projected = camera.position.clone();
+  const { tileSize, chunkSize } = worldStore;
+  const water = config.stylizedSurface.water;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const sample = (x, z) => {
+    const cellX = x / tileSize, cellZ = -z / tileSize;
+    const ix = Math.floor(cellX), iz = Math.floor(cellZ);
+    const fx = cellX - ix, fz = cellZ - iz;
+    const cpu = sampleWorldStoreWater(worldStore, cellX, cellZ);
+    const page = slots.find(({ page }) => page && ix >= page.originX && iz >= page.originZ
+      && ix < page.originX + chunkSize && iz < page.originZ + chunkSize)?.page;
+    if (!page) throw new Error(`Transect contains an unresident cell at ${x}, ${z}.`);
+    const width = page.waterFieldWidth, index = (iz - page.originZ) * width + ix - page.originX;
+    const indices = [index, index + 1, index + width, index + width + 1];
+    const bilinear = ([a, b, c, d]) => lerp(lerp(a, b, fx), lerp(c, d, fx), fz);
+    const [a, b, c, d] = indices.map(i => page.heights[i]);
+    const triangleHeight = fx <= fz ? a + (d - c) * fx + (c - a) * fz
+      : a + (b - a) * fx + (d - b) * fz;
+    const corners = indices.map(i => Array.from(page.waterFieldPixels.subarray(i * 4, i * 4 + 4), halfToFloat));
+    const [coverage, relativeSurface, depth, shoreDistance] = corners[0].map((_, i) => bilinear(corners.map(v => v[i])));
+    const surfaceHeight = page.waterFieldSurfaceOrigin + relativeSurface;
+    const exposure = bilinear(indices.map(i => page.waterAppearancePixels[i * 4 + 3] / 255));
+    const kind = page.waterAppearancePixels[(index + Number(fx >= .5) + width * Number(fz >= .5)) * 4];
+    const local = floatingOrigin.toRender(x, z);
+    const viewY = camera.position.y - surfaceHeight;
+    const optics = computeSeaOpticsSample({ depthMeters: depth, viewCosine: viewY /
+      Math.hypot(viewY, local.x - camera.position.x, local.z - camera.position.z),
+    storm: seaStateUniforms.storm.value, settings: water.sea.optics, tier: water.qualityTier });
+    projected.set(local.x, surfaceHeight, local.z).project(camera);
+    return { x, z, page: page.key, cellX, cellZ, cpu,
+      cpuExposure: cpu.kind === 1 ? sampleWorldStoreSeaExposure(worldStore, x, z, cpu.shoreDistance) : null,
+      field: { coverage, surfaceHeight, depth, shoreDistance, exposure, kind, corners }, triangleHeight,
+      flatNormalReference: { distance: optics.opticalDistance, transmission: optics.transmission },
+      stillSurfaceNdc: projected.toArray() };
+  };
+  return transects.map(({ name, from, to, steps }) => ({ name, samples: Array.from({ length: steps + 1 },
+    (_, i) => sample(lerp(from[0], to[0], i / steps), lerp(from[1], to[1], i / steps))) }));
 }
 
 export async function measureCoastalFrame(durationMs) {

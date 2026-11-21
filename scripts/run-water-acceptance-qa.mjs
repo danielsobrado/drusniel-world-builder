@@ -45,11 +45,9 @@ async function waitForServer(url, timeoutMs = 30_000) {
 function startServer(baseUrl) {
   const parsed = new URL(baseUrl);
   const child = spawn(
-    process.platform === 'win32' ? 'npm.cmd' : 'npm',
+    process.execPath,
     [
-      'run',
-      'dev',
-      '--',
+      join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js'),
       '--host',
       parsed.hostname,
       '--port',
@@ -325,7 +323,8 @@ async function main() {
     const discoveryUrl = new URL(baseUrl);
     for (const [key, value] of new URLSearchParams({ qa: 'water-acceptance', autostart: '0', download: '0' })) discoveryUrl.searchParams.set(key, value);
     const startupFocus = await focusPerfBrowser(browser, page, { headed });
-    if (!(await startupFocus()).passed) throw new Error('Water benchmark startup did not retain foreground focus.');
+    const startup = await startupFocus();
+    if (!startup.passed) throw new Error(`Water benchmark startup lost foreground focus: ${JSON.stringify(startup)}`);
     await page.goto(discoveryUrl.href, {
       waitUntil: 'commit',
     });
@@ -338,7 +337,7 @@ async function main() {
 
     const discovery = await discoverRoute(page);
     const discoveryFocus = await captureDiscoveryFocus();
-    if (!discoveryFocus.passed) throw new Error('Water route discovery lost browser foreground focus.');
+    if (!discoveryFocus.passed) throw new Error(`Water route discovery lost foreground focus: ${JSON.stringify(discoveryFocus)}`);
     if (!discovery.route) {
       throw new Error(
         `No deterministic dry-to-deep shoreline route was found: ${
