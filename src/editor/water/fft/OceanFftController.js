@@ -14,7 +14,7 @@ import { resolveOceanSpectrumParams } from './OceanSpectrum.js';
  */
 export class OceanFftController {
   /** The controller for this view, or null when the profile is off (reason logged once). */
-  static create({ renderer, qualityTier, requested, log = console }) {
+  static create({ renderer, qualityTier, requested, log = console, gpu }) {
     const profile = resolveOceanFftProfile({
       qualityTier, requested, unsupportedReason: requested ? oceanFftUnsupportedReason(renderer) : null,
     });
@@ -22,12 +22,13 @@ export class OceanFftController {
       if (requested) log.warn?.(`[ocean-fft] off: ${profile.reason}.`);
       return null;
     }
-    return new OceanFftController(renderer, profile, log);
+    return new OceanFftController(renderer, profile, log, gpu);
   }
 
-  constructor(renderer, profile, log = console) {
+  /** `gpu` is the runtime's resource factory, injectable for tests (OceanFftRuntime). */
+  constructor(renderer, profile, log = console, gpu = undefined) {
     this.profile = profile;
-    this.runtime = new OceanFftRuntime(renderer, { log });
+    this.runtime = new OceanFftRuntime(renderer, { log, gpu });
     this.binding = new OceanFftBinding(profile);
     const params = resolveOceanSpectrumParams(OFFSHORE_FFT_WIND);
     const spectra = buildCascadeSpectra({ size: profile.size, seed: OFFSHORE_FFT_SEED, params, cascades: profile.cascades });
@@ -43,10 +44,10 @@ export class OceanFftController {
   prepare(timeSeconds) {
     this.runtime.prepare(timeSeconds);
     this.binding.update(this.runtime.output);
-    const diagnostics = this.runtime.diagnostics();
+    // Read the fields directly: diagnostics() builds an object, and this runs every frame.
     PerfCounters.set('oceanFftActive', this.binding.available.value);
-    PerfCounters.set('oceanFftBytes', diagnostics.bytes?.total ?? 0);
-    PerfCounters.set('oceanFftTransforms', diagnostics.transforms);
+    PerfCounters.set('oceanFftBytes', this.runtime.resources?.bytes?.total ?? 0);
+    PerfCounters.set('oceanFftTransforms', this.runtime.counters.transforms);
   }
 
   dispose() {

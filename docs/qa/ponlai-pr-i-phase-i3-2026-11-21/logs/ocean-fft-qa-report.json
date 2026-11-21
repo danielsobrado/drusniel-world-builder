@@ -3784,9 +3784,21 @@
     "pass": true
   },
   "screenshots": [
+    "screenshots/world-origin.png",
+    "screenshots/fft-disabled.png",
+    "screenshots/negative-xz.png",
     "screenshots/top-down-chunk-corner.png",
+    "screenshots/huge-positive.png",
+    "screenshots/rebased-render-origin.png",
+    "screenshots/low-altitude.png",
     "screenshots/grazing-horizon.png",
-    "screenshots/high-altitude.png"
+    "screenshots/high-altitude.png",
+    "screenshots/grazing-slope-x.png",
+    "screenshots/grazing-slope-z.png",
+    "screenshots/grazing-normal.png",
+    "screenshots/grazing-mip-level.png",
+    "screenshots/grazing-unresolved.png",
+    "screenshots/grazing-resolved.png"
   ],
   "scene": {
     "rebase": {
@@ -3795,12 +3807,536 @@
       "differingChannelsWithoutFloatingOrigin": 205332,
       "pass": true
     },
+    "teleport": {
+      "channels": 518400,
+      "differingAfterReturn": 0,
+      "differingAtOtherPlace": 161162,
+      "pass": true
+    },
+    "captures": [
+      {
+        "name": "world-origin",
+        "mode": "combined",
+        "base": [
+          64,
+          64
+        ],
+        "renderOrigin": [
+          64,
+          64
+        ],
+        "canonicalEye": [
+          128,
+          160,
+          129
+        ],
+        "look": [
+          128,
+          0,
+          128
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "fft-disabled",
+        "mode": "combined",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234432,
+          160,
+          -4234431
+        ],
+        "look": [
+          -4234432,
+          0,
+          -4234432
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": -1,
+        "spectrumRevision": 45,
+        "available": 0
+      },
+      {
+        "name": "negative-xz",
+        "mode": "combined",
+        "base": [
+          -20032,
+          -20032
+        ],
+        "renderOrigin": [
+          -20032,
+          -20032
+        ],
+        "canonicalEye": [
+          -19968,
+          160,
+          -19967
+        ],
+        "look": [
+          -19968,
+          0,
+          -19968
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "top-down-chunk-corner",
+        "mode": "combined",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234432,
+          160,
+          -4234431
+        ],
+        "look": [
+          -4234432,
+          0,
+          -4234432
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "huge-positive",
+        "mode": "combined",
+        "base": [
+          4226496,
+          -278464
+        ],
+        "renderOrigin": [
+          4226496,
+          -278464
+        ],
+        "canonicalEye": [
+          4226560,
+          160,
+          -278399
+        ],
+        "look": [
+          4226560,
+          0,
+          -278400
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "rebased-render-origin",
+        "mode": "combined",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234432,
+          -4234560
+        ],
+        "canonicalEye": [
+          -4234432,
+          160,
+          -4234431
+        ],
+        "look": [
+          -4234432,
+          0,
+          -4234432
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "low-altitude",
+        "mode": "combined",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          3,
+          -4234536
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234436
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-horizon",
+        "mode": "combined",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "high-altitude",
+        "mode": "combined",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234696,
+          1200,
+          -4235396
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234496
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-slope-x",
+        "mode": "slopeX",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-slope-z",
+        "mode": "slopeZ",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-normal",
+        "mode": "normal",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-mip-level",
+        "mode": "mipLevel",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-unresolved",
+        "mode": "unresolved",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      },
+      {
+        "name": "grazing-resolved",
+        "mode": "resolved",
+        "base": [
+          -4234496,
+          -4234496
+        ],
+        "renderOrigin": [
+          -4234496,
+          -4234496
+        ],
+        "canonicalEye": [
+          -4234496,
+          6,
+          -4235196
+        ],
+        "look": [
+          -4234496,
+          0,
+          -4234096
+        ],
+        "resolution": "1280×720",
+        "quality": "fixture 128²×2",
+        "seed": 1234,
+        "waterTime": 126,
+        "size": 128,
+        "tileSizes": [
+          57.3,
+          15.45
+        ],
+        "generation": 99,
+        "spectrumRevision": 45,
+        "available": 1
+      }
+    ],
     "cost": {
       "resolution": "1600×900",
-      "medianWithoutMs": 0.024576,
-      "medianWithMs": 0.04096,
-      "medianWithoutAgainMs": 0.024576,
-      "addedMs": 0.016384000000000003
+      "medianWithoutMs": 0.008192,
+      "medianWithMs": 0.018432,
+      "medianWithoutAgainMs": 0.008192,
+      "addedMs": 0.01024
+    },
+    "live": {
+      "buffers": 362,
+      "bufferBytes": 1306772,
+      "textures": 2,
+      "textureBytes": 174768
     },
     "pass": true
   },
@@ -3847,7 +4383,7 @@
   },
   "disabled": {
     "state": "disabled",
-    "cpuMsPerCall": 0.00009999999776482581,
+    "cpuMsPerCall": 0,
     "submits": 0,
     "buffersCreated": 0,
     "computePipelines": 0,
@@ -3861,15 +4397,15 @@
       "cpuMsPerCall": 0.00030000000074505807,
       "submits": 1,
       "transforms": 0,
-      "gpuComputeMsTotal": 0.062368
+      "gpuComputeMsTotal": 0.028384
     },
     "jump": {
       "label": "time jump +1000 s",
       "calls": 1,
-      "cpuMsPerCall": 0.3999999985098839,
+      "cpuMsPerCall": 0.30000000074505806,
       "submits": 5,
       "transforms": 1,
-      "gpuComputeMsTotal": 0.05632
+      "gpuComputeMsTotal": 0.0256
     }
   },
   "topologies": {
@@ -3904,60 +4440,60 @@
         "textures": 1,
         "textureBytes": 21844
       },
-      "configureMs": 0.5,
-      "firstTransformMs": 4,
+      "configureMs": 1,
+      "firstTransformMs": 10.800000000745058,
       "phasesMs": {
         "evolve": {
           "samples": 120,
-          "median": 0.004096,
-          "mean": 0.004360533333333328,
-          "min": 0.004096,
-          "max": 0.01536
+          "median": 0.002048,
+          "mean": 0.002833066666666662,
+          "min": 0.002048,
+          "max": 0.00512
         },
         "rows": {
           "samples": 120,
-          "median": 0.019456,
-          "mean": 0.020189866666666664,
-          "min": 0.018432,
-          "max": 0.036864
+          "median": 0.01024,
+          "mean": 0.012774399999999993,
+          "min": 0.009216,
+          "max": 0.019456
         },
         "columns": {
           "samples": 120,
-          "median": 0.019456,
-          "mean": 0.020121599999999996,
-          "min": 0.019456,
-          "max": 0.028672
+          "median": 0.01024,
+          "mean": 0.012979199999999991,
+          "min": 0.009216,
+          "max": 0.019456
         },
         "output": {
           "samples": 120,
-          "median": 0.00512,
-          "mean": 0.005290666666666675,
-          "min": 0.004096,
-          "max": 0.011264
+          "median": 0.002048,
+          "mean": 0.002858666666666666,
+          "min": 0.001024,
+          "max": 0.007168
         }
       },
       "computeMs": {
         "samples": 120,
-        "median": 0.038912,
-        "mean": 0.03896319999999997,
-        "min": 0.037888,
-        "max": 0.057344
+        "median": 0.018432,
+        "mean": 0.018312533333333325,
+        "min": 0.017408,
+        "max": 0.019456
       },
       "outputPassesMs": {
         "samples": 120,
-        "median": 0.004096,
-        "mean": 0.0044373333333333305,
-        "min": 0.003072,
-        "max": 0.012288
+        "median": 0.002048,
+        "mean": 0.0017066666666666634,
+        "min": 0.001024,
+        "max": 0.002048
       },
       "cpuPrepareMs": {
         "samples": 120,
-        "median": 0.19999999925494194,
-        "mean": 0.18333333268140753,
+        "median": 0.6000000014901161,
+        "mean": 0.5008333335630596,
         "min": 0,
-        "max": 1.199999999254942
+        "max": 2.800000000745058
       },
-      "throughputMsPerTransform": 0.18600000000248354
+      "throughputMsPerTransform": 0.3933333333333333
     },
     "128²×2": {
       "size": 128,
@@ -3990,60 +4526,60 @@
         "textures": 1,
         "textureBytes": 174760
       },
-      "configureMs": 1.5999999977648258,
-      "firstTransformMs": 8.900000002235174,
+      "configureMs": 3.800000000745058,
+      "firstTransformMs": 8.800000000745058,
       "phasesMs": {
         "evolve": {
           "samples": 120,
           "median": 0.00512,
-          "mean": 0.005486933333333344,
-          "min": 0.00512,
-          "max": 0.017408
+          "mean": 0.008157866666666675,
+          "min": 0.004096,
+          "max": 0.073728
         },
         "rows": {
           "samples": 120,
-          "median": 0.027648,
-          "mean": 0.028211199999999978,
-          "min": 0.026624,
-          "max": 0.057344
+          "median": 0.026624,
+          "mean": 0.05429759999999999,
+          "min": 0.0256,
+          "max": 2.952192
         },
         "columns": {
           "samples": 120,
-          "median": 0.028672,
-          "mean": 0.02901333333333332,
+          "median": 0.027648,
+          "mean": 0.030668799999999972,
           "min": 0.026624,
-          "max": 0.067584
+          "max": 0.09728
         },
         "output": {
           "samples": 120,
           "median": 0.01024,
-          "mean": 0.01056426666666668,
-          "min": 0.009216,
-          "max": 0.018432
+          "mean": 0.011818666666666679,
+          "min": 0.008192,
+          "max": 0.13824
         }
       },
       "computeMs": {
         "samples": 120,
-        "median": 0.055296,
-        "mean": 0.05521066666666673,
+        "median": 0.054272,
+        "mean": 0.05469866666666674,
         "min": 0.054272,
-        "max": 0.075776
+        "max": 0.055296
       },
       "outputPassesMs": {
         "samples": 120,
         "median": 0.009216,
-        "mean": 0.008712533333333328,
+        "mean": 0.008917333333333331,
         "min": 0.006144,
         "max": 0.012288
       },
       "cpuPrepareMs": {
         "samples": 120,
-        "median": 0.10000000149011612,
-        "mean": 0.1574999992425243,
+        "median": 0.19999999925494194,
+        "mean": 0.29416666642452277,
         "min": 0,
-        "max": 0.6999999992549419
+        "max": 1.7000000029802322
       },
-      "throughputMsPerTransform": 0.25233333334326746
+      "throughputMsPerTransform": 0.5693333333233992
     },
     "256²×2 (research)": {
       "size": 256,
@@ -4076,67 +4612,67 @@
         "textures": 1,
         "textureBytes": 699048
       },
-      "configureMs": 5.199999999254942,
-      "firstTransformMs": 142,
+      "configureMs": 13.400000002235174,
+      "firstTransformMs": 199.39999999850988,
       "phasesMs": {
         "evolve": {
           "samples": 120,
-          "median": 0.008192,
-          "mean": 0.01262933333333332,
-          "min": 0.007168,
-          "max": 0.205824
+          "median": 0.007168,
+          "mean": 0.026112000000000024,
+          "min": 0.006144,
+          "max": 0.219136
         },
         "rows": {
           "samples": 120,
-          "median": 0.048128,
-          "mean": 0.04961280000000005,
-          "min": 0.047104,
-          "max": 0.096256
+          "median": 0.04096,
+          "mean": 0.04686506666666669,
+          "min": 0.039936,
+          "max": 0.11776
         },
         "columns": {
           "samples": 120,
-          "median": 0.050176,
-          "mean": 0.05120000000000004,
-          "min": 0.048128,
-          "max": 0.08192
+          "median": 0.041984,
+          "mean": 0.048768000000000034,
+          "min": 0.04096,
+          "max": 0.101376
         },
         "output": {
           "samples": 120,
-          "median": 0.012288,
-          "mean": 0.012612266666666674,
-          "min": 0.010239999999999999,
-          "max": 0.020479999999999998
+          "median": 0.01024,
+          "mean": 0.011716266666666674,
+          "min": 0.007168,
+          "max": 0.037888
         }
       },
       "computeMs": {
         "samples": 120,
-        "median": 0.099328,
-        "mean": 0.09955839999999998,
-        "min": 0.098304,
-        "max": 0.105472
+        "median": 0.083968,
+        "mean": 0.08422399999999991,
+        "min": 0.082944,
+        "max": 0.114688
       },
       "outputPassesMs": {
         "samples": 120,
-        "median": 0.011264,
-        "mean": 0.011042133333333346,
-        "min": 0.008192,
-        "max": 0.023552
+        "median": 0.009216,
+        "mean": 0.008908799999999991,
+        "min": 0.007168,
+        "max": 0.011264
       },
       "cpuPrepareMs": {
         "samples": 120,
-        "median": 0.10000000149011612,
-        "mean": 0.14416666614512602,
+        "median": 0.19999999925494194,
+        "mean": 0.35166666690881054,
         "min": 0,
-        "max": 0.6999999992549419
+        "max": 1.300000000745058
       },
-      "throughputMsPerTransform": 0.2753333333258828
+      "throughputMsPerTransform": 0.5626666666691502
     }
   },
   "restart": {
     "state": "active",
-    "rendererInitMs": 20.800000000745058,
-    "coldStartMs": 46,
-    "warmReconfigureMs": 13.700000002980232,
+    "rendererInitMs": 18.900000002235174,
+    "coldStartMs": 39.100000001490116,
+    "warmReconfigureMs": 10.399999998509884,
     "errors": []
   },
   "validationErrors": [],
@@ -4148,5 +4684,10 @@
   "pass": true,
   "consoleErrors": [
     "[ocean-fft] device lost: qa-simulated lifecycle check; the authored sea detail stays in use. "
-  ]
+  ],
+  "source": {
+    "commit": "b5935abdf1056d294021ef63f941f4e0d3916a63",
+    "workingTreeDirty": true,
+    "url": "http://localhost:5175/ocean-fft-qa.html"
+  }
 }

@@ -7,7 +7,7 @@ import {
   proof64Cases, realSpectra, smallGridCases, spectrumRebuildCase, timeContractCases,
 } from './cases.js';
 import { instrumentDevice, liveSummary } from './instrument.js';
-import { captureView, createSamplingScene, mipCase, orientationCase, rebaseCase, samplingCostCase, seamCase } from './sampling.js';
+import { captureView, createSamplingScene, mipCase, orientationCase, rebaseCase, samplingCostCase, seamCase, teleportCase } from './sampling.js';
 
 /**
  * Isolated GPU QA fixture for the ocean FFT (PR I phase I.2). Its own renderer
@@ -116,21 +116,54 @@ async function restartTiming() {
   return result;
 }
 
-/** Rendered chunk planes near −4.2 Mm: rebase invariance, screenshots and sampling cost (PR I phase I.3). */
+/**
+ * Rendered chunk planes: rebase and teleport invariance, the I.3 image scenarios in
+ * selectable debug modes, and the sampling cost (PR I phase I.3).
+ */
 async function samplingScene(ctx, report, benchmark) {
   const parts = await createSamplingScene(ctx);
-  const far = parts.FAR;
-  const result = { rebase: await rebaseCase(ctx, parts) };
+  const far = parts.FAR, huge = [4_226_496, -278_464];
+  const result = { rebase: await rebaseCase(ctx, parts), teleport: await teleportCase(ctx, parts) };
+  const topDown = (b, h = 160) => ({ base: b, renderOrigin: b, eye: [b[0] + 64, h, b[1] + 65], look: [b[0] + 64, 0, b[1] + 64] });
+  const grazing = (b) => ({ base: b, renderOrigin: b, eye: [b[0], 6, b[1] - 700], look: [b[0], 0, b[1] + 400] });
   const views = {
-    'top-down-chunk-corner': { renderOrigin: [far, far], eye: [far + 64, 160, far + 65], look: [far + 64, 0, far + 64] },
-    'grazing-horizon': { renderOrigin: [far, far], eye: [far, 6, far - 700], look: [far, 0, far + 400] },
-    'high-altitude': { renderOrigin: [far, far], eye: [far - 200, 1200, far - 900], look: [far, 0, far] },
+    'world-origin': topDown([64, 64]),
+    // Early, so every later capture proves the swap back to the live output renders.
+    'fft-disabled': { ...topDown([far, far]), disabled: true },
+    'negative-xz': topDown([-20_032, -20_032]),
+    'top-down-chunk-corner': topDown([far, far]),
+    'huge-positive': topDown(huge),
+    'rebased-render-origin': { ...topDown([far, far]), renderOrigin: [far + 64, far - 64] },
+    'low-altitude': { base: [far, far], renderOrigin: [far, far], eye: [far, 3, far - 40], look: [far, 0, far + 60] },
+    'grazing-horizon': grazing([far, far]),
+    'high-altitude': { base: [far, far], renderOrigin: [far, far], eye: [far - 200, 1200, far - 900], look: [far, 0, far] },
+    'grazing-slope-x': { ...grazing([far, far]), mode: 'slopeX' },
+    'grazing-slope-z': { ...grazing([far, far]), mode: 'slopeZ' },
+    'grazing-normal': { ...grazing([far, far]), mode: 'normal' },
+    'grazing-mip-level': { ...grazing([far, far]), mode: 'mipLevel' },
+    'grazing-unresolved': { ...grazing([far, far]), mode: 'unresolved' },
+    'grazing-resolved': { ...grazing([far, far]), mode: 'resolved' },
   };
   report.screenshots = {};
-  for (const [name, view] of Object.entries(views)) report.screenshots[name] = await captureView(ctx, parts, view);
+  result.captures = [];
+  for (const [name, { base, mode = 'combined', disabled = false, ...view }] of Object.entries(views)) {
+    parts.place(base);
+    parts.setMode(mode);
+    // Disabled: the binding's zero fallback, exactly what the water binds before/after the runtime.
+    if (disabled) parts.binding.update(null);
+    report.screenshots[name] = await captureView(ctx, parts, view);
+    result.captures.push({
+      name, mode, base, renderOrigin: view.renderOrigin, canonicalEye: view.eye, look: view.look,
+      resolution: '1280×720', quality: 'fixture 128²×2', ...parts.meta(),
+    });
+    if (disabled) parts.binding.update(ctx.runtime.output);
+  }
+  parts.place([far, far]);
+  parts.setMode('combined');
   if (benchmark) result.cost = await samplingCostCase(ctx, parts);
+  result.live = liveSummary(ctx.stats);
   parts.dispose();
-  result.pass = result.rebase.pass;
+  result.pass = result.rebase.pass && result.teleport.pass;
   return result;
 }
 

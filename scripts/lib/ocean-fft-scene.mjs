@@ -2,7 +2,7 @@
  * In-app inspection of the offshore FFT (PR I phase I.3), run in the page by
  * run-coastal-review.mjs --ocean-fft-inspect: runtime state, every water slot's
  * cascade origins against the CPU formula, and the water materials' fragment
- * WGSL (texture/sampler counts and a hash, captured by forcing one rebuild).
+ * WGSL (texture/sampler/varying counts and a hash, read from the cached pipeline).
  */
 export async function inspectOceanFftScene() {
   const editor = window.__editor, surface = editor.stylizedSurface, renderer = editor.terrainView.renderer;
@@ -18,36 +18,24 @@ export async function inspectOceanFftScene() {
     worst = Math.max(worst, ...actual.map((value, i) => Math.abs(value - expected[i])));
     checked++;
   }
-  const materials = [...surface.sharedWaterMaterials.materials.entries()];
-  const captured = new Map();
-  const previous = renderer.debug.onNodeBuilderCreated;
-  renderer.debug.onNodeBuilderCreated = (builder, target) => {
-    previous?.(builder, target);
-    const entry = materials.find(([, material]) => material === builder.material);
-    if (!entry) return;
-    for (const name of ['build', 'buildAsync']) {
-      const original = builder[name];
-      if (!original) continue;
-      builder[name] = function wrapped(...args) {
-        const record = () => captured.set(entry[0], builder.fragmentShader);
-        const result = original.apply(this, args);
-        if (result?.then) return result.then((value) => { record(); return value; });
-        record();
-        return result;
-      };
-    }
-  };
-  for (const [, material] of materials) material.needsUpdate = true;
-  for (let i = 0; i < 60 && captured.size < materials.length; i++) await new Promise((resolve) => requestAnimationFrame(resolve));
-  renderer.debug.onNodeBuilderCreated = previous;
+  // One water slot mesh per shared variant; getShaderAsync reads the cached pipeline's WGSL.
+  const view = editor.terrainView, materials = [...surface.sharedWaterMaterials.materials.entries()];
   const hash = (text) => [...text].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7).toString(16);
-  const shaders = [...captured].map(([refraction, wgsl]) => ({
-    refraction,
-    textures: (wgsl.match(/var\s+\w+\s*:\s*texture_\w+/g) ?? []).length,
-    samplers: (wgsl.match(/var\s+\w+\s*:\s*sampler(?:_comparison)?\s*;/g) ?? []).length,
-    oceanFftReferenced: /oceanFft/i.test(wgsl),
-    length: wgsl.length, hash: hash(wgsl),
-  }));
+  const shaders = [];
+  for (const [refraction, material] of materials) {
+    const mesh = surface.waterSlots.map((slot) => slot.mesh).find((candidate) => candidate?.material === material);
+    if (!mesh) continue;
+    const { fragmentShader: wgsl, vertexShader } = await renderer.debug.getShaderAsync(view.scene, editor.viewModeController.camera, mesh);
+    shaders.push({
+      refraction,
+      textures: (wgsl.match(/var\s+\w+\s*:\s*texture_\w+/g) ?? []).length,
+      samplers: (wgsl.match(/var\s+\w+\s*:\s*sampler(?:_comparison)?\s*;/g) ?? []).length,
+      // Interstage variables: user @location outputs of the vertex stage.
+      varyings: new Set(vertexShader.match(/@location\(\s*\d+\s*\)(?=[^;{]*:)/g) ?? []).size,
+      oceanFftReferenced: /oceanFft/i.test(wgsl),
+      length: wgsl.length, hash: hash(wgsl),
+    });
+  }
   const fft = surface.oceanFft;
   return {
     oceanFft: fft ? { ...fft.runtime.diagnostics(), available: fft.binding.available.value, bindingGeneration: fft.binding.generation, tileSizes: fft.tileSizes } : null,

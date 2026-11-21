@@ -1,6 +1,6 @@
 # PR I phase I.3 — World sampling evidence
 
-Evidence for the [Phase I.3 report](../../plans/ponlai-pr-i-phase-i3-world-sampling-2026-11-21.md). RTX 4080, Windows 11, Chromium, native WebGPU.
+Evidence for the [Phase I.3 report](../../plans/ponlai-pr-i-phase-i3-world-sampling-and-quality-2026-11-21.md). RTX 4080, Windows 11, Chromium, native WebGPU.
 
 ## Reproduce
 
@@ -14,7 +14,11 @@ node scripts/run-coastal-review.mjs --url http://localhost:5174 --fixtures docs/
 
 ## Contents
 
-- `logs/ocean-fft-qa-report.json`: the full isolated-fixture run, including I.3's orientation, seam, mip, rebase and sampling-cost cases. Its one console error is the deliberate simulated device loss.
-- `logs/inspect-on.json`, `logs/inspect-off.json`: runtime state per tier, slot-origin check and water WGSL texture/sampler counts and hashes, with and without `oceanFft=1`.
-- `logs/perf-off-a.json`, `logs/perf-on.json`, `logs/perf-off-b.json`: frame timings of the A / FFT / A′ runs, trimmed to timings and counters.
-- `screenshots/`: slope visualization from the fixture (not the water material): `top-down-chunk-corner`, `grazing-horizon`, `high-altitude`.
+- `logs/ocean-fft-qa-report.json`: the full isolated-fixture run: orientation, seam, mip, rebase, teleport and sampling-cost cases, capture metadata (`scene.captures`), live GPU allocations, and the source commit with a dirty-tree flag. Its one console error is the deliberate simulated device loss.
+- `logs/inspect-on.json`, `logs/inspect-off.json`: per tier, the runtime state, the slot-origin check and the water WGSL texture/sampler/varying counts and hashes, with and without `oceanFft=1`.
+- `logs/perf-off-a.json`, `logs/perf-on.json`, `logs/perf-off-b.json`: frame timings of the A / FFT / A′ runs (from `b5935abd`), trimmed to timings and counters.
+- `screenshots/`: 15 fixture captures (slope visualization, not the water material):
+  - top-down: `world-origin`, `negative-xz`, `top-down-chunk-corner`, `huge-positive`, `rebased-render-origin`
+  - other angles: `low-altitude`, `grazing-horizon`, `high-altitude`
+  - grazing debug views: `grazing-slope-x`, `-slope-z`, `-normal`, `-mip-level`, `-unresolved`, `-resolved`
+  - `fft-disabled`

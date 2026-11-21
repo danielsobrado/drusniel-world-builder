@@ -4,7 +4,7 @@ import test from 'node:test';
 import { OCEAN_FFT_FIELD } from '../src/editor/water/fft/OceanFftGpuKernels.js';
 import { buildCascadeSpectra } from '../src/editor/water/fft/OceanFftGpuLayout.js';
 import { OCEAN_FFT_STATE as S, OceanFftRuntime } from '../src/editor/water/fft/OceanFftRuntime.js';
-import { WINDY } from './helpers/oceanFftFixtures.js';
+import { fakeGpu, fakeRenderer, WINDY } from './helpers/oceanFftFixtures.js';
 
 // PR I phase I.2 runtime lifecycle with a fake renderer and fake GPU objects:
 // states, zero work when off or unchanged, publish-only-complete, failure and disposal.
@@ -13,47 +13,6 @@ import { WINDY } from './helpers/oceanFftFixtures.js';
 const CONFIG = Object.freeze({ size: 8, tileSizes: [48] });
 const spectra = (seed = 1) => buildCascadeSpectra({ size: 8, seed, params: WINDY, cascades: [{ tileSizeMeters: 48, kMin: 0, kMax: Infinity }] });
 const silent = { error() {} };
-
-function fakeRenderer({ webgpu = true, scopeError = null } = {}) {
-  let loseDevice;
-  const device = {
-    lost: new Promise((resolve) => { loseDevice = resolve; }),
-    pushErrorScope() {},
-    popErrorScope: async () => scopeError,
-  };
-  const renderer = {
-    backend: { isWebGPUBackend: webgpu, device: webgpu ? device : null },
-    computes: 0, renders: 0, target: null,
-    compute() { this.computes++; },
-    getRenderTarget() { return this.target; },
-    setRenderTarget(target) { this.target = target; },
-  };
-  return { renderer, device, loseDevice: (info) => loseDevice(info) };
-}
-
-function fakeGpu() {
-  const live = new Set();
-  return {
-    live,
-    createResources(topology) {
-      const resources = {
-        topology, bytes: { total: 1 }, uploads: 0, output: { texture: { name: 'out' } },
-        upload() { this.uploads++; }, dispose() { live.delete(this); },
-      };
-      live.add(resources);
-      return resources;
-    },
-    createKernels(resources) {
-      const kernels = {
-        tick: { value: 0 }, fieldMode: { value: 0 }, transform: [], dispatchCount: 4,
-        outputQuads: resources.topology.tileSizes.map(() => ({ render: (r) => { r.renders++; } })),
-        dispose() { live.delete(this); },
-      };
-      live.add(kernels);
-      return kernels;
-    },
-  };
-}
 
 async function activeRuntime(options = {}) {
   const fake = fakeRenderer(options);

@@ -78,16 +78,19 @@ export function pixelFootprint(localXZ) {
  * could not show, at chunk-local metres `localXZ` of a chunk whose per-slot
  * cascade origins are `origin` (vec4: u0, v0, u1, v1). `lod` overrides the
  * footprint LOD (QA, compute). Callers weight it by `binding.available`.
+ * `lods` is each cascade's mip level (debug views).
  */
 export function sampleOceanFftSlope(binding, { origin, localXZ, footprint = null, lod = null }) {
   const reach = footprint ?? (lod === null ? pixelFootprint(localXZ) : null);
   const maxLevel = binding.levels - 1;
   let slope = vec2(0), unresolved = float(0);
+  const lods = [];
   binding.tileSizes.forEach((tile, c) => {
     const texel = tile / binding.size;
     const level = lod === null
       ? clamp(log2(max(reach, texel).div(texel)), 0, maxLevel).toVar(`oceanFftLod${c}`)
       : float(lod);
+    lods.push(level);
     const cascadeOrigin = c === 0 ? origin.xy : origin.zw;
     // No fract(): the repeat sampler wraps, and continuous UVs keep derivatives seam-free.
     const uv = cascadeOrigin.add(localXZ.div(tile));
@@ -97,5 +100,5 @@ export function sampleOceanFftSlope(binding, { origin, localXZ, footprint = null
     const upper = binding.unresolved.element(int(low).add(1).min(maxLevel).add(base));
     unresolved = unresolved.add(mix(lower, upper, level.sub(low)));
   });
-  return { slope, unresolved };
+  return { slope, unresolved, lods };
 }

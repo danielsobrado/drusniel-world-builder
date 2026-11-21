@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from 'playwright';
@@ -31,6 +32,8 @@ try {
   await browser.close();
 }
 report.consoleErrors = consoleErrors;
+const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+report.source = { commit: git('rev-parse', 'HEAD'), workingTreeDirty: git('status', '--porcelain').length > 0, url: url.href };
 await mkdir(path.dirname(out), { recursive: true });
 const shots = path.join(path.dirname(out), 'screenshots');
 await mkdir(shots, { recursive: true });

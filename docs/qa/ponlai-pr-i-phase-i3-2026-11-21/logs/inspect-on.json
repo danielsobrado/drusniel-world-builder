@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "6ff50d84f15007ca582bf5ea2f9731a06a512203",
+  "sourceRevision": "b5935abdf1056d294021ef63f941f4e0d3916a63",
   "query": {
     "oceanFft": "1"
   },
@@ -24,11 +24,11 @@
         "outputPasses": 2,
         "spectrumRevision": 1,
         "configGeneration": 1,
-        "transforms": 2930,
+        "transforms": 2983,
         "skipped": 0,
-        "outputs": 2930,
+        "outputs": 2983,
         "available": 1,
-        "bindingGeneration": 2930,
+        "bindingGeneration": 2983,
         "tileSizes": [
           57.3,
           15.45
@@ -44,14 +44,16 @@
           "refraction": false,
           "textures": 15,
           "samplers": 12,
+          "varyings": 12,
           "oceanFftReferenced": false,
-          "length": 213725,
-          "hash": "b3c62d4e"
+          "length": 213727,
+          "hash": "6eb6cc2"
         },
         {
           "refraction": true,
           "textures": 20,
           "samplers": 13,
+          "varyings": 12,
           "oceanFftReferenced": false,
           "length": 227926,
           "hash": "6a9b2b63"
@@ -77,11 +79,11 @@
         "outputPasses": 2,
         "spectrumRevision": 1,
         "configGeneration": 1,
-        "transforms": 3593,
-        "skipped": 118,
-        "outputs": 3593,
+        "transforms": 3730,
+        "skipped": 113,
+        "outputs": 3730,
         "available": 1,
-        "bindingGeneration": 3593,
+        "bindingGeneration": 3730,
         "tileSizes": [
           57.3,
           15.45
@@ -92,7 +94,26 @@
         "maxError": 0
       },
       "materialVariants": 2,
-      "shaders": []
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213727,
+          "hash": "6eb6cc2"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 227926,
+          "hash": "6a9b2b63"
+        }
+      ]
     },
     {
       "scope": "offshore-calm/ultra (diffraction on)",
@@ -113,11 +134,11 @@
         "outputPasses": 2,
         "spectrumRevision": 1,
         "configGeneration": 1,
-        "transforms": 2574,
+        "transforms": 3231,
         "skipped": 0,
-        "outputs": 2574,
+        "outputs": 3231,
         "available": 1,
-        "bindingGeneration": 2574,
+        "bindingGeneration": 3231,
         "tileSizes": [
           57.3,
           15.45
@@ -133,14 +154,16 @@
           "refraction": false,
           "textures": 15,
           "samplers": 12,
+          "varyings": 12,
           "oceanFftReferenced": false,
-          "length": 213911,
-          "hash": "737edf92"
+          "length": 213913,
+          "hash": "bd2026a2"
         },
         {
           "refraction": true,
           "textures": 20,
           "samplers": 13,
+          "varyings": 12,
           "oceanFftReferenced": false,
           "length": 228128,
           "hash": "563efbbb"
@@ -155,7 +178,26 @@
         "maxError": 0
       },
       "materialVariants": 2,
-      "shaders": []
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        },
+        {
+          "refraction": true,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        }
+      ]
     },
     {
       "scope": "offshore-calm/low (diffraction on)",
@@ -165,7 +207,26 @@
         "maxError": 0
       },
       "materialVariants": 2,
-      "shaders": []
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        },
+        {
+          "refraction": true,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        }
+      ]
     }
   ]
 }

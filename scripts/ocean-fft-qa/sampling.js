@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { Fn, instanceIndex, storage, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
+import { float, Fn, instanceIndex, normalize, select, storage, uniform, uv, vec2, vec3, vec4 } from 'three/tsl';
 import { writeCascadeUvOrigins } from '../../src/editor/water/fft/OceanFftCoordinates.js';
 import { interpolateLevel, unresolvedSlopeVariance } from '../../src/editor/water/fft/OceanFftFiltering.js';
 import { OceanFftBinding, sampleOceanFftSlope } from '../../src/editor/water/fft/OceanFftSampling.js';
@@ -144,31 +144,50 @@ export async function mipCase(ctx) {
   };
 }
 
+/** Debug views of the rendered planes (QA only): `debugMode` selects one. */
+export const SAMPLING_DEBUG_MODES = Object.freeze(['combined', 'slopeX', 'slopeZ', 'normal', 'mipLevel', 'unresolved', 'resolved']);
+
 /**
- * Render 3×3 chunk planes near −4.2 Mm, the way the water draws them: chunk-local
- * metres from the plane UV, per-object origin uniforms, footprint LOD. Returns the
- * scene parts; the runner screenshots each view and the rebase check reads pixels.
+ * Render 13×13 chunk planes, the way the water draws them: chunk-local metres from
+ * the plane UV, per-object origin uniforms, footprint LOD. The grid can be moved to
+ * any canonical base (`place`); the runner screenshots views and the rebase and
+ * teleport checks read pixels.
  */
 export async function createSamplingScene(ctx) {
   const spectra = realSpectra(N);
   const binding = await setup(ctx, spectra, 126);
   const origin = uniform(new THREE.Vector4()).onObjectUpdate(({ object }) => object.userData.oceanFftOrigin);
   const localXZ = vec2(uv().x.sub(0.5).mul(CHUNK), uv().y.oneMinus().sub(0.5).mul(CHUNK));
-  const { slope, unresolved } = sampleOceanFftSlope(binding, { origin, localXZ });
+  const { slope, unresolved, lods } = sampleOceanFftSlope(binding, { origin, localXZ });
+  const debugMode = uniform(0);
+  const total = binding.unresolved.element(binding.levels - 1).add(binding.unresolved.element(2 * binding.levels - 1));
+  const normal = normalize(vec3(slope.x.negate(), 1, slope.y.negate()));
+  const views = [
+    vec3(slope.x.mul(2).add(0.5), slope.y.mul(2).add(0.5), unresolved.mul(40)),
+    vec3(slope.x.mul(4).add(0.5)), vec3(slope.y.mul(4).add(0.5)),
+    normal.mul(0.5).add(0.5), vec3(lods[0].div(7), lods[1].div(7), 0),
+    vec3(unresolved.div(total)), vec3(total.sub(unresolved).div(total)),
+  ];
   const material = new THREE.MeshBasicNodeMaterial();
-  material.colorNode = vec3(slope.x.mul(2).add(0.5), slope.y.mul(2).add(0.5), unresolved.mul(40));
+  material.colorNode = views.slice(1).reduce((chosen, node, i) => select(debugMode.equal(float(i + 1)), node, chosen), views[0]);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x101418);
   const geometry = new THREE.PlaneGeometry(CHUNK, CHUNK, 1, 1).rotateX(-Math.PI / 2);
-  const centres = [];
-  for (let dz = -6; dz <= 6; dz++) for (let dx = -6; dx <= 6; dx++) centres.push([FAR + dx * CHUNK, FAR + dz * CHUNK]);
-  const meshes = centres.map(([x, z]) => {
+  const offsets = [];
+  for (let dz = -6; dz <= 6; dz++) for (let dx = -6; dx <= 6; dx++) offsets.push([dx * CHUNK, dz * CHUNK]);
+  const meshes = offsets.map(() => {
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.userData.centre = [x, z];
-    mesh.userData.oceanFftOrigin = new THREE.Vector4(...writeCascadeUvOrigins(x, z, TILES, [0, 0, 0, 0]));
+    mesh.userData.oceanFftOrigin = new THREE.Vector4();
     scene.add(mesh);
     return mesh;
   });
+  /** Centre the grid on canonical `base` (a chunk centre); origins in f64, as StylizedWaterSlot does. */
+  const place = (base) => meshes.forEach((mesh, i) => {
+    const centre = [base[0] + offsets[i][0], base[1] + offsets[i][1]];
+    mesh.userData.centre = centre;
+    mesh.userData.oceanFftOrigin.set(...writeCascadeUvOrigins(centre[0], centre[1], TILES, [0, 0, 0, 0]));
+  });
+  place([FAR, FAR]);
   const camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.5, 20_000);
   /** Place meshes and camera relative to a floating render origin (canonical metres). */
   const view = (renderOrigin, eye, target) => {
@@ -177,8 +196,13 @@ export async function createSamplingScene(ctx) {
     camera.lookAt(target[0] - renderOrigin[0], target[1], target[2] - renderOrigin[1]);
     camera.updateMatrixWorld();
   };
+  const meta = () => ({
+    seed: 1234, waterTime: 126, size: N, tileSizes: TILES, generation: binding.generation,
+    spectrumRevision: ctx.runtime.output?.spectrumRevision ?? null, available: binding.available.value,
+  });
   return {
-    binding, scene, camera, view, material, geometry, centres, FAR,
+    binding, scene, camera, view, place, material, geometry, FAR, debugMode, meta,
+    setMode(name) { debugMode.value = SAMPLING_DEBUG_MODES.indexOf(name); },
     dispose() { binding.dispose(); material.dispose(); geometry.dispose(); },
   };
 }
@@ -203,6 +227,28 @@ export async function rebaseCase(ctx, sceneParts) {
   // sampling never sees positions, only per-object origins and chunk-local metres.
   const nearRebase = differing(shots[0], shots[1]), noRebase = differing(shots[0], shots[2]);
   return { channels: shots[0].length, differingChannelsAfterRebase: nearRebase, differingChannelsWithoutFloatingOrigin: noRebase, pass: nearRebase === 0 };
+}
+
+/** Teleport away (grid and camera re-placed at the world origin) and back: the image must not change. */
+export async function teleportCase(ctx, sceneParts) {
+  const { renderer } = ctx;
+  const target = new THREE.RenderTarget(480, 270, { type: THREE.HalfFloatType, depthBuffer: true });
+  const shoot = async (base) => {
+    sceneParts.place(base);
+    sceneParts.view(base, [base[0] + 40, 30, base[1] - 90], [base[0] + 40, 0, base[1] + 60]);
+    renderer.setRenderTarget(target);
+    renderer.render(sceneParts.scene, sceneParts.camera);
+    renderer.setRenderTarget(null);
+    return renderer.readRenderTargetPixelsAsync(target, 0, 0, 480, 270);
+  };
+  const before = await shoot([FAR, FAR]);
+  const away = await shoot([64, 64]);
+  const after = await shoot([FAR, FAR]);
+  target.dispose();
+  const differing = (a, b) => a.reduce((n, v, i) => n + (v !== b[i] ? 1 : 0), 0);
+  const changed = differing(before, after), elsewhere = differing(before, away);
+  // `elsewhere` > 0 proves the view at the origin shows other waves (the check is not blind).
+  return { channels: before.length, differingAfterReturn: changed, differingAtOtherPlace: elsewhere, pass: changed === 0 && elsewhere > 0 };
 }
 
 /** Render a view into a float target and return it as a PNG data URL (visual evidence). */

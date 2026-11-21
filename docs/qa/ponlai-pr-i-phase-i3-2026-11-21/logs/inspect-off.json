@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "6ff50d84f15007ca582bf5ea2f9731a06a512203",
+  "sourceRevision": "b5935abdf1056d294021ef63f941f4e0d3916a63",
   "query": {},
   "failures": [],
   "oceanFft": [
@@ -16,14 +16,16 @@
           "refraction": false,
           "textures": 15,
           "samplers": 12,
+          "varyings": 12,
           "oceanFftReferenced": false,
-          "length": 213725,
-          "hash": "b3c62d4e"
+          "length": 213727,
+          "hash": "6eb6cc2"
         },
         {
           "refraction": true,
           "textures": 20,
           "samplers": 13,
+          "varyings": 12,
           "oceanFftReferenced": false,
           "length": 227926,
           "hash": "6a9b2b63"
@@ -38,7 +40,26 @@
         "maxError": 0
       },
       "materialVariants": 2,
-      "shaders": []
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 213727,
+          "hash": "6eb6cc2"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 227926,
+          "hash": "6a9b2b63"
+        }
+      ]
     },
     {
       "scope": "offshore-calm/ultra (diffraction on)",
@@ -53,14 +74,16 @@
           "refraction": false,
           "textures": 15,
           "samplers": 12,
+          "varyings": 12,
           "oceanFftReferenced": false,
-          "length": 213911,
-          "hash": "737edf92"
+          "length": 213913,
+          "hash": "bd2026a2"
         },
         {
           "refraction": true,
           "textures": 20,
           "samplers": 13,
+          "varyings": 12,
           "oceanFftReferenced": false,
           "length": 228128,
           "hash": "563efbbb"
@@ -75,7 +98,26 @@
         "maxError": 0
       },
       "materialVariants": 2,
-      "shaders": []
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        },
+        {
+          "refraction": true,
+          "textures": 14,
+          "samplers": 12,
+          "varyings": 12,
+          "oceanFftReferenced": false,
+          "length": 210475,
+          "hash": "25f44842"
+        }
+      ]
     },
     {
       "scope": "offshore-calm/low (diffraction on)",
@@ -85,7 +127,26 @@
         "maxError": 0
       },
       "materialVariants": 2,
-      "shaders": []
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        },
+        {
+          "refraction": true,
+          "textures": 6,
+          "samplers": 5,
+          "varyings": 4,
+          "oceanFftReferenced": false,
+          "length": 107327,
+          "hash": "ca02d814"
+        }
+      ]
     }
   ]
 }
