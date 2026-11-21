@@ -121,8 +121,7 @@ async function inspectShaders() {
   for (const [material, object] of seen) {
     try {
       const { fragmentShader, vertexShader } = await renderer.debug.getShaderAsync(e.terrainView.scene, camera, object);
-      shaders.push({ object: object.name, material: material.name, fragment: hash(fragmentShader), vertex: hash(vertexShader),
-        readsField: /storm-snow-field|stormSnowField/.test(fragmentShader + vertexShader) });
+      shaders.push({ object: object.name, material: material.name, fragment: hash(fragmentShader), vertex: hash(vertexShader) });
     } catch (error) {
       shaders.push({ object: object.name, material: material.name, error: String(error).slice(0, 200) });
     }
