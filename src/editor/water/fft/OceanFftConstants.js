@@ -75,11 +75,30 @@ export const LIMITS = Object.freeze({
 });
 
 /**
- * Provisional cascades: half-open |k| bands [kMin, kMax) on their own tile
- * lattice. Contiguous from the high-pass cut-off; each ends below its own
- * Nyquist π·N/L at N=64. Final tile sizes belong to I.3.
+ * Cascades: half-open |k| bands [kMin, kMax) on their own tile lattice,
+ * contiguous from the high-pass cut-off; each ends below its own Nyquist π·N/L
+ * even at N=64. Tile sizes fixed in I.3 for N=128:
+ *   – ≥ 4 texels per shortest band wavelength (2 m → 4.47, 0.5 m → 4.14) so
+ *     bilinear slopes stay faithful: L0 ≤ 64, L1 ≤ 16;
+ *   – ≥ 7.6 periods of the longest band wavelength per tile, so the band's low
+ *     end is sampled finely: band variance within 0.14 % of a 512² reference
+ *     (the former 48 / 12 m lost 2.7 % of cascade 1's height variance);
+ *   – a non-integer tile ratio (3.709) so the two cascades never repeat together
+ *     (48 / 12 m = 4 repeated the summed pattern exactly every 48 m).
  */
 export const CASCADE_CANDIDATES = Object.freeze([
-  Object.freeze({ tileSizeMeters: 48, kMin: TAU / CARRIER_MIN_WAVELENGTH, kMax: TAU / 2 }),
-  Object.freeze({ tileSizeMeters: 12, kMin: TAU / 2, kMax: TAU / 0.5 }),
+  Object.freeze({ tileSizeMeters: 57.3, kMin: TAU / CARRIER_MIN_WAVELENGTH, kMax: TAU / 2 }),
+  Object.freeze({ tileSizeMeters: 15.45, kMin: TAU / 2, kMax: TAU / 0.5 }),
 ]);
+
+/**
+ * Offshore wind sea the runtime evolves until weather drives it (later phase):
+ * a moderate breeze over open-ocean fetch, blowing along the primary swell so the
+ * short waves ride the long ones. Seed is fixed: the sea is the same every session.
+ */
+export const OFFSHORE_FFT_WIND = Object.freeze({
+  windSpeed: 10,
+  fetchMeters: 50_000,
+  windDirection: Math.atan2(SEA_SWELL_COMPONENTS[0].z, SEA_SWELL_COMPONENTS[0].x),
+});
+export const OFFSHORE_FFT_SEED = 1234;

@@ -22,7 +22,7 @@ test('topology validates size and cascade count and derives Δk per cascade', ()
   const topology = candidate();
   assert.equal(topology.total, 2 * 128 * 128);
   assert.equal(topology.log2Size, 7);
-  assert.deepEqual(topology.deltaK, [2 * Math.PI / 48, 2 * Math.PI / 12]);
+  assert.deepEqual(topology.deltaK, [2 * Math.PI / 57.3, 2 * Math.PI / 15.45]);
   assert.throws(() => resolveFftTopology({ size: 96, tileSizes: [48] }));
   assert.throws(() => resolveFftTopology({ size: 64, tileSizes: [] }));
   assert.throws(() => resolveFftTopology({ size: 64, tileSizes: [1, 2, 3, 4, 5] }));

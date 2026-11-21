@@ -17,6 +17,10 @@ import { waterfallPatternOrigin } from './WaterfallShading.js';
 import { createWaterPatternOrigins } from './WaterPatternOrigins.js';
 import { updateWaterVisualClock } from '../water/WaterVisualClock.js';
 import { REFRACTION_CHUNK_RADIUS } from '../water/WaterRefraction.js';
+import { CASCADE_CANDIDATES } from '../water/fft/OceanFftConstants.js';
+import { writeCascadeUvOrigins } from '../water/fft/OceanFftCoordinates.js';
+
+const OCEAN_FFT_TILES = CASCADE_CANDIDATES.map((cascade) => cascade.tileSizeMeters);
 
 const WATER_FIELD_CHANNELS = 4;
 
@@ -33,6 +37,8 @@ export class StylizedWaterSlot {
     this.rippleOrigin = uniform(new THREE.Vector2());
     // This chunk's centre wrapped for the fall strands, in double precision.
     this.patternOrigin = uniform(new THREE.Vector2());
+    // Offshore FFT cascade UV origins (u0, v0, u1, v1) at this chunk's centre, in double precision.
+    this.oceanFftOrigin = uniform(new THREE.Vector4());
     // Every surface pattern's origin at this chunk's centre, in double precision.
     this.surfacePatterns = createWaterPatternOrigins(config.water);
     this.seaPhaseDescriptor = null;
@@ -103,6 +109,7 @@ export class StylizedWaterSlot {
       seaPhaseOrigin: this.seaPhaseOrigin,
       rippleOrigin: this.rippleOrigin,
       patternOrigin: this.patternOrigin,
+      oceanFftOrigin: this.oceanFftOrigin,
       surfacePatterns: this.surfacePatterns,
       sunDirection,
     };
@@ -248,6 +255,8 @@ export class StylizedWaterSlot {
       );
       const [patternX, patternZ] = waterfallPatternOrigin(descriptor.centerWorldX, descriptor.centerWorldZ);
       this.patternOrigin.value.set(patternX, patternZ);
+      const [u0, v0, u1, v1] = writeCascadeUvOrigins(descriptor.centerWorldX, descriptor.centerWorldZ, OCEAN_FFT_TILES, [0, 0, 0, 0]);
+      this.oceanFftOrigin.value.set(u0, v0, u1, v1);
       this.surfacePatterns.update(descriptor.centerWorldX, descriptor.centerWorldZ);
     }
   }

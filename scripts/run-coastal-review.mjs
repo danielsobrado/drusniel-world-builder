@@ -12,6 +12,7 @@ import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
 import { prepareVisualPose } from './lib/world-visual-prepare-pose.mjs';
 import { captureWorldCanvas } from './lib/world-visual-canvas.mjs';
 import { advanceCoastalClock, inspectCoastalScene, measureCoastalFrame, sampleCoastalTransects } from './lib/coastal-review-browser.mjs';
+import { inspectOceanFftScene } from './lib/ocean-fft-scene.mjs';
 import { coastalDiagnostics, coastalLayerControls, installCoastalDiagnostics, setCoastalDiagnostic } from './lib/coastal-review-diagnostics.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -25,6 +26,9 @@ const measure = perf || process.argv.includes('--measure');
 const minimumInterstageLimit = process.argv.includes('--minimum-interstage-limit');
 const diagnostic = process.argv.includes('--diagnostics');
 const only = option('--only', '').split(',').filter(Boolean);
+// Extra app query flags, e.g. --query oceanFft=1 (PR I A/B); --ocean-fft-inspect records the FFT scene state.
+const extraQuery = new URLSearchParams(option('--query', ''));
+const oceanFftInspect = process.argv.includes('--ocean-fft-inspect');
 const minimumMs = Number(option('--settle-ms', 5000));
 const durationMs = Number(option('--duration-ms', 8000));
 const viewport = { width: 1600, height: 900 };
@@ -69,7 +73,7 @@ const manifest = { schemaVersion: 1, viewport, sourceRevision: source.sourceSha,
   sourceOverrides: source.sourceSnapshot?.sourceOverrides?.map(file => ({
     file, sha256: source.sourceSnapshot.files[file],
   })) ?? [],
-  screenshots: [], timings: [], timingFailures: [], failures: [] };
+  screenshots: [], timings: [], timingFailures: [], failures: [], oceanFft: [], query: Object.fromEntries(extraQuery) };
 const save = () => writeFile(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
 let browser;
@@ -137,6 +141,7 @@ try {
   const browserUrl = new URL('/?qaVisual=1', url);
   if (process.argv.includes('--startup-log')) browserUrl.searchParams.set('qaRecovery', '1');
   if (measure) browserUrl.searchParams.set('gpuTimings', '1');
+  for (const [key, value] of extraQuery) browserUrl.searchParams.set(key, value);
   let currentConfig, adapter;
   for (job of jobs) {
     const name = job.label ?? job.qualityTier;
@@ -213,6 +218,11 @@ try {
           manifest.timingFailures.push({ scope, error: error.stack });
           console.error(error.message);
         }
+      }
+      if (oceanFftInspect) {
+        const fft = await page.evaluate(inspectOceanFftScene);
+        manifest.oceanFft.push({ scope, ...fft });
+        console.log(`  ocean fft ${JSON.stringify({ state: fft.oceanFft?.state ?? 'off', origins: fft.slotOrigins, shaders: fft.shaders })}`);
       }
       if (!job.timingOnly) {
         async function capture(label, moment, diagnosticMode = null) {

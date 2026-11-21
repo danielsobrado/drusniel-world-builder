@@ -1114,13 +1114,15 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.3 — Canonical world sampling and stable quality tiers
 
-- [ ] Implement CPU double precision positive modulo for each cascade and per-slot centre, GPU chunk-local UV; verify ±million metres and shared chunk edges.
-- [ ] Extend per-object water material options/shared bindings with **small stable** cascade UV origins; no per-slot FFT/CPU DFT.
-- [ ] Determine 128² candidate cascade tile sizes based on short-wave frequency limits, not blindly Ponlai's [733,157].
-- [ ] Generate derivative mips and footprint LOD, record expected unresolved slope variance and roughness correction.
-- [ ] Test texture repeat seam, nonintegral cascade period, camera movement, origin snap and high-altitude view.
-- [ ] Check sampler and varyings under portable limits; if failed, reduce/reuse bindings before changing tier.
-- [ ] Ensure quality change yields one clean target rebuild and no 49 material re-compiles or lost sea level.
+- [x] Implement CPU double precision positive modulo for each cascade and per-slot centre, GPU chunk-local UV; verify ±million metres and shared chunk edges.
+- [x] Extend per-object water material options/shared bindings with **small stable** cascade UV origins; no per-slot FFT/CPU DFT.
+- [x] Determine 128² candidate cascade tile sizes based on short-wave frequency limits, not blindly Ponlai's [733,157].
+- [x] Generate derivative mips and footprint LOD, record expected unresolved slope variance and roughness correction.
+- [x] Test texture repeat seam, nonintegral cascade period, camera movement, origin snap and high-altitude view. (Camera movement covered by the rebase and multi-view cases; no moving-camera sequence.)
+- [ ] Check sampler and varyings under portable limits; if failed, reduce/reuse bindings before changing tier. **Counted, carried to I.4:** plain water fragment uses 15 textures (16 with the FFT, at the limit), refraction 20 already; varyings not counted.
+- [x] Ensure quality change yields one clean target rebuild and no 49 material re-compiles or lost sea level.
+
+**I.3 result:** [Phase I.3 world sampling](ponlai-pr-i-phase-i3-world-sampling-2026-11-21.md). One FFT per surface view on high/ultra behind `?oceanFft=1`; per-chunk f64 cascade UV origins (42 chunks, max error 0); shared binding and `sampleOceanFftSlope` with footprint LOD and an unresolved-slope table. Tiles 57.3 / 15.45 m (band variance within 0.14 % of a 512² reference; no common 48 m period). GPU QA: seams at −4.2 Mm differ by 0, rebase pixel-identical, no v-flip. Water shaders byte-identical with the flag on and off; the material does not sample the FFT until I.4.
 
 **Stop:** seam at −4.2 million-metre position, floating origin ripple swimming, physical waves moving upwind because inverse sign, thin glitter and repeating diagonals at distant horizon.
 

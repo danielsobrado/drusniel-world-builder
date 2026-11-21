@@ -7,6 +7,7 @@ import {
   proof64Cases, realSpectra, smallGridCases, spectrumRebuildCase, timeContractCases,
 } from './cases.js';
 import { instrumentDevice, liveSummary } from './instrument.js';
+import { captureView, createSamplingScene, mipCase, orientationCase, rebaseCase, samplingCostCase, seamCase } from './sampling.js';
 
 /**
  * Isolated GPU QA fixture for the ocean FFT (PR I phase I.2). Its own renderer
@@ -52,7 +53,7 @@ async function lifecycleChecks(ctx) {
   const fallback = new OceanFftRuntime(webgl);
   checks.webglFallback = {
     state: fallback.state, reason: fallback.reason,
-    configured: fallback.configure({ size: 64, tileSizes: [48], spectra: realSpectra(64, 1, [CASCADE_CANDIDATES[0]]) }),
+    configured: fallback.configure({ size: 64, tileSizes: [CASCADE_CANDIDATES[0].tileSizeMeters], spectra: realSpectra(64, 1, [CASCADE_CANDIDATES[0]]) }),
     prepared: fallback.prepare(1), output: fallback.output,
   };
   fallback.dispose();
@@ -73,7 +74,7 @@ async function lifecycleChecks(ctx) {
   runtime.dispose();
   await ctx.device.queue.onSubmittedWorkDone();
   const baseline = liveSummary(stats);
-  const cycle = [{ size: 64, tileSizes: [48], spectra: realSpectra(64, 1, [CASCADE_CANDIDATES[0]]) }, config];
+  const cycle = [{ size: 64, tileSizes: [CASCADE_CANDIDATES[0].tileSizeMeters], spectra: realSpectra(64, 1, [CASCADE_CANDIDATES[0]]) }, config];
   const pipelinesBefore = stats.computePipelines;
   for (let i = 0; i < 12; i++) {
     const again = new OceanFftRuntime(renderer);
@@ -115,6 +116,24 @@ async function restartTiming() {
   return result;
 }
 
+/** Rendered chunk planes near −4.2 Mm: rebase invariance, screenshots and sampling cost (PR I phase I.3). */
+async function samplingScene(ctx, report, benchmark) {
+  const parts = await createSamplingScene(ctx);
+  const far = parts.FAR;
+  const result = { rebase: await rebaseCase(ctx, parts) };
+  const views = {
+    'top-down-chunk-corner': { renderOrigin: [far, far], eye: [far + 64, 160, far + 65], look: [far + 64, 0, far + 64] },
+    'grazing-horizon': { renderOrigin: [far, far], eye: [far, 6, far - 700], look: [far, 0, far + 400] },
+    'high-altitude': { renderOrigin: [far, far], eye: [far - 200, 1200, far - 900], look: [far, 0, far] },
+  };
+  report.screenshots = {};
+  for (const [name, view] of Object.entries(views)) report.screenshots[name] = await captureView(ctx, parts, view);
+  if (benchmark) result.cost = await samplingCostCase(ctx, parts);
+  parts.dispose();
+  result.pass = result.rebase.pass;
+  return result;
+}
+
 async function run({ benchmark = true } = {}) {
   const ctx = await createRenderer();
   ctx.runtime = new OceanFftRuntime(ctx.renderer);
@@ -128,6 +147,10 @@ async function run({ benchmark = true } = {}) {
   await step('timeContract', () => timeContractCases(ctx));
   await step('cascadeIsolation', () => cascadeIsolationCase(ctx));
   await step('spectrumRebuild', () => spectrumRebuildCase(ctx));
+  await step('orientation', () => orientationCase(ctx));
+  await step('seams', () => seamCase(ctx));
+  await step('mips', () => mipCase(ctx));
+  await step('scene', () => samplingScene(ctx, report, benchmark));
   await step('lifecycle', () => lifecycleChecks(ctx));
   await step('disabled', () => benchmarkDisabled(createRenderer));
   if (benchmark) {
@@ -139,7 +162,8 @@ async function run({ benchmark = true } = {}) {
   report.pipelines = { compute: ctx.stats.computePipelines, render: ctx.stats.renderPipelines, shaderModules: ctx.stats.shaderModules };
   const caseLists = ['smallGrids', 'i1Table', 'direction', 'proof64', 'candidate128'].map((key) => report[key]);
   report.pass = caseLists.every((list) => list.every((row) => row.pass))
-    && ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'lifecycle', 'disabled'].every((key) => report[key].pass)
+    && ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'lifecycle', 'disabled', 'seams', 'mips', 'scene'].every((key) => report[key].pass)
+    && report.orientation.every((row) => row.pass)
     && report.validationErrors.length === 0;
   ctx.runtime.dispose();
   ctx.renderer.dispose();

@@ -31,6 +31,8 @@ import { createForestDebrisPrototypes } from './forest/forestDebrisPrototypes.js
 import { createBiomeUnderstoryPrototypes } from './flora/biomeUnderstoryPrototypes.js';
 import { collectDebrisGrassZones } from './UnderstoryClearance.js';
 import { createShoreLifePrototypes } from './shoreLifePrototypes.js';
+import { OceanFftController } from '../water/fft/OceanFftController.js';
+import { waterVisualClock } from '../water/WaterVisualClock.js';
 import { createAquaticFloraPrototypes } from './aquaticFloraPrototypes.js';
 import { advancePlantSway } from './plantSway.js';
 import { contactShadeRadius, paintContactShade, resolveContactShade } from './contactShade.js';
@@ -383,9 +385,18 @@ export class StylizedSurfaceView {
       : [];
     this.reflections = this.enabled && !this.impostorBakeMode && config.enhancements?.waterReflections.enabled
       ? new WaterReflectionController(terrainView, config.enhancements.waterReflections) : null;
-    this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections);
+    // Offshore FFT slope (PR I, I.0 Decision C): one per view, opt-in until I.4 samples it.
+    this.oceanFft = this.enabled && !this.impostorBakeMode && config.water?.enabled && config.water.sea?.enabled
+      ? OceanFftController.create({
+        renderer: terrainView.renderer,
+        qualityTier: config.water.qualityTier,
+        requested: config.enhancements?.oceanFft === true,
+      })
+      : null;
+    this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections, this.oceanFft?.binding ?? null);
     this.reflectionPrepared = null;
     terrainView.beforeMainRender = camera => {
+      this.oceanFft?.prepare(waterVisualClock.value);
       this.skyView?.cascades?.prepare(camera);
       const now = performance.now();
       const prepared = this.reflections?.prepare(camera, this) ?? null;
@@ -1198,6 +1209,8 @@ export class StylizedSurfaceView {
     for (const slot of this.waterSlots) slot.dispose();
     this.waterObstacleUpdates.dispose();
     this.sharedWaterMaterials.dispose();
+    this.oceanFft?.dispose();
+    this.oceanFft = null;
     this.reflectionReservation?.cancel();
     this.reflections?.dispose();
     this.terrainView.beforeMainRender = null;

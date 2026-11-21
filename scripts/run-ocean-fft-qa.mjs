@@ -32,13 +32,19 @@ try {
 }
 report.consoleErrors = consoleErrors;
 await mkdir(path.dirname(out), { recursive: true });
+const shots = path.join(path.dirname(out), 'screenshots');
+await mkdir(shots, { recursive: true });
+for (const [name, dataUrl] of Object.entries(report.screenshots ?? {})) {
+  await writeFile(path.join(shots, `${name}.png`), Buffer.from(dataUrl.split(',')[1], 'base64'));
+}
+report.screenshots = Object.keys(report.screenshots ?? {}).map((name) => `screenshots/${name}.png`);
 await writeFile(out, `${JSON.stringify(report, null, 2)}\n`);
 
 const failed = (list) => list.filter((row) => !row.pass).length;
-const lists = ['smallGrids', 'i1Table', 'direction', 'proof64', 'candidate128'];
+const lists = ['smallGrids', 'i1Table', 'direction', 'proof64', 'candidate128', 'orientation'];
 console.log(`adapter ${report.adapter.vendor} ${report.adapter.architecture} (${report.adapter.backend}, three r${report.adapter.three})`);
 for (const key of lists) console.log(`${key}: ${report[key].length - failed(report[key])}/${report[key].length} pass`);
-for (const key of ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'lifecycle', 'disabled']) console.log(`${key}: ${report[key].pass ? 'pass' : 'FAIL'}`);
+for (const key of ['timeContract', 'cascadeIsolation', 'spectrumRebuild', 'seams', 'mips', 'scene', 'lifecycle', 'disabled']) console.log(`${key}: ${report[key].pass ? 'pass' : 'FAIL'}`);
 for (const [label, row] of Object.entries(report.topologies ?? {})) {
   console.log(`${label}: compute ${row.computeMs.median?.toFixed(4)} ms, output ${row.outputPassesMs.median?.toFixed(4)} ms, throughput ${row.throughputMsPerTransform.toFixed(4)} ms/transform`);
 }

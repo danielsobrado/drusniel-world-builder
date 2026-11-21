@@ -1,0 +1,171 @@
+{
+  "sourceRevision": "6ff50d84f15007ca582bf5ea2f9731a06a512203",
+  "query": {
+    "oceanFft": "1"
+  },
+  "failures": [],
+  "oceanFft": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "oceanFft": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 1,
+        "configGeneration": 1,
+        "transforms": 2930,
+        "skipped": 0,
+        "outputs": 2930,
+        "available": 1,
+        "bindingGeneration": 2930,
+        "tileSizes": [
+          57.3,
+          15.45
+        ]
+      },
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "oceanFftReferenced": false,
+          "length": 213725,
+          "hash": "b3c62d4e"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "oceanFftReferenced": false,
+          "length": 227926,
+          "hash": "6a9b2b63"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "oceanFft": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 1,
+        "configGeneration": 1,
+        "transforms": 3593,
+        "skipped": 118,
+        "outputs": 3593,
+        "available": 1,
+        "bindingGeneration": 3593,
+        "tileSizes": [
+          57.3,
+          15.45
+        ]
+      },
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": []
+    },
+    {
+      "scope": "offshore-calm/ultra (diffraction on)",
+      "oceanFft": {
+        "state": "active",
+        "reason": null,
+        "size": 128,
+        "cascades": 2,
+        "bytes": {
+          "h0": 524288,
+          "cycles": 131072,
+          "ping": 262144,
+          "pong": 262144,
+          "output": 174760,
+          "total": 1354408
+        },
+        "dispatchesPerTransform": 15,
+        "outputPasses": 2,
+        "spectrumRevision": 1,
+        "configGeneration": 1,
+        "transforms": 2574,
+        "skipped": 0,
+        "outputs": 2574,
+        "available": 1,
+        "bindingGeneration": 2574,
+        "tileSizes": [
+          57.3,
+          15.45
+        ]
+      },
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": [
+        {
+          "refraction": false,
+          "textures": 15,
+          "samplers": 12,
+          "oceanFftReferenced": false,
+          "length": 213911,
+          "hash": "737edf92"
+        },
+        {
+          "refraction": true,
+          "textures": 20,
+          "samplers": 13,
+          "oceanFftReferenced": false,
+          "length": 228128,
+          "hash": "563efbbb"
+        }
+      ]
+    },
+    {
+      "scope": "offshore-calm/medium (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": []
+    },
+    {
+      "scope": "offshore-calm/low (diffraction on)",
+      "oceanFft": null,
+      "slotOrigins": {
+        "checked": 42,
+        "maxError": 0
+      },
+      "materialVariants": 2,
+      "shaders": []
+    }
+  ]
+}

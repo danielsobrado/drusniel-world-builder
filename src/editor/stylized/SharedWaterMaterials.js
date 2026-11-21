@@ -7,8 +7,10 @@ export const WATER_SLOT_OPTIONS = 'waterSlotOptions';
 
 /** One graph for each water variant, with exact per-slot inputs at draw time. */
 export class SharedWaterMaterials {
-  constructor(reflections = null) {
+  /** @param {?OceanFftBinding} oceanFft the view's shared FFT slope binding (PR I); sampled from I.4 */
+  constructor(reflections = null, oceanFft = null) {
     this.reflections = reflections;
+    this.oceanFft = oceanFft;
     this.materials = new Map();
     this.bindings = null;
     this.disposed = false;
@@ -19,7 +21,7 @@ export class SharedWaterMaterials {
     if (!this.bindings) {
       const read = object => object?.userData?.[WATER_SLOT_OPTIONS] ?? options;
       const bindings = { ...options };
-      for (const name of ['waterSurfaceOrigin', 'chunkCenter', 'time', 'rippleOrigin', 'patternOrigin']) {
+      for (const name of ['waterSurfaceOrigin', 'chunkCenter', 'time', 'rippleOrigin', 'patternOrigin', 'oceanFftOrigin']) {
         const value = options[name]?.value;
         if (value === undefined) continue;
         bindings[name] = uniform(value.clone?.() ?? value)

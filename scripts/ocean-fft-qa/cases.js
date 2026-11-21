@@ -168,7 +168,7 @@ export async function directionCase(ctx) {
 
 export async function proof64Cases(ctx) {
   const results = [];
-  results.push(...await sweep(ctx, { name: '64² cascade 0 (48 m)', size: 64, spectra: realSpectra(64, 1234, [CASCADE_CANDIDATES[0]]), times: TIMES }));
+  results.push(...await sweep(ctx, { name: '64² cascade 0', size: 64, spectra: realSpectra(64, 1234, [CASCADE_CANDIDATES[0]]), times: TIMES }));
   results.push(...await sweep(ctx, { name: '64² I.1 fixture (6 m, full band)', size: 64, spectra: realSpectra(64, 1234, I1_FIXTURE), times: [0, 123.4, 127.6] }));
   return results;
 }
