@@ -26,18 +26,18 @@ import { PREVAILING_WIND } from '../materials/SnowAccumulation.js';
 export const SNOW_GROUND_COLOR = '#e8eef2';
 const WIND = vec2(...PREVAILING_WIND).normalize();
 /** Up-facing value where a full fall starts to cap a face, and how much higher a trace of snow starts. */
-const CAP_START = 0.58;
-const CAP_LIGHT = 0.4;
-const CAP_WIDTH = 0.1;
+const CAP_START = 0.54;
+const CAP_LIGHT = 0.42;
+const CAP_WIDTH = 0.18;
 /** Skirt height as a share of the object's height above the ground line, under a full fall. */
-const SKIRT = 0.13;
+const SKIRT = 0.16;
 /** How much higher the skirt climbs a lee face, and how much lower it sits on the windward one. */
-const SKIRT_LEE = 0.08;
+const SKIRT_LEE = 0.11;
 const SKIRT_SCOUR = 0.04;
 /** Drift up a lee face, as a share of the object's height. */
-const LEE_DRIFT = 0.22;
-/** Softness of the skirt's top edge, in the same share. */
-const SKIRT_EDGE = 0.025;
+const LEE_DRIFT = 0.28;
+/** Softness of the skirt's top edge, in the same share (feathered powder transition, not a hard cutout). */
+const SKIRT_EDGE = 0.065;
 
 /**
  * Welds a faceted stone's normals into one smooth normal per position, as the

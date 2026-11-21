@@ -92,6 +92,12 @@ const SWEEP_SECONDS = 10;
 
 let clockSeconds = 0;
 let lastSweepSeconds = 0;
+let brushSink = null;
+
+/** Registers an optional GPU snow deformation sink receiving footprints and spell discs. */
+export function setDeformationBrushSink(sink) {
+  brushSink = typeof sink === 'function' ? sink : null;
+}
 
 export function updateGroundDeformation(timeSeconds) {
   if (!Number.isFinite(timeSeconds)) return;
@@ -174,6 +180,10 @@ export function stampFootprint(x, z, facing, depth = 1) {
     }
   }
   groundDeformationTexture.needsUpdate = true;
+  brushSink?.({
+    x, z, radius: 0.14, elongation: 2.1, yaw: facing,
+    depression: 0.14 * depth, berm: 0.075 * depth, compression: 0.85 * depth, ice: 0,
+  });
 }
 
 /** Discs wider than this are clipped: the window is only 16 m across. */
@@ -225,6 +235,10 @@ export function stampDisc(x, z, radius, depth = 1, inner = 0.5) {
     }
   }
   groundDeformationTexture.needsUpdate = true;
+  brushSink?.({
+    x, z, radius: reachMetres, elongation: 1, yaw: 0,
+    depression: 0.28 * depth, berm: 0.18 * depth, compression: 0.9 * depth, ice: 0.25 * depth,
+  });
 }
 
 /** Test hook: the raw texel at a canonical point. */

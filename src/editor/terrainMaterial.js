@@ -61,6 +61,7 @@ import { applyJungleMist } from './stylized/ambient/jungleMistOutput.js';
 import { createValleyFogNodes } from './stylized/mist/ValleyFogShading.js';
 import { applyValleyFogOutput } from './stylized/mist/ValleyFogOutput.js';
 import { createFootprintShading } from './stylized/deformation/FootprintShading.js';
+import { createGpuSnowDeformNodes, gpuSnowDeformVertexDisplacement } from './stylized/deformation/GpuSnowDeformNodes.js';
 import { createGlacierIceShading } from './stylized/GlacierIceShading.js';
 import { acquireGroundLayers } from './stylized/path/terrainGroundLayers.js';
 import { GROUND_LAYERS } from './stylized/path/groundLayerIds.js';
@@ -580,36 +581,43 @@ export function createTerrainMaterial({
       config: stylizedConfig.snowWake,
     });
     const snowSettings = resolveSnowSurfaceConfig(stylizedConfig.snowSurface);
+    const snowSun = sunDirection ? normalize(frameUniform(sunDirection)) : null;
     const snowPressed = max(pathMask, footprints.pressed);
+    const gpuDeform = bakedSurface.snow ? createGpuSnowDeformNodes({
+      terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow,
+    }) : null;
     const snowDetail = bakedSurface.snow ? createSnowDetailNodes({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, material,
       groundHeight: terrainHeight, pathMask: snowPressed, baseNormal: bakedSurface.normal, settings: snowSettings,
-      sun: sunDirection ? normalize(frameUniform(sunDirection)) : null,
+      sun: snowSun,
       reliefEnabled: stylizedConfig.enhancements?.snowRelief === true,
     }) : null;
     const snowNormal = bakedSurface.normal && snowDetail
-      ? snowDetail.normal(bakedSurface.normal).toVar()
+      ? (gpuDeform ? gpuDeform.applyNormal(snowDetail.normal(bakedSurface.normal)) : snowDetail.normal(bakedSurface.normal)).toVar()
       : bakedSurface.normal;
     const snowSurface = bakedSurface.snow ? createSnowSurfaceNodes({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, stylizedConfig, sunDirection,
-      baseNormal: snowNormal, pathMask: snowPressed, settings: snowSettings,
+      baseNormal: snowNormal, pathMask: snowPressed,
+      crestMask: max(snowDetail?.crest ?? float(0), gpuDeform?.crest ?? float(0)),
+      settings: snowSettings,
     }) : null;
     const drift = createTerrainDriftNodes({worldXZ,grassCoverage,snow:bakedSurface.snow,
       wetness:bakedSurface.wetness,pathMask,pressed:footprints.pressed,settings:surfaceEffects?.blownStreaks,wind:surfaceDriftWind});
     const driftColor = drift ? drift.apply(surface.color) : surface.color;
     const detailedSnowColor = snowDetail ? snowDetail.color(driftColor) : driftColor;
     const printed = footprints.apply(snowSurface ? snowSurface.apply(detailedSnowColor) : detailedSnowColor);
+    const deformedSnow = gpuDeform ? gpuDeform.applyColor(printed) : printed;
     // Glacier biomes show bare ice through the snow (biome-looks `glacier`).
     const glacierTable = stylizedConfig.biomeLooks?.glacier;
     const glacierShareByTile = glacierTable?.some((value) => value > 0) ? uniformArray(Array.from(glacierTable), 'float') : null;
     const glacierIce = bakedSurface.snow && glacierShareByTile ? createGlacierIceShading({
-      terrainUv, chunkWorldSize, chunkCenter, normal: bakedSurface.normal,
+      terrainUv, chunkWorldSize, chunkCenter, normal: bakedSurface.normal, material, sun: snowSun,
       // Decoded per cell and then filtered: the ecotone swaps border cells to the
       // neighbouring biome one by one, and a per-cell share drew 2 m blue squares.
       tileShare: slotBilinearLoad('tileTexture', tileTexture, terrainUv, (value) =>
         glacierShareByTile.element(value.a.mul(255).round().toInt())),
     }) : null;
-    const iced = glacierIce ? glacierIce.apply(printed) : printed;
+    const iced = glacierIce ? glacierIce.apply(deformedSnow) : deformedSnow;
     material.colorNode = wake ? wake.apply(iced) : iced;
     const filteredRoughness = bakedSurface.normal
       ? antialiasSpecularRoughness(surface.roughness, bakedSurface.normal)
@@ -618,13 +626,30 @@ export function createTerrainMaterial({
     if (snowSurface) {
       // Glints and transmitted light belong to the powder, not to the bare ice beside it.
       const powder = glacierIce ? glacierIce.share.oneMinus() : float(1);
-      applySnowLighting(material, snowSurface.sunResponse.mul(powder));
-      if (snowDetail) material.emissiveNode = snowDetail.shade.mul(powder);
+      const sunResponse = glacierIce
+        ? snowSurface.sunResponse.mul(powder).add(glacierIce.sunGlaze)
+        : snowSurface.sunResponse.mul(powder);
+      const combinedCavity = snowDetail?.cavity
+        ? (gpuDeform ? snowDetail.cavity.mul(gpuDeform.cavity) : snowDetail.cavity)
+        : (gpuDeform?.cavity ?? null);
+      const cavityOcclusion = combinedCavity
+        ? mix(float(1), combinedCavity, powder)
+        : null;
+      applySnowLighting(material, sunResponse, {
+        snowWeight: bakedSurface.snow.mul(powder),
+        cavityOcclusion,
+        snowBounce: snowSurface.snowBounce.mul(powder),
+      });
+      const snowEmissive = snowDetail ? snowDetail.shade.mul(powder) : vec3(0);
+      material.emissiveNode = glacierIce ? snowEmissive.add(glacierIce.glaze) : snowEmissive;
     }
     if (bakedSurface.normal) material.normalNode = footprints.relief(bakedSurface.normal);
     if (snowDetail) {
       material.roughnessNode = snowDetail.roughness(filteredRoughness);
       if (snowNormal) material.normalNode = snowNormal;
+    }
+    if (gpuDeform) {
+      material.roughnessNode = gpuDeform.applyRoughness(material.roughnessNode);
     }
     if (glacierIce) {
       material.roughnessNode = glacierIce.roughness(material.roughnessNode);
@@ -676,8 +701,11 @@ export function createTerrainMaterial({
     // Jungle ground mist, blended over the lit output like the grass and trees
     // that stand in it; a zero region weight skips it with one compare.
     applyJungleMist(material, surfaceEffects?.ambientEffects);
-    // Geometry displacement and the baked surface normal are derived from the same heightfield.
-    material.positionNode = positionLocal.add(vec3(0, 0, terrainHeight));
+    // Geometry displacement: heightfield + GPU 4-channel snow deformation (raised berms & carved trails).
+    const snowDeformDz = bakedSurface.snow
+      ? gpuSnowDeformVertexDisplacement({ terrainUv, chunkWorldSize, chunkCenter })
+      : float(0);
+    material.positionNode = positionLocal.add(vec3(0, 0, terrainHeight.add(snowDeformDz)));
     applyCloudShadow(material, stylizedConfig.sky);
     return assignTerrainMaterialData(material);
   } catch (error) {

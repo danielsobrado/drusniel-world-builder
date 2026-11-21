@@ -1,6 +1,7 @@
 import { AlpineRockView } from './alpine/AlpineRockView.js';
 import { PathBridgeView } from './path/PathBridgeView.js';
 import { IcebergView } from './ice/IcebergView.js';
+import { GlacierSeracView } from './ice/GlacierSeracView.js';
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
 import { WaterObstacleUpdates } from './WaterObstacleUpdates.js';
 import { WaterReflectionController } from '../../render/reflections/WaterReflectionController.js';
@@ -135,6 +136,16 @@ export class StylizedSurfaceView {
         snowBand: config.materialBake?.classification,
         seaLevel: terrainView.worldStore.generator?.seaLevel ?? 0,
         config,
+      })
+      : null;
+    this.glacierSeracView = this.enabled && !this.impostorBakeMode && this.skyView
+      ? new GlacierSeracView({
+        scene: terrainView.scene,
+        terrainView,
+        glacierByTile: config.biomeLooks?.glacier ?? [],
+        seaLevel: terrainView.worldStore.generator?.seaLevel ?? 0,
+        sunDirection: this.skyView.sunDirectionValue,
+        pathClearance: this.alpineRockView?.pathClearance ?? null,
       })
       : null;
     this.pathBridgeView = this.enabled && !this.impostorBakeMode
@@ -677,6 +688,7 @@ export class StylizedSurfaceView {
   prewarmStreamingResources(renderer = this.terrainView.renderer) {
     // Seven fixed shapes belong to loading-screen geometry and shader warmup.
     this.alpineRockView?.ensureMeshes();
+    this.glacierSeracView?.ensureMeshes();
     this.icebergView?.ensureMeshes();
     const textures = new Set();
     for (const terrainSlot of this.terrainView.slots) {
@@ -862,6 +874,7 @@ export class StylizedSurfaceView {
       const updateGeology = () => {
         this.icebergView?.update(cameraWorld, this.shouldYieldWork);
         this.alpineRockView?.update(cameraWorld, this.shouldYieldWork);
+        this.glacierSeracView?.update(cameraWorld, this.shouldYieldWork);
         this.pathBridgeView?.update(cameraWorld, this.shouldYieldWork);
       };
       if (this.runDeferredWork) this.runDeferredWork(updateGeology);
@@ -1189,6 +1202,7 @@ export class StylizedSurfaceView {
     this.terrainView.getBridgeDeckHeight = null;
     this.icebergView?.dispose();
     this.alpineRockView?.dispose();
+    this.glacierSeracView?.dispose();
     this.pathBridgeView?.dispose();
     if (this.sharedScenePath) {
       this.sceneAssets?.release(this.sharedScenePath);

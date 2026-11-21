@@ -74,11 +74,17 @@ export function createFarAlpineSurface({ vertexColor, snowCover, snowColor, iceC
   const ground = mix(vertexColor.mul(broad.mul(0.4).add(1)), rock, bare);
   const offset = triplanar(maps.normal, CRAG_METERS).mul(2).sub(1).mul(NORMAL_STRENGTH).mul(snow.oneMinus());
   const lit = normalize(up.add(vec3(offset.x, 0, offset.y)));
-  // The near snow's albedo and shade, or the two meet at a visible seam.
+  // The near snow's albedo, cool glacial shade, and subtle alpine arête & glacier valley striations.
   const farShade = mix(vec3(1), snowLightUniforms.shadeTint, snowLightUniforms.shade);
+  const valleyIce = mix(color(FAR_GLACIER_ICE), color('#4e9ec9'), smoothstep(-0.2, 0.45, broad).mul(0.55));
+  const areteGlow = smoothstep(0.42, 0.85, up.y).mul(smoothstep(0.15, 0.65, broad)).mul(0.08);
+  const snowSurface = mix(color(snowColor), valleyIce, iceCover)
+    .mul(snowLightUniforms.brightness)
+    .mul(farShade)
+    .add(vec3(areteGlow));
   return {
-    // A glacier's snow reads as its bare grey-blue ice from afar (GlacierIceShading).
-    color: mix(ground, mix(color(snowColor), color(FAR_GLACIER_ICE), iceCover).mul(snowLightUniforms.brightness).mul(farShade), snow),
+    // A glacier's snow reads as its fractured grey-blue ice from afar (GlacierIceShading).
+    color: mix(ground, snowSurface, snow),
     normal: normalize(cameraViewMatrix.mul(vec4(lit, 0)).xyz),
     /** Keeps the rock fixed to the world across floating-origin snaps. */
     setOrigin(state) {

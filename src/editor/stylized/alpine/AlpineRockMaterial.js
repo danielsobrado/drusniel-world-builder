@@ -1,34 +1,66 @@
 import * as THREE from 'three/webgpu';
 import {
-  attribute, color, float, mix, mx_noise_float, normalView, normalWorld, normalize, positionWorld, vec3,
+  attribute, cameraPosition, color, dot, float, mix, mx_noise_float, normalLocal, normalView, normalWorld, normalize,
+  positionLocal, positionWorld, smoothstep, vec3,
 } from 'three/tsl';
 import { coldStone } from '../rockSnowSurface.js';
 import { snowCoat } from '../surfaceCoatings/SnowCoat.js';
 import { surfaceCoatings } from '../surfaceCoatings/SurfaceCoatingConfig.js';
 import { blendCoat } from '../../../render/materials/surfaceLayers/PbrCoatBlend.js';
+import { PREVAILING_WIND } from '../../materials/SnowAccumulation.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from '../snowDeposition.js';
+import { snowLightUniforms } from '../sky/skyLight.js';
 import { stormSnowCoverAt } from '../../weather/storm/snowField/snowFieldState.js';
 
-const SNOW = '#e8eef2';
+const SNOW = '#eef3f8';
 /** AlpineRockView sinks each unit rock to put the ground here, in its own space (0.5 - BURIAL below centre). */
 const GROUND_Y = -0.15;
+/** Vertex puff thickness (in unit-rock space) on snow-capped upper shelves & lee aprons. */
+const SNOW_CAP_PUFF = 0.055;
 
-/** Stone projected in world space so every instance differs, with snow settled on its upper faces. */
+/** Stone projected in world space with wind-feathered, slightly puffed snow caps & drift skirts. */
 export function createAlpineRockMaterial() {
   const material = new THREE.MeshStandardNodeMaterial({ name: 'alpine-rock' });
+  const instanceSnow = attribute('instanceSnow', 'float');
+  // Subtle vertex puffing on upper snow-capped shelves so snow pillows over jagged crag ledges.
+  const capPuff = smoothstep(0.42, 0.85, normalLocal.y).mul(instanceSnow).mul(SNOW_CAP_PUFF);
+  const puffDir = normalize(normalLocal.mul(0.55).add(vec3(0, 0.85, 0)));
+  material.positionNode = positionLocal.add(puffDir.mul(capPuff));
+
   const p = positionWorld.toVar();
   const n = normalize(normalWorld).toVar();
   const stone = coldStone(p, n).toVar();
-  // A finer octave too: a crag is tens of metres, and the broad one alone ran its skirt as a level band.
-  const breakup = mx_noise_float(p.mul(0.35)).add(mx_noise_float(p.mul(1.4)).mul(0.5)).toVar();
-  // Per crag (AlpineRockView): its biome's ground snow or its altitude's, so badlands crags stay bare.
-  const { cover: snow, skirt } = snowDeposition({ snow: attribute('instanceSnow', 'float').max(stormSnowCoverAt(p.xz)), breakup: breakup.mul(0.9), centre: [0, 0, 0], groundY: GROUND_Y, height: 1.15 });
+  // Anisotropically wind-streaked breakup replaces round cow-spot noise blotches.
+  const wind = vec3(PREVAILING_WIND[0], 0, PREVAILING_WIND[1]).normalize();
+  const along = dot(p, wind);
+  const across = p.x.mul(wind.z.negate()).add(p.z.mul(wind.x));
+  const stretched = vec3(along.mul(0.18), p.y.mul(0.65), across.mul(0.52));
+  const breakup = mx_noise_float(stretched).mul(0.65).add(mx_noise_float(p.mul(1.6)).mul(0.35)).toVar();
+
+  const { cover: snow, skirt } = snowDeposition({
+    snow: instanceSnow.max(stormSnowCoverAt(p.xz)),
+    breakup: breakup.mul(0.62),
+    centre: [0, 0, 0],
+    groundY: GROUND_Y,
+    height: 1.15,
+  });
   const settings = surfaceCoatings();
   const coat = snowCoat(p, n, snow, settings);
-  const snowColor = mix(color(SNOW), color(SNOW_GROUND_COLOR), skirt).mul(coat?.tint ?? vec3(1));
+  // Subtle blue skylight fill on side-facing snow + soft powder velvet rim on crag caps.
+  const view = normalize(cameraPosition.sub(p));
+  const velvet = float(1).sub(dot(n, view).clamp(0, 1)).pow(2.5).mul(0.14);
+  const shadeFill = mix(snowLightUniforms.shadeTint, vec3(1, 1, 1), smoothstep(0.35, 0.88, n.y));
+  const snowColor = mix(color(SNOW), color(SNOW_GROUND_COLOR), skirt)
+    .mul(shadeFill)
+    .mul(snowLightUniforms.brightness.max(0.84))
+    .mul(coat?.tint ?? vec3(1))
+    .add(vec3(0.85, 0.92, 1.0).mul(velvet));
   const snowRoughness = settings.snow.enabled ? settings.snow.roughness : 0.78;
-  const surface = blendCoat({ color: stone, roughness: float(0.86), normal: normalView },
-    { color: snowColor, roughness: float(snowRoughness).add(coat?.roughness ?? 0), normal: coat?.normal() }, snow);
+  const surface = blendCoat(
+    { color: stone, roughness: float(0.86), normal: normalView },
+    { color: snowColor, roughness: float(snowRoughness).add(coat?.roughness ?? 0), normal: coat?.normal() },
+    snow,
+  );
   material.colorNode = surface.color;
   material.roughnessNode = surface.roughness;
   if (coat && settings.snow.enabled) material.normalNode = surface.normal;

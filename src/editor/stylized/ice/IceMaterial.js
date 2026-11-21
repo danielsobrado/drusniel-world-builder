@@ -71,8 +71,14 @@ export function createIceMaterial({ sunDirection, seaLevel }) {
   const steep = smoothstep(0.55, 0.95, normalWorld.y.abs().oneMinus());
   const blueShare = clamp(smoothstep(0.32, 0.75, masks.b.mul(0.9).add(masks.r.mul(0.45)))
     .add(steep.mul(0.25)).add(wet.mul(0.7)), 0, 1).toVar();
-  const inner = texture(detail, coarse.xz.sub(view.xz.mul(INNER_REACH))).r;
-  const blue = mix(color(DEEP), color(CLEAR), smoothstep(0.15, 0.75, masks.g.mul(0.7).add(inner.mul(0.5)))).toVar();
+  // Refracted 3-channel chromatic parallax into the iceberg interior (adapted from Snowflow crystal.fragment.wgsl, MIT).
+  const innerR = texture(detail, coarse.xz.sub(view.xz.mul(INNER_REACH * 0.92))).r;
+  const innerG = texture(detail, coarse.xz.sub(view.xz.mul(INNER_REACH * 1.0))).r;
+  const innerB = texture(detail, coarse.xz.sub(view.xz.mul(INNER_REACH * 1.12))).r;
+  const inner = innerR.mul(0.25).add(innerG.mul(0.45)).add(innerB.mul(0.30));
+  const dispersion = vec3(innerR, innerG, innerB).mul(vec3(0.45, 0.82, 1.0)).mul(0.26);
+  const blue = mix(color(DEEP), color(CLEAR), smoothstep(0.15, 0.75, masks.g.mul(0.7).add(inner.mul(0.5))))
+    .add(dispersion).toVar();
   const weathered = mix(color(WEATHERED), color(FROST), masks.g);
   const cap = smoothstep(0.62, 0.86, normalWorld.y.add(masks.g.sub(0.4).mul(0.5))).toVar();
   material.colorNode = mix(mix(weathered, blue, blueShare), color(SNOW), cap);

@@ -1,24 +1,30 @@
 import { frameUniform } from '../../../render/FrameUniforms.js';
 import * as THREE from 'three/webgpu';
 import {
+  atan,
   attribute,
   cameraWorldMatrix,
   cameraViewMatrix,
+  cos,
   dot,
   exp,
   float,
   int,
   length,
+  max,
   mix,
   normalize,
+  sin,
   smoothstep,
   step,
   uniformArray,
   uv,
+  vec2,
   vec3,
   vec4,
 } from 'three/tsl';
 
+import { noise2 } from '../SnowNoiseNodes.js';
 import { skyLightUniforms } from '../sky/skyLight.js';
 
 /** Powder falls slowly: drag-limited, not ballistic. */
@@ -85,12 +91,16 @@ export function createSnowPowderMaterial(uniforms, { lifetime, size, opacity }, 
   // its intersection as a hard hatched edge.
   const lifted = center.add(vec3(0, radius.mul(0.8), 0));
   material.positionNode = lifted.add(right.mul(corner.x.mul(radius))).add(up.mul(corner.y.mul(radius)));
-  const soft = float(1).sub(smoothstep(0.25, 1, length(uv().sub(0.5).mul(2))));
+  const local = uv().sub(0.5).mul(2);
+  // Snowflow `spray.fragment.wgsl` angular wobble breaks circular puff outlines into organic snow clouds.
+  const ang = atan(local.y, local.x);
+  const wob = float(1).add(noise2(vec2(cos(ang), sin(ang)).mul(2.4).add(seed.w.mul(37.0))).mul(0.32));
+  const radial = length(local).div(max(wob, float(0.5)));
+  const soft = float(1).sub(smoothstep(0.22, 1, radial));
   const fade = float(1).sub(t).mul(smoothstep(0, 0.2, t));
   material.opacityNode = soft.mul(fade).mul(opacity).mul(strength.min(1)).mul(alive);
-  // Gods' End's powder catches warm direct light while its shaded side stays
+  // Gods' End + Snowflow powder catches warm direct light while its shaded side stays
   // cool. The forward-scatter lobe brightens a puff viewed toward the sun.
-  const local = uv().sub(0.5).mul(2);
   const sphereNormal = normalize(vec3(local, dot(local, local).oneMinus().max(0).sqrt()));
   const sun = frameUniform(sunDirection ?? new THREE.Vector3(0.35, 0.85, 0.25));
   const lightView = normalize(cameraViewMatrix.mul(vec4(sun, 0)).xyz);

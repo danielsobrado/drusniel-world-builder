@@ -111,11 +111,13 @@ import { terrainBakeMacroSeed } from './editor/materials/TerrainBakeNoise.js';
 import {
   groundDeformationUniforms,
   readDeformationTexel,
+  setDeformationBrushSink,
   setGroundDeformationRegion,
   stampDisc,
   stampFootprint,
   updateGroundDeformation,
 } from './editor/stylized/deformation/groundDeformationState.js';
+import { GpuSnowDeformSim } from './editor/stylized/deformation/GpuSnowDeformSim.js';
 import { snowWakeRecorder } from './editor/stylized/deformation/SnowWakeRecorder.js';
 import { PLAYER_WATER_DRY } from './editor/player/PlayerWaterState.js';
 import { SwitchableCharacterView } from './editor/character/SwitchableCharacterView.js';
@@ -1159,6 +1161,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const waterInteraction = resources.own(new WaterInteractionSurface({ terrainView,
     player: playerController, config: config.stylizedSurface.water,
     rippleField: new RippleField({ renderer: terrainView.renderer }) }));
+  const gpuSnowDeform = new GpuSnowDeformSim({ renderer: terrainView.renderer });
+  setDeformationBrushSink((brush) => gpuSnowDeform.brush(brush));
+  resources.own({ dispose() { setDeformationBrushSink(null); gpuSnowDeform.dispose(); } });
   // How the region's water ripples and its ground takes prints (biome-looks `ripples`, `prints`).
   const biomeSurface = new BiomeSurfaceResponse({
     surface: config.stylizedSurface.biomeLooks.surface,
@@ -1943,6 +1948,13 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     snowField?.update(frameDelta, viewModeController.camera.position, frameOrigin,
       { cover: snowCover.value, melting: snowCover.melting, snowFall: Math.min(1, groundStorm.snow), snap: groundSnap });
     snowField?.render(terrainView.renderer);
+    const deformPlayerRender = viewModeController.camera.position;
+    gpuSnowDeform.update(
+      frameDelta,
+      { x: deformPlayerRender.x + frameOrigin.x, z: deformPlayerRender.z + frameOrigin.z },
+      deformPlayerRender,
+      { enabled: snowCountry.value > 0.05 || snowCover.value > 0.05 },
+    );
     stormRainUniform.value = frameWeatherAudio.rain;
     stormSnowFallUniform.value = Math.min(1, groundStorm.snow);
     stormLevelUniform.value = groundStorm.storm;

@@ -1,98 +1,198 @@
 import { Color } from 'three/webgpu';
-import { cameraWorldMatrix, dot, float, fwidth, length, max, mix, oneMinus, smoothstep, vec2, vec3, vec4 } from 'three/tsl';
+import {
+  Fn, If, abs, cameraPosition, cameraWorldMatrix, clamp, dot, exp, float, fract, fwidth, length, max, mix, normalize,
+  oneMinus, positionWorld, refract, smoothstep, step, vec2, vec3, vec4,
+} from 'three/tsl';
+import { acquireSnowDetailMaps } from '../assets/godsEnd/snowDetailMaps.js';
 import { heightRelief } from '../materials/heightRelief.js';
 import { PREVAILING_WIND } from '../materials/SnowAccumulation.js';
+import { repeatMipTextureLoad } from './RepeatMipTextureLoad.js';
+import { skyLightUniforms } from './sky/skyLight.js';
 import { noise2, noised, snowWarp } from './SnowNoiseNodes.js';
 import { snowSurfacePoint } from './SnowSurfaceState.js';
 
 const color = (hex) => { const c = new Color(hex); return vec3(c.r, c.g, c.b); };
-/** Weathered surface ice: grey-white, never the clean white of snow. */
-const ICE_DULL = color('#97a8b1');
-const ICE_BRIGHT = color('#c8d6dc');
-/** Light through the ice where the surface dips: melt hollows and the floor of every trough. */
-const ICE_BLUE = color('#55a9cf');
-/** Melt holes and the deepest troughs, where the light has come through metres of ice. */
-const ICE_DEEP = color('#1f78ad');
-/** Grit, ash and cryoconite drawn out along the flow. */
-const GRIT = color('#5d5b55');
-/** Height of the melt hummocks, metres: enough to model every ridge in a low sun. */
-const HUMMOCK_HEIGHT = 0.6;
-/** The bake's wind, not the live weather's: lying drifts must not swing round with a gust. */
+/** Frosted firn crust on wind-scoured ice hummocks. */
+const ICE_FIRN = color('#bfd5e0');
+/** Clear refracted glacial body colour (before Beer-Lambert path absorption). */
+const ICE_CLEAR = color('#5abae0');
+/** Deep crevasse & melt-hole abyss blue where red & green are absorbed over metres. */
+const ICE_DEEP = color('#0c4c86');
+/** Cryoconite & moraine silt drawn out along glacial flow bands. */
+const GRIT = color('#54585c');
+/** Beer-Lambert absorption per metre (red absorbed ~12x faster than blue). */
+const ICE_ABSORB = vec3(1.65, 0.42, 0.14);
+const ICE_IOR = 1.31;
+const ICE_F0 = ((ICE_IOR - 1) / (ICE_IOR + 1)) ** 2;
+const HUMMOCK_HEIGHT = 0.65;
 const WIND = vec2(PREVAILING_WIND[0], PREVAILING_WIND[1]);
 const WIND_ACROSS = vec2(-PREVAILING_WIND[1], PREVAILING_WIND[0]);
+/** Internal parallax layer depths (metres) and UV repeat scales along the refracted ray. */
+const INTERIOR_LAYERS = Object.freeze([
+  { depth: 0.14, scale: 0.19, shift: vec2(0.0, 0.0) },
+  { depth: 0.52, scale: 0.11, shift: vec2(0.37, 0.61) },
+  { depth: 1.35, scale: 0.065, shift: vec2(0.73, 0.19) },
+]);
 
 /**
- * Glacier ice instead of snowfield where a biome's `glacier` share says so
- * (after the scanned Icelandic glacier reference): grey-white weathered ice
- * worked into hummocks, light coming through blue in every hollow and in the
- * odd deep melt hole, dark grit drawn out in streaks along the flow, and the
- * powder snow left lying only in wind drifts. Coordinates are the snow's bounded
- * ones (SnowSurfaceState), so the pattern holds at planet scale.
+ * Upgraded open-world Glacier Ice shader (sampler-free, zero viewport copies):
  *
- * @param {object} options.tileShare float node: the biome's `glacier` share, filtered between cells
- * @param {object} [options.normal] view-space terrain normal: snow drifts into the lee faces
- * @returns {{ share: object, apply(color: object): object, roughness(r: object): object, normal(n: object): object }}
+ *  - Uses CC0 packed `glacier-depth-pack.png` (R sharp cracks, G flow veins,
+ *    B meltwater scallops) via `repeatMipTextureLoad`.
+ *  - 3-layer refracted parallax interior along `refract(-V, N, 1/1.31)` with
+ *    Beer-Lambert absorption and a critical-angle internal fracture plane.
+ *  - Dual-specular Schlick Fresnel sky mirror (`glaze`) + sharp sun clearcoat
+ *    glint (`sunGlaze`) for glossy melt channels against frosted firn ridges.
+ *  - Branches cleanly behind `share > 0.01` so non-glacier biomes pay ~0 cost.
  */
-export function createGlacierIceShading({ terrainUv, chunkWorldSize, chunkCenter, tileShare, normal = null }) {
+export function createGlacierIceShading({
+  terrainUv,
+  chunkWorldSize,
+  chunkCenter,
+  tileShare,
+  material = null,
+  normal = null,
+  sun = null,
+}) {
+  const packMaps = acquireSnowDetailMaps();
+  if (packMaps && material) {
+    const dispose = () => {
+      packMaps.release();
+      material.removeEventListener('dispose', dispose);
+    };
+    material.addEventListener('dispose', dispose);
+  }
+
   const local = vec2(terrainUv.x.sub(0.5), float(0.5).sub(terrainUv.y)).mul(chunkWorldSize);
   const p = snowSurfacePoint(local, chunkCenter);
   const q = snowWarp(p);
-  // World size of a pixel. A feature fades once it spans fewer than ~30 pixels:
-  // resolved but busy, the chop, holes and mottling read as speckle from the
-  // air, where a glacier settles into broad grey ice and long streaks.
-  const footprint = length(fwidth(local));
-  const near = (wavelength) => oneMinus(smoothstep(wavelength * 0.02, wavelength * 0.06, footprint));
-  // Hummocks: rounded melt ridges a few metres across over a finer chop.
-  const swell = noised(q.div(11)).x;
-  const broad = noised(q.div(3.4)).x;
-  const fine = noised(q.div(1.15).add(vec2(5.3, 11.7))).x;
-  const hummock = swell.mul(0.6).add(broad.mul(0.5).mul(near(3.4))).add(fine.mul(0.25).mul(near(1.15))).toVar();
+  const footprint = length(fwidth(local)).toVar('glacierFootprint');
+  const packUv = p.mul(1 / 16);
+  const packDx = packUv.dFdx().toVar('glacierPackDx');
+  const packDy = packUv.dFdy().toVar('glacierPackDy');
+  const near = (wavelength) => oneMinus(smoothstep(wavelength * 0.02, wavelength * 0.065, footprint));
 
-  // Powder lies where the wind drops it, as on the bake's snow: drifts drawn out
-  // downwind, banked against lee faces and filling the hummock hollows, with
-  // ragged edges that thin into the ice. Isotropic noise blobs 26 m across read
-  // as white ovals painted on, blind to wind and ground.
-  const worldNormal = normal ? cameraWorldMatrix.mul(vec4(normal, 0)).xyz.normalize() : vec3(0, 1, 0);
-  const lee = dot(worldNormal.xz, WIND).mul(2.5).clamp(-0.3, 0.3);
-  const tail = noise2(vec2(p.dot(WIND).div(90), p.dot(WIND_ACROSS).div(14)).add(vec2(q.y, q.x).div(40)));
-  // Three octaves, so an edge stays torn from the air once the finer ones fade.
-  const ragged = noise2(q.div(7).add(vec2(11.9, -2.3))).mul(near(7)).mul(0.5)
-    .add(noise2(q.div(3.1).add(vec2(-6.1, 9.4))).mul(near(3.1)).mul(0.35))
-    .add(noise2(q.div(1.1).add(vec2(2.7, -13.3))).mul(near(1.1)).mul(0.2));
-  // Hollow filling only up close: from the air its smooth 11 m pockets read as ovals.
-  const drift = tail.add(lee).sub(swell.mul(near(11)).mul(0.35)).add(ragged.mul(0.75));
-  const powder = smoothstep(0.12, 0.17, drift);
-  // Not gated by the baked snow weight: it is read per texel, and where rock takes
-  // a texel's weight it drops to zero, which switched the ice off in 2 m squares.
-  const share = tileShare.mul(oneMinus(powder)).toVar('glacierIce');
+  const worldNormal = normal ? cameraWorldMatrix.mul(vec4(normal, 0)).xyz.normalize().toVar() : vec3(0, 1, 0);
+  const view = normalize(cameraPosition.sub(positionWorld)).toVar();
 
-  const trough = smoothstep(0.1, -0.4, hummock);
-  // Melt holes: rare, small and sharp-edged. Warped: thresholded this high, the
-  // plain lattice left one blob per noise cell, in rows of blue squares. Pocks
-  // under a metre: at 4 m they lay on the ice as dark blue ellipses.
-  const hole = smoothstep(0.45, 0.52, noise2(q.div(1.4).add(vec2(-21.7, 3.1)))).mul(near(1.4));
-  // Grit streaks: noise stretched along a flow that veers slowly over the ice.
-  const veer = noise2(p.div(140)).mul(1.4);
-  const along = vec2(veer.cos(), veer.sin());
-  const across = vec2(along.y.negate(), along.x);
-  // Bands metres wide with soft edges, broken along their length: at 1.3 m across
-  // under a hard threshold they drew as crisp ruled lines, like tyre tracks.
-  const streakField = noise2(vec2(q.dot(along).div(28), q.dot(across).div(4.5)));
-  const broken = smoothstep(-0.2, 0.35, noise2(p.div(37).add(vec2(-8.3, 12.9))));
-  const grit = smoothstep(0.12, 0.5, streakField).mul(broken).mul(0.42).mul(near(4.5).mul(0.6).add(0.4))
-    .add(smoothstep(0.3, 0.55, noise2(q.div(9))).mul(0.15));
+  // Broad wind-drifted powder ribbons across bare glacier ice.
+  const swell = noised(q.div(11)).x.toVar();
+  const lee = dot(worldNormal.xz, WIND).mul(2.4).clamp(-0.3, 0.3);
+  const tail = noise2(vec2(p.dot(WIND).div(85), p.dot(WIND_ACROSS).div(15)).add(vec2(q.y, q.x).div(42)));
+  const ragged = noise2(q.div(7).add(vec2(11.9, -2.3))).mul(near(7)).mul(0.45)
+    .add(noise2(q.div(3.1).add(vec2(-6.1, 9.4))).mul(near(3.1)).mul(0.32));
+  const drift = tail.add(lee).sub(swell.mul(near(11)).mul(0.32)).add(ragged.mul(0.68));
+  // Higher drift threshold exposes sweeping blue glacier ribs & melt troughs while keeping drifts intact.
+  const powder = smoothstep(0.20, 0.29, drift);
+  // Dissolve 4 m biome tile boundaries into organic wind-drifted ice/snow edges (zero leak when tileShare == 0).
+  const edgeMask = smoothstep(0.01, 0.25, tileShare);
+  const organicTile = smoothstep(0.24, 0.78, tileShare.add(ragged.mul(0.28)).add(tail.mul(0.16))).mul(edgeMask);
+  const share = organicTile.mul(oneMinus(powder)).toVar('glacierIce');
 
-  const shade = noise2(q.div(6.5)).mul(near(6.5)).mul(0.5).add(0.5);
-  let ice = mix(ICE_DULL, ICE_BRIGHT, shade.mul(0.6).add(hummock.mul(0.5)).clamp(0, 1));
-  ice = mix(ice, ICE_BLUE, trough.mul(0.95));
-  ice = mix(ice, GRIT, grit.mul(oneMinus(trough.mul(0.6))));
-  ice = mix(ice, ICE_DEEP, max(hole.mul(0.6), smoothstep(-0.45, -0.62, hummock)).mul(0.9));
+  const ready = packMaps ? packMaps.ready : float(0);
+  // Compute ice body color, roughness, hummock height, and Fresnel glaze inside a coherent branch.
+  const iceOut = Fn(() => {
+    // rgb = surface albedo, a = roughness
+    const colRough = vec4(0.5, 0.7, 0.85, 0.28).toVar();
+    If(share.greaterThan(0.008).and(packDx.x.equal(packDx.x)).and(packDy.x.equal(packDy.x)), () => {
+      const broad = noised(q.div(3.4)).x;
+      const scallopTap = packMaps
+        ? repeatMipTextureLoad(packMaps.glacier, p.mul(0.22), packDx.mul(3.52), packDy.mul(3.52))
+        : vec4(0.2, 0.2, 0.5, 1);
+      const scallop = mix(float(0.5), scallopTap.b, ready);
+      const hummock = swell.mul(0.58).add(broad.mul(0.44).mul(near(3.4)))
+        .add(scallop.sub(0.5).mul(0.32).mul(near(1.6))).toVar();
+      const trough = smoothstep(0.14, -0.38, hummock).toVar();
+
+      // Refracted view ray into the glacier body (IOR 1.31).
+      const into = refract(view.negate(), worldNormal, 1 / ICE_IOR).toVar();
+      const ndv = clamp(dot(worldNormal, view), 0.04, 1);
+      const pathDepth = mix(float(0.38), float(2.2), trough).mul(mix(float(1.55), float(0.75), ndv));
+      const bodyTransmit = exp(ICE_ABSORB.mul(pathDepth).negate());
+
+      // 3-layer refracted parallax interior cracks & veins (Beer-Lambert attenuated).
+      const interiorGlow = vec3(0).toVar();
+      const crackDensity = float(0).toVar();
+      if (packMaps) {
+        If(ready.greaterThan(0.5), () => {
+          const veil = mix(float(0.22), float(1.45), oneMinus(trough));
+          const parallaxFade = near(0.8);
+          for (const layer of INTERIOR_LAYERS) {
+            const shifted = p.add(into.xz.mul(layer.depth)).mul(layer.scale).add(layer.shift);
+            const scaleMul = layer.scale * 16;
+            const sample = repeatMipTextureLoad(packMaps.glacier, shifted, packDx.mul(scaleMul), packDy.mul(scaleMul));
+            const crackLine = smoothstep(0.56, 0.88, sample.r);
+            const veinLine = smoothstep(0.52, 0.86, sample.g).mul(0.55);
+            const feat = max(crackLine, veinLine).mul(parallaxFade);
+            const atten = exp(ICE_ABSORB.mul(-2 * layer.depth)).mul(exp(veil.mul(-layer.depth)));
+            interiorGlow.addAssign(atten.mul(feat));
+            crackDensity.assign(max(crackDensity, crackLine.mul(exp(float(-layer.depth)))));
+          }
+          // Critical-angle internal fracture sheet (adapted from IceInterior.js).
+          const planeN = normalize(vec3(0.76, 0.32, 0.56));
+          const across = dot(vec3(p.x, float(0), p.y), planeN).div(5.5);
+          const toward = dot(into, planeN);
+          const crossing = max(abs(toward), float(0.08));
+          const ahead = mix(fract(across), fract(across).oneMinus(), step(0, toward));
+          const dist = ahead.mul(5.5).div(crossing);
+          const mirror = smoothstep(0.74, 0.52, crossing).mul(0.75).add(0.25);
+          const sheet = exp(ICE_ABSORB.mul(dist.mul(-2))).mul(smoothstep(4.5, 2.2, dist)).mul(mirror).mul(0.28);
+          interiorGlow.addAssign(sheet.mul(parallaxFade));
+        });
+      }
+
+      // Melt holes & glacial moraine grit streaks.
+      const hole = smoothstep(0.44, 0.52, noise2(q.div(1.5).add(vec2(-21.7, 3.1)))).mul(near(1.5));
+      const gritStreak = mix(float(0), smoothstep(0.62, 0.88, scallopTap.g), ready)
+        .mul(smoothstep(0.1, 0.55, noise2(p.div(28)))).mul(0.32);
+
+      // Blend frosted firn crust -> clear refracted aqua -> deep cobalt crevasses + interior cracks.
+      const firnShare = oneMinus(trough).mul(smoothstep(0.05, 0.55, hummock).mul(0.65).add(0.2)).mul(oneMinus(hole));
+      const clearBody = mix(ICE_DEEP, ICE_CLEAR, clamp(bodyTransmit.b.mul(0.75).add(bodyTransmit.g.mul(0.25)), 0, 1))
+        .mul(bodyTransmit.mul(0.55).add(0.45));
+      let ice = mix(clearBody, ICE_FIRN, firnShare);
+      ice = ice.add(interiorGlow.mul(vec3(0.48, 0.84, 1.0)).mul(0.62));
+      ice = mix(ice, ICE_DEEP, max(hole.mul(0.72), smoothstep(-0.42, -0.62, hummock).mul(0.85)));
+      ice = mix(ice, GRIT, gritStreak.mul(oneMinus(trough.mul(0.65))));
+
+      // Glazed ice roughness: mirror-slick 0.08–0.14 in blue troughs & cracks, 0.42 on weathered firn.
+      const iceRough = mix(float(0.42), float(0.09), max(trough, max(hole, crackDensity.mul(0.85))));
+      colRough.assign(vec4(ice, iceRough));
+    });
+    return colRough;
+  })().toVar('glacierIceOut');
+
+  // Hummock + scallop height for normal relief.
+  const reliefHeight = swell.mul(0.58)
+    .add(noised(q.div(3.4)).x.mul(0.42).mul(near(3.4)))
+    .mul(HUMMOCK_HEIGHT);
+
+  // Schlick Fresnel sky glaze (emissive sky reflection on glassy ice) + crisp sun clearcoat highlight.
+  const ndv = clamp(dot(worldNormal, view), 0.02, 1);
+  const smooth = iceOut.a.oneMinus().clamp(0, 1);
+  const fresnel = float(ICE_F0).add(float(1 - ICE_F0).mul(float(1).sub(ndv).pow(5)));
+  const skyGlaze = skyLightUniforms.reflectionTint
+    .mul(skyLightUniforms.brightness)
+    .mul(vec3(0.72, 0.88, 1.0))
+    .mul(fresnel.mul(smooth.mul(smooth)).mul(1.85))
+    .mul(share);
+
+  let sunGlaze = vec3(0);
+  if (sun) {
+    const halfDir = normalize(view.add(sun));
+    const ndh = clamp(dot(worldNormal, halfDir), 0, 1);
+    const spec = ndh.pow(mix(float(28), float(180), smooth)).mul(smooth).mul(fresnel.mul(1.6).add(0.18));
+    // Backlit ice subsurface aqua glow when looking through hummocks into low sun.
+    const back = clamp(dot(view, sun.negate()), 0, 1).pow(3.0).mul(0.28).mul(smooth);
+    sunGlaze = vec3(0.92, 0.98, 1.0).mul(spec.mul(1.4)).add(ICE_CLEAR.mul(back)).mul(share);
+  }
 
   return {
     share,
-    apply(base) { return mix(base, ice, share); },
-    /** Wet, glazed ice: glossier than snow, glossiest where melt water lies in the hollows. */
-    roughness(base) { return mix(base, mix(float(0.38), float(0.14), max(trough, hole)), share); },
-    normal(base) { return mix(base, heightRelief(base, hummock.mul(HUMMOCK_HEIGHT)), share).normalize(); },
+    glaze: skyGlaze,
+    sunGlaze,
+    apply(base) { return mix(base, iceOut.rgb, share); },
+    roughness(base) { return mix(base, iceOut.a, share); },
+    normal(base) { return mix(base, heightRelief(base, reliefHeight), share).normalize(); },
   };
 }

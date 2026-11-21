@@ -1,6 +1,8 @@
 import { AmbientEffectsSystem } from './AmbientEffectsSystem.js';
 import { BreathPuffs } from './BreathPuffs.js';
 import { RidgePlumes } from './RidgePlumes.js';
+import { AlpineSnowShellField } from '../snow/AlpineSnowShellField.js';
+import { GpuSnowComputeField } from '../snow/GpuSnowComputeField.js';
 import { ambientPresetName } from './ambientPresets.js';
 import { SettlementSamplingPreparation } from '../../world/settlements/SettlementSamplingPreparation.js';
 
@@ -62,6 +64,15 @@ export class WorldAmbience {
         getSnowLine: () => snowLine,
       }));
     }
+    // Reallocate a slice of the idle high-mountain grass budget into fluffy snow shells & GPU spindrift.
+    system.addExtra(new AlpineSnowShellField({ ground: system.ground, light: system.light, sun: system.sun }));
+    system.addExtra(new GpuSnowComputeField({
+      renderer: this.terrainView.renderer,
+      ground: system.ground,
+      light: system.light,
+      sun: system.sun,
+      puffTexture: system.puffTexture,
+    }));
   }
 
   /**
