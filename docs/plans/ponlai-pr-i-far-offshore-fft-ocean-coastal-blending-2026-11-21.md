@@ -1085,13 +1085,14 @@ These are verified package script names. The exact supported flags on QA runners
 - [x] Test U=0, unusual fetch/depth, extreme storm, signed large canonical coordinate seed, and time seek.
 - [x] Keep mode constants in separate file; actual tuning in approved quality profile.
 
-**I.1 result** (`src/editor/water/fft/OceanSpectrum.js`, `OceanFourierReference.js`, `OceanFftConstants.js`; `test/ocean-fft-spectrum.test.js`):
+**I.1 result** — full report and I.2 handoff: [Phase I.1 spectrum and reference](ponlai-pr-i-phase-i1-spectrum-and-reference-2026-11-21.md). Modules in `src/editor/water/fft/` (`OceanFftConstants`, `OceanSpectrum`, `OceanGaussianModes`, `OceanFourierReference`); tests `test/ocean-fft-{spectrum,fourier,determinism}.test.js`. Band cut-offs and cascades are provisional until the I.0 report lands.
 
 - Convention: `h(k,t) = h0(k)e^{-iωt} + conj(h0(-k))e^{+iωt}` with synthesis `Σ h e^{+ik·x}`, so modes travel toward +k (downwind); this is the opposite time sign to Ponlai [P1]. Wind direction is the heading the wind blows toward, radians from +X toward +Z.
 - `h0 = (z0+iz1)·sqrt(PΔk²)/2`, not `/√2`: the conjugate partner contributes the other half, and the seed-averaged variance test confirms `E[H²] = ΣPΔk²`. DC and both Nyquist lines are zero. Each mode's Gaussian pair is hashed from (seed, cascade, signed index), so it is independent of scan order and N.
 - Spreading is Donelan–Banner sech² (closed-form normalisation); TMA is Kitaigorodskii; fetch-limited α and ω_p follow Hasselmann.
 - Candidate cascades: 48 m tile for λ 7.5→2 m and 12 m tile for λ 2→0.5 m, disjoint half-open bands. At fetch 50 km the residual RMS height / mean-square slope is 0.040 m / 0.0084 (U=3), 0.054 m / 0.0147 (U=10), 0.064 m / 0.0200 (U=20), each below the Cox–Munk whole-spectrum prior; the five carriers at amplitude 0.9 carry 0.39 m RMS / 0.0057 slope.
-- Detail overlap: the medium detail train (~0.95 m ripples) lies inside the FFT band, so FFT **replaces** it in I.4; the fine train (~0.35 m) lies above the 0.5 m band top and stays. The test fails if either moves.
+- Detail overlap: the whole medium detail group (index 0, ~2 m, and index 1, ~0.95 m ripples) lies inside the FFT band, so FFT **replaces** it in I.4; the fine group (~0.35 m) lies above the 0.5 m band top and stays. The test fails if either moves.
+- Evolution runs at the carriers' 0.55× phase speed with ω quantised to a 512 s repeat period, so the GPU can take `τ = (t mod T)/T` from double precision (reconciled with the I.0 draft's Decisions A and E).
 
 **Stop:** inconsistent Fourier sign, seed non-determinism, overlapping energy with five carrier modes, unbounded variance, invalid TMA small-depth behavior or CPU oracle disagreement.
 

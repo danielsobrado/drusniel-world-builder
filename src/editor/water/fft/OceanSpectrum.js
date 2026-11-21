@@ -1,62 +1,81 @@
-import { hashString, createSeededRng } from '../../../sim/util/seededRng.js';
 import {
-  COX_MUNK_SLOPE, DEEP_KD, GRAVITY, HIGH_PASS_K0, HIGH_PASS_K1, JONSWAP_GAMMA,
-  JONSWAP_SIGMA_HIGH, JONSWAP_SIGMA_LOW, SHORT_WAVE_FADE_LENGTH, TAU, WIND_SPEED_MAX,
+  CALM_WIND_SPEED, CARRIER_PHASE_SPEED_SCALE, COX_MUNK_SLOPE, WAVE_REPEAT_PERIOD_SECONDS, DEEP_KD, DEFAULT_HIGH_PASS, DONELAN_BANNER_MIN_RATIO, GRAVITY,
+  JONSWAP_ALPHA, JONSWAP_GAMMA, JONSWAP_PEAK, JONSWAP_SIGMA_HIGH, JONSWAP_SIGMA_LOW, LIMITS,
+  MIN_OMEGA, SHORT_WAVE_FADE_LENGTH, TAU,
 } from './OceanFftConstants.js';
 
 /**
- * Pure CPU model of the offshore wind-sea short band (PR I §4): TMA-corrected
- * JONSWAP with Donelan–Banner spreading, high-passed so it carries no energy at
- * the analytic swell carriers' wavelengths. The long swell stays analytic
- * (SeaSwell, normalised units × amplitude); this module is only the local wind
- * sea, in metres.
+ * Pure directional wind-sea spectrum for the offshore FFT residual (PR I §4).
+ * TMA-corrected JONSWAP × Donelan–Banner spreading, converted to a 2D
+ * wave-number density and high-passed so the analytic swell carriers keep every
+ * wavelength they own. Formulas are from the published literature (Hasselmann
+ * 1973, Bouws 1985 / Kitaigorodskii, Donelan 1985, Tessendorf 2001); Ponlai's
+ * OceanSpectrum.ts (MIT, after tidewater) was a reference, no code is copied.
  *
- * Fourier convention: field(x) = Σ_k h(k,t)·exp(+i k·x) (no 1/N², see
- * OceanFourierReference.synthesize2d) with
- *   h(k,t) = h0(k)·exp(-iωt) + conj(h0(-k))·exp(+iωt)
- * so a mode travels toward +k, i.e. downwind. Ponlai's exp(+iωt) runs against k.
- * Wind direction is the heading the wind blows toward, radians from +X toward +Z.
+ * Only the local wind sea lives here, in metres. The long swell stays analytic
+ * (SeaSwell: normalised units × amplitude).
  */
 
-const MIN_OMEGA = 1e-6;
-const MIN_WIND = 1e-3;
-
-function assertFinite(value, name, min, max) {
+export function assertInRange(value, name, [min, max]) {
   if (!Number.isFinite(value) || value < min || value > max) {
-    throw new Error(`ocean spectrum: ${name} must be a finite number in [${min}, ${max}], got ${value}.`);
+    throw new RangeError(`ocean fft: ${name} must be a finite number in [${min}, ${max}], got ${value}.`);
   }
 }
 
-/** Validate inputs and derive fetch-limited JONSWAP terms (Hasselmann et al. 1973). */
+export const waveNumberFromWavelength = (wavelengthMeters) => TAU / wavelengthMeters;
+export const wavelengthFromWaveNumber = (k) => TAU / k;
+
+/** Fourier index i ∈ [0, N) → signed frequency index in [-N/2, N/2). */
+export function signedIndex(i, n) {
+  return i < n / 2 ? i : i - n;
+}
+
+/** Flat index of the mode at −k: the conjugate partner for a real field. */
+export function mirrorIndex(index, n) {
+  const p = index % n, q = (index - p) / n;
+  return ((n - q) % n) * n + ((n - p) % n);
+}
+
+/**
+ * Validated wind-sea parameters with derived fetch-limited JONSWAP terms.
+ * Calm policy: windSpeed below CALM_WIND_SPEED gives an exactly zero spectrum.
+ */
 export function resolveOceanSpectrumParams({
   windSpeed, windDirection, fetchMeters, depthMeters = Infinity, gamma = JONSWAP_GAMMA,
 } = {}) {
-  assertFinite(windSpeed, 'windSpeed (m/s)', 0, WIND_SPEED_MAX);
-  assertFinite(windDirection, 'windDirection (rad)', -1e6, 1e6);
-  assertFinite(fetchMeters, 'fetchMeters', 1, 1e8);
-  if (!(depthMeters === Infinity || (Number.isFinite(depthMeters) && depthMeters > 0))) {
-    throw new Error(`ocean spectrum: depthMeters must be positive or Infinity, got ${depthMeters}.`);
-  }
-  assertFinite(gamma, 'gamma', 1, 10);
-  const calm = windSpeed < MIN_WIND;
+  assertInRange(windSpeed, 'windSpeed (m/s)', LIMITS.windSpeed);
+  assertInRange(windDirection, 'windDirection (rad)', LIMITS.windDirection);
+  assertInRange(fetchMeters, 'fetchMeters', LIMITS.fetchMeters);
+  if (depthMeters !== Infinity) assertInRange(depthMeters, 'depthMeters', LIMITS.depthMeters);
+  assertInRange(gamma, 'gamma', LIMITS.gamma);
+  const calm = windSpeed < CALM_WIND_SPEED;
+  const g2 = GRAVITY * GRAVITY;
   return Object.freeze({
     windSpeed, windDirection, fetchMeters, depthMeters, gamma, calm,
-    alpha: calm ? 0 : 0.076 * ((windSpeed * windSpeed) / (fetchMeters * GRAVITY)) ** 0.22,
-    omegaPeak: calm ? Infinity : 22 * ((GRAVITY * GRAVITY) / (windSpeed * fetchMeters)) ** (1 / 3),
+    alpha: calm ? 0 : JONSWAP_ALPHA.scale * ((windSpeed * windSpeed) / (fetchMeters * GRAVITY)) ** JONSWAP_ALPHA.exponent,
+    omegaPeak: calm ? Infinity : JONSWAP_PEAK.scale * (g2 / (windSpeed * fetchMeters)) ** JONSWAP_PEAK.exponent,
   });
 }
 
-/** Finite-depth dispersion ω(k,d) = sqrt(g·k·tanh(k·d)) and its derivative dω/dk. */
-export function dispersion(k, depthMeters = Infinity) {
-  if (!(k > 0)) return { omega: 0, dOmegaDk: 0 };
+/** Finite-depth dispersion ω = sqrt(g·k·tanh(k·d)); k ≤ 0 gives 0. */
+export function angularFrequency(k, depthMeters = Infinity) {
+  if (!(k > 0)) return 0;
   const kd = k * depthMeters;
-  const deep = kd > DEEP_KD;
-  const t = deep ? 1 : Math.tanh(kd);
-  const omega = Math.sqrt(GRAVITY * k * t);
-  const shallowTerm = deep ? 0 : kd / Math.cosh(kd) ** 2;
-  return { omega, dOmegaDk: (GRAVITY * (t + shallowTerm)) / (2 * omega) };
+  return Math.sqrt(GRAVITY * k * (kd > DEEP_KD ? 1 : Math.tanh(kd)));
 }
 
+/** dω/dk = g·(tanh(kd) + kd·sech²(kd)) / 2ω, the Jacobian from ω- to k-density. */
+export function angularFrequencyDerivative(k, depthMeters = Infinity) {
+  const omega = angularFrequency(k, depthMeters);
+  if (omega === 0) return 0;
+  const kd = k * depthMeters;
+  const deep = kd > DEEP_KD;
+  const tanhKd = deep ? 1 : Math.tanh(kd);
+  const shallowTerm = deep ? 0 : kd / Math.cosh(kd) ** 2;
+  return (GRAVITY * (tanhKd + shallowTerm)) / (2 * omega);
+}
+
+/** JONSWAP angular-frequency density S(ω), m²·s. */
 export function jonswap(omega, { alpha, omegaPeak, gamma }) {
   if (!(omega > MIN_OMEGA) || alpha === 0) return 0;
   const sigma = omega <= omegaPeak ? JONSWAP_SIGMA_LOW : JONSWAP_SIGMA_HIGH;
@@ -65,7 +84,7 @@ export function jonswap(omega, { alpha, omegaPeak, gamma }) {
 }
 
 /** Kitaigorodskii depth attenuation Φ(ω_h), ω_h = ω·sqrt(d/g); 1 in deep water. */
-export function tmaCorrection(omega, depthMeters) {
+export function tmaCorrection(omega, depthMeters = Infinity) {
   if (depthMeters === Infinity) return 1;
   const wh = omega * Math.sqrt(depthMeters / GRAVITY);
   if (wh <= 1) return 0.5 * wh * wh;
@@ -73,9 +92,9 @@ export function tmaCorrection(omega, depthMeters) {
   return 1;
 }
 
-/** Donelan–Banner sech² spreading, normalised over θ ∈ [-π, π]. */
+/** Donelan–Banner sech² spreading D(θ), normalised to 1 over θ ∈ [-π, π]. */
 export function directionalSpread(theta, omegaRatio) {
-  const r = Math.max(omegaRatio, 0.56);
+  const r = Math.max(omegaRatio, DONELAN_BANNER_MIN_RATIO);
   const beta = r < 0.95 ? 2.61 * r ** 1.3
     : r < 1.6 ? 2.28 * r ** -0.65
       : 10 ** (-0.4 + 0.8393 * Math.exp(-0.567 * Math.log(r * r)));
@@ -83,128 +102,114 @@ export function directionalSpread(theta, omegaRatio) {
   return (beta / (2 * Math.tanh(beta * Math.PI))) * sech * sech;
 }
 
-function wrapAngle(angle) {
+/** Angle wrapped to [-π, π). */
+export function wrapAngle(angle) {
   const wrapped = (angle + Math.PI) % TAU;
   return (wrapped < 0 ? wrapped + TAU : wrapped) - Math.PI;
 }
 
-/** smoothstep(k0, k1, k): exactly zero at and below the carrier knee. */
-export function highPass(k) {
-  if (k <= HIGH_PASS_K0) return 0;
-  if (k >= HIGH_PASS_K1) return 1;
-  const x = (k - HIGH_PASS_K0) / (HIGH_PASS_K1 - HIGH_PASS_K0);
+/** smoothstep weight in [0, 1]: exactly zero at and below the cut-off wave number. */
+export function highPassWeight(k, { cutoffWavelength, fullWavelength } = DEFAULT_HIGH_PASS) {
+  const k0 = TAU / cutoffWavelength, k1 = TAU / fullWavelength;
+  if (!(k1 > k0)) throw new RangeError('ocean fft: high-pass fullWavelength must be shorter than cutoffWavelength.');
+  if (k <= k0) return 0;
+  if (k >= k1) return 1;
+  const x = (k - k0) / (k1 - k0);
   return x * x * (3 - 2 * x);
 }
 
-/** Half-open |k| band, so adjacent cascades never share a mode. */
-export function inBand(k, { kMin, kMax }) {
-  return k >= kMin && k < kMax;
+/** Half-open |k| band [kMin, kMax): adjacent cascades never share a mode. */
+export function cascadeBandWeight(k, { kMin, kMax }) {
+  return k >= kMin && k < kMax ? 1 : 0;
 }
 
-/** Residual 2D wave-number power density P(kx,kz) in m⁴ (height variance per (rad/m)²). */
-export function spectrumDensity(kx, kz, params) {
+/**
+ * Residual 2D wave-number density P(kx, kz) in m⁴ (height variance per (rad/m)²):
+ * S(ω)·TMA·D(θ)·(dω/dk)/k · shortWaveFade · highPass.
+ */
+export function spectrumDensity(kx, kz, params, highPass = DEFAULT_HIGH_PASS) {
   const k = Math.hypot(kx, kz);
-  const pass = highPass(k);
-  if (pass === 0 || params.calm) return 0;
-  const { omega, dOmegaDk } = dispersion(k, params.depthMeters);
+  if (params.calm || k === 0) return 0;
+  const pass = highPassWeight(k, highPass);
+  if (pass === 0) return 0;
+  const omega = angularFrequency(k, params.depthMeters);
   const s = jonswap(omega, params) * tmaCorrection(omega, params.depthMeters);
   if (s === 0) return 0;
-  const spread = directionalSpread(wrapAngle(Math.atan2(kz, kx) - params.windDirection), omega / params.omegaPeak);
+  const theta = wrapAngle(Math.atan2(kz, kx) - params.windDirection);
   const fade = Math.exp(-((k * SHORT_WAVE_FADE_LENGTH) ** 2));
-  return (s * spread * dOmegaDk / k) * fade * pass;
-}
-
-export function signedIndex(i, n) {
-  return i < n / 2 ? i : i - n;
-}
-
-function assertGrid(size, tileSizeMeters) {
-  if (!Number.isInteger(size) || size < 4 || (size & (size - 1)) !== 0 || size > 512) {
-    throw new Error(`ocean spectrum: size must be a power of two in [4, 512], got ${size}.`);
-  }
-  assertFinite(tileSizeMeters, 'tileSizeMeters', 1e-3, 1e5);
+  return s * directionalSpread(theta, omega / params.omegaPeak)
+    * angularFrequencyDerivative(k, params.depthMeters) / k * fade * pass;
 }
 
 /**
- * Seeded h0 table for one cascade. Each mode's Gaussian pair is hashed from
- * (seed, cascade, signed kx index, signed kz index), so it depends neither on
- * scan order nor on N. DC and both Nyquist lines are zero: Nyquist cells are
- * their own mirror, so i·k·h there could not stay Hermitian.
+ * Per-mode expected height variance P·Δk² on one cascade lattice. DC and both
+ * Nyquist lines are zero: a Nyquist cell is its own mirror, so i·k·h there
+ * cannot stay Hermitian.
  */
-export function createModeTable({ seed, size, tileSizeMeters, band, params, cascadeIndex = 0 }) {
-  if (!Number.isSafeInteger(seed)) throw new Error(`ocean spectrum: seed must be a safe integer, got ${seed}.`);
-  assertGrid(size, tileSizeMeters);
-  const count = size * size;
+export function createModePowerTable({ size, tileSizeMeters, band, params, highPass = DEFAULT_HIGH_PASS }) {
+  assertFftSize(size);
+  assertInRange(tileSizeMeters, 'tileSizeMeters', LIMITS.tileSizeMeters);
   const deltaK = TAU / tileSizeMeters;
-  const table = {
-    size, tileSizeMeters, deltaK, band, seed, cascadeIndex,
-    kx: new Float64Array(count), kz: new Float64Array(count), omega: new Float64Array(count),
-    power: new Float64Array(count), h0Re: new Float64Array(count), h0Im: new Float64Array(count),
-  };
+  const power = new Float64Array(size * size);
   const half = size / 2;
   for (let q = 0; q < size; q++) {
+    if (q === half) continue;
+    const kz = signedIndex(q, size) * deltaK;
     for (let p = 0; p < size; p++) {
-      const index = q * size + p;
-      const sp = signedIndex(p, size), sq = signedIndex(q, size);
-      const kx = sp * deltaK, kz = sq * deltaK, k = Math.hypot(kx, kz);
-      table.kx[index] = kx;
-      table.kz[index] = kz;
-      table.omega[index] = dispersion(k, params.depthMeters).omega;
-      if (p === half || q === half || k === 0 || !inBand(k, band)) continue;
-      const power = spectrumDensity(kx, kz, params) * deltaK * deltaK;
-      if (power === 0) continue;
-      const rng = createSeededRng(hashString(`ocean-fft:${seed}:${cascadeIndex}:${sp}:${sq}`));
-      const u1 = Math.max(rng.nextFloat(), 1e-9), u2 = rng.nextFloat();
-      const radius = Math.sqrt(-2 * Math.log(u1));
-      // E|h0|² = power/2; the conj(h0(-k)) partner supplies the other half of the real field's variance.
-      const amplitude = Math.sqrt(power) / 2;
-      table.power[index] = power;
-      table.h0Re[index] = radius * Math.cos(TAU * u2) * amplitude;
-      table.h0Im[index] = radius * Math.sin(TAU * u2) * amplitude;
+      if (p === half) continue;
+      const kx = signedIndex(p, size) * deltaK;
+      if (cascadeBandWeight(Math.hypot(kx, kz), band) === 0) continue;
+      power[q * size + p] = spectrumDensity(kx, kz, params, highPass) * deltaK * deltaK;
     }
   }
-  return table;
+  return { size, tileSizeMeters, deltaK, power };
 }
 
 /**
- * h(k,t) and its slopes i·kx·h, i·kz·h at absolute time t. Phase is ω·t
- * reduced mod 2π in double precision, so seeks and large clocks repeat exactly.
+ * Per-mode evolution frequencies for one cascade lattice. ω is the finite-depth
+ * dispersion scaled to the carriers' phase speed, then quantised to whole
+ * `cycles` per repeat period so the sea loops exactly every periodSeconds.
+ * Quantisation error is at most half a cycle per period (≤ 0.5 % at the 7.5 m knee).
  */
-export function evolveModes(table, timeSeconds) {
-  assertFinite(timeSeconds, 'timeSeconds', -1e9, 1e9);
-  const { size, h0Re, h0Im, kx, kz, omega } = table;
-  const count = size * size;
-  const out = {
-    heightRe: new Float64Array(count), heightIm: new Float64Array(count),
-    slopeXRe: new Float64Array(count), slopeXIm: new Float64Array(count),
-    slopeZRe: new Float64Array(count), slopeZIm: new Float64Array(count),
-  };
+export function createWaveFrequencies(size, tileSizeMeters, {
+  depthMeters = Infinity, phaseSpeedScale = CARRIER_PHASE_SPEED_SCALE, periodSeconds = WAVE_REPEAT_PERIOD_SECONDS,
+} = {}) {
+  assertFftSize(size);
+  assertInRange(tileSizeMeters, 'tileSizeMeters', LIMITS.tileSizeMeters);
+  assertInRange(phaseSpeedScale, 'phaseSpeedScale', [0, 10]);
+  assertInRange(periodSeconds, 'periodSeconds', [1, 1e5]);
+  const deltaK = TAU / tileSizeMeters;
+  const cycles = new Float64Array(size * size);
+  const omega = new Float64Array(size * size);
   for (let q = 0; q < size; q++) {
     for (let p = 0; p < size; p++) {
-      const index = q * size + p;
-      const mirror = ((size - q) % size) * size + ((size - p) % size);
-      const phase = (omega[index] * timeSeconds) % TAU;
-      const c = Math.cos(phase), s = Math.sin(phase);
-      // h0(k)·e^{-iφ} + conj(h0(-k))·e^{+iφ}; ω(k) = ω(-k)
-      const re = h0Re[index] * c + h0Im[index] * s + h0Re[mirror] * c + h0Im[mirror] * s;
-      const im = h0Im[index] * c - h0Re[index] * s - h0Im[mirror] * c + h0Re[mirror] * s;
-      out.heightRe[index] = re;
-      out.heightIm[index] = im;
-      out.slopeXRe[index] = -kx[index] * im;
-      out.slopeXIm[index] = kx[index] * re;
-      out.slopeZRe[index] = -kz[index] * im;
-      out.slopeZIm[index] = kz[index] * re;
+      const k = Math.hypot(signedIndex(p, size), signedIndex(q, size)) * deltaK;
+      const whole = Math.round(angularFrequency(k, depthMeters) * phaseSpeedScale * periodSeconds / TAU);
+      cycles[q * size + p] = whole;
+      omega[q * size + p] = whole * TAU / periodSeconds;
     }
   }
-  return out;
+  return { cycles, omega, periodSeconds };
 }
 
-/** Expected height variance (m²) and mean-square slope E[sx²+sz²] of a table's realisations. */
-export function expectedVariance(table) {
+export function assertFftSize(size) {
+  const [min, max] = LIMITS.fftSize;
+  if (!Number.isInteger(size) || size < min || size > max || (size & (size - 1)) !== 0) {
+    throw new RangeError(`ocean fft: size must be a power of two in [${min}, ${max}], got ${size}.`);
+  }
+}
+
+/** Expected height variance (m²) and total mean-square slope E[sx² + sz²] of a power table. */
+export function expectedVariance({ size, deltaK, power }) {
   let height = 0, slope = 0;
-  for (let i = 0; i < table.power.length; i++) {
-    height += table.power[i];
-    slope += table.power[i] * (table.kx[i] ** 2 + table.kz[i] ** 2);
+  for (let q = 0; q < size; q++) {
+    const kz = signedIndex(q, size) * deltaK;
+    for (let p = 0; p < size; p++) {
+      const kx = signedIndex(p, size) * deltaK;
+      const value = power[q * size + p];
+      height += value;
+      slope += value * (kx * kx + kz * kz);
+    }
   }
   return { height, slope };
 }
