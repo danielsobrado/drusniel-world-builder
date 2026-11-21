@@ -16,8 +16,9 @@ test('water acceptance runner requires hardware WebGPU by default', () => {
   assert.match(source, /performanceAuthoritative/);
 });
 
-test('water acceptance runner launches the local dev server through Node', () => {
+test('water acceptance runner uses the Windows dev server and GPU-capable browser entry points', () => {
   assert.match(source, /spawn\(\s*process\.execPath,\s*\[\s*join\(ROOT, 'node_modules', 'vite', 'bin', 'vite\.js'\)/);
+  assert.match(source, /channel: !headed && process\.platform === 'win32' \? 'chromium' : undefined/);
 });
 
 test('water acceptance runner drives enter, dive, surface and exit phases', () => {

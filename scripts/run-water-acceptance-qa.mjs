@@ -302,6 +302,8 @@ async function main() {
     await waitForServer(baseUrl);
     browser = await chromium.launch({
       headless: !headed,
+      // The Windows headless shell can fail to load Dawn's DXIL libraries.
+      channel: !headed && process.platform === 'win32' ? 'chromium' : undefined,
       args: [
         '--enable-unsafe-webgpu',
         '--ignore-gpu-blocklist',
