@@ -961,3 +961,321 @@ existing scene HDR, fog, TAA/FXAA, output tonemap
 A shadow-map **phase** must store exact generation+age. After teleport/sky jump, unrefreshed rows must be flagged invalid and cannot be sampled as if current. No scanning entire world edits: clouds are world-scale and do not bake into terrain geometry. No worker jobs per terrain chunk.
 
 ---
+
+## 14. Deterministic QA matrix and real acceptance tests
+
+### 14.1 Pure CPU/reference mathematics
+
+Build **small independent reference tests**, using the same constants and input field definitions as the shader, without needing a GPU. This is what prevents a good-looking screenshot from concealing a physically wrong or unstable implementation.
+
+1. **Density boundedness:** `rho(p)∈[0,1]` and `sigmaT≥0` for a grid of cloud types, weather values, shell levels, wind offsets and negative world coordinates. No NaN/Inf.
+2. **Empty space:** no coverage or outside shell → zero cloud source, `T=1`, no false cloud shadow.
+3. **Beer–Lambert exact constant slab:** for constant `sigmaT=0.002 m⁻¹` and length 100 m, reference `T=exp(-0.2)`; compare 1, 4, 16 and 64 steps. Energy must be nearly identical as step changes.
+4. **Source unit consistency:** in a homogeneous slab with uniform source `S`, integrated `C=S(1−T)` (assuming source function normalized consistently), and cloud composite `C+T*background`. Transparent and opaque limits are correct.
+5. **HG phase normalization:** quadrature of HG across sphere ≈1 for tested `g`, finite for both forward/back directions; no singular `g=±1` accepted.
+6. **Direct-to-sun shadow:** opaque thick cloud between ground and sun gives low T; adjacent hole gives high T; same density field gives expected viewed cloud silhouette.
+7. **Stratus/cumulus interpolation:** at type 0 and 1 the appropriate shell shapes appear; intermediate types vary continuously in density and cloud height, never pop.
+8. **Conservative empty bound:** for a dense sampling lattice, whenever fine density >0, candidate coarse bound must **not** be zero. False negatives are a hard failure.
+9. **Tileable 3D noise:** opposite tile faces match in value, first derivative/filtered mips within tolerance, all 64³ source/mip byte lengths valid.
+10. **Canonical motion:** translating camera and reference world together changes neither sky sample nor shadow when physical viewpoint is equivalent; negative modulo gives periodic continuity.
+11. **Wind sign test:** cloud patch moving east should have sky image and ground shadow move east, with matching velocity. One must not move west because an advection sign is inverted.
+12. **Floating origin:** wrapping at ±8,300,000 m and equivalent origin rebases produces identical sample coordinates and no light shift.
+13. **Shadow altitude projection:** reference plane map and receiver high on a cliff project along matching sunbeam; no offset based only on camera height.
+14. **Near-horizon light:** finite map UV/optical depth at e.g. sun elevations 0°, 1°, 5°, 15°, 45°; grazing shadows fade or clamp by disclosed policy.
+15. **Sky authored-key normalization:** at fixed weather look, H local cloud multiplier never exceeds the old clear/authorial maximum by a bright gap or adds a second global blackout.
+16. **Closed overcast:** shadow local variance stays low; mean look reduction handled once by existing sky/weather light.
+17. **History reprojection:** current and previous canonical view transforms plus advection map known synthetic cloud point to correct previous pixel (with and without origin snap).
+18. **History rejection:** wrong generation/teleport/FOV/resize/time jump rejects old samples; no stale cloud from previous location.
+19. **Lightning:** one transient flash changes current output only and **not** long history; after flash there is no long bright checkerboard ghost.
+20. **Resize and resource lifetime:** textures disposed only after safe swap; no old-size texture sampled, no one-frame sky black.
+21. **Capability fallback:** unsupported 3D texture/filter, WebGL fallback, shader-compile fail and missing noise asset restore exactly original cloud path.
+22. **Radiometric sky order:** stars and moon are attenuated by cloud T; cloud scattered RGB is not multiplied by opacity twice; fog/exposure follow exactly once.
+23. **Shader binding budget:** compile terrain, snow, rock, foliage, grass, towns and water under actual WebGPU portable sampler limits with cloud shadows enabled.
+24. **Device loss:** H GPU state is invalidated safely while CPU noise source remains usable for replay, no old target use-after-dispose.
+25. **No world edit work:** moving or editing 128 m terrain chunks creates **zero new CPU cloud voxel bake** jobs; sky noise stays global/canonical.
+
+### 14.2 Synthetic image and world-space tests
+
+| Fixture | Expected appearance/measurement |
+| --- | --- |
+| Clear sky `rho=0` | Pixel-identical clear-sky background, cloud T=1, no ground shadow |
+| One uniform 500m cloud slab | Analytic T and cloud brightness match reference independently of step count |
+| Cumulus isolated over a flat white plane | Visible 3D billowing cap/base and matching traveling ground shadow |
+| Cumulus/sun at 45°, 10° and 2° | Plausible cloud bright-side rotation and safe grazing shadow |
+| Two overlapping cloud masses | Correct front-to-back radiance + T composition; no doubled opacity |
+| Opaque stratus under sun | Soft grey/bright overhead gradient, no black checkerboard on ground |
+| Camera orbits fixed cumulus | Correct parallax, no static “2D noise painted on sphere” appearance |
+| Flight into/above cloud | Depth ordering with ground/buildings or clearly documented unsupported fallback |
+| Pan across cloud silhouette | Fine erosion survives; no 4×4 checker ghost after fast turn |
+| Forest silhouette at horizon | Trees/sky/cloud haze grade consistently without bright strip or double fog |
+| Snowfield at sunset | Clouds remain warm/cool correctly without neon bloom and no lost snow glints |
+| Town at dusk | Shadows don't alter emissive windows/lanterns or double-dim ambient |
+| Shallow coast and storm | Foam/water shaders unchanged and cloud glint attenuation coherent |
+| Negative giant-world coordinate, forced rebase | Cloud body and shadow keep world position and phase |
+| Teleport 50 km with moving wind | No stale history cloud from previous scene; shadow first valid frame current |
+| Sky quality/viewport resize | No target leak/compile storm; current output stable |
+| Lightning event | Flash from cloud vicinity for current frame; no 16-slot echo |
+| Fast 24h timelapse | Sunlight/sky colour changes, history rejected correctly; no old gold clouds at midnight |
+| Constant weather, paused camera | Deterministic settled output / hash across reloads |
+
+### 14.3 Actual Drusniel look QA: 38 verified fixtures [D33]
+
+At minimum compare the following **existing IDs** from `scripts/fixtures/environment-look-shots.json`:
+
+| ID | Specific PR H concern |
+| --- | --- |
+| `forest-off-12` | Normal fair cloud sky and tree silhouette |
+| `forest-air-off-12` | Clouds blend into air/haze above wooded skyline |
+| `grassland-off-12` | Cloud shape, bright fair masses and moving meadow shadow |
+| `wetland-off-12` | Low cloudy humid horizon, no cloud–fog band |
+| `coast-off-12` | Sea/sky hue and rock wetness, cloud direction vs reflection |
+| `desert-off-12` | Dusty horizon colour and sun edge warmth |
+| `legacy-rainforest-off-12` | Dense canopy shadow amount and cloud contrast |
+| `core-rainforest-off-12` | Heavy humid forest air with diffuse cloud overhead |
+| `core-temperate-rainforest-off-12` | Cool wet cloudy character |
+| `core-taiga-off-12` | Needle silhouette and cold ambient |
+| `core-wetland-off-12` | Swamp bog overcast cloud base |
+| `forest-off-7` | Low sun, safe long shadow projection and warm illuminated edges |
+| `forest-off-18.6` | Sunset high-contrast near-forward scattering without neon |
+| `forest-off-21` | Moon/stars occlusion and no daylight cloud shading |
+| `core-rainforest-off-18.6` | Tropical late sun/storm transition lighting |
+| `forest-storm-12` | Dense layer, low local shadow variance, dark underbase |
+| `forest-air-storm-12` | Storm cloud blended with air/fog, no solid horizontal sky cut |
+| `wetland-rain-12` | Low rainy lid, cloud vs rain visibility |
+| `coast-storm-12` | Storm horizon and ocean VFX preserved |
+| `core-taiga-snow-12` | Snow glints and shadowed direct remain |
+| `core-taiga-air-snow-12` | Snow/air sky continuity |
+| `glacier-off-12` | Bright sky against white glacier and high-altitude path |
+| `snow-eye-off-12` | Snow exposure follow not double applied to cloud |
+| `town-off-12` | Town/sky sunlight and expected shadow silhouette |
+| `town-off-21` | Night clouds, stars and lanterns unaffected |
+| `town-rain-19` | Dusk wet town, cloud/sky and emission |
+| `tundra-snow-12` | Wide exposed panorama and sunlit snow |
+| `snow-eye-snow-12` | Dense snow cloud/whiteout transition |
+
+The other fixture IDs should be included in automated full-matrix regression; this shortlist is not an exemption from the 38-scene run. QA uses exactly the same camera pose, weather, time, seed, region, render path, viewport, backend and release build. For each key scenario capture:
+
+- A/A same source to identify existing TAA, world-stream, rain, wind and shader timing nondeterminism.
+- **H off**, **H volume-view only** (development diagnostic), **H shadow only** (diagnostic), **H both**, and at least one moving clip or multi-frame screenshot sequence.
+- Cloud radiance, transmittance, depth, shadow map, actual material direct multiplier, temporal-validity heatmap, sky/horizon and overlay of sun direction.
+- The same asset/world source hashes and camera canonical coordinates. Record when a QA fixture needs a custom sky cloud coverage because default look happens to contain **no visible clouds**.
+- Save rejected screenshots/captures and backend feature failures instead of silently rerunning until a result looks good.
+
+### 14.4 Hardware performance and acceptance scripts
+
+`package.json` includes:
+
+```bash
+git branch --show-current
+git status --short
+git log -15 --oneline
+
+npm test
+npm run lint
+npm run build
+
+npm run qa:look
+npm run qa:weather
+npm run qa:weather:browser
+npm run qa:postprocessing:browser
+npm run qa:world:visual
+
+npm run qa:perf -- --headed --qa chunk-cross --warmup 8 --duration 12 --settle
+npm run qa:perf -- --headed --qa edited-world --warmup 8 --duration 12 --settle
+npm run qa:perf -- --headed --qa object-town --warmup 8 --duration 12 --settle
+
+# When WSL Chromium falls back to software WebGPU use the Windows adapter.
+npm run qa:perf:windows -- --qa chunk-cross --warmup 8 --duration 12 --settle
+```
+
+Do not treat these example QA arguments as guaranteed current flags without checking the runner's own `--help` when implementation begins. Source and test runners were inspected; **this documentation commit did not execute them**.
+
+Native headed WebGPU A/A/A/B/A capture on the same GPU must include p50/p95/p99 frame, shader compile count, active render path, per-cloud-pass GPU time or unavailable markers, CPU/cloud preparation, cloud map work and upload/alloc bytes. A forward-looking benchmark on a synthetic sky alone is **insufficient**: test full actual grassland, forest, town, wet coast, night and storm, with sunlight direct/cloud shadows consumed by terrain and vegetation.
+
+---
+
+## 15. Implementation phases (clear tasks, code targets and stop conditions)
+
+### H.0 — Audit and baseline (no feature code)
+
+- [ ] Re-fetch latest `main`, read [D1] `AGENTS.md`, [D32] `docs/perf-qa.md`, the PR E/F/G plans and all current active sky/weather/shadow/render source.
+- [ ] Verify actual Drusniel renderer Three.js release/TSL compute and texture capabilities, sampler budgets and chosen HDR post route.
+- [ ] Confirm no other collaborator already implemented a 3D volumetric cloud path, especially newer main commits after this plan.
+- [ ] Build an ownership diagram of [D3] sky, [D4] material shadows, [D19] cloudMaskScene and cinematic/volumetric shafts.
+- [ ] Capture A/A legacy look and perf in forest, grassland, coast, storm, town and night. Record baseline GPU backend, screenshots, exact config/shader counts.
+- [ ] Confirm whether PR E/F/G actually implemented; treat missing code as optional integration blockers, not base H blockers.
+- [ ] Inspect asset provenance for Ponlai's shape noise and verify imported/alternate source license before adopting any binary.
+- [ ] Read [D30] current config validator and choose strict H enum/settings owner.
+
+**Stop:** if current main has incompatible new cloud architecture, no safe WebGPU lower-res render target support, or missing reproducible QA. Re-plan against actual code, not the stale document.
+
+### H.1 — Pure cloud model and periodic density
+
+- [ ] Implement `CloudWeather` adapter from sky look+storm+wind with no new schedule or direct light.
+- [ ] Implement CPU reference for canonical-to-local mapping, positive modulo, smooth shell bounds, coverage, cumulus–stratus blend, and conservative empty masks.
+- [ ] Generate/load one **tileable 64³ packed** 3D shape+erosion source with mips, validation and license metadata; use project CC0 noise only with verified suitable packing.
+- [ ] Create equivalent TSL density sampling with explicit uniform arguments, stable layout naming/binding and matching periodic weather.
+- [ ] Compare shader density slices vs CPU reference on grid and large negative positions.
+- [ ] Verify coast, tundra, snow mountains and rainy forest cloud shell altitude; no arbitrary above-sea assumptions.
+- [ ] Add cheap density 2D cross-section debug mode (side/top/height), no sky integration yet.
+- [ ] Measure GPU upload/asset load and average shape samples; lazy initialization only.
+
+**Stop:** tile seams, positive-only modulo, NaN, blank cloud when assets load late, unlicensed source or false-negative empty bound.
+
+### H.2 — Standalone lower-res view raymarch
+
+- [ ] Build minimal half-resolution output of cloud scattered radiance, transmittance and characteristic depth, no timeline history.
+- [ ] Implement Beer–Lambert step opacity and sunlight/self-shadow/sky fill, with fixed bounded step and coarse empty-space skipping.
+- [ ] Verify 1/4/16/64 step constant-density invariance and limit max expensive sun taps.
+- [ ] Build one optional H sky compositing node that reads the cloud view and retains existing stars/moon/sun/haze/fog/exposure semantics.
+- [ ] Prove H disabled produces **byte-identical** legacy shader graph and screenshot; no second old `cloudCoverageNode` cost in H active path.
+- [ ] Test sky-below-cloud camera, looking up/around sun, sunset and night, and cloud depth alignment.
+- [ ] Capture synthetic and real sky visuals before adding temporal or global shadow.
+- [ ] Guard GPU errors and leave old sky active if H view output isn't ready.
+
+**Stop:** cloud looks as 2D FBM cutout, sun/sky drawn twice, cloud premultiplied twice, clouds neon at night, 256-step full sky loops, a new whole-screen copy from material depth, or unacceptable render cost.
+
+### H.3 — Same-density shadow map and direct-light hook
+
+- [ ] Use **same** H density/time/coverage/shell for shadow rays from material world positions to the sun direction.
+- [ ] Prototype 192² at ~6.1 km with ≤12 shadow integration steps, interleaved updates measured; tune against current 2D shadow reference.
+- [ ] Validate height parallax along sunbeam, world-coordinate grid snapping, large/negative origin, map edges and low sun.
+- [ ] Integrate through existing [D4] `receivedShadowNode` hook **without** adding a second cloud attenuation.
+- [ ] Check sampler constraints on terrain (16 limit) and foliage/wet snow/town/grass shaders under real WebGPU.
+- [ ] In current authored light mode, apply **relative local modulation**, respecting existing overcast direct light amount. Do not double mean blackout.
+- [ ] Publish view and shadow coherent generations. On teleport/new weather, do not show old map with new cloud view.
+- [ ] At full overcast, low local contrast but plausible cloud diffuse base; at partly cloudy, clear shadow patch correspondence.
+- [ ] If shadow/source quality fails, retain legacy and mark H development-only rather than claiming coherent cloud shadows.
+
+**Stop:** camera-attached shadows, cloud/view moving opposite directions, unshadowed water glints claimed solved, shader sampler budget exceeded, visible 128m chunk seams or 2D legacy factor doubled with H map.
+
+### H.4 — Existing cinematic/god-ray integration
+
+- [ ] Audit [D19] `cloudMaskScene` construction and `cloudTransmissionNode`, screen/volumetric/cinematic techniques, sky exposure/scene depth.
+- [ ] When H active, substitute matching H transmittance or an equivalent derived sky mask node; **do not** render the second old cloud dome pass.
+- [ ] Preserve current `godrays` scene shadow, bilateral filtering, fog and contact AO; H volume is not replacing their function.
+- [ ] Stage H update **before** scene render in all branches [D21]; make duplicate reflection/underwater/prewarm calls idempotent with frame tokens.
+- [ ] Verify high-sun shafts, low-sun forest beam, storm/cloud-obscured shaft reduction, city occluders and cloud silhouettes.
+- [ ] Test exactly one actual scene render per frame across cinematic/volumetric/post/direct, no extra beauty pass for H.
+- [ ] No new clip/depth copies; use existing scene pass ownership if depth compositing is required.
+- [ ] Verify initial render and toggling H during active cinematic effect shows no one-frame missing/bad mask.
+
+**Stop:** cloud and shaft occlusion doubled, sky horizon two-layer seam, double scene draw, lost god-rays pass, invalid sky mask when H loads asynchronously or black first frame.
+
+### H.5 — Temporal/LOD enhancement only if measured worthwhile
+
+- [ ] First compare half-resolution single-frame + depth-aware upsample to 4×4 interleaved temporal at fixed 1280×720 and native GPU.
+- [ ] If needed, implement [P4] 16-slot ordered sampling, camera+wind reprojection, opacity-weighted depth, neighborhood clamp, ping-pong history.
+- [ ] Separate fast lightning flash, reset/shorten for camera/weather/light/time/FOV/render scale/origin events.
+- [ ] Rebind stable nodes on resize/quality tier without shader recompile cascade. Guard stale-history generation.
+- [ ] Ensure camera cut immediate visible fresh output, no 16-frame old cloud smear. Paused QA settle is separate bounded opt-in, not gameplay.
+- [ ] Compare stationary 60 frames, pan at 90°/s, fast fly, sudden stop, timelapse and wet cloud motion.
+- [ ] On slow GPU, auto select measured safe tier **without** a dynamic threshold causing oscillating frequent shader/target reallocations.
+
+**Stop:** checkerboard cloud shadow, ghost moon/sun/flash, horizon swimming, 5 shader rebuilds on resize, stale velocity from scene TAA or worse GPU than simple half view.
+
+### H.6 — Optional cirrus, overcast diffusion, lightning and environment
+
+- [ ] Add cirrus on a separately configurable high thin layer only if cumulus/stratus already correct and extra materials are licensed.
+- [ ] Apply multiple scattering/column diffusion only when benchmark and white/overcast/sunset/night reference scenes justify the extra light taps.
+- [ ] Internal lightning reads [D16] existing strike-bearing/time, retains no long history, preserves hemisphere flash.
+- [ ] Rain curtain/rainbow weather visuals remain **optional** and must not duplicate existing precipitation/particle simulation.
+- [ ] Optional cloud panorama follows H source, staged low-frequency refresh, no every-frame PMREM rebuild.
+- [ ] If implemented E physical sky actually exists, connect to its **real** sky radiance API; only then enable physical-direct shadow mode.
+- [ ] If implemented F/G probes/bounce exist, publish broad sky generation changes and emitter-side cloud transmittance once; do not retrace static geometry.
+- [ ] Preserve ocean wet/gloss/specular and water-reflection behaviour; do not change offshore FFT before PR I.
+
+**Stop:** source asset license unclear, extra GPU > quality gain, rain drawn twice, lightning ghost, new HDR env black metallic armour, new sky rig/exposure duplication.
+
+### H.7 — QA, code review, performance and integration
+
+- [ ] Run `14.1` pure CPU/TSL reference test suite and `14.2` synthetic visual fixtures.
+- [ ] Run `npm test`, `npm run lint`, `npm run build` and all existing weather/look/post/world QA scripts.
+- [ ] Test [D33] all 38 scenes with A/A reference, H on/off/pair source, snapshots and source metadata.
+- [ ] Run native headed WebGPU frame and GPU stage timings, with optional compute timestamp availability reported accurately, at low/balanced/high.
+- [ ] Check stale target/cleanup on 10× resize, 20× camera cut, 1h accelerated time, 100 km canonical walk/fly and device recovery.
+- [ ] Check cloud shadow sampler count on real terrain/snow/foliage and draw route invariants.
+- [ ] Check CPU/renderer first-frame shader compiling during first weather preset change and first cloud asset decode.
+- [ ] Verify ocean, near-shore foam, terrain sky visibility, alpha foliage, sun haze, moon/stars, global fog and exposure.
+- [ ] Review architecture and shaders for major inefficiencies; review lifetime/disposal/error handling; profile one more pass after fixing issues.
+- [ ] Report optional limitations precisely, supported cameras/renderers/quality and verified integration with E/F/G (or none).
+
+**Stop:** no native hardware evidence, hidden performance regression, visible global sky duplication, sampler overflow, non-deterministic QA, device loss failure or screenshot deficits.
+
+### H.8 — Production enable/rollback and PR I handoff
+
+- [ ] Enable H only behind explicit YAML feature flag/approved tier; keep legacy default if acceptance threshold unmet.
+- [ ] Push **small reviewable** commits onto latest main; no force push, no actions, no branches, no stale code overwrite.
+- [ ] Add `docs/rendering/volumetric-clouds.md` documenting exact rendering owner, source/asset lineage, supported tier/camera, known issues and reproducible QA evidence.
+- [ ] Preserve direct-adapted MIT/tidewater/VolumetricCloudsCS1/David Hoskins SPDX notices and independently verify actual 3D asset license.
+- [ ] Immediate rollback `sky.volumetricClouds.enabled:false` restores original sky/shadow/mask/god rays pixel-identically and releases H GPU resources.
+- [ ] Report final source commit, exact supported mode and pass data. Do not call H implemented if only `.md` documents have landed.
+- [ ] Leave a small cloud radiance/T and cloud-shadow source API for PR I offshore water reflection/lighting only after actually implemented.
+
+Future **implementation** commit title (not this documentation commit):
+
+```text
+feat(sky): add coherent volumetric clouds and physically linked cloud shadows
+```
+
+---
+
+## 16. Definition of done and rejection conditions
+
+### Mandatory physics and source
+
+- [ ] One canonical periodic 3D cloud density reused by view and shadow, time/weather/cloud-type source identical at published generation.
+- [ ] No float32 hash collapse at huge coordinates, no negative modulo seam, no camera-attached cloud pattern or shadow.
+- [ ] Beer–Lambert radiance/opacity math passes constant-slab invariants and outputs finite transmittance in [0,1].
+- [ ] Cloud light uses existing sun/moon/sky intensity and in-cloud self-shadow; no separate exposure or second sun.
+- [ ] Distinct local shadow contrast vs broad overcast mean is managed once, preserving existing storm direct-light policy.
+- [ ] Light direction, ground shadow projection and view density follow same advected source and altitude mapping.
+- [ ] Stars/moon behind clouds attenuated by H transmittance, sun haze and snow exposure compensation applied once.
+- [ ] Lightning flashes are transient and not stored in long cloud history.
+
+### Mandatory renderer and compatibility
+
+- [ ] H off is **exact old sky**, with zero H shader/asset/load/dispatch/texture allocation and correct original cloud shadow/god-rays.
+- [ ] H on does not evaluate extra legacy cloud layers or a second cloud mask pass.
+- [ ] Existing `receivedShadowNode` preserves directional sun/cloud chain and no duplicate attenuation or 17th terrain sampler.
+- [ ] No extra beauty render; direct, post, cinematic and volumetric god rays render routes update clouds once before draw.
+- [ ] Camera cut, free flight, origin snap, resize, time scrub, weather, device recovery behave according to documented support.
+- [ ] Post TAA and H temporal history don't add visible ghost/jitter and no stale sky from another camera after teleport.
+- [ ] Hero armour's environment IBL, water foam/refraction/shore rocks, snow/leaf highlights and regional fog preserved.
+- [ ] Actual cloud resource owner and disposal boundaries defined; no GPU/leaked history after quality or renderer reset.
+- [ ] No new Azgaar world-save or biome-ID changes and no terrain chunk worker spike.
+
+### Mandatory visual and performance QA
+
+- [ ] Fair cumulus, cloudy sky and storm stratus visually distinct with coherent lower and upper shading and visible 3D parallax.
+- [ ] Actual ground direct shadows track the same 3D cloud geometry, with appropriate soft penumbra and no excessive contrast under an even lid.
+- [ ] Night moon/star occlusion and dusk sunlight edge behaviour work across real climates/latitudes/times.
+- [ ] All 38 existing world look fixtures and synthetic QA verified on same real GPU; screenshots and source hashes reviewable.
+- [ ] Native GPU pass timing, CPU/frame p95/p99, shadow map ages, shader count, texture samplers and bounded VRAM reported.
+- [ ] Source/noise licensing from all adapted third-party ancestors documented.
+- [ ] Clean config validation and feature fallback, no black sky on initial async failure.
+- [ ] Proper unit/math tests, smoke tests, baseline A/A, stress QA and two rounds of code/performance review complete.
+
+### Optional features cannot be silently claimed
+
+High cirrus, multiple-scatter, positional lightning/rainbow, reflection PMREM updates, advanced sparse 4×4 temporal, atmosphere E and probes F/G connections, flight-with-cloud-in-front-depth compositing — each has its own gate, test evidence and explicit status. A missing optional item is acceptable for H minimum **only** when the user-facing description doesn't claim it.
+
+**Reject H** for an attractive 2D FBM shader renamed “volumetric,” two different cloud densities for sky/ground, a shadow map sliding with camera, double overcast blackout, default-on 256-step full screen, source noise without copyright/asset proof, lost god rays or wet ocean, emitted-cloud brightness after sundown, old history printed over a lightning flash, silently ignored 16-sampler limit, or “done” based solely on a documentation commit.
+
+---
+
+## 17. PR I — far-offshore FFT ocean handoff
+
+The next planned PR I is **distant/offshore FFT ocean blended with the current nearshore breaking waves**, not an overhaul of clouds. H should provide only small **real** interfaces:
+
+1. Sky radiance/cloud transmittance for distant reflected sky **only if a stable environment/panorama path has actually been implemented**.
+2. A coherent **direct sun visibility** cloud shadow field for near/offshore surface where map coverage exists; outside it, a calibrated global mean/legacy source rather than dark edge-clamped water.
+3. One authoritative wind direction/speed state and sky/weather generation; FFT sea wind spectra may use this independently without modifying clouds' accumulated high-altitude drift.
+4. Current sea surface direct sun glint must be attenuated by the appropriate **unscattered beam** source, not by a diffuse-after-cloud scattered sky approximation.
+5. Horizon fog/colour and far-ocean water should meet the same sky/haze at low sun and storms; no visible “sea under clouds” detached band.
+6. No cloud shader writes into `WaveMaps`, swash foam, rock impacts or FFT textures. Keep material/texture lifetime isolated and avoid duplicate environment PMREM updates.
+7. A low-cost way to ask for the *published* cloud source version, current key, and optional cloud transmittance/sky panorama; no new dependency on PR F/G classes that still may not exist.
+
+**This PR H specification is complete only as a plan until the implementation phases, QA and source code are actually delivered.**
+
+---
