@@ -27,7 +27,7 @@ world wind (WorldWindPass) ──► OceanFftController.setWeather ──► Oce
                           │                                        Gaussian phases fixed)
                           │                                              │ one cascade per frame
                           │                                              ▼
-                          │                         OceanFftRuntime (WebGPU compute, once per frame)
+                          │                         OceanFftRuntime (WebGPU compute, once per frame while ocean is drawn)
                           │                           128² × 2, Stockham radix-2, absolute water time
                           │                           → RG16F 2-layer array with mips (∂h/∂x, ∂h/∂z)
                           │                                              │
@@ -115,7 +115,7 @@ Measured on an RTX 4080, Windows 11, Chromium 151, native WebGPU, 1600×900 ([I.
 
 | | Cost |
 | --- | --- |
-| FFT compute | 0.055 ms + 0.010 ms output passes per frame (timestamped), one transform per frame regardless of slot count |
+| FFT compute | 0.055 ms + 0.010 ms output passes per frame (timestamped), one transform per frame regardless of slot count. None inland: since `fa4af9cd` the controller steps only while a drawn water chunk holds ocean, and resumes on absolute water time when one returns |
 | GPU render, high/ultra, offshore and open coast | +0.07–0.19 ms (p50) |
 | GPU render, sheltered cove (most refraction water near the camera) | +0.33–0.35 ms, above the plan's provisional 0.2 ms target, well inside the 60 FPS floor |
 | medium / low | 0 |
