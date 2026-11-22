@@ -56,15 +56,11 @@ export function preparePlacementEcology(page, request, generator) {
     const size = chunkSize * tileSize;
     const centerX = (chunkX + 0.5) * size;
     const centerZ = -(chunkZ + 0.5) * size;
-    for (let z = 0; z < FOREST_FLOOR_CANOPY_SAMPLES; z++) for (let x = 0; x < FOREST_FLOOR_CANOPY_SAMPLES; x++) {
-      sample(centerX - size * 0.5 + (x + 0.5) / FOREST_FLOOR_CANOPY_SAMPLES * size,
-        centerZ + size * 0.5 - (z + 0.5) / FOREST_FLOOR_CANOPY_SAMPLES * size);
-    }
-    // Ground cover samples the existing edge-aligned grid; canopy textures use
-    // cell centers above. Retain both exact coordinate sets.
-    for (let z = 0; z < 16; z++) for (let x = 0; x < 16; x++) {
-      sample(centerX - size * 0.5 + x / 15 * size,
-        centerZ + size * 0.5 - z / 15 * size);
+    // Ground cover and the canopy texture share one edge-aligned grid.
+    const last = FOREST_FLOOR_CANOPY_SAMPLES - 1;
+    for (let z = 0; z <= last; z++) for (let x = 0; x <= last; x++) {
+      sample(centerX - size * 0.5 + x / last * size,
+        centerZ + size * 0.5 - z / last * size);
     }
     page.forestSamples = samples;
   }

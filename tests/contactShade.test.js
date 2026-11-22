@@ -174,11 +174,26 @@ test('the forest floor keeps the canopy coarse and upsamples it smoothly', () =>
   // The habitat is sampled at the old 16 × 16, not per texel.
   assert.equal(calls, samples * samples);
   const row = Array.from({ length: size }, (_, x) => pixels[(10 * size + x) * 4]);
-  assert.equal(row[0], 0);
-  assert.equal(row[size - 1], 255);
-  for (let x = 1; x < size; x += 1) assert.ok(row[x] >= row[x - 1], 'the ramp must not step back');
+  // Edge-aligned samples: each texel reads the ramp at its own centre.
+  for (let x = 0; x < size; x += 1) assert.ok(Math.abs(row[x] - (x + 0.5) / size * 255) <= 0.5 + 1e-9);
   // Shade and blue are cleared for the contact pass; alpha is opaque.
   assert.equal(pixels[1], 0);
   assert.equal(pixels[2], 0);
   assert.equal(pixels[3], 255);
+});
+
+test('neighbouring chunks agree on the canopy at their shared edge', () => {
+  const size = FOREST_FLOOR_SIZE;
+  const samples = FOREST_FLOOR_CANOPY_SAMPLES;
+  // A world-continuous canopy bump that crosses the border between chunk 0 and chunk 1.
+  const canopy = worldX => Math.exp(-(((worldX - 128) / 40) ** 2));
+  const chunk = (originX) => {
+    const pixels = new Uint8Array(size * size * 4);
+    writeForestFloorCanopy({ pixels, size, samples, canopyAt: x => canopy(originX + x / (samples - 1) * 128) });
+    return pixels;
+  };
+  const west = chunk(0), east = chunk(128);
+  const step = Math.abs(west[(size - 1) * 4] - east[0]);
+  const inner = Math.abs(west[(size - 1) * 4] - west[(size - 2) * 4]);
+  assert.ok(step <= inner + 1, `edge step ${step} vs ${inner} one texel inside`);
 });

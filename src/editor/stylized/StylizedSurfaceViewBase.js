@@ -40,6 +40,7 @@ import { advancePlantSway } from './plantSway.js';
 import { contactShadeRadius, paintContactShade, resolveContactShade } from './contactShade.js';
 import {
   FOREST_FLOOR_CANOPY_SAMPLES,
+  canopySampleCoord,
   writeForestFloorCanopy,
   writeForestFloorLitter,
 } from './forestFloorTexture.js';
@@ -1027,8 +1028,8 @@ export class StylizedSurfaceView {
         scratch: this.canopyScratch,
         canopyAt: (x, z) => {
           const habitat = field.sample(
-            descriptor.centerWorldX - half + (x + 0.5) / samples * this.chunkWorldSize,
-            descriptor.centerWorldZ + half - (z + 0.5) / samples * this.chunkWorldSize,
+            descriptor.centerWorldX - half + x / (samples - 1) * this.chunkWorldSize,
+            descriptor.centerWorldZ + half - z / (samples - 1) * this.chunkWorldSize,
           );
           const floor = forestFloorDensity(habitat, 'grass', floorConfig);
           grassFloor[z * samples + x] = floor;
@@ -1058,15 +1059,13 @@ export class StylizedSurfaceView {
     const half = this.chunkWorldSize * 0.5;
     const tileSize = this.terrainView.worldStore.tileSize;
     const seed = (this.terrainView.worldStore.generator?.toMetadata?.().seed ?? 0) ^ CANOPY_FLOOR_PATCH_SALT;
-    const ratio = samples / size;
-    const at = (sample) => Math.min(samples - 1, Math.max(0, sample));
     writeForestFloorLitter({
       pixels: terrainSlot.forestFloorPixels,
       size,
       bareAt: (x, z) => {
         // Texel centre in sample space, as the canopy is upsampled.
-        const sx = at((x + 0.5) * ratio - 0.5);
-        const sz = at((z + 0.5) * ratio - 0.5);
+        const sx = canopySampleCoord(x, size, samples);
+        const sz = canopySampleCoord(z, size, samples);
         const floor = bilinearSample(grassFloor, samples, sx, sz);
         if (floor >= 1) return 0;
         return 1 - canopyFloorCover(
