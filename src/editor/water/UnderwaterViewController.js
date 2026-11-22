@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { validateUnderwaterConfig } from './UnderwaterConfig.js';
-import { advanceUnderwaterBlend, mixNumber } from './UnderwaterTransition.js';
+import { advanceUnderwaterBlend, mixNumber, resolveWaterlineNearPlane } from './UnderwaterTransition.js';
 import { resolveWaterQualityFeatures } from './WaterQuality.js';
 import { UnderwaterCausticsPostProcess } from './UnderwaterCausticsPostProcess.js';
 import { getCanonicalOffshoreGeography } from './TerrainWaterQueries.js';
@@ -35,6 +35,8 @@ export class UnderwaterViewController {
     // existence from the live scene after surfacing would leak that fog forever.
     this.originalFogExists = Boolean(this.scene.fog?.isFogExp2);
     this.surfaceNearPlane = this.camera.near;
+    this.nearPlaneTightened = false;
+    this.waterlineNearState = { enabled: false, surfaceHeight: null };
     this.surfaceHemisphereIntensity = this.hemisphere?.intensity ?? 0;
     this.surfaceDirectionalIntensity = this.directional?.intensity ?? 0;
     this.surfaceSkyVisible = this.skyMesh?.visible ?? true;
@@ -127,7 +129,7 @@ export class UnderwaterViewController {
       this.surfaceFogColor.copy(this.scene.fog.color);
       this.surfaceFogDensity = this.scene.fog.density;
     }
-    this.surfaceNearPlane = this.camera.near;
+    if (!this.nearPlaneTightened) this.surfaceNearPlane = this.camera.near;
     if (this.hemisphere) this.surfaceHemisphereIntensity = this.hemisphere.intensity;
     if (this.directional) this.surfaceDirectionalIntensity = this.directional.intensity;
     if (this.skyMesh) this.surfaceSkyVisible = this.skyMesh.visible;
@@ -164,7 +166,15 @@ export class UnderwaterViewController {
     if (this.skyMesh) this.skyMesh.visible = showSky && this.surfaceSkyVisible;
     if (this.cloudMaskMesh) this.cloudMaskMesh.visible = showSky && this.surfaceCloudVisible;
 
-    const nearPlane = mixNumber(this.surfaceNearPlane, this.config.nearPlane, this.blend);
+    const nearPlane = resolveWaterlineNearPlane({
+      surfaceNearPlane: this.surfaceNearPlane,
+      underwaterNearPlane: this.config.nearPlane,
+      blend: this.blend,
+      waterlineEnabled: this.waterlineNearState.enabled,
+      surfaceHeight: this.waterlineNearState.surfaceHeight,
+      eyeY: this.camera.position.y,
+    });
+    this.nearPlaneTightened = Math.abs(nearPlane - this.surfaceNearPlane) > 1e-6;
     if (Math.abs(this.camera.near - nearPlane) > 1e-6) {
       this.camera.near = nearPlane;
       this.camera.updateProjectionMatrix();
@@ -198,6 +208,9 @@ export class UnderwaterViewController {
     if (status.headSubmerged || status.waterDepth > 0) {
       causticsState.surfaceHeight = status.waterSurfaceHeight;
     }
+    this.waterlineNearState.enabled = causticsState.waterlineEnabled;
+    this.waterlineNearState.surfaceHeight = Number.isFinite(status.waterSurfaceHeight)
+      ? status.waterSurfaceHeight : null;
     this.causticsPostProcess?.update(causticsState);
     this.applyEnvironment();
     // Published for the surface view, which stands its land streaming down while
@@ -234,6 +247,9 @@ export class UnderwaterViewController {
     if (this.directional) this.directional.intensity = this.surfaceDirectionalIntensity;
     if (this.skyMesh) this.skyMesh.visible = this.surfaceSkyVisible;
     if (this.cloudMaskMesh) this.cloudMaskMesh.visible = this.surfaceCloudVisible;
+    this.nearPlaneTightened = false;
+    this.waterlineNearState.enabled = false;
+    this.waterlineNearState.surfaceHeight = null;
     if (Math.abs(this.camera.near - this.surfaceNearPlane) > 1e-6) {
       this.camera.near = this.surfaceNearPlane;
       this.camera.updateProjectionMatrix();

@@ -135,3 +135,29 @@ test('worlds that started with fog restore their surface fog', () => {
   assert.equal(scene.fog.density, 0.012);
   controller.dispose();
 });
+
+test('swimming near the waterline tightens camera.near and restores surfaceNearPlane when leaving water', () => {
+  const { controller, playerController } = createHarness();
+  let waterDepth = 1.5;
+  let waterSurfaceHeight = 4;
+  playerController.camera.position.y = 4.35;
+  playerController.getStatus = () => ({
+    enabled: true,
+    headSubmerged: false,
+    waterDepth,
+    waterSurfaceHeight,
+    waterKind: 2,
+  });
+
+  controller.update(0);
+  controller.update(16);
+  assert.ok(playerController.camera.near <= 0.15, 'tightens near plane while swimming at surface');
+  assert.equal(controller.surfaceNearPlane, 0.5, 'preserves original surface near plane across waterline frames');
+
+  waterDepth = 0;
+  waterSurfaceHeight = null;
+  playerController.camera.position.y = 6;
+  controller.update(32);
+  assert.equal(playerController.camera.near, 0.5, 'restores surface near plane after leaving water');
+  controller.dispose();
+});

@@ -4,6 +4,7 @@ import { validateUnderwaterConfig } from '../src/editor/water/UnderwaterConfig.j
 import {
   advanceUnderwaterBlend,
   mixNumber,
+  resolveWaterlineNearPlane,
 } from '../src/editor/water/UnderwaterTransition.js';
 
 const config = Object.freeze({
@@ -33,4 +34,13 @@ test('underwater visual settings reject unsafe values', () => {
     () => validateUnderwaterConfig({ ...config, nearPlane: 0 }),
     /nearPlane/,
   );
+});
+
+test('waterline near plane tightens before swimming eye height clips the water mesh', () => {
+  const base = { surfaceNearPlane: 0.5, underwaterNearPlane: 0.15, blend: 0, waterlineEnabled: true, surfaceHeight: 10 };
+  assert.equal(resolveWaterlineNearPlane({ ...base, eyeY: 11.7 }), 0.5, 'standing high keeps full near plane');
+  assert.ok(resolveWaterlineNearPlane({ ...base, eyeY: 10.35 }) <= 0.15, 'swimming eye at +0.35m never clips at 0.5m');
+  assert.ok(resolveWaterlineNearPlane({ ...base, eyeY: 10.08 }) < 0.10, 'bobbing right at the surface tightens further');
+  assert.equal(resolveWaterlineNearPlane({ ...base, blend: 1, eyeY: 9.0 }), 0.15, 'fully submerged uses underwater nearPlane');
+  assert.equal(resolveWaterlineNearPlane({ ...base, waterlineEnabled: false, eyeY: 10.2 }), 0.5, 'dry state restores surface nearPlane');
 });
