@@ -1,6 +1,6 @@
 # PR I [P9] follow-on — FFT caustics evidence
 
-Evidence for the [FFT caustics report](../../plans/ponlai-pr-i-fft-caustics-2026-11-21.md). RTX 4080, Windows 11, Chromium, native WebGPU.
+Evidence for the [FFT caustics report](../../plans/ponlai-pr-i-fft-caustics-2026-11-22.md). RTX 4080, Windows 11, Chromium, native WebGPU.
 
 ## Reproduce
 

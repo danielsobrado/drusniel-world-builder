@@ -1,0 +1,470 @@
+{
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "waterTime": 126,
+  "url": "http://localhost:5224/",
+  "captures": [
+    {
+      "scope": "shelf-plateau/web",
+      "file": "shelf-plateau-web.png",
+      "sha256": "44e4cdb62439912431841b40468c4ec212f52e20cf92fac5b9952f780874af25",
+      "headSubmerged": true,
+      "underwater": {
+        "blend": 1,
+        "active": true,
+        "submerged": true,
+        "projectedCaustics": {
+          "enabled": true,
+          "active": true,
+          "blend": 1,
+          "waterlineBlend": 1,
+          "surfaceHeight": -1.6889794366374347,
+          "optics": true,
+          "fftCaustics": null
+        }
+      },
+      "camera": {
+        "x": 2290,
+        "y": -7.944769851729508,
+        "z": -10567
+      },
+      "bedDepth": 7.955790415092074,
+      "shoreDistance": 22
+    },
+    {
+      "scope": "shelf-slope/web",
+      "file": "shelf-slope-web.png",
+      "sha256": "2f200144b0cec8980e2acddea5add0533561188629b180a92c18a2dff4923bc7",
+      "headSubmerged": true,
+      "underwater": {
+        "blend": 1,
+        "active": true,
+        "submerged": true,
+        "projectedCaustics": {
+          "enabled": true,
+          "active": true,
+          "blend": 1,
+          "waterlineBlend": 1,
+          "surfaceHeight": -1.1830752136925193,
+          "optics": true,
+          "fftCaustics": null
+        }
+      },
+      "camera": {
+        "x": 2280,
+        "y": -12.752080473706133,
+        "z": -10575
+      },
+      "bedDepth": 13.269005260013614,
+      "shoreDistance": 29.73213768005371
+    },
+    {
+      "scope": "shelf-plateau/fft",
+      "file": "shelf-plateau-fft.png",
+      "sha256": "44cc03783013d4cdc789151f0c647295c729b731a4d78d32fd073bf8f48b0511",
+      "headSubmerged": true,
+      "underwater": {
+        "blend": 1,
+        "active": true,
+        "submerged": true,
+        "projectedCaustics": {
+          "enabled": true,
+          "active": true,
+          "blend": 1,
+          "waterlineBlend": 1,
+          "surfaceHeight": -1.6889794366374347,
+          "optics": true,
+          "fftCaustics": {
+            "available": 1,
+            "cameraWeight": 1,
+            "levels": [
+              -0.8404632338695426,
+              1.050465066982988
+            ]
+          }
+        }
+      },
+      "camera": {
+        "x": 2290,
+        "y": -7.944769851729508,
+        "z": -10567
+      },
+      "bedDepth": 7.955790415092074,
+      "shoreDistance": 22
+    },
+    {
+      "scope": "shelf-slope/fft",
+      "file": "shelf-slope-fft.png",
+      "sha256": "08fd4203755e0adde2c748fc5eadc4a2b8a867c2a3d91aededd450b2bfd2535c",
+      "headSubmerged": true,
+      "underwater": {
+        "blend": 1,
+        "active": true,
+        "submerged": true,
+        "projectedCaustics": {
+          "enabled": true,
+          "active": true,
+          "blend": 1,
+          "waterlineBlend": 1,
+          "surfaceHeight": -1.1830752136925193,
+          "optics": true,
+          "fftCaustics": {
+            "available": 1,
+            "cameraWeight": 1,
+            "levels": [
+              -0.8404632338695426,
+              1.050465066982988
+            ]
+          }
+        }
+      },
+      "camera": {
+        "x": 2280,
+        "y": -12.752080473706133,
+        "z": -10575
+      },
+      "bedDepth": 13.269005260013614,
+      "shoreDistance": 29.73213768005371
+    },
+    {
+      "scope": "shelf-plateau/web-repeat",
+      "file": "shelf-plateau-web-repeat.png",
+      "sha256": "b41e237aa0aa80c7c17f06ed39b276685218f5a3db9672f9e9a271e0856edf62",
+      "headSubmerged": true,
+      "underwater": {
+        "blend": 1,
+        "active": true,
+        "submerged": true,
+        "projectedCaustics": {
+          "enabled": true,
+          "active": true,
+          "blend": 1,
+          "waterlineBlend": 1,
+          "surfaceHeight": -1.6889794366374347,
+          "optics": true,
+          "fftCaustics": null
+        }
+      },
+      "camera": {
+        "x": 2290,
+        "y": -7.944769851729508,
+        "z": -10567
+      },
+      "bedDepth": 7.955790415092074,
+      "shoreDistance": 22
+    },
+    {
+      "scope": "shelf-slope/web-repeat",
+      "file": "shelf-slope-web-repeat.png",
+      "sha256": "dbe036208cc10e889e220c6793ca52ba8c2ea20cc92fc048cc773cfb70ed665c",
+      "headSubmerged": true,
+      "underwater": {
+        "blend": 1,
+        "active": true,
+        "submerged": true,
+        "projectedCaustics": {
+          "enabled": true,
+          "active": true,
+          "blend": 1,
+          "waterlineBlend": 1,
+          "surfaceHeight": -1.1830752136925193,
+          "optics": true,
+          "fftCaustics": null
+        }
+      },
+      "camera": {
+        "x": 2280,
+        "y": -12.752080473706133,
+        "z": -10575
+      },
+      "bedDepth": 13.269005260013614,
+      "shoreDistance": 29.73213768005371
+    }
+  ],
+  "timings": [
+    {
+      "scope": "shelf-plateau/web",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 56216,
+          "finalForegroundPid": 56216,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 56216,
+          "samples": 146
+        },
+        "passed": true
+      },
+      "stillSubmerged": true,
+      "raf": {
+        "samples": 983,
+        "p50Ms": 8.200000000011642,
+        "p95Ms": 11.5,
+        "p99Ms": 15.5
+      },
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+        "samples": 99,
+        "avgMs": 3.90093317171717,
+        "p50Ms": 3.830784,
+        "p95Ms": 4.29568,
+        "maxMs": 7.462912
+      },
+      "renderCpu": {
+        "samples": 984,
+        "p50Ms": 6.5999999940395355,
+        "p95Ms": 9.099999994039536,
+        "p99Ms": 12.300000011920929
+      }
+    },
+    {
+      "scope": "shelf-slope/web",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 56216,
+          "finalForegroundPid": 56216,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 56216,
+          "samples": 92
+        },
+        "passed": true
+      },
+      "stillSubmerged": true,
+      "raf": {
+        "samples": 1675,
+        "p50Ms": 5.899999999994179,
+        "p95Ms": 7.5,
+        "p99Ms": 10.39999999999418
+      },
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+        "samples": 175,
+        "avgMs": 3.4880014628571443,
+        "p50Ms": 3.4600959999999996,
+        "p95Ms": 3.780608,
+        "maxMs": 4.137984
+      },
+      "renderCpu": {
+        "samples": 1676,
+        "p50Ms": 4.700000002980232,
+        "p95Ms": 5.9000000059604645,
+        "p99Ms": 7.4000000059604645
+      }
+    },
+    {
+      "scope": "shelf-plateau/fft",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 56216,
+          "finalForegroundPid": 56216,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 56216,
+          "samples": 92
+        },
+        "passed": true
+      },
+      "stillSubmerged": true,
+      "raf": {
+        "samples": 1151,
+        "p50Ms": 8.200000000011642,
+        "p95Ms": 13.10000000000582,
+        "p99Ms": 15.89999999999418
+      },
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+        "samples": 125,
+        "avgMs": 3.626336256000002,
+        "p50Ms": 3.648512,
+        "p95Ms": 3.928064,
+        "maxMs": 4.197375999999999
+      },
+      "renderCpu": {
+        "samples": 1152,
+        "p50Ms": 6.700000002980232,
+        "p95Ms": 10.899999991059303,
+        "p99Ms": 13.200000002980232
+      }
+    },
+    {
+      "scope": "shelf-slope/fft",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 56216,
+          "finalForegroundPid": 56216,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 56216,
+          "samples": 91
+        },
+        "passed": true
+      },
+      "stillSubmerged": true,
+      "raf": {
+        "samples": 1194,
+        "p50Ms": 8.099999999976717,
+        "p95Ms": 12.10000000000582,
+        "p99Ms": 15
+      },
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+        "samples": 129,
+        "avgMs": 3.293501519379847,
+        "p50Ms": 3.214336,
+        "p95Ms": 3.513344,
+        "maxMs": 3.639296
+      },
+      "renderCpu": {
+        "samples": 1195,
+        "p50Ms": 6.5999999940395355,
+        "p95Ms": 9.900000005960464,
+        "p99Ms": 12
+      }
+    },
+    {
+      "scope": "shelf-plateau/web-repeat",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 56216,
+          "finalForegroundPid": 56216,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 56216,
+          "samples": 92
+        },
+        "passed": true
+      },
+      "stillSubmerged": true,
+      "raf": {
+        "samples": 1866,
+        "p50Ms": 5.2000000000116415,
+        "p95Ms": 6.600000000005821,
+        "p99Ms": 7.899999999994179
+      },
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+        "samples": 190,
+        "avgMs": 3.6047225263157903,
+        "p50Ms": 3.525632,
+        "p95Ms": 3.8707200000000004,
+        "maxMs": 4.096
+      },
+      "renderCpu": {
+        "samples": 1867,
+        "p50Ms": 4.200000002980232,
+        "p95Ms": 5.399999991059303,
+        "p99Ms": 6.4000000059604645
+      }
+    },
+    {
+      "scope": "shelf-slope/web-repeat",
+      "focus": {
+        "required": true,
+        "method": "windows-native-foreground",
+        "focusedAtEnd": true,
+        "lostFocus": false,
+        "events": [],
+        "native": {
+          "browserPid": 56216,
+          "finalForegroundPid": 56216,
+          "type": "complete",
+          "focusedAtEnd": true,
+          "passed": true,
+          "lostFocus": false,
+          "events": [],
+          "initialForegroundPid": 56216,
+          "samples": 92
+        },
+        "passed": true
+      },
+      "stillSubmerged": true,
+      "raf": {
+        "samples": 2006,
+        "p50Ms": 4.7999999999883585,
+        "p95Ms": 6.699999999982538,
+        "p99Ms": 8
+      },
+      "gpuRender": {
+        "supported": true,
+        "error": null,
+        "scope": "Sampled render passes; excludes CPU submission, uploads and compute work.",
+        "samples": 205,
+        "avgMs": 3.294053151219512,
+        "p50Ms": 3.339264,
+        "p95Ms": 3.57376,
+        "maxMs": 3.678208
+      },
+      "renderCpu": {
+        "samples": 2007,
+        "p50Ms": 3.7999999970197678,
+        "p95Ms": 5.200000002980232,
+        "p99Ms": 6.200000002980232
+      }
+    }
+  ],
+  "failures": [],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "backend": "webgpu",
+    "fallback": false
+  },
+  "browserErrors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  }
+}

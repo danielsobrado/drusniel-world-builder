@@ -11,7 +11,7 @@ Built by PR I ([plan](../plans/ponlai-pr-i-far-offshore-fft-ocean-coastal-blendi
 | **FFT normals and roughness:** a 128² × 2-cascade wind-sea spectrum on high and ultra | **Shipped, on** | `enabled` |
 | **Long swell geometry:** 16 Fourier modes, 48–160 m, real wave height; the CPU water query and the vertex shader agree to 0.6 µm | **Shipped, on** | `geometry.enabled` (needs `enabled`) |
 | **Weather coupling:** the spectrum and swell follow the world wind | **Shipped, on** | `weather.*` |
-| **FFT caustics:** underwater bed lighting from the FFT slopes | Built and tested, **off** (invisible on this world's bathymetry) | `caustics.enabled` |
+| **FFT caustics:** underwater bed lighting from the FFT slopes, on ocean beds deeper than 2–6 m | Built and tested, **off** (visible on the shelf; enabling it is an art call) | `caustics.enabled` |
 
 Precisely, for the plan's question "normal/roughness only, or geometry?":
 - **FFT output is normal and roughness only.** The 128² FFT never displaces vertices, so it has no height.
@@ -75,7 +75,7 @@ water:
       blend: { depthStartMeters: 7, depthEndMeters: 14, shoreStartMeters: 24, shoreEndMeters: 40 }
       weather: { referenceWindSpeed: 10, transitionSeconds: 2 }
       geometry: { enabled: true }
-      caustics: { enabled: false, strength: 1 }
+      caustics: { enabled: false, strength: 1, depthStartMeters: 2, depthEndMeters: 6 }
 ```
 
 - Code defaults (`OFFSHORE_FFT_DEFAULTS`) are all off. The shipped YAML turns the normals and swell on.
@@ -211,4 +211,4 @@ Phase reports:
 [I.6](../plans/ponlai-pr-i-phase-i6-long-swell-geometry-2026-11-21.md) ·
 [I.7](../plans/ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md) ·
 [I.8](../plans/ponlai-pr-i-phase-i8-qa-and-rollout-2026-11-21.md) ·
-[FFT caustics](../plans/ponlai-pr-i-fft-caustics-2026-11-21.md)
+[FFT caustics](../plans/ponlai-pr-i-fft-caustics-2026-11-22.md)

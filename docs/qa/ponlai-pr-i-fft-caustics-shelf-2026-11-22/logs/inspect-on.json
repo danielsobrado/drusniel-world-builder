@@ -1,0 +1,267 @@
+{
+ "sourceRevision": "d70f918677a61feeb9194354046be04e63d58fe2",
+ "waterPatch": {
+  "sea": {
+   "offshoreFft": {
+    "caustics": {
+     "enabled": true
+    }
+   }
+  }
+ },
+ "failures": [],
+ "oceanFft": [
+  {
+   "scope": "offshore-calm/high (diffraction on)",
+   "underwaterPost": {
+    "textures": 3,
+    "oceanFftReferenced": true,
+    "length": 17041,
+    "hash": "382b3837",
+    "status": {
+     "enabled": true,
+     "active": false,
+     "blend": 0,
+     "waterlineBlend": 0,
+     "surfaceHeight": -1.3833438299195557,
+     "optics": true,
+     "fftCaustics": {
+      "available": 1,
+      "cameraWeight": 1,
+      "levels": [
+       -0.8404632338695426,
+       1.050465066982988
+      ]
+     }
+    }
+   },
+   "oceanFft": {
+    "state": "active",
+    "reason": null,
+    "size": 128,
+    "cascades": 2,
+    "bytes": {
+     "h0": 524288,
+     "cycles": 131072,
+     "ping": 262144,
+     "pong": 262144,
+     "output": 174760,
+     "total": 1354408
+    },
+    "dispatchesPerTransform": 15,
+    "outputPasses": 2,
+    "spectrumRevision": 1,
+    "configGeneration": 1,
+    "transforms": 2630,
+    "skipped": 0,
+    "outputs": 2630,
+    "available": 1,
+    "bindingGeneration": 2630,
+    "tileSizes": [
+     57.3,
+     15.45
+    ],
+    "spectrumWind": {
+     "windSpeed": 10,
+     "windDirection": 0.21655030497608926
+    },
+    "transitioning": false
+   },
+   "slotOrigins": {
+    "checked": 42,
+    "maxError": 0
+   },
+   "materialVariants": 2,
+   "shaders": [
+    {
+     "refraction": false,
+     "textures": 16,
+     "samplers": 13,
+     "varyings": 12,
+     "oceanFftReferenced": true,
+     "length": 216542,
+     "hash": "a95839db",
+     "vertexHash": "5ae704e5"
+    },
+    {
+     "refraction": true,
+     "textures": 21,
+     "samplers": 14,
+     "varyings": 12,
+     "oceanFftReferenced": true,
+     "length": 230732,
+     "hash": "a48570fb",
+     "vertexHash": "12c22c"
+    }
+   ]
+  },
+  {
+   "scope": "offshore-calm/calm-motion (diffraction on)",
+   "underwaterPost": {
+    "textures": 3,
+    "oceanFftReferenced": true,
+    "length": 17041,
+    "hash": "382b3837",
+    "status": {
+     "enabled": true,
+     "active": false,
+     "blend": 0,
+     "waterlineBlend": 0,
+     "surfaceHeight": -0.9825031230381993,
+     "optics": true,
+     "fftCaustics": {
+      "available": 1,
+      "cameraWeight": 1,
+      "levels": [
+       -0.8404632338695426,
+       1.050465066982988
+      ]
+     }
+    }
+   },
+   "oceanFft": {
+    "state": "active",
+    "reason": null,
+    "size": 128,
+    "cascades": 2,
+    "bytes": {
+     "h0": 524288,
+     "cycles": 131072,
+     "ping": 262144,
+     "pong": 262144,
+     "output": 174760,
+     "total": 1354408
+    },
+    "dispatchesPerTransform": 15,
+    "outputPasses": 2,
+    "spectrumRevision": 1,
+    "configGeneration": 1,
+    "transforms": 3233,
+    "skipped": 107,
+    "outputs": 3233,
+    "available": 1,
+    "bindingGeneration": 3233,
+    "tileSizes": [
+     57.3,
+     15.45
+    ],
+    "spectrumWind": {
+     "windSpeed": 10,
+     "windDirection": 0.21655030497608926
+    },
+    "transitioning": false
+   },
+   "slotOrigins": {
+    "checked": 42,
+    "maxError": 0
+   },
+   "materialVariants": 2,
+   "shaders": [
+    {
+     "refraction": false,
+     "textures": 16,
+     "samplers": 13,
+     "varyings": 12,
+     "oceanFftReferenced": true,
+     "length": 216542,
+     "hash": "a95839db",
+     "vertexHash": "5ae704e5"
+    },
+    {
+     "refraction": true,
+     "textures": 21,
+     "samplers": 14,
+     "varyings": 12,
+     "oceanFftReferenced": true,
+     "length": 230732,
+     "hash": "a48570fb",
+     "vertexHash": "12c22c"
+    }
+   ]
+  },
+  {
+   "scope": "offshore-calm/ultra (diffraction on)",
+   "underwaterPost": {
+    "textures": 3,
+    "oceanFftReferenced": true,
+    "length": 17265,
+    "hash": "d0404cd",
+    "status": {
+     "enabled": true,
+     "active": false,
+     "blend": 0,
+     "waterlineBlend": 0,
+     "surfaceHeight": -1.4463014707155557,
+     "optics": true,
+     "fftCaustics": {
+      "available": 1,
+      "cameraWeight": 1,
+      "levels": [
+       -0.8404632338695426,
+       1.050465066982988
+      ]
+     }
+    }
+   },
+   "oceanFft": {
+    "state": "active",
+    "reason": null,
+    "size": 128,
+    "cascades": 2,
+    "bytes": {
+     "h0": 524288,
+     "cycles": 131072,
+     "ping": 262144,
+     "pong": 262144,
+     "output": 174760,
+     "total": 1354408
+    },
+    "dispatchesPerTransform": 15,
+    "outputPasses": 2,
+    "spectrumRevision": 1,
+    "configGeneration": 1,
+    "transforms": 2525,
+    "skipped": 0,
+    "outputs": 2525,
+    "available": 1,
+    "bindingGeneration": 2525,
+    "tileSizes": [
+     57.3,
+     15.45
+    ],
+    "spectrumWind": {
+     "windSpeed": 10,
+     "windDirection": 0.21655030497608926
+    },
+    "transitioning": false
+   },
+   "slotOrigins": {
+    "checked": 42,
+    "maxError": 0
+   },
+   "materialVariants": 2,
+   "shaders": [
+    {
+     "refraction": false,
+     "textures": 16,
+     "samplers": 13,
+     "varyings": 12,
+     "oceanFftReferenced": true,
+     "length": 216728,
+     "hash": "2b90c273",
+     "vertexHash": "5ae704e5"
+    },
+    {
+     "refraction": true,
+     "textures": 21,
+     "samplers": 14,
+     "varyings": 12,
+     "oceanFftReferenced": true,
+     "length": 230934,
+     "hash": "42e2018f",
+     "vertexHash": "12c22c"
+    }
+   ]
+  }
+ ]
+}

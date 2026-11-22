@@ -1,0 +1,6 @@
+[
+  { "id": "shelf-plateau", "note": "A 7 m plateau on the shelf (shore distance ~20 m), looking toward the beach: beds from 7 m up to 2 m, the caustic depth band.",
+    "camera": { "x": 2290, "z": -10567, "yaw": 2.356, "pitch": -0.3 } },
+  { "id": "shelf-slope", "note": "Mid-shelf slope at 13 m looking up it to 1 m: FFT caustics on the deep side fading to the web in the shallows.",
+    "camera": { "x": 2280, "z": -10575, "yaw": 3.1416, "pitch": -0.22 } }
+]
