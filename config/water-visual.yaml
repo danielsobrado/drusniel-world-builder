@@ -230,13 +230,16 @@ water:
       geometry:
         enabled: true
       # Underwater caustics from the FFT slopes (the [P9] follow-on): the bed is lit by
-      # 1/|det J| of the refracted rays, J = I + (1 − 1/η)·depth·∂(slope)/∂x, offshore by
-      # the blend above (per-pixel bed depth, camera shore distance). The caustic web
-      # stays elsewhere. Off builds the original underwater shader. Strength scales the
-      # excess light against the web's. Off until its native QA passes.
+      # 1/|det J| of the refracted rays, J = I + (1 − 1/η)·depth·∂(slope)/∂x, on ocean
+      # beds fading in over the depth band below (per pixel; not the blend above, whose
+      # floor is too deep to show caustics). The caustic web stays in the shallows and
+      # inland. Off builds the original underwater shader. Strength scales the excess
+      # light against the web's. Off until its native QA passes.
       caustics:
         enabled: false
         strength: 1
+        depthStartMeters: 2
+        depthEndMeters: 6
   # Where the ground meets the sea: a swash film that runs up the sand and back
   # each wave, a foam line on its front, and wet sand behind it. Keyed on height
   # above sea level, so it follows any coast; lakes and rivers get none.

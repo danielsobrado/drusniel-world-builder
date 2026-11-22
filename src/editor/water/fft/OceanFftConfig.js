@@ -16,8 +16,8 @@ export const OFFSHORE_FFT_DEFAULTS = Object.freeze({
   weather: Object.freeze({ referenceWindSpeed: 10, transitionSeconds: 2 }),
   // I.6: wind-driven long swell (48–160 m) as real wave height, CPU and shader alike.
   geometry: Object.freeze({ enabled: false }),
-  // [P9] follow-on: underwater caustics from the FFT slopes where it owns the sea (OceanFftCaustics).
-  caustics: Object.freeze({ enabled: false, strength: 1 }),
+  // [P9] follow-on: underwater caustics from the FFT slopes over ocean beds in their own depth band (OceanFftCaustics).
+  caustics: Object.freeze({ enabled: false, strength: 1, depthStartMeters: 2, depthEndMeters: 6 }),
 });
 
 // config/water-domain.yaml waterDomain.shoreDistanceMeters: the field saturates there.
@@ -51,6 +51,8 @@ export function resolveOffshoreFft(source = {}) {
   if (typeof geometry.enabled !== 'boolean') throw new Error(`${field('geometry.enabled')} must be a boolean.`);
   if (typeof caustics.enabled !== 'boolean') throw new Error(`${field('caustics.enabled')} must be a boolean.`);
   finiteIn(caustics.strength, 'caustics.strength', 0, 4);
+  finiteIn(caustics.depthStartMeters, 'caustics.depthStartMeters', 0, 50);
+  finiteIn(caustics.depthEndMeters, 'caustics.depthEndMeters', caustics.depthStartMeters + 0.5, 100);
   for (const key of Object.keys(source)) if (!(key in OFFSHORE_FFT_DEFAULTS)) throw new Error(`${field(key)} is not a setting.`);
   for (const group of ['blend', 'weather', 'geometry', 'caustics']) {
     for (const key of Object.keys(source[group] ?? {})) {

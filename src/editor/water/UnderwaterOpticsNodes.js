@@ -77,8 +77,8 @@ export function createUnderwaterOpticsNodes({ beauty, depthTexture, cameraMatrix
         .mul(smoothstep(0, 1, float(45).sub(distance).div(25)))
         .mul(state.sun).mul(surface.select(float(0), float(1)));
       const web = godsEndCausticLattice(point.xz.add(state.causticOffset), settings.causticTileMeters, clock);
-      // Offshore, light focused by the FFT sea itself, traced back along the refracted sun to
-      // the surface point that lit this bed point; the web stays everywhere the FFT does not.
+      // On ocean beds in the caustic depth band, light focused by the FFT sea itself, traced back
+      // along the refracted sun to the surface point that lit this bed point; the web elsewhere.
       const pattern = fftCaustics ? mix(web, fftCausticExcess({ ...fftCaustics, depth: pointDepth,
         offset: ray.xz.mul(distance).add(state.sunDirection.xz.div(state.sunDirection.y.max(0.15)).mul(pointDepth)) })
         .mul(fftCaustics.strength), fftCausticWeight({ ...fftCaustics, depth: pointDepth })) : web;

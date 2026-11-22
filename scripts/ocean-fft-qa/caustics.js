@@ -78,7 +78,7 @@ async function parity(ctx, c) {
 
 /** Distribution over a 48 m × 48 m patch per depth, at the shipped levels; the web alongside. */
 async function statistics(ctx, binding, levels) {
-  const depths = [3, 7, 10, 14, 20], side = 96, spacing = 0.5, rows = [];
+  const depths = [2, 3, 5, 7, 10, 14, 20], side = 96, spacing = 0.5, rows = [];
   for (const depth of depths) for (let j = 0; j < side; j++) for (let i = 0; i < side; i++) rows.push([i * spacing - 24, j * spacing - 24, depth]);
   const values = await probe(ctx, binding, rows, levels);
   const per = side * side;

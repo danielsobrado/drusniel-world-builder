@@ -195,8 +195,7 @@ export function getCanonicalWater(terrainView, worldX, worldZ) {
 export function getCanonicalOffshoreGeography(terrainView, worldX, worldZ) {
   const water = getCanonicalWater(terrainView, worldX, worldZ);
   if (water.kind !== WATER_KIND_OCEAN) return null;
-  return { shoreDistance: water.shoreDistance, oceanMask: 1, waterCoverage: water.coverage,
-    exposure: sampleWorldStoreSeaExposure(terrainView.worldStore, worldX, worldZ, water.shoreDistance) };
+  return { shoreDistance: water.shoreDistance, oceanMask: 1, waterCoverage: water.coverage };
 }
 
 export function getWorldWater(terrainView, renderX, renderZ) {

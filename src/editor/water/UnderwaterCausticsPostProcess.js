@@ -28,7 +28,7 @@ import { createUnderwaterOpticsNodes } from './UnderwaterOpticsNodes.js';
 import { UnderwaterWaterScene } from './UnderwaterWaterScene.js';
 import { resolveWaterlineBlend } from './UnderwaterTransition.js';
 import { resolveOffshoreFft } from './fft/OceanFftConfig.js';
-import { causticLevels, offshoreCausticCameraWeight } from './fft/OceanFftCaustics.js';
+import { causticCameraWeight, causticLevels } from './fft/OceanFftCaustics.js';
 import { writeCascadeUvOrigins } from './fft/OceanFftCoordinates.js';
 import { OceanFftBinding } from './fft/OceanFftSampling.js';
 
@@ -121,8 +121,8 @@ export class UnderwaterCausticsPostProcess {
     this.pipeline = null;
     this.sceneCpuMs = 0;
     // FFT caustics (PR I [P9] follow-on): `oceanFft()` is the surface view's live binding, or
-    // null; `offshoreGeography(x, z)` the canonical sea at a point ({ shoreDistance, exposure,
-    // oceanMask, waterCoverage }, or null). Built with the pipeline only where both are live.
+    // null; `offshoreGeography(x, z)` the canonical sea at a point ({ shoreDistance, oceanMask,
+    // waterCoverage }, or null). Built with the pipeline only where both are live.
     this.oceanFft = oceanFft;
     this.offshoreGeography = offshoreGeography;
     this.offshoreFft = offshoreFft ? resolveOffshoreFft(offshoreFft) : null;
@@ -138,10 +138,10 @@ export class UnderwaterCausticsPostProcess {
     const binding = new OceanFftBinding({ size: live.size, tileSizes: live.tileSizes });
     return { binding, levels: causticLevels(binding), origin: uniform(new THREE.Vector4()), cameraWeight: uniform(0),
       refractiveIndex: this.opticsState.seaSettings.opticalDistance.refractiveIndex,
-      slopeStrength: settings.slopeStrength, strength: settings.caustics.strength, blend: settings.blend };
+      slopeStrength: settings.slopeStrength, strength: settings.caustics.strength, band: settings.caustics };
   }
 
-  /** Once per drawn frame: the live FFT output, the camera's cascade origins and its offshore weight. */
+  /** Once per drawn frame: the live FFT output, the camera's cascade origins and its caustic weight. */
   updateFftCaustics() {
     const fft = this.fftCaustics;
     fft.binding.mirror(this.oceanFft?.() ?? null);
@@ -149,8 +149,7 @@ export class UnderwaterCausticsPostProcess {
     const canonical = this.floatingOrigin ? this.floatingOrigin.writeCanonical(eye.x, eye.z, this.canonicalEye) : { x: eye.x, z: eye.z };
     fft.origin.value.fromArray(writeCascadeUvOrigins(canonical.x, canonical.z, fft.binding.tileSizes, this.fftOrigin));
     const geography = fft.binding.available.value ? this.offshoreGeography?.(canonical.x, canonical.z) : null;
-    fft.cameraWeight.value = geography
-      ? offshoreCausticCameraWeight({ ...geography, available: 1, blend: fft.blend }) : 0;
+    fft.cameraWeight.value = geography ? causticCameraWeight({ ...geography, available: 1 }) : 0;
   }
 
   update({ blend = 0, surfaceHeight, waterKind, waterlineEnabled = false } = {}) {

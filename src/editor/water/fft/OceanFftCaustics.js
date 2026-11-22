@@ -1,5 +1,4 @@
-import { abs, clamp, exp2, float, int, log2, max, smoothstep, vec2, vec4 } from 'three/tsl';
-import { offshoreFftWeightCpu } from './OceanFftBlendNodes.js';
+import { abs, clamp, exp2, float, int, log2, max, min, smoothstep, vec2, vec4 } from 'three/tsl';
 
 /**
  * Underwater caustics from the offshore FFT (the PR I [P9] follow-on). The FFT's slope
@@ -13,29 +12,41 @@ import { offshoreFftWeightCpu } from './OceanFftBlendNodes.js';
  *
  * The slope Jacobian ∂s/∂x comes from forward differences of the FFT output itself, at a
  * mip chosen by bed depth, never by the camera (a bounded resolution). Waves focus at a
- * depth proportional to their length, so the texel grows with depth past a reference:
- * lever × filtered curvature stays bounded and the net does not fold into noise, and
- * caustic cells widen with depth as real ones do. No second FFT, no extra pass, no
- * readback: three taps per cascade of the texture the water already binds.
+ * depth proportional to their length, so past a reference depth the texel grows: ∝ depth
+ * on the shelf, then ∝ √depth once it meets the deep law, which keeps lever × filtered
+ * curvature bounded so the net never folds into noise. The GPU fixture calibrates it:
+ * the mean excess stays near the caustic web's from 3 m to 20 m. No second FFT, no extra
+ * pass, no readback: three taps per cascade of the texture the water already binds.
  * Only the excess light max(I − 1, 0) is added, like the caustic web it replaces.
  */
 
-/** Finest caustic detail in metres: each cascade samples the mip whose texel is nearest this. */
-export const CAUSTIC_TEXEL_METERS = 0.5;
-/** Bed depth (metres) to which that detail holds; deeper, the texel grows as (depth / it)^CAUSTIC_DEPTH_EXPONENT. */
+/** Finest caustic detail in metres, held to CAUSTIC_REFERENCE_DEPTH. */
+export const CAUSTIC_TEXEL_METERS = 0.25;
 export const CAUSTIC_REFERENCE_DEPTH = 3;
+/** Deep law: texel = CAUSTIC_DEEP_TEXEL_METERS · (depth / reference)^CAUSTIC_DEPTH_EXPONENT; it meets the linear one at 12 m. */
+export const CAUSTIC_DEEP_TEXEL_METERS = 0.5;
 export const CAUSTIC_DEPTH_EXPONENT = 0.5;
 /** Brightest focus, in multiples of the flat-sea irradiance: bounds 1/|det J| at a focal line. */
 export const CAUSTIC_FOCUS_CAP = 6;
 
-/** Mip level each cascade samples (bounded resolution). Pure. */
-export function causticLevels({ size, tileSizes, levels }, texelMeters = CAUSTIC_TEXEL_METERS) {
-  return tileSizes.map((tile) => Math.min(Math.max(Math.round(Math.log2(texelMeters / (tile / size))), 0), levels - 1));
+/** Caustic texel (metres) at bed depth `depth`: min(linear, deep law) past the reference. Pure. */
+export function causticTexel(depth) {
+  const ratio = Math.max(depth, CAUSTIC_REFERENCE_DEPTH) / CAUSTIC_REFERENCE_DEPTH;
+  return Math.min(CAUSTIC_TEXEL_METERS * ratio, CAUSTIC_DEEP_TEXEL_METERS * ratio ** CAUSTIC_DEPTH_EXPONENT);
 }
 
-/** Mip level a cascade samples at bed depth `depth`, from its base level. CPU twin of the shader. Pure. */
+/**
+ * Each cascade's mip level for the finest texel: log2(CAUSTIC_TEXEL_METERS / its texel), unclamped
+ * and fractional (a cascade coarser than the texel sits below 0; the shader clamps after the
+ * depth lift, so every cascade follows the texel law exactly once it can). Pure.
+ */
+export function causticLevels({ size, tileSizes }, texelMeters = CAUSTIC_TEXEL_METERS) {
+  return tileSizes.map((tile) => Math.log2(texelMeters / (tile / size)));
+}
+
+/** Mip level a cascade samples at bed depth `depth`, from its causticLevels entry. CPU twin of the shader. Pure. */
 export function causticDepthLevel(baseLevel, depth, maxLevel) {
-  return Math.min(Math.max(baseLevel + CAUSTIC_DEPTH_EXPONENT * Math.log2(Math.max(depth, CAUSTIC_REFERENCE_DEPTH) / CAUSTIC_REFERENCE_DEPTH), 0), maxLevel);
+  return Math.min(Math.max(baseLevel + Math.log2(causticTexel(depth) / CAUSTIC_TEXEL_METERS), 0), maxLevel);
 }
 
 /** Horizontal landing offset per unit slope at bed depth `depth` (metres). Pure. */
@@ -54,13 +65,13 @@ export function causticExcessCpu(gradient, lever, cap = CAUSTIC_FOCUS_CAP) {
 }
 
 /**
- * The I.4 offshore weight without its depth factor, at the camera: shore distance,
- * exposure, ocean mask, coverage and availability. The shader multiplies in the depth
- * smoothstep per pixel from the bed depth it reconstructs, so the product is the I.4
- * weight with per-pixel depth. Pure.
+ * The caustic share at the camera: ocean water only, no shore-distance or exposure
+ * factor. Caustics keep their own geography (a bed-depth band, fftCausticWeight)
+ * rather than the I.4 offshore one, whose 14 m floor lies past where this world's
+ * shelf drops to beds too deep to show any caustic. Pure.
  */
-export function offshoreCausticCameraWeight({ shoreDistance, exposure, oceanMask, waterCoverage, available, blend }) {
-  return offshoreFftWeightCpu({ waterDepth: blend.depthEndMeters, shoreDistance, exposure, oceanMask, waterCoverage, available, blend });
+export function causticCameraWeight({ oceanMask, waterCoverage, available }) {
+  return Math.min(Math.max(oceanMask * waterCoverage, 0), 1) * available;
 }
 
 /**
@@ -70,7 +81,10 @@ export function offshoreCausticCameraWeight({ shoreDistance, exposure, oceanMask
  * `depthScaled: false` holds the base levels at every depth (QA parity).
  */
 export function fftCausticExcess({ binding, levels, origin, offset, depth, refractiveIndex, slopeStrength = 1, cap = CAUSTIC_FOCUS_CAP, depthScaled = true }) {
-  const lift = depthScaled ? log2(depth.max(CAUSTIC_REFERENCE_DEPTH).div(CAUSTIC_REFERENCE_DEPTH)).mul(CAUSTIC_DEPTH_EXPONENT) : float(0);
+  // log2(causticTexel(depth) / CAUSTIC_TEXEL_METERS): the linear law, or the deep law past where they meet.
+  const octaves = log2(depth.max(CAUSTIC_REFERENCE_DEPTH).div(CAUSTIC_REFERENCE_DEPTH));
+  const lift = depthScaled
+    ? min(octaves, octaves.mul(CAUSTIC_DEPTH_EXPONENT).add(Math.log2(CAUSTIC_DEEP_TEXEL_METERS / CAUSTIC_TEXEL_METERS))) : float(0);
   // ∂sx/∂x, ∂sz/∂x, ∂sx/∂z, ∂sz/∂z summed over cascades
   let gradient = vec4(0);
   binding.tileSizes.forEach((tile, c) => {
@@ -87,7 +101,7 @@ export function fftCausticExcess({ binding, levels, origin, offset, depth, refra
   return clamp(float(1).div(max(abs(det), 1 / cap)).sub(1), 0, cap - 1).mul(binding.available);
 }
 
-/** Per-pixel FFT share: the I.4 depth smoothstep times the camera weight (uniform). */
-export function fftCausticWeight({ depth, cameraWeight, blend }) {
-  return smoothstep(blend.depthStartMeters, blend.depthEndMeters, depth).mul(cameraWeight);
+/** Per-pixel FFT share: the caustic depth band (`band`: the caustics settings) times the camera weight (uniform). */
+export function fftCausticWeight({ depth, cameraWeight, band }) {
+  return smoothstep(band.depthStartMeters, band.depthEndMeters, depth).mul(cameraWeight);
 }
