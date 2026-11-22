@@ -18,6 +18,7 @@ import { prepareVisualPose } from './lib/world-visual-prepare-pose.mjs';
 //     [--poses docs/qa/ponlai-pr-i-fft-caustics-2026-11-21/poses.json] [--only id,id] [--time 126]
 //     [--scan "x0,z0,x1,z1,steps;…"]  (print depth / shore distance along lines instead of capturing)
 //     [--perf [--duration-ms 10000]]  (also time each pose underwater, uncapped and focus-verified, A/B/A)
+//     [--strength 2]  (the FFT variant's caustics.strength instead of the YAML's)
 const root = fileURLToPath(new URL('../', import.meta.url));
 const option = (name, fallback) => (process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : fallback);
 const url = new URL(option('--url', 'http://localhost:5174'));
@@ -30,7 +31,9 @@ const viewport = { width: 1600, height: 900 };
 const perf = process.argv.includes('--perf');
 const durationMs = Number(option('--duration-ms', 10000));
 const webVariant = { label: 'web', patch: { sea: { offshoreFft: { caustics: { enabled: false } } } } };
-const variants = [webVariant, { label: 'fft', patch: { sea: { offshoreFft: { caustics: { enabled: true } } } } }, ...(perf ? [{ ...webVariant, label: 'web-repeat' }] : [])];
+const strength = option('--strength', null);
+const fftCaustics = { enabled: true, ...(strength === null ? {} : { strength: Number(strength) }) };
+const variants = [webVariant, { label: 'fft', patch: { sea: { offshoreFft: { caustics: fftCaustics } } } }, ...(perf ? [{ ...webVariant, label: 'web-repeat' }] : [])];
 const deepMerge = (target, patch) => {
   for (const [key, value] of Object.entries(patch)) {
     if (value && typeof value === 'object' && !Array.isArray(value)) deepMerge(target[key] ??= {}, value);
