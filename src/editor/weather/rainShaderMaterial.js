@@ -233,6 +233,7 @@ uniform float uRate;
 varying vec2 vLocal;
 varying float vAge;
 varying float vActive;
+varying float vSeed;
 
 void main() {
   float age = fract(uTime * uRate + aSplashParams.y);
@@ -254,6 +255,7 @@ void main() {
   vLocal = position.xy;
   vAge = age;
   vActive = aSplashParams.w;
+  vSeed = aSplashParams.z;
   gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition, 1.0);
 }
 `
@@ -295,22 +297,42 @@ uniform float uIntensity;
 varying vec2 vLocal;
 varying float vAge;
 varying float vActive;
+varying float vSeed;
 
 void main() {
   float r = length(vLocal);
   if (r > 1.04) discard;
-  float rippleAge = clamp((vAge - 0.08) / 0.78, 0.0, 1.0);
-  float rippleRadius = mix(0.1, 0.9, smoothstep(0.0, 1.0, rippleAge));
-  float rippleWidth = mix(0.018, 0.052, rippleAge);
-  float ripple = 1.0 - smoothstep(rippleWidth, rippleWidth * 2.2, abs(r - rippleRadius));
-  ripple *= smoothstep(0.06, 0.16, vAge) * (1.0 - smoothstep(0.7, 0.98, vAge));
-  float crownRadius = mix(0.05, 0.24, smoothstep(0.0, 0.2, vAge));
-  float crown = (1.0 - smoothstep(0.02, 0.065, abs(r - crownRadius)))
-    * (1.0 - smoothstep(0.16, 0.3, vAge));
-  float center = (1.0 - smoothstep(0.02, 0.09, r))
-    * (1.0 - smoothstep(0.06, 0.18, vAge));
-  float alpha = (ripple * 0.52 + crown * 0.32 + center * 0.22)
-    * vActive * uOpacity * clamp(uIntensity, 0.0, 1.6);
+  float varA = fract(sin(vSeed * 12.9898) * 43758.5453);
+  float varB = fract(sin(vSeed * 78.233 + 1.7) * 28461.2317);
+  vec2 dir = vLocal / max(r, 1e-4);
+  float c2 = dir.x * dir.x - dir.y * dir.y;
+  float s2 = 2.0 * dir.x * dir.y;
+  float warp = (c2 * (varA - 0.5) + s2 * (varB - 0.5)) * 0.09;
+  float rw = r * (1.0 + warp);
+
+  float rippleAge = clamp((vAge - 0.06) / 0.82, 0.0, 1.0);
+  float maxRadius = mix(0.62, 0.94, varA);
+  float rippleRadius = mix(0.09, maxRadius, smoothstep(0.0, 1.0, rippleAge));
+  float rippleWidth = mix(0.011, 0.028, rippleAge);
+  float rippleFade = smoothstep(0.05, 0.14, vAge) * (1.0 - smoothstep(0.65, 0.98, vAge));
+  float primaryRing = 1.0 - smoothstep(rippleWidth, rippleWidth * 2.1, abs(rw - rippleRadius));
+  float innerRadius = rippleRadius * mix(0.58, 0.72, varB);
+  float innerRing = (1.0 - smoothstep(rippleWidth * 0.85, rippleWidth * 1.9, abs(rw - innerRadius)))
+    * smoothstep(0.18, 0.34, vAge) * 0.55;
+  float arcLight = mix(0.32, 1.0, smoothstep(-0.55, 0.85, dir.x * 0.58 + dir.y * 0.81))
+    * mix(0.7, 1.0, c2 * 0.5 + 0.5);
+  float ripple = (primaryRing + innerRing) * rippleFade * arcLight;
+
+  float crownRadius = mix(0.04, mix(0.16, 0.26, varB), smoothstep(0.0, 0.18, vAge));
+  float beads = smoothstep(0.15, 0.85, sin(dir.x * 5.2 + dir.y * 4.7 + vSeed * 3.1) * 0.5 + 0.5);
+  float crown = (1.0 - smoothstep(0.014, 0.048, abs(rw - crownRadius)))
+    * mix(0.35, 1.0, beads)
+    * (1.0 - smoothstep(0.14, 0.28, vAge));
+  float center = (1.0 - smoothstep(0.015, 0.075, r))
+    * (1.0 - smoothstep(0.05, 0.15, vAge));
+  float dropGain = mix(0.52, 1.15, (varA * varB + varA) * 0.5);
+  float alpha = (ripple * 0.46 + crown * 0.34 + center * 0.28)
+    * dropGain * vActive * uOpacity * clamp(uIntensity, 0.0, 1.6);
   if (alpha < 0.01) discard;
   gl_FragColor = vec4(uColor, alpha);
 }

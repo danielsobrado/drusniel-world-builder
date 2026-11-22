@@ -76,19 +76,39 @@ function waterSplashFragment(age, params, color, opacity, intensity) {
     const p = uv().mul(2).sub(1);
     const r = length(p);
     r.greaterThan(1.04).discard();
-    const rippleAge = clamp(age.sub(0.08).div(0.78), 0, 1);
-    const rippleRadius = mix(0.1, 0.9, smoothstep(0, 1, rippleAge));
-    const rippleWidth = mix(0.018, 0.052, rippleAge);
-    const ripple = float(1).sub(smoothstep(rippleWidth, rippleWidth.mul(2.2), abs(r.sub(rippleRadius))))
-      .mul(smoothstep(0.06, 0.16, age))
-      .mul(float(1).sub(smoothstep(0.7, 0.98, age)));
-    const crownRadius = mix(0.05, 0.24, smoothstep(0, 0.2, age));
-    const crown = float(1).sub(smoothstep(0.02, 0.065, abs(r.sub(crownRadius))))
-      .mul(float(1).sub(smoothstep(0.16, 0.3, age)));
-    const center = float(1).sub(smoothstep(0.02, 0.09, r))
-      .mul(float(1).sub(smoothstep(0.06, 0.18, age)));
-    const alpha = ripple.mul(0.52).add(crown.mul(0.32)).add(center.mul(0.22))
-      .mul(params.w).mul(opacity).mul(clamp(intensity, 0, 1.6));
+    const seed = params.z;
+    const varA = fract(sin(seed.mul(12.9898)).mul(43758.5453));
+    const varB = fract(sin(seed.mul(78.233).add(1.7)).mul(28461.2317));
+    const dir = p.div(r.max(1e-4));
+    const c2 = dir.x.mul(dir.x).sub(dir.y.mul(dir.y));
+    const s2 = dir.x.mul(dir.y).mul(2);
+    const warp = c2.mul(varA.sub(0.5)).add(s2.mul(varB.sub(0.5))).mul(0.09);
+    const rw = r.mul(float(1).add(warp));
+
+    const rippleAge = clamp(age.sub(0.06).div(0.82), 0, 1);
+    const maxRadius = mix(0.62, 0.94, varA);
+    const rippleRadius = mix(0.09, maxRadius, smoothstep(0, 1, rippleAge));
+    const rippleWidth = mix(0.011, 0.028, rippleAge);
+    const rippleFade = smoothstep(0.05, 0.14, age).mul(float(1).sub(smoothstep(0.65, 0.98, age)));
+    const primaryRing = float(1).sub(smoothstep(rippleWidth, rippleWidth.mul(2.1), abs(rw.sub(rippleRadius))));
+    const innerRadius = rippleRadius.mul(mix(0.58, 0.72, varB));
+    const innerRing = float(1).sub(smoothstep(rippleWidth.mul(0.85), rippleWidth.mul(1.9), abs(rw.sub(innerRadius))))
+      .mul(smoothstep(0.18, 0.34, age)).mul(0.55);
+    // Directional sky glint + subtle arc breakup along the ring.
+    const arcLight = mix(0.32, 1.0, smoothstep(-0.55, 0.85, dir.x.mul(0.58).add(dir.y.mul(0.81))))
+      .mul(mix(0.7, 1.0, c2.mul(0.5).add(0.5)));
+    const ripple = primaryRing.add(innerRing).mul(rippleFade).mul(arcLight);
+
+    const crownRadius = mix(0.04, mix(0.16, 0.26, varB), smoothstep(0, 0.18, age));
+    const beads = smoothstep(0.15, 0.85, sin(dir.x.mul(5.2).add(dir.y.mul(4.7)).add(seed.mul(3.1))).mul(0.5).add(0.5));
+    const crown = float(1).sub(smoothstep(0.014, 0.048, abs(rw.sub(crownRadius))))
+      .mul(mix(0.35, 1.0, beads))
+      .mul(float(1).sub(smoothstep(0.14, 0.28, age)));
+    const center = float(1).sub(smoothstep(0.015, 0.075, r))
+      .mul(float(1).sub(smoothstep(0.05, 0.15, age)));
+    const dropGain = mix(0.52, 1.15, varA.mul(varB).add(varA).mul(0.5));
+    const alpha = ripple.mul(0.46).add(crown.mul(0.34)).add(center.mul(0.28))
+      .mul(dropGain).mul(params.w).mul(opacity).mul(clamp(intensity, 0, 1.6));
     alpha.lessThan(0.01).discard();
     return vec4(color, alpha);
   })();

@@ -8,10 +8,14 @@ import { createSeaSurfaceNodes } from '../src/editor/stylized/SeaSurfaceShading.
 test('rain ring lattices stay exact on the whole-metre chunk origin', () => {
   // A cell index is origin metres × cells per metre: it must stay an integer, or
   // the rings tear at every chunk border at planet scale.
-  assert.ok(RAIN_RIPPLE_LAYERS.length >= 2, 'more than one ring size');
-  for (const [cellMeters] of RAIN_RIPPLE_LAYERS) {
+  assert.ok(RAIN_RIPPLE_LAYERS.length >= 3, 'multiple distinct drop-size scales');
+  let previousMeters = Infinity;
+  for (const [cellMeters, , profile] of RAIN_RIPPLE_LAYERS) {
     assert.ok(Number.isInteger(1 / cellMeters), `${cellMeters} m does not divide a metre`);
     assert.ok(cellMeters < 1, 'rings smaller than the old 1 m discs');
+    assert.ok(cellMeters < previousMeters, 'layers descend cleanly in drop scale');
+    previousMeters = cellMeters;
+    assert.ok(profile && profile.ringWidth < 0.015, 'crisp capillary crest width rather than blurry discs');
   }
   const rain = createRainRippleNode({ localMeters: vec2(3, 4), originMeters: uniform(new THREE.Vector2()), time: uniform(0), rain: uniform(1) });
   assert.equal(typeof rain.ring.mul, 'function');
