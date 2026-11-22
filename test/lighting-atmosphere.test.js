@@ -152,3 +152,25 @@ test('full overcast closes the cloud deck under any regional sky', () => {
   assert.ok(covered.cloudDensity + covered.cloudSharpness < 0.25, 'cloud noise must clear the threshold everywhere');
   assert.ok(overcastSkyLook(clear, 0.4).cloudDensity > 0.3, 'light cover stays broken');
 });
+
+test('the sun shadow depth range reaches the ground round a raised camera', () => {
+  const terrainView = { scene: new THREE.Scene(),
+    renderer: { toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1 },
+    godRays: { sunDirection: new THREE.Vector3(), setCloudMaskScene() {}, setVolumetricLight() {}, setLight() {} } };
+  const view = new StylizedSkyView({ terrainView, config: stylizedSurface });
+  try {
+    const { near, far } = view.directional.shadow.camera;
+    const reach = sky.shadowDistance;
+    for (const elevation of [0.3, 0.6, 1.0, 1.5]) {
+      const sun = new THREE.Vector3(Math.cos(elevation), Math.sin(elevation), 0);
+      for (const height of [2, 34, 60]) {
+        // Ground up to the shadow distance down-sun of a camera `height` above it, as the
+        // light (lightDistance up-sun of the camera) sees it.
+        for (const along of [-reach, 0, reach]) {
+          const depth = sky.lightDistance + height * sun.y - along * sun.x;
+          assert.ok(depth > near && depth < far, `elevation ${elevation}, height ${height}, ${along} m: ${depth} outside ${near}..${far}`);
+        }
+      }
+    }
+  } finally { view.dispose(); }
+});

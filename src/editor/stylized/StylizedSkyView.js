@@ -352,7 +352,11 @@ export class StylizedSkyView {
     this.directional.shadow.radius = config.sky.shadowRadius ?? 2.4;
     this.directional.shadow.intensity = config.sky.shadowIntensity ?? 1;
     this.directional.shadow.camera.near = 1;
-    this.directional.shadow.camera.far = config.sky.shadowDistance * 2;
+    // The light sits lightDistance up-sun of the camera (update), so the depth range must
+    // run that far plus the box's own depth past it. At twice the box distance from the
+    // light, a camera flown 30 m up lost every shadow beyond a straight line just past it
+    // (storm-snow-field report §5.1).
+    this.directional.shadow.camera.far = config.sky.lightDistance + config.sky.shadowDistance * 2;
     const extent = config.sky.shadowDistance;
     this.directional.shadow.camera.left = -extent;
     this.directional.shadow.camera.right = extent;
