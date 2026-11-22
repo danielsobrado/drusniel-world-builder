@@ -51,15 +51,20 @@ function terrainShape(heights, chunkSize, tileSize, x, z) {
   const dx = (topRight + bottomRight - topLeft - bottomLeft) / (2 * tileSize);
   const dz = (bottomLeft + bottomRight - topLeft - topRight) / (2 * tileSize);
   const slope = Math.hypot(dx, dz);
-  let curvature = 0;
-  if (x > 0 && x + 1 < chunkSize && z > 0 && z + 1 < chunkSize) {
-    const left = cellHeight(heights, chunkSize, x - 1, z);
-    const right = cellHeight(heights, chunkSize, x + 1, z);
-    const near = cellHeight(heights, chunkSize, x, z - 1);
-    const far = cellHeight(heights, chunkSize, x, z + 1);
-    curvature = (left + right + near + far - center * 4) / (tileSize * tileSize);
-  }
-  return { center, dx, dz, slope, curvature };
+  return { center, dx, dz, slope, curvature: cellCurvature(heights, chunkSize, tileSize, x, z) };
+}
+
+// The border ring has no neighbour cell in this chunk: it takes the nearest interior
+// cell's curvature. Zero there drew every chunk edge as a line in the snow and ridge terms.
+function cellCurvature(heights, chunkSize, tileSize, x, z) {
+  if (chunkSize < 3) return 0;
+  const cx = clamp(x, 1, chunkSize - 2);
+  const cz = clamp(z, 1, chunkSize - 2);
+  const left = cellHeight(heights, chunkSize, cx - 1, cz);
+  const right = cellHeight(heights, chunkSize, cx + 1, cz);
+  const near = cellHeight(heights, chunkSize, cx, cz - 1);
+  const far = cellHeight(heights, chunkSize, cx, cz + 1);
+  return (left + right + near + far - cellHeight(heights, chunkSize, cx, cz) * 4) / (tileSize * tileSize);
 }
 
 function octNormal(dx, dz) {

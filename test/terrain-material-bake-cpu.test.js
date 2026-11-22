@@ -4,6 +4,7 @@ import {
   bakeTerrainMaterialPage,
   captureTerrainMaterialBakeSource,
 } from '../src/editor/materials/TerrainMaterialBakeCpu.js';
+import { floatToHalf } from '../src/editor/materials/HalfFloat.js';
 import { createTerrainMaterialBakeDescriptor } from '../src/editor/materials/TerrainMaterialBakeDescriptor.js';
 
 function bakeConfig(resolution = 4) {
@@ -198,4 +199,17 @@ test('terrain bake source is snapshotted before asynchronous work mutates the li
   assert.equal(source.tilePixels[0], 90);
   assert.equal(source.surfaceMaskPixels[1], 255);
   assert.equal(source.heights[0], 0);
+});
+
+test('curvature reaches the chunk border ring, so a bowl reads the same at every texel', async () => {
+  const bowl = page(6);
+  for (let z = 0; z <= 6; z += 1) {
+    for (let x = 0; x <= 6; x += 1) bowl.heights[z * 7 + x] = 0.5 * x * x;
+  }
+  const result = await bakeTerrainMaterialPage({ ...options(captureTerrainMaterialBakeSource({ page: bowl })),
+    config: bakeConfig(6), chunkSize: 6 });
+  const shape = result.value.channels.terrainShape;
+  // h = 0.5·x² has a second difference of 1 per cell, over tileSize² = 4.
+  const expected = floatToHalf(0.25);
+  for (let index = 0; index < 36; index += 1) assert.equal(shape[index * 2 + 1], expected, `texel ${index}`);
 });
