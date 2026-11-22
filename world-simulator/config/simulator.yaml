@@ -1,0 +1,45 @@
+# World Simulator runtime configuration. Paths are relative to world-simulator/.
+schemaVersion: 1
+
+server:
+  host: 127.0.0.1      # loopback only; override with WS_BACKEND_HOST
+  port: 3100           # override with WS_BACKEND_PORT
+
+frontend:
+  # 5174 is the main game's dev port (.claude/launch.json); 5180 lets both run together.
+  port: 5180           # override with WS_FRONTEND_PORT
+
+world:
+  manifest: ../maps/manifest.json   # the parent repository's map library
+  mapsDirectory: ../maps            # maps must resolve inside this directory
+  mapId: eldara-2026                # override with WS_MAP_ID
+  # Counts documented in docs/reference/eldara-local-cultures-populations.md, checked
+  # against the source on every audit. Keyed by map id; omit for other maps.
+  referenceCounts:
+    eldara-2026: { settlements: 502, provinces: 131, states: 8, cultures: 14 }
+
+# Worldbuilding size classes (docs/reference/eldara-local-cultures-populations.md).
+# A settlement belongs to the first class whose maxPopulation it is below.
+# These do not replace the game's rendering classes (SettlementProfile.js).
+classification:
+  - { id: named-village, label: Named village, maxPopulation: 1000 }
+  - { id: small-town,    label: Small town,    maxPopulation: 3000 }
+  - { id: town,          label: Town,          maxPopulation: 8000 }
+  - { id: large-town,    label: Large town,    maxPopulation: 15000 }
+  - { id: city,          label: City,          maxPopulation: 25000 }
+  - { id: major-city,    label: Major city,    maxPopulation: null }   # null = no upper bound
+
+connectivity:
+  landRouteGroups: [roads, trails]
+  seaRouteGroups: [searoutes]
+  # Fallback when a route point carries no cell id: a point this close (map px) to a
+  # settlement counts as passing through it, flagged as a coordinate match.
+  coordinateTolerance: 1.5
+  nearbyCount: 5             # nearest settlements listed per settlement (proximity only)
+
+api:
+  defaultPageSize: 50
+  maxPageSize: 200
+
+output:
+  directory: data/generated

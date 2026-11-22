@@ -1,0 +1,24 @@
+# Persistent NPC budget. Changing numbers here needs no code change.
+schemaVersion: 1
+
+target: 10040
+comparisonScenarios: [5000, 10040, 20000]
+
+# Settlements below this many inhabitants receive no persistent NPCs.
+minimumEligiblePopulation: 1
+
+# Per settlement-class [minimum, maximum] persistent NPCs (class ids from simulator.yaml).
+ranges:
+  named-village: { min: 4,  max: 12 }
+  small-town:    { min: 8,  max: 18 }
+  town:          { min: 15, max: 30 }
+  large-town:    { min: 24, max: 45 }
+  city:          { min: 35, max: 70 }
+  major-city:    { min: 50, max: 100 }
+
+# Weight multipliers on sqrt(population); they shape the share above the minimum
+# and never lift a settlement past its class maximum.
+importance:
+  capital: 1.5
+  port: 1.15
+  marketCenter: 1.25   # Azgaar market center (pack.markets[].centerBurgId)

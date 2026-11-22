@@ -1,0 +1,26 @@
+# Three-settlement pilot for future simulation experiments.
+schemaVersion: 1
+
+# Stable Azgaar burg ids, one per role in the order below. When set, the selector
+# validates and reports these instead of searching; [] re-runs the search.
+pinnedSourceIds: [113, 60, 238]   # Falanenerwin, Sshanderi, Vhaltha (found by search, docs/01-...)
+
+# Roles are hypotheses backed by source evidence: goods a burg extracts (production
+# entries without a recipe), goods it crafts (with a recipe), and market centers.
+roles:
+  - id: resource
+    label: Mining, mountain or craft
+    extractedGoodTags: [ore, mineral]
+    craftedGoods: [Tools, Arms, Bronze, Jewelry]
+  - id: food
+    label: Agricultural or food supply
+    extractedGoodTags: [food]
+    craftedGoods: [Cheese, Beer]   # Preserved food is crafted almost everywhere, so it is no evidence
+  - id: trade
+    label: Trade or market
+    marketCenter: true
+
+constraints:
+  requireRoadConnection: true      # every pair joined by imported roads/trails
+  maxRouteDistance: 150            # map px along roads per pilot pair (x distanceScale = 450 mi on Eldara)
+  npcBudgetTarget: { min: 60, max: 100 }   # summed NPCs under the configured target

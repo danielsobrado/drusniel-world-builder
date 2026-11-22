@@ -1,0 +1,41 @@
+/* Design tokens. A theme overrides these on [data-theme]; layouts never hard-code colours. */
+:root {
+  color-scheme: dark;
+  --bg: #0d0f12;            /* obsidian */
+  --surface: #14171b;        /* slate panel */
+  --surface-2: #1a1e23;
+  --surface-3: #22272d;
+  --border: #2b3037;
+  --border-strong: #3a4048;
+  --text: #ddd8cc;           /* limestone */
+  --muted: #8f8a7e;
+  --bronze: #b38b55;         /* aged bronze */
+  --bronze-strong: #d1a76a;
+  --bronze-soft: rgba(179, 139, 85, 0.14);
+  --good: #7fae7a;
+  --bad: #d0776a;
+  --warn: #d6b360;
+  --sea: #10161c;
+  --road: #c9a46a;
+  --trail: #8f7f62;
+  --sea-route: #4f7389;
+  --pilot: #e6c27a;
+  --marble: linear-gradient(135deg, #181b20 0%, #1d2026 38%, #16181d 52%, #1f2329 74%, #15181c 100%);
+  --vein: repeating-linear-gradient(115deg, transparent 0 46px, rgba(255, 255, 255, 0.018) 46px 47px, transparent 47px 120px);
+
+  --font-ui: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-display: "Cinzel", "Trajan Pro", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --radius: 3px;
+  --gap: 12px;
+  --rail-width: 48px;
+  --explorer-width: 264px;
+  --bar-height: 44px;
+  --subbar-height: 34px;
+  --status-height: 26px;
+}

@@ -3,6 +3,7 @@ import globals from 'globals';
 // Correctness checks only. Authoring assets and generated build output are excluded.
 export default [
   { ignores: ['node_modules/**', 'dist/**', 'tmp/**', '.history/**', 'public/**',
+    'world-simulator/**', // standalone app with its own lint (world-simulator/eslint.config.js)
     'reference/**', 'src/editor/_clod_shims/**', '**/*.generated.js',
     // Exact historical capture scripts are hashed evidence, not maintained runners.
     'docs/qa/sparse-grass-audit-2026-10-16/capture-script.mjs',

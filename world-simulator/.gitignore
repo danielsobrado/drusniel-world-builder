@@ -1,0 +1,5 @@
+node_modules/
+frontend/dist/
+# Audit artifacts are reproducible with `npm run audit`; keep them local.
+data/generated/*
+!data/generated/.gitkeep
