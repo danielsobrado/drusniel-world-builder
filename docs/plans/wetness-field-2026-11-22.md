@@ -1,6 +1,6 @@
 # Ground wetness field — spatially varied, GPU-only rain wetness
 
-**Status:** implemented in `6a33c372`, tuned in `929237ba` after the bare-soil and town captures (§6.1), on `main`. **Off by default** (`stylizedSurface.wetness.field.enabled: false`, `?wetnessField=1` turns it on for QA). Evidence: [`docs/qa/wetness-field-2026-11-21/`](../qa/wetness-field-2026-11-21/).
+**Status:** implemented in `6a33c372`, tuned in `929237ba` after the bare-soil and town captures (§6.1), on `main`. **On by default** since 2026-11-22 (`stylizedSurface.wetness.field.enabled: true`; `?wetnessField=0` turns it off). Evidence: [`docs/qa/wetness-field-2026-11-21/`](../qa/wetness-field-2026-11-21/).
 
 It applies the offshore FFT ocean's approach (PR I) to rain wetness: the GPU owns the visual field and computes it in one shared pass, nothing is read back, world-space patterns go through double-precision origins, a YAML switch proves itself byte-identical when off, and timings come from native hardware runs.
 
@@ -190,4 +190,4 @@ Re-captured every pose with the tuned field (`tuned/`, snapshot `929237ba`):
 - Paving is in the town captures, but storm fog hides it; its wetness is confirmed only by the luma difference, not by eye. Its off switch is proven device-free (§4).
 - The hard line at the paving's draw edge in rain comes from existing code and is not fixed here.
 - The tuned model's in-app shader hashes were not re-measured. The off path does not include the model: device-free, `929237ba` with the field off hashes the same as its ancestor `b607b261` for all four shaders. The paving fragment hash itself moved after `6a33c372` (`9ec22f35d8a0` → `417cbb76a0f6` on WebGPU) through another session's shader commits, not this field.
-- Left **off by default**, pending a decision after these captures.
+- Turned **on by default** on 2026-11-22 after these captures.

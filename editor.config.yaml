@@ -3033,7 +3033,7 @@ stylizedSurface:
     # patchily, sunny slopes first and puddles last. Off (or ?wetnessField=0):
     # the global wetness above, byte-identical shaders, no pass.
     field:
-      enabled: false
+      enabled: true
       intervalSeconds: 0.25
   sky:
     enabled: true
