@@ -21,9 +21,9 @@ import { resolveFftWind } from '../src/editor/water/fft/OceanFftWeather.js';
 
 const modes = createOceanSwellModes();
 const f32 = Math.fround;
-const sea = (geometry) => ({
+const sea = (geometry, enabled = true) => ({
   enabled: true, amplitude: 0.9, stormScale: 2.6, choppiness: 4, shallowDepth: 1.5, depthRatio: 0.42,
-  offshoreFft: { geometry: { enabled: geometry } },
+  offshoreFft: { enabled, geometry: { enabled: geometry } },
 });
 const storm = { enabled: true, directionDegrees: 30, intensity: 2.4 };
 const exactBandVariance = (u) => {
@@ -97,6 +97,10 @@ test('CPU twin: slope is the height gradient; f32 shader phases match at ±4.2 M
 test('state: off by default, no headroom; on: first weather snaps, then eases continuously, settle is exact', () => {
   configureOceanSwell(sea(false));
   assert.equal(oceanSwellHeadroom(), 0);
+  updateOceanSwell({ waterTimeSeconds: 10, realSeconds: 1, weather: storm });
+  assert.equal(oceanSwellOffset(0, 0, 22, 48, 1), 0);
+  configureOceanSwell(sea(true, false));
+  assert.equal(oceanSwellHeadroom(), 0, 'offshoreFft.enabled: false turns the swell off too');
   updateOceanSwell({ waterTimeSeconds: 10, realSeconds: 1, weather: storm });
   assert.equal(oceanSwellOffset(0, 0, 22, 48, 1), 0);
   configureOceanSwell(sea(true));

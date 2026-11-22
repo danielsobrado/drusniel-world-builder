@@ -43,10 +43,11 @@ function writeUniforms() {
   }
 }
 
-/** From `configureSea`: on only with `water.sea.offshoreFft.geometry.enabled`. */
+/** From `configureSea`: on only with `water.sea.offshoreFft.enabled` and its `geometry.enabled`. */
 export function configureOceanSwell(sea) {
   const resolved = sea ? resolveOffshoreFft(sea.offshoreFft) : null;
-  settings = resolved?.geometry.enabled ? resolved : null;
+  // `enabled` is the master switch: off restores the original sea, swell included.
+  settings = resolved?.enabled && resolved.geometry.enabled ? resolved : null;
   // Storm ceiling of the wind mapping (OceanFftWeather): 2.4 × the reference breeze.
   headroom = settings ? oceanSwellAmplitudeBound(OCEAN_SWELL_MODES, settings.weather.referenceWindSpeed * 2.4) : 0;
   oceanSwellAmplitudes(OCEAN_SWELL_MODES, resolveFftWind(null, resolved?.weather ?? { referenceWindSpeed: 10 }), target);

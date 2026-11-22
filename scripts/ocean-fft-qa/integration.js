@@ -95,7 +95,7 @@ export async function rippleSplitCase(ctx) {
  * amplitudes and a late water time, at chunk-local points of chunks near ±4.2 Mm and the origin.
  */
 export async function swellParityCase(ctx) {
-  configureOceanSwell({ enabled: true, offshoreFft: { geometry: { enabled: true } } });
+  configureOceanSwell({ enabled: true, offshoreFft: { enabled: true, geometry: { enabled: true } } });
   const time = 98_765.4321;
   updateOceanSwell({ waterTimeSeconds: time, realSeconds: 1, weather: { enabled: true, directionDegrees: 35, intensity: 2.4 } });
   const amplitudes = oceanSwellAmplitudesNow();

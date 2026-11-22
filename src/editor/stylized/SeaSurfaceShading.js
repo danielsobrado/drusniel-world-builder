@@ -121,7 +121,7 @@ export function createSeaSurfaceNodes({
   const strength = (surf?.amplitude ?? amplitude).div(offshore.max(1e-4));
   const height = (surf?.height ?? swell.height).toVarying('seaSwellHeight');
   const geometry = oceanSwellOrigin && oceanMask ? resolveOffshoreFft(config.offshoreFft) : null;
-  const longSwell = geometry?.geometry.enabled ? (() => {
+  const longSwell = geometry?.enabled && geometry.geometry.enabled ? (() => {
     const nodes = createOceanSwellNodes({ localXZ, origin: oceanSwellOrigin });
     // Same geography as the FFT normals, never the GPU's availability: the CPU twin can't see it.
     const weight = offshoreFftWeight({ waterDepth, shoreDistance, exposure, oceanMask, waterCoverage,
