@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import type { Link, SettlementClass, SettlementDetail } from '../api/types';
+import type { Link, ScenarioState, SettlementClass, SettlementDetail } from '../api/types';
+import type { Simulation } from '../simulation/useSimulation';
 import { useState } from 'react';
 import { paths, useApi } from '../api/worldApi';
 import { classLabel, fmt } from './format';
@@ -73,11 +74,39 @@ function Connectivity({ c, onSelect }: { c: SettlementDetail['connectivity']; on
   );
 }
 
-const TABS = ['Overview', 'Connectivity', 'Data'];
+function SimulationTab({ sim, id }: { sim: Simulation; id: string }) {
+  const active = sim.active!;
+  const state = useApi<ScenarioState>(`/api/scenarios/${encodeURIComponent(active.id)}/state?v=${sim.version}`);
+  return (
+    <ApiView result={state} loadingLabel="Loading scenario state…">
+      {(s) => {
+        const mine = s.settlements.find((x) => x.settlementId === id);
+        if (!mine) return <p className="muted">Not in the scope of scenario {active.name}.</p>;
+        const start = s.history[0]?.population[id] ?? mine.population;
+        return (
+          <dl className="fields">
+            <Field label="Scenario" source="computed">{active.name} · {s.date.label}</Field>
+            <Field label="Population" source="computed">{fmt(mine.population)} <span className="muted">(start {fmt(start)})</span></Field>
+            <Field label="Children" source="computed">{fmt(mine.cohorts.children)}</Field>
+            <Field label="Adults" source="computed">{fmt(mine.cohorts.adults)}</Field>
+            <Field label="Elders" source="computed">{fmt(mine.cohorts.elders)}</Field>
+            <Field label="Births · deaths" source="computed">{fmt(mine.births)} · {fmt(mine.deaths)}</Field>
+          </dl>
+        );
+      }}
+    </ApiView>
+  );
+}
 
-export function SettlementDetails({ id, classes, onSelect }: { id: string; classes?: SettlementClass[]; onSelect?: (id: string) => void }) {
+const BASE_TABS = ['Overview', 'Connectivity', 'Data'];
+
+export function SettlementDetails({ id, classes, onSelect, sim }: {
+  id: string; classes?: SettlementClass[]; onSelect?: (id: string) => void; sim?: Simulation;
+}) {
   const result = useApi<SettlementDetail>(paths.settlement(id));
   const [tab, setTab] = useState('Overview');
+  const inScenario = Boolean(sim?.active?.settlementIds.includes(id));
+  const tabs = inScenario ? [...BASE_TABS, 'Simulation'] : BASE_TABS;
   return (
     <ApiView result={result} loadingLabel="Loading settlement…">
       {(s) => (
@@ -87,11 +116,12 @@ export function SettlementDetails({ id, classes, onSelect }: { id: string; class
             <code className="muted">{s.id}</code>
           </div>
           <div className="subtabs" role="tablist">
-            {TABS.map((t) => <button key={t} type="button" role="tab" aria-selected={t === tab} className={`subtab${t === tab ? ' active' : ''}`} onClick={() => setTab(t)}>{t}</button>)}
+            {tabs.map((t) => <button key={t} type="button" role="tab" aria-selected={t === tab} className={`subtab${t === tab ? ' active' : ''}`} onClick={() => setTab(t)}>{t}</button>)}
           </div>
           {tab === 'Overview' && <Overview s={s} classes={classes} />}
           {tab === 'Connectivity' && <Connectivity c={s.connectivity} onSelect={onSelect} />}
           {tab === 'Data' && <pre className="raw">{JSON.stringify(s, null, 2)}</pre>}
+          {tab === 'Simulation' && inScenario && sim && <SimulationTab sim={sim} id={id} />}
         </div>
       )}
     </ApiView>

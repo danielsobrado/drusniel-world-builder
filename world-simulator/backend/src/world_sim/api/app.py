@@ -2,6 +2,7 @@
 
 import os
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote
@@ -22,8 +23,10 @@ from ..reports.builder import (
     settlement_row,
     world_identity,
 )
+from ..simulation.manager import ScenarioManager
 from ..world.model import WorldModel, build_world_model
 from .errors import ApiError, failure, ok
+from .scenario_routes import scenario_router
 from .settlement_query import parse_settlement_query, query_settlements
 
 LIST_FIELDS = ("id", "sourceId", "name", "stateId", "stateName", "cultureId", "cultureName", "population", "class",
@@ -41,7 +44,8 @@ def _json(status: int, body: dict[str, Any]) -> JSONResponse:
 
 
 def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
-    """Payloads are computed once; handlers only read them, so concurrent requests never race."""
+    """World payloads are computed once and only read; scenario state lives in the ScenarioManager."""
+    manager = ScenarioManager(model)
     rows = [settlement_row(model, s) for s in model.audit["settlements"]]
     summary = build_summary(model)
     world = {
@@ -63,11 +67,26 @@ def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
                       "sourceFingerprint": model.audit["identity"]["sourceFingerprint"]}
     class_ids = model.config.class_ids
 
-    app = FastAPI(title="Drusniel World Simulator", docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None)
-    app.state.model = model
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        yield
+        await manager.shutdown()
 
-    def reply(data: Any, meta: dict[str, Any] | None = None) -> JSONResponse:
-        return _json(200, ok(envelope_world, data, meta))
+    app = FastAPI(title="Drusniel World Simulator", docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None,
+                  lifespan=lifespan)
+    app.state.model = model
+    app.state.scenarios = manager
+
+    def reply(data: Any, meta: dict[str, Any] | None = None, status: int = 200) -> JSONResponse:
+        return _json(status, ok(envelope_world, data, meta))
+
+    @app.middleware("http")
+    async def json_only_writes(request: Request, call_next):
+        # Browsers cannot send application/json cross-site without a CORS preflight, which this API never grants.
+        if request.method not in ("GET", "HEAD", "OPTIONS") and request.url.path.startswith("/api/"):
+            if request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
+                return _json(415, failure("unsupported_media_type", "Write requests must send application/json"))
+        return await call_next(request)
 
     @app.exception_handler(ApiError)
     async def _api_error(_: Request, exc: ApiError) -> JSONResponse:
@@ -76,14 +95,17 @@ def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
     @app.exception_handler(StarletteHTTPException)
     async def _http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         if exc.status_code == 405:
-            return _json(405, failure("method_not_allowed", "The API is read-only"))
+            return _json(405, failure("method_not_allowed", f"{request.method} is not allowed on {request.url.path}"))
         if exc.status_code == 404:
             return _json(404, failure("not_found", f"No endpoint {request.url.path}"))
         return _json(exc.status_code, failure("http_error", str(exc.detail)))
 
     @app.exception_handler(RequestValidationError)
     async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
-        return _json(400, failure("invalid_request", "Request did not validate", {"errors": exc.errors()}))
+        errors = exc.errors()
+        where = [str(p) for p in errors[0]["loc"] if p not in ("body", "query", "path")] if errors else []
+        details = {"parameter": ".".join(where) or "body", "errors": [{"loc": list(e["loc"]), "msg": e["msg"]} for e in errors]}
+        return _json(400, failure("invalid_parameter", errors[0]["msg"] if errors else "Request did not validate", details))
 
     @app.exception_handler(Exception)
     async def _unexpected(request: Request, exc: Exception) -> JSONResponse:
@@ -127,6 +149,8 @@ def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
         if settlement is None:
             raise ApiError(404, "not_found", f"No settlement {settlement_id}", {"id": settlement_id})
         return reply(settlement_detail(model, settlement))
+
+    app.include_router(scenario_router(manager, reply))
 
     if static_dir is not None:
         root = static_dir.resolve()

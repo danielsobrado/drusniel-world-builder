@@ -2,6 +2,8 @@
 // Captures the workbench at a fixed 1600x900 viewport (plus one phone view) for visual
 // comparison between PRs. Needs `npm run dev` running. Playwright is borrowed from the
 // parent repository's devDependencies rather than added here.
+// It steps and snapshots the active scenario, so run the backend on throwaway storage:
+//   WS_SCENARIO_STORAGE=<temp dir> npm run dev
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
@@ -20,7 +22,7 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   const shot = (name) => page.screenshot({ path: path.join(out, `${name}.png`) });
-  const workspace = async (name) => { await page.getByRole('tab', { name, exact: true }).click(); };
+  const workspace = async (name) => { await page.locator('.workspace-bar').getByRole('tab', { name, exact: true }).click(); };
 
   await page.goto(url);
   await page.getByText('Reference counts verified').waitFor();
@@ -54,6 +56,21 @@ try {
   await workspace('Pilot');
   await page.getByText('Why these three').waitFor();
   await shot('07-pilot');
+
+  await workspace('Simulation');
+  await page.getByText('Population trend').waitFor();
+  await page.getByRole('button', { name: '+Year' }).click();
+  await page.getByText('1213-01-01').first().waitFor();
+  await page.getByRole('combobox', { name: 'Speed (simulated days per second)' }).selectOption('120');
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Pause simulation' }).click();
+  await page.getByLabel('Snapshot label').fill('After the first year');
+  await page.getByRole('button', { name: 'Save snapshot' }).click();
+  await page.getByText('After the first year').first().waitFor();
+  await page.getByRole('cell', { name: 'Vhaltha' }).click();
+  await page.getByLabel('Inspector', { exact: true }).getByRole('tab', { name: 'Simulation' }).click();
+  await page.locator('.trend-svg rect').hover({ position: { x: 300, y: 80 } });
+  await shot('09-simulation');
 
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);

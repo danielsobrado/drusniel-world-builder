@@ -1,8 +1,10 @@
 import type { Summary } from '../api/types';
 import type { ApiResult } from '../api/worldApi';
+import type { Simulation } from '../simulation/useSimulation';
 import { fmt } from '../components/format';
 
-export function StatusBar({ health, summary }: { health: ApiResult<{ status: string }>; summary: ApiResult<Summary> }) {
+export function StatusBar({ health, summary, sim }: { health: ApiResult<{ status: string }>; summary: ApiResult<Summary>; sim: Simulation }) {
+  const active = sim.active;
   const budget = summary.data?.npcBudget;
   const failed = health.error ?? summary.error;
   return (
@@ -16,7 +18,7 @@ export function StatusBar({ health, summary }: { health: ApiResult<{ status: str
         <span>NPC budget {fmt(budget!.allocated)} / {fmt(budget!.target)} {budget!.feasible ? '· feasible' : '· infeasible'}</span>
       </>}
       <span className="appbar-spacer" />
-      <span>Simulation: not started</span>
+      <span>{active ? `Simulation: ${active.name} · ${active.date.label} · ${active.running ? `running ${active.speed} d/s` : 'paused'}` : 'Simulation: no scenario'}</span>
       <span className="sep" />
       <span>LLM jobs: none</span>
     </footer>

@@ -17,3 +17,9 @@ byte-identical files.
 
 They are reproducible, so `data/generated/` is git-ignored. Commit one only on purpose,
 as a fixture.
+
+## Scenarios
+
+`data/scenarios/<id>/` holds each scenario's metadata, canonical state, event log and
+snapshots (see docs/02). It is local working data and git-ignored. Point
+`WS_SCENARIO_STORAGE` elsewhere for throwaway runs, such as screenshot capture.

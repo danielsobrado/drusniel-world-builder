@@ -123,3 +123,35 @@ export interface Pilot {
   selectionOrder: string[];
   warnings: string[];
 }
+
+/* ---- Simulation (scenarios) ---- */
+
+export interface CalendarDate { day: number; year: number; month: number; dayOfMonth: number; label: string }
+export interface ScenarioScope { type: 'pilot' | 'state' | 'province' | 'settlements'; id?: string | null; settlementIds?: string[] | null }
+
+export interface ScenarioStatus {
+  id: string; name: string; description: string; scope: ScenarioScope; seed: number;
+  parent: { scenarioId: string; snapshotId: string } | null; createdAt: string; snapshotSeq: number; eventSeq: number;
+  settlementIds: string[]; date: CalendarDate; running: boolean; speed: number; population: number;
+  checksum: string; snapshots: number; error: string | null;
+}
+
+export interface Cohorts { children: number; adults: number; elders: number }
+export interface SettlementSimState {
+  settlementId: string; sourceId: number; name: string; population: number; cohorts: Cohorts; births: number; deaths: number;
+}
+export interface ScenarioState {
+  schemaVersion: number; scenarioId: string; seed: number; startYear: number; date: CalendarDate;
+  settlements: SettlementSimState[]; history: { day: number; population: Record<string, number> }[];
+}
+
+export interface SimEvent { seq: number; day: number; date: string; kind: string; message: string }
+export interface SnapshotMeta { id: string; label: string; date: CalendarDate; checksum: string; createdAt: string }
+
+export interface SimulationConfig {
+  stepSizes: Record<'day' | 'week' | 'month' | 'year', number>;
+  speeds: number[];
+  startYear: number;
+  scopeTypes: ScenarioScope['type'][];
+  limits: { maxScopeSettlements: number };
+}

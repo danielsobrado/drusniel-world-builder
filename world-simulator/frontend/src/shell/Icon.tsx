@@ -13,6 +13,9 @@ const PATHS: Record<string, string> = {
   reset: 'M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4',
   plus: 'M12 5v14M5 12h14',
   minus: 'M5 12h14',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  play: 'M7 5l12 7-12 7z',
+  pause: 'M8 5v14M16 5v14',
 };
 
 export function Icon({ name, size = 18, title }: { name: string; size?: number; title?: string }) {

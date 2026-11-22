@@ -1,5 +1,6 @@
 import { useRef, type PointerEvent } from 'react';
 import type { SettlementClass } from '../api/types';
+import type { Simulation } from '../simulation/useSimulation';
 import { Icon } from './Icon';
 import { SettlementDetails } from '../components/SettlementDetails';
 import { Empty } from '../components/StateViews';
@@ -8,9 +9,9 @@ const MIN = 280;
 const MAX = 640;
 
 /** The one shared inspector: whatever is selected anywhere shows here. Drag the left edge to resize. */
-export function Inspector({ selectedId, classes, width, onResize, onClose, onSelect }: {
+export function Inspector({ selectedId, classes, width, onResize, onClose, onSelect, sim }: {
   selectedId: string | null; classes?: SettlementClass[]; width: number; onResize: (width: number) => void;
-  onClose: () => void; onSelect: (id: string) => void;
+  onClose: () => void; onSelect: (id: string) => void; sim?: Simulation;
 }) {
   const drag = useRef<{ x: number; width: number } | null>(null);
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -31,7 +32,7 @@ export function Inspector({ selectedId, classes, width, onResize, onClose, onSel
       </div>
       <div className="inspector-body">
         {selectedId
-          ? <SettlementDetails id={selectedId} classes={classes} onSelect={onSelect} />
+          ? <SettlementDetails id={selectedId} classes={classes} onSelect={onSelect} sim={sim} />
           : <Empty>Select a settlement in the table, atlas, explorer tree or pilot view.</Empty>}
       </div>
     </aside>

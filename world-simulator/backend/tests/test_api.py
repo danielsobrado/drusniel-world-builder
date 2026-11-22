@@ -70,6 +70,7 @@ def test_settlement_detail_by_stable_or_source_id(client):
 
 
 def test_the_world_api_is_read_only_and_has_no_file_endpoints(client):
-    assert client.post("/api/world").status_code == 405
+    assert client.post("/api/world", json={}).status_code == 405
+    assert client.post("/api/world").status_code == 415, "writes without a JSON body are refused before routing"
     assert client.get("/api/files/..%2F..%2Fpackage.json").status_code == 404
     assert client.get("/index.html").status_code == 404, "no static serving unless enabled"

@@ -1,11 +1,12 @@
 # Drusniel World Simulator
 
 A standalone, offline workbench for the Drusniel world. It reads the imported Azgaar
-map straight from the parent repository and, in this first version, audits it:
-settlements, population, roads, a persistent-NPC budget and a three-settlement pilot
-for later simulation work. It runs without the game or its renderer.
+map straight from the parent repository, audits it (settlements, population, roads,
+a persistent-NPC budget, a three-settlement pilot) and runs deterministic, snapshotable
+simulation scenarios over it. It runs without the game or its renderer.
 
 Findings, method and pilot ids: [docs/01-azgaar-audit-and-npc-budget-2026-11-22.md](docs/01-azgaar-audit-and-npc-budget-2026-11-22.md).
+Scenarios, clock, snapshots and the state contract: [docs/02-scenarios-and-baseline-state-2026-11-22.md](docs/02-scenarios-and-baseline-state-2026-11-22.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -49,16 +50,21 @@ backend/                Python package (pyproject.toml, uv.lock)
     geography/          connectivity (cell-based route graph, components, Dijkstra)
     npc/                budget (NPC allocator)
     pilot/              selector
+    simulation/         contracts (Pydantic state v1), engine, demography, calendar,
+                        scope, store (files), manager (run loop, snapshots, branches)
     reports/            builder, writer
-    api/                app (FastAPI), settlement_query, errors
+    api/                app (FastAPI), scenario_routes, settlement_query, errors
     cli/audit.py        canonical.py ids.py config.py log.py server.py
   tests/                pytest
 frontend/               TypeScript + React + Vite
   src/shell/            app bar, workspace bar, icon rail, explorer, inspector, status bar
   src/components/       WorldSummary, PopulationChart, SettlementTable, SettlementDetails,
                         BudgetComparison, WorldMap, PilotSettlements
+  src/simulation/       useSimulation, SimulationControls, SimulationWorkspace,
+                        ScenarioExplorer, PopulationTrend
   src/api/              types.ts (API contracts), worldApi.ts (fetch + useApi hook)
-  src/styles/           tokens.css (theme variables), shell.css, components.css
+  src/styles/           tokens.css (theme variables), shell.css, components.css,
+                        glass.css (frosted navigation chrome)
   tests/                Vitest
 scripts/                dev.js (process launcher), capture-screenshots.js
 ```
@@ -71,7 +77,7 @@ concurrent requests all read the same data.
 
 ## API
 
-Read-only, loopback-only, JSON. Every response is
+Loopback-only JSON. The world endpoints are read-only. Every response is
 `{ apiVersion, world: { mapId, sourceFingerprint }, data, meta? }`; errors are
 `{ apiVersion, error: { code, message, details? } }` with status 400, 404, 405 or 500.
 
@@ -95,6 +101,19 @@ parameters return 400 naming the parameter.
 There are no endpoints that take a file path. Static files are served only from
 `frontend/dist/`, and only with `npm start`.
 
+## Scenario API
+
+Writes (`POST`) must send `application/json`. Full table in
+[docs/02](docs/02-scenarios-and-baseline-state-2026-11-22.md#api).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/simulation` | clock and limit settings |
+| `GET · POST /api/scenarios` | list · create or branch |
+| `GET /api/scenarios/{id}` · `/state` · `/events` | status · canonical state · event log |
+| `POST /api/scenarios/{id}/step` · `/run` · `/pause` · `/restore` | clock control |
+| `GET · POST /api/scenarios/{id}/snapshots` | list · save |
+
 ## Configuration
 
 - `config/simulator.yaml` — host and ports, map id, reference counts, settlement
@@ -102,9 +121,11 @@ There are no endpoints that take a file path. Static files are served only from
 - `config/npc-population.yaml` — target, comparison scenarios, per-class ranges,
   importance weights.
 - `config/pilot-selection.yaml` — role evidence rules, constraints, pinned ids.
+- `config/simulation.yaml` — scenario storage, calendar, step sizes, speeds, limits,
+  baseline scenario, demography rates.
 
 Environment overrides: `WS_BACKEND_HOST`, `WS_BACKEND_PORT`, `WS_FRONTEND_PORT`,
-`WS_MAP_ID`. Another Azgaar Full JSON is added by listing it in `../maps/manifest.json`
+`WS_MAP_ID`, `WS_SCENARIO_STORAGE`. Another Azgaar Full JSON is added by listing it in `../maps/manifest.json`
 and setting `world.mapId`. Map files must resolve inside `../maps/`.
 
 ## Generated data
@@ -120,7 +141,7 @@ status bar. Selecting a settlement anywhere (table, map, tree, pilot, inspector 
 updates the same inspector. Inspector fields are marked `src` (imported Azgaar fact)
 or `calc` (computed from config).
 
-Shortcuts: `1`–`5` switch workspace, `[` and `]` toggle the side panels, `/` focuses
+Shortcuts: `1`–`6` switch workspace, `[` and `]` toggle the side panels, `/` focuses
 search. Panel layout is remembered per browser.
 
 ## Relationship to the game
@@ -132,7 +153,8 @@ later exports can join on them.
 
 ## Current limitations
 
-- Read-only audit: no simulation clock, households, economy or NPC identities yet.
+- The only simulated system is monthly cohort demography with authored rates;
+  households, economy and NPC identities come in later PRs.
 - Pilot roles are hypotheses from Azgaar production records, not specialisations.
 - The atlas draws settlements and routes, not coastlines or terrain.
 - The game's renderer and sim projection read population differently (documented in

@@ -1,0 +1,36 @@
+# Scenario engine configuration (PR2). Paths are relative to world-simulator/.
+schemaVersion: 1
+
+storage: data/scenarios            # one folder per scenario; git-ignored
+
+calendar:
+  daysPerMonth: 30
+  monthsPerYear: 12
+  startYear: source                # "source" = Azgaar settings.options.year (1212 on Eldara)
+
+stepSizes: { day: 1, week: 7, month: 30, year: 360 }
+speeds: [1, 7, 30, 120]            # simulated days per real second while running
+runner:
+  tickSeconds: 0.25                # how often a running scenario advances
+
+limits:
+  maxScopeSettlements: 120
+  maxStepDays: 3600
+  maxScenarios: 50
+  maxSnapshots: 50
+  maxEvents: 1000
+
+baseline:                          # created on first start if no scenario exists
+  id: baseline-pilot
+  name: Pilot baseline
+  description: The three pilot settlements from the audit, as imported.
+  scope: { type: pilot }
+  seed: 1212
+
+# Monthly demography. These rates are authored assumptions for a pre-modern world,
+# not calibrated data; PR3+ replaces them with household-level simulation.
+demography:
+  initialShares: { children: 0.33, adults: 0.55, elders: 0.12 }
+  birthsPerAdultPerYear: 0.065
+  deathRatePerYear: { children: 0.035, adults: 0.012, elders: 0.07 }
+  bandYears: { children: 15, adults: 45 }   # years spent in a band before ageing out

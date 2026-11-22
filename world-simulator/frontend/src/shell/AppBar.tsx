@@ -1,9 +1,13 @@
 import type { Summary, World } from '../api/types';
 import { Icon } from './Icon';
+import { SimulationControls } from '../simulation/SimulationControls';
+import type { Simulation } from '../simulation/useSimulation';
 import { shortHash } from '../components/format';
 
 /** World identity and application controls; PR1 is a read-only audit, so no simulation clock yet. */
-export function AppBar({ world, summary, onResetLayout }: { world: World | null; summary: Summary | null; onResetLayout: () => void }) {
+export function AppBar({ world, summary, sim, onResetLayout }: {
+  world: World | null; summary: Summary | null; sim: Simulation; onResetLayout: () => void;
+}) {
   const settings = summary?.sourceSettings;
   return (
     <header className="appbar">
@@ -17,8 +21,8 @@ export function AppBar({ world, summary, onResetLayout }: { world: World | null;
           <option value={world?.mapId ?? ''}>{world?.name ?? 'Loading…'}</option>
         </select>
       </label>
-      {settings?.year != null && <span className="chip" title={settings.era ?? ''}>Year {settings.year} {settings.era ? `· ${settings.era}` : ''}</span>}
-      <span className="chip chip-muted" title="This build audits the imported world; simulation arrives in a later PR">Mode: read-only audit</span>
+      {settings?.year != null && <span className="chip chip-muted" title="Year the Azgaar map describes">Source year {settings.year} {settings.era ? `· ${settings.era}` : ''}</span>}
+      <SimulationControls sim={sim} />
       <span className="appbar-spacer" />
       <span className="chip chip-muted" title={world?.sourceFingerprint}>Source {shortHash(world?.sourceFingerprint)}</span>
       <span className="chip chip-muted" title="No local model is configured in this build">Local LLM: not configured</span>

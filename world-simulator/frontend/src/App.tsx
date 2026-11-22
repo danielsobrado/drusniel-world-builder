@@ -16,6 +16,9 @@ import { SettlementTable } from './components/SettlementTable';
 import { BudgetComparison } from './components/BudgetComparison';
 import { WorldMap } from './components/WorldMap';
 import { PilotSettlements } from './components/PilotSettlements';
+import { ScenarioExplorer } from './simulation/ScenarioExplorer';
+import { SimulationWorkspace } from './simulation/SimulationWorkspace';
+import { useSimulation } from './simulation/useSimulation';
 
 export default function App() {
   const { layout, update, reset } = useLayout();
@@ -23,6 +26,7 @@ export default function App() {
   const health = useApi<{ status: string }>(paths.health);
   const world = useApi<World>(paths.world);
   const summary = useApi<Summary>(paths.summary);
+  const sim = useSimulation();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const select = useCallback((id: string) => { setSelectedId(id); update({ rightOpen: true }); }, [update]);
@@ -35,21 +39,24 @@ export default function App() {
     settlements: () => <SettlementTable filters={filters} classes={classes} selectedId={selectedId} onSelect={select} />,
     budget: () => <BudgetComparison classes={classes} />,
     pilot: () => <PilotSettlements classes={classes} onSelect={select} onShowAtlas={() => go('atlas')} />,
+    simulation: () => <SimulationWorkspace sim={sim} summary={summary.data} onSelect={select} />,
   };
   const workspace = views[layout.workspace] ? layout.workspace : 'overview';
 
   return (
     <div className="app" style={{ '--inspector-width': `${layout.rightWidth}px` } as CSSProperties}>
-      <AppBar world={world.data} summary={summary.data} onResetLayout={reset} />
+      <AppBar world={world.data} summary={summary.data} sim={sim} onResetLayout={reset} />
       <WorkspaceBar world={world.data} workspaces={WORKSPACES} active={workspace} onSelect={go} layout={layout} update={update} />
       <div className={`body${layout.leftOpen ? ' left-open' : ''}${layout.rightOpen ? ' right-open' : ''}`}>
         <IconRail workspaces={WORKSPACES} active={workspace} onSelect={go} />
-        {layout.leftOpen && <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />}
+        {layout.leftOpen && (workspace === 'simulation'
+          ? <ScenarioExplorer sim={sim} />
+          : <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />)}
         <main className="workspace" aria-label={WORKSPACES.find((w) => w.id === workspace)?.label}>{views[workspace]()}</main>
-        {layout.rightOpen && <Inspector selectedId={selectedId} classes={classes} width={layout.rightWidth} onSelect={select}
+        {layout.rightOpen && <Inspector selectedId={selectedId} classes={classes} width={layout.rightWidth} onSelect={select} sim={sim}
           onResize={(rightWidth) => update({ rightWidth })} onClose={() => update({ rightOpen: false })} />}
       </div>
-      <StatusBar health={health} summary={summary} />
+      <StatusBar health={health} summary={summary} sim={sim} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 
 import pytest
 
@@ -7,14 +8,21 @@ from world_sim.world.model import build_world_model
 
 
 @pytest.fixture(scope="session")
-def config():
-    return load_config(env={})
+def config(tmp_path_factory):
+    return load_config(env={"WS_SCENARIO_STORAGE": str(tmp_path_factory.mktemp("scenarios"))})
 
 
 @pytest.fixture(scope="session")
 def eldara(config):
     """The real Eldara model, built once per test session."""
     return build_world_model(config)
+
+
+@pytest.fixture
+def fresh_model(eldara, tmp_path):
+    """The Eldara model with its own empty scenario storage."""
+    simulation = {**eldara.config.simulation, "storage": str(tmp_path / "scenarios")}
+    return dataclasses.replace(eldara, config=dataclasses.replace(eldara.config, simulation=simulation))
 
 
 def _cell(i):
