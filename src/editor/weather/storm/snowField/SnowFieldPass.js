@@ -29,6 +29,18 @@ import { snapWindowCenter, snowFieldTarget, snowFieldUniforms } from './snowFiel
 /** Laplacian (1/m) that counts as a full hollow or crest. */
 const HOLLOW_PER_LAPLACIAN = 10;
 const MAX_STEP_SECONDS = 0.25;
+/**
+ * Metres the creeping drift moves between redraws. A twelfth of a 4 m texel is
+ * invisible, and it bounds a storm's redraws to a few a second, not every frame.
+ */
+export const DRIFT_STEP_METRES = 0.25;
+/** Seconds between redraws while a thaw follows the moving sun. */
+const THAW_REDRAW_SECONDS = 0.5;
+
+/** The drift offset in whole steps, so the pattern only moves (and redraws) a step at a time. */
+export function steppedDriftOffset(offset, step = DRIFT_STEP_METRES) {
+  return Math.round(offset / step) * step;
+}
 
 /**
  * The drift pattern's coordinate at the window centre, in double precision and
@@ -67,6 +79,7 @@ export class SnowFieldPass {
       getHeight, prepareBounds, getRevision, resolution: config.resolution + 1, extent: config.windowMetres,
     });
     this.offset = { x: 0, z: 0 };
+    this.clock = 0;
     this.cover = 0;
     this.renderKey = '';
     this.focus = { x: 0, z: 0 };
@@ -134,8 +147,11 @@ export class SnowFieldPass {
     this.cover = this.config.enabled ? cover : 0;
     this.sandCover = this.sand ? sandCover : 0;
     const fall = Math.max(snowFall, this.sand ? sandFall : 0);
-    this.ground.update(this.focus, origin, yieldAfter(1));
+    // No cover, nothing to draw: the ground patch waits for the first storm rather
+    // than rebuilding on the CPU every 64 m of clear-weather travel.
+    if (this.cover > 0 || this.sandCover > 0) this.ground.update(this.focus, origin, yieldAfter(1));
     const step = Math.min(Math.max(Number.isFinite(dt) ? dt : 0, 0), MAX_STEP_SECONDS);
+    this.clock += step;
     const wind = worldWindUniforms.prevailing.value;
     if (!snap && fall > 0) {
       const creep = this.config.driftSpeed * fall * worldWindCamera.envelope * step;
@@ -149,11 +165,12 @@ export class SnowFieldPass {
     const snapped = snapWindowCenter(center.x, center.z, this.texel);
     snowFieldUniforms.windowCenterCanonical.value.set(snapped.x, snapped.z);
     snowFieldUniforms.windowCenter.value.set(snapped.x - origin.x, snapped.z - origin.z);
-    const [u, v] = driftPatternOrigin(snapped.x, snapped.z, this.offset.x, this.offset.z, wind.x, wind.y,
-      this.config.driftAlongMetres, this.config.driftAcrossMetres);
+    const [u, v] = driftPatternOrigin(snapped.x, snapped.z, steppedDriftOffset(this.offset.x), steppedDriftOffset(this.offset.z),
+      wind.x, wind.y, this.config.driftAlongMetres, this.config.driftAcrossMetres);
     this.uniforms.driftOrigin.value.set(u, v);
-    // Thawing follows the moving sun every frame; otherwise a held cover draws nothing new.
-    this.nextKey = melting > 0 ? null : [snapped.x, snapped.z, u, v, wind.x, wind.y, this.ground.rebuilds].join();
+    // A thaw follows the moving sun, a couple of times a second; otherwise a held cover draws nothing new.
+    const thaw = melting > 0 ? Math.floor(this.clock / THAW_REDRAW_SECONDS) : -1;
+    this.nextKey = [snapped.x, snapped.z, u, v, wind.x, wind.y, this.ground.rebuilds, thaw].join();
   }
 
   /** Draw the field when there is snow or sand to place and its inputs moved. Call before the scene. */

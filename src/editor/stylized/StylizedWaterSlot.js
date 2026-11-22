@@ -10,6 +10,7 @@ import {
   PerfCounters,
 } from '../performance/qa/PerfCounters.js';
 import { WATER_FLOW_CHANNELS, waterFieldHasCoverage, waterFieldSurfaceRange } from '../water/WaterField.js';
+import { WATER_KIND_OCEAN } from '../water/WaterConstants.js';
 import { createSlotGeometry, fitSlotBoundsToRange } from '../world/TerrainSlotBounds.js';
 import { createStylizedWaterMaterial } from './StylizedWaterMaterial.js';
 import { SEA_SWELL_COMPONENTS, seaSwellPhaseOrigin } from '../water/SeaSwell.js';
@@ -96,6 +97,8 @@ export class StylizedWaterSlot {
     this.uploadedPage = null;
     this.uploadedFieldRevision = -1;
     this.hasWaterCoverage = false;
+    /** Ocean in this chunk: only then does it read the offshore FFT. */
+    this.hasOceanWater = false;
     const terrainData = terrainSlot.mesh.userData?.[TERRAIN_SLOT_KEY];
     if (terrainData) terrainData.waterSlot = this;
     this.materialOptions = {
@@ -197,6 +200,7 @@ export class StylizedWaterSlot {
     // that floods or drains this chunk re-decides whether it draws.
     this.hasWaterCoverage = waterFieldHasCoverage(this.waterFieldPixels);
     this.hasRiverWater = this.waterAppearancePixels.some((value, index) => index % 4 === 0 && value === 3);
+    this.hasOceanWater = this.waterAppearancePixels.some((value, index) => index % 4 === 0 && value === WATER_KIND_OCEAN);
     const uploadedBytes = page.waterFieldPixels.byteLength + page.waterFlowPixels.byteLength + page.waterAppearancePixels.byteLength;
     PerfCounters.inc(PERF_COUNTER_WATER_UPLOAD_BYTES, uploadedBytes);
     PerfCounters.inc('textureBytesUploaded', uploadedBytes);

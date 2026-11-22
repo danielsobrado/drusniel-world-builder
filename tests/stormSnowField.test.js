@@ -13,7 +13,9 @@ import {
 import {
   snapWindowCenter, stormSnowCoverAt, stormSnowCoverAtCanonical,
 } from '../src/editor/weather/storm/snowField/snowFieldState.js';
-import { driftPatternOrigin, SnowFieldPass } from '../src/editor/weather/storm/snowField/SnowFieldPass.js';
+import {
+  DRIFT_STEP_METRES, driftPatternOrigin, SnowFieldPass, steppedDriftOffset,
+} from '../src/editor/weather/storm/snowField/SnowFieldPass.js';
 import { createAlpineRockMaterial } from '../src/editor/stylized/alpine/AlpineRockMaterial.js';
 
 const shipped = yaml.load(readFileSync(new URL('../config/weather-effects.yaml', import.meta.url), 'utf8')).snowField;
@@ -103,4 +105,33 @@ test('SnowCover hands over to the melt pattern only while thawing, and QA can ho
   assert.equal(cover.update(1, 1, 0), 0.4);
   assert.equal(cover.snap(1), 0.4);
   assert.equal(cover.melting, 1);
+});
+
+test('clear weather builds no ground patch; the drift and a thaw redraw only a step at a time', () => {
+  const pass = new SnowFieldPass({ config: on, getHeight: () => 0 });
+  const zero = { x: 0, z: 0 };
+  const calm = { cover: 0, melting: 0, snowFall: 0 };
+  for (let i = 0; i < 5; i++) pass.update(0.1, zero, zero, calm);
+  assert.equal(pass.ground.job, null);
+  assert.equal(pass.ground.ready, false, 'no cover: the patch is never started');
+  pass.update(0.1, zero, zero, { ...calm, cover: 0.5 });
+  assert.ok(pass.ground.job || pass.ground.ready, 'the first cover starts it');
+  pass.ground.rebuild(zero, zero);
+
+  assert.equal(steppedDriftOffset(0.12), 0);
+  assert.equal(steppedDriftOffset(0.13), DRIFT_STEP_METRES);
+  assert.equal(steppedDriftOffset(-0.6), -0.5);
+  // Snowing: the key holds until the drift has crept a whole step.
+  const snowing = { cover: 1, melting: 0, snowFall: 1 };
+  pass.update(0, zero, zero, snowing);
+  const keys = new Set();
+  for (let i = 0; i < 60; i++) { pass.update(1 / 60, zero, zero, snowing); keys.add(pass.nextKey); }
+  const crept = Math.hypot(pass.offset.x, pass.offset.z);
+  assert.ok(crept > 0, 'the drift creeps');
+  assert.ok(keys.size <= Math.ceil(crept / DRIFT_STEP_METRES) + 2, `${keys.size} redraws for ${crept.toFixed(2)} m`);
+  // Thawing: a couple of redraws a second, not one a frame.
+  keys.clear();
+  for (let i = 0; i < 60; i++) { pass.update(1 / 60, zero, zero, { cover: 0.5, melting: 1, snowFall: 0 }); keys.add(pass.nextKey); }
+  assert.ok(keys.size <= 3, `${keys.size} thaw redraws in a second`);
+  pass.dispose();
 });

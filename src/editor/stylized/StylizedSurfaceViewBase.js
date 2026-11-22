@@ -416,7 +416,10 @@ export class StylizedSurfaceView {
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections, this.oceanFft?.binding ?? null);
     this.reflectionPrepared = null;
     terrainView.beforeMainRender = camera => {
-      this.oceanFft?.prepare(waterVisualClock.value);
+      // Only ocean water slots read the offshore FFT: inland it would step and transform for nothing.
+      if (this.oceanFft && this.waterSlots.some((slot) => slot.hasOceanWater && slot.mesh.visible)) {
+        this.oceanFft.prepare(waterVisualClock.value);
+      }
       this.skyView?.cascades?.prepare(camera);
       const now = performance.now();
       const prepared = this.reflections?.prepare(camera, this) ?? null;
