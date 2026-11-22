@@ -27,6 +27,12 @@ from .stonehold_parts import (
     work_tent,
 )
 from .stonehold_formation_base import _talus_skirt
+from .stonehold_sculptures import (
+    chamfered_octagonal_portal,
+    gate_guardian_statue,
+    half_open_fortress_doors,
+    king_keystone_mask,
+)
 
 
 def _build_vent_stack_at(b, cx, cy, z0, scale=1.0, seed=900):
@@ -105,18 +111,20 @@ def mountain_cliff_wall():
         if detailed():
             b.box((-4.15, -1.52, cz + 0.12), (4.15, 1.52, cz + 0.24), 'hold_bronze', bevel=0)
 
-    # Rock-cut subterranean hall embrasures with shouldered lintels & glowing forge light
+    # Rock-cut subterranean hall embrasures with recessed shadowed reveals & forged grilles
     for wx in (-2.4, 0.0, 2.4):
         for wz in (1.8, 5.8):
-            b.box((wx - 0.48, -1.40, wz), (wx + 0.48, 1.40, wz + 1.85), 'stone_granite', bevel=STONE_BEVEL)
-            b.box((wx - 0.58, -1.50, wz + 1.75), (wx + 0.58, 1.50, wz + 2.12), 'stone_basalt', bevel=STONE_BEVEL)
+            b.box((wx - 0.52, -1.42, wz), (wx + 0.52, 1.42, wz + 1.90), 'stone_granite', bevel=STONE_BEVEL)
+            b.box((wx - 0.64, -1.54, wz + 1.78), (wx + 0.64, 1.54, wz + 2.18), 'stone_basalt', bevel=STONE_BEVEL)
             for side in (-1, 1):
-                y0, y1 = (side * 1.44, side * 1.30) if side < 0 else (side * 1.30, side * 1.44)
-                b.box((wx - 0.32, y0, wz + 0.18), (wx + 0.32, y1, wz + 1.68), 'firelight', bevel=0)
+                y0, y1 = (side * 1.44, side * 1.24) if side < 0 else (side * 1.24, side * 1.44)
+                b.box((wx - 0.34, y0, wz + 0.16), (wx + 0.34, y1, wz + 1.72), 'shadow', bevel=0)
+                ym0, ym1 = (side * 1.36, side * 1.26) if side < 0 else (side * 1.26, side * 1.36)
+                b.box((wx - 0.22, ym0, wz + 0.28), (wx + 0.22, ym1, wz + 1.42), 'firelight', bevel=0)
                 if detailed():
                     yi0, yi1 = (side * 1.47, side * 1.40) if side < 0 else (side * 1.40, side * 1.47)
-                    b.box((wx - 0.03, yi0, wz + 0.18), (wx + 0.03, yi1, wz + 1.68), 'iron', bevel=0)
-                    b.box((wx - 0.32, yi0, wz + 0.92), (wx + 0.32, yi1, wz + 0.98), 'iron', bevel=0)
+                    b.box((wx - 0.03, yi0, wz + 0.16), (wx + 0.03, yi1, wz + 1.72), 'iron', bevel=0)
+                    b.box((wx - 0.34, yi0, wz + 0.92), (wx + 0.34, yi1, wz + 0.98), 'iron', bevel=0)
 
     # Continuous dark-rock upper mountain crag crown & spires (Z = 10.6..17.6m)
     for idx, (cx, cy, z0, z1, rx, ry) in enumerate((
@@ -133,58 +141,49 @@ def mountain_cliff_wall():
 
 
 def mountain_gate_massif():
-    """14m-wide x 20.0m-tall monumental Vondari Dwarven Fortress Mountain Gate carved directly
-    into a towering dark-rock mountain massif with gold-inlaid bastions, hanging Vondari
-    banners, raised iron portcullis, and smoking Mine_Vent_Stack crown."""
+    """14m-wide x 20.5m-tall monumental Vondari Dwarven Fortress Mountain Gate carved directly
+    into a towering dark-rock mountain massif: triple-stepped chamfered octagonal portal,
+    stern Dwarf-King keystone mask, colossal flanking Gate Guardian warrior statues, half-open
+    bronze fortress doors spilling forge firelight, crimson Vondari banners, stepped approach
+    apron with braziers, and jagged alpine peak crown (Refs 4, 5, 6)."""
     b = MeshBuilder()
     for side, s_base in ((-1, 930), (1, 940)):
-        jagged_cliff_tier(b, side * 4.7, 0.4, -0.4, 7.2, 2.45, 1.85, seed=s_base, ribs=18)
-        jagged_cliff_tier(b, side * 4.6, 0.5, 6.8, 13.4, 2.35, 1.75, seed=s_base + 1, ribs=16)
-        # Carved granite & basalt bastion face flanking the portal on both -Y and +Y
-        b.box((side * 3.55 - 1.15, -1.35, -0.2), (side * 3.55 + 1.15, 2.15, 6.8),
-              'stone_granite', skip=('-z',), bevel=0)
-        b.box((side * 2.55 - 0.35, -1.55, -0.2), (side * 2.55 + 0.35, 2.35, 7.2),
-              'stone_basalt', skip=('-z',), bevel=0)
-        b.box((side * 4.55 - 0.35, -1.45, -0.2), (side * 4.55 + 0.35, 2.25, 7.0),
-              'stone_basalt', skip=('-z',), bevel=0)
-        for bz in (0.9, 3.4, 6.4):
-            b.box((side * 3.55 - 1.35, -1.50, bz), (side * 3.55 + 1.35, 2.30, bz + 0.34), 'stone_basalt', bevel=STONE_BEVEL)
+        jagged_cliff_tier(b, side * 5.0, 0.6, -0.4, 7.6, 2.45, 1.95, seed=s_base, ribs=18)
+        jagged_cliff_tier(b, side * 4.8, 0.7, 7.2, 14.0, 2.35, 1.85, seed=s_base + 1, ribs=16)
+        # Carved granite & basalt bastion wing flanking the guardian pedestals
+        b.box((side * 4.65 - 1.05, -1.25, -0.2), (side * 4.65 + 1.05, 2.15, 7.6),
+              'stone_granite', skip=('-z',), bevel=STONE_BEVEL)
+        b.box((side * 5.45 - 0.36, -1.45, -0.2), (side * 5.45 + 0.36, 2.25, 8.2),
+              'stone_basalt', skip=('-z',), bevel=STONE_BEVEL)
+        for bz in (1.0, 4.0, 7.2):
+            b.box((side * 4.65 - 1.18, -1.38, bz), (side * 4.65 + 1.18, 2.24, bz + 0.34), 'stone_basalt', bevel=STONE_BEVEL)
             if detailed():
-                b.box((side * 3.55 - 1.38, -1.54, bz + 0.10), (side * 3.55 + 1.38, 2.34, bz + 0.22), 'hold_bronze', bevel=0)
-        # Glowing bastion guard embrasure & Vondari banner
-        b.box((side * 3.55 - 0.36, -1.42, 3.95), (side * 3.55 + 0.36, 2.22, 5.65), 'firelight', bevel=0)
-        b.box((side * 3.55 - 0.48, -1.52, 5.60), (side * 3.55 + 0.48, 2.32, 5.92), 'stone_basalt', bevel=STONE_BEVEL)
-        vondari_cliff_banner(b, side * 3.55, -1.48, 3.30, yaw=0.0, height=2.20, width=0.68)
-        if detailed():
-            for y_bronze, y_glow in ((-1.58, -1.60), (2.36, 2.38)):
-                b.box((side * 2.55 - 0.12, y_bronze - 0.04, 1.4), (side * 2.55 + 0.12, y_bronze + 0.04, 5.4), 'hold_bronze', bevel=0)
-                b.box((side * 2.55 - 0.07, y_glow - 0.04, 1.8), (side * 2.55 + 0.07, y_glow + 0.04, 5.0), 'glow', bevel=0)
+                b.box((side * 4.65 - 1.20, -1.42, bz + 0.10), (side * 4.65 + 1.20, 2.26, bz + 0.22), 'hold_bronze', bevel=0)
+        # Colossal armored Gate Guardian warrior statue flanking the portal (Refs 4, 5, 6!)
+        gate_guardian_statue(b, side * 4.25, -1.65, 0.0, scale=1.08, handedness=side)
+        # Crimson & gold Vondari banner framing the portal jamb + threshold brazier
+        vondari_cliff_banner(b, side * 2.65, -1.85, 5.45, yaw=0.0, height=2.55, width=0.78)
+        dwarven_brazier(b, side * 2.85, -2.55, 0.32, scale=3.6, tall=False)
 
-    # Monumental squared & corbelled basalt lintel spanning over the central tunnel (Z = 6.2..7.9)
-    b.box((-3.2, -1.62, 6.2), (3.2, 2.42, 7.6), 'stone_basalt', bevel=STONE_BEVEL)
-    b.box((-3.5, -1.72, 7.4), (3.5, 2.52, 7.95), 'stone_granite', bevel=STONE_BEVEL)
-    for side in (-1, 1):
-        b.box((side * 2.05 - 0.32, -1.50, 5.35), (side * 2.05 + 0.32, 2.30, 6.22), 'stone_basalt', bevel=STONE_BEVEL)
-    if detailed():
-        for y_frz, y_glw in ((-1.66, -1.70), (2.44, 2.48)):
-            b.box((-2.2, y_frz - 0.06, 6.55), (2.2, y_frz + 0.06, 7.25), 'hold_bronze', bevel=0)
-            for rx in (-1.5, -0.75, 0.0, 0.75, 1.5):
-                b.box((rx - 0.14, y_glw - 0.05, 6.72), (rx + 0.14, y_glw + 0.05, 7.08), 'glow', bevel=0)
-        for px in (-1.8, -1.2, -0.6, 0.0, 0.6, 1.2, 1.8):
-            b.box((px - 0.05, -0.65, 5.05), (px + 0.05, -0.52, 6.25), 'iron', bevel=0)
-        b.box((-2.2, -0.68, 5.35), (2.2, -0.50, 5.48), 'iron', bevel=0)
-        b.box((-0.40, 0.1, 5.85), (0.40, 0.9, 6.20), 'firelight', bevel=0)
+    # Monumental chamfered octagonal Dwarven portal, Dwarf-King keystone & half-open forge doors
+    chamfered_octagonal_portal(b, 0.0, 0.35, 0.0, opening_w=4.4, opening_h=6.3, depth=3.8, frame_w=1.35)
+    king_keystone_mask(b, 0.0, -1.78, 7.55, scale=1.08)
+    half_open_fortress_doors(b, 0.0, -0.85, 0.0, width=4.2, height=6.0)
 
-    # Towering central dark-rock mountain peak above the gate (Z = 7.5..20.2)
-    jagged_cliff_tier(b, 0.0, 0.5, 7.5, 14.2, 3.85, 1.95, seed=950, ribs=18)
-    jagged_cliff_tier(b, -3.8, 0.6, 11.0, 16.8, 2.65, 1.85, seed=951, ribs=14)
-    jagged_cliff_tier(b, 3.8, 0.6, 11.0, 16.6, 2.65, 1.85, seed=952, ribs=14)
-    jagged_cliff_tier(b, 0.0, 0.6, 13.6, 18.2, 2.45, 1.75, seed=953, ribs=14)
-    rock_spire(b, (-3.2, 0.6, 14.8), (-3.8, 0.3, 19.8), 1.20, 0.98,
+    # Broad stepped basalt & flagstone approach landing in front of the gate
+    b.box((-3.8, -2.95, -0.2), (3.8, -1.15, 0.32), 'stone_basalt', skip=('-z',), bevel=STONE_BEVEL)
+    b.box((-3.4, -3.45, -0.2), (3.4, -2.85, 0.16), 'stone_dressed', skip=('-z',), bevel=STONE_BEVEL)
+
+    # Towering central dark-rock mountain peak above the gate (Z = 8.0..20.6)
+    jagged_cliff_tier(b, 0.0, 0.7, 8.0, 14.8, 4.15, 2.05, seed=950, ribs=18)
+    jagged_cliff_tier(b, -3.9, 0.8, 11.4, 17.2, 2.75, 1.90, seed=951, ribs=14)
+    jagged_cliff_tier(b, 3.9, 0.8, 11.4, 17.0, 2.75, 1.90, seed=952, ribs=14)
+    jagged_cliff_tier(b, 0.0, 0.8, 14.0, 19.2, 2.60, 1.80, seed=953, ribs=14)
+    rock_spire(b, (-3.2, 0.8, 15.0), (-3.9, 0.4, 20.4), 1.24, 1.00,
                seed=954, mat='rock_cliff', cap_mat='rock_cliff', curve=(-0.22, -0.08, 0.25), sides=6, segs=5)
-    rock_spire(b, (3.2, 0.6, 14.8), (3.8, 0.3, 19.6), 1.20, 0.98,
+    rock_spire(b, (3.2, 0.8, 15.0), (3.9, 0.4, 20.2), 1.24, 1.00,
                seed=955, mat='rock_cliff', cap_mat='rock_cliff', curve=(0.22, -0.08, 0.25), sides=6, segs=5)
-    _build_vent_stack_at(b, 0.0, 0.6, 17.9, scale=0.95, seed=956)
+    _build_vent_stack_at(b, 0.0, 0.8, 18.6, scale=0.92, seed=956)
     return b
 
 

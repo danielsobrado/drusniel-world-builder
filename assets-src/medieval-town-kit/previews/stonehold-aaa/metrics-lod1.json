@@ -4,9 +4,9 @@
     "Stonehold_Ledge_Small": {
       "triangles": 3500,
       "vertices": 5938,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 21,
-      "buildSeconds": 0.34,
+      "buildSeconds": 0.39,
       "bounds": [
         [
           -8.37759780883789,
@@ -25,9 +25,9 @@
     "Stonehold_Ledge_Large": {
       "triangles": 6593,
       "vertices": 11597,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 21,
-      "buildSeconds": 0.52,
+      "buildSeconds": 0.54,
       "bounds": [
         [
           -11.403851509094238,
@@ -46,9 +46,9 @@
     "Stonehold_Twin_Outcrop": {
       "triangles": 11712,
       "vertices": 20048,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 21,
-      "buildSeconds": 0.77,
+      "buildSeconds": 0.91,
       "bounds": [
         [
           -15.362104415893555,
@@ -67,9 +67,9 @@
     "Stonehold_Vent_Crater": {
       "triangles": 2444,
       "vertices": 3645,
-      "repeatVerified": true,
-      "materials": 17,
-      "buildSeconds": 0.35,
+      "repeatVerified": false,
+      "materials": 18,
+      "buildSeconds": 0.34,
       "bounds": [
         [
           -9.716102600097656,
@@ -88,9 +88,9 @@
     "Stonehold_Caldera_Basin": {
       "triangles": 4275,
       "vertices": 7072,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 21,
-      "buildSeconds": 0.38,
+      "buildSeconds": 0.43,
       "bounds": [
         [
           -11.911563873291016,
@@ -109,9 +109,9 @@
     "Stonehold_Fang_Shrine": {
       "triangles": 3442,
       "vertices": 5500,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 15,
-      "buildSeconds": 0.35,
+      "buildSeconds": 0.42,
       "bounds": [
         [
           -10.44460391998291,
@@ -130,9 +130,9 @@
     "Stonehold_Cavern_Maw": {
       "triangles": 4202,
       "vertices": 5908,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 17,
-      "buildSeconds": 0.45,
+      "buildSeconds": 0.64,
       "bounds": [
         [
           -12.013744354248047,
@@ -151,9 +151,9 @@
     "Stonehold_Horned_Sanctum": {
       "triangles": 8033,
       "vertices": 13259,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 21,
-      "buildSeconds": 0.57,
+      "buildSeconds": 0.72,
       "bounds": [
         [
           -14.960765838623047,
@@ -172,9 +172,9 @@
     "Mine_Vent_Stack": {
       "triangles": 692,
       "vertices": 1124,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 6,
-      "buildSeconds": 0.21,
+      "buildSeconds": 0.46,
       "bounds": [
         [
           -1.6135568618774414,
@@ -191,11 +191,11 @@
       ]
     },
     "Mountain_Cliff_Wall": {
-      "triangles": 1523,
-      "vertices": 1382,
-      "repeatVerified": true,
-      "materials": 4,
-      "buildSeconds": 0.25,
+      "triangles": 1667,
+      "vertices": 1670,
+      "repeatVerified": false,
+      "materials": 5,
+      "buildSeconds": 0.39,
       "bounds": [
         [
           -5.411231517791748,
@@ -212,30 +212,30 @@
       ]
     },
     "Mountain_Gate_Massif": {
-      "triangles": 1526,
-      "vertices": 1484,
-      "repeatVerified": true,
-      "materials": 8,
-      "buildSeconds": 0.26,
+      "triangles": 2298,
+      "vertices": 3024,
+      "repeatVerified": false,
+      "materials": 12,
+      "buildSeconds": 0.4,
       "bounds": [
         [
-          -7.683164119720459,
-          7.838288307189941
+          -7.951900482177734,
+          7.963357925415039
         ],
         [
-          -2.467013359069824,
-          3.4213807582855225
+          -3.450000047683716,
+          3.679483413696289
         ],
         [
           -0.20000000298023224,
-          21.243999481201172
+          21.83839988708496
         ]
       ]
     },
     "Mountain_Cavern_Vault": {
       "triangles": 1070,
       "vertices": 1456,
-      "repeatVerified": true,
+      "repeatVerified": false,
       "materials": 7,
       "buildSeconds": 0.22,
       "bounds": [

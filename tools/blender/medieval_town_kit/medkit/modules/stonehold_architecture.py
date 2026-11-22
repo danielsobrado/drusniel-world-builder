@@ -96,28 +96,23 @@ def dwarven_terrace_deck(b, cx, cy, z0, z_deck, rx, ry, seed=1, sides=8,
             continue
         # Note: in MeshBuilder.beam(p0, p1, (0,0,1), side_range, width, mat),
         # `side_range` is vertical height along Z and `width` is horizontal thickness!
-        # Low dark balustrade (curb, slim posts, handrail) so the paving stays the bright read.
+        # Heavy stepped Dwarven crenellated stone parapet (replacing spindly iron rails).
         b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-               (0, 0, 1), (0.0, 0.022), 0.040, 'stone_basalt', bevel=STONE_BEVEL)
+               (0, 0, 1), (0.0, 0.135), 0.068, 'stone_granite', bevel=STONE_BEVEL)
         b.beam((p0.x, p0.y, z_deck), (p1.x, p1.y, z_deck),
-               (0, 0, 1), (0.175, 0.19), 0.026, 'stone_basalt', bevel=STONE_BEVEL)
+               (0, 0, 1), (0.132, 0.158), 0.084, 'stone_basalt', bevel=STONE_BEVEL)
         if detailed():
-            n_posts = max(2, int(seg_len / 0.22))
-            for m_idx in range(1, n_posts):
-                mp = p0.lerp(p1, m_idx / n_posts)
-                b.box((mp.x - 0.009, mp.y - 0.009, z_deck + 0.02),
-                       (mp.x + 0.009, mp.y + 0.009, z_deck + 0.18), 'iron', bevel=0)
+            n_merlons = max(2, int(seg_len / 0.24))
+            for m_idx in range(n_merlons):
+                mt0 = (m_idx + 0.16) / n_merlons
+                mt1 = (m_idx + 0.68) / n_merlons
+                mp0 = p0.lerp(p1, mt0)
+                mp1 = p0.lerp(p1, mt1)
+                b.beam((mp0.x, mp0.y, z_deck), (mp1.x, mp1.y, z_deck),
+                       (0, 0, 1), (0.155, 0.215), 0.072, 'stone_dressed', bevel=STONE_BEVEL)
             if seg_len > 0.40 and i % 2 == 0:
-                # Lantern post mid-span: the warm points of light along every terrace edge.
                 lp = p0.lerp(p1, 0.5)
-                b.box((lp.x - 0.013, lp.y - 0.013, z_deck), (lp.x + 0.013, lp.y + 0.013, z_deck + 0.12),
-                      'stone_basalt', bevel=0)
-                b.box((lp.x - 0.018, lp.y - 0.018, z_deck + 0.12), (lp.x + 0.018, lp.y + 0.018, z_deck + 0.128),
-                      'hold_bronze', bevel=0)
-                b.box((lp.x - 0.012, lp.y - 0.012, z_deck + 0.128), (lp.x + 0.012, lp.y + 0.012, z_deck + 0.158),
-                      'glow', bevel=0)
-                b.box((lp.x - 0.017, lp.y - 0.017, z_deck + 0.158), (lp.x + 0.017, lp.y + 0.017, z_deck + 0.166),
-                      'iron', bevel=0)
+                dwarven_brazier(b, lp.x, lp.y, z_deck + 0.158, scale=0.62)
 
 
 def dwarven_brazier(b, cx, cy, z0, scale=1.0, tall=False):

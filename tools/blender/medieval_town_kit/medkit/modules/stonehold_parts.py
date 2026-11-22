@@ -43,7 +43,7 @@ def vondari_cliff_banner(b, cx, cy, z_top, yaw=0.0, height=0.58, width=0.22):
     p_tip = Vector((top_c.x, top_c.y, z_tip))
 
     thick = fwd * 0.002
-    b.extrude([p_tl, p_tr, p_br, p_tip, p_bl], thick, 'cloth_blue')
+    b.extrude([p_tl, p_tr, p_br, p_tip, p_bl], thick, 'cloth_red')
 
     if detailed():
         # Gold edge borders (use `fwd` as side_axis so steep lines in banner plane never become degenerate)
