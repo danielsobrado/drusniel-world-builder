@@ -111,14 +111,75 @@
     {
       "name": "worldnoise-A",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "F:/drusniel-cache/tmp/claude/b21a3a8a25f2bac0/715537a3-90b6-4728-8c15-6b5460c1a483/scratchpad/frozenA", "run", "dev", "--", "--port", "5292", "--strictPort"],
+      "runtimeArgs": [
+        "--prefix",
+        "F:/drusniel-cache/tmp/claude/b21a3a8a25f2bac0/715537a3-90b6-4728-8c15-6b5460c1a483/scratchpad/frozenA",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5292",
+        "--strictPort"
+      ],
       "port": 5292
     },
     {
       "name": "worldnoise-B",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "F:/drusniel-cache/tmp/claude/b21a3a8a25f2bac0/715537a3-90b6-4728-8c15-6b5460c1a483/scratchpad/frozenB", "run", "dev", "--", "--port", "5293", "--strictPort"],
+      "runtimeArgs": [
+        "--prefix",
+        "F:/drusniel-cache/tmp/claude/b21a3a8a25f2bac0/715537a3-90b6-4728-8c15-6b5460c1a483/scratchpad/frozenB",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5293",
+        "--strictPort"
+      ],
       "port": 5293
+    },
+    {
+      "name": "pr-i-snapshot",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "8bb0106b",
+        "5217"
+      ],
+      "port": 5217
+    },
+    {
+      "name": "wetness-base",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "3af7bb12",
+        "5233"
+      ],
+      "port": 5233,
+      "autoPort": false
+    },
+    {
+      "name": "wetness-tuned",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "929237ba",
+        "5235"
+      ],
+      "port": 5235,
+      "autoPort": false
+    },
+    {
+      "name": "wetness-change",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "6a33c372",
+        "5234"
+      ],
+      "port": 5234,
+      "autoPort": false
     }
   ]
 }
