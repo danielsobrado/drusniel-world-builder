@@ -19,7 +19,7 @@ const texel = (ground, clocks) => evaluate(wetnessTexel({
 test('soaked ground is uneven: slopes shed rain, the mottle varies the film', () => {
   const [flat] = texel({}, [1, 1, 1]);
   const [steep] = texel({ slope: 1.2 }, [1, 1, 1]);
-  assert.ok(flat > 0.85 && steep < flat * 0.5, `flat ${flat}, steep ${steep}`);
+  assert.ok(flat > 0.75 && steep < flat * 0.5, `flat ${flat}, steep ${steep}`);
   assert.ok(texel({ mottle: 0 }, [1, 1, 1])[0] < texel({ mottle: 1 }, [1, 1, 1])[0]);
 });
 
@@ -29,6 +29,7 @@ test('puddles stand in flat hollows, never on slopes or before the puddle clock'
   assert.ok(hollow > 0.75 && rise < hollow * 0.5, `hollow ${hollow}, rise ${rise}`);
   assert.equal(texel({ hollow: 0.6, slope: 0.5 }, [1, 1, 1])[1], 0);
   assert.equal(texel({ hollow: 0.6 }, [1, 1, 0.4])[1], 0, 'the film soaks before water pools');
+  assert.deepEqual(texel({ sun: 1 }, [1, 1, 1]), texel({}, [1, 1, 1]), 'a noon storm still pools: the sun only dries');
 });
 
 test('drying is patchy: sunny slopes go first, shaded hollows hold water', () => {

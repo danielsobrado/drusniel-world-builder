@@ -23,17 +23,19 @@ export function wetnessTexel({ slope, hollow, sun, patches, mottle, clocks }) {
   const runoff = smoothstep(0.35, 1, slope);
   const basin = smoothstep(0.05, 0.5, hollow);
   const flat = oneMinus(smoothstep(0.06, 0.2, slope));
+  // The sun only dries: while rain keeps the fast clock full it changes nothing.
+  const drying = sun.mul(oneMinus(clocks.x));
   // 0 dries first (sunny, steep, raised), 1 stays wet longest (shaded hollows).
   const retention = clamp(
-    float(0.55).add(basin.mul(0.45)).sub(sun.mul(0.35)).sub(runoff.mul(0.5)).add(patches.sub(0.5).mul(0.5)),
+    float(0.55).add(basin.mul(0.45)).sub(drying.mul(0.35)).sub(runoff.mul(0.5)).add(patches.sub(0.5).mul(0.5)),
     0, 1,
   );
   // Steep ground sheds the rain and never soaks through.
-  const film = mix(clocks.x, clocks.y, retention).mul(oneMinus(runoff.mul(0.6))).mul(mix(float(0.8), float(1), mottle));
+  const film = mix(clocks.x, clocks.y, retention).mul(oneMinus(runoff.mul(0.6))).mul(mix(float(0.55), float(1), mottle));
   // Puddles stand on flats, deepest in hollows and where the soil holds water;
   // sun shrinks them first. Their clock fills last and dries last.
   const holds = clamp(
-    float(0.25).add(basin.mul(0.6)).add(patches.sub(0.5).mul(0.5)).add(mottle.sub(0.5).mul(0.4)).sub(sun.mul(0.25)),
+    float(0.25).add(basin.mul(0.6)).add(patches.sub(0.5).mul(0.5)).add(mottle.sub(0.5).mul(0.4)).sub(drying.mul(0.25)),
     0, 1,
   ).mul(flat);
   const puddle = smoothstep(PUDDLE_CLOCK_START, PUDDLE_CLOCK_FULL, clocks.z).mul(holds);
