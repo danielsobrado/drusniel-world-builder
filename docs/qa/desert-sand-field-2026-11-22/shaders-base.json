@@ -1,0 +1,534 @@
+{
+  "url": "http://localhost:5240",
+  "hour": 15,
+  "afterCover": 0.5,
+  "startedAt": "2026-11-22T05:23:13.013Z",
+  "captures": [
+    {
+      "variant": "base",
+      "state": "storm",
+      "pose": "tor-field",
+      "file": "base/storm/tor-field.png",
+      "field": {
+        "sandCover": null,
+        "sandstorm": null,
+        "present": true,
+        "sand": false,
+        "ready": true,
+        "center": {
+          "x": -5688,
+          "z": -84
+        },
+        "offset": {
+          "x": 0,
+          "z": 0
+        }
+      }
+    }
+  ],
+  "shaders": {
+    "base": [
+      {
+        "object": "",
+        "material": "alpine-rock",
+        "fragment": "506950f2",
+        "vertex": "ee3bdc80"
+      },
+      {
+        "object": "stylized-groundDetail-88-0-0",
+        "material": "Brown_Grass",
+        "fragment": "1c2fe37f",
+        "vertex": "e76d76de"
+      },
+      {
+        "object": "stylized-groundDetail-89-0-0",
+        "material": "Brown_Grass",
+        "fragment": "1c2fe37f",
+        "vertex": "e76d76de"
+      },
+      {
+        "object": "stylized-groundDetail-90-0-1",
+        "material": "Brown_Grass",
+        "fragment": "ab475147",
+        "vertex": "4ae7f4e3"
+      },
+      {
+        "object": "stylized-bush-near-2-0-0",
+        "material": "bush_leaf",
+        "fragment": "807e718e",
+        "vertex": "178077ad"
+      },
+      {
+        "object": "stylized-groundDetail-84-0-0",
+        "material": "Grass_C",
+        "fragment": "c5f8c0be",
+        "vertex": "582db885"
+      },
+      {
+        "object": "stylized-groundDetail-85-0-0",
+        "material": "Grass_C",
+        "fragment": "3ec70089",
+        "vertex": "16e1d6e0"
+      },
+      {
+        "object": "stylized-groundDetail-80-0-0",
+        "material": "GrassGrass_MAT",
+        "fragment": "3dc222a6",
+        "vertex": "86015435"
+      },
+      {
+        "object": "stylized-groundDetail-81-0-0",
+        "material": "GrassGrass_MAT",
+        "fragment": "3dc222a6",
+        "vertex": "4a35d298"
+      },
+      {
+        "object": "stylized-groundDetail-82-0-0",
+        "material": "GrassGrass_MAT",
+        "fragment": "3dc222a6",
+        "vertex": "bea59dbd"
+      },
+      {
+        "object": "stylized-groundDetail-83-0-0",
+        "material": "GrassGrass_MAT",
+        "fragment": "cfb3b6cf",
+        "vertex": "791bec10"
+      },
+      {
+        "object": "stylized-groundDetail-90-0-0",
+        "material": "Green_Grass",
+        "fragment": "ab475147",
+        "vertex": "723188ec"
+      },
+      {
+        "object": "stylized-pine-near-22-0",
+        "material": "Meadow bark",
+        "fragment": "835c6e27",
+        "vertex": "35e81737"
+      },
+      {
+        "object": "stylized-pine-near-23-0",
+        "material": "Meadow bark",
+        "fragment": "835c6e27",
+        "vertex": "dfa5c756"
+      },
+      {
+        "object": "stylized-pine-near-24-0",
+        "material": "Meadow bark",
+        "fragment": "835c6e27",
+        "vertex": "33326b88"
+      },
+      {
+        "object": "stylized-pine-near-29-0",
+        "material": "Meadow bark",
+        "fragment": "835c6e27",
+        "vertex": "ec815133"
+      },
+      {
+        "object": "stylized-pine-near-30-0",
+        "material": "Meadow bark",
+        "fragment": "835c6e27",
+        "vertex": "57b41766"
+      },
+      {
+        "object": "stylized-pine-near-22-1",
+        "material": "Meadow leaves",
+        "fragment": "1c3a972e",
+        "vertex": "f215aff7"
+      },
+      {
+        "object": "stylized-pine-near-23-1",
+        "material": "Meadow leaves",
+        "fragment": "c5a9a151",
+        "vertex": "6195e469"
+      },
+      {
+        "object": "stylized-pine-near-24-1",
+        "material": "Meadow leaves",
+        "fragment": "63100a1b",
+        "vertex": "faf0757e"
+      },
+      {
+        "object": "stylized-pine-near-29-1",
+        "material": "Meadow leaves",
+        "fragment": "b3942dbd",
+        "vertex": "7fac9c32"
+      },
+      {
+        "object": "stylized-pine-near-30-1",
+        "material": "Meadow leaves",
+        "fragment": "4bf6fc36",
+        "vertex": "6486e359"
+      },
+      {
+        "object": "meadow-grass-veryLow-0",
+        "material": "meadow-grass-blades",
+        "fragment": "a50f535f",
+        "vertex": "e721c0e3"
+      },
+      {
+        "object": "meadow-grass-cards-cards-0",
+        "material": "meadow-grass-cards",
+        "fragment": "22568ed1",
+        "vertex": "41d60319"
+      },
+      {
+        "object": "stylized-rock-near-0-0-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "801820b2"
+      },
+      {
+        "object": "stylized-rock-near-0-1-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "956d938b"
+      },
+      {
+        "object": "stylized-rock-near-0-2-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "79ef5e03"
+      },
+      {
+        "object": "stylized-rock-near-0-3-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "d32d08cd"
+      },
+      {
+        "object": "stylized-rock-near-0-4-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "5ee774b8"
+      },
+      {
+        "object": "stylized-rock-near-0-5-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "8bd7b919"
+      },
+      {
+        "object": "stylized-rock-near-0-6-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "6b5142ca"
+      },
+      {
+        "object": "stylized-rock-near-7-0-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "2dc8e83e"
+      },
+      {
+        "object": "stylized-rock-near-7-1-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "c11b2336"
+      },
+      {
+        "object": "stylized-rock-near-7-2-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "b64589ad"
+      },
+      {
+        "object": "stylized-rock-near-7-3-0",
+        "material": "RocksStylized_M",
+        "fragment": "89e7c311",
+        "vertex": "d0526ffc"
+      },
+      {
+        "object": "stylized-groundDetail-113-0-0",
+        "material": "Scan badlands-trunk-01",
+        "fragment": "a17d3bfd",
+        "vertex": "b60aad9f"
+      },
+      {
+        "object": "stylized-bush-near-7-0-0",
+        "material": "Scan bush-meadow-scan-01",
+        "fragment": "b617d76f",
+        "vertex": "ed0e96c1"
+      },
+      {
+        "object": "stylized-groundDetail-106-0-0",
+        "material": "Scan meadow-celandine-01",
+        "fragment": "6703ba3a",
+        "vertex": "7cd6cfca"
+      },
+      {
+        "object": "stylized-groundDetail-105-0-0",
+        "material": "Scan meadow-dandelion-01",
+        "fragment": "6703ba3a",
+        "vertex": "a26db4ff"
+      },
+      {
+        "object": "stylized-groundDetail-107-0-0",
+        "material": "Scan meadow-flower-01",
+        "fragment": "6703ba3a",
+        "vertex": "9aa33f3f"
+      },
+      {
+        "object": "stylized-groundDetail-99-0-0",
+        "material": "Scan meadow-weed-02",
+        "fragment": "6703ba3a",
+        "vertex": "9c7fd186"
+      },
+      {
+        "object": "stylized-groundDetail-117-0-0",
+        "material": "SteppeFeathergrass",
+        "fragment": "b0ed52dc",
+        "vertex": "7f717fce"
+      },
+      {
+        "object": "stylized-pine-impostor-20",
+        "material": "",
+        "fragment": "bc3bc833",
+        "vertex": "f3d49e2c"
+      },
+      {
+        "object": "stylized-pine-impostor-21",
+        "material": "",
+        "fragment": "6202be03",
+        "vertex": "71d91bc7"
+      },
+      {
+        "object": "stylized-pine-impostor-22",
+        "material": "",
+        "fragment": "da870fae",
+        "vertex": "f2bb58b7"
+      },
+      {
+        "object": "stylized-pine-impostor-23",
+        "material": "",
+        "fragment": "2e47e609",
+        "vertex": "8d0d5088"
+      },
+      {
+        "object": "stylized-pine-impostor-24",
+        "material": "",
+        "fragment": "1c7f2abd",
+        "vertex": "9b5a16fb"
+      },
+      {
+        "object": "stylized-pine-impostor-25",
+        "material": "",
+        "fragment": "c267b4a3",
+        "vertex": "156bc29a"
+      },
+      {
+        "object": "stylized-pine-impostor-26",
+        "material": "",
+        "fragment": "be62cec1",
+        "vertex": "b4a211b2"
+      },
+      {
+        "object": "stylized-pine-impostor-27",
+        "material": "",
+        "fragment": "e921150d",
+        "vertex": "15dca055"
+      },
+      {
+        "object": "stylized-pine-impostor-28",
+        "material": "",
+        "fragment": "5d2a886c",
+        "vertex": "44883134"
+      },
+      {
+        "object": "stylized-pine-impostor-29",
+        "material": "",
+        "fragment": "b20affa1",
+        "vertex": "ef01e2f3"
+      },
+      {
+        "object": "stylized-pine-impostor-30",
+        "material": "",
+        "fragment": "6d31387",
+        "vertex": "7383d438"
+      },
+      {
+        "object": "stylized-pine-impostor-37",
+        "material": "",
+        "fragment": "4e7dcf01",
+        "vertex": "801eb1a4"
+      },
+      {
+        "object": "stylized-pine-impostor-38",
+        "material": "",
+        "fragment": "6a6601b4",
+        "vertex": "826db233"
+      },
+      {
+        "object": "stylized-pine-impostor-39",
+        "material": "",
+        "fragment": "7968d2ac",
+        "vertex": "38fe8d05"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-20-0",
+        "material": "",
+        "fragment": "7573f620",
+        "vertex": "d21b65c3"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-20-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "a4d64cb2"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-21-0",
+        "material": "",
+        "fragment": "c3c160cb",
+        "vertex": "7fdc201"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-21-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "1da88cff"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-22-0",
+        "material": "",
+        "fragment": "61544af7",
+        "vertex": "2a05eace"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-22-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "24aeb4fa"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-23-0",
+        "material": "",
+        "fragment": "a4eee78e",
+        "vertex": "801e2260"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-23-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "4adae173"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-24-0",
+        "material": "",
+        "fragment": "9fced95",
+        "vertex": "297a37d6"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-24-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "961f415c"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-25-0",
+        "material": "",
+        "fragment": "e55d9511",
+        "vertex": "96b231bc"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-25-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "13784c2"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-26-0",
+        "material": "",
+        "fragment": "c730c3f6",
+        "vertex": "ed3f6fe7"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-26-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "c3f61f6b"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-27-0",
+        "material": "",
+        "fragment": "f94cc40a",
+        "vertex": "f44ad1e8"
+      },
+      {
+        "object": "stylized-pine-impostor-fallback-27-1",
+        "material": "",
+        "fragment": "76d96199",
+        "vertex": "9eb47cbd"
+      },
+      {
+        "object": "terrain-slot-0",
+        "material": "",
+        "fragment": "440f4776",
+        "vertex": "636ef536"
+      },
+      {
+        "object": "weather-rain-streaks",
+        "material": "weather-gods-end-rain",
+        "fragment": "8ab98ae2",
+        "vertex": "f0bae91"
+      },
+      {
+        "object": "weather-snow-flakes",
+        "material": "weather-gods-end-snowfall",
+        "fragment": "bddce643",
+        "vertex": "28852021"
+      },
+      {
+        "object": "weather-rain-hard-splashes",
+        "material": "weather-hard-splash-node",
+        "fragment": "e490cf6",
+        "vertex": "93a9cc32"
+      },
+      {
+        "object": "weather-sandstorm-haze",
+        "material": "weather-sandstorm-haze-node",
+        "fragment": "76033379",
+        "vertex": "42798755"
+      },
+      {
+        "object": "weather-sandstorm-puffs",
+        "material": "weather-sandstorm-node",
+        "fragment": "46241828",
+        "vertex": "857fc671"
+      },
+      {
+        "object": "weather-storm-bolt",
+        "material": "weather-storm-bolt-node",
+        "fragment": "ab878c0d",
+        "vertex": "7a254003"
+      },
+      {
+        "object": "weather-sunbeam-motes",
+        "material": "weather-sunbeam-motes-node",
+        "fragment": "f2c325ce",
+        "vertex": "fea823b4"
+      },
+      {
+        "object": "weather-rain-water-splashes",
+        "material": "weather-water-splash-node",
+        "fragment": "4d2dbef4",
+        "vertex": "1ff33bb4"
+      },
+      {
+        "object": "weather-wind-ribbons",
+        "material": "weather-wind-node",
+        "fragment": "66010455",
+        "vertex": "fc820b8a"
+      }
+    ]
+  },
+  "bench": {},
+  "errors": [],
+  "backend": {
+    "mode": "webgpu",
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "fallback": false
+  },
+  "finishedAt": "2026-11-22T05:26:23.555Z"
+}

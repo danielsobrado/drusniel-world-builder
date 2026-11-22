@@ -1,0 +1,14 @@
+{
+  "root": "F:\\Development\\drusniel-world-builder",
+  "sand": "off",
+  "stormField/webgpu": "e433f3ae5039:6e1edacdb735",
+  "stormField/webgl": "0ccb01e90b06:66be2b663f93",
+  "sandstormDust/webgpu": "2f9d8e6fdbcf:215bb6f475bb",
+  "sandstormDust/webgl": "f1ecf34f7d70:b5cc40346a10",
+  "sandstormHaze/webgpu": "d7c68aaf7f94:a4aa97c14972",
+  "sandstormHaze/webgl": "e8e215bdede1:a9c86194bc70",
+  "alpineRock/webgpu": "84e51600fbb4:86ea3ccd3da2",
+  "alpineRock/webgl": "a8dc71813a98:1d8340151271",
+  "crown/webgpu": "69bada47735e:91e351619f1f",
+  "crown/webgl": "6e54f27fb6c2:c5a8b1cd1274"
+}
