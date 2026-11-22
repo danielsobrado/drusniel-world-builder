@@ -51,6 +51,8 @@ function applyRuntimeOverrides(config) {
   if (params.get('bakeImpostors') === '1') {
     config.renderer.forceWebGL = true;
   }
+  // `?weather=<mode>` opens on that weather (perf A/Bs); the controller turns an unknown mode into off.
+  if (params.get('weather')) config.weather = { ...config.weather, mode: params.get('weather') };
 }
 
 export function loadEditorConfig() {
