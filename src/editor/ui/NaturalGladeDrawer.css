@@ -31,6 +31,14 @@
   scrollbar-color: rgb(233 224 203 / 22%) transparent;
 }
 
+[data-view-mode="edit"] .editor-shell[data-natural-ui-installed="true"] .sidebar {
+  background:
+    radial-gradient(ellipse 130% 48% at 0 0, rgb(255 255 255 / 15%), transparent),
+    linear-gradient(156deg, transparent 34%, rgb(170 218 236 / 10%) 48%, transparent 64%),
+    color-mix(in srgb, var(--glade-cream) 82%, transparent);
+  box-shadow: inset 0 1px 0 rgb(245 253 255 / 22%), var(--glade-shadow);
+}
+
 .editor-shell[data-natural-ui-installed="true"] .sidebar.is-settings-drawer {
   right: var(--glade-gutter);
   width: min(400px, calc(100vw - 32px));
