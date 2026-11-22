@@ -37,15 +37,17 @@ export function resolveMeadowNormals(source, path = 'stylizedSurface.grass.meado
   return Object.freeze(result);
 }
 
-/** Rounded ribbon normal in the blade's rotated XZ frame. */
-export function meadowBladeWorldNormal(rotation, side, ratio) {
+/** Rounded ribbon normal in the blade's rotated XZ frame, anchored to the local ground normal at the root. */
+export function meadowBladeWorldNormal(rotation, side, ratio, groundNormal = null) {
   const widthAxis = vec3(rotation.y, 0, rotation.x);
   const forwardAxis = vec3(rotation.x.negate(), 0, rotation.y);
   const tip = smoothstep(0.15, 1, ratio);
   const rooted = smoothstep(0, 0.12, ratio);
-  return normalize(vec3(0, 1, 0)
+  const ribbon = normalize(vec3(0, 1, 0)
     .add(widthAxis.mul(side).mul(mix(0.6, 0.25, tip)).mul(rooted))
     .add(forwardAxis.mul(tip).mul(0.45)));
+  if (!groundNormal) return ribbon;
+  return normalize(mix(groundNormal, ribbon, smoothstep(0, 0.28, ratio)));
 }
 
 /**

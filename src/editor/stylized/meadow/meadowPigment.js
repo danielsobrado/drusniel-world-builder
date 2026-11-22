@@ -13,6 +13,7 @@ import { meadowShortStand } from './meadowGrowthNodes.js';
 import { applyMeadowGroundStyle, meadowGroundStyle } from './meadowGroundStyle.js';
 import { meadowStandNodes } from './meadowStandNodes.js';
 import { meadowTuftNodes } from './meadowTuftNodes.js';
+import { sampleGroundContactAt } from '../groundContact/GroundContactState.js';
 
 /** Share of the root pigment the stem's foot keeps where it meets the soil. */
 const SOIL_SHARE = 0.88;
@@ -88,6 +89,13 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   const stormCover = stormSnowCoverAtCanonical(blade.canonical);
   root = mix(root, canopySnowColor.mul(0.8), stormCover.mul(0.6));
   tip = mix(tip, canopySnowColor, stormCover.mul(0.9));
+  // Inherit local ground contact AO, canopy shade, and biome soil colour from the GPU field (vertex stage).
+  const groundContact = sampleGroundContactAt(blade.canonical, { canonical: true });
+  const groundAo = float(1).sub(groundContact.contact.mul(0.32)).sub(groundContact.canopy.mul(0.14)).clamp(0.45, 1);
+  root = root.mul(groundAo);
+  tip = tip.mul(mix(float(1), groundAo, float(0.55)));
+  const footSoilColor = mix(root.mul(SOIL_SHARE), groundContact.soilColor.mul(0.92), groundContact.inside.mul(0.45))
+    .toVarying('meadowFootSoil');
   // Occupancy rides in the root varying's fourth lane: no extra vertex output.
   const rootData = vec4(root, occupancy).toVarying('meadowRootPigment');
   root = rootData.xyz;
@@ -107,13 +115,14 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   const rootShade = mix(mix(rootFloor, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height)), float(1), melting);
   // The foot meets the ground as the terrain shows it from this view
   // (MeadowGroundShading's root): soil-side from above, canopy when grazing.
-  const soil = mix(root.mul(SOIL_SHARE), canopy, meadowCanopyView(appearance.canopyStrength));
+  const soil = mix(footSoilColor, canopy, meadowCanopyView(appearance.canopyStrength));
   const based = mix(soil, pigment, smoothstep(0, 0.18, height).max(melting));
   const variation = mix(mix(vec3(0.93, 1, 0.9), vec3(1.07, 1, 0.86), blade.variation), vec3(1), melting);
   const bladeValue = mix(fract(blade.rank.mul(0.618034)).sub(0.5).mul(appearance.valueJitter).add(1), float(1), melting);
   return {
     pigment,
     bladeValue,
+    rootShade,
     color: based.mul(rootShade).mul(variation).mul(bladeValue).mul(brightness),
     height,
   };

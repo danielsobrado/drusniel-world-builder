@@ -12,6 +12,7 @@ import { applyCloudShadow } from './CloudShadow.js';
 import { meadowPatchOnPlant } from './understoryPatch.js';
 import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
+import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
 
 /** Roughness of a fully rain-wet leaf. */
 const WET_LEAF_ROUGHNESS = 0.34;
@@ -97,6 +98,22 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const local = (role === 'leaf' || role === 'foliage') ? patched : mix(graded, patched, plantGreen);
   const color = biomeLook ? biomeUnderstoryColor(local) : local;
   const blossom = role === 'petal' || role === 'center';
+  // Pure-shader root/base AO, ground-contact darkening, and subtle biome-soil
+  // foot blend so bushes and ferns sit planted in the floor rather than hovering.
+  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'understory');
+  const spanY = bounds ? Math.max(0.05, bounds.max[1] - bounds.min[1]) : 0.85;
+  const localHeightT = bounds
+    ? positionGeometry.y.sub(bounds.min[1]).div(spanY).clamp(0, 1)
+    : float(1);
+  const worldHeightT = positionWorld.y.sub(groundContact.height).div(Math.max(0.35, spanY)).clamp(0, 1);
+  const baseT = mix(localHeightT, worldHeightT, groundContact.inside);
+  const baseRamp = smoothstep(0.0, 0.30, baseT);
+  const baseAo = mix(float(0.60), float(1.0), baseRamp)
+    .mul(float(1).sub(groundContact.contact.mul(0.24)).clamp(0.65, 1));
+  const soilMask = smoothstep(0.0, 0.14, baseT).oneMinus()
+    .mul(mix(float(0.50), float(0.20), plantGreen))
+    .mul(groundContact.inside);
+  const groundedColor = blossom ? color.mul(mix(float(0.82), float(1.0), baseRamp)) : mix(color, groundContact.soilColor, soilMask).mul(baseAo);
   // Cutout shrub/understory cards get GPU edge-on grazing fade + soft horizon-air fringe.
   const edge = softEdges && material.map && !blossom
     ? understoryEdgeNodes(authoredTexture(material.map).a, {
@@ -104,26 +121,25 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
       greenMask: plantGreen,
     })
     : null;
-  material.colorNode = edge ? color.mul(edge.airRim.oneMinus()) : color;
+  material.colorNode = edge ? groundedColor.mul(edge.airRim.oneMinus()) : groundedColor;
   if (edge) {
     let opacity = edge.opacity;
     if (material.alphaMap) opacity = opacity.mul(authoredTexture(material.alphaMap).g);
     if (material.opacity < 1) opacity = opacity.mul(material.opacity);
     material.opacityNode = opacity;
   }
-  const fill = understoryShadeEmission(color, { blossom, airRim: edge?.airRim ?? null });
-  material.foliageTransmissionNode = blossom
+  const fillAttenuation = mix(float(0.42), float(1.0), baseRamp);
+  const fill = understoryShadeEmission(groundedColor, { blossom, airRim: edge?.airRim ?? null }).mul(fillAttenuation);
+  material.foliageTransmissionNode = (blossom
     ? float(0.16)
-    : mix(float(0.02), float(0.22), plantGreen);
+    : mix(float(0.02), float(0.22), plantGreen)).mul(mix(float(0.28), float(1.0), baseRamp));
   if (!blossom) {
     material.foliageWrapDiffuseNode = mix(float(0.08), float(0.32), plantGreen);
-    material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen);
+    material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen).mul(baseRamp);
     if (bounds) {
-      const spanY = Math.max(0.05, bounds.max[1] - bounds.min[1]);
-      const heightT = positionGeometry.y.sub(bounds.min[1]).div(spanY).clamp(0, 1);
       // Vertex-safe puff normals: modest upward bias keeps sunlit shrub sides rich at noon.
       material.foliageShapeNormalNode = crownPuffNormalNode(bounds, 0.34, 0.12);
-      material.foliageNormalBlendNode = mix(float(0.22), float(0.76), smoothstep(0.06, 0.38, heightT));
+      material.foliageNormalBlendNode = mix(float(0.22), float(0.76), smoothstep(0.06, 0.38, localHeightT));
     }
   }
   // Retain any authored emission (e.g. flower centres).

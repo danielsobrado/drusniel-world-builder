@@ -2340,7 +2340,7 @@ stylizedSurface:
       # lighting instead of stacking the old near-white donor correction.
       toning: 0.92
       undersideShade: 0.2
-      moss: 0.85
+      moss: 0.55
       dust: 0.35
       waterline: 0.7
       waterlineHeight: 1.2

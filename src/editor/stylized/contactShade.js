@@ -15,28 +15,30 @@
 
 export const DEFAULT_CONTACT_SHADE = Object.freeze({
   enabled: true,
-  // The donor's footprints, at trunk scale now that the ground texture has 2 m
+  // The donor's footprints, at trunk scale now that the ground texture has 1 m
   // texels (forestFloorTexture.js): `trunk · 3 + 3` round a tree and
   // `radius · 1.5 + 1` round a stone. A patch is `base + radiusPerScale · scale`
   // metres; 1.2 a unit of scale stands for the donor's trunk and stone radii.
   treeRadius: 3,
   rockRadius: 1,
+  bushRadius: 0.75,
   radiusPerScale: 1.2,
   treeStrength: 1,
   rockStrength: 0.8,
+  bushStrength: 0.56,
 });
 
 export function resolveContactShade(config) {
   const configured = config?.contactShade;
   if (configured?.enabled === false) return null;
   const settings = { ...DEFAULT_CONTACT_SHADE, ...(configured ?? {}) };
-  for (const key of ['treeRadius', 'rockRadius', 'radiusPerScale']) {
+  for (const key of ['treeRadius', 'rockRadius', 'bushRadius', 'radiusPerScale']) {
     const value = Number(settings[key]);
     if (!Number.isFinite(value) || value < 0) {
       throw new Error(`Invalid editor configuration: contactShade.${key} must not be negative.`);
     }
   }
-  for (const key of ['treeStrength', 'rockStrength']) {
+  for (const key of ['treeStrength', 'rockStrength', 'bushStrength']) {
     const value = Number(settings[key]);
     if (!Number.isFinite(value) || value < 0 || value > 1) {
       throw new Error(`Invalid editor configuration: contactShade.${key} must be within [0, 1].`);
@@ -46,15 +48,20 @@ export function resolveContactShade(config) {
 }
 
 /**
- * The patch round one tree or stone, in metres.
+ * The patch round one tree, stone, or bush, in metres.
  *
  * @param {object} settings resolved contact shade
- * @param {'tree' | 'rock'} kind
+ * @param {'tree' | 'rock' | 'bush'} kind
  * @param {number} scale the placement's scale
  */
 export function contactShadeRadius(settings, kind, scale = 1) {
-  const base = kind === 'tree' ? settings.treeRadius : settings.rockRadius;
-  return base + settings.radiusPerScale * (Number.isFinite(scale) ? scale : 1);
+  const base = kind === 'tree'
+    ? settings.treeRadius
+    : kind === 'bush'
+      ? settings.bushRadius
+      : settings.rockRadius;
+  const perScale = kind === 'bush' ? settings.radiusPerScale * 0.75 : settings.radiusPerScale;
+  return base + perScale * (Number.isFinite(scale) ? scale : 1);
 }
 
 /**
@@ -100,6 +107,8 @@ export function paintContactShade({
     if (!Number.isFinite(radius) || radius <= 0) continue;
     const isCapsule = Number.isFinite(source.x0) && Number.isFinite(source.z0)
       && Number.isFinite(source.x1) && Number.isFinite(source.z1);
+    const isEllipse = !isCapsule && Number.isFinite(source.radiusX) && Number.isFinite(source.radiusZ)
+      && source.radiusX > 0 && source.radiusZ > 0;
     if (!isCapsule && (!Number.isFinite(source.x) || !Number.isFinite(source.z))) continue;
     const strength = Number(source.strength ?? 1) * strengthScale;
     if (!(strength > 0)) continue;
@@ -107,7 +116,8 @@ export function paintContactShade({
     const tz0 = toTexelZ(isCapsule ? source.z0 : source.z);
     const tx1 = isCapsule ? toTexelX(source.x1) : tx0;
     const tz1 = isCapsule ? toTexelZ(source.z1) : tz0;
-    const texelRadius = radius / metersPerTexel;
+    const boundRadius = isEllipse ? Math.max(source.radiusX, source.radiusZ) : radius;
+    const texelRadius = boundRadius / metersPerTexel;
     const minimumZ = Math.max(0, Math.floor(Math.min(tz0, tz1) - texelRadius));
     const maximumZ = Math.min(size - 1, Math.ceil(Math.max(tz0, tz1) + texelRadius));
     const minimumX = Math.max(0, Math.floor(Math.min(tx0, tx1) - texelRadius));
@@ -117,14 +127,29 @@ export function paintContactShade({
     const vx = tx1 - tx0;
     const vz = tz1 - tz0;
     const segLenSq = vx * vx + vz * vz;
+    const invRx = isEllipse ? metersPerTexel / source.radiusX : 1 / texelRadius;
+    const invRz = isEllipse ? metersPerTexel / source.radiusZ : 1 / texelRadius;
+    const rotY = isEllipse && Number.isFinite(source.rotationY) ? source.rotationY : 0;
+    const cosR = isEllipse ? Math.cos(rotY) : 1;
+    const sinR = isEllipse ? Math.sin(rotY) : 0;
     for (let z = minimumZ; z <= maximumZ; z += 1) {
       for (let x = minimumX; x <= maximumX; x += 1) {
-        const t = segLenSq > 1e-6
-          ? Math.max(0, Math.min(1, ((x - tx0) * vx + (z - tz0) * vz) / segLenSq))
-          : 0;
-        const dx = (x - (tx0 + vx * t)) / texelRadius;
-        const dz = (z - (tz0 + vz * t)) / texelRadius;
-        const distance = Math.hypot(dx, dz);
+        let distance;
+        if (isEllipse) {
+          const ex = x - tx0;
+          // Texel Z runs opposite world Z; flip sign so rotationY matches world yaw.
+          const ez = tz0 - z;
+          const lx = (ex * cosR - ez * sinR) * invRx;
+          const lz = (ex * sinR + ez * cosR) * invRz;
+          distance = Math.hypot(lx, lz);
+        } else {
+          const t = segLenSq > 1e-6
+            ? Math.max(0, Math.min(1, ((x - tx0) * vx + (z - tz0) * vz) / segLenSq))
+            : 0;
+          const dx = (x - (tx0 + vx * t)) * invRx;
+          const dz = (z - (tz0 + vz * t)) * invRz;
+          distance = Math.hypot(dx, dz);
+        }
         if (distance >= 1) continue;
         // Quadratic, as the donor has it: a soft patch rather than a disc, with no
         // visible rim where it stops.

@@ -1,6 +1,7 @@
 import { frameUniform } from '../../render/FrameUniforms.js';
 import {
   attribute,
+  cameraViewMatrix,
   color,
   dot,
   float,
@@ -17,6 +18,7 @@ import {
   varying,
   vec2,
   vec3,
+  vec4,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
 import { worldNoiseField } from './worldNoise.js';
@@ -32,6 +34,7 @@ import { surfaceCoatings } from './surfaceCoatings/SurfaceCoatingConfig.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from './snowDeposition.js';
 import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
+import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
 
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
@@ -71,8 +74,9 @@ function patternPosition() {
   return positionGeometry.add(vec3(...SEED_SPREAD).mul(seed));
 }
 
-const MOSS_LIGHT = '#7d9a3a';
-const MOSS_DARK = '#4d6424';
+const MOSS_LIGHT = '#5d6e3e';
+const MOSS_DARK = '#42522d';
+const MOSS_DEEP = '#2f3d21';
 const DUST = '#a89a80';
 const ALGAE = '#4a5a2a';
 const ROCK_SNOW = '#eef2f6';
@@ -92,7 +96,7 @@ export const DEFAULT_ROCK_WEATHERING = Object.freeze({
   enabled: true,
   // Multiplies source albedo; the current mid-value pack overrides this to .92.
   toning: 0.72,
-  moss: 0.85,
+  moss: 0.55,
   dust: 0.35,
   undersideShade: 0.2,
   waterline: 0.7,
@@ -185,31 +189,34 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   const clumpTone = noiseAt(WORLD_NOISE_LAYERS.meso, 6).g;
   const up = normalWorld.y;
   const rockLuma = dot(biomeAlbedo, vec3(0.3, 0.59, 0.11));
-  // Bias moss gently toward stone crevices/darker grain while keeping upward-facing growth.
-  const creviceBias = rockLuma.smoothstep(0.18, 0.65).oneMinus().mul(0.14);
-  const patchField = macroPatch.mul(0.72).add(edgeBreakup.mul(0.28)).add(creviceBias);
+  // Bias moss toward stone crevices/darker grain while keeping upward-facing growth.
+  const creviceBias = rockLuma.smoothstep(0.16, 0.62).oneMinus().mul(0.18);
+  const patchField = macroPatch.mul(0.64).add(edgeBreakup.mul(0.36)).add(creviceBias);
   // Orientation from the geometric normal: the authored normal map's bumps
-  // would otherwise speckle the mat's edge.
-  const potential = normalWorldGeometry.y.smoothstep(0.28, 0.80)
+  // would otherwise speckle the mat's edge. Taper smoothly off steeper faces.
+  const potential = normalWorldGeometry.y.smoothstep(0.42, 0.88)
     .mul(settings.moss)
     .mul(look ? moss : float(1));
-  // Thresholds put the default stone's patch edge (0.85 potential) where the
-  // old fixed 0.42-0.56 band had it.
-  const mossMask = mossGrowth({ field: patchField, potential, sparse: 0.8, dense: 0.44, edge: 0.07 });
+  // Wide soft transition so moss feathers gradually into stone instead of cutting out a hard cap.
+  const mossMask = mossGrowth({ field: patchField, potential, sparse: 0.84, dense: 0.46, edge: 0.17 });
 
-  // Damp moisture rim around moss edges grounds the mat onto bare stone.
-  const dampBand = patchField.smoothstep(0.36, 0.45)
+  // Gentle damp rim around moss edges grounds colonization onto bare stone without a dark outline.
+  const dampBand = patchField.smoothstep(0.38, 0.62)
     .mul(mossMask.oneMinus())
-    .mul(up.smoothstep(0.22, 0.72))
+    .mul(up.smoothstep(0.30, 0.80))
     .mul(settings.moss)
     .mul(look ? moss : float(1));
-  const dampStone = biomeAlbedo.mul(mix(float(1), float(0.72), dampBand));
+  const dampStone = biomeAlbedo.mul(mix(float(1), float(0.88), dampBand));
 
-  const shade = rockLuma.mul(0.75).add(0.60);
-  const mossDeep = color('#3a4f1b');
-  const mossBase = mix(mossDeep, color(MOSS_DARK), clumpTone);
-  const mossVelvet = mix(mossBase, color(MOSS_LIGHT), tuftGrain.smoothstep(0.30, 0.85));
+  const shade = rockLuma.mul(0.55).add(0.52);
+  const mossBase = mix(color(MOSS_DEEP), color(MOSS_DARK), clumpTone);
+  const mossVelvet = mix(mossBase, color(MOSS_LIGHT), tuftGrain.smoothstep(0.35, 0.88));
   const mossColor = mossVelvet.mul(shade);
+  // Two-stage blend: a faint lichen/moss stain lets stone grain read through at the
+  // fringes, while the fuller velvety coat builds gradually in damp patch cores.
+  const mossStain = mossMask.smoothstep(0.0, 0.55).mul(0.24);
+  const stainedStone = mix(dampStone, mossColor, mossStain);
+  const mossCoatMask = mossMask.pow(1.5).mul(mix(float(0.48), float(0.76), potential.clamp(0, 1)));
   // Keep a modest contact cue; Lambert lighting and scene AO supply the shade.
   const underside = mix(float(1 - settings.undersideShade), float(1), up.smoothstep(-0.7, 0.15));
   const coatSettings = surfaceCoatings();
@@ -219,37 +226,52 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
   const stoneNormal = material.normalNode ?? materialNormal;
   // The micro layer's pits are the cushions, its grit the tufts inside them.
   const mossLayer = mossCoat({ color: mossColor, pillow: edgeBreakup, tuft: tuftGrain, settings: coatSettings });
-  const mossed = blendCoat({ color: dampStone, roughness: stoneRoughness, normal: stoneNormal }, {
+  const mossed = blendCoat({ color: stainedStone, roughness: stoneRoughness, normal: stoneNormal }, {
     color: mossLayer.color,
     roughness: mossLayer.roughness ?? stoneRoughness.max(0.96),
     normal: mossLayer.normal(stoneNormal),
-  }, mossMask);
+  }, mossCoatMask);
   let weathered = mossed.color.mul(underside);
   let roughness = mossed.roughness;
   let normal = mossed.normal;
 
   // Dust settles on the bare tops the moss has not claimed.
   const dust = up.smoothstep(0.55, 0.95)
-    .mul(mossMask.oneMinus())
+    .mul(mossCoatMask.oneMinus())
     .mul(macroPatch.oneMinus())
     .mul(settings.dust);
   weathered = mix(weathered, color(DUST).mul(shade), dust);
 
-  // The floor's duff carried up the foot. The terrain paints the same duff under a
-  // stone (terrainMaterial's contact shade), so the two meet in one colour and
-  // the stone grows out of the ground. No scene depth: a `viewportDepthTexture`
-  // blend would cost a whole-frame copy (CLAUDE.md), and the ground line is known.
+  // The floor's duff carried up the foot, tracking the actual sloped terrain
+  // elevation and biome soil colour from the GPU ground-contact field (vertex stage).
+  const groundContact = (ground || look) ? sampleGroundContactVarying(world.xz, 'rock') : null;
+  const objectLevel = ground
+    ? varying(positionGeometry.y.sub(ground.groundY).div(Math.max(1e-3, ground.height)))
+    : null;
+  const groundLevel = (ground && groundContact)
+    ? mix(
+      objectLevel,
+      world.y.sub(groundContact.height).div(Math.max(1.0, ground.height)),
+      groundContact.inside,
+    )
+    : objectLevel;
   if (ground && settings.soil > 0) {
-    const level = varying(positionGeometry.y.sub(ground.groundY).div(Math.max(1e-3, ground.height)));
     const top = stylizedFbm2(pattern.xz.mul(SOIL_EDGE_PER_METRE)).mul(0.7).add(0.3).max(0.15).mul(settings.soilHeight);
-    const soil = level.smoothstep(top.mul(0.35), top).oneMinus().mul(settings.soil);
-    // The terrain's own duff recipe: half the surface dulled and darkened, half earth.
+    const soil = groundLevel.smoothstep(top.mul(0.35), top).oneMinus().mul(settings.soil);
+    // The terrain's own duff recipe: half the surface dulled and darkened, half biome soil.
     const dull = mix(vec3(dot(weathered, vec3(0.3, 0.59, 0.11))), weathered, 0.5).mul(vec3(1, 0.94, 0.76));
-    // shortcut: earth leans to the biome through the rock tint, not the tile's soil colour;
-    // upgrade to a per-instance soil colour if a biome's foot reads off against its ground.
-    const earth = color(settings.soilColor).mul(look ? look.rgb : vec3(1));
-    weathered = mix(weathered, mix(dull.mul(0.45), earth, 0.5), soil);
+    const fallbackEarth = color(settings.soilColor).mul(look ? look.rgb : vec3(1));
+    const earth = groundContact ? mix(fallbackEarth, groundContact.soilColor, groundContact.inside) : fallbackEarth;
+    const contactAo = groundContact
+      ? float(1).sub(soil.mul(groundContact.contact.mul(0.24).add(0.12)))
+      : float(1);
+    weathered = mix(weathered, mix(dull.mul(0.45), earth, 0.5), soil).mul(contactAo);
     roughness = roughness.max(soil.mul(0.95));
+    // Soften flat-shaded polygon facet seams into the terrain normal inside the soil collar.
+    if (groundContact) {
+      const groundViewNormal = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
+      normal = mix(normal, groundViewNormal, soil.mul(0.6).mul(groundContact.inside)).normalize();
+    }
   }
 
   // Wet, dark and glossy up to a ragged local splash line, with the green
@@ -309,7 +331,10 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     const tear = mx_noise_float(pattern.mul(SNOW_TEAR_PER_METRE)).mul(0.6).add(macroPatch.sub(0.5).mul(0.3));
     const { cover, skirt } = snowDeposition({
       // A storm's snow settles on any stone; the cold stone stays the biome's.
-      snow: snowGround.max(stormSnowCoverAt(positionWorld.xz)), breakup: tear, ...(ground ?? {}),
+      snow: snowGround.max(stormSnowCoverAt(positionWorld.xz)),
+      breakup: tear,
+      ...(ground ?? {}),
+      levelNode: groundLevel,
     });
     // Pattern space on both sides: the projection follows the stone, not its placement.
     const snowLayer = snowCoat(pattern, normalGeometry, cover, coatSettings);

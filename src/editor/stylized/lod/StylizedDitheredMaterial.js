@@ -155,9 +155,10 @@ export function createDitheredMaterial(sourceMaterial, {
     } else if (kind === 'trunk') {
       // The tree's canopy snow, carried in the trunk's morphology x.
       const trunkSnowAmount = withStormSnow(attribute('instanceMorphology', 'vec3').x);
-      material.colorNode = trunkSnow(material.colorNode, trunkSnowAmount);
+      const groundHeight = sourceMaterial.treeGroundHeightNode ?? positionGeometry.y;
+      material.colorNode = trunkSnow(material.colorNode, trunkSnowAmount, groundHeight);
       if (material.roughnessNode) material.roughnessNode = mix(material.roughnessNode, float(0.95),
-        trunkSnowCap(trunkSnowAmount));
+        trunkSnowCap(trunkSnowAmount, groundHeight));
     }
   }
   applyMorphology(

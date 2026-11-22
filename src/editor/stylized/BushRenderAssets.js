@@ -6,6 +6,8 @@ import {
   float,
   mix,
   positionGeometry,
+  positionWorld,
+  smoothstep,
   vec3,
 } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -17,6 +19,7 @@ import { applySkywardNormal, understoryShadeEmission } from './forest/foliageLig
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
 import { applyCloudShadow } from './CloudShadow.js';
+import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
 
 export const BUSH_CAST_SHADOW = false;
 export const BUSH_PROXY_TRIANGLES = 100;
@@ -91,7 +94,7 @@ export function cloneBushMaterial(source, { config = null, height = 0, tileId = 
   const cutout = usesCutout(material);
   if (config) applyUnderstoryPalette(material, config, tileId, 'auto', { biomeLook, bounds, softEdges: cutout });
   else material.emissiveNode = understoryShadeEmission(material.colorNode);
-  applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
+  applyPlantMotion(material, { wind: config?.wind, height, profile: motion, groundConform: true });
   if (config) applySkywardNormal(material);
   material.side = THREE.DoubleSide;
   if (cutout) {
@@ -194,18 +197,26 @@ export function createBushProxyMaterial(sourceMaterial, {
   );
   const local = config ? meadowPatchOnPlant(ramp, config) : ramp;
   const shadedColor = biomeLook ? biomeUnderstoryColor(local) : local;
-  material.colorNode = shadedColor;
-  material.emissiveNode = understoryShadeEmission(shadedColor);
-  material.foliageTransmissionNode = float(0.2);
+  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'bushProxy');
+  const worldHeightT = positionWorld.y.sub(groundContact.height).div(Math.max(0.35, height)).clamp(0, 1);
+  const baseT = mix(heightMix, worldHeightT, groundContact.inside);
+  const baseRamp = smoothstep(0.0, 0.30, baseT);
+  const baseAo = mix(float(0.60), float(1.0), baseRamp)
+    .mul(float(1).sub(groundContact.contact.mul(0.24)).clamp(0.65, 1));
+  const soilMask = smoothstep(0.0, 0.14, baseT).oneMinus().mul(0.24).mul(groundContact.inside);
+  const groundedProxy = mix(shadedColor, groundContact.soilColor, soilMask).mul(baseAo);
+  material.colorNode = groundedProxy;
+  material.emissiveNode = understoryShadeEmission(groundedProxy).mul(mix(float(0.42), float(1.0), baseRamp));
+  material.foliageTransmissionNode = float(0.2).mul(mix(float(0.28), float(1.0), baseRamp));
   material.foliageWrapDiffuseNode = float(0.32);
-  material.foliageRimGlowNode = float(0.14);
+  material.foliageRimGlowNode = float(0.14).mul(baseRamp);
   if (bounds) {
     material.foliageShapeNormalNode = crownPuffNormalNode(bounds, 0.34, 0.12);
     material.foliageNormalBlendNode = float(0.72);
   }
   material.transparent = false;
   material.depthWrite = true;
-  applyPlantMotion(material, { wind: config?.wind, height, profile: motion });
+  applyPlantMotion(material, { wind: config?.wind, height, profile: motion, groundConform: true });
   if (config) applySkywardNormal(material);
   applyCloudShadow(material, config?.sky);
   applyJungleMist(material, config?.ambientEffects);

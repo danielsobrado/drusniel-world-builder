@@ -86,18 +86,46 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
         if (hash2d(rank, 91) >= keep) return false;
       }
     }
-    // Nothing grows under a rock; round its foot the stand is pressed flatter.
-    for (const rock of rocks) {
-      const distance = Math.hypot(x - rock.x, z - rock.z);
-      if (distance < rock.radius) return false;
-      if (distance < rock.reach) {
-        strength *= 1 - flatten * (1 - smoothstep(rock.radius, rock.reach, distance));
-      }
-    }
-    // Root & deadwood zone: clears tightly under wood, parts collar tufts outward around logs and stumps.
+    // Nothing grows under a rock; round its foot collar tufts part outward to
+    // soften the rock-to-ground intersection before outer blades flatten slightly.
     out.rotSin = NaN;
     out.rotCos = NaN;
+    for (const rock of rocks) {
+      const dx = x - rock.x;
+      const dz = z - rock.z;
+      const distance = Math.hypot(dx, dz);
+      if (distance < rock.radius) return false;
+      if (distance < rock.reach) {
+        const t = smoothstep(rock.radius, rock.reach, distance);
+        const collarWidth = Math.min(0.55, (rock.reach - rock.radius) * 0.6);
+        if (distance < rock.radius + collarWidth && distance > 1e-4) {
+          out.rotSin = -dx / distance;
+          out.rotCos = dz / distance;
+          const collarBoost = 1 + 0.14 * (1 - smoothstep(rock.radius, rock.radius + collarWidth, distance));
+          strength = Math.min(1.2, strength * collarBoost * (1 - flatten * 0.45 * (1 - t)));
+        } else {
+          strength *= 1 - flatten * (1 - t);
+        }
+      }
+    }
+    // Root, bush, & deadwood zones: clears tightly under wood/shrubs, parts collar tufts outward.
     for (const root of roots) {
+      if (root.kind === 'bush') {
+        const dx = x - root.x;
+        const dz = z - root.z;
+        const distSq = dx * dx + dz * dz;
+        if (distSq >= root.reach * root.reach) continue;
+        const dist = Math.sqrt(distSq);
+        if (dist < root.radius * 0.45) return false;
+        const keep = 0.25 + 0.75 * smoothstep(root.radius * 0.45, root.reach, dist);
+        if (hash2d(rank, 95) >= keep) return false;
+        strength *= 0.55 + 0.45 * smoothstep(root.radius * 0.45, root.reach, dist);
+        if (dist < root.reach && dist > 1e-4 && Number.isNaN(out.rotSin)) {
+          out.rotSin = -dx / dist;
+          out.rotCos = dz / dist;
+        }
+        continue;
+      }
       if (root.kind === 'log') {
         const vx = root.x1 - root.x0;
         const vz = root.z1 - root.z0;

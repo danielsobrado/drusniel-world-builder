@@ -52,7 +52,10 @@ function finishBark(material, { barkWeathering, barkGrade, sway, surface }) {
   if (sway?.time) material.positionNode = treeBendPosition(sway);
   material.userData.barkLighting = true;
   material.userData.treeBarkSurface = surface;
-  return addTreeEmission(material, treeBarkEmission(material.colorNode));
+  return addTreeEmission(
+    material,
+    treeBarkEmission(material.colorNode, { height: material.treeGroundHeightNode ?? positionGeometry.y }),
+  );
 }
 
 function pbrBarkMaterial(source, surface) {

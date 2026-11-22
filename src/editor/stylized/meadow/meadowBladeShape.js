@@ -34,6 +34,7 @@ import { MEADOW_MAX_BODY_BEND } from './meadowInteractionBend.js';
 import { meadowGrowthNodes } from './meadowGrowthNodes.js';
 import { meadowBentNormalNode, meadowBladeWorldNormal } from './meadowBladeNormals.js';
 import { meadowTipFlutterNode, meadowWindFrontNodes } from './meadowWindNodes.js';
+import { sampleGroundContactAt } from '../groundContact/GroundContactState.js';
 
 const HALF_PI = Math.PI * 0.5;
 const HIDDEN = 1e9;
@@ -387,10 +388,14 @@ export function createMeadowBladePosition({
       // The player's body, last so it folds whatever the wind has already done.
       if (interaction) foldUnderBody(blade,local,ribbon,height,r,uniforms,interaction);
 
+      // Sample the GPU ground-contact field once in the vertex stage for
+      // slope-matched root normals and micro-sinking on angled terrain.
+      const groundContact = sampleGroundContactAt(blade.canonical, { canonical: true });
+
       // Sample the final deformed centreline before LOD shrink/world translation.
       if (normalOutput) {
         const baseline = meadowBladeWorldNormal(
-          blade.rotation, attribute('bladeProfile', 'vec4').x.clamp(-1, 1), r,
+          blade.rotation, attribute('bladeProfile', 'vec4').x.clamp(-1, 1), r, groundContact.normal,
         );
         normalOutput.assign(meadowBentNormalNode({
           baseline, centerline: local.sub(ribbon), ratio: r,
@@ -398,7 +403,8 @@ export function createMeadowBladePosition({
         }));
       }
 
-      local.assign(local.mul(clamp(lod.shrink, 0, 1)).add(blade.base));
+      const slopeSink = groundContact.inside.mul(float(0.015).add(groundContact.normal.y.oneMinus().mul(0.06)));
+      local.assign(local.mul(clamp(lod.shrink, 0, 1)).add(blade.base).sub(vec3(0, slopeSink, 0)));
       If(sparseHide, () => {
         local.assign(vec3(HIDDEN));
       });

@@ -52,7 +52,7 @@ export function createMeadowBladeMaterial({
   material.positionNode = position;
 
   const blade = meadowInstance(uniforms.origin);
-  const { pigment, bladeValue, color: albedo, height } = meadowPigment({
+  const { pigment, bladeValue, rootShade, color: albedo, height } = meadowPigment({
     uniforms, tuning, config, blade, marks: true, height: profileHeight,
   });
 
@@ -80,7 +80,7 @@ export function createMeadowBladeMaterial({
   const emissive = pigment.mul(bladeValue).mul(uniforms.sunColor)
     .mul(transmission).mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength)
     .mul(smoothstep(0.35, 1, height))
-    .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill))
+    .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill).mul(mix(0.45, 1, rootShade)))
     .add(sheen);
   // A spell's light warming the meadow round it (one uniform light, no scene light).
   // Evaluated per vertex: blades are thin, and the meadow's overdraw makes a

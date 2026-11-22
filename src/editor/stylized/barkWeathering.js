@@ -1,5 +1,6 @@
 import {
   attribute,
+  cameraViewMatrix,
   color,
   dot,
   float,
@@ -15,6 +16,7 @@ import {
   smoothstep,
   vec2,
   vec3,
+  vec4,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
@@ -23,6 +25,7 @@ import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
 import { mossCoat } from './surfaceCoatings/MossCoat.js';
+import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
 
 /**
  * Bark weathering — after grass-test's `barkWeathering`.
@@ -177,19 +180,36 @@ export function applyBarkWeathering(material, { settings }) {
   }
   const mossy = mossed.color;
 
-  // Soil splashes and damp wick up from the ground.
-  const baseShade = smoothstep(0, settings.baseHeight, local.y).oneMinus().mul(settings.base);
-  const shaded = mix(mossy, mossy.mul(vec3(BASE_TINT[0], BASE_TINT[1], BASE_TINT[2])), baseShade);
+  // True height above the sloped/sunk ground from the GPU ground-contact field
+  // (vertex stage), falling back to prototype `local.y` outside the near window.
+  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'bark');
+  const heightAbove = mix(local.y, positionWorld.y.sub(groundContact.height), groundContact.inside);
+  material.treeGroundHeightNode = heightAbove;
+
+  // Soil splashes and damp wick up from the true ground contour, plus subtle
+  // contact AO where concave root pockets meet the floor.
+  const baseShade = smoothstep(0, settings.baseHeight, heightAbove).oneMinus().mul(settings.base);
+  const rootContactAo = float(1).sub(
+    smoothstep(0, 0.55, heightAbove).oneMinus().mul(groundContact.contact.mul(0.28).add(0.14)),
+  );
+  const shaded = mix(mossy, mossy.mul(vec3(BASE_TINT[0], BASE_TINT[1], BASE_TINT[2])), baseShade).mul(rootContactAo);
   // The foot of the tree, and every root running out from it, ends in the floor
   // in broken patches instead of a line where bark meets ground.
-  const soil = smoothstep(0, SOIL_REACH, local.y.add(patches.sub(0.5).mul(0.3))).oneMinus().mul(SOIL_SHARE);
-  const grounded = mix(shaded, color(settings.soilColor), soil);
+  const soil = smoothstep(0, SOIL_REACH, heightAbove.add(patches.sub(0.5).mul(0.24))).oneMinus().mul(SOIL_SHARE);
+  const soilAlbedo = mix(color(settings.soilColor), groundContact.soilColor, groundContact.inside);
+  const grounded = mix(shaded, soilAlbedo, soil);
+  // Dissolve bark specular sheen and crisp bump normals smoothly into matte duff at the seam.
+  const currentRoughness = material.roughnessNode ?? barkRoughness;
+  material.roughnessNode = mix(currentRoughness, currentRoughness.max(0.95), soil);
+  const currentNormal = material.normalNode ?? barkNormal;
+  const groundViewNormal = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
+  material.normalNode = mix(currentNormal, groundViewNormal, soil.mul(0.55).mul(groundContact.inside)).normalize();
 
   // Rain runs down in streaks, so the bark darkens unevenly rather than as one
   // flat soak.
   const runs = stylizedFbm2(vec2(around.mul(2.4), local.y.mul(0.18)).add(seed.mul(7)))
     .smoothstep(-0.4, 0.4).mul(0.6).add(0.4);
-  const wet = surfaceWetnessUniform.mul(settings.wet).mul(runs);
+  const wet = surfaceWetnessUniform.mul(settings.wet).mul(runs).mul(soil.mul(0.7).oneMinus());
   const soaked = grounded.mul(wet.mul(WET_DARKENING).oneMinus());
 
   if (!settings.snowBand) {
@@ -197,12 +217,11 @@ export function applyBarkWeathering(material, { settings }) {
     material.colorNode = soaked;
     return material;
   }
-  // Snow collects on whatever faces up, broken by the same patches so it is not a
-  // uniform white cap.
-  // Geometric exposure avoids a feedback loop when wet-film normal filtering
-  // itself depends on snow coverage, and keeps macro snow off the bump noise.
+  // Snow collects on whatever faces up, plus a low ground-drift collar round
+  // the roots so trunks sit embedded in deep snow rather than poking out bare.
   const snowFaces = normalWorldGeometry.y.smoothstep(0.3, 0.7).mul(patches.mul(0.5).add(0.5));
-  const snow = snowFaces.mul(snowLine).mul(settings.snow);
+  const snowSkirt = smoothstep(0.04, 0.34, heightAbove.add(patches.sub(0.5).mul(0.18))).oneMinus();
+  const snow = snowFaces.max(snowSkirt.mul(0.9)).mul(snowLine).mul(settings.snow);
   material.treeWetnessNode = wet.mul(snow.clamp(0, 1).oneMinus());
   material.colorNode = mix(soaked, color(settings.snowBand.color), snow.clamp(0, 1));
   return material;

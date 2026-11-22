@@ -132,16 +132,19 @@ export function applyCanopySnow({ color, emissive = null, cap }) {
 const TRUNK_SNOW = 0.85;
 
 /**
- * Snow along the tops of a trunk's limbs and root flares: the same tree's
- * canopy snow on its upward bark faces, broken by the bark's own geometry.
+ * Snow along the tops of a trunk's limbs and root flares, plus a low ground-level
+ * drift skirt where the bole meets snowy earth.
  */
-export function trunkSnowCap(snow) {
+export function trunkSnowCap(snow, heightAbove = positionGeometry.y) {
   const local = positionGeometry;
   const broken = local.y.mul(2.3).add(local.x.mul(4.1)).sin().mul(0.12);
   const faces = smoothstep(0.35, 0.75, normalWorld.y.add(broken));
-  return faces.mul(snow).mul(TRUNK_SNOW);
+  const skirtTop = float(0.12).add(snow.clamp(0, 1).sqrt().mul(0.28)).add(broken.mul(0.45));
+  const skirt = smoothstep(skirtTop.sub(0.12).max(0.01), skirtTop, heightAbove).oneMinus()
+    .mul(snow.smoothstep(0.12, 0.35));
+  return faces.mul(snow).mul(TRUNK_SNOW).max(skirt.mul(0.88));
 }
 
-export function trunkSnow(color, snow) {
-  return mix(color, canopySnowColor, trunkSnowCap(snow));
+export function trunkSnow(color, snow, heightAbove = positionGeometry.y) {
+  return mix(color, canopySnowColor, trunkSnowCap(snow, heightAbove));
 }

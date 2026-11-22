@@ -36,9 +36,11 @@ export class MeadowGroundSampler {
   constructor({
     terrainView, tileIds, shapeTable, forestFieldProvider = () => null, forestFloorConfig = null,
     rockPlacementsProvider = () => [], rocks = null, growth = null, pathConfig = null,
-    treePlacementsProvider = null, debrisPlacementsProvider = null, debrisFootprintsProvider = null,
+    treePlacementsProvider = null, bushPlacementsProvider = null,
+    debrisPlacementsProvider = null, debrisFootprintsProvider = null,
   }) {
     this.treePlacementsProvider = treePlacementsProvider;
+    this.bushPlacementsProvider = bushPlacementsProvider;
     this.debrisPlacementsProvider = debrisPlacementsProvider;
     this.debrisFootprintsProvider = debrisFootprintsProvider;
     const rootZone = forestFloorConfig?.rootZone;
@@ -154,18 +156,34 @@ export class MeadowGroundSampler {
     return chunks;
   }
 
-  /** Keyed on placement-list identity, so a tile rebuilds once its trees or deadwood arrive or change. */
+  /** Bush placement lists within reach of a tile. */
+  bushChunks(centerX, centerZ, tileHalf) {
+    if (!this.bushPlacementsProvider) return [];
+    const reach = tileHalf + 2.5;
+    const [x0, z0] = this.chunkOf(centerX - reach, centerZ + reach);
+    const [x1, z1] = this.chunkOf(centerX + reach, centerZ - reach);
+    const chunks = [];
+    for (let chunkZ = z0; chunkZ <= z1; chunkZ += 1) {
+      for (let chunkX = x0; chunkX <= x1; chunkX += 1) chunks.push(this.bushPlacementsProvider(chunkX, chunkZ));
+    }
+    return chunks;
+  }
+
+  /** Keyed on placement-list identity, so a tile rebuilds once its trees, bushes or deadwood arrive or change. */
   rootSignature(centerX, centerZ, tileHalf) {
     const treeSig = this.rootZone
       ? `:r${this.rootChunks(centerX, centerZ, tileHalf).map(list => (list ? identityOf(list) : '-')).join(',')}`
       : '';
+    const bushSig = this.bushPlacementsProvider
+      ? `:b${this.bushChunks(centerX, centerZ, tileHalf).map(list => (list ? identityOf(list) : '-')).join(',')}`
+      : '';
     const debrisSig = this.debrisPlacementsProvider
       ? `:d${this.debrisChunks(centerX, centerZ, tileHalf).map(list => (list ? identityOf(list) : '-')).join(',')}`
       : '';
-    return `${treeSig}${debrisSig}`;
+    return `${treeSig}${bushSig}${debrisSig}`;
   }
 
-  /** Trunks and fallen logs whose zone touches a tile: grass thins to bare litter round their foot. */
+  /** Trunks, bushes, and fallen logs whose zone touches a tile: grass thins/parts round their foot. */
   rootsNear(centerX, centerZ, tileHalf) {
     const near = [];
     if (this.rootZone) {
@@ -178,6 +196,16 @@ export class MeadowGroundSampler {
           // Deterministic per trunk, so the lobes do not turn with every rebuild.
           const phase = (Math.abs(Math.sin(tree.x * 12.9898 + tree.z * 78.233)) * 43758.5453 % 1) * Math.PI * 2;
           near.push({ x: tree.x, z: tree.z, radius: radius * scale, reach, phase });
+        }
+      }
+    }
+    if (this.bushPlacementsProvider) {
+      for (const list of this.bushChunks(centerX, centerZ, tileHalf)) {
+        for (const bush of list ?? []) {
+          const radius = Math.max(0.45, (bush.radius ?? 0.9) * 0.65);
+          const reach = radius + 0.65;
+          if (Math.abs(bush.x - centerX) > tileHalf + reach || Math.abs(bush.z - centerZ) > tileHalf + reach) continue;
+          near.push({ kind: 'bush', x: bush.x, z: bush.z, radius, reach });
         }
       }
     }

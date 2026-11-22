@@ -89,7 +89,15 @@ const UP_VECTOR = new THREE.Vector3(0, 1, 0);
  * @param {boolean} [options.smoothNormal] read the cap and cavities from `snowNormal` (bakeSnowNormal)
  * @returns {{ cover: object, skirt: object }} cover includes the skirt; skirt alone picks the terrain snow colour
  */
-export function snowDeposition({ snow, breakup = float(0), centre = null, groundY = null, height = 1, smoothNormal = false }) {
+export function snowDeposition({
+  snow,
+  breakup = float(0),
+  centre = null,
+  groundY = null,
+  height = 1,
+  smoothNormal = false,
+  levelNode = null,
+}) {
   const welded = smoothNormal ? varying(attribute('snowNormal', 'vec3')) : null;
   const up = welded ? welded.y : normalWorld.y;
   const surfaceLocal = welded ?? normalLocal;
@@ -106,9 +114,9 @@ export function snowDeposition({ snow, breakup = float(0), centre = null, ground
     : float(0);
   const start = float(CAP_START).add(depth.oneMinus().mul(CAP_LIGHT)).sub(cavity.mul(0.25));
   const cap = up.add(breakup.mul(0.45)).smoothstep(start, start.add(CAP_WIDTH));
-  if (groundY === null) return { cover: cap.mul(present), skirt: float(0) };
+  if (groundY === null && !levelNode) return { cover: cap.mul(present), skirt: float(0) };
 
-  const level = varying(positionGeometry.y.sub(groundY).div(Math.max(1e-3, height)));
+  const level = levelNode ?? varying(positionGeometry.y.sub(groundY).div(Math.max(1e-3, height)));
   // Deeper snow buries more of the foot; the root keeps a light fall from sitting as high as a heavy one.
   const fill = depth.sqrt();
   // Banked against the lee face, tallest straight downwind and tapering round the

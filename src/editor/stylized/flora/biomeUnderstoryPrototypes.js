@@ -10,6 +10,7 @@ import {
   normalGeometry,
   normalWorld,
   positionGeometry,
+  positionWorld,
   smoothstep,
   texture,
   uv,
@@ -32,6 +33,7 @@ import { acquireIceTextures } from '../ice/iceTextures.js';
 import { meadowPatchOnPlant } from '../understoryPatch.js';
 import { worldNoiseField } from '../worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
+import { sampleGroundContactVarying } from '../groundContact/GroundContactState.js';
 import { COLD_ALPINE_BIOME_FLORA } from './biomeFloraColdAlpine.js';
 import { COASTAL_ARID_BIOME_FLORA } from './biomeFloraCoastalArid.js';
 import { SAVANNA_BADLANDS_BIOME_FLORA } from './biomeFloraSavannaBadlands.js';
@@ -73,21 +75,28 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
   const microField = worldNoiseField(WORLD_NOISE_LAYERS.micro)(positionGeometry.xz.mul(3.8).add(positionGeometry.y.mul(1.6)));
   const veinRib = dot(uvCoord.sub(0.5).abs(), vec3(2, 0, 0).xy).oneMinus().clamp(0, 1);
 
-  // Smooth ground-contact soil/humus collar + AO so roots & cushions blend seamlessly off terrain.
+  // Smooth ground-contact soil/humus collar + AO from the GPU ground-contact field
+  // (vertex stage) so roots & cushions track sloped terrain and biome soil seamlessly.
+  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'biomeFlora');
+  const heightAbove = mix(positionGeometry.y, positionWorld.y.sub(groundContact.height), groundContact.inside);
   const soilWave = microField.g.sub(0.5).mul(0.06);
-  const groundTouch = smoothstep(0.09, -0.03, positionGeometry.y.add(soilWave));
-  const contactAO = mix(float(1), float(0.58), groundTouch.mul(0.8));
-  const soilTone = color(environment.soilColor ?? '#5c4a30').mul(mix(0.84, 1.12, grainSample.r));
-  const groundedColor = mix(local, soilTone, groundTouch.mul(0.52)).mul(contactAO);
+  const groundTouch = smoothstep(-0.03, 0.11, heightAbove.add(soilWave)).oneMinus();
+  const baseRamp = smoothstep(0.0, 0.24, heightAbove);
+  const contactAO = mix(float(0.58), float(1), baseRamp)
+    .mul(float(1).sub(groundContact.contact.mul(0.24)).clamp(0.65, 1));
+  const fallbackSoil = color(environment.soilColor ?? '#5c4a30');
+  const soilTone = mix(fallbackSoil, groundContact.soilColor, groundContact.inside)
+    .mul(mix(0.84, 1.12, grainSample.r));
+  const groundedColor = mix(local, soilTone, groundTouch.mul(0.54)).mul(contactAO);
 
   const finalColor = biomeUnderstoryColor(groundedColor);
   const blossom = entry.kind === 'blossom';
-  const fill = understoryShadeEmission(finalColor, { blossom });
+  const fill = understoryShadeEmission(finalColor, { blossom }).mul(mix(float(0.45), float(1.0), baseRamp));
 
-  // Normal relief from vein height + organic noise texture, blending softly upward on green foliage & root skirt.
+  // Normal relief from vein height + organic noise texture, blending smoothly into the terrain normal at the foot.
   const reliefHeight = mix(grainSample.r, veinRib, plantGreen.mul(0.45)).mul(0.01);
   const bumpNormal = barkBumpNormal(reliefHeight);
-  const groundUpView = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
+  const groundUpView = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
   const skySoft = groundTouch.mul(0.78).max(plantGreen.mul(0.52));
   const blendedNormal = mix(bumpNormal, groundUpView, skySoft).normalize();
 
@@ -108,18 +117,19 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
     roughnessNode,
     emissiveNode: fill,
   });
-  material.foliageTransmissionNode = blossom
+  material.foliageTransmissionNode = (blossom
     ? float(0.16)
-    : mix(float(0.02), float(0.22), plantGreen);
+    : mix(float(0.02), float(0.22), plantGreen)).mul(mix(float(0.30), float(1.0), baseRamp));
   if (!blossom) {
     material.foliageWrapDiffuseNode = mix(float(0.08), float(0.30), plantGreen);
-    material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen);
+    material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen).mul(baseRamp);
   }
 
   applyPlantMotion(material, {
     wind: config?.wind,
     height: entry.height ?? 0.5,
     profile: entry.motionProfile ?? 'woody-shrub',
+    groundConform: true,
   });
   return assignBushFoliageMaterialData(material);
 }

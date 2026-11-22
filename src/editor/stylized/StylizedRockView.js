@@ -33,6 +33,8 @@ const ROCK_UP = new THREE.Vector3(0, 1, 0);
 const ROCK_SCRATCH = {
   position: new THREE.Vector3(),
   quaternion: new THREE.Quaternion(),
+  yaw: new THREE.Quaternion(),
+  normal: new THREE.Vector3(),
   scale: new THREE.Vector3(),
 };
 import { createPathClearanceField } from './TreeManifestStore.js';
@@ -153,6 +155,7 @@ export class StylizedRockView {
     this.proxyPrototypes = [];
     this.prototypeHeights = [];
     this.prototypeFootprints = [];
+    this.prototypeEllipses = [];
     this.meshes = [];
     this.proxyMeshes = [];
     this.placements = [];
@@ -180,13 +183,19 @@ export class StylizedRockView {
     terrainView.scene.add(this.root);
   }
 
-  /** Sink each boulder by a fraction of its height so it reads as embedded in the ground. */
+  /** Sink each boulder by a fraction of its height and seat it gently into the slope. */
   placementMatrix(placement) {
     const burial = Math.max(0, Number(this.config.rocks.burial) || 0)
       * (this.prototypeHeights[placement.prototypeIndex] ?? this.prototypeHeight) * placement.scale;
+    const rotation = placement.groundNormal
+      ? ROCK_SCRATCH.quaternion.setFromUnitVectors(
+        ROCK_UP,
+        ROCK_SCRATCH.normal.fromArray(placement.groundNormal),
+      ).multiply(ROCK_SCRATCH.yaw.setFromAxisAngle(ROCK_UP, placement.rotationY))
+      : ROCK_SCRATCH.quaternion.setFromAxisAngle(ROCK_UP, placement.rotationY);
     return new THREE.Matrix4().compose(
       ROCK_SCRATCH.position.set(placement.x, placement.height - burial, placement.z),
-      ROCK_SCRATCH.quaternion.setFromAxisAngle(ROCK_UP, placement.rotationY),
+      rotation,
       ROCK_SCRATCH.scale.setScalar(placement.scale),
     );
   }
@@ -301,6 +310,12 @@ export class StylizedRockView {
       geometry.boundingBox.max.x - geometry.boundingBox.min.x,
       geometry.boundingBox.max.z - geometry.boundingBox.min.z,
     )));
+    this.prototypeEllipses.push(...newPrototypes.map(({ geometry }) => {
+      const sx = Math.max(0.1, geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+      const sz = Math.max(0.1, geometry.boundingBox.max.z - geometry.boundingBox.min.z);
+      const mean = 0.5 * (sx + sz);
+      return Object.freeze({ scaleX: sx / mean, scaleZ: sz / mean, ratio: Math.max(sx, sz) / Math.min(sx, sz) });
+    }));
     this.meshes.push(...yield* iterateInstancedRenderers({
       root: this.root,
       partsByPrototype: newPrototypes.map((prototype) => [prototype]),
@@ -476,8 +491,12 @@ export class StylizedRockView {
       const footprint = this.prototypeFootprints[placement.prototypeIndex] ?? placement.radius * 2 / placement.scale;
       const fit = fitRockToGround(placement, footprint, heightAt);
       if (!fit) continue;
-      resolved.push(Object.freeze({ ...placement, height: fit.groundFitHeight,
-        surfaceData: Object.freeze(this.rockWeatheringSettings ? rockWaterContact(placement, footprint, waterAt) : [0, 0, 0]) }));
+      resolved.push(Object.freeze({
+        ...placement,
+        height: fit.groundFitHeight,
+        groundNormal: fit.groundNormal,
+        surfaceData: Object.freeze(this.rockWeatheringSettings ? rockWaterContact(placement, footprint, waterAt) : [0, 0, 0]),
+      }));
     }
     return resolved;
   }

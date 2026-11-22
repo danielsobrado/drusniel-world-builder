@@ -33,6 +33,7 @@ import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import { applySkywardNormal, foliageSkyFill } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { createFlowerPalette } from './FlowerPalette.js';
+import { sampleGroundContactAt } from './groundContact/GroundContactState.js';
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -124,9 +125,11 @@ export function createStylizedFlowerMaterial({
     .add(worldXZ.x.mul(0.7)))
     .mul(config.flowers.bendAmplitude)
     .mul(heightMask);
+  const groundContact = sampleGroundContactAt(worldXZ, { canonical: true });
+  const slopeSink = groundContact.inside.mul(float(0.02).add(groundContact.normal.y.oneMinus().mul(0.04)));
   const finalPosition = vec3(
     base.x.add(rotationX.mul(size)).add(wind.x).add(bend),
-    base.y.add(localHeight),
+    base.y.add(localHeight).sub(slopeSink),
     base.z.add(rotationZ.mul(size)).add(wind.y),
   ).mul(vec3(1, alive, 1));
 
@@ -148,22 +151,29 @@ export function createStylizedFlowerMaterial({
     weighted.div(max(total, 0.001)),
     step(0.01, total),
   );
+  const flowerGroundAo = float(1)
+    .sub(groundContact.contact.mul(0.32))
+    .sub(groundContact.canopy.mul(0.16))
+    .clamp(0.48, 1)
+    .toVarying('flowerGroundAo');
+  const stemBaseAo = mix(float(0.62), float(1), smoothstep(0, 0.28, uv().y));
   const flowerColor = mix(
     stem,
     palette,
     gradient,
-  ).mul(config.flowers.brightness);
+  ).mul(config.flowers.brightness).mul(stemBaseAo).mul(flowerGroundAo);
 
   const material = new (foliageMaterialClass(THREE.MeshLambertNodeMaterial))({ side: THREE.DoubleSide });
   material.positionNode = finalPosition;
   const nx = cos(angle).mul(normalGeometry.x).sub(sin(angle).mul(normalGeometry.z));
   const nz = sin(angle).mul(normalGeometry.x).add(cos(angle).mul(normalGeometry.z));
   const slope = wind.add(vec2(bend, 0)).mul(2).div(localHeight.max(.05));
-  const normal = vec3(nx, nx.mul(slope.x).add(nz.mul(slope.y)).negate(), nz).normalize();
+  const bladeNormal = vec3(nx, nx.mul(slope.x).add(nz.mul(slope.y)).negate(), nz).normalize();
+  const normal = mix(groundContact.normal, bladeNormal, smoothstep(0, 0.35, uv().y)).normalize();
   material.normalNode = cameraViewMatrix.mul(vec4(normal, 0)).xyz.toVarying('flowerBentNormal').normalize();
   applySkywardNormal(material);
   material.colorNode = flowerColor;
-  material.emissiveNode = foliageSkyFill(flowerColor, .1);
+  material.emissiveNode = foliageSkyFill(flowerColor, .1).mul(mix(float(0.45), float(1), stemBaseAo));
   material.foliageTransmissionNode = float(.18);
   material.opacityNode = mask.mul(alive);
   material.alphaTest = 0.5;

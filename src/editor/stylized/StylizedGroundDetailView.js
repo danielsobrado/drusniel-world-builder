@@ -54,7 +54,7 @@ const DETAIL_SCRATCH = {
   basis: new THREE.Matrix4(),
 };
 
-function cloneDetailMaterial(source, { wind = null, height = 0, bounds = null, motion = 'woody-shrub', foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
+function cloneDetailMaterial(source, { wind = null, height = 0, bounds = null, motion = 'woody-shrub', groundConform = false, foliageConfig = null, tileId = null, role = 'auto', ambientEffects = null } = {}) {
   const material = cloneAuthoredNodeMaterial(source, { lit: !!foliageConfig });
   const cutout = Boolean(material.map || material.alphaMap || material.transparent);
   // Foliage parts carry `instanceBiomeLook` (see appendVariants), so they wear each biome's understory look.
@@ -67,7 +67,7 @@ function cloneDetailMaterial(source, { wind = null, height = 0, bounds = null, m
   }
   // Swayed with the meadow's own wave, so a tuft is not a rigid patch in a moving
   // sward (groundDetailWind.js).
-  applyPlantMotion(material, { wind, height, profile: motion });
+  applyPlantMotion(material, { wind, height, profile: motion, groundConform });
   if (foliageConfig) applySkywardNormal(material);
   if ('roughness' in material) material.roughness = Math.max(0.72, material.roughness ?? 1);
   if ('metalness' in material) material.metalness = 0;
@@ -310,6 +310,7 @@ export class StylizedGroundDetailView {
               height: geometry.boundingBox.max.y - Math.min(0, geometry.boundingBox.min.y),
               bounds: { min: geometry.boundingBox.min.toArray(), max: geometry.boundingBox.max.toArray() },
               motion: definition.motion,
+              groundConform: Boolean(foliage && definition.conform !== true && this.layerName !== 'aquaticPlant'),
               role: definition.materialRoles?.[sourceMaterial.name],
               foliageConfig: foliage ? this.config : null,
               // `paletteTileId` grades a shrub with another biome's foliage palette

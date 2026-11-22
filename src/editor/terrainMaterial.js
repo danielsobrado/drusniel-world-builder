@@ -344,6 +344,7 @@ export function createTerrainMaterial({
   // Last, so nothing painted after it can lift the patch back off the ground.
   // `contactShade` is 0 on bare ground and 1 under a trunk's centre.
   const pathPaintSettings = resolvePathPaint(pathConfig.paint);
+  let contactMatte = float(0);
   if (stylizedConfig.contactShade?.enabled !== false) {
     const dull = mix(vec3(dot(groundColor, vec3(0.3, 0.59, 0.11))), groundColor, 0.5)
       .mul(vec3(1, 0.94, 0.76));
@@ -361,7 +362,9 @@ export function createTerrainMaterial({
     // Duff is a wood's floor. A lone meadow tree or boulder shades its grass and
     // keeps most of it: from the air every tree stood on a brown disc.
     const duffShare = mix(float(0.35), float(1), smoothstep(0.15, 0.6, forestFloor));
-    groundColor = mix(groundColor, duff, smoothstep(0.02, 0.35, contact).mul(duffShare));
+    const duffWeight = smoothstep(0.02, 0.35, contact).mul(duffShare);
+    contactMatte = smoothstep(0.08, 0.55, contact);
+    groundColor = mix(groundColor, duff, duffWeight);
     groundColor = groundColor.mul(oneMinus(smoothstep(0.1, 0.6, contact).mul(0.4)));
   }
   groundColor = max(groundColor, vec3(0));
@@ -544,19 +547,23 @@ export function createTerrainMaterial({
       tileId: tileSample.a.mul(255).round(),
       wet: waterContext?.damp,
     });
-    // Rain darkens and slicks exposed ground; snow and canopy shelter it.
+    // Rain darkens and slicks exposed ground; snow, canopy, and object contact pockets shelter it.
     const rainWetness = createRainWetnessShading({
       snow: bakedSurface.snow ?? float(0),
-      canopy: bakedSurface.canopy ?? float(0),
+      canopy: max(bakedSurface.canopy ?? float(0), contactMatte.mul(0.65)),
       config: resolveSurfaceWetnessConfig(stylizedConfig.wetness),
     });
     // Standing water on soaked flat hollows; a dry frame skips it with one compare.
     const puddles = bakedSurface.shape ? createPuddleShading({
       shape: bakedSurface.shape, exposure: rainWetness.exposure, water: bakedSurface.water, worldXZ, field: rainWetness.field,
     }) : null;
+    const contactRoughness = max(
+      shoreSurface.roughness ?? float(stylizedConfig.materialBake.render.fallbackRoughness),
+      contactMatte.mul(0.94),
+    );
     const wetSurface = rainWetness.apply(
       shoreSurface.color,
-      shoreSurface.roughness ?? float(stylizedConfig.materialBake.render.fallbackRoughness),
+      contactRoughness,
       puddles?.mask,
     );
     const surface = puddles ? { ...wetSurface, roughness: puddles.apply(wetSurface.roughness) } : wetSurface;

@@ -30,14 +30,15 @@ import { StylizedFlowerView } from './StylizedFlowerView.js';
 import { StylizedGroundDetailView } from './StylizedGroundDetailView.js';
 import { createForestDebrisPrototypes } from './forest/forestDebrisPrototypes.js';
 import { createBiomeUnderstoryPrototypes } from './flora/biomeUnderstoryPrototypes.js';
-import { collectDebrisGrassZones } from './UnderstoryClearance.js';
 import { createShoreLifePrototypes } from './shoreLifePrototypes.js';
 import { OceanFftController } from '../water/fft/OceanFftController.js';
 import { resolveOffshoreFft } from '../water/fft/OceanFftConfig.js';
 import { waterVisualClock } from '../water/WaterVisualClock.js';
 import { createAquaticFloraPrototypes } from './aquaticFloraPrototypes.js';
 import { advancePlantSway } from './plantSway.js';
-import { contactShadeRadius, paintContactShade, resolveContactShade } from './contactShade.js';
+import { paintContactShade, resolveContactShade } from './contactShade.js';
+import { GroundContactField } from './groundContact/GroundContactField.js';
+import { buildChunkContactShadeKey, collectChunkContactShadeSources } from './groundContact/contactShadeSources.js';
 import {
   FOREST_FLOOR_CANOPY_SAMPLES,
   canopySampleCoord,
@@ -380,9 +381,13 @@ export class StylizedSurfaceView {
         baseUrl,
         rockPlacementsProvider: () => this.rockView?.getPlacements() ?? [],
         treePlacementsProvider: (chunkX, chunkZ) => this.treeView?.manifestStore?.peek(chunkX, chunkZ) ?? null,
+        bushPlacementsProvider: (chunkX, chunkZ) => this.bushView?.manifestCache.get(`${chunkX}:${chunkZ}`)?.placements ?? null,
         debrisPlacementsProvider: (chunkX, chunkZ) => this.forestDebrisView?.manifestCache.get(`${chunkX}:${chunkZ}`)?.placements ?? null,
         debrisFootprintsProvider: () => this.forestDebrisView?.prototypeFootprints ?? null,
       })
+      : null;
+    this.groundContactField = this.enabled && !this.impostorBakeMode
+      ? new GroundContactField({ terrainView, config })
       : null;
     this.slots = this.enabled && !this.impostorBakeMode && !this.meadowGrass
       ? terrainView.slots.map((terrainSlot) => new StylizedGrassSlot({
@@ -896,6 +901,13 @@ export class StylizedSurfaceView {
     this.sceneryScheduler.flush(this.sceneryConsumers, this.shouldYieldWork);
     if (this.runDeferredWork) this.runDeferredWork(() => this.updateForestGroundTextures());
     else this.updateForestGroundTextures();
+    if (camera && this.groundContactField) {
+      const origin = this.terrainView.floatingOrigin.getState();
+      this.groundContactField.update(
+        { x: camera.position.x + origin.x, z: camera.position.z + origin.z },
+        origin,
+      );
+    }
     this.flowerView?.update(timestamp);
     for (const slot of this.waterSlots) slot.update(timestamp);
     this.waterObstacleUpdates.schedule();
@@ -1085,61 +1097,16 @@ export class StylizedSurfaceView {
    */
   paintContactShade(terrainSlot, descriptor) {
     if (!this.contactShadeSettings) return;
-    const sources = [];
-    const manifest = this.treeView?.manifestStore?.get(
-      descriptor.chunkX,
-      descriptor.chunkZ,
-      this.rockView,
-    ) ?? [];
-    for (const placement of manifest) {
-      const scale = placement.heightScale ?? placement.scale ?? 1;
-      sources.push({
-        x: placement.x,
-        z: placement.z,
-        radius: contactShadeRadius(this.contactShadeSettings, 'tree', scale),
-        strength: this.contactShadeSettings.treeStrength,
-      });
-    }
-    for (const placement of this.rockView?.getPlacements() ?? []) {
-      if (placement.ownerChunkX !== descriptor.chunkX
-        || placement.ownerChunkZ !== descriptor.chunkZ) continue;
-      sources.push({
-        x: placement.x,
-        z: placement.z,
-        radius: contactShadeRadius(this.contactShadeSettings, 'rock', placement.scale ?? 1),
-        strength: this.contactShadeSettings.rockStrength,
-      });
-    }
-    const debrisPlacements = this.forestDebrisView?.manifestCache.get(
-      `${descriptor.chunkX}:${descriptor.chunkZ}`,
-    )?.placements ?? [];
-    const debrisSources = [];
-    for (const zone of collectDebrisGrassZones(debrisPlacements, this.forestDebrisView?.prototypeFootprints)) {
-      if (zone.kind === 'log') {
-        const shadeRadius = Math.max(0.58, zone.radius + 0.42);
-        const entry = {
-          x0: zone.x0,
-          z0: zone.z0,
-          x1: zone.x1,
-          z1: zone.z1,
-          x: zone.x,
-          z: zone.z,
-          radius: shadeRadius,
-          strength: Math.min(1, this.contactShadeSettings.rockStrength * 1.2),
-        };
-        sources.push(entry);
-        debrisSources.push({ ...entry, radius: Math.max(0.95, zone.collar + 0.42), strength: 0.85 });
-      } else {
-        const entry = {
-          x: zone.x,
-          z: zone.z,
-          radius: Math.max(0.75, zone.radius + 0.45),
-          strength: Math.min(1, this.contactShadeSettings.rockStrength * 1.25),
-        };
-        sources.push(entry);
-        debrisSources.push({ ...entry, radius: Math.max(1.1, zone.collar + 0.45), strength: 0.9 });
-      }
-    }
+    const { sources, debrisSources } = collectChunkContactShadeSources({
+      descriptor,
+      chunkWorldSize: this.chunkWorldSize,
+      settings: this.contactShadeSettings,
+      treeView: this.treeView,
+      rockView: this.rockView,
+      bushView: this.bushView,
+      forestDebrisView: this.forestDebrisView,
+      alpineRockView: this.alpineRockView,
+    });
     if (sources.length === 0) return;
     paintContactShade({
       pixels: terrainSlot.forestFloorPixels,
@@ -1173,14 +1140,14 @@ export class StylizedSurfaceView {
    */
   contactShadeKey(descriptor) {
     if (!this.contactShadeSettings) return 'no-contact-shade';
-    const manifest = this.treeView?.manifestStore?.get(
-      descriptor.chunkX,
-      descriptor.chunkZ,
-      this.rockView,
-    ) ?? [];
-    const rocksHere = this.rockView?.placementsByChunk?.get(`${descriptor.chunkX}:${descriptor.chunkZ}`)?.length ?? 0;
-    const debrisHere = this.forestDebrisView?.manifestCache.get(`${descriptor.chunkX}:${descriptor.chunkZ}`)?.placements?.length ?? 0;
-    return `${manifest.length}:${rocksHere}:${debrisHere}`;
+    return buildChunkContactShadeKey({
+      descriptor,
+      treeView: this.treeView,
+      rockView: this.rockView,
+      bushView: this.bushView,
+      forestDebrisView: this.forestDebrisView,
+      alpineRockView: this.alpineRockView,
+    });
   }
 
   dispose() {
@@ -1239,6 +1206,8 @@ export class StylizedSurfaceView {
     this.waterSlots.length = 0;
     for (const slot of this.slots) slot.dispose();
     this.meadowGrass?.dispose();
+    this.groundContactField?.dispose();
+    this.groundContactField = null;
     this.slots.length = 0;
     this.revisionTracker?.dispose();
     this.revisionTracker = null;
