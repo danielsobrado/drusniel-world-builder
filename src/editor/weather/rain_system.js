@@ -9,7 +9,9 @@ import { createRainGeometry, createSplashGeometry } from "./rain_geometry.js";
 import { RainSplashPlacement } from "./rain_splash_placement.js";
 import { createCinematicRainField } from './CinematicRainField.js';
 import { worldWindCamera } from './wind/worldWindState.js';
-import { applyWindWeatherToMaterials, clampWindWeatherSettings, isWeatherVisible } from "./weather_settings.js";
+import { applyStormWeatherToMaterials, clampStormWeatherSettings, isWeatherVisible } from "./weather_settings.js";
+/** Drop drift (m/s) in the calm reference wind: the UI default wind the rain was tuned under. */
+const RAIN_DRIFT_SPEED = Math.hypot(-0.42, 0.18);
 class RainWeatherSystem {
   group = new THREE.Group();
   rainMaterial;
@@ -57,9 +59,9 @@ class RainWeatherSystem {
     this.applySettings(this.settings);
   }
   applySettings(settings) {
-    this.settings = clampWindWeatherSettings(settings);
+    this.settings = clampStormWeatherSettings(settings);
     this.group.visible = isWeatherVisible(this.settings);
-    applyWindWeatherToMaterials(this.settings, [this.rainMaterial, this.hardSplashMaterial, this.waterSplashMaterial]);
+    applyStormWeatherToMaterials(this.settings, [this.rainMaterial, this.hardSplashMaterial, this.waterSplashMaterial]);
     // Splashes are placed at random, so any prefix of the buffer is an even subset.
     const level = Math.min(1, Math.max(0, this.settings.intensity));
     const { hardSplashes, waterSplashes } = this.rainSettings.levels;
@@ -71,7 +73,11 @@ class RainWeatherSystem {
     if (!this.group.visible) return;
     this.rainCenter.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     this.rainMaterial.setCenter(this.rainCenter);
-    this.rainMaterial.setGust?.(worldWindCamera.envelope);
+    // Drift with the world wind at the camera, as the snow does (worldWindCamera).
+    const { directionX, directionZ, envelope } = worldWindCamera;
+    const gusted = this.rainMaterial.setGust ? 1 : envelope;
+    this.rainMaterial.setWind(directionX * RAIN_DRIFT_SPEED * gusted, directionZ * RAIN_DRIFT_SPEED * gusted);
+    this.rainMaterial.setGust?.(envelope);
     this.rainMaterial.setTime(elapsedSeconds);
     this.hardSplashMaterial.setTime(elapsedSeconds);
     this.waterSplashMaterial.setTime(elapsedSeconds);

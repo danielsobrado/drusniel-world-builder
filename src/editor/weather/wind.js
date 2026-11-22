@@ -2,15 +2,14 @@ import * as THREE from "three";
 import { Rng, hashCombine, hashString } from '../_clod_shims/seed.js';
 import { createWindNodeMaterial } from "./windNodeMaterial.js";
 import { createWindShaderMaterial } from "./windShaderMaterial.js";
+import { worldWindUniforms } from "./wind/worldWindState.js";
 const WIND_RIBBON_COUNT = 7200;
 const WIND_NEAR_COUNT = 2800;
 const WIND_MID_COUNT = 2600;
 const WIND_FAR_COUNT = 1800;
 const DEFAULT_WIND_WEATHER_SETTINGS = {
   enabled: false,
-  intensity: 0.95,
-  windX: -2.2,
-  windZ: 0.36
+  intensity: 0.95
 };
 class WindWeatherSystem {
   group = new THREE.Group();
@@ -33,17 +32,17 @@ class WindWeatherSystem {
   applySettings(settings) {
     this.settings = {
       enabled: settings.enabled,
-      intensity: THREE.MathUtils.clamp(settings.intensity, 0, 1.6),
-      windX: THREE.MathUtils.clamp(settings.windX, -8, 8),
-      windZ: THREE.MathUtils.clamp(settings.windZ, -8, 8)
+      intensity: THREE.MathUtils.clamp(settings.intensity, 0, 1.6)
     };
     this.group.visible = this.settings.enabled && this.settings.intensity > 1e-3;
     this.material.setIntensity(this.settings.intensity);
-    this.material.setWind(this.settings.windX, this.settings.windZ);
   }
   update(deltaSeconds, elapsedSeconds, cameraPosition) {
     void deltaSeconds;
     if (!this.group.visible) return;
+    // Ribbons show the prevailing world wind (only its direction shapes them).
+    const prevailing = worldWindUniforms.prevailing.value;
+    this.material.setWind(prevailing.x, prevailing.y);
     this.material.setTime(elapsedSeconds);
     this.material.setCenter(cameraPosition);
   }

@@ -81,8 +81,6 @@ function resolveMeadowSettings(weatherSettings, moteSettings) {
   return {
     enabled: true,
     intensity: weatherSettings.weatherIntensity,
-    windX: weatherSettings.weatherWindX,
-    windZ: weatherSettings.weatherWindZ,
     motes,
   };
 }
@@ -243,8 +241,6 @@ export function createWeatherController(deps) {
   const currentWindSettings = () => ({
     enabled: settings.weatherMode === 'wind',
     intensity: settings.weatherIntensity,
-    windX: settings.weatherWindX,
-    windZ: settings.weatherWindZ,
   });
   // Rain, snow and lightning follow the eased storm channels, not the mode:
   // changing the weather builds or breaks over a minute or two (StormState).
@@ -257,15 +253,13 @@ export function createWeatherController(deps) {
     return true;
   };
   const applyStormChannels = (frame) => {
-    const wind = { windX: settings.weatherWindX, windZ: settings.weatherWindZ };
-    if (changed('rain', frame.rain)) rainWeather.applySettings({ enabled: frame.rain > 0, intensity: frame.rain, ...wind });
-    if (changed('snow', frame.snow)) snowWeather.applySettings({ enabled: frame.snow > 0, intensity: frame.snow, ...wind });
+    // Particles drift with the world wind (worldWindState), which the UI wind steers.
+    if (changed('rain', frame.rain)) rainWeather.applySettings({ enabled: frame.rain > 0, intensity: frame.rain });
+    if (changed('snow', frame.snow)) snowWeather.applySettings({ enabled: frame.snow > 0, intensity: frame.snow });
   };
   const currentSandstormSettings = () => ({
     enabled: settings.weatherMode === 'sandstorm',
     intensity: settings.weatherIntensity,
-    windX: settings.weatherWindX,
-    windZ: settings.weatherWindZ,
   });
   /** @param {{ snap?: boolean }} [options] snap: jump straight to the new weather (QA, captures). */
   const applySettings = ({ snap = false } = {}) => {
@@ -350,6 +344,10 @@ export function createWeatherController(deps) {
     },
     /** Weather lightning: `subscribe(event => …)` for strikes, `flash` for the sky (LightningScheduler). */
     lightning,
+    /** The sandstorm blowing now, 0..1.6 (0 when it is not): the ground's windblown sand follows it. */
+    get sandstorm() {
+      return sandstormWeather.intensity;
+    },
     /** This frame's storm channels (StormState.frame); read-only. */
     get storm() {
       return storm.frame;

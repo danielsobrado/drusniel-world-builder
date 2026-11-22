@@ -8,10 +8,24 @@ import { SANDSTORM_PARTICLE_COUNT } from "./rain_constants.js";
 import { DEFAULT_SANDSTORM_WEATHER_SETTINGS } from "./rain_defaults.js";
 import { createSandstormGeometry } from "./rain_geometry.js";
 import { placeCameraFacingBillboard } from "./weather_camera_billboard.js";
-import { applyWindWeatherToMaterials, clampWindWeatherSettings, isWeatherVisible } from "./weather_settings.js";
+import { applyStormWeatherToMaterials, clampStormWeatherSettings, isWeatherVisible } from "./weather_settings.js";
+import { worldWindCamera, worldWindUniforms } from "./wind/worldWindState.js";
 const HAZE_DISTANCE = 1.2;
 const HAZE_WIDTH_SCALE = 0.56;
 const HAZE_HEIGHT_SCALE = 0.56;
+/** Bounds of the gust ratio that speeds the dust up or slows it down. */
+const GUST_MIN = 0.4;
+const GUST_MAX = 2.5;
+/**
+ * The gust at the camera against the world wind's mean: 1 in the mean wind.
+ * The dust's authored speed already scales with the sandstorm's intensity, so
+ * only the gust on top of the mean moves it.
+ */
+function sandstormGust(sample = worldWindCamera, uniforms = worldWindUniforms) {
+  const mean = uniforms.prevailingStrength.value / Math.max(uniforms.referenceStrength.value, 1e-4);
+  const ratio = sample.envelope / Math.max(mean, 1e-4);
+  return Number.isFinite(ratio) ? THREE.MathUtils.clamp(ratio, GUST_MIN, GUST_MAX) : 1;
+}
 class SandstormWeatherSystem {
   group = new THREE.Group();
   sandMaterial;
@@ -22,6 +36,8 @@ class SandstormWeatherSystem {
   center = new THREE.Vector3();
   cameraDirection = new THREE.Vector3();
   settings = { ...DEFAULT_SANDSTORM_WEATHER_SETTINGS };
+  /** Seconds of dust travel: the gust integrated, so a gust never jumps a puff. */
+  clock = 0;
   constructor(options) {
     this.camera = options.camera;
     this.group.name = "weather-sandstorm";
@@ -41,17 +57,26 @@ class SandstormWeatherSystem {
     this.applySettings(this.settings);
   }
   applySettings(settings) {
-    this.settings = clampWindWeatherSettings(settings);
+    this.settings = clampStormWeatherSettings(settings);
     this.group.visible = isWeatherVisible(this.settings);
-    applyWindWeatherToMaterials(this.settings, [this.sandMaterial, this.hazeMaterial]);
+    applyStormWeatherToMaterials(this.settings, [this.sandMaterial, this.hazeMaterial]);
+  }
+  /** The sandstorm channel the ground's sand follows (0 when it is not blowing). */
+  get intensity() {
+    return this.group.visible ? this.settings.intensity : 0;
   }
   update(deltaSeconds, elapsedSeconds, cameraPosition) {
-    void deltaSeconds;
+    void elapsedSeconds;
     if (!this.group.visible) return;
+    // Along the prevailing world wind, not the local field: every puff's place
+    // hangs on the direction, and the field's curl would swing the whole cloud.
+    const prevailing = worldWindUniforms.prevailing.value;
+    this.sandMaterial.setWind(prevailing.x, prevailing.y);
+    this.clock += Math.min(0.25, Math.max(0, Number(deltaSeconds) || 0)) * sandstormGust();
     this.center.copy(cameraPosition);
     this.sandMaterial.setCenter(this.center);
-    this.sandMaterial.setTime(elapsedSeconds);
-    this.hazeMaterial.setTime(elapsedSeconds);
+    this.sandMaterial.setTime(this.clock);
+    this.hazeMaterial.setTime(this.clock);
     placeCameraFacingBillboard({
       camera: this.camera,
       mesh: this.hazeMesh,
@@ -74,5 +99,6 @@ class SandstormWeatherSystem {
   }
 }
 export {
-  SandstormWeatherSystem
+  SandstormWeatherSystem,
+  sandstormGust
 };

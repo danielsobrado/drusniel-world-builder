@@ -8,6 +8,12 @@ import {
   MEADOW_PARTICLE_COUNT
 } from "./meadow_defaults.js";
 import { createMeadowGeometry, createMeadowNodeMaterial, createMeadowShaderMaterial } from "./meadow_material.js";
+import { worldWindUniforms } from "./wind/worldWindState.js";
+/**
+ * Mote drift speed (shader units). Fixed: the motes' travel is time × speed, so
+ * a changing speed would sweep every mote; only the direction follows the wind.
+ */
+const MOTE_WIND = Math.hypot(DEFAULT_MEADOW_WEATHER_SETTINGS.windX, DEFAULT_MEADOW_WEATHER_SETTINGS.windZ);
 class MeadowWeatherSystem {
   group = new THREE.Group();
   meadowMaterial;
@@ -37,10 +43,6 @@ class MeadowWeatherSystem {
       Math.max(0, Math.floor(this.settings.motes.maxParticles))
     );
     this.meadowMaterial.setIntensity(THREE.MathUtils.clamp(this.settings.intensity, 0, 1.6));
-    this.meadowMaterial.setWind(
-      THREE.MathUtils.clamp(this.settings.windX, -5, 5),
-      THREE.MathUtils.clamp(this.settings.windZ, -5, 5)
-    );
     this.meadowMaterial.setMoteSettings(this.settings.motes);
     this.applyVisibility();
   }
@@ -60,6 +62,9 @@ class MeadowWeatherSystem {
       this.group.position.y = focus.y;
       this.meadowMaterial.setCenter(this.anchor);
     }
+    // The prevailing world wind the grass bends to (steady, unlike the local gust field).
+    const prevailing = worldWindUniforms.prevailing.value;
+    this.meadowMaterial.setWind(prevailing.x * MOTE_WIND, prevailing.y * MOTE_WIND);
     this.meadowMaterial.setTime(elapsedSeconds);
     this.meadowMaterial.setEnvironment(environment);
     this.syncSunVisibilityAtlas();
@@ -100,8 +105,6 @@ function cloneSettings(settings) {
   return {
     enabled: settings.enabled,
     intensity: settings.intensity,
-    windX: settings.windX,
-    windZ: settings.windZ,
     motes: {
       ...settings.motes,
       warmColorRgb: [...settings.motes.warmColorRgb],

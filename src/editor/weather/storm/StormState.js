@@ -40,8 +40,8 @@ export function stormTargetForSettings(settings, enabled = true) {
   else if (mode === 'snow') Object.assign(target, { storm: level, kind: 'snow' });
   else if (mode === 'storm') Object.assign(target, { storm: level, thunder: true });
   else if (mode === 'overcast') target.cloud = level;
-  // A sandstorm's dust is its own system; the sky only dims under it.
-  else if (mode === 'sandstorm') target.cloud = level * 0.4;
+  // A sandstorm's dust is its own system; the sky only dims under it, and it is a gale.
+  else if (mode === 'sandstorm') Object.assign(target, { cloud: level * 0.4, wind: level });
   else if (mode === 'wind') target.wind = level;
   return target;
 }

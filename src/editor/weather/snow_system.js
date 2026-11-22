@@ -4,7 +4,7 @@ import { SNOW_FLAKE_COUNT } from "./rain_constants.js";
 import { DEFAULT_SNOW_WEATHER_SETTINGS } from "./rain_defaults.js";
 import { createSnowGeometry } from "./rain_geometry.js";
 import { createSnowfallField } from "./snowfall/SnowfallField.js";
-import { clampWindWeatherSettings, isWeatherVisible } from "./weather_settings.js";
+import { clampStormWeatherSettings, isWeatherVisible } from "./weather_settings.js";
 import { DEFAULT_WEATHER_EFFECTS } from './WeatherEffectsConfig.js';
 import { worldWindCamera } from './wind/worldWindState.js';
 import { evaluateLevels, PRECIP_LEVEL_KEYS } from './storm/stormCurves.js';
@@ -60,7 +60,7 @@ class SnowWeatherSystem {
     this.applySettings(this.settings);
   }
   applySettings(settings) {
-    this.settings = clampWindWeatherSettings(settings);
+    this.settings = clampStormWeatherSettings(settings);
     this.refresh();
   }
   /**
