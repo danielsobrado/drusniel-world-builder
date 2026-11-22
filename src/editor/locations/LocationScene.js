@@ -33,13 +33,19 @@ export class LocationScene {
   static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress }) {
     const location = new LocationScene(site);
     const isIceSite = site.materials?.terrain?.kind === 'ice';
-    const enableIcePost = isIceSite && quality.icePost !== false && Boolean(renderer?.backend);
+    const isStoneholdSite = Boolean(site.archetypeKey?.startsWith('stonehold') || site.id?.includes('stonehold'));
+    const enableLocationPost = (isIceSite || isStoneholdSite) && quality.icePost !== false && Boolean(renderer?.backend);
     const softShaftDepth = isIceSite && quality.iceTransmission !== false;
 
     try {
       await progress('load-assets');
       location.materials = new LocationMaterials({ baseUrl, anisotropy: renderer.getMaxAnisotropy?.() ?? 8 });
-      const materials = await location.materials.create(site.materials, quality, { usePostMrt: enableIcePost });
+      const siteWind = site.params?.snow?.wind ?? [0.6, 0.8];
+      const materials = await location.materials.create(site.materials, quality, {
+        usePostMrt: enableLocationPost,
+        wind: siteWind,
+        hasPeaks: Boolean(site.lighting?.sky?.peaks),
+      });
 
       await progress('build-geometry');
       const builder = generateLocation(site, generator);
@@ -55,6 +61,17 @@ export class LocationScene {
           maxNeedles: Math.round((rawCrystalField.needles ?? 0) * crystalScale),
         }
         : null;
+      const understoryScale = quality.understoryScale ?? 1;
+      const rawUnderstory = site.params?.alpineUnderstory ?? null;
+      const alpineUnderstory = rawUnderstory && understoryScale > 0
+        ? {
+          wind: siteWind,
+          cobbles: Math.round((rawUnderstory.cobbles ?? 0) * understoryScale),
+          iceShards: Math.round((rawUnderstory.iceShards ?? 0) * understoryScale),
+          tundraSedge: Math.round((rawUnderstory.tundraSedge ?? 0) * understoryScale),
+          tundraLichen: Math.round((rawUnderstory.tundraLichen ?? 0) * understoryScale),
+        }
+        : null;
 
       location.scene.add(builder.build({
         materials,
@@ -63,6 +80,7 @@ export class LocationScene {
         indirectBounce: site.lighting.indirectBounce ?? null,
         propShadows: site.lighting.propShadows ?? null,
         crystalField,
+        alpineUnderstory,
       }));
       location.lightPool = new LocationLightPool(builder.dynamicLights, {
         gain: site.lighting.dynamicGain ?? (site.lighting.indirectBounce ? 0.28 : 0.14),
@@ -89,7 +107,7 @@ export class LocationScene {
         location.scene.add(location.breath.sprite);
       }
       if (site.lighting.sky) {
-        location.sky = createSky(site.lighting.sky);
+        location.sky = createSky(site.lighting.sky, { alpinePack: location.materials.alpinePack });
         location.scene.add(location.sky.group);
       }
       location.skyAbove = (point) => builder.skyAbove(point.x, point.y, point.z);
@@ -100,13 +118,13 @@ export class LocationScene {
       await progress('prepare-shaders');
       location.applyLighting();
       location.lightPool?.update(builder.spawns.entry, 0);
-      if (enableIcePost) {
+      if (enableLocationPost) {
         location.postProcessing = new LocationPostProcessing({
           renderer,
           scene: location.scene,
           camera,
-          exposure: site.lighting.exposure ?? 1.15,
-          enableSsr: quality.iceSsr !== false,
+          exposure: site.lighting.exposure ?? (isIceSite ? 1.15 : 1.12),
+          enableSsr: isIceSite && quality.iceSsr !== false,
           enableAo: true,
           enableBloom: true,
         });

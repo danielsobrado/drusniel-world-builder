@@ -10,24 +10,36 @@ const P = (x, y, z) => ({ x, y, z });
 export function buildWatchtower(b, at, { height = 10.5, width = 4.6, brazier = true } = {}) {
   const x = at.x, y = at.y, z = at.z;
   // Deep foundation plinth anchoring cleanly into rugged cliff rock below.
-  b.prop('masonry', stoneBlock(width + 1.0, 6.0, width + 1.0, P(x, y - 5.8, z), { bevel: 0.10, batter: 0.08 }), 0x8e939c);
-  // Main battered tower shaft with corner buttress pilasters.
-  b.prop('carved', stoneBlock(width, height, width, P(x, y, z), { bevel: 0.10, batter: 0.06 }), 0xbcc0c8);
+  b.prop('masonry', stoneBlock(width + 1.0, 6.0, width + 1.0, P(x, y - 5.8, z), { bevel: 0.12, batter: 0.1, irregular: 0.18 }), 0x868c96);
+  // Main battered tower shaft with corner buttress pilasters & weathered block variation.
+  b.prop('carved', stoneBlock(width, height, width, P(x, y, z), { bevel: 0.12, batter: 0.06, irregular: 0.12 }), 0xb4bac4);
   for (const sx of [-1, 1]) {
     for (const sz of [-1, 1]) {
-      b.prop('carved', stoneBlock(1.05, height + 0.4, 1.05, P(x + sx * (width * 0.46), y, z + sz * (width * 0.46)), { bevel: 0.07 }), 0xa8adb6);
+      b.prop('carved', stoneBlock(1.08, height + 0.4, 1.08, P(x + sx * (width * 0.46), y, z + sz * (width * 0.46)), {
+        bevel: 0.08, irregular: 0.14,
+      }), 0x9ea4ae);
     }
   }
-  // Overhanging corbelled cornice belt + bronze frieze band.
-  b.prop('carved', stoneBox(width + 0.85, 0.72, width + 0.85, P(x, y + height + 0.1, z), { bevel: 0.08 }), 0xcad0d8);
-  b.prop('bronze', stoneBox(width + 0.92, 0.18, width + 0.92, P(x, y + height + 0.12, z), { bevel: 0.02 }), 0xd4aa62);
-  // Heavy stepped Dwarven crenellated merlons around the crown deck.
+  // Carved corbel brackets supporting the overhanging cornice belt + bronze frieze band.
+  for (const sign of [-1, 1]) {
+    for (const off of [-width * 0.32, 0, width * 0.32]) {
+      b.prop('carved', stoneBlock(0.56, 0.92, 0.72, P(x + off, y + height - 0.72, z + sign * (width * 0.52)), {
+        bevel: 0.05, batter: -0.25, irregular: 0.14,
+      }), 0xbec3cc);
+      b.prop('carved', stoneBlock(0.72, 0.92, 0.56, P(x + sign * (width * 0.52), y + height - 0.72, z + off), {
+        bevel: 0.05, batter: -0.25, irregular: 0.14,
+      }), 0xbec3cc);
+    }
+  }
+  b.prop('carved', stoneBox(width + 0.88, 0.74, width + 0.88, P(x, y + height + 0.1, z), { bevel: 0.09, irregular: 0.12 }), 0xc2c8d2);
+  b.prop('bronze', stoneBox(width + 0.94, 0.18, width + 0.94, P(x, y + height + 0.12, z), { bevel: 0.02 }), 0xcfa45a);
+  // Heavy stepped Dwarven crenellated merlons with natural quarry settlement variation.
   const deckY = y + height + 0.46;
   const hw = width * 0.5 + 0.25;
   for (const sign of [-1, 1]) {
     for (const off of [-hw * 0.65, 0, hw * 0.65]) {
-      b.prop('carved', stoneBlock(0.95, 1.15, 0.65, P(x + off, deckY, z + sign * hw), { bevel: 0.05 }), 0xd0d4dc);
-      b.prop('carved', stoneBlock(0.65, 1.15, 0.95, P(x + sign * hw, deckY, z + off), { bevel: 0.05 }), 0xd0d4dc);
+      b.prop('carved', stoneBlock(0.95, 1.15, 0.65, P(x + off, deckY, z + sign * hw), { bevel: 0.06, irregular: 0.18 }), 0xc8ced6);
+      b.prop('carved', stoneBlock(0.65, 1.15, 0.95, P(x + sign * hw, deckY, z + off), { bevel: 0.06, irregular: 0.18 }), 0xc8ced6);
     }
   }
   // Arrow-slit embrasure with subtle warm guard lantern glow.
@@ -58,20 +70,32 @@ export function buildChasmViaduct(b, {
   const spanLen = totalLen / spans;
   const yAt = (z) => yStart + (yEnd - yStart) * ((zStart - z) / totalLen);
 
-  // Continuous beveled flagstone roadway deck & heavy structural spandrel fascia.
+  // Weathered hand-dressed flagstone roadway deck & irregular stone parapets (breaking CAD uniformity).
   const deckSegs = 14;
+  const bridgeTones = [0xb4bac4, 0xc0c5ce, 0xa8aeb8, 0xbcc1ca];
   for (let i = 0; i < deckSegs; i += 1) {
     const z0 = zStart - (i / deckSegs) * totalLen;
     const z1 = zStart - ((i + 1) / deckSegs) * totalLen;
     const zm = (z0 + z1) * 0.5;
     const ym = yAt(zm);
     const segD = Math.abs(z0 - z1) + 0.16;
-    b.prop('carved', stoneBox(width, 1.15, segD, P(0, ym - 0.58, zm), { bevel: 0.06, irregular: 0.03 }), 0xbcc0c8);
-    b.prop('masonry', stoneBox(width - 1.2, 0.18, segD, P(0, ym - 0.04, zm), { bevel: 0.03 }), 0xc8ccd2);
-    // Side stone parapet walls + heavy coping cap.
+    const tone = bridgeTones[i % bridgeTones.length];
+    b.prop('carved', stoneBox(width, 1.15, segD, P(0, ym - 0.58, zm), { bevel: 0.07, irregular: 0.12 }), tone);
+    b.prop('masonry', stoneBox(width - 1.2, 0.18, segD, P(0, ym - 0.04, zm), { bevel: 0.04, irregular: 0.1 }), bridgeTones[(i + 1) % bridgeTones.length]);
+    // Side stone parapet walls + chipped coping caps + exterior stone corbels.
     for (const sign of [-1, 1]) {
-      b.prop('carved', stoneBlock(0.86, 1.15, segD, P(sign * (hw - 0.42), ym, zm), { bevel: 0.05 }), 0xc2c6ce);
-      b.prop('carved', stoneBox(1.04, 0.24, segD, P(sign * (hw - 0.42), ym + 1.22, zm), { bevel: 0.04 }), 0xd2d6dc);
+      const pTone = bridgeTones[(i + (sign > 0 ? 2 : 0)) % bridgeTones.length];
+      b.prop('carved', stoneBlock(0.88, 1.15, segD, P(sign * (hw - 0.42), ym, zm), {
+        bevel: 0.06, irregular: 0.18,
+      }), pTone);
+      b.prop('carved', stoneBox(1.06, 0.25, segD, P(sign * (hw - 0.42), ym + 1.22, zm), {
+        bevel: 0.05, irregular: 0.2,
+      }), 0xcad0d8);
+      if (i % 2 === 0) {
+        b.prop('masonry', stoneBlock(0.55, 0.85, 0.62, P(sign * (hw + 0.18), ym - 1.1, zm), {
+          bevel: 0.06, batter: -0.25, irregular: 0.18,
+        }), 0x9ca2ac);
+      }
     }
   }
 
@@ -142,14 +166,17 @@ export function buildGateStaircase(b, {
     b.prop('masonry', stoneBlock(width + 1.4, topY - chasmFloorY, segD, P(0, chasmFloorY, zm), { bevel: 0.10, batter: 0.03 }), 0x8e939c);
   }
 
+  const stepTones = [0xbec3cc, 0xb4bac4, 0xc8ced6, 0xaeb4be];
   for (let i = 0; i < steps; i += 1) {
     const sy = yStart + (i + 1) * stepH;
     const sz = zStart - (i + 0.5) * stepD;
-    const treadTint = i % 3 === 0 ? 0xd2d6dc : 0xc6cad0;
-    b.prop('carved', stoneBlock(width - 1.4, stepH + 0.45, stepD + 0.24, P(0, sy - stepH - 0.42, sz), { bevel: 0.035, irregular: 0.03 }), treadTint);
+    const treadTint = stepTones[i % stepTones.length];
+    b.prop('carved', stoneBlock(width - 1.4, stepH + 0.45, stepD + 0.24, P(0, sy - stepH - 0.42, sz), {
+      bevel: 0.045, irregular: 0.14,
+    }), treadTint);
   }
 
-  // Heavy stepped cheek balustrades climbing either side of the staircase.
+  // Heavy stepped cheek balustrades climbing either side of the staircase with weathered coping stones.
   const cheekSegments = 6;
   for (let k = 0; k < cheekSegments; k += 1) {
     const t0 = k / cheekSegments;
@@ -159,8 +186,12 @@ export function buildGateStaircase(b, {
     const topY = yStart + t1 * totalRise + 1.35;
     const baseY = yStart + t0 * totalRise - 1.2;
     for (const sign of [-1, 1]) {
-      b.prop('carved', stoneBlock(1.25, topY - baseY, segD, P(sign * (hw - 0.15), baseY, zm), { bevel: 0.06 }), 0xc0c4cc);
-      b.prop('carved', stoneBox(1.42, 0.26, segD + 0.06, P(sign * (hw - 0.15), topY + 0.1, zm), { bevel: 0.04 }), 0xd4d8de);
+      b.prop('carved', stoneBlock(1.25, topY - baseY, segD, P(sign * (hw - 0.15), baseY, zm), {
+        bevel: 0.07, irregular: 0.16,
+      }), stepTones[(k + (sign > 0 ? 1 : 0)) % stepTones.length]);
+      b.prop('carved', stoneBox(1.44, 0.26, segD + 0.06, P(sign * (hw - 0.15), topY + 0.1, zm), {
+        bevel: 0.05, irregular: 0.18,
+      }), 0xcad0d8);
     }
   }
 

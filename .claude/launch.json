@@ -180,6 +180,52 @@
       ],
       "port": 5234,
       "autoPort": false
+    },
+    {
+      "name": "gates-base",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "bf16fddf",
+        "5243",
+        "fa4af9cd"
+      ],
+      "port": 5243,
+      "autoPort": false
+    },
+    {
+      "name": "gates-change",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "fa4af9cd",
+        "5244",
+        "fa4af9cd"
+      ],
+      "port": 5244,
+      "autoPort": false
+    },
+    {
+      "name": "world-simulator-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "world-simulator",
+        "run",
+        "dev:backend"
+      ],
+      "port": 3100
+    },
+    {
+      "name": "world-simulator",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "world-simulator",
+        "run",
+        "dev:frontend"
+      ],
+      "port": 5180
     }
   ]
 }

@@ -8,6 +8,7 @@ import { excavatedTunnel } from './gen/excavatedTunnel.js';
 import { PropOcclusionGrid } from './gen/PropOcclusionGrid.js';
 import { chamber, tunnel } from './gen/shapes.js';
 import { extractSurface, smoothAttribute, smoothSurfaceTaubin, splitByColumns } from './gen/SurfaceNets.js';
+import { buildLocationAlpineUnderstory } from './generators/LocationAlpineUnderstory.js';
 import { buildLocationCrystalField } from './generators/LocationCrystalField.js';
 import { LocationNav } from './LocationNav.js';
 
@@ -376,6 +377,7 @@ export class LocationBuilder {
     indirectBounce = null,
     propShadows = null,
     crystalField = null,
+    alpineUnderstory = null,
   }) {
     const group = new THREE.Group();
     const preparedProps = [];
@@ -386,7 +388,8 @@ export class LocationBuilder {
       const entry = materials[key];
       if (!entry) throw new Error(`Location prop material "${key}" is not in the generator's material set.`);
       const needWood = Boolean(entry.woodGrain) || parts.some((part) => part.attributes.woodMask);
-      const needUv = needWood || parts.some((part) => part.attributes.uv);
+      const needCloth = Boolean(entry.cloth) || parts.some((part) => part.attributes.clothData);
+      const needUv = needWood || needCloth || parts.some((part) => part.attributes.uv);
       for (const part of parts) {
         const vCount = part.attributes.position.count;
         if (needUv && !part.attributes.uv) {
@@ -397,10 +400,13 @@ export class LocationBuilder {
         if (needWood && !part.attributes.woodMask) {
           part.setAttribute('woodMask', new THREE.BufferAttribute(new Float32Array(vCount * 4), 4));
         }
+        if (needCloth && !part.attributes.clothData) {
+          part.setAttribute('clothData', new THREE.BufferAttribute(new Float32Array(vCount * 4), 4));
+        }
       }
       const geometry = mergeGeometries(parts);
       for (const part of parts) part.dispose();
-      if (key !== 'glow' && key !== 'water' && key !== 'waterfall') {
+      if (key !== 'glow' && key !== 'water' && key !== 'waterfall' && key !== 'cloth' && key !== 'pelt') {
         propGrid.addTriangles(geometry.attributes.position.array, {
           excludeLights: pointLights,
           excludeRadius: propShadows?.excludeRadius ?? 0.3,
@@ -521,6 +527,26 @@ export class LocationBuilder {
         mesh.renderOrder = 1;
         group.add(mesh);
       }
+    }
+
+    if (alpineUnderstory) {
+      const understoryMeshes = buildLocationAlpineUnderstory({
+        surface,
+        baked,
+        mask,
+        mask2,
+        nav: this.nav,
+        isStoneTerrain: !(materials.terrain?.ice > 0),
+        rockMaterial: materials.rock?.material ?? null,
+        crystalMaterial: materials.iceCrystal?.material ?? materials.clearIce?.material ?? null,
+        wind: alpineUnderstory.wind ?? [0.6, 0.8],
+        seed: this.seed + 31,
+        maxCobbles: alpineUnderstory.cobbles ?? 0,
+        maxIceShards: alpineUnderstory.iceShards ?? 0,
+        maxTundraSedge: alpineUnderstory.tundraSedge ?? 0,
+        maxTundraLichen: alpineUnderstory.tundraLichen ?? 0,
+      });
+      for (const mesh of understoryMeshes) group.add(mesh);
     }
 
     for (const { key, entry, geometry } of preparedProps) {

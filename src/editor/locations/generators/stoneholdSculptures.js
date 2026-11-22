@@ -1,3 +1,4 @@
+import { boulder } from '../gen/iceKit.js';
 import { extrudedProfile, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { atFrame } from './propFrame.js';
 
@@ -45,70 +46,75 @@ export function buildGateGuardianStatue(b, at, {
 
   // 2. Planted armored boots, greaves, knee guards, and lamellar battle skirt.
   for (const sx of [-0.82, 0.82]) {
-    b.prop(stoneMat, stoneBlock(1.18 * s, 0.72 * s, 1.85 * s, L(sx * s, y0, 0.25 * s), { yaw, bevel: 0.07 * s, batter: 0.08 }), 0xbec2ca);
-    b.prop(stoneMat, stoneBlock(1.08 * s, 2.5 * s, 1.24 * s, L(sx * s, y0 + 0.68 * s, 0.02 * s), { yaw, bevel: 0.08 * s, batter: 0.05 }), 0xc8ccd3);
+    b.prop(stoneMat, stoneBlock(1.18 * s, 0.72 * s, 1.85 * s, L(sx * s, y0, 0.25 * s), { yaw, bevel: 0.08 * s, batter: 0.1, irregular: 0.14 }), 0xb6bac2);
+    b.prop(stoneMat, stoneBlock(1.08 * s, 2.5 * s, 1.24 * s, L(sx * s, y0 + 0.68 * s, 0.02 * s), { yaw, bevel: 0.09 * s, batter: 0.06, irregular: 0.12 }), 0xc0c5ce);
     // Angular knee cop & shin ridge.
-    b.prop(stoneMat, stoneBox(0.96 * s, 0.68 * s, 0.42 * s, L(sx * s, y0 + 2.35 * s, 0.66 * s), { yaw, bevel: 0.06 * s }), 0xd4d7dd);
+    b.prop(stoneMat, stoneBox(0.96 * s, 0.68 * s, 0.42 * s, L(sx * s, y0 + 2.35 * s, 0.66 * s), { yaw, bevel: 0.06 * s, irregular: 0.1 }), 0xccd0d8);
     b.prop(trimMat, stoneBox(1.12 * s, 0.16 * s, 1.3 * s, L(sx * s, y0 + 1.4 * s, 0.04 * s), { yaw, bevel: 0.02 * s }), 0xcba25e);
   }
   // Armored lamellar coat/skirt & heavy dwarven belt.
-  b.prop(stoneMat, stoneBlock(3.1 * s, 2.0 * s, 2.15 * s, L(0, y0 + 2.75 * s, -0.04 * s), { yaw, bevel: 0.10 * s, batter: 0.12 }), 0xc2c6ce);
+  b.prop(stoneMat, stoneBlock(3.1 * s, 2.0 * s, 2.15 * s, L(0, y0 + 2.75 * s, -0.04 * s), { yaw, bevel: 0.11 * s, batter: 0.14, irregular: 0.14 }), 0xbac0c8);
   b.prop(trimMat, stoneBox(3.15 * s, 0.46 * s, 2.25 * s, L(0, y0 + 4.85 * s, 0.02 * s), { yaw, bevel: 0.04 * s }), 0xcba25e);
-  b.prop(stoneMat, stoneBox(0.92 * s, 0.66 * s, 0.35 * s, L(0, y0 + 4.85 * s, 1.18 * s), { yaw, bevel: 0.05 * s }), 0xd8dbe0);
+  b.prop(stoneMat, stoneBox(0.92 * s, 0.66 * s, 0.35 * s, L(0, y0 + 4.85 * s, 1.18 * s), { yaw, bevel: 0.05 * s, irregular: 0.1 }), 0xd2d6dc);
 
   // 3. Broad barrel cuirass, layered angular pauldrons, and thick stone cape/backplate.
-  b.prop(stoneMat, stoneBlock(3.45 * s, 3.05 * s, 2.35 * s, L(0, y0 + 5.0 * s, -0.02 * s), { yaw, bevel: 0.12 * s, batter: -0.08 }), 0xcad0d8);
-  b.prop(stoneMat, stoneBlock(3.2 * s, 7.6 * s, 0.72 * s, L(0, y0 + 0.55 * s, -1.28 * s), { yaw, bevel: 0.10 * s, batter: 0.08 }), 0xa8adb6);
+  b.prop(stoneMat, stoneBlock(3.45 * s, 3.05 * s, 2.35 * s, L(0, y0 + 5.0 * s, -0.02 * s), { yaw, bevel: 0.13 * s, batter: -0.08, irregular: 0.12 }), 0xc2c7d0);
+  b.prop(stoneMat, stoneBlock(3.2 * s, 7.6 * s, 0.72 * s, L(0, y0 + 0.55 * s, -1.28 * s), { yaw, bevel: 0.11 * s, batter: 0.09, irregular: 0.14 }), 0x9ea4ae);
   for (const sx of [-1, 1]) {
-    // Massive stepped pauldrons.
-    b.prop(stoneMat, stoneBlock(1.45 * s, 1.55 * s, 2.15 * s, L(sx * 2.15 * s, y0 + 6.75 * s, 0.02 * s), { yaw, bevel: 0.11 * s, batter: 0.18 }), 0xd2d6dc);
+    // Articulated double-tiered stone pauldrons.
+    b.prop(stoneMat, stoneBlock(1.48 * s, 1.55 * s, 2.18 * s, L(sx * 2.15 * s, y0 + 6.75 * s, 0.02 * s), { yaw, bevel: 0.12 * s, batter: 0.22, irregular: 0.14 }), 0xcad0d8);
+    b.prop(stoneMat, stoneBlock(1.22 * s, 0.68 * s, 1.85 * s, L(sx * 2.24 * s, y0 + 7.85 * s, 0.02 * s), { yaw, bevel: 0.09 * s, batter: 0.28, irregular: 0.14 }), 0xd2d6de);
     b.prop(trimMat, stoneBox(1.52 * s, 0.18 * s, 2.22 * s, L(sx * 2.15 * s, y0 + 7.28 * s, 0.02 * s), { yaw, bevel: 0.02 * s }), 0xd4aa64);
-    // Upper arm + heavy armored forearm.
-    b.prop(stoneMat, stoneBlock(1.08 * s, 2.25 * s, 1.18 * s, L(sx * 2.18 * s, y0 + 4.75 * s, 0.25 * s), { yaw, bevel: 0.08 * s }), 0xc0c4cc);
+    b.prop(stoneMat, stoneBlock(1.08 * s, 2.25 * s, 1.18 * s, L(sx * 2.18 * s, y0 + 4.75 * s, 0.25 * s), { yaw, bevel: 0.09 * s, irregular: 0.12 }), 0xb8bec8);
   }
 
-  // 4. Head, stern brow, winged angular Dwarven helm, and sweeping tiered geometric beard.
+  // 4. Head, deep recessed eye sockets, stern brow, winged Dwarven helm, and sculpted braided beard.
   const headY = y0 + 8.15 * s;
-  b.prop(stoneMat, stoneBlock(1.75 * s, 1.95 * s, 1.85 * s, L(0, headY, 0.15 * s), { yaw, bevel: 0.12 * s, batter: 0.06 }), 0xd2d6dc);
-  // Heavy angular brow visor + nose guard + cheek plates.
-  b.prop(stoneMat, stoneBox(1.88 * s, 0.44 * s, 0.55 * s, L(0, headY + 1.42 * s, 0.96 * s), { yaw, bevel: 0.05 * s }), 0xdce0e6);
-  b.prop(stoneMat, stoneBox(0.32 * s, 0.92 * s, 0.48 * s, L(0, headY + 1.02 * s, 1.10 * s), { yaw, bevel: 0.04 * s }), 0xdce0e6);
+  b.prop(stoneMat, stoneBlock(1.75 * s, 1.95 * s, 1.85 * s, L(0, headY, 0.15 * s), { yaw, bevel: 0.13 * s, batter: 0.07, irregular: 0.12 }), 0xcad0d8);
+  // Dark shadowed eye recess under the brow visor so the face reads with monumental stern depth.
+  b.prop(ironMat, stoneBox(1.38 * s, 0.34 * s, 0.22 * s, L(0, headY + 1.14 * s, 0.96 * s), { yaw, bevel: 0.02 * s }), 0x262930);
+  b.prop(stoneMat, stoneBox(1.88 * s, 0.44 * s, 0.55 * s, L(0, headY + 1.42 * s, 0.96 * s), { yaw, bevel: 0.05 * s, irregular: 0.1 }), 0xd6dae0);
+  b.prop(stoneMat, stoneBox(0.32 * s, 0.92 * s, 0.48 * s, L(0, headY + 1.02 * s, 1.10 * s), { yaw, bevel: 0.04 * s, irregular: 0.08 }), 0xd8dce2);
   for (const sx of [-0.72, 0.72]) {
-    b.prop(stoneMat, stoneBox(0.46 * s, 0.98 * s, 0.65 * s, L(sx * s, headY + 0.95 * s, 0.88 * s), { yaw, bevel: 0.04 * s }), 0xc8ccd4);
+    b.prop(stoneMat, stoneBox(0.46 * s, 0.98 * s, 0.65 * s, L(sx * s, headY + 0.95 * s, 0.88 * s), { yaw, bevel: 0.05 * s, irregular: 0.1 }), 0xc2c6ce);
   }
   // Stepped geometric helm crown + central crest + bronze diadem band.
   const helmPts = [[-0.98 * s, 0], [-0.78 * s, 0.85 * s], [0, 1.38 * s], [0.78 * s, 0.85 * s], [0.98 * s, 0]];
-  b.prop(stoneMat, extrudedProfile(helmPts, 1.92 * s, { bevel: 0.08 * s, yaw, at: L(0, headY + 1.62 * s, 0.12 * s) }), 0xc6cad2);
+  b.prop(stoneMat, extrudedProfile(helmPts, 1.92 * s, { bevel: 0.09 * s, yaw, at: L(0, headY + 1.62 * s, 0.12 * s) }), 0xbec3cc);
   b.prop(trimMat, stoneBox(1.94 * s, 0.22 * s, 2.02 * s, L(0, headY + 1.66 * s, 0.16 * s), { yaw, bevel: 0.025 * s }), 0xd8b068);
-  b.prop(stoneMat, stoneBox(0.34 * s, 1.35 * s, 2.15 * s, L(0, headY + 2.55 * s, 0.08 * s), { yaw, bevel: 0.05 * s }), 0xd4d8de);
+  b.prop(stoneMat, stoneBox(0.34 * s, 1.35 * s, 2.15 * s, L(0, headY + 2.55 * s, 0.08 * s), { yaw, bevel: 0.05 * s, irregular: 0.1 }), 0xced2da);
 
   // Sweeping angular faceted braided beard cascading over the chest.
   const beardPts = [
     [-1.08 * s, 0.65 * s], [1.08 * s, 0.65 * s], [0.92 * s, -0.85 * s],
     [0.52 * s, -2.05 * s], [0, -2.65 * s], [-0.52 * s, -2.05 * s], [-0.92 * s, -0.85 * s],
   ];
-  b.prop(stoneMat, extrudedProfile(beardPts, 0.85 * s, { bevel: 0.08 * s, yaw, at: L(0, headY + 0.18 * s, 1.15 * s) }), 0xd6dae0);
-  // Carved vertical beard braid grooves & bronze beard clasps.
+  b.prop(stoneMat, extrudedProfile(beardPts, 0.85 * s, { bevel: 0.09 * s, yaw, at: L(0, headY + 0.18 * s, 1.15 * s) }), 0xd0d4dc);
   for (const bx of [-0.54, 0, 0.54]) {
-    b.prop(stoneMat, stoneBox(0.34 * s, 2.1 * s, 0.28 * s, L(bx * s, headY - 0.65 * s, 1.54 * s), { yaw, bevel: 0.04 * s }), 0xe0e3e8);
+    b.prop(stoneMat, stoneBox(0.34 * s, 2.1 * s, 0.28 * s, L(bx * s, headY - 0.65 * s, 1.54 * s), { yaw, bevel: 0.05 * s, irregular: 0.1 }), 0xd8dce2);
     b.prop(trimMat, stoneBox(0.38 * s, 0.18 * s, 0.34 * s, L(bx * s, headY - 1.25 * s, 1.56 * s), { yaw, bevel: 0.02 * s }), 0xd8b068);
   }
-  // Twin angular moustache wings.
   for (const sx of [-1, 1]) {
-    b.prop(stoneMat, hewnBeam(L(0, headY + 0.52 * s, 1.56 * s), L(sx * 1.05 * s, headY + 0.14 * s, 1.48 * s), 0.32 * s, 0.34 * s, { bevel: 0.04 * s }), 0xe2e5ea);
+    b.prop(stoneMat, hewnBeam(L(0, headY + 0.52 * s, 1.56 * s), L(sx * 1.05 * s, headY + 0.14 * s, 1.48 * s), 0.32 * s, 0.34 * s, { bevel: 0.04 * s, irregular: 0.12 }), 0xdce0e6);
   }
 
-  // 5. Weapons: Great round bossed Dwarven shield on `h` side, grounded greatsword on `-h` side.
+  // 5. Weapons: Domed, riveted, bronze-rimmed Dwarven heater/round shield on `h` side, greatsword on `-h` side.
   const shieldX = h * 2.02 * s;
   const shieldY = y0 + 4.75 * s;
   const shieldZ = 1.42 * s;
-  b.prop(stoneMat, rod(L(shieldX, shieldY, shieldZ - 0.24 * s), L(shieldX, shieldY, shieldZ + 0.22 * s), 1.92 * s, 1.84 * s, 12), 0xc4c8d0);
-  b.prop(trimMat, rod(L(shieldX, shieldY, shieldZ + 0.14 * s), L(shieldX, shieldY, shieldZ + 0.28 * s), 1.86 * s, 1.62 * s, 12), 0xcfa660);
-  b.prop(stoneMat, rod(L(shieldX, shieldY, shieldZ + 0.20 * s), L(shieldX, shieldY, shieldZ + 0.32 * s), 1.48 * s, 1.42 * s, 12), 0xb8bcc4);
-  b.prop(trimMat, rod(L(shieldX, shieldY, shieldZ + 0.28 * s), L(shieldX, shieldY, shieldZ + 0.52 * s), 0.58 * s, 0.32 * s, 8), 0xdeb870);
-  // Shield cross bands.
-  b.prop(trimMat, stoneBox(3.2 * s, 0.24 * s, 0.14 * s, L(shieldX, shieldY, shieldZ + 0.28 * s), { yaw, bevel: 0.02 * s }), 0xcba25e);
-  b.prop(trimMat, stoneBox(0.24 * s, 3.2 * s, 0.14 * s, L(shieldX, shieldY, shieldZ + 0.28 * s), { yaw, bevel: 0.02 * s }), 0xcba25e);
+  b.prop(stoneMat, rod(L(shieldX, shieldY, shieldZ - 0.26 * s), L(shieldX, shieldY, shieldZ + 0.18 * s), 1.96 * s, 1.88 * s, 16), 0xb8bec8);
+  b.prop(trimMat, rod(L(shieldX, shieldY, shieldZ + 0.12 * s), L(shieldX, shieldY, shieldZ + 0.28 * s), 1.92 * s, 1.66 * s, 16), 0xcfa45a);
+  b.prop(stoneMat, rod(L(shieldX, shieldY, shieldZ + 0.18 * s), L(shieldX, shieldY, shieldZ + 0.34 * s), 1.54 * s, 1.38 * s, 16), 0xa8aeb8);
+  // Sculpted domed center umbo boss + 8 forged bronze perimeter rivet studs.
+  b.prop(trimMat, boulder(L(shieldX, shieldY - 0.1 * s, shieldZ + 0.32 * s), 0.56 * s, 0.56 * s, 0.36 * s,
+    { seed: Math.round(at.x * 13) + 17, blocky: 0.12, maxDetail: 3 }), 0xdeb870);
+  for (let r = 0; r < 8; r += 1) {
+    const a = (r / 8) * Math.PI * 2 + Math.PI / 8;
+    b.prop(trimMat, stoneBox(0.18 * s, 0.18 * s, 0.16 * s,
+      L(shieldX + Math.cos(a) * 1.66 * s, shieldY + Math.sin(a) * 1.66 * s, shieldZ + 0.3 * s), { yaw: yaw + a, bevel: 0.02 * s }), 0xe2be78);
+  }
+  b.prop(trimMat, stoneBox(3.2 * s, 0.22 * s, 0.14 * s, L(shieldX, shieldY, shieldZ + 0.30 * s), { yaw, bevel: 0.02 * s }), 0xcba25e);
+  b.prop(trimMat, stoneBox(0.22 * s, 3.2 * s, 0.14 * s, L(shieldX, shieldY, shieldZ + 0.30 * s), { yaw, bevel: 0.02 * s }), 0xcba25e);
 
   // Grounded colossal greatsword held on `-h` side (resting straight down onto the plinth).
   const swordX = -h * 1.48 * s;
@@ -189,7 +195,11 @@ export function buildFortressDoors(b, at, {
       b.prop('bronze', stoneBlock(0.54, height - 0.4, leafThick + 0.24, F(dir * sx, 0.2, 0), { yaw: leafYaw, bevel: 0.04 }), 0xdcb46e);
     }
     for (const y of [1.2, 4.4, 7.6, 10.8, height - 0.8]) {
-      b.prop('iron', stoneBox(leafW - 0.15, 0.48, leafThick + 0.28, F(dir * leafW * 0.5, y, 0), { yaw: leafYaw, bevel: 0.03 }), 0x3b3f48);
+      b.prop('iron', stoneBox(leafW - 0.15, 0.48, leafThick + 0.28, F(dir * leafW * 0.5, y, 0), { yaw: leafYaw, bevel: 0.03 }), 0x383c45);
+      // Heavy forged iron rivet studs along every cross-strap.
+      for (const frac of [0.16, 0.38, 0.62, 0.84]) {
+        b.prop('bronze', stoneBox(0.18, 0.18, leafThick + 0.42, F(dir * leafW * frac, y, 0), { yaw: leafYaw + Math.PI / 4, bevel: 0.02 }), 0xcba058);
+      }
     }
 
     // Geometric diamond knotwork relief coffers along each door bay.
@@ -198,25 +208,30 @@ export function buildFortressDoors(b, at, {
       const rX = leafW * 0.32;
       const rY = 1.25;
       const pts = [[0, rY], [rX, 0], [0, -rY], [-rX, 0]];
-      b.prop('bronze', extrudedProfile(pts, leafThick + 0.32, { bevel: 0.04, yaw: leafYaw, at: F(cx, cy, 0) }), 0xe0ba74);
+      b.prop('bronze', extrudedProfile(pts, leafThick + 0.32, { bevel: 0.04, yaw: leafYaw, at: F(cx, cy, 0) }), 0xd8b26a);
       const inPts = [[0, rY * 0.6], [rX * 0.6, 0], [0, -rY * 0.6], [-rX * 0.6, 0]];
-      b.prop('iron', extrudedProfile(inPts, leafThick + 0.38, { bevel: 0.03, yaw: leafYaw, at: F(cx, cy, 0) }), 0x4a4642);
+      b.prop('iron', extrudedProfile(inPts, leafThick + 0.38, { bevel: 0.03, yaw: leafYaw, at: F(cx, cy, 0) }), 0x3f3c3a);
     }
-    // Monumental bronze ring handle.
-    b.prop('bronze', rod(F(dir * (leafW - 0.95), 4.1, 0.56), F(dir * (leafW - 0.95), 5.0, 0.56), 0.28, 0.28, 8), 0xe8c47c);
+    // Monumental bronze ring handle & backplate.
+    b.prop('iron', stoneBox(0.68, 1.15, 0.16, F(dir * (leafW - 0.95), 4.55, 0.46), { yaw: leafYaw, bevel: 0.03 }), 0x2f333b);
+    b.prop('bronze', rod(F(dir * (leafW - 0.95), 4.1, 0.58), F(dir * (leafW - 0.95), 5.0, 0.58), 0.28, 0.28, 10), 0xe2bc72);
   }
 
+  // Extended dark forged-iron & soot-weathered threshold floor slab running cleanly under the open doors.
+  b.prop('iron', stoneBox(width + 2.4, 0.32, 9.6, L(0, 0.04, -3.2), { yaw, bevel: 0.04 }), 0x242830);
+  b.prop('bronze', stoneBox(width + 0.4, 0.08, 0.28, L(0, 0.20, 1.48), { yaw, bevel: 0.02 }), 0xb58e4a);
+
   if (glowForge) {
-    // Deep recessed roaring forge hearth glow behind the cracked doors (Refs 4 & 6).
-    b.prop('iron', stoneBlock(width * 1.15, height * 1.05, 0.5, L(0, 0, -6.2), { yaw, bevel: 0.04 }), 0x1e1612);
-    b.prop('glow', stoneBlock(width * 0.72, height * 0.88, 0.35, L(0, 0.2, -5.6), { yaw, bevel: 0.02 }), '#ff5a10', 2.6);
-    b.prop('glow', stoneBlock(width * 0.42, height * 0.68, 0.35, L(0, 0.4, -5.1), { yaw, bevel: 0.02 }), '#ffa42e', 3.4);
-    b.flame(L(0, 0.4, -3.2), { width: 4.8, height: 8.6, core: '#fff2be', outer: '#ff4808', speed: 0.85 });
-    b.flame(L(-1.4, 0.6, -3.8), { width: 3.4, height: 6.4, core: '#ffe89c', outer: '#ff520e', speed: 1.05 });
-    b.flame(L(1.4, 0.6, -3.8), { width: 3.4, height: 6.4, core: '#ffe89c', outer: '#ff520e', speed: 0.95 });
-    b.light(L(0, 4.2, -2.4), '#ff7822', 26, 44, { radius: 4.2, halo: 5.5, haloGain: 0.42, importance: 2 });
-    b.light(L(0, 2.2, 2.8), '#ff9c42', 11, 28, { radius: 3.0, halo: 2.2, haloGain: 0.28, importance: 1.6 });
-    b.shaft(L(0, 6.2, -3.6), L(0, 2.4, 10.5), 5.6, '#ff8f34', 0.46);
+    // Deep recessed molten forge hearth glow behind the cracked doors (rich amber-orange without white clipping!).
+    b.prop('iron', stoneBlock(width * 1.15, height * 1.05, 0.5, L(0, 0, -6.4), { yaw, bevel: 0.04 }), 0x1a1310);
+    b.prop('glow', stoneBlock(width * 0.72, height * 0.86, 0.35, L(0, 0.5, -5.8), { yaw, bevel: 0.02 }), '#ff520e', 1.85);
+    b.prop('glow', stoneBlock(width * 0.38, height * 0.64, 0.35, L(0, 0.8, -5.3), { yaw, bevel: 0.02 }), '#ff8822', 2.35);
+    b.flame(L(0, 0.5, -3.4), { width: 4.6, height: 8.2, core: '#ffe8a8', outer: '#ff4808', speed: 0.85 });
+    b.flame(L(-1.4, 0.7, -4.0), { width: 3.2, height: 6.2, core: '#ffd884', outer: '#ff520e', speed: 1.05 });
+    b.flame(L(1.4, 0.7, -4.0), { width: 3.2, height: 6.2, core: '#ffd884', outer: '#ff520e', speed: 0.95 });
+    b.light(L(0, 4.4, -2.4), '#ff7822', 17, 42, { radius: 4.2, halo: 4.6, haloGain: 0.36, importance: 2 });
+    b.light(L(0, 2.4, 3.0), '#ff983c', 7.5, 26, { radius: 3.0, halo: 1.8, haloGain: 0.24, importance: 1.5 });
+    b.shaft(L(0, 6.2, -3.6), L(0, 2.4, 10.5), 5.2, '#ff8a30', 0.36);
   }
 }
 

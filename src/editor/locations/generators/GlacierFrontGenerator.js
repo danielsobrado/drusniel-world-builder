@@ -1,9 +1,9 @@
+import { collarRing, hewnPole, windFlagMesh } from '../gen/clothKit.js';
 import { boulder } from '../gen/iceKit.js';
 import { cellNoise3, fbm3 } from '../gen/noise.js';
 import { onTrail, planDistance } from '../gen/plan.js';
-import { panel, rod } from '../gen/propKit.js';
 import { chamber, tunnel } from '../gen/shapes.js';
-import { DARK, torch } from './frostgardKit.js';
+import { torch } from './frostgardKit.js';
 import { dryingRack, sled, woodpile } from './frostgardDressing.js';
 import { hangCornice, openRidge, raiseRidge, ridgeLayout, splitLip } from './glacierFrontIce.js';
 import { driftAround, leeBank, scourAt } from './glacierFrontSnow.js';
@@ -85,10 +85,21 @@ export function generate(b, params) {
     const cut = rolling - channel.depth * bed(x, z);
     return cut + (pool.y - cut) * basin(x, z);
   }, spanX, spanZ, voxel);
-  // Jointed rock: bedding planes dip gently down-valley, and every `ledge` metres up the face steps back onto a bench.
+  // Jointed alpine rock walls: domain-warped irregular rock benches broken vertically by
+  // scree chutes and buttress ribs, flaring gently into talus aprons at the valley floor.
   const wallX = cached((y, z) => {
-    const bedding = y + z * wall.dip + wave(z, y, 0.03, 13) * wall.warp;
-    return wall.x + wave(z, y * 0.25, 0.05, 3) * 9 + y * wall.lean + Math.floor(Math.max(0, bedding) / wall.ledge) * wall.bench;
+    const warp = wave(z, y * 0.65, 0.038, 13, 3) * (wall.warp * 1.45)
+      + wave(z * 1.9, y * 0.35, 0.075, 29, 2) * 2.4;
+    const bedding = Math.max(0, y + z * wall.dip + warp);
+    const stepPos = bedding / wall.ledge;
+    const stepIdx = Math.floor(stepPos);
+    const stepFrac = stepPos - stepIdx;
+    // Smoothly varied bench step with noise-broken vertical chutes so snow ledges never read as ruled lines.
+    const smoothStep = stepIdx + stepFrac * stepFrac * (3 - 2 * stepFrac) * 0.45;
+    const chute = (wave(z, y * 0.08, 0.09, 41, 2) - 0.5) * 4.8;
+    const buttress = wave(z, y * 0.22, 0.048, 3, 3) * 9.5;
+    const talusApron = Math.max(0, 1 - y / 9.5) ** 2 * (2.6 + wave(z, 0.5, 0.14, 53, 2) * 2.2);
+    return wall.x + buttress + chute - talusApron + y * wall.lean + smoothStep * (wall.bench * 0.85);
   }, spanY, spanZ, voxel);
   // The face stands in facets between the crevasses: buttresses forward, re-entrants back, each one a plane.
   const facet = (x) => cellNoise3(x / front.facet, 0.5, 0.5, seed + 4);
@@ -241,11 +252,26 @@ export function generate(b, params) {
     }
   }
   scatter(b, P(0, 0, 12), 30, 10, footing, { material: 'rock', size: [0.3, 1.2] });
-  // Erratics: boulders carried down on the ice and set down where it melted, each with its drift and its moat.
-  for (const { x, z, size } of erratics) {
-    const at = P(x, ground(x, z), z);
-    b.prop('rock', boulder(P(x, at.y - size * 0.3, z), size, size * 0.75, size * 0.9,
-      { seed: Math.floor(b.range(1, 9999)), blocky: 0.45, yaw: b.range(0, Math.PI) }));
+  // Erratics: sculpted craggy glacial boulders bedded deeply into their wind drifts & ringed with fractured talus stones.
+  for (let eIdx = 0; eIdx < erratics.length; eIdx += 1) {
+    const { x, z, size } = erratics[eIdx];
+    const at = P(x, footing(x, z) ?? ground(x, z), z);
+    const eSeed = Math.floor(b.range(1, 9999));
+    const eYaw = b.range(0, Math.PI);
+    b.prop('rock', boulder(P(x, at.y - size * 0.34, z), size, size * 0.78, size * 0.9,
+      { seed: eSeed, blocky: 0.18, yaw: eYaw }));
+    // Natural apron of frost-shattered talus cobbles grounding the erratic visually into the snowpack.
+    const cobbles = 8 + (eIdx % 3);
+    for (let k = 0; k < cobbles; k += 1) {
+      const ang = (k / cobbles) * Math.PI * 2 + b.range(-0.32, 0.32);
+      const dist = size * b.range(0.78, 1.52);
+      const cx = x + Math.cos(ang) * dist;
+      const cz = z + Math.sin(ang) * dist;
+      const cy = footing(cx, cz) ?? ground(cx, cz);
+      const cr = size * b.range(0.11, 0.26);
+      b.prop('rock', boulder(P(cx, cy - cr * 0.36, cz), cr * 1.18, cr * 0.74, cr,
+        { seed: eSeed + 41 + k * 13, blocky: 0.22, yaw: b.range(0, Math.PI), maxDetail: 3 }));
+    }
     b.nav.block(at, size * 0.95, size * 1.5);
   }
 
@@ -267,14 +293,28 @@ export function generate(b, params) {
   b.sunShaft(P(windowX, windowY, ridge.z(windowX)), 3.4, params.shafts);
   b.sunShaft(P(arch.x, archFloor + arch.height * 0.6, arch.z), arch.width * 0.6, params.shafts * 0.7);
 
-  // Snow sifting off the lip, and the stakes the Norths set to mark the safe line to the cave.
+  // Snow sifting off the lip, and the hand-hewn trail stakes flying wind-animated Norths swallowtail pennants.
   for (let x = -40; x <= 40; x += 16) b.emit('sift', P(x, top(x, faceZ(x, 36)) + 0.5, faceZ(x, 36) + 1));
   b.anchor('lip', P(0, front.height, front.z));
-  for (const [x, z] of params.stakes) {
+  for (let sIdx = 0; sIdx < params.stakes.length; sIdx += 1) {
+    const [x, z] = params.stakes[sIdx];
     const foot = stand(x, z);
-    b.prop('timber', rod(P(foot.x, foot.y - 0.3, foot.z), P(foot.x + 0.06, foot.y + 2.3, foot.z), 0.06, 0.045, 6), DARK);
-    b.prop('cloth', panel(P(foot.x + 0.06, foot.y + 2.05, foot.z), P(foot.x + 0.75, foot.y + 1.95, foot.z + 0.2), P(0, 1, 0), 0.34, 0.02), 0xd6402e);
-    b.nav.block(foot, 0.3, 2.3);
+    const sSeed = seed + 401 + sIdx * 37;
+    const tip = P(foot.x + 0.05 + b.range(-0.04, 0.04), foot.y + 2.38 + b.range(-0.1, 0.14), foot.z + b.range(-0.04, 0.04));
+    // Crooked, debarked hand-hewn spruce stake driven directly into the snowpack + forged iron hoist rings.
+    b.prop('timber', hewnPole(P(foot.x, foot.y - 0.38, foot.z), tip, 0.064, 0.042,
+      { seed: sSeed, segments: 6, sides: 8, bow: 0.05 }), 0x463525);
+    b.prop('iron', collarRing(P(tip.x, tip.y - 0.14, tip.z), P(0, 1, 0), 0.052, 0.036, 8), 0x3b404a);
+    b.prop('iron', collarRing(P(tip.x, tip.y - 0.54, tip.z), P(0, 1, 0), 0.055, 0.036, 8), 0x3b404a);
+    // GPU wind-animated oxblood wool swallowtail pennant aligned with the valley katabatic wind.
+    b.prop('cloth', windFlagMesh(
+      P(tip.x, tip.y - 0.12, tip.z),
+      P(tip.x, tip.y - 0.54, tip.z),
+      P(wind.x, 0, wind.z),
+      0.92 + b.range(-0.06, 0.12),
+      { style: 'swallowtail', seed: sSeed + 19, droop: 0.14 },
+    ), 0x8e241b);
+    b.nav.block(foot, 0.32, 2.4);
   }
   torch(b, stand(cave[1].x + 2.2, cave[1].z + 3), { intensity: 4, range: 13 });
   // A Norths waystation before the arch: the sled pointed at the way through, wood stacked, hides on the rack.

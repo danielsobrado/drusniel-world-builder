@@ -326,17 +326,29 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
 
   if (profile.snow) {
     // Rime: whatever stands in the weather is greyed with frost before any snow settles on it.
-    albedo = mix(albedo, color(profile.snow.color).mul(0.55), bakedShade.z.mul(profile.snow.rime ?? 0));
-    // Snow lies on what faces a sky it can fall from: ledges, roof pitches, the tops of logs and stones.
-    const settle = locationNoise(NOISE.patch, point.mul(1.3)).mul(0.22);
-    const lying = smoothstep(profile.snow.from, profile.snow.from + 0.35, geometryNormal.y.add(settle))
+    albedo = mix(albedo, color(profile.snow.color).mul(0.58), bakedShade.z.mul(profile.snow.rime ?? 0));
+    // Snow lies on sky-exposed crevices and shoulders: combine geometric + detail normal with
+    // multi-scale wind-drift breakup so snow-to-rock transitions feather organically with a frost skirt.
+    const snowNormalY = mix(geometryNormal.y, normal.y, float(0.42));
+    const settleBroad = locationNoise(NOISE.patch, point.mul(0.85)).mul(0.22);
+    const settleFine = locationNoise(NOISE.fbm, point.mul(2.9).add(vec3(3.7, 1.3, 6.2))).mul(0.14);
+    const snowSignal = snowNormalY.add(settleBroad).add(settleFine);
+    const lying = smoothstep(profile.snow.from, profile.snow.from + 0.34, snowSignal)
       .mul(bakedShade.z).mul(profile.snow.amount);
-    albedo = mix(albedo, color(profile.snow.color).mul(locationNoise(NOISE.grit, point.mul(9)).mul(0.04).add(1)), lying);
-    normal = normalize(mix(normal, geometryNormal, lying.mul(0.8)));
-    roughness = mix(roughness, float(0.9), lying);
+    const frostSkirt = smoothstep(profile.snow.from - 0.22, profile.snow.from + 0.14, snowSignal)
+      .mul(lying.oneMinus()).mul(bakedShade.z).mul(0.52);
+    const dampRim = smoothstep(profile.snow.from - 0.32, profile.snow.from - 0.04, snowSignal)
+      .mul(frostSkirt.oneMinus()).mul(lying.oneMinus()).mul(bakedShade.z).mul(0.28);
+    albedo = albedo.mul(float(1).sub(dampRim.mul(0.32)));
+    albedo = mix(albedo, color(profile.snow.color).mul(0.86), frostSkirt.mul(0.65));
+    const snowSparkle = locationNoise(NOISE.grit, point.mul(10.5)).mul(0.05).add(0.99);
+    albedo = mix(albedo, color(profile.snow.color).mul(snowSparkle), lying);
+    normal = normalize(mix(normal, geometryNormal, lying.mul(0.76)));
+    roughness = mix(roughness, float(0.76), frostSkirt.mul(0.45));
+    roughness = mix(roughness, float(0.88), lying);
     f0 = mix(f0, float(0.02), lying);
     metalness = metalness.mul(lying.oneMinus());
-    wrap = mix(wrap, float(0.6), lying);
+    wrap = mix(wrap, float(0.58), lying);
   }
 
   return { albedo, normal, roughness, f0, metalness, emissive, wrap };

@@ -135,46 +135,208 @@ function fork(axis, radiusAt, length, taper, sides, shape, range) {
   return spindle(stations, Math.max(4, sides - 2), shape);
 }
 
+const smin = (a, b, k) => {
+  if (k <= 1e-4) return Math.min(a, b);
+  const h = Math.max(0, Math.min(1, 0.5 + (0.5 * (b - a)) / k));
+  return b * (1 - h) + a * h - k * h * (1 - h);
+};
+
+/** 3-octave ridged noise for sharp alpine fracture crests and weathered rock ledges. */
+function ridgedRock3(x, y, z, seed) {
+  let sum = 0;
+  let amp = 0.58;
+  let freq = 1;
+  let weight = 1;
+  for (let oct = 0; oct < 3; oct += 1) {
+    const n = fbm3(x * freq + oct * 4.3, y * freq - oct * 2.9, z * freq + oct * 3.7, seed + oct * 19, 1);
+    let r = 1 - Math.abs(n * 2 - 1);
+    r = r * r * weight;
+    weight = Math.max(0.2, Math.min(1, r * 1.7));
+    sum += r * amp;
+    freq *= 2.15;
+    amp *= 0.46;
+  }
+  return sum;
+}
+
 /**
- * A boulder or a block of fallen ice resting on `at`, flat underneath.
- * `blocky` runs from 0, a weathered rock (a lumpy body with its corners worn
- * into shallow facets, shaded round), to 1, a calved block (cut by deep flat
- * fracture faces that meet in sharp edges).
+ * A sculpted alpine boulder or fractured block of fallen ice resting on `at`,
+ * bedded naturally into the ground. `blocky` runs from 0 (weathered glacial
+ * erratic with multi-octave ridged crags, stratified ledges, and rounded wind-
+ * worn shoulders) to 1 (freshly calved ice block with crisp fracture facets).
  */
-export function boulder(at, rx, ry, rz, { seed = 1, blocky = 0, yaw = 0 } = {}) {
+export function boulder(at, rx, ry, rz, { seed = 1, blocky = 0, yaw = 0, maxDetail = 5 } = {}) {
   const rng = createRng(seed);
   const range = (lo, hi) => lo + rng() * (hi - lo);
   const size = Math.max(rx, ry, rz);
-  const detail = size < 0.45 ? 1 : size < 1.1 ? 2 : 3;
-  // Fracture planes in the unit body. The first five frame it (a top, four sides), as ice
-  // calves along its layers and joints; the rest are chips off its corners.
+  // High welded subdivision on foreground erratics & cairns eliminates flat polygonal silhouettes.
+  const detail = Math.min(maxDetail, size < 0.35 ? 2 : size < 0.85 ? 3 : size < 1.6 ? 4 : 5);
+  // Oblique cleavage planes: softer polynomial smooth-min on rocks, crisp cuts on calved ice.
   const planes = [{ x: 0, y: -1, z: 0, d: BASE_CUT }];
   const facets = Math.round(ROCK_FACETS + (ICE_FACETS - ROCK_FACETS) * blocky);
   for (let index = 0; index < facets; index += 1) {
     const frame = index < 5;
-    const azimuth = frame ? (index - 1) * Math.PI / 2 + range(-0.35, 0.35) : range(0, TAU);
-    const rise = index === 0 ? range(0.92, 1) : frame ? range(-0.2, 0.25) : range(-0.1, 0.9);
-    const across = Math.sqrt(1 - rise * rise);
-    const deep = frame ? range(0.58, 0.8) : range(0.7, 0.9), shallow = range(0.82, 0.96);
-    planes.push({ x: Math.cos(azimuth) * across, y: rise, z: Math.sin(azimuth) * across, d: shallow + (deep - shallow) * blocky });
+    const azimuth = frame ? (index - 1) * Math.PI / 2 + range(-0.42, 0.42) : range(0, TAU);
+    const rise = index === 0 ? range(0.84, 0.98) : frame ? range(-0.22, 0.32) : range(-0.14, 0.88);
+    const across = Math.sqrt(Math.max(0, 1 - rise * rise));
+    const deep = frame ? range(0.62, 0.82) : range(0.72, 0.92), shallow = range(0.84, 0.98);
+    planes.push({
+      x: Math.cos(azimuth) * across,
+      y: rise,
+      z: Math.sin(azimuth) * across,
+      d: shallow + (deep - shallow) * blocky,
+    });
   }
-  const geometry = mergeVertices(new THREE.IcosahedronGeometry(1, detail).deleteAttribute('uv').deleteAttribute('normal'));
+  const smoothK = (1 - blocky) * 0.14 + 0.012;
+  const strataTiltX = range(-0.28, 0.28);
+  const strataTiltZ = range(-0.28, 0.28);
+  const strataFreq = range(4.2, 7.2);
+
+  const sphere = new THREE.IcosahedronGeometry(1, detail);
+  sphere.deleteAttribute('uv');
+  sphere.deleteAttribute('normal');
+  const geometry = mergeVertices(sphere, 1e-4);
+  sphere.dispose();
+
+  const position = geometry.attributes.position;
+  const tints = new Float32Array(position.count * 3);
+  for (let v = 0; v < position.count; v += 1) {
+    const x = position.getX(v), y = position.getY(v), z = position.getZ(v);
+    // Macro organic rock asymmetry + ridged glacial crags + dipping cleavage strata.
+    const macro = (fbm3(x * 1.15 + seed * 0.13, y * 1.15, z * 1.15, seed, 3) - 0.5) * 0.36 * (1 - blocky * 0.55);
+    const crag = (ridgedRock3(x * 1.85 + 2.1, y * 1.85 - 1.4, z * 1.85 + 0.7, seed + 47) - 0.44)
+      * (0.34 * (1 - blocky * 0.35));
+    const bedCoord = (y + x * strataTiltX + z * strataTiltZ) * strataFreq;
+    const strata = Math.sin(bedCoord + macro * 2.6) * 0.038 * (1 - blocky * 0.65);
+    // Subtle basal flare so boulders bed heavily into the snowfield instead of hovering.
+    const baseFlare = Math.max(0, -y - 0.05) * 0.14 * (1 - blocky * 0.5);
+
+    let reach = 1 + macro + crag + strata + baseFlare;
+    for (let pIdx = 0; pIdx < planes.length; pIdx += 1) {
+      const plane = planes[pIdx];
+      const facing = x * plane.x + y * plane.y + z * plane.z;
+      if (facing > 1e-3) {
+        const planeReach = plane.d / facing;
+        reach = pIdx === 0 ? Math.min(reach, planeReach) : smin(reach, planeReach, smoothK);
+      }
+    }
+    // Fine chipped surface grit on top of the smoothly cleaved silhouette.
+    const fine = (fbm3(x * 5.2 + 7.1, y * 5.2, z * 5.2, seed + 83, 2) - 0.5) * 0.055 * (1 - blocky * 0.4);
+    reach = Math.max(0.28, reach + fine);
+
+    const px = x * reach * rx;
+    const py = (y * reach + BASE_CUT) * ry;
+    const pz = z * reach * rz;
+    position.setXYZ(v, px, py, pz);
+
+    // Bake natural crevice/shoulder cavity occlusion so carved crags read crisply in any light.
+    const crevice = Math.max(0.7, Math.min(1.08, 0.88 + crag * 0.65 + y * 0.08 + fine * 1.2));
+    tints[v * 3] = crevice;
+    tints[v * 3 + 1] = crevice * (0.99 + Math.max(0, y) * 0.02);
+    tints[v * 3 + 2] = crevice * (1.0 + Math.max(0, y) * 0.03);
+  }
+  geometry.setAttribute('tint', new THREE.BufferAttribute(tints, 3));
+  geometry.computeVertexNormals();
+  // Keep weathered rocks smooth-welded so triplanar rock normals & ridged displacement read organically;
+  // only freshly calved ice blocks (`blocky >= 0.65`) sharpen into planar fracture facets.
+  const sharpAmount = blocky >= 0.65 ? (blocky - 0.5) * 1.15 : 0;
+  const shaped = sharpAmount > 0.05 ? sharpen(geometry.toNonIndexed(), sharpAmount) : geometry;
+  if (yaw) shaped.rotateY(yaw);
+  return shaped.translate(at.x, at.y, at.z);
+}
+
+/**
+ * Continuous contoured snow blanket conforming closely to a pitched timber roof
+ * (`width` along X, `depth` along Z tilted by `pitchRad`), with wind-drifted
+ * depth undulation and smoothly feathered eaves (no bulbous cloud-buns).
+ */
+export function roofSnowBlanket(at, width, depth, pitchRad, {
+  seed = 1,
+  thickness = 0.14,
+  cols = 18,
+  rows = 8,
+} = {}) {
+  const halfW = width * 0.5;
+  const halfD = depth * 0.5;
+  const vCount = (cols + 1) * (rows + 1);
+  const positions = new Float32Array(vCount * 3);
+  const indices = [];
+
+  for (let c = 0; c <= cols; c += 1) {
+    const u = c / cols;
+    const x = (u - 0.5) * width;
+    const edgeX = Math.min(u, 1 - u);
+    const taperX = Math.min(1, edgeX / 0.14);
+    const smoothX = taperX * taperX * (3 - 2 * taperX);
+
+    for (let r = 0; r <= rows; r += 1) {
+      const v = r / rows;
+      const z = (v - 0.5) * depth;
+      const edgeZ = Math.min(v, 1 - v);
+      const taperZ = Math.min(1, edgeZ / 0.18);
+      const smoothZ = taperZ * taperZ * (3 - 2 * taperZ);
+
+      // Wind-drifted uneven snow accumulation across the roof deck, feathering cleanly down at eaves.
+      const drift = fbm3(x * 0.9 + seed * 0.37, z * 1.1 - seed * 0.21, 0.5, seed + 17, 3);
+      const ripple = fbm3(x * 2.4 + 4.1, z * 2.2, 0.8, seed + 53, 2) - 0.5;
+      const overhang = (v > 0.85 ? (v - 0.85) * 0.36 : 0) + (v < 0.15 ? (0.15 - v) * 0.24 : 0);
+      const h = (thickness * (0.45 + drift * 0.85) + ripple * 0.04) * smoothX * smoothZ - overhang * 0.18;
+      // Subtle wavy eave profile along the front/back lips.
+      const eaveJitter = (fbm3(u * 5.2 + seed, v * 3.1, 0.3, seed + 71, 2) - 0.5) * 0.11;
+      const pz = z + (v > 0.5 ? 1 : -1) * eaveJitter * (1 - smoothZ);
+      const px = x + (u > 0.5 ? 1 : -1) * eaveJitter * 0.6 * (1 - smoothX);
+
+      const idx = c * (rows + 1) + r;
+      positions[idx * 3] = Math.max(-halfW - 0.12, Math.min(halfW + 0.12, px));
+      positions[idx * 3 + 1] = h;
+      positions[idx * 3 + 2] = Math.max(-halfD - 0.12, Math.min(halfD + 0.12, pz));
+    }
+  }
+
+  for (let c = 0; c < cols; c += 1) {
+    for (let r = 0; r < rows; r += 1) {
+      const a = c * (rows + 1) + r;
+      const b = a + 1;
+      const d = (c + 1) * (rows + 1) + r;
+      const e = d + 1;
+      indices.push(a, b, d, b, e, d);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  if (pitchRad) geometry.rotateX(pitchRad);
+  return geometry.translate(at.x, at.y, at.z);
+}
+
+/**
+ * Smooth wind-sculpted snow pillow / drifted cap resting on `at` (e.g. atop a
+ * roof, woodpile, cairn, or grounding collar). Replaces boxy `stoneBlock` snow caps.
+ */
+export function snowPillow(at, rx, ry, rz, { seed = 1, yaw = 0, drape = 0.22, detail = 3 } = {}) {
+  const sphere = new THREE.IcosahedronGeometry(1, detail);
+  sphere.deleteAttribute('uv');
+  sphere.deleteAttribute('normal');
+  const geometry = mergeVertices(sphere, 1e-4);
+  sphere.dispose();
+
   const position = geometry.attributes.position;
   for (let v = 0; v < position.count; v += 1) {
     const x = position.getX(v), y = position.getY(v), z = position.getZ(v);
-    // Each vertex is pulled in along its own direction onto the nearest plane in its way, so
-    // every face stays flat and the mesh keeps its even spacing.
-    let reach = 1 + (fbm3(x * 1.3 + seed, y * 1.3, z * 1.3, seed, 3) - 0.5) * 0.5 * (1 - blocky);
-    for (const plane of planes) {
-      const facing = x * plane.x + y * plane.y + z * plane.z;
-      if (facing > 1e-3) reach = Math.min(reach, plane.d / facing);
-    }
-    position.setXYZ(v, x * reach * rx, (y * reach + BASE_CUT) * ry, z * reach * rz);
+    const drift = (fbm3(x * 1.45 + seed * 0.31, y * 1.2, z * 1.45 - seed * 0.17, seed + 13, 3) - 0.5) * 0.26;
+    const ripple = (fbm3(x * 3.6 + 5.1, z * 2.1, y * 2.0, seed + 59, 2) - 0.5) * 0.08;
+    const radial = 1 + drift + ripple;
+    const horiz = Math.hypot(x, z);
+    // Flatten underside softly, pillow the dome, and drape overhanging edges smoothly down.
+    let sy = y < 0 ? y * 0.26 : Math.pow(y, 0.84) * (1 + drift * 0.55);
+    sy -= Math.pow(Math.max(0, horiz - 0.55), 1.6) * drape;
+    position.setXYZ(v, x * radial * rx, (sy + 0.24) * ry, z * radial * rz);
   }
   geometry.computeVertexNormals();
-  const shaped = blocky > 0 ? sharpen(geometry.toNonIndexed(), blocky) : geometry;
-  if (yaw) shaped.rotateY(yaw);
-  return shaped.translate(at.x, at.y, at.z);
+  if (yaw) geometry.rotateY(yaw);
+  return geometry.translate(at.x, at.y, at.z);
 }
 
 /** Bends smooth normals toward their faces' by `amount`: fracture edges catch the light, worn ones roll it. */

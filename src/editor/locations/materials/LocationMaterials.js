@@ -2,10 +2,12 @@ import * as THREE from 'three/webgpu';
 import { createGlowMaterial } from '../LocationEffects.js';
 import { createGlacierIceMaterial } from './GlacierIceMaterial.js';
 import { createIceCrystalMaterial } from './IceCrystalMaterial.js';
+import { createLocationClothMaterial } from './LocationClothMaterial.js';
 import { createStoneMaterial } from './StoneSurface.js';
 import { createWaterfallMaterial } from './WaterfallMaterial.js';
 
 const ICE_CRYSTAL_PACK_PATH = 'assets/textures/ice/ice-cave-crystal-pack.png';
+const ALPINE_DETAIL_PACK_PATH = 'assets/textures/ice/alpine-detail-pack.png';
 
 /**
  * Builds a site's material set from its resolved config and owns what it
@@ -20,6 +22,8 @@ export class LocationMaterials {
     this.loader = new THREE.TextureLoader();
     this.textures = new Map();
     this.materials = [];
+    /** Optional on-demand CC0 alpine erosion/drift/grain atlas shared with mountain sky & cloth. */
+    this.alpinePack = null;
   }
 
   async #texture(path, colorSpace) {
@@ -46,14 +50,19 @@ export class LocationMaterials {
   /**
    * @param {Record<string, object>} entries a resolved site's `materials`
    * @param {{ iceLayers: number, iceTransmission?: boolean }} quality
-   * @param {{ usePostMrt?: boolean }} [options]
+   * @param {{ usePostMrt?: boolean, wind?: number[], hasPeaks?: boolean }} [options]
    * @returns {Promise<Record<string, { material: Material, ice: number }>>} keyed for `LocationBuilder.build`
    */
-  async create(entries, quality, { usePostMrt = false } = {}) {
+  async create(entries, quality, { usePostMrt = false, wind = [0.6, 0.8], hasPeaks = false } = {}) {
     const hasIce = Object.values(entries).some((entry) => entry.kind === 'ice');
+    const hasCloth = Object.values(entries).some((entry) => Boolean(entry.profile?.cloth));
     const crystalPack = hasIce
       ? await this.#texture(ICE_CRYSTAL_PACK_PATH, THREE.NoColorSpace).catch(() => null)
       : null;
+    const alpinePack = (hasIce || hasCloth || hasPeaks)
+      ? await this.#texture(ALPINE_DETAIL_PACK_PATH, THREE.NoColorSpace).catch(() => null)
+      : null;
+    this.alpinePack = alpinePack;
 
     const set = {};
     for (const [key, entry] of Object.entries(entries)) {
@@ -94,6 +103,8 @@ export class LocationMaterials {
             usePostMrt,
           });
         }
+      } else if (entry.profile?.cloth) {
+        material = createLocationClothMaterial(`location-${key}`, entry.profile, { wind, alpinePack });
       } else {
         const profile = entry.masked ? entry.profile : { ...entry.profile, vertexTint: true };
         const maps = await this.#maps(entry.surfaces.stone);
@@ -106,6 +117,7 @@ export class LocationMaterials {
         material,
         ice: entry.kind === 'ice' ? 1 : 0,
         woodGrain: Boolean(entry.profile?.woodGrain),
+        cloth: Boolean(entry.profile?.cloth),
       };
     }
     return set;

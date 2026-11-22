@@ -1,4 +1,5 @@
 import { emitRadialArch } from '../gen/dwarvenMasonry.js';
+import { boulder, icicle } from '../gen/iceKit.js';
 import { fbm3 } from '../gen/noise.js';
 import { box, stoneBlock, stoneBox } from '../gen/propKit.js';
 import {
@@ -124,22 +125,33 @@ export function generate(b) {
     air: (x, y, z) => {
       const h = heightAt(x, z);
       let air = y - h;
-      // Carve the deep vaulted portal throat cavity straight into the mountain cliff behind the doors.
-      if (z < -25 && z > -38 && Math.abs(x) < 6.4 && y >= 14.5 && y < 29.8) {
-        const inside = Math.min(5.6 - Math.abs(x), 28.8 - y, y - 14.5, z + 36);
+      // Carve the deep vaulted portal throat cavity straight into the mountain cliff behind the doors,
+      // sinking the bedrock floor 1.2 m below the 14.6 m stone threshold so snow never peeks under the doors.
+      if (z < -21.5 && z > -38 && Math.abs(x) < 8.5 && y >= 13.4 && y < 30.2) {
+        const inside = Math.min(7.6 - Math.abs(x), 29.0 - y, y - 13.4, z + 36);
         if (inside > air) air = inside;
       }
       return air;
     },
   });
+  // Fractured alpine granite cliffs & ridges outside the cleared gate plaza and foreground pass road.
+  const onClearedFloor = (x, y, z) => (Math.abs(x) < 15 && z < -15 && z > -32 && Math.abs(y - 14.55) < 2.6)
+    || (Math.abs(x) < 6.5 && z > 20 && Math.abs(y - roadHeightAt(z)) < 2.4);
+  b.grid.fracture({
+    amp: 2.35,
+    cell: 7.4,
+    stretchY: 1.85,
+    seed: b.seed + 59,
+    ampAt: (x, y, z) => (onClearedFloor(x, y, z) ? 0 : 1),
+  });
   b.grid.roughen({
-    amp: 1.4,
-    scale: 0.14,
+    amp: 1.95,
+    scale: 0.16,
     seed: b.seed + 77,
-    octaves: 2,
-    floorAmp: 0.08,
-    stretchY: 1.6,
-    ampAt: (x, y, z) => (Math.abs(x) < 14 && z < -16 && z > -31 && Math.abs(y - 14.55) < 2.2 ? 0 : 1),
+    octaves: 3,
+    floorAmp: 0.1,
+    stretchY: 1.65,
+    ampAt: (x, y, z) => (onClearedFloor(x, y, z) ? 0 : 1),
   });
 
   // Natural stratified alpine granite & snow-dusted crags; living rock everywhere except road/plaza.
@@ -154,25 +166,44 @@ export function generate(b) {
     return 0;
   };
 
-  // --- 2. Foreground Flagstone Approach Trail, Runic Boulders, Pines & Banner Standards ---
+  // --- 2. Foreground Flagstone Approach Trail, Sculpted Runic Boulders, Pines & Draped Banners ---
+  const roadTones = [0xb6bcc6, 0xa8aeb8, 0xc0c5ce, 0x9fa6b0];
+  let roadIdx = 0;
   for (let z = 60; z >= 24; z -= 2.2) {
     const y = roadHeightAt(z);
     const sway = Math.sin(z * 0.08) * 1.4 * smoothstep(24, 42, z);
-    b.prop('carved', stoneBox(7.2, 0.36, 2.35, P(sway, y - 0.08, z), { bevel: 0.05, irregular: 0.08 }), 0xc0c4cc);
+    const tone = roadTones[roadIdx % roadTones.length];
+    b.prop('carved', stoneBox(7.2, 0.36, 2.35, P(sway, y - 0.08, z), { bevel: 0.06, irregular: 0.16 }), tone);
     for (const sign of [-1, 1]) {
-      b.prop('masonry', stoneBlock(0.95, 0.55, 2.2, P(sway + sign * 3.85, y - 0.15, z), { bevel: 0.07, irregular: 0.25 }), 0x9aa0aa);
+      const curbH = 0.48 + ((roadIdx * 7 + (sign > 0 ? 3 : 1)) % 4) * 0.055;
+      b.prop('masonry', stoneBlock(0.98, curbH, 2.22, P(sway + sign * 3.85, y - 0.16, z), {
+        yaw: ((roadIdx % 5) - 2) * 0.015, bevel: 0.08, irregular: 0.32,
+      }), roadTones[(roadIdx + (sign > 0 ? 1 : 2)) % roadTones.length]);
     }
+    roadIdx += 1;
   }
   b.nav.addSegment(P(0, roadHeightAt(60), 60), P(0, roadHeightAt(24), 24), 6.2);
 
-  // Runic foreground boulders & fluttering crimson/gold Dwarven banner standards flanking the pass.
-  for (const [bx, bz, sc] of [[-7.2, 48, 1.3], [7.8, 44, 1.5], [-6.8, 36, 1.1], [8.2, 33, 1.2], [-10.5, 52, 1.8]]) {
+  // Sculpted craggy alpine granite runic boulders & flanking talus stones along the pass.
+  const boulderSpecs = [[-7.2, 48, 1.3], [7.8, 44, 1.5], [-6.8, 36, 1.1], [8.2, 33, 1.2], [-10.5, 52, 1.8]];
+  for (let i = 0; i < boulderSpecs.length; i += 1) {
+    const [bx, bz, sc] = boulderSpecs[i];
     const by = roadHeightAt(bz);
-    b.prop('masonry', stoneBlock(2.4 * sc, 1.7 * sc, 2.2 * sc, P(bx, by - 0.4, bz), {
-      yaw: bx * 0.4, bevel: 0.24 * sc, batter: 0.22, irregular: 0.42,
-    }), 0x8f949e);
+    const bSeed = seed + 301 + i * 29;
+    b.prop('rock', boulder(P(bx, by - 0.45 * sc, bz), 1.45 * sc, 1.05 * sc, 1.32 * sc, {
+      seed: bSeed, blocky: 0.24, yaw: bx * 0.4, maxDetail: 4,
+    }), 0x8a909a);
+    // Flanking frost-shattered talus stones grounding each hero boulder.
+    for (let k = 0; k < 4; k += 1) {
+      const ang = (k / 4) * Math.PI * 2 + i * 0.7;
+      const dist = (1.35 + (k % 2) * 0.45) * sc;
+      const cr = (0.28 + (k % 3) * 0.12) * sc;
+      b.prop('rock', boulder(P(bx + Math.cos(ang) * dist, by - 0.25, bz + Math.sin(ang) * dist), cr * 1.2, cr * 0.75, cr, {
+        seed: bSeed + 17 + k * 11, blocky: 0.28, yaw: ang, maxDetail: 2,
+      }), 0x828892);
+    }
     if (Math.abs(bx) < 8.5) {
-      b.prop('bronze', stoneBox(0.72 * sc, 0.72 * sc, 0.12, P(bx, by + 0.55 * sc, bz + 1.05 * sc), { yaw: Math.PI / 4, bevel: 0.02 }), 0xc8a05a);
+      b.prop('bronze', stoneBox(0.68 * sc, 0.68 * sc, 0.12, P(bx, by + 0.52 * sc, bz + 1.02 * sc), { yaw: Math.PI / 4, bevel: 0.02 }), 0xc8a05a);
     }
   }
   for (const [sx, sz, yaw] of [[-5.6, 46, 0.35], [5.8, 42, -0.35], [-5.4, 32, 0.25], [5.6, 32, -0.25]]) {
@@ -247,40 +278,80 @@ export function generate(b) {
   b.prop('masonry', stoneBlock(22.0, 44.0, 15.0, P(38, -30.5, -28), { yaw: -0.36, bevel: 0.65, batter: 0.08, irregular: 0.32 }), 0x707680);
   buildMountainColossus(b, P(38, 12.0, -28), { yaw: -0.36, scale: 1.08 });
 
-  // --- 7. Multi-Tier Cascading Waterfalls (tucked inside carved stone sluice spouts!) & Chasm Mist ---
-  // Carved basalt sluice mouths so every waterfall pours cleanly out of cliff rock, never mid-air!
-  for (const [sx, sy, sz, sw] of [[-21.0, 21.5, -14.8, 4.6], [22.2, 18.8, -19.2, 4.6], [-7.2, -2.5, -16.4, 3.8]]) {
-    b.prop('carved', stoneBox(sw + 1.6, 2.2, 4.4, P(sx, sy + 0.6, sz - 0.8), { bevel: 0.12 }), 0x7a808a);
-    b.prop('masonry', stoneBlock(sw + 2.2, 3.4, 3.6, P(sx, sy - 2.6, sz - 1.4), { bevel: 0.14 }), 0x6a707a);
+  // --- 7. Multi-Tier Cascading Waterfalls Framed by Recessed Dwarven Culvert Arches, Crags & Icicles ---
+  const sluices = [
+    [-21.0, 21.2, -16.2, 3.8],
+    [23.0, 18.6, -22.6, 3.8],
+    [-7.2, -2.6, -16.8, 3.2],
+  ];
+  for (let sIdx = 0; sIdx < sluices.length; sIdx += 1) {
+    const [sx, sy, sz, sw] = sluices[sIdx];
+    const hw = sw * 0.5;
+    // Deep recessed wet spillway culvert throat + granite under-buttress anchored solidly into the mountain rock.
+    b.prop('masonry', stoneBlock(sw + 4.4, 9.6, 10.2, P(sx, sy - 6.2, sz - 4.8), { bevel: 0.16, batter: 0.10, irregular: 0.24 }), 0x5c626c);
+    b.prop('rock', boulder(P(sx, sy - 4.4, sz - 1.8), hw + 3.2, 3.6, 3.4, {
+      seed: seed + 577 + sIdx * 23, blocky: 0.26, maxDetail: 3,
+    }), 0x666d78);
+    for (const side of [-1, 1]) {
+      b.prop('carved', stoneBlock(1.25, 3.8, 3.8, P(sx + side * (hw + 0.55), sy - 0.8, sz - 1.4), {
+        bevel: 0.09, batter: 0.06, irregular: 0.18,
+      }), 0x828994);
+      // Flanking sculpted alpine rock crags merging the carved spillway seamlessly into the cliff slope.
+      b.prop('rock', boulder(P(sx + side * (hw + 1.95), sy - 1.0, sz - 1.2), 2.35, 3.1, 2.65, {
+        seed: seed + 601 + sIdx * 31 + (side > 0 ? 7 : 0), blocky: 0.24, yaw: side * 0.4, maxDetail: 3,
+      }), 0x6b727d);
+    }
+    // Rock crown boulder draping the culvert arch cleanly into the mountain slope above.
+    b.prop('rock', boulder(P(sx, sy + 2.8, sz - 1.8), hw + 2.6, 1.8, 2.9, {
+      seed: seed + 651 + sIdx * 19, blocky: 0.24, maxDetail: 3,
+    }), 0x6b727d);
+    // Radial voussoir spillway arch crowning the water mouth.
+    emitRadialArch(b, 'carved', P(sx - hw - 0.25, sy + 1.85, sz - 0.1), P(sx + hw + 0.25, sy + 1.85, sz - 0.1),
+      1.55, 0.88, 2.2, 11, { pointed: 0.15, tint: 0x949ba6, keystoneTint: 0xb0b7c2, irregular: 0.12 });
+    b.prop('iron', stoneBox(sw + 0.6, 0.45, 2.8, P(sx, sy - 0.15, sz - 0.8), { bevel: 0.05 }), 0x2a3038);
+    // Shimmering frozen spray icicles hanging off both cold shoulders of the spillway arch.
+    for (let ic = -3; ic <= 3; ic += 1) {
+      if (Math.abs(ic) < 2) continue;
+      const ix = sx + ic * (hw * 0.48);
+      const len = 0.85 + Math.abs(ic) * 0.35;
+      b.prop('clearIce', icicle(P(ix, sy + 2.0, sz + 0.55), len, 0.08 + len * 0.04, { phase: sIdx * 7 + ic }), 0xe8f6ff);
+    }
+    b.emit('mist', P(sx, sy - 0.4, sz + 1.4));
   }
   // Left double-cascade beside the bridge and cliff flank.
-  b.prop('waterfall', createWaterfallSheet(P(-21.0, 21.2, -14.0), P(-20.4, 3.5, -8.5), { widthTop: 3.4, widthBot: 4.8, bow: 2.2 }));
-  b.prop('waterfall', createWaterfallSheet(P(-20.4, 3.5, -8.5), P(-19.6, -29.5, -3.5), { widthTop: 4.6, widthBot: 6.4, bow: 2.8 }));
-  // Right cliffside cascade plunging beside the right bastion.
-  b.prop('waterfall', createWaterfallSheet(P(22.2, 18.5, -18.4), P(21.2, -29.5, -10.5), { widthTop: 3.4, widthBot: 5.6, bow: 3.0 }));
+  b.prop('waterfall', createWaterfallSheet(P(-21.0, 21.1, -15.6), P(-20.4, 3.5, -8.8), { widthTop: 3.4, widthBot: 4.9, bow: 2.3 }));
+  b.prop('waterfall', createWaterfallSheet(P(-20.4, 3.5, -8.8), P(-19.6, -29.5, -3.5), { widthTop: 4.6, widthBot: 6.6, bow: 2.8 }));
+  // Right cliffside cascade plunging cleanly out of its recessed mountain culvert beside the right bastion.
+  b.prop('waterfall', createWaterfallSheet(P(23.0, 18.4, -22.0), P(21.4, -29.5, -13.0), { widthTop: 3.5, widthBot: 5.8, bow: 3.6 }));
   // Sub-bridge cascade tumbling past the lower abyssal arcades.
-  b.prop('waterfall', createWaterfallSheet(P(-7.2, -2.8, -15.6), P(-6.8, -29.5, -11.5), { widthTop: 2.8, widthBot: 4.4, bow: 2.1 }));
+  b.prop('waterfall', createWaterfallSheet(P(-7.2, -2.7, -15.8), P(-6.8, -29.5, -11.5), { widthTop: 2.8, widthBot: 4.5, bow: 2.1 }));
 
   // Gorge mist plumes rising from every waterfall plunge pool and across the abyssal chasm.
   for (const mp of [
-    P(-20.4, 4.0, -8.0), P(-19.5, -24.0, -3.0), P(21.0, -24.0, -10.0),
+    P(-20.4, 4.0, -8.0), P(-19.5, -24.0, -3.0), P(21.4, -24.0, -12.5),
     P(-6.8, -24.0, -11.0), P(0, -18.0, -6.0), P(-12, -16.0, 2.0), P(12, -16.0, 0.0),
   ]) {
     b.emit('mist', mp);
   }
 
-  // --- 8. Alpine Pines Perched Along the Foreground Crags & Colossus Shoulders (Refs 1, 3, 4) ---
+  // --- 8. Gnarled Drooping-Bough Alpine Pines Grounded into Crags & Colossus Shoulders ---
   const pines = [
     [-14.5, 50, 7.8], [-19.5, 42, 9.2], [-15.2, 33, 6.8], [-24.0, 26, 8.4],
     [13.8, 52, 8.2], [18.4, 40, 7.6], [15.5, 30, 6.4], [24.5, 24, 9.0],
     [-26.5, 14, 7.2], [27.0, 12, 7.5],
-    // Tiny alpine pines perched on the Mountain Colossus shoulders for monumental scale (Ref 3!).
     [35.2, -28.0, 4.4, 31.5], [37.4, -27.2, 3.8, 32.8], [45.0, -29.5, 4.6, 30.2],
   ];
   for (let i = 0; i < pines.length; i += 1) {
     const [px, pz, ph, fixedY] = pines[i];
-    const py = fixedY ?? (b.terrainAt(px, 28, pz, 32) ?? roadHeightAt(pz));
-    buildAlpinePine(b, P(px, py - 0.3, pz), { height: ph, seed: seed + i * 31 });
+    const py = fixedY ?? (b.terrainAt(px, 34, pz, 38) ?? roadHeightAt(pz));
+    buildAlpinePine(b, P(px, py - 0.35, pz), { height: ph, seed: seed + i * 31 });
+    // Broad stepped granite cliff-ledge crag anchoring every pine's deep root trunk into steep slopes.
+    b.prop('rock', boulder(P(px, py - 1.05, pz), ph * 0.26, ph * 0.20, ph * 0.26, {
+      seed: seed + 701 + i * 17, blocky: 0.28, yaw: i * 1.1, maxDetail: 2,
+    }), 0x767c86);
+    b.prop('rock', boulder(P(px + (i % 2 ? 0.65 : -0.65), py - 2.15, pz + 0.35), ph * 0.32, ph * 0.24, ph * 0.30, {
+      seed: seed + 757 + i * 23, blocky: 0.30, yaw: i * 1.9, maxDetail: 2,
+    }), 0x676e78);
   }
 
   // --- 9. Spawn & Seamless Portal into Stonehold Mountain Hall ---

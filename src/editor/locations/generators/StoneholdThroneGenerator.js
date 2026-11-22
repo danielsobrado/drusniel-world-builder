@@ -1,4 +1,6 @@
+import { hangingBannerMesh } from '../gen/clothKit.js';
 import { coursedMasonryWall, emitRadialArch } from '../gen/dwarvenMasonry.js';
+import { boulder } from '../gen/iceKit.js';
 import { box, extrudedProfile, hewnBeam, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { hall } from '../gen/shapes.js';
 import { buildHeraldicBanner, buildMonumentalBrazier } from './stoneholdDressing.js';
@@ -56,18 +58,26 @@ function buildChevronBackdrop(b, zWall) {
   // Deep recessed dark carved rear cliff slabs.
   b.prop('masonry', stoneBlock(28, 25, 2.4, P(0, 0, zWall - 3.6), { bevel: 0.12 }), 0x454448);
 
-  // Stacked vertical geometric stone monolith piers framing the central chevron recess.
+  // Stacked vertical geometric basalt monolith piers framing the central chevron recess,
+  // separated by recessed warm amber forged-ember architectural light fissures (eliminates rear black void!).
   const stacks = [
-    [-9.5, 0, 22, 3.4, 2.8, 0x5c5a5c],
-    [9.5, 0, 22, 3.4, 2.8, 0x5c5a5c],
-    [-6.2, 0, 19.5, 2.8, 3.2, 0x6e6a68],
-    [6.2, 0, 19.5, 2.8, 3.2, 0x6e6a68],
-    [-3.2, 1.5, 17.0, 2.2, 2.6, 0x7a7570],
-    [3.2, 1.5, 17.0, 2.2, 2.6, 0x7a7570],
+    [-9.5, 0, 22, 3.4, 2.8, 0x625f60],
+    [9.5, 0, 22, 3.4, 2.8, 0x625f60],
+    [-6.2, 0, 19.5, 2.8, 3.2, 0x746f6c],
+    [6.2, 0, 19.5, 2.8, 3.2, 0x746f6c],
+    [-3.2, 1.5, 17.0, 2.2, 2.6, 0x827c76],
+    [3.2, 1.5, 17.0, 2.2, 2.6, 0x827c76],
   ];
   for (const [sx, sy, sh, sw, sd, tint] of stacks) {
-    b.prop('carved', stoneBlock(sw, sh, sd, P(sx, sy, zWall - 1.5), { bevel: 0.12, batter: 0.03 }), tint);
+    b.prop('carved', stoneBlock(sw, sh, sd, P(sx, sy, zWall - 1.5), { bevel: 0.12, batter: 0.03, irregular: 0.14 }), tint);
+    // Gilded bronze vertical runic inlay trim catching the warm dais firelight.
+    b.prop('bronze', stoneBlock(0.24, sh * 0.72, 0.2, P(sx, sy + sh * 0.12, zWall - 1.5 + sd * 0.5 + 0.04), { bevel: 0.02 }), 0xc89e56);
   }
+  // Hidden warm amber architectural uplights washing the towering basalt monoliths & chevrons (no glowing laser tubes!).
+  for (const fx of [-7.8, -4.6, 4.6, 7.8]) {
+    b.light(P(fx, 8.8, zWall - 0.6), '#ff9c42', 6.4, 22, { flat: true });
+  }
+  b.light(P(0, 11.2, zWall + 1.8), '#ffaa54', 8.5, 26, { flat: true });
 
   // Three monumental downward-pointing cantilevered V-chevron monoliths stepping up above the throne.
   const chevrons = [
@@ -133,62 +143,72 @@ function buildRoyalThrone(b, at) {
   b.prop('carved', stoneBox(0.88, 3.8, 0.22, P(x, y + 3.25, z - 0.20), { bevel: 0.04 }), 0xb5a48e);
   b.prop('bronze', stoneBox(1.06, 0.22, 0.28, P(x, y + 5.15, z - 0.18), { bevel: 0.03 }), 0xd8b064);
 
-  // Heavy angled stone seat slab + trapezoidal front apron.
-  b.prop('carved', stoneBlock(2.85, 1.35, 2.35, P(x, y + 0.55, z + 0.15), { bevel: 0.08, batter: -0.06 }), 0xc2b29c);
-  b.prop('carved', stoneBox(3.1, 0.36, 2.55, P(x, y + 1.98, z + 0.22), { bevel: 0.05 }), 0xd4c5ae);
+  // Heavy angled stone seat slab + crimson velvet royal seat drape & backrest tapestry.
+  b.prop('carved', stoneBlock(2.85, 1.35, 2.35, P(x, y + 0.55, z + 0.15), { bevel: 0.09, batter: -0.06, irregular: 0.12 }), 0xc2b29c);
+  b.prop('carved', stoneBox(3.1, 0.36, 2.55, P(x, y + 1.98, z + 0.22), { bevel: 0.06, irregular: 0.1 }), 0xd4c5ae);
+  // Draped deep crimson velvet royal seat runner & backrest tapestry inset cleanly forward of the stone tablet.
+  b.prop('cloth', hangingBannerMesh(P(x - 0.88, y + 4.98, z + 0.12), P(x + 0.88, y + 4.98, z + 0.12), 2.75, {
+    style: 'heraldic', seed: 911, cols: 16, rows: 16, flutter: 0.04, primaryHex: 0x5c130e, paleHex: 0x1a1416, goldHex: 0xa6803a,
+  }), 0xffffff);
+  b.prop('cloth', stoneBox(2.25, 0.18, 1.85, P(x, y + 2.22, z + 0.28), { bevel: 0.06, irregular: 0.16 }), 0x5a130e);
 
-  // Twin massive angular stepped arm piers with chamfered bronze-trimmed caps.
+  // Twin massive angular stepped arm piers with carved corbels & bronze trim.
   for (const sign of [-1, 1]) {
     const ax = x + sign * 1.72;
-    b.prop('carved', stoneBlock(1.05, 2.85, 2.85, P(ax, y + 0.55, z + 0.35), { bevel: 0.09, batter: 0.05 }), 0xcabaa4);
+    b.prop('carved', stoneBlock(1.05, 2.85, 2.85, P(ax, y + 0.55, z + 0.35), { bevel: 0.10, batter: 0.05, irregular: 0.14 }), 0xcabaa4);
     b.prop('carved', hewnBeam(
       P(ax, y + 3.35, z - 0.95),
       P(ax + sign * 0.28, y + 3.85, z + 1.65),
-      0.95, 0.48, { bevel: 0.06 },
+      0.95, 0.48, { bevel: 0.07, irregular: 0.14 },
     ), 0xd8c9b4);
     b.prop('bronze', stoneBox(1.12, 0.18, 2.75, P(ax, y + 2.35, z + 0.35), { bevel: 0.025 }), 0xd4aa60);
   }
 
   // Warm golden key light modeling the throne + strong uplights washing the chevron backdrop (Ref 2!).
-  b.light(P(x, y + 5.2, z + 3.4), '#ffb45c', 12.5, 24, { radius: 2.2, halo: 0, importance: 1.6 });
-  b.light(P(x, y + 7.5, z - 2.2), '#ff9c3c', 14.0, 26, { flat: true });
-  b.light(P(x, y + 15.5, z - 1.5), '#8496b4', 5.8, 24, { flat: true });
+  b.light(P(x, y + 5.2, z + 3.4), '#ffb45c', 14.0, 26, { radius: 2.2, halo: 0, importance: 1.6 });
+  b.light(P(x, y + 7.5, z - 2.2), '#ff9c3c', 16.0, 28, { flat: true });
+  b.light(P(x, y + 15.5, z - 1.5), '#8c9eb8', 7.2, 26, { flat: true });
   b.nav.block(at, 3.0, 8.0);
 }
 
 /**
- * Gleaming Dwarven gold & treasury hoard mounds flanking the throne dais (Ref 2).
+ * Gleaming sculpted Dwarven gold coin hills, stacked bullion ingots, gilded shields,
+ * and iron-bound treasury coffers flanking the throne dais.
  */
 function buildTreasuryHoards(b, daisY, zThrone) {
   for (const sign of [-1, 1]) {
-    // Organic stepped golden mound clusters + glittering faceted ingots + iron-banded coffers.
+    // Sculpted displaced metallic gold coin mounds (replaces blocky gold pyramids!).
     const clusters = [
-      [3.4, 0.0, -0.3, 2.8, 2.15, 2.6],
-      [5.2, 0.0, -0.7, 3.4, 2.85, 3.0],
-      [7.0, 0.0, -0.1, 2.8, 1.95, 2.4],
-      [4.4, 0.0, 1.2, 2.5, 1.35, 2.1],
-      [6.2, 0.0, 1.4, 2.3, 1.15, 1.9],
+      [3.4, 0.0, -0.3, 1.55, 1.35, 1.42],
+      [5.2, 0.0, -0.7, 1.95, 1.85, 1.72],
+      [7.0, 0.0, -0.1, 1.6, 1.25, 1.38],
+      [4.4, 0.0, 1.2, 1.45, 0.92, 1.25],
+      [6.2, 0.0, 1.4, 1.35, 0.78, 1.12],
     ];
-    for (const [dx, dy, dz, w, h, d] of clusters) {
-      b.prop('gold', stoneBlock(w, h, d, P(sign * dx, daisY + dy, zThrone + dz), {
-        yaw: sign * (dx * 0.4 + dz * 0.3), bevel: Math.min(w, h) * 0.26, batter: 0.42, irregular: 0.48,
-      }), 0xffda78);
+    for (let idx = 0; idx < clusters.length; idx += 1) {
+      const [dx, dy, dz, rx, ry, rz] = clusters[idx];
+      b.prop('gold', boulder(P(sign * dx, daisY + dy - ry * 0.2, zThrone + dz), rx, ry, rz, {
+        seed: 401 + idx * 31 + (sign > 0 ? 11 : 0),
+        blocky: 0.14,
+        yaw: sign * (dx * 0.4 + dz * 0.3),
+        maxDetail: 4,
+      }), 0xffdc78);
     }
-    // Scattered bright gold bullion bars & chalices catching the brazier speculars.
-    for (let i = 0; i < 12; i += 1) {
-      const gx = sign * (2.8 + (i % 4) * 1.25 + (i % 2) * 0.25);
-      const gz = zThrone - 1.1 + Math.floor(i / 4) * 1.2 + (i % 3) * 0.28;
-      const gy = daisY + 0.75 + (i % 3) * 0.58;
-      b.prop('gold', stoneBox(0.64, 0.28, 0.36, P(gx, gy, gz), { yaw: i * 0.85, bevel: 0.03 }), 0xffe896);
+    // Scattered gleaming gold bullion bars seated solidly across the gold coin mounds.
+    for (let i = 0; i < 14; i += 1) {
+      const gx = sign * (3.2 + (i % 4) * 1.15 + (i % 2) * 0.2);
+      const gz = zThrone - 0.9 + Math.floor(i / 4) * 0.78 + (i % 3) * 0.18;
+      const gy = daisY + 0.26 + (i % 3) * 0.22;
+      b.prop('gold', stoneBox(0.56, 0.22, 0.30, P(gx, gy, gz), { yaw: i * 0.85, bevel: 0.035 }), 0xffea9a);
     }
-    // Heavy iron-bound Dwarven treasury coffers nestled into the gold.
+    // Heavy iron-bound Dwarven treasury coffers nestled into the gold mounds.
     for (const [cx, cz, cyaw] of [[3.8, 2.0, 0.25], [5.8, 1.9, -0.35]]) {
-      b.prop('timber', stoneBlock(1.42, 0.96, 0.98, P(sign * cx, daisY, zThrone + cz), { yaw: sign * cyaw, bevel: 0.04 }), 0x5c3e26);
+      b.prop('timber', stoneBlock(1.42, 0.96, 0.98, P(sign * cx, daisY, zThrone + cz), { yaw: sign * cyaw, bevel: 0.05, irregular: 0.1 }), 0x5c3e26);
       b.prop('gold', stoneBox(1.48, 0.18, 1.04, P(sign * cx, daisY + 0.94, zThrone + cz), { yaw: sign * cyaw, bevel: 0.02 }), 0xffd268);
       b.prop('iron', stoneBox(1.46, 0.14, 1.02, P(sign * cx, daisY + 0.48, zThrone + cz), { yaw: sign * cyaw, bevel: 0.02 }), 0x3b3e45);
     }
-    b.light(P(sign * 4.8, daisY + 2.4, zThrone + 1.4), '#ffc258', 13.5, 18, { radius: 2.0, halo: 0, importance: 1.4 });
-    b.light(P(sign * 6.5, daisY + 7.2, zThrone - 2.4), '#ffa046', 7.5, 18, { flat: true });
+    b.light(P(sign * 4.8, daisY + 2.4, zThrone + 1.4), '#ffc258', 14.5, 20, { radius: 2.0, halo: 0, importance: 1.4 });
+    b.light(P(sign * 6.5, daisY + 7.2, zThrone - 2.4), '#ffa046', 8.5, 20, { flat: true });
     b.nav.block(P(sign * 5.2, daisY, zThrone + 0.4), 2.8, 2.8);
   }
 }
@@ -239,12 +259,22 @@ export function generate(b) {
     const sy = i * stepH;
     const sz = daisStartZ - i * stepD;
     const sw = 18.6 - i * 0.45;
-    b.prop('carved', stoneBlock(sw, stepH, stepD + 0.35, P(0, sy, sz - stepD * 0.5), { bevel: 0.04, irregular: 0.03 }), 0xa89f94);
+    b.prop('carved', stoneBlock(sw, stepH, stepD + 0.35, P(0, sy, sz - stepD * 0.5), { bevel: 0.045, irregular: 0.1 }), 0xa89f94);
     b.prop('bronze', stoneBox(sw - 0.6, 0.045, 0.09, P(0, sy + stepH - 0.015, sz - 0.04), { bevel: 0.01 }), 0xcba25e);
+    // Draped crimson & gold-trimmed royal velvet carpet runner ascending the center of the dais stairs.
+    b.prop('cloth', stoneBox(3.6, 0.04, stepD + 0.14, P(0, sy + stepH + 0.015, sz - stepD * 0.5), { bevel: 0.015, irregular: 0.04 }), 0x5c130e);
+    b.prop('cloth', stoneBox(3.6, stepH + 0.04, 0.05, P(0, sy + stepH * 0.5, sz + 0.02), { bevel: 0.015, irregular: 0.04 }), 0x50100c);
+    for (const bx of [-1.62, 1.62]) {
+      b.prop('bronze', stoneBox(0.14, 0.05, stepD + 0.12, P(bx, sy + stepH + 0.02, sz - stepD * 0.5), { bevel: 0.01 }), 0xc6984a);
+    }
   }
-  // Upper dais stone deck extending to the rear chevron wall.
+  // Upper dais stone deck + royal carpet runner extending cleanly up to the throne plinth.
   const deckDepth = daisStartTopZ - (zBack + 2.5);
-  b.prop('carved', stoneBlock(19.5, daisTopY, deckDepth, P(0, 0, daisStartTopZ - deckDepth * 0.5), { bevel: 0.07 }), 0x9b9286);
+  b.prop('carved', stoneBlock(19.5, daisTopY, deckDepth, P(0, 0, daisStartTopZ - deckDepth * 0.5), { bevel: 0.07, irregular: 0.08 }), 0x9b9286);
+  b.prop('cloth', stoneBox(3.6, 0.04, 5.2, P(0, daisTopY + 0.02, daisStartTopZ - 2.6), { bevel: 0.015 }), 0x5c130e);
+  for (const bx of [-1.62, 1.62]) {
+    b.prop('bronze', stoneBox(0.14, 0.05, 5.2, P(bx, daisTopY + 0.025, daisStartTopZ - 2.6), { bevel: 0.01 }), 0xc6984a);
+  }
   // Walkable stair ramp & upper dais platform.
   b.nav.addSegment(P(0, 0, daisStartZ + 0.6), P(0, daisTopY, daisStartTopZ - 0.4), 12.5);
   b.nav.addRect(P(0, daisTopY, daisStartTopZ - 5.2), 7.8, 5.6);

@@ -24,9 +24,9 @@ instancedLocations:
   quality:
     default: high
     tiers:
-      high: { iceLayers: 4, particleScale: 1, voxelScale: 1, iceTransmission: true, icePost: true, iceSsr: true, crystalScale: 1 }
-      medium: { iceLayers: 3, particleScale: 0.6, voxelScale: 1.2, iceTransmission: true, icePost: true, iceSsr: false, crystalScale: 0.55 }
-      low: { iceLayers: 2, particleScale: 0.3, voxelScale: 1.5, iceTransmission: false, icePost: false, iceSsr: false, crystalScale: 0 }
+      high: { iceLayers: 4, particleScale: 1, voxelScale: 1, iceTransmission: true, icePost: true, iceSsr: true, crystalScale: 1, understoryScale: 1 }
+      medium: { iceLayers: 3, particleScale: 0.6, voxelScale: 1.2, iceTransmission: true, icePost: true, iceSsr: false, crystalScale: 0.55, understoryScale: 0.65 }
+      low: { iceLayers: 2, particleScale: 0.3, voxelScale: 1.5, iceTransmission: false, icePost: false, iceSsr: false, crystalScale: 0, understoryScale: 0.35 }
 
   # Files under the app's base URL. `rough` is read from the green channel, so an
   # AO/roughness/metal map works as well as a plain roughness map.
@@ -257,9 +257,9 @@ instancedLocations:
     snow_roof:
       surface: timber
       scale: 0.5
-      tint: '#5d5a4c'
-      normalStrength: 1.1
-      snow: { amount: 1, from: -0.1, color: '#f2f6fb' }
+      tint: '#94a6b8'
+      normalStrength: 0.65
+      snow: { amount: 1, from: -0.25, color: '#f2f6fb' }
     snowy_rubble:
       surface: rubble
       scale: 0.42
@@ -277,12 +277,14 @@ instancedLocations:
       seam: { color: '#a8b4be', strength: 0.55, frost: 0.65 }
     moraine_boulder:
       surface: frost-rock
-      scale: 0.3
-      tint: '#bdb7af'
-      normalStrength: 1.2
-      roughness: 0.95
-      snow: { amount: 1, from: 0.3, color: '#eef4fa', rime: 0.2 }
-      seam: { color: '#b7c6d4', strength: 0.62, frost: 0.72 }
+      scale: 0.34
+      tint: '#96938e'
+      normalStrength: 1.4
+      roughness: 0.94
+      cavityShade: 0.78
+      strata: { frequency: 0.72, warp: 3.2, dip: 0.18, dark: '#545a64', light: '#aaa59e', relief: 1.35 }
+      snow: { amount: 0.88, from: 0.56, color: '#eef4fa', rime: 0.14 }
+      seam: { color: '#b7c6d4', strength: 0.56, frost: 0.68 }
     plank_floor:
       surface: planks
       scale: 0.42
@@ -355,11 +357,12 @@ instancedLocations:
       surface: dressed-stone
       scale: 0.52
       tint: '#a6acb6'
-      normalStrength: 1.48
-      roughness: 0.76
-      chiselGrain: 0.82
+      normalStrength: 1.55
+      roughness: 0.78
+      chiselGrain: 0.85
       cavityShade: 0.95
-      weathering: { tone: 0.65, speckle: 0.72, grime: 0.85, streaks: 0.52, dust: 0.46 }
+      masonry: { courseHeight: 0.64, blockLength: 1.52, jointWidth: 0.032, relief: 1.72 }
+      weathering: { tone: 0.72, speckle: 0.74, grime: 0.88, streaks: 0.58, dust: 0.46 }
       seam: { color: '#393531', strength: 0.78, soot: 0.48 }
     bronze:
       surface: iron
@@ -392,53 +395,69 @@ instancedLocations:
       f0: 0.74
       patina: { color: '#4f8a72', amount: 0.5, spread: 0.3 }
     stonehold_gold_hoard:
-      surface: iron
-      scale: 0.9
-      tint: '#f2c15a'
-      normalStrength: 0.85
-      roughness: 0.22
-      metalness: 0.94
-      f0: 0.88
+      surface: rubble
+      scale: 2.6
+      tint: '#ffd452'
+      normalStrength: 1.75
+      roughness: 0.34
+      metalness: 0.42
+      f0: 0.65
+      cavityShade: 0.55
+      patina: { color: '#b57c1c', amount: 0.22, spread: 0.25 }
     royal_bronze:
       surface: iron
-      scale: 0.78
-      tint: '#e2b45c'
-      normalStrength: 0.95
-      roughness: 0.34
-      metalness: 0.88
-      f0: 0.78
-      patina: { color: '#5c4628', amount: 0.14, spread: 0.25 }
+      scale: 0.82
+      tint: '#dcb05a'
+      normalStrength: 1.08
+      roughness: 0.36
+      metalness: 0.86
+      f0: 0.76
+      patina: { color: '#456a5a', amount: 0.24, spread: 0.30 }
     stonehold_alpine_rock:
       surface: frost-rock
       floorSurface: flagstone
       floorScale: 0.34
-      floorTint: '#9aa0ac'
-      floorRoughness: 0.86
+      floorTint: '#9098a6'
+      floorRoughness: 0.88
       scale: 0.16
-      tint: '#4d5563'
-      normalStrength: 1.55
+      tint: '#464e5c'
+      normalStrength: 1.85
       roughness: 0.92
-      cavityShade: 0.92
-      strata: { frequency: 0.52, warp: 3.4, dip: 0.18, dark: '#363d48', light: '#7b8390', relief: 1.65 }
-      snow: { from: 0.50, amount: 0.82, rime: 0.16, color: '#edf3fa' }
+      cavityShade: 0.94
+      strata: { frequency: 0.62, warp: 4.2, dip: 0.22, dark: '#262d38', light: '#7b8492', relief: 1.95 }
+      snow: { from: 0.56, amount: 0.84, rime: 0.14, color: '#edf3fa' }
+    stonehold_alpine_masonry:
+      surface: granite
+      scale: 0.34
+      tint: '#8e95a2'
+      normalStrength: 1.62
+      roughness: 0.88
+      cavityShade: 0.94
+      masonry: { courseHeight: 1.02, blockLength: 2.25, jointWidth: 0.044, relief: 2.15 }
+      weathering: { tone: 0.82, speckle: 0.76, grime: 0.88, streaks: 0.74, dust: 0.36 }
+      snow: { from: 0.66, amount: 0.66, rime: 0.14, color: '#edf3fa' }
+      seam: { color: '#3b4048', strength: 0.78, damp: 0.38 }
     stonehold_alpine_carved:
       surface: dressed-stone
       scale: 0.44
-      tint: '#b8bec8'
-      normalStrength: 1.45
-      roughness: 0.80
-      chiselGrain: 0.76
-      cavityShade: 0.92
-      weathering: { tone: 0.62, speckle: 0.68, grime: 0.76, streaks: 0.55, dust: 0.38 }
-      snow: { from: 0.78, amount: 0.42, rime: 0.08, color: '#edf3fa' }
+      tint: '#adb4c0'
+      normalStrength: 1.6
+      roughness: 0.82
+      chiselGrain: 0.82
+      cavityShade: 0.94
+      masonry: { courseHeight: 0.72, blockLength: 1.72, jointWidth: 0.036, relief: 1.95 }
+      weathering: { tone: 0.76, speckle: 0.74, grime: 0.84, streaks: 0.66, dust: 0.42 }
+      snow: { from: 0.68, amount: 0.62, rime: 0.12, color: '#edf3fa' }
+      seam: { color: '#40454e', strength: 0.74, damp: 0.32 }
     stonehold_pine:
       surface: earth-dry
-      scale: 1.2
-      tint: '#ffffff'
-      normalStrength: 0.7
+      scale: 1.6
+      tint: '#243c28'
+      normalStrength: 1.35
       roughness: 0.94
-      snow: { from: 0.52, amount: 0.54, rime: 0.08, color: '#eaf2fa' }
-      seam: { color: '#3d342a', strength: 0.66, soot: 0.42 }
+      cavityShade: 0.82
+      snow: { from: 0.72, amount: 0.58, rime: 0.1, color: '#e6eff8' }
+      seam: { color: '#1e2c20', strength: 0.62, damp: 0.3 }
     obsidian_seal:
       surface: frost-rock
       scale: 0.3
@@ -452,7 +471,15 @@ instancedLocations:
       scale: 1.6
       tint: '#ffffff'
       normalStrength: 0.35
-      roughness: 0.96
+      roughness: 0.92
+      cloth: { style: wool, windAmp: 0.13, windSpeed: 5.4, weaveDensity: 44, sheen: 0.28, translucency: 0.3, borderDarken: 0.45 }
+    waystation_hide:
+      surface: earth-dry
+      scale: 1.4
+      tint: '#ffffff'
+      normalStrength: 0.42
+      roughness: 0.93
+      cloth: { style: pelt, windAmp: 0.04, windSpeed: 2.2, weaveDensity: 18, sheen: 0.24, translucency: 0.08, borderDarken: 0.7 }
 
   # Ice families: one shader (materials/GlacierIceMaterial.js), a preset each. A vertex mask
   # can push part of a wall toward another family, so one cave shows several.
@@ -1001,15 +1028,19 @@ instancedLocations:
       voxel: 1.15
       materials:
         terrain: { kind: stone, profile: stonehold_alpine_rock }
-        masonry: { kind: stone, profile: stonehold_alpine_carved, masked: false }
+        masonry: { kind: stone, profile: stonehold_alpine_masonry, masked: false }
         carved: { kind: stone, profile: stonehold_alpine_carved, masked: false }
+        rock: { kind: stone, profile: moraine_boulder, masked: false }
+        clearIce: { kind: ice, profile: fractured, masked: false }
         timber: { kind: stone, profile: timber, masked: false }
         iron: { kind: stone, profile: forge_iron, masked: false }
         bronze: { kind: stone, profile: royal_bronze, masked: false }
         cloth: { kind: stone, profile: trail_cloth, masked: false }
         pine: { kind: stone, profile: stonehold_pine, masked: false }
-        waterfall: { kind: waterfall, waterTint: '#3f6d80', foamTint: '#f2f8fc', speed: 1.75 }
+        waterfall: { kind: waterfall, waterTint: '#2b5a70', foamTint: '#f2f8fc', speed: 1.85 }
         glow: { kind: glow }
+      params:
+        alpineUnderstory: { cobbles: 380, iceShards: 0, tundraSedge: 120, tundraLichen: 130 }
     stonehold_throne_hall:
       generatorKey: stonehold-throne-hall
       lightingProfile: stonehold_throne
@@ -1040,6 +1071,8 @@ instancedLocations:
         iceCrystal: { kind: ice, profile: ice_crystal, masked: false }
         iceBlock: { kind: ice, profile: fractured, masked: false }
         timber: { kind: stone, profile: timber, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
+        pelt: { kind: stone, profile: waystation_hide, masked: false }
         iron: { kind: stone, profile: iron, masked: false }
         masonry: { kind: stone, profile: rubble_masonry, masked: false }
         roof: { kind: stone, profile: sod_roof, masked: false }
@@ -1091,6 +1124,7 @@ instancedLocations:
         rock: { kind: stone, profile: moraine_boulder, masked: false }
         timber: { kind: stone, profile: frost_timber, masked: false }
         cloth: { kind: stone, profile: trail_cloth, masked: false }
+        pelt: { kind: stone, profile: waystation_hide, masked: false }
         roof: { kind: stone, profile: snow_roof, masked: false }
         iron: { kind: stone, profile: iron, masked: false }
         glow: { kind: glow }
@@ -1138,6 +1172,7 @@ instancedLocations:
         # Strength of the sun shafts through the old wall's openings.
         shafts: 0.08
         crystalField: { clusters: 450, needles: 700 }
+        alpineUnderstory: { cobbles: 420, iceShards: 220, tundraSedge: 160, tundraLichen: 160 }
         icicles: 240
         stakes: [[0.6, 20], [2.5, 14], [5.5, 4], [7, -14], [9.5, -24]]
         # A Norths waystation before the arch, and the torches at its mouth ([x, z]).
@@ -1155,6 +1190,8 @@ instancedLocations:
         iceBlock: { kind: ice, profile: cut_block, masked: false }
         rock: { kind: stone, profile: moraine_boulder, masked: false }
         timber: { kind: stone, profile: frost_timber, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
+        pelt: { kind: stone, profile: waystation_hide, masked: false }
         masonry: { kind: stone, profile: snowy_rubble, masked: false }
         roof: { kind: stone, profile: snow_roof, masked: false }
         planks: { kind: stone, profile: plank_floor, masked: false }
@@ -1177,6 +1214,7 @@ instancedLocations:
         yard: { gateZ: 15 }
         cottage: { length: 7, width: 4.4, wallHeight: 2.2, roofRise: 2.6 }
         strata: { amp: 0.3, frequency: 0.3, dip: 0.08, warp: 6 }
+        alpineUnderstory: { cobbles: 220, iceShards: 60, tundraSedge: 80, tundraLichen: 90 }
         # Icicle clusters at the store's door end, where warm air leaks in and refreezes.
         icicles: 16
 

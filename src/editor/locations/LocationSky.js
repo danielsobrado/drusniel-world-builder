@@ -1,21 +1,20 @@
 import * as THREE from 'three/webgpu';
 import {
-  acos, attribute, clamp, color, dot, exp, float, floor, hash, max, mix, normalize, positionLocal, pow, sin, smoothstep,
+  acos, clamp, color, dot, exp, float, floor, hash, max, mix, normalize, positionLocal, pow, sin, smoothstep,
   time, vec2, vec3,
 } from 'three/tsl';
-import { fbm3 } from './gen/noise.js';
+import { createAlpineMountainBackdrop } from './AlpineMountainBackdrop.js';
 import { noiseTap } from './LocationEffects.js';
 
 /**
  * The sky over an open-air location, from a lighting profile's `sky` entry: a
- * dome drawn behind everything, and far peaks standing in the haze beyond the
- * place itself. The world's own sky belongs to the world scene and its post
- * chain; a location draws straight to the canvas, so it carries this instead.
- * Its clouds, aurora and gullies read the shared world-noise texture rather than
- * evaluating noise per pixel.
+ * dome drawn behind everything, and a multi-range 3D alpine massif standing in
+ * the haze beyond the place itself. The world's own sky belongs to the world
+ * scene and its post chain; a location draws straight to the canvas, so it
+ * carries this instead. Its clouds and aurora read the shared world-noise
+ * texture rather than evaluating noise per pixel.
  */
 
-const PEAK_COLUMNS = 180;
 /** Radius and width of the halo ice crystals in the air draw round the sun, radians: the 22 degree halo. */
 const HALO_RADIUS = 0.384, HALO_WIDTH = 0.024;
 /** How far above or below the sun's own height its sundogs reach, as a share of the dome. */
@@ -44,9 +43,6 @@ const AURORA_WANDER = { scale: 0.14, rate: 0.008 };
 const AURORA_RAYS = { scale: 1, rate: 0.0086 };
 /** Texture tiles between the two curtains' patches. */
 const AURORA_PHASE_SPREAD = 0.37;
-
-/** Metres of far ridge one tile of gully streaks spans, rounded so the ring closes on whole tiles. */
-const PEAK_NOISE_METRES = 1000;
 
 const unit = (direction) => {
   const length = Math.hypot(...direction);
@@ -123,55 +119,12 @@ function skyColor(sky) {
   return mix(tone, color(sky.ground), smoothstep(0.02, -0.06, height));
 }
 
-/** A ridge of far mountains as one strip: snow above, rock below, sinking into the horizon haze. */
-function createPeaks(sky) {
-  const { radius, height, seed } = sky.peaks;
-  const position = new Float32Array((PEAK_COLUMNS + 1) * 6);
-  // Per vertex: bottom 0 or top 1, how sunlit, and tiles of gully streaks around the ring.
-  const shade = new Float32Array((PEAK_COLUMNS + 1) * 6);
-  const tilesAround = Math.max(1, Math.round(2 * Math.PI * radius / PEAK_NOISE_METRES));
-  const indices = [];
-  const ridge = (column) => {
-    const angle = column / PEAK_COLUMNS * Math.PI * 2;
-    const crest = fbm3(Math.cos(angle) * 2.2 + 9, Math.sin(angle) * 2.2 + 9, 0.5, seed, 4);
-    const teeth = 1 - Math.abs(fbm3(Math.cos(angle) * 9 + 3, Math.sin(angle) * 9 + 3, 0.5, seed + 7, 2) * 2 - 1);
-    return height * (0.3 + crest * 0.75 + teeth * 0.3);
-  };
-  const [sunX, , sunZ] = sky.sun.direction;
-  for (let column = 0; column <= PEAK_COLUMNS; column += 1) {
-    const angle = column / PEAK_COLUMNS * Math.PI * 2;
-    const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius, top = ridge(column);
-    position.set([x, -height * 0.2, z, x, top, z], column * 6);
-    // A slope that falls away from the sun is in shade.
-    const fall = (ridge(column + 1) - ridge(column - 1)) * (-Math.sin(angle) * sunX + Math.cos(angle) * sunZ);
-    const lit = Math.min(1, Math.max(0, 0.5 + fall / height * 4));
-    const around = column / PEAK_COLUMNS * tilesAround;
-    shade.set([0, lit, around, 1, lit, around], column * 6);
-    if (column < PEAK_COLUMNS) indices.push(column * 2, column * 2 + 1, column * 2 + 2, column * 2 + 1, column * 2 + 3, column * 2 + 2);
-  }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
-  geometry.setAttribute('peak', new THREE.BufferAttribute(shade, 3));
-  geometry.setIndex(indices);
-  const material = new THREE.MeshBasicNodeMaterial({ name: 'location-peaks', side: THREE.DoubleSide, fog: false, depthWrite: false });
-  const peak = attribute('peak', 'vec3');
-  // Spurs and gullies: without them a ridge is a paper cut-out lit one column at a time. The meso
-  // layer's oriented streak (B), stood on end so it runs down the slopes and drags the snow line with it.
-  const spur = noiseTap(vec2(positionLocal.y.div(PEAK_NOISE_METRES), peak.z), 'meso').b.sub(0.5);
-  const snow = mix(color(sky.peaks.shade), color(sky.peaks.snow), smoothstep(0.3, 0.7, peak.y.add(spur.mul(0.9))));
-  const body = mix(color(sky.peaks.rock), snow, smoothstep(0.15, 0.55, peak.x.add(spur.mul(0.35))));
-  material.colorNode = mix(color(sky.ground), body, smoothstep(0, 0.5, peak.x).mul(float(1).sub(sky.peaks.haze)));
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
-  mesh.renderOrder = -1;
-  return mesh;
-}
-
 /**
  * @param {object} sky a resolved `lightingProfiles.*.sky` entry
+ * @param {{ alpinePack?: THREE.Texture | null }} [options]
  * @returns {{ group: THREE.Group, follow(camera: THREE.Camera): void }}
  */
-export function createSky(sky) {
+export function createSky(sky, { alpinePack = null } = {}) {
   const group = new THREE.Group();
   const material = new THREE.MeshBasicNodeMaterial({ name: 'location-sky', side: THREE.BackSide, fog: false, depthWrite: false });
   material.colorNode = skyColor(sky);
@@ -179,7 +132,7 @@ export function createSky(sky) {
   dome.frustumCulled = false;
   dome.renderOrder = -2;
   group.add(dome);
-  if (sky.peaks) group.add(createPeaks(sky));
+  if (sky.peaks) group.add(createAlpineMountainBackdrop(sky, alpinePack));
   return {
     group,
     /** The dome rides with the camera, just inside its far plane; the peaks stay where they stand. */

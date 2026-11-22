@@ -42,6 +42,47 @@ const SITE_SPECS = {
       ['02-arch', [4, 3, 9, 0, 0.16]],
       ['03-cliff', [4, 2, -13, 0.1, 0.3]],
       ['04-cave-mouth', [-4, 2, -22, 1.25, 0.22]],
+      ['05-peaks', [0, 4.2, 24, -0.22, 0.24]],
+      ['06-boulder-understory', [-2.5, 2.4, 21.5, 0.62, -0.14]],
+      ['07-flag-cloth', [-1.4, 3.0, 22.8, -0.78, 0.04]],
+      ['08-waystation', [8.5, 2.8, 14.5, -0.42, -0.06]],
+      ['09-serac-monolith', [-10.5, 2.6, 11.5, 0.64, 0.04]],
+    ],
+  },
+  frosthold: {
+    id: 'showcase-frostgard-hold',
+    prefix: 'hold',
+    poses: [
+      ['01-yard', [0, 3.2, 24, 0, 0.06]],
+      ['02-waystation', [10, 2.8, 14, -0.35, -0.04]],
+    ],
+  },
+  gate: {
+    id: 'showcase-stonehold-gate',
+    prefix: 'stonehold-gate',
+    poses: [
+      ['01-approach', [0, 8.8, 36, 0, 0.08]],
+      ['02-bridge-gate', [1.5, 11.2, 6, 0.05, 0.18]],
+      ['03-doors-closeup', [0, 16.5, -16, 0, 0.08]],
+      ['04-waterfall-statue', [-11.5, 15.2, -10, -0.38, 0.16]],
+      ['05-colossus-pines', [4, 14.5, 22, -0.52, 0.14]],
+    ],
+  },
+  throne: {
+    id: 'showcase-stonehold-throne',
+    prefix: 'stonehold-throne',
+    poses: [
+      ['01-nave-wide', [0, 3.6, 8.5, 0, 0.08]],
+      ['02-dais-throne', [0, 3.2, -7.2, 0, 0.16]],
+      ['03-hoard-banner', [-4.8, 4.4, -14.5, 0.35, 0.12]],
+    ],
+  },
+  hall: {
+    id: 'showcase-stonehold-hall',
+    prefix: 'stonehold-hall',
+    poses: [
+      ['01-avenue', [0, 3.6, -24, 0, 0.06]],
+      ['02-forge', [0, 3.2, -112, 0, 0.05]],
     ],
   },
 };
