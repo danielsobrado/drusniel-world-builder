@@ -28,4 +28,5 @@ The captures, timings and inspection were served from `d70f9186`; acceptance fro
 - `logs/texel-law-experiment.json`: the candidate texel laws, compared in the same fixture.
 - `logs/underwater-captures-and-perf.json`: capture states and the focus-verified A/B/A timings.
 - `logs/inspect-{off,on}.json`: underwater post and water WGSL hashes, trimmed.
+- `logs/water-acceptance-caustics-on.json`: the acceptance run with caustics on, trimmed. Every gate passes, but the run lost foreground focus, so it is not performance-authoritative.
 - `logs/shelf-bathymetry-scan.txt`: bed depth and shore distance across the shelf.

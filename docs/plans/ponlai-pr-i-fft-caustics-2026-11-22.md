@@ -3,7 +3,7 @@
 Follow-on of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md), deferred there by [I.7](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md) to its own PR. Evidence: [first iteration](../qa/ponlai-pr-i-fft-caustics-2026-11-21/README.md) (I.4 geography) and [shelf iteration](../qa/ponlai-pr-i-fft-caustics-shelf-2026-11-22/README.md).
 
 **Status:** built, verified and pushed, but **off by default**. `water.sea.offshoreFft.caustics.enabled: false`.
-- **Correct and free.** The shader matches its CPU twin on hardware. Off is byte-identical. On, the GPU cost is within noise. Water acceptance passed with the first iteration on; the shelf iteration's rerun is pending (§8).
+- **Correct and free.** The shader matches its CPU twin on hardware. Off is byte-identical. On, the GPU cost is within noise. Water acceptance passed with the first iteration on. For the shelf iteration every functional gate passes, but its run lost foreground focus, so the timing is not authoritative (§8).
 - **Visible now, but not clearly better.** The first iteration followed the I.4 offshore geography, which put the FFT only on the ~24 m floor, where it was invisible (§6). On 2026-11-22 caustics got their own geography, a 2–6 m bed-depth band on any ocean water, and a finer texel law for the shelf (§2, §8). On a 7 m shelf plateau the FFT now draws soft, wind-aligned bands at the web's average brightness. They are broader and less crisp than the web's thin lines: a different look in stills, not a demonstrated improvement.
 - **Stop rule.** It ships as a tested option. Turning it on is an art call (§9).
 
@@ -186,7 +186,9 @@ On the plateau the A/B difference exceeds the A/A noise (the light shafts): the 
 
 GPU p50 for the FFT sits inside the web runs' spread at both poses. The shader is the same six taps and Jacobian as §7, plus one `min`. Frame times were noisy in this run: the shared machine ran other sessions' QA between the lock-held runs, and even the A/A pair differs by up to 3 ms at p50. The frame-time cost is therefore not resolved here. The clean first-iteration run (§7) and the GPU timings both put it within noise.
 
-**Water acceptance** with caustics **on** (`npm run qa:water:acceptance -- --headed`, frozen snapshot `e35fbb06`): **not yet confirmed for this iteration.** The first attempt aborted during route discovery, before any measurement, when another window took foreground focus. A retry was still queued behind the shared GPU lock at push time. The first iteration passed acceptance with the same post path (§7).
+**Water acceptance** with caustics **on** (`npm run qa:water:acceptance -- --headed`, frozen snapshot `e35fbb06`; [`logs/water-acceptance-caustics-on.json`](../qa/ponlai-pr-i-fft-caustics-shelf-2026-11-22/logs/water-acceptance-caustics-on.json)): **every functional gate passes, but the run is not performance-authoritative**, so the overall result is `pass: false`.
+- **Gates (all pass):** route found, water entered, swimming reached, submerged for 58 frames, surfaced, returned dry, body identity and floating origin stable, projected caustics active for 5,562 frames with post CPU at most **0.30 ms**, frame p95 **10 ms**, hitch rate 0.0009, 0 GPU validation errors.
+- **Not authoritative:** the browser lost native foreground focus about 3.4 s into the run, when another desktop window came to the front. An earlier attempt aborted at route discovery for the same reason, when the user's Chrome took focus. A focus-held acceptance run for this iteration needs an idle desktop. The first iteration passed one with the same post path (§7).
 
 ## 9. Not done, and what would change the verdict
 
@@ -194,5 +196,6 @@ GPU p50 for the FFT sits inside the web runs' spread at both poses. The shader i
 - **Crisper lines** would need detail the bounded texel deliberately filters out. A 0.25 m texel at every depth saturates past 10 m (§4). A camera-footprint term, to resolve finer only near the camera, is the next lever. It would need its own aliasing check in motion.
 - **Surface mismatch on the shelf.** The surface above the shelf is the authored coastal sea, not the FFT (§2).
 - **The light shafts** move on the render clock, not the water clock, so underwater A/B captures carry their motion as noise.
+- **A focus-held water acceptance run** for the shelf iteration (§8).
 - **Still captures only**, at one water time. Motion and temporal stability were not measured.
 - **Single GPU** (RTX 4080).
