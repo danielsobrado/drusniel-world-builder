@@ -1,6 +1,6 @@
 # Ground wetness field — spatially varied, GPU-only rain wetness
 
-**Status:** implemented in `6a33c372` (on `main`). **Off by default** (`stylizedSurface.wetness.field.enabled: false`, `?wetnessField=1` turns it on for QA). Evidence: [`docs/qa/wetness-field-2026-11-21/`](../qa/wetness-field-2026-11-21/).
+**Status:** implemented in `6a33c372`, tuned in `929237ba` after the bare-soil and town captures (§6.1), on `main`. **Off by default** (`stylizedSurface.wetness.field.enabled: false`, `?wetnessField=1` turns it on for QA). Evidence: [`docs/qa/wetness-field-2026-11-21/`](../qa/wetness-field-2026-11-21/).
 
 It applies the offshore FFT ocean's approach (PR I) to rain wetness: the GPU owns the visual field and computes it in one shared pass, nothing is read back, world-space patterns go through double-precision origins, a YAML switch proves itself byte-identical when off, and timings come from native hardware runs.
 
@@ -8,13 +8,13 @@ It applies the offshore FFT ocean's approach (PR I) to rain wetness: the GPU own
 
 Before, ground wetness was one global value (`SurfaceWetness`), so a storm darkened every patch of exposed ground by the same amount and the puddles followed one curve. With the field on, within about 100 m of the camera:
 
-- **Rain darkens unevenly.** A ~32 m CC0 mottle varies the film by ±10 %, and slopes shed water: from tan 0.35 to tan 1 the film falls to 40 %.
+- **Rain darkens unevenly.** A ~32 m CC0 mottle varies the film between 55 % and 100 %, and slopes shed water: from tan 0.35 to tan 1 the film falls to 40 %.
 - **Puddles pool in hollows and on flats.** Each point's puddle *spread* combines:
   - how far the ground sits below its ~6 m ring;
   - flatness;
   - a broad (~85 m) CC0 field for where the soil holds water;
   - the mottle;
-  - sun exposure.
+  - sun exposure, only while the ground dries (scaled by how far the fast clock has fallen), so a storm at noon still pools.
 
   The terrain's own baked slope and curvature (`shape`) still decide the exact outline, as before.
 - **Runoff on steep slopes.** Slopes never soak through and never pool.
@@ -158,6 +158,22 @@ Not captured:
 - A bare-soil, road or town pose, where the film's mottling and runoff should read more clearly. This is the first thing to look at before turning the field on by default.
 - Motion through a window rebuild.
 
+### 6.1 Bare soil and town (2026-11-22)
+
+Two more poses, same four weather states:
+
+- **desert:** (−5791, −27), flat bare sand, looking slightly down;
+- **town:** Cyvazin, burg 18 of the frozen Eldara map (the settlement perf town), standing on its main street facing the centre.
+
+The first field-on desert run found a bug. In heavy rain at noon the field drew **no puddles at all**, where the field-off path floods every flat into sheets of water. The cause: the sun term cut puddle capacity during the storm itself, and at noon open flat ground faces the sun squarely, so capacity fell to the noise floor. `929237ba` makes the sun act only while the ground dries (× `1 − clocks.x`, which is 0 while rain keeps the fast clock full). The same commit widens the film mottle from 0.8–1 to 0.55–1, because the film darkens albedo linearly by `darkening` (0.3), so the old range moved it by only a few percent and soaked ground looked flat. A test now pins "a noon storm still pools".
+
+Re-captured every pose with the tuned field (`tuned/`, snapshot `929237ba`):
+
+- **Desert** (`compare-desert.jpg`: rows off | first field | tuned): with the tuned field, heavy rain leaves separate puddles on the flats instead of the field-off flood or the first field's none. Mid-rain darkens without standing water (the puddle clock is at 0.30, below its 0.45 start), by design.
+- **Town** (`compare-town.jpg`: off | tuned): storm fog dominates both rain shots, so paving wetness cannot be judged by eye. On the lower street the tuned run is darker (mean luma 62 vs 75 in rain; 77 vs 79 dry, which is run-to-run noise). In both runs a hard horizontal line crosses the street at mid-distance. It exists with the field off too, and looks like the paving mesh's draw edge: past it the field-off terrain floods into a pale, sky-reflecting sheet, while with the tuned field it stays mostly dark, so the field makes the line less visible.
+- **Grassland aerial** (`compare-grassland-air-tuned.jpg`: off | tuned): drying still leaves patchy puddles and damp ground in the clearing.
+- **Cost:** field pass 0.004 ms GPU at p50 and p95 over 60 timestamped draws (one 7 ms outlier); all 16 shots and the 4 field-off town shots captured with 0 failures and 0 browser errors.
+
 ## 7. Checks
 
 | Check | Result |
@@ -171,5 +187,7 @@ Not captured:
 - Single GPU (RTX-class desktop, see the reports' adapter field).
 - Puddle outlines still come from the terrain's baked per-chunk shape, so the field cannot open puddles where that shape sees no hollow; it decides how full each basin is.
 - Beyond ~100 m the ground uses the global value (by design: the window is 256 m).
-- Paving was not in view at the capture pose; its off-switch is proven device-free (§4) but not captured.
-- Left **off by default**, pending a review of the captures by eye.
+- Paving is in the town captures, but storm fog hides it; its wetness is confirmed only by the luma difference, not by eye. Its off switch is proven device-free (§4).
+- The hard line at the paving's draw edge in rain comes from existing code and is not fixed here.
+- The tuned model's in-app shader hashes were not re-measured. The off path does not include the model: device-free, `929237ba` with the field off hashes the same as its ancestor `b607b261` for all four shaders. The paving fragment hash itself moved after `6a33c372` (`9ec22f35d8a0` → `417cbb76a0f6` on WebGPU) through another session's shader commits, not this field.
+- Left **off by default**, pending a decision after these captures.
