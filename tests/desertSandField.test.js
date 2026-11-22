@@ -13,6 +13,7 @@ import {
 import { resolveSnowFieldConfig } from '../src/editor/weather/storm/snowField/snowFieldConfig.js';
 import { SnowFieldPass } from '../src/editor/weather/storm/snowField/SnowFieldPass.js';
 import { stormSandFieldSample, withStormSand } from '../src/editor/materials/TerrainStormSandNodes.js';
+import { withStormSnow } from '../src/editor/materials/TerrainStormSnowNodes.js';
 import { createSandstormNodeMaterial } from '../src/editor/weather/rainNodeMaterial.js';
 import { sandstormGust } from '../src/editor/weather/sandstorm_system.js';
 import { resolveBiomeLooks } from '../src/editor/biomes/BiomeLooks.js';
@@ -71,7 +72,9 @@ test('on, the pass, the dust fetch and the terrain weights compile for WebGPU an
       const field = stormSandFieldSample({ sand: [1, 32] });
       assert.ok(field);
       const samples = { terrainShape: vec4(0.2, 0, 0, 0), canopyWater: vec4(0), macroTint: vec4(0.5) };
-      const weights = withStormSand(vec4(0.4, 0.2, 0.3, 0.1), samples, float(1), { sand: [1, 32] }, field);
+      // Sand first, then storm snow over it, sharing the one field fetch (as the terrain does).
+      const weights = withStormSnow(withStormSand(vec4(0.4, 0.2, 0.3, 0.1), samples, float(1), { sand: [1, 32] }, field),
+        samples, field);
       const material = new THREE.MeshBasicNodeMaterial();
       material.colorNode = weights.rgb;
       wgsl(material, renderer);
