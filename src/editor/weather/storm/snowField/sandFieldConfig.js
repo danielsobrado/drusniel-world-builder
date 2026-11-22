@@ -24,13 +24,15 @@ export const DEFAULT_SAND_FIELD = Object.freeze({
   steepLoss: 1,
   /** Share of the gain the wind-streaked drift pattern varies (0 = no streaks). */
   driftContrast: 0.6,
+  /** How much paler fresh drifted sand reads than the erg under it (0 = only the weights). */
+  paleness: 0.25,
   /** Share of the dust a fully sheltered lee thins (sandstorm particles; 0 = none). */
   dustThinning: 0.5,
 });
 
 const RANGES = Object.freeze({
   buildSeconds: [1, 86400], fadeSeconds: [1, 86400], flatGain: [0, 4], leeGain: [0, 4], hollowGain: [0, 4],
-  steepLoss: [0, 1], driftContrast: [0, 1], dustThinning: [0, 1],
+  steepLoss: [0, 1], driftContrast: [0, 1], paleness: [0, 1], dustThinning: [0, 1],
 });
 
 /**

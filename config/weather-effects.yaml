@@ -83,4 +83,5 @@ sandField:
   hollowGain: 0.9
   steepLoss: 1
   driftContrast: 0.6
+  paleness: 0.25
   dustThinning: 0.5

@@ -12,7 +12,7 @@ import {
 } from '../src/editor/weather/storm/snowField/sandFieldConfig.js';
 import { resolveSnowFieldConfig } from '../src/editor/weather/storm/snowField/snowFieldConfig.js';
 import { SnowFieldPass } from '../src/editor/weather/storm/snowField/SnowFieldPass.js';
-import { stormSandFieldSample, withStormSand } from '../src/editor/materials/TerrainStormSandNodes.js';
+import { stormSandDrift, stormSandFieldSample, withFreshSandColor, withStormSand } from '../src/editor/materials/TerrainStormSandNodes.js';
 import { withStormSnow } from '../src/editor/materials/TerrainStormSnowNodes.js';
 import { createSandstormNodeMaterial } from '../src/editor/weather/rainNodeMaterial.js';
 import { sandstormGust } from '../src/editor/weather/sandstorm_system.js';
@@ -55,7 +55,9 @@ test('off, the field pass, the dust and the terrain weights compile as before', 
     after.dispose();
     assert.equal(stormSandFieldSample({ sand: [1] }), null);
     const weights = vec4(0.25);
-    assert.equal(withStormSand(weights, {}, float(1), { sand: [1] }, null), weights);
+    assert.equal(withStormSand(weights, null), weights);
+    const color = weights.rgb;
+    assert.equal(withFreshSandColor(color, null), color);
     assert.doesNotMatch(wgsl(createSandstormNodeMaterial().material, renderer).vertexShader, /texture/i);
   });
 });
@@ -73,10 +75,10 @@ test('on, the pass, the dust fetch and the terrain weights compile for WebGPU an
       assert.ok(field);
       const samples = { terrainShape: vec4(0.2, 0, 0, 0), canopyWater: vec4(0), macroTint: vec4(0.5) };
       // Sand first, then storm snow over it, sharing the one field fetch (as the terrain does).
-      const weights = withStormSnow(withStormSand(vec4(0.4, 0.2, 0.3, 0.1), samples, float(1), { sand: [1, 32] }, field),
-        samples, field);
+      const drift = stormSandDrift(samples, float(1), { sand: [1, 32] }, field);
+      const weights = withStormSnow(withStormSand(vec4(0.4, 0.2, 0.3, 0.1), drift), samples, field);
       const material = new THREE.MeshBasicNodeMaterial();
-      material.colorNode = weights.rgb;
+      material.colorNode = withFreshSandColor(weights.rgb, drift);
       wgsl(material, renderer);
     }
   });

@@ -23,7 +23,7 @@ import { bilinearLoad } from './TerrainSlotBindings.js';
 import { createTerrainMaterialGenome } from './TerrainMaterialGenomeNodes.js';
 import { createTerrainTransitionState } from './TerrainTransitionNodes.js';
 import { withStormSnow } from './TerrainStormSnowNodes.js';
-import { stormSandFieldSample, withStormSand } from './TerrainStormSandNodes.js';
+import { stormSandDrift, stormSandFieldSample, withFreshSandColor, withStormSand } from './TerrainStormSandNodes.js';
 import {
   applyTerrainMaterialFeatureColor,
   createTerrainMaterialFeatureState,
@@ -166,7 +166,8 @@ export function createTerrainMaterialBakedSurface({
   // A sandstorm's windblown sand on desert ground, then storm snow over it; one shared field fetch.
   const arid = stylizedConfig.biomeLooks?.arid;
   const field = stormSandFieldSample(arid);
-  const weights = withStormSnow(withStormSand(transitions.weights, samples, tileId, arid, field), samples, field);
+  const sandDrift = field ? stormSandDrift(samples, tileId, arid, field) : null;
+  const weights = withStormSnow(withStormSand(transitions.weights, sandDrift), samples, field);
   // The snow a storm laid beyond the bake's own (0 in clear weather, so nothing below changes then).
   const stormSnow = weights.a.sub(transitions.weights.a).max(0);
   const genome = createTerrainMaterialGenome({
@@ -362,7 +363,7 @@ export function createTerrainMaterialBakedSurface({
     stormSnow,
   );
   return {
-    color: assembleBakedColor({
+    color: withFreshSandColor(assembleBakedColor({
       nearDetailed,
       midColor,
       farColor,
@@ -374,7 +375,7 @@ export function createTerrainMaterialBakedSurface({
       farBlend,
       nearBlendEnd,
       farBlendEnd,
-    }),
+    }), sandDrift),
     roughness: readyRoughness,
     normal: readyNormal,
     /** 0..1 baked rock, for the stone laid over it (TerrainRockDetail.js). */
