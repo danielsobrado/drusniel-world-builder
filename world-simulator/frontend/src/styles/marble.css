@@ -1,0 +1,49 @@
+:root {
+  --marble-base: #1b2633;
+  /* Tinted from the source library's marble-03 and marble-06 noise. */
+  --marble-texture: url('/assets/textures/world-simulator-marble.jpg');
+  --marble-sheen: linear-gradient(180deg, rgba(209, 226, 245, 0.035), rgba(11, 17, 25, 0.32));
+  --marble-muted: #b7c3d2;
+  --marble-edge: rgba(171, 193, 216, 0.24);
+  --marble-highlight: inset 0 1px 0 rgba(219, 233, 249, 0.14);
+}
+
+.appbar, .workspace-bar, .rail, .statusbar {
+  --muted: var(--marble-muted);
+  position: relative;
+  background: var(--marble-sheen), var(--marble-texture) center / 512px, var(--marble-base);
+  box-shadow: var(--marble-highlight);
+  z-index: 3;
+}
+
+.appbar, .workspace-bar { border-bottom: 1px solid var(--marble-edge); }
+.statusbar { border-top: 1px solid var(--marble-edge); }
+.rail { border-right: 1px solid var(--marble-edge); }
+
+.rail-btn { transition: background-color 0.15s, box-shadow 0.15s, color 0.15s; }
+.rail-btn.active, .icon-btn.on {
+  background: rgba(22, 29, 42, 0.55);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  box-shadow: var(--marble-highlight);
+}
+
+.appbar select, .explorer select {
+  font-size: var(--fs-sm);
+  background: var(--marble-sheen), var(--marble-texture) center / 270px, var(--marble-base);
+  border-color: var(--marble-edge);
+  box-shadow: var(--marble-highlight);
+}
+
+.explorer select { color: var(--marble-muted); }
+select option { background: var(--marble-base); color: var(--text); }
+
+@media (max-width: 900px) {
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    border-right: 0;
+    border-bottom: 1px solid var(--marble-edge);
+  }
+}

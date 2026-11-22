@@ -64,7 +64,7 @@ frontend/               TypeScript + React + Vite
                         ScenarioExplorer, PopulationTrend
   src/api/              types.ts (API contracts), worldApi.ts (fetch + useApi hook)
   src/styles/           tokens.css (theme variables), shell.css, components.css,
-                        glass.css (frosted navigation chrome)
+                        marble.css (textured navigation chrome)
   tests/                Vitest
 scripts/                dev.js (process launcher), capture-screenshots.js
 ```

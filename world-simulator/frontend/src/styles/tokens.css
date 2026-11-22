@@ -7,11 +7,11 @@
   --surface-3: #22272d;
   --border: #2b3037;
   --border-strong: #3a4048;
-  --text: #ddd8cc;           /* limestone */
-  --muted: #8f8a7e;
-  --bronze: #b38b55;         /* aged bronze */
-  --bronze-strong: #d1a76a;
-  --bronze-soft: rgba(179, 139, 85, 0.14);
+  --text: #e0e4eb;
+  --muted: #9ba7b5;
+  --accent: #b5afd4;
+  --accent-strong: #d8d1f0;
+  --accent-soft: rgba(181, 175, 212, 0.14);
   --good: #7fae7a;
   --bad: #d0776a;
   --warn: #d6b360;
@@ -20,8 +20,6 @@
   --trail: #8f7f62;
   --sea-route: #4f7389;
   --pilot: #e6c27a;
-  --marble: linear-gradient(135deg, #181b20 0%, #1d2026 38%, #16181d 52%, #1f2329 74%, #15181c 100%);
-  --vein: repeating-linear-gradient(115deg, transparent 0 46px, rgba(255, 255, 255, 0.018) 46px 47px, transparent 47px 120px);
 
   --font-ui: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --font-display: "Cinzel", "Trajan Pro", Georgia, "Times New Roman", serif;
