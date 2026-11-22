@@ -1,5 +1,9 @@
 node_modules/
 frontend/dist/
+backend/.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
 # Audit artifacts are reproducible with `npm run audit`; keep them local.
 data/generated/*
 !data/generated/.gitkeep

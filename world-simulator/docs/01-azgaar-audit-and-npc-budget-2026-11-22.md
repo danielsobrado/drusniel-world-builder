@@ -86,7 +86,7 @@ Distances use `settings.distanceScale` = 3 mi per map pixel.
 
 ## NPC allocation methodology
 
-`backend/src/npc/NpcBudgetAllocator.js`, configured by `config/npc-population.yaml`:
+`backend/src/world_sim/npc/budget.py`, configured by `config/npc-population.yaml`:
 
 1. Every settlement with population ≥ 1 gets its class minimum.
 2. The remaining slots are shared by weight `sqrt(population) × importance`, with

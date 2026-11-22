@@ -3,34 +3,41 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Standalone offline World Simulator for Drusniel: Azgaar audit, NPC budget and pilot selection.",
+  "description": "Standalone offline World Simulator for Drusniel: Python backend, TypeScript/React frontend.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
+    "postinstall": "uv sync --project backend",
     "dev": "node scripts/dev.js",
-    "dev:backend": "node --watch backend/src/server.js",
-    "dev:frontend": "vite --config frontend/vite.config.js",
-    "start": "node backend/src/server.js --serve-frontend",
-    "audit": "node backend/src/cli/audit.js",
+    "dev:backend": "uv run --project backend python -m world_sim.server --reload",
+    "dev:frontend": "vite --config frontend/vite.config.ts",
+    "start": "uv run --project backend python -m world_sim.server --serve-frontend",
+    "audit": "uv run --project backend python -m world_sim.cli.audit",
     "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "node --test \"backend/tests/**/*.test.js\"",
-    "test:frontend": "vitest run --config frontend/vite.config.js",
-    "lint": "eslint .",
-    "build": "vite build --config frontend/vite.config.js"
-  },
-  "dependencies": {
-    "js-yaml": "4.1.0"
+    "test:backend": "uv run --project backend pytest backend/tests -q",
+    "test:frontend": "vitest run --config frontend/vite.config.ts",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "uv run --project backend ruff check backend",
+    "lint:frontend": "eslint . && tsc -p frontend",
+    "build": "tsc -p frontend && vite build --config frontend/vite.config.ts"
   },
   "devDependencies": {
     "@testing-library/react": "16.3.0",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.19.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
     "@vitejs/plugin-react": "5.1.0",
     "eslint": "9.39.1",
     "eslint-plugin-react-hooks": "7.0.1",
     "globals": "16.5.0",
+    "js-yaml": "4.1.0",
     "jsdom": "27.2.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.2",
     "vite": "7.2.2",
     "vitest": "4.0.8"
   }

@@ -11,59 +11,63 @@ Findings, method and pilot ids: [docs/01-azgaar-audit-and-npc-budget-2026-11-22.
 
 ## Requirements
 
-Node.js 22 or newer. Run every command from `world-simulator/`.
+- Node.js 22+ (frontend tooling) and [uv](https://docs.astral.sh/uv/) (Python 3.12 backend).
+- Run every command from `world-simulator/`.
 
 ```bash
-npm install
-npm run dev        # backend + frontend; Ctrl+C stops both
+npm install        # also runs `uv sync --project backend`
+npm run dev        # Python backend + Vite frontend; Ctrl+C stops both
 ```
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | backend (watch mode) on 127.0.0.1:3100 and Vite on 127.0.0.1:5180 |
+| `npm run dev` | uvicorn (auto-reload) on 127.0.0.1:3100 and Vite on 127.0.0.1:5180 |
 | `npm run dev:backend` / `npm run dev:frontend` | one of the two |
 | `npm run audit` | writes the JSON reports to `data/generated/` |
-| `npm test` | backend tests (node:test) then frontend tests (Vitest + jsdom) |
-| `npm run lint` | ESLint |
-| `npm run build` | production frontend bundle in `frontend/dist/` |
+| `npm test` | pytest (backend), then Vitest + jsdom (frontend) |
+| `npm run lint` | ruff (backend), ESLint and `tsc` (frontend) |
+| `npm run build` | type-check and build the frontend into `frontend/dist/` |
 | `npm start` | backend that also serves `frontend/dist/` on port 3100 |
 | `node scripts/capture-screenshots.js` | 1600×900 + phone screenshots into `docs/screenshots/` (needs `npm run dev`; uses the parent repo's Playwright) |
 
 Open http://127.0.0.1:5180 during development, or http://127.0.0.1:3100 after
-`npm run build && npm start`.
+`npm run build && npm start`. Interactive API docs: http://127.0.0.1:3100/api/docs.
 
 The frontend port is 5180, not 5174, because 5174 is the main game's dev port.
 
 ## Architecture
 
+The backend is Python and owns all world and simulation logic. The frontend is a
+TypeScript React app that only talks to the backend's JSON API.
+
 ```text
-config/            simulator.yaml, npc-population.yaml, pilot-selection.yaml
-backend/src/
-  world/           AzgaarWorldLoader (manifest, path guard, validation, fingerprint)
-                   WorldAudit, PopulationNormalizer, SettlementClassifier
-                   WorldModel (builds everything once; shared by API and CLI)
-  geography/       SettlementConnectivity (cell-based route graph, components, distances)
-  npc/             NpcBudgetAllocator
-  pilot/           PilotSelector
-  reports/         ReportBuilder, ReportWriter (canonical JSON)
-  api/             routes, settlementQuery, responses
-  app.js server.js log.js cli/audit.js
-frontend/src/
-  shell/           app bar, workspace bar, icon rail, explorer, inspector, status bar
-  components/      WorldSummary, PopulationChart, SettlementTable, SettlementDetails,
-                   BudgetComparison, WorldMap, PilotSettlements
-  api/worldApi.js  fetch wrapper and useApi hook
-  styles/          tokens.css (theme variables), shell.css, components.css
-scripts/           dev.js (process launcher), capture-screenshots.js
+config/                 simulator.yaml, npc-population.yaml, pilot-selection.yaml
+backend/                Python package (pyproject.toml, uv.lock)
+  src/world_sim/
+    world/              loader (manifest, path guard, validation, fingerprint),
+                        audit, population, classifier, model (built once, shared)
+    geography/          connectivity (cell-based route graph, components, Dijkstra)
+    npc/                budget (NPC allocator)
+    pilot/              selector
+    reports/            builder, writer
+    api/                app (FastAPI), settlement_query, errors
+    cli/audit.py        canonical.py ids.py config.py log.py server.py
+  tests/                pytest
+frontend/               TypeScript + React + Vite
+  src/shell/            app bar, workspace bar, icon rail, explorer, inspector, status bar
+  src/components/       WorldSummary, PopulationChart, SettlementTable, SettlementDetails,
+                        BudgetComparison, WorldMap, PilotSettlements
+  src/api/              types.ts (API contracts), worldApi.ts (fetch + useApi hook)
+  src/styles/           tokens.css (theme variables), shell.css, components.css
+  tests/                Vitest
+scripts/                dev.js (process launcher), capture-screenshots.js
 ```
 
-The backend has no browser or rendering dependencies. It reuses the main repo's pure
-helpers `src/sim/model/ids.js` (stable ids) and
-`src/sim/persistence/canonicalSerialize.js` (sorted JSON, config fingerprint). The
-editor importers are not used: they pull in terrain and rendering code.
-
-The world model is built once at startup and frozen, so concurrent requests all read
-the same data.
+Settlement ids (`ids.py`) and the config checksum (`canonical.py`) reproduce the
+game's `src/sim/model/ids.js` and `src/sim/persistence/canonicalSerialize.js`, and a
+test pins the checksum to values computed by the JS version, so ids stay joinable
+with the game. The world model is built once at startup and never mutated, so
+concurrent requests all read the same data.
 
 ## API
 

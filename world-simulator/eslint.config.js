@@ -1,35 +1,29 @@
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
+import tseslint from 'typescript-eslint';
 
-// Same correctness-only rules as the main repository, plus JSX and hooks for the frontend.
-const rules = {
-  'no-undef': 'error',
-  'no-unreachable': 'error',
-  'no-unused-vars': ['error', { args: 'none', varsIgnorePattern: '^_', caughtErrors: 'none', ignoreRestSiblings: true }],
-};
-
-export default [
-  { ignores: ['node_modules/**', 'frontend/dist/**', 'data/**'] },
+// Correctness rules for the TypeScript frontend and the Node helper scripts.
+// The Python backend is linted by ruff (npm run lint:backend).
+export default tseslint.config(
+  { ignores: ['node_modules/**', 'frontend/dist/**', 'data/**', 'backend/**'] },
   {
-    files: ['backend/**/*.js', 'scripts/**/*.js', 'eslint.config.js'],
+    files: ['scripts/**/*.js', 'eslint.config.js'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: globals.node },
-    rules,
+    rules: {
+      'no-undef': 'error',
+      'no-unused-vars': ['error', { args: 'none', varsIgnorePattern: '^_', caughtErrors: 'none' }],
+    },
   },
   {
-    files: ['frontend/**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parserOptions: { ecmaFeatures: { jsx: true } },
-      globals: { ...globals.browser, ...globals.node },
-    },
+    files: ['frontend/**/*.{ts,tsx}'],
+    extends: [tseslint.configs.recommended],
+    languageOptions: { globals: { ...globals.browser } },
     plugins: { 'react-hooks': reactHooks },
     rules: {
-      ...rules,
-      // JSX identifiers are not seen by no-unused-vars without the react plugin; count them as used.
-      'no-unused-vars': ['error', { args: 'none', varsIgnorePattern: '^(_|[A-Z])', caughtErrors: 'none', ignoreRestSiblings: true }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { args: 'none', varsIgnorePattern: '^_', ignoreRestSiblings: true }],
+      '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
-];
+);
