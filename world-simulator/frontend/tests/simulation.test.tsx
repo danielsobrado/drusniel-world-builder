@@ -4,7 +4,7 @@ import type { ScenarioState, ScenarioStatus } from '../src/api/types';
 import { SimulationControls } from '../src/simulation/SimulationControls';
 import { SimulationWorkspace } from '../src/simulation/SimulationWorkspace';
 import { useSimulation, type Simulation } from '../src/simulation/useSimulation';
-import { mockApi } from './helpers';
+import { mockApi, society } from './helpers';
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -12,12 +12,12 @@ const date = (day: number) => ({ day, year: 1212, month: 1 + Math.floor(day / 30
 const status = (extra: Partial<ScenarioStatus> = {}): ScenarioStatus => ({
   id: 'baseline-pilot', name: 'Pilot baseline', description: '', scope: { type: 'pilot' }, seed: 1212, parent: null, createdAt: '',
   settlementIds: ['settlement:azgaar-burg:238'], date: date(0), running: false, speed: 0, population: 15747, checksum: 'abcd1234',
-  snapshots: 0, error: null, snapshotSeq: 0, eventSeq: 1, ...extra,
+  snapshots: 0, error: null, snapshotSeq: 0, eventSeq: 1, readOnly: null, schemaVersion: 2, ...extra,
 });
 const state: ScenarioState = {
   schemaVersion: 1, scenarioId: 'baseline-pilot', seed: 1212, startYear: 1212, date: date(60),
   settlements: [{ settlementId: 'settlement:azgaar-burg:238', sourceId: 238, name: 'Vhaltha', population: 15760,
-    cohorts: { children: 5200, adults: 8660, elders: 1900 }, births: 90, deaths: 77 }],
+    cohorts: { children: 5200, adults: 8660, elders: 1900 }, births: 90, deaths: 77, society: society() }],
   history: [{ day: 0, population: { 'settlement:azgaar-burg:238': 15747 } }, { day: 30, population: { 'settlement:azgaar-burg:238': 15752 } },
     { day: 60, population: { 'settlement:azgaar-burg:238': 15760 } }],
 };
@@ -40,6 +40,11 @@ describe('SimulationControls', () => {
     expect(sim.step).toHaveBeenCalledWith('month');
     fireEvent.click(screen.getByRole('button', { name: 'Run simulation' }));
     expect(sim.run).toHaveBeenCalledWith(1);
+
+    const locked = fakeSim({ active: status({ readOnly: 'Saved against a different source map' }) });
+    rerender(<SimulationControls sim={locked} />);
+    expect(screen.getByText('read-only')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Run simulation' }) as HTMLButtonElement).disabled).toBe(true);
 
     const running = fakeSim({ active: status({ running: true, speed: 30 }) });
     rerender(<SimulationControls sim={running} />);

@@ -18,6 +18,7 @@ class Config:
     npc: dict[str, Any]
     pilot: dict[str, Any]
     simulation: dict[str, Any]
+    society: dict[str, Any]
 
     @property
     def class_ids(self) -> list[str]:
@@ -70,6 +71,7 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     npc = _read_yaml(root / "config/npc-population.yaml")
     pilot = _read_yaml(root / "config/pilot-selection.yaml")
     simulation = _read_yaml(root / "config/simulation.yaml")
+    society = _read_yaml(root / "config/society.yaml")
     _validate_classification(simulator["classification"])
     _validate_npc(npc, [c["id"] for c in simulator["classification"]])
     if not isinstance(pilot.get("roles"), list) or len(pilot["roles"]) != 3:
@@ -82,4 +84,4 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     storage = env.get("WS_SCENARIO_STORAGE")
     if storage:
         simulation["storage"] = storage
-    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation)
+    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society)

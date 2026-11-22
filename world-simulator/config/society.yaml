@@ -1,0 +1,71 @@
+# Households, housing, businesses and employment (PR3).
+# Every number here is an authored assumption for a pre-modern world, not calibrated
+# data. Changing them needs no code change; the state checksum changes with them.
+schemaVersion: 1
+
+households:
+  meanChildrenPerFamily: 2.4        # children per child-rearing household
+  singleParentShare: 0.12           # of child-rearing households, those with one adult
+  multigenerationalElderShare: 0.35 # of elders, those living in a family household
+  elderCoupleShare: 0.5             # of the other elders, those living as couples
+  adultCoupleShare: 0.75            # of adults not raising children, those in couples
+
+housing:
+  types:                            # capacity in households per building
+    cottage:   { label: Cottage,   households: 1 }
+    farmstead: { label: Farmstead, households: 1 }
+    townhouse: { label: Townhouse, households: 2 }
+    tenement:  { label: Tenement,  households: 6 }
+  # Share of baseline households housed in each type, by settlement class.
+  mixByClass:
+    named-village: { cottage: 0.55, farmstead: 0.45 }
+    small-town:    { cottage: 0.50, farmstead: 0.25, townhouse: 0.25 }
+    town:          { cottage: 0.35, farmstead: 0.15, townhouse: 0.40, tenement: 0.10 }
+    large-town:    { cottage: 0.25, farmstead: 0.10, townhouse: 0.45, tenement: 0.20 }
+    city:          { cottage: 0.15, farmstead: 0.05, townhouse: 0.45, tenement: 0.35 }
+    major-city:    { cottage: 0.10, farmstead: 0.05, townhouse: 0.40, tenement: 0.45 }
+  vacancyRate: 0.04                 # spare capacity built at baseline; no construction in PR3
+
+labour:
+  participation: { adults: 0.9, elders: 0.25 }   # children do not count as labour in PR3
+  # Share of the labour force each sector employs at baseline, by settlement class.
+  sectorShareByClass:
+    named-village: { agriculture: 0.68, extraction: 0.04, crafts: 0.13, trade: 0.05, services: 0.08, security: 0.02 }
+    small-town:    { agriculture: 0.55, extraction: 0.05, crafts: 0.19, trade: 0.08, services: 0.105, security: 0.025 }
+    town:          { agriculture: 0.42, extraction: 0.05, crafts: 0.26, trade: 0.11, services: 0.13, security: 0.03 }
+    large-town:    { agriculture: 0.34, extraction: 0.05, crafts: 0.29, trade: 0.14, services: 0.15, security: 0.03 }
+    city:          { agriculture: 0.26, extraction: 0.04, crafts: 0.32, trade: 0.18, services: 0.165, security: 0.035 }
+    major-city:    { agriculture: 0.20, extraction: 0.04, crafts: 0.34, trade: 0.20, services: 0.18, security: 0.04 }
+  # Workers are assigned to sectors in this order when labour is short.
+  priority: [agriculture, security, services, extraction, crafts, trade]
+
+# Business templates. staff = workers per business; wage = copper per worker-day.
+# Kinds marked `evidence` exist only where Azgaar records the matching good.
+businesses:
+  farm:          { label: Farm,           sector: agriculture, profession: farmhand,   staff: 8,  wage: 3 }
+  fishery:       { label: Fishery,        sector: agriculture, profession: fisher,     staff: 6,  wage: 3, requires: port }
+  hunting-lodge: { label: Hunting lodge,  sector: agriculture, profession: hunter,     staff: 4,  wage: 3, evidence: { extracted: [Game, Furs] } }
+  mine:          { label: Mine,           sector: extraction,  profession: miner,      staff: 12, wage: 5, evidence: { extractedTags: [ore, mineral] } }
+  woodcutter:    { label: Woodcutters,    sector: extraction,  profession: woodcutter, staff: 5,  wage: 3, evidence: { extracted: [Wood] } }
+  quarry:        { label: Clay pit,       sector: extraction,  profession: digger,     staff: 5,  wage: 3, evidence: { extracted: [Clay, White sand] } }
+  workshop:      { label: Workshop,       sector: crafts,      profession: artisan,    staff: 5,  wage: 5, evidence: { crafted: any } }
+  smithy:        { label: Smithy,         sector: crafts,      profession: smith,      staff: 4,  wage: 5 }
+  carpentry:     { label: Carpentry,      sector: crafts,      profession: carpenter,  staff: 4,  wage: 4 }
+  bakery:        { label: Bakery,         sector: crafts,      profession: baker,      staff: 3,  wage: 4 }
+  tailor:        { label: Tailor,         sector: crafts,      profession: tailor,     staff: 3,  wage: 4 }
+  market-stall:  { label: Market stall,   sector: trade,       profession: trader,     staff: 2,  wage: 4 }
+  merchant-house: { label: Merchant house, sector: trade,       profession: merchant,   staff: 6,  wage: 7, requires: marketCenter }
+  tavern:        { label: Tavern,         sector: services,    profession: innkeeper,  staff: 4,  wage: 3 }
+  temple:        { label: Temple,         sector: services,    profession: cleric,     staff: 6,  wage: 3, requires: temple }
+  healer:        { label: Healer,         sector: services,    profession: healer,     staff: 2,  wage: 6 }
+  watch-post:    { label: Watch post,     sector: security,    profession: watchman,   staff: 6,  wage: 4 }
+  garrison:      { label: Garrison,       sector: security,    profession: soldier,    staff: 20, wage: 4, requires: walls }
+
+# Evidence-backed kinds get this weight against generic kinds of the same sector.
+evidenceWeight: 2
+
+needs:
+  rationsPerFarmWorkerDay: 3.2      # food output per agriculture worker, in daily rations
+  rationsPerPersonDay: 1.0
+  securityPerThousand: 12           # guards and soldiers per 1,000 inhabitants that count as "safe"
+  thresholds: { strained: 0.9, critical: 0.7 }   # need value below which status degrades

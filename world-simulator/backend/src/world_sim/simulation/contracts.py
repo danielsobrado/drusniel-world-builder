@@ -1,10 +1,10 @@
-"""Canonical scenario state contracts (schema v1). Everything persisted or exported goes through these."""
+"""Canonical scenario state contracts (schema v2). Everything persisted or exported goes through these."""
 
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-STATE_SCHEMA_VERSION = 1
+STATE_SCHEMA_VERSION = 2  # v2 (PR3) adds society; v1 states migrate on load
 
 
 class Contract(BaseModel):
@@ -32,6 +32,72 @@ class Cohorts(Contract):
         return self.children + self.adults + self.elders
 
 
+class HouseholdGroup(Contract):
+    """Households of one composition; `adults` etc. are totals over the group."""
+    kind: str
+    label: str
+    households: int = Field(ge=0)
+    adults: int = Field(ge=0)
+    children: int = Field(ge=0)
+    elders: int = Field(ge=0)
+
+
+class HousingStock(Contract):
+    type: str
+    label: str
+    buildings: int = Field(ge=0)
+    capacity: int = Field(ge=0)      # households
+    occupied: int = Field(ge=0)
+    vacant: int = Field(ge=0)
+
+
+class Business(Contract):
+    id: str
+    settlementId: str
+    kind: str
+    name: str
+    sector: str
+    profession: str
+    good: str | None = None
+    staff: int = Field(ge=1)         # posts
+    wage: int = Field(ge=0)          # copper per worker-day
+    filled: int = Field(ge=0)
+    evidence: str | None = None      # why it exists, when sourced from Azgaar
+
+
+class Employment(Contract):
+    labourSupply: int
+    employed: int
+    unemployed: int
+    vacancies: int
+    wageBillPerMonth: int
+
+
+class SectorEmployment(Contract):
+    sector: str
+    businesses: int
+    demand: int
+    filled: int
+
+
+class Need(Contract):
+    id: str
+    label: str
+    value: float
+    status: Literal["ok", "strained", "critical"]
+    explanation: str
+
+
+class Society(Contract):
+    households: list[HouseholdGroup]
+    housing: list[HousingStock]
+    overcrowdedHouseholds: int
+    businesses: list[Business]
+    employment: Employment
+    sectors: list[SectorEmployment]
+    needs: list[Need]
+
+
 class SettlementState(Contract):
     settlementId: str
     sourceId: int
@@ -40,6 +106,7 @@ class SettlementState(Contract):
     cohorts: Cohorts
     births: int = 0      # cumulative since the scenario began
     deaths: int = 0
+    society: Society
 
 
 class CalendarDate(Contract):
@@ -95,7 +162,7 @@ class Event(Contract):
     seq: int
     day: int
     date: str
-    kind: Literal["created", "branched", "stepped", "month", "snapshot", "restored", "run", "paused", "error"]
+    kind: Literal["created", "branched", "stepped", "month", "snapshot", "restored", "run", "paused", "error", "migrated"]
     message: str
     data: dict[str, int | float | str | None] = {}
 

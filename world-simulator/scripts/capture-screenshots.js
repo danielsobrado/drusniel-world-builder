@@ -72,6 +72,18 @@ try {
   await page.locator('.trend-svg rect').hover({ position: { x: 300, y: 80 } });
   await shot('09-simulation');
 
+  await workspace('Households & Buildings');
+  await page.getByText('Household composition').waitFor();
+  await page.getByLabel('Settlement', { exact: true }).selectOption({ label: 'Vhaltha' });
+  await shot('10-households');
+
+  await workspace('Businesses & Employment');
+  await page.getByText('Labour by sector').waitFor();
+  await page.getByRole('table', { name: 'Businesses' }).getByRole('row').nth(1).click();
+  await page.getByText('Why it exists').waitFor();
+  await page.locator('.workspace').evaluate((el) => { el.scrollTop = 0; });
+  await shot('11-businesses');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

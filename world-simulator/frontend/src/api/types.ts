@@ -133,12 +133,26 @@ export interface ScenarioStatus {
   id: string; name: string; description: string; scope: ScenarioScope; seed: number;
   parent: { scenarioId: string; snapshotId: string } | null; createdAt: string; snapshotSeq: number; eventSeq: number;
   settlementIds: string[]; date: CalendarDate; running: boolean; speed: number; population: number;
-  checksum: string; snapshots: number; error: string | null;
+  checksum: string; snapshots: number; error: string | null; readOnly: string | null; schemaVersion: number;
 }
 
 export interface Cohorts { children: number; adults: number; elders: number }
+export interface HouseholdGroup { kind: string; label: string; households: number; adults: number; children: number; elders: number }
+export interface HousingStock { type: string; label: string; buildings: number; capacity: number; occupied: number; vacant: number }
+export interface Business {
+  id: string; settlementId: string; kind: string; name: string; sector: string; profession: string; good: string | null;
+  staff: number; wage: number; filled: number; evidence: string | null; settlementName?: string;
+}
+export interface Employment { labourSupply: number; employed: number; unemployed: number; vacancies: number; wageBillPerMonth: number }
+export interface SectorEmployment { sector: string; businesses: number; demand: number; filled: number }
+export interface Need { id: string; label: string; value: number; status: 'ok' | 'strained' | 'critical'; explanation: string }
+export interface Society {
+  households: HouseholdGroup[]; housing: HousingStock[]; overcrowdedHouseholds: number; businesses: Business[];
+  employment: Employment; sectors: SectorEmployment[]; needs: Need[];
+}
 export interface SettlementSimState {
   settlementId: string; sourceId: number; name: string; population: number; cohorts: Cohorts; births: number; deaths: number;
+  society: Society;
 }
 export interface ScenarioState {
   schemaVersion: number; scenarioId: string; seed: number; startYear: number; date: CalendarDate;

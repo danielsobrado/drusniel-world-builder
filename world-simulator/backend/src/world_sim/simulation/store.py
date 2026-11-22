@@ -1,4 +1,9 @@
-"""Scenario files: <storage>/<id>/{scenario,state,events}.json and snapshots/<snapshot>.json."""
+"""
+Scenario files. Each scenario is one bundle, <storage>/<id>/scenario.json holding
+{formatVersion, meta, state, events}, written by a single atomic replace, so metadata,
+state and events can never disagree after a crash. Snapshots are one file each.
+Raw dicts go in and out; schema migration happens in the manager.
+"""
 
 import json
 import os
@@ -6,10 +11,11 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ..canonical import canonical_json
-from .contracts import Event, ScenarioMeta, ScenarioState, SnapshotMeta
+from ..canonical import compact_json
 
+FORMAT_VERSION = 2   # 1 = PR2's separate scenario/state/events files
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
+LEGACY_FILES = ("state.json", "events.json")
 
 
 def slugify(text: str) -> str:
@@ -17,10 +23,10 @@ def slugify(text: str) -> str:
 
 
 def _write(path: Path, value: Any) -> None:
-    """Atomic replace, so a crash never leaves half a file."""
+    """Atomic replace: readers see the old file or the new one, never half of either."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(canonical_json(value), encoding="utf-8")
+    tmp.write_text(compact_json(value), encoding="utf-8")
     os.replace(tmp, path)
 
 
@@ -39,39 +45,38 @@ class ScenarioStore:
         return self.root / scenario_id
 
     def ids(self) -> list[str]:
-        return sorted(p.name for p in self.root.iterdir() if p.is_dir() and ID_PATTERN.match(p.name) and (p / "scenario.json").is_file())
+        return sorted(p.name for p in self.root.iterdir()
+                      if p.is_dir() and ID_PATTERN.match(p.name) and (p / "scenario.json").is_file())
 
-    def exists(self, scenario_id: str) -> bool:
-        return (self._dir(scenario_id) / "scenario.json").is_file()
-
-    def load(self, scenario_id: str) -> tuple[ScenarioMeta, ScenarioState, list[Event]]:
+    def load(self, scenario_id: str) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]], int]:
+        """Returns raw meta, state, events and the format version the files were in."""
         d = self._dir(scenario_id)
-        events = [Event(**e) for e in _read(d / "events.json")] if (d / "events.json").is_file() else []
-        return ScenarioMeta(**_read(d / "scenario.json")), ScenarioState(**_read(d / "state.json")), events
+        raw = _read(d / "scenario.json")
+        if raw.get("formatVersion") == FORMAT_VERSION:
+            return raw["meta"], raw["state"], raw["events"], FORMAT_VERSION
+        events = _read(d / "events.json") if (d / "events.json").is_file() else []
+        return raw, _read(d / "state.json"), events, 1
 
-    def save_meta(self, meta: ScenarioMeta) -> None:
-        _write(self._dir(meta.id) / "scenario.json", meta.model_dump())
+    def save(self, scenario_id: str, meta: dict[str, Any], state: dict[str, Any], events: list[dict[str, Any]]) -> None:
+        d = self._dir(scenario_id)
+        _write(d / "scenario.json", {"formatVersion": FORMAT_VERSION, "meta": meta, "state": state, "events": events})
+        for name in LEGACY_FILES:  # the bundle now holds them
+            (d / name).unlink(missing_ok=True)
 
-    def save_state(self, scenario_id: str, state: ScenarioState) -> None:
-        _write(self._dir(scenario_id) / "state.json", state.model_dump())
+    def save_snapshot(self, scenario_id: str, meta: dict[str, Any], state: dict[str, Any]) -> None:
+        _write(self._dir(scenario_id) / "snapshots" / f"{meta['id']}.json", {"meta": meta, "state": state})
 
-    def save_events(self, scenario_id: str, events: list[Event]) -> None:
-        _write(self._dir(scenario_id) / "events.json", [e.model_dump() for e in events])
-
-    def save_snapshot(self, scenario_id: str, meta: SnapshotMeta, state: ScenarioState) -> None:
-        _write(self._dir(scenario_id) / "snapshots" / f"{meta.id}.json", {"meta": meta.model_dump(), "state": state.model_dump()})
-
-    def snapshots(self, scenario_id: str) -> list[SnapshotMeta]:
+    def snapshots(self, scenario_id: str) -> list[dict[str, Any]]:
         folder = self._dir(scenario_id) / "snapshots"
         if not folder.is_dir():
             return []
-        return sorted((SnapshotMeta(**_read(p)["meta"]) for p in folder.glob("*.json")), key=lambda m: m.id)
+        return sorted((_read(p)["meta"] for p in folder.glob("*.json")), key=lambda m: m["id"])
 
-    def load_snapshot(self, scenario_id: str, snapshot_id: str) -> tuple[SnapshotMeta, ScenarioState] | None:
+    def load_snapshot(self, scenario_id: str, snapshot_id: str) -> tuple[dict[str, Any], dict[str, Any]] | None:
         if not ID_PATTERN.match(snapshot_id):
             return None
         path = self._dir(scenario_id) / "snapshots" / f"{snapshot_id}.json"
         if not path.is_file():
             return None
         raw = _read(path)
-        return SnapshotMeta(**raw["meta"]), ScenarioState(**raw["state"])
+        return raw["meta"], raw["state"]

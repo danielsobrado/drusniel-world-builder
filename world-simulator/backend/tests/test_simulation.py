@@ -13,7 +13,8 @@ from world_sim.simulation.scope import resolve_scope
 
 def pilot_state(model, seed=1212):
     ids = [r["settlementId"] for r in model.pilot["roles"]]
-    return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212, sim_config=model.config.simulation)
+    return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212,
+                          sim_config=model.config.simulation, society_cfg=model.config.society)
 
 
 def test_calendar_dates():
@@ -38,18 +39,18 @@ def test_baseline_matches_the_audit(eldara):
 
 
 def test_stepping_at_once_equals_stepping_day_by_day(eldara):
-    config = eldara.config.simulation
-    at_once, _ = advance(pilot_state(eldara), 100, config)
+    config, society = eldara.config.simulation, eldara.config.society
+    at_once, _ = advance(pilot_state(eldara), 100, config, society)
     one_by_one = pilot_state(eldara)
     for _ in range(100):
-        one_by_one, _ = advance(one_by_one, 1, config)
+        one_by_one, _ = advance(one_by_one, 1, config, society)
     assert state_checksum(at_once) == state_checksum(one_by_one)
     assert at_once.date.label == "1212-04-11"
 
 
 def test_demography_conserves_accounting_over_ten_years(eldara):
     start = pilot_state(eldara)
-    state, months = advance(start, 3600, eldara.config.simulation)
+    state, months = advance(start, 3600, eldara.config.simulation, eldara.config.society)
     assert len(months) == 120 and len(state.history) == 121
     for before, after in zip(start.settlements, state.settlements, strict=True):
         assert after.population == after.cohorts.total
@@ -58,10 +59,10 @@ def test_demography_conserves_accounting_over_ten_years(eldara):
 
 
 def test_seeds_change_outcomes_and_reruns_do_not(eldara):
-    config = eldara.config.simulation
-    a, _ = advance(pilot_state(eldara, 1), 360, config)
-    b, _ = advance(pilot_state(eldara, 1), 360, config)
-    c, _ = advance(pilot_state(eldara, 2), 360, config)
+    config, society = eldara.config.simulation, eldara.config.society
+    a, _ = advance(pilot_state(eldara, 1), 360, config, society)
+    b, _ = advance(pilot_state(eldara, 1), 360, config, society)
+    c, _ = advance(pilot_state(eldara, 2), 360, config, society)
     assert state_checksum(a) == state_checksum(b)
     assert state_checksum(a) != state_checksum(c)
 

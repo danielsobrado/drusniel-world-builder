@@ -1,6 +1,7 @@
 import { useRef, type PointerEvent } from 'react';
 import type { SettlementClass } from '../api/types';
 import type { Simulation } from '../simulation/useSimulation';
+import { BusinessDetails } from '../society/BusinessDetails';
 import { Icon } from './Icon';
 import { SettlementDetails } from '../components/SettlementDetails';
 import { Empty } from '../components/StateViews';
@@ -31,9 +32,11 @@ export function Inspector({ selectedId, classes, width, onResize, onClose, onSel
         <button type="button" className="icon-btn" aria-label="Close inspector" onClick={onClose}><Icon name="close" size={15} /></button>
       </div>
       <div className="inspector-body">
-        {selectedId
+        {selectedId?.startsWith('business:') && sim?.active
+          ? <BusinessDetails id={selectedId} sim={sim} onSelect={onSelect} />
+          : selectedId && !selectedId.startsWith('business:')
           ? <SettlementDetails id={selectedId} classes={classes} onSelect={onSelect} sim={sim} />
-          : <Empty>Select a settlement in the table, atlas, explorer tree or pilot view.</Empty>}
+          : <Empty>Select a settlement or business anywhere in the workbench.</Empty>}
       </div>
     </aside>
   );

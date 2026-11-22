@@ -29,7 +29,8 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
 
     @router.get("/scenarios")
     async def list_scenarios() -> JSONResponse:
-        return reply(manager.list())
+        unloadable = [{"id": k, "reason": v} for k, v in sorted(manager.unloadable.items())]
+        return reply(manager.statuses(), {"unloadable": unloadable} if unloadable else None)
 
     @router.post("/scenarios", status_code=201)
     async def create_scenario(body: CreateScenario) -> JSONResponse:
@@ -42,6 +43,26 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
     @router.get("/scenarios/{scenario_id}/state")
     async def get_state(scenario_id: str) -> JSONResponse:
         return reply(manager.session(scenario_id).state.model_dump())
+
+    @router.get("/scenarios/{scenario_id}/businesses")
+    async def businesses(scenario_id: str, settlement: str | None = None, sector: str | None = None, q: str | None = None,
+                         page: int = Query(1, ge=1), pageSize: int = Query(50, ge=1, le=200)) -> JSONResponse:  # noqa: N803
+        rows = [b for s in manager.session(scenario_id).state.settlements if settlement in (None, s.settlementId)
+                for b in s.society.businesses]
+        needle = (q or "").strip().casefold()
+        rows = [b for b in rows if (sector is None or b.sector == sector)
+                and (not needle or needle in b.name.casefold() or needle in b.profession or needle in (b.good or "").casefold())]
+        start = (page - 1) * pageSize
+        meta = {"page": {"page": page, "pageSize": pageSize, "totalItems": len(rows), "totalPages": max(1, -(-len(rows) // pageSize))}}
+        return reply([b.model_dump() for b in rows[start:start + pageSize]], meta)
+
+    @router.get("/scenarios/{scenario_id}/businesses/{business_id}")
+    async def business(scenario_id: str, business_id: str) -> JSONResponse:
+        for s in manager.session(scenario_id).state.settlements:
+            for b in s.society.businesses:
+                if b.id == business_id:
+                    return reply({**b.model_dump(), "settlementName": s.name})
+        raise ApiError(404, "not_found", f"No business {business_id}", {"id": business_id})
 
     @router.post("/scenarios/{scenario_id}/step")
     async def step(scenario_id: str, body: StepRequest) -> JSONResponse:
@@ -65,8 +86,7 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
 
     @router.get("/scenarios/{scenario_id}/snapshots")
     async def snapshots(scenario_id: str) -> JSONResponse:
-        manager.session(scenario_id)
-        return reply([m.model_dump() for m in reversed(manager.store.snapshots(scenario_id))])
+        return reply(list(reversed(manager.snapshot_list(scenario_id))))
 
     @router.post("/scenarios/{scenario_id}/snapshots", status_code=201)
     async def save_snapshot(scenario_id: str, body: SnapshotRequest) -> JSONResponse:

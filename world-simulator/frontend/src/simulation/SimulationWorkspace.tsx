@@ -45,6 +45,7 @@ function Snapshots({ sim, version }: { sim: Simulation; version: string }) {
   const list = useApi<SnapshotMeta[]>(`/api/scenarios/${encodeURIComponent(id)}/snapshots?v=${version}`);
   const [label, setLabel] = useState('');
   const running = sim.active!.running;
+  const locked = Boolean(sim.active!.readOnly);
   const save = async (e: FormEvent) => {
     e.preventDefault();
     if (await sim.snapshot(label)) setLabel('');
@@ -54,7 +55,7 @@ function Snapshots({ sim, version }: { sim: Simulation; version: string }) {
     <div>
       <form className="inline-form" onSubmit={save}>
         <input aria-label="Snapshot label" placeholder="Snapshot label (optional)" value={label} maxLength={80} onChange={(e) => setLabel(e.target.value)} />
-        <button type="submit" className="btn" disabled={sim.busy}>Save snapshot</button>
+        <button type="submit" className="btn" disabled={sim.busy || locked}>Save snapshot</button>
       </form>
       <ApiView result={list} loadingLabel="Loading snapshots…">
         {(snaps) => (snaps.length === 0 ? <Empty>No snapshots yet.</Empty> : (
@@ -63,9 +64,9 @@ function Snapshots({ sim, version }: { sim: Simulation; version: string }) {
               <li key={s.id}>
                 <span><b>{s.label}</b> <span className="muted">{s.date.label} · {s.checksum}</span></span>
                 <span>
-                  <button type="button" className="btn btn-compact" disabled={running || sim.busy} title={running ? 'Pause first' : undefined}
+                  <button type="button" className="btn btn-compact" disabled={running || sim.busy || locked} title={running ? 'Pause first' : undefined}
                     onClick={() => void sim.restore(s.id)}>Restore</button>
-                  <button type="button" className="btn btn-compact" disabled={sim.busy} onClick={() => void branch(s)}>Branch</button>
+                  <button type="button" className="btn btn-compact" disabled={sim.busy || locked} onClick={() => void branch(s)}>Branch</button>
                 </span>
               </li>
             ))}
@@ -130,6 +131,7 @@ export function SimulationWorkspace({ sim, summary, onSelect }: { sim: Simulatio
             <span className="muted">{active.date.label} · day {active.date.day} · seed {active.seed} · state {shortHash(active.checksum)}</span>
             {active.parent && <span className="muted">branched from {active.parent.scenarioId} / {active.parent.snapshotId}</span>}
           </div>
+          {active.readOnly && <p className="warn" role="status">Read-only: {active.readOnly}</p>}
           <ApiView result={state} loadingLabel="Loading state…">
             {(s) => <>
               <div className="tiles">

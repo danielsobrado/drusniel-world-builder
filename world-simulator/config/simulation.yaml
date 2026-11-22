@@ -19,6 +19,7 @@ limits:
   maxScenarios: 50
   maxSnapshots: 50
   maxEvents: 1000
+  maxHistoryPoints: 1201          # baseline + 100 years of month closes; older points are dropped
 
 baseline:                          # created on first start if no scenario exists
   id: baseline-pilot

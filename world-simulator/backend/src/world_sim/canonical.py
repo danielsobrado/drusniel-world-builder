@@ -1,5 +1,6 @@
 """Deterministic JSON: sorted keys, JS-style numbers, no NaN. Same inputs give the same bytes."""
 
+import hashlib
 import json
 import math
 from typing import Any
@@ -85,3 +86,13 @@ def checksum(value: Any) -> str:
         h ^= data[i] | (data[i + 1] << 8)
         h = (h * 16777619) & 0xFFFFFFFF
     return f"{h:08x}"
+
+
+def compact_json(value: Any) -> str:
+    """Sorted-key compact JSON via the C encoder; for large scenario state where speed matters."""
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+
+
+def state_digest(value: Any) -> str:
+    """SHA-256 prefix of compact_json. Stable within the Python engine; not the JS-compatible FNV."""
+    return hashlib.sha256(compact_json(value).encode("utf-8")).hexdigest()[:16]
