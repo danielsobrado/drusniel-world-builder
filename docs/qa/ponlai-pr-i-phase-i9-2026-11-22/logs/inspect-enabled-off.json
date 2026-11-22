@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "sourceRevision": "8c1d30a28db85ab35bb758c16ae37a37b64bf3b9",
+  "sourceSnapshotSha256": "8a95b7774b47d29dac6ea62e5cdc2a197c25e4a13aeb5e7c2861fa5c10759ae3",
+  "runtimeDiffSha256": null,
+  "sourceOverrides": [],
+  "screenshots": [],
+  "timings": [],
+  "timingFailures": [],
+  "failures": [
+    {
+      "scope": "offshore-calm/high (diffraction on)",
+      "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at F:\\Development\\drusniel-world-builder\\scripts\\run-coastal-review.mjs:166:20"
+    },
+    {
+      "scope": "offshore-calm/calm-motion (diffraction on)",
+      "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at F:\\Development\\drusniel-world-builder\\scripts\\run-coastal-review.mjs:166:20"
+    },
+    {
+      "scope": "cove/high (diffraction on)",
+      "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at F:\\Development\\drusniel-world-builder\\scripts\\run-coastal-review.mjs:166:20"
+    }
+  ],
+  "oceanFft": [],
+  "query": {},
+  "waterPatch": {
+    "sea": {
+      "offshoreFft": {
+        "enabled": false
+      }
+    }
+  },
+  "browser": "151.0.7922.34",
+  "browserErrors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "gpuAndNetworkAlerts": [],
+  "browserWarnings": [
+    "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+    "THREE.MeshPhysicalMaterial: The \"iridescenceThicknessRange\" property has been replaced by \"iridescenceThicknessMinimum\" and \"iridescenceThicknessMaximum\".",
+    "THREE.Source: \"Source\" has been renamed to \"TextureSource\". Please update your code to use \"THREE.TextureSource\" instead.",
+    "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.",
+    "Calling [RenderPassEncoder (unlabeled)].Draw with an index count of 0 is unusual.",
+    "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n3 warning(s) generated while compiling the shader:\n:142:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:199:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:261:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+    "Compilation log for [ShaderModule \"fragment_ShadowMaterial\"]:\n\n1 warning(s) generated while compiling the shader:\n:129:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+    "Compilation log for [ShaderModule \"fragment\"]:\n\n3 warning(s) generated while compiling the shader:\n:312:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:373:5 warning: code is unreachable\n        break;\n        ^^^^^\n\n:439:5 warning: code is unreachable\n        break;\n        ^^^^^\n",
+    "Calling [RenderPassEncoder (unlabeled)].Draw with a vertex count of 0 is unusual.",
+    "Compilation log for [ShaderModule \"fragment\"]:\n\n1 warning(s) generated while compiling the shader:\n:283:5 warning: code is unreachable\n        break;\n        ^^^^^\n"
+  ]
+}

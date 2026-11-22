@@ -1,6 +1,6 @@
 # PR I — Phase I.1: spectrum model and Fourier reference
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md), §4 and §13.1.
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md), §4 and §13.1.
 
 **Status:** done. This phase is CPU-only. It adds no WebGPU code, shaders, textures, configuration schema or render hooks, and nothing in the runtime imports it. It does not validate GPU FFT correctness; that is Phase I.2.
 

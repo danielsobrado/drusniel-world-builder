@@ -1,6 +1,6 @@
 # PR I follow-on [P9] — Underwater caustics from the offshore FFT
 
-Follow-on of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md), deferred there by [I.7](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md) to its own PR. Evidence: [`docs/qa/ponlai-pr-i-fft-caustics-2026-11-21/`](../qa/ponlai-pr-i-fft-caustics-2026-11-21/README.md).
+Follow-on of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md), deferred there by [I.7](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md) to its own PR. Evidence: [`docs/qa/ponlai-pr-i-fft-caustics-2026-11-21/`](../qa/ponlai-pr-i-fft-caustics-2026-11-21/README.md).
 
 **Status:** built, verified and pushed, but **off by default**. `water.sea.offshoreFft.caustics.enabled: false`.
 - **Correct and free.** The shader matches its CPU twin on hardware. Off is byte-identical. On, it costs nothing measurable, and water acceptance passes with it on.

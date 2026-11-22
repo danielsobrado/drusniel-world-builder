@@ -1,6 +1,6 @@
 # PR I phase I.5 — Weather, visual stability and reflection integration
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.4 offshore normal integration](ponlai-pr-i-phase-i4-offshore-normal-integration-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i5-2026-11-21/`](../qa/ponlai-pr-i-phase-i5-2026-11-21/README.md).
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md). It follows [I.4 offshore normal integration](ponlai-pr-i-phase-i4-offshore-normal-integration-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i5-2026-11-21/`](../qa/ponlai-pr-i-phase-i5-2026-11-21/README.md).
 
 **Status:** done. **Enabled by default** after I.5 (`water.sea.offshoreFft.enabled: true` in `config/water-visual.yaml`). It runs on the high and ultra water tiers with WebGPU; low, medium and WebGL keep the authored sea. A default load verified this: active on high with the I.4 shader hashes, off and unchanged on low.
 

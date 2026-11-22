@@ -1,6 +1,6 @@
 # PR I phase I.8 — Full QA, performance, visual review and rollout
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.7](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i8-2026-11-21/`](../qa/ponlai-pr-i-phase-i8-2026-11-21/).
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md). It follows [I.7](ponlai-pr-i-phase-i7-optics-evaluation-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i8-2026-11-21/`](../qa/ponlai-pr-i-phase-i8-2026-11-21/).
 
 **Status:** done. **Rollout decision: keep the offshore FFT normals and the long-swell geometry enabled by default** (§8).
 

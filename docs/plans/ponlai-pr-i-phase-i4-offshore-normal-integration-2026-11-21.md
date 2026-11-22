@@ -1,6 +1,6 @@
 # PR I phase I.4 — Offshore normal-only material integration
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.3 world sampling and quality](ponlai-pr-i-phase-i3-world-sampling-and-quality-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i4-2026-11-21/`](../qa/ponlai-pr-i-phase-i4-2026-11-21/README.md).
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md). It follows [I.3 world sampling and quality](ponlai-pr-i-phase-i3-world-sampling-and-quality-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i4-2026-11-21/`](../qa/ponlai-pr-i-phase-i4-2026-11-21/README.md).
 
 **Status:** done. It shipped **off** until I.5 drove the spectrum from the weather, and was enabled by default after I.5 (see the [I.5 report](ponlai-pr-i-phase-i5-weather-and-stability-2026-11-21.md)).
 

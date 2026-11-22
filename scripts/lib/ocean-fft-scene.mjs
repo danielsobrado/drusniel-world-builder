@@ -33,7 +33,7 @@ export async function inspectOceanFftScene() {
       // Interstage variables: user @location outputs of the vertex stage.
       varyings: new Set(vertexShader.match(/@location\(\s*\d+\s*\)(?=[^;{]*:)/g) ?? []).size,
       oceanFftReferenced: /oceanFft/i.test(wgsl),
-      length: wgsl.length, hash: hash(wgsl),
+      length: wgsl.length, hash: hash(wgsl), vertexHash: hash(vertexShader),
     });
   }
   // The underwater post (FFT caustics): its quad's fragment WGSL, once its pipeline exists (prewarm builds it).

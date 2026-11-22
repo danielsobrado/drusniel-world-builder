@@ -2,7 +2,7 @@
 
 **Status:** Phase I.0 complete. Audit, native capability probe and baseline only. No FFT shader, kernel, texture, config key or water displacement was added.
 **Date:** 2026-11-21
-**Specification:** [PR I far-offshore FFT ocean and coastal blending](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md) (§14 I.0).
+**Specification:** [PR I far-offshore FFT ocean and coastal blending](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md) (§14 I.0).
 **Evidence:** [`docs/qa/ponlai-pr-i-phase-i0-2026-11-21/`](../qa/ponlai-pr-i-phase-i0-2026-11-21/README.md).
 
 ## 1. Source revision and implementation status

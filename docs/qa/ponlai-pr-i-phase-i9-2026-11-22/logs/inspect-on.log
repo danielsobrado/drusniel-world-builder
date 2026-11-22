@@ -1,0 +1,23 @@
+Waiting for another hardware browser QA run to finish.
+offshore-calm/high (diffraction on)
+  loading app
+page.waitForFunction: Timeout 180000ms exceeded.
+offshore-calm/calm-motion (diffraction on)
+  loading app
+  nvidia lovelace webgpu
+  ground cut
+  ground settle
+  camera cut
+  camera settle
+  ocean fft {"state":"active","origins":{"checked":42,"maxError":0},"shaders":[{"refraction":false,"textures":16,"samplers":13,"varyings":12,"oceanFftReferenced":true,"length":216542,"hash":"a95839db","vertexHash":"5ae704e5"},{"refraction":true,"textures":21,"samplers":14,"varyings":12,"oceanFftReferenced":true,"length":230732,"hash":"a48570fb","vertexHash":"12c22c"}]}
+  captured screenshots/01-offshore/calm-motion.png
+  captured screenshots/01-offshore/calm-motion-124.60.png
+  captured screenshots/01-offshore/calm-motion-126.00.png
+  captured screenshots/01-offshore/calm-motion-127.60.png
+cove/high (diffraction on)
+  ground cut
+  ground settle
+  camera cut
+  camera settle
+  ocean fft {"state":"active","origins":{"checked":47,"maxError":0},"shaders":[{"refraction":false,"textures":16,"samplers":13,"varyings":12,"oceanFftReferenced":true,"length":216542,"hash":"a95839db","vertexHash":"5ae704e5"},{"refraction":true,"textures":21,"samplers":14,"varyings":12,"oceanFftReferenced":true,"length":230732,"hash":"a48570fb","vertexHash":"12c22c"}]}
+  captured screenshots/04-sheltered-cove/high.png

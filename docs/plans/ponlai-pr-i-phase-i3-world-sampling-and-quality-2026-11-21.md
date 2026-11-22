@@ -1,6 +1,6 @@
 # PR I phase I.3 — Canonical world sampling and stable quality tiers
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.2 WebGPU FFT](ponlai-pr-i-phase-i2-webgpu-fft-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i3-2026-11-21/`](../qa/ponlai-pr-i-phase-i3-2026-11-21/README.md).
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md). It follows [I.2 WebGPU FFT](ponlai-pr-i-phase-i2-webgpu-fft-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i3-2026-11-21/`](../qa/ponlai-pr-i-phase-i3-2026-11-21/README.md).
 
 **Status:** done. I.4 can start.
 

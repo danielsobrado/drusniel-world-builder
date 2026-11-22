@@ -2,6 +2,7 @@
 
 **Status:** DETAILED IMPLEMENTATION SPECIFICATION ONLY — this commit does not implement the FFT, change rendering, or report new hardware QA.  
 **Date:** 2026-11-21  
+**Implemented:** phases I.0–I.9 are done; see [Offshore FFT ocean](../rendering/offshore-fft-ocean-2026-11-22.md) for what shipped.  
 **Drusniel inspected baseline:** [`1ad7a8902517a6926ee79edf9e98bc62d2f404cd`](https://github.com/danielsobrado/drusniel-world-builder/tree/1ad7a8902517a6926ee79edf9e98bc62d2f404cd), immediately after the coastal diagnostics commit.  
 **Ponlai reference:** [`cca905649fe657458697a9e1b179113c97ce5e6e`](https://github.com/HuberyLL/ponlai/tree/cca905649fe657458697a9e1b179113c97ce5e6e), immutable commit.  
 **Roadmap:** PR I after [PR H](ponlai-pr-h-volumetric-clouds-and-shadows-2026-11-21.md), before the following integration PR.  
@@ -853,7 +854,7 @@ Avoid creating all modules if some can be safely combined without a huge file. K
 | [D31/D42] GPU fixtures / water acceptance | FFT toggles and per-tier photos, timing | Existing negative-world water and swim acceptance |
 | [D43] `GpuPassProfiler.js` | Optional computed FFT stage timings with accurate fallback | Existing render GPU pass timing |
 | [D17] water-domain architecture docs | Record **no geometric FFT initially** and explicit later CPU-query gate | Canonical water/sea-level contract |
-| `docs/rendering/offshore-fft-ocean.md` | Final implementation, provenance, supported tiers, native perf results | New document **on implementation**, not now |
+| [`docs/rendering/offshore-fft-ocean-2026-11-22.md`](../rendering/offshore-fft-ocean-2026-11-22.md) | Final implementation, provenance, supported tiers, native perf results | Published in I.9 |
 
 **Do not touch by default:** [D6/D7/D8/D9/D10] actual nearshore wave CPU model, [D19/D20] worker water domain, [D21/D22] global coastal distance fields, [D25–D27] swash/rock spray event physics, [D37] reflection pipeline, terrain masks, edited page history and postprocess scene graph. If a real test uncovers a necessary seam, make that change small and separately review it.
 
@@ -1213,11 +1214,16 @@ These are verified package script names. The exact supported flags on QA runners
 
 ### I.9 — Acceptance decision, direct-main commits and handoff
 
-- [ ] Commit small changes directly to current `main`, without overwriting unrelated concurrent commits, force pushing or GitHub Actions.
-- [ ] Publish final README-style `docs/rendering/offshore-fft-ocean.md` with exact implementation status, pinned source and licenses, measured performance, supported tiers/backend, fallback and optional future geometry.
-- [ ] Confirm `water.sea.offshoreFft.enabled:false` returns exact original five-wave/surf/rock/foam/reflection behavior.
-- [ ] State **precisely** that first release is normal/roughness-only FFT unless the optional full CPU-parity geometry phase was separately implemented.
-- [ ] Provide integration contract to next PR without imposing new global ocean, weather, atmosphere or simulation data models.
+- [x] Commit small changes directly to current `main`, without overwriting unrelated concurrent commits, force pushing or GitHub Actions.
+- [x] Publish final README-style `docs/rendering/offshore-fft-ocean.md` with exact implementation status, pinned source and licenses, measured performance, supported tiers/backend, fallback and optional future geometry.
+- [x] Confirm `water.sea.offshoreFft.enabled:false` returns exact original five-wave/surf/rock/foam/reflection behavior.
+- [x] State **precisely** that first release is normal/roughness-only FFT unless the optional full CPU-parity geometry phase was separately implemented.
+- [x] Provide integration contract to next PR without imposing new global ocean, weather, atmosphere or simulation data models.
+
+**I.9 result:** [Offshore FFT ocean](../rendering/offshore-fft-ocean-2026-11-22.md), the final README.
+- **Off switch fixed:** `enabled: false` used to leave the long swell on whenever `geometry.enabled` was true. `enabled` is now the master switch, on the CPU and in the shader (commit `8c1d30a2`). In-app, `enabled: false` alone now builds the same shaders as both switches off, which are the pre-PR I ones.
+- **Not quite "exact original":** I.7's reflection-gate and foam-rate fixes apply on and off alike, by design.
+- **Status stated precisely:** the FFT is normal and roughness only. The separately approved I.6 geometry is a 16-mode CPU-parity long swell, not FFT height.
 
 Suggested **future code commit** (not this document):
 

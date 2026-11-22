@@ -2,7 +2,7 @@
 
 **Status:** shipped on, behind `weatherEffects.snowField.enabled`
 (`config/weather-effects.yaml`). It follows the approach of the offshore FFT ocean
-([PR I](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md)).
+([PR I](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md)).
 
 ## 1. What changed
 

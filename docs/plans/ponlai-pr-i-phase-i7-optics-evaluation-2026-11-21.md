@@ -1,6 +1,6 @@
 # PR I phase I.7 — Spectral optics evaluation, plus band and foam fixes
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.6 long swell geometry](ponlai-pr-i-phase-i6-long-swell-geometry-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i7-2026-11-21/`](../qa/ponlai-pr-i-phase-i7-2026-11-21/).
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md). It follows [I.6 long swell geometry](ponlai-pr-i-phase-i6-long-swell-geometry-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i7-2026-11-21/`](../qa/ponlai-pr-i-phase-i7-2026-11-21/).
 
 **Status:** done.
 - **Candidates:** I.7's candidates are all "consider … only after measured benefit". One was already delivered (P5), one was prototyped and measured (P7 cat's paws) and rejected under the stop rule, and the rest were declined with reasons.

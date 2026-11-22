@@ -1,6 +1,6 @@
 # PR I phase I.2 — Native WebGPU FFT and output buffers
 
-Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-21.md). It follows [I.0 audit](ponlai-pr-i-phase-i0-audit-and-baseline-2026-11-21.md) and [I.1 spectrum](ponlai-pr-i-phase-i1-spectrum-and-reference-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i2-2026-11-21/`](../qa/ponlai-pr-i-phase-i2-2026-11-21/README.md).
+Part of [PR I: far-offshore FFT ocean](ponlai-pr-i-far-offshore-fft-ocean-coastal-blending-2026-11-22.md). It follows [I.0 audit](ponlai-pr-i-phase-i0-audit-and-baseline-2026-11-21.md) and [I.1 spectrum](ponlai-pr-i-phase-i1-spectrum-and-reference-2026-11-21.md). Evidence: [`docs/qa/ponlai-pr-i-phase-i2-2026-11-21/`](../qa/ponlai-pr-i-phase-i2-2026-11-21/README.md).
 
 **Status:** done.
 
