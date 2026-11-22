@@ -189,17 +189,23 @@ export function generate(b, params) {
   b.classify = (p, n, mask, mask2) => {
     const grain = fbm3(p.x * 0.09, p.y * 0.09, p.z * 0.09, seed + 11, 3);
     const up = clamp01((n.y - 0.25) / 0.45);
-    const height = p.y - ground(p.x, p.z), low = height < 1.2 ? 1 : 0;
+    const height = p.y - ground(p.x, p.z);
+    const low = clamp01((1.6 - height) / 0.8);
     const margin = Math.abs(p.x) - wallX(p.y, p.z);
     const frozen = near(p, P(fallFoot.x + 2, p.y, fallFoot.z), 7);
     const lake = Math.max(basin(p.x, p.z), bed(p.x, p.z)) * up * low;
-    const cliff = p.z < faceZ(p.x, p.y) + 2.5;
+    const cliffWeight = clamp01((faceZ(p.x, p.y) + 3.2 - p.z) / 2.2);
+    const cliff = cliffWeight > 0.5;
     // Whatever stands clear of the valley floor short of the rock is ice: the old wall, seracs, calved blocks.
-    const glacier = cliff || (height > 0.6 && margin < -3);
+    const standingIce = clamp01((height - 0.25) / 0.75) * clamp01((-2.2 - margin) / 1.8);
+    const glacierWeight = Math.max(cliffWeight, standingIce);
+    const glacier = glacierWeight > 0.5;
     // Rock is the valley walls and the till under the forefield; along the margin, ice and rock interleave.
     // No snow falls under the arch, so its floor is the old ice the wall stands on, not bare till.
     const underArch = clamp01(2 - Math.hypot(p.x - arch.x, p.z - arch.z) / ARCH_FLOOR_RADIUS * 2);
-    const rock = glacier ? clamp01((margin + 4 + (grain - 0.5) * 9) / 3) : clamp01(1 - frozen * 2 - lake * 2 - underArch * 2);
+    const glacierRock = clamp01((margin + 4 + (grain - 0.5) * 9) / 3);
+    const floorRock = clamp01(1 - frozen * 2 - lake * 2 - underArch * 2);
+    const rock = floorRock + (glacierRock - floorRock) * glacierWeight;
     mask[0] = rock;
     // Negative snow: the wind scours the pool, the frozen channel, the moats before obstacles and the moraine crests.
     mask[1] = -Math.max(lake * (1.25 - grain), scour(p.x, p.z) * low, crestScour(p.x, p.z) * 0.7 * low);

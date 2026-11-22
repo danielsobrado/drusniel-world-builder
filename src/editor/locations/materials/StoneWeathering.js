@@ -43,15 +43,16 @@ export function weatherDressedStone({ point, albedo, roughness }, weathering) {
   const streak = smoothstep(0.55, 0.85, run).mul(vertical).mul(streaks);
   out = out.mul(mix(float(1), float(0.68), streak));
 
-  // Hairline stone fractures & basal floor dampness grounding columns into the flagstones.
+  // Hairline stone fractures & true 3D seam-contact basal dampness (works on every tier/gallery, not just y=0).
   const cracksRaw = triplanarNoise(NOISE.cracks, point.mul(18.0), triplanarWeights(geometryNormal));
-  const crackLine = smoothstep(float(0.32), float(0.08), cracksRaw).mul(grime);
+  const crackLine = smoothstep(float(0.08), float(0.32), cracksRaw).oneMinus().mul(grime);
   out = mix(out, out.mul(color('#2d2926')), crackLine.mul(0.62));
   rough = mix(rough, float(0.96), crackLine.mul(0.55));
 
-  const basalDamp = smoothstep(float(1.35), float(0.0), point.y).mul(vertical).mul(grime);
-  out = out.mul(mix(float(1), float(0.74), basalDamp.mul(0.75)));
-  rough = mix(rough, roughness.mul(0.82), basalDamp.mul(0.4));
+  const seamContact = clamp(float(1).sub(bakedShade.w), 0, 1);
+  const basalDamp = smoothstep(float(0.12), float(0.85), seamContact).mul(vertical).mul(grime);
+  out = out.mul(mix(float(1), float(0.74), basalDamp.mul(0.72)));
+  rough = mix(rough, roughness.mul(0.84), basalDamp.mul(0.38));
 
   // Dust settles on anything facing up, thicker where it is sheltered.
   const settled = smoothstep(0.55, 0.95, up).mul(dust).mul(occluded.mul(0.6).add(0.4));

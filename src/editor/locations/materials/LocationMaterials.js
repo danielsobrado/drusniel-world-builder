@@ -1,12 +1,17 @@
 import * as THREE from 'three/webgpu';
 import { createGlowMaterial } from '../LocationEffects.js';
 import { createGlacierIceMaterial } from './GlacierIceMaterial.js';
+import { createIceCrystalMaterial } from './IceCrystalMaterial.js';
 import { createStoneMaterial } from './StoneSurface.js';
+import { createWaterfallMaterial } from './WaterfallMaterial.js';
+
+const ICE_CRYSTAL_PACK_PATH = 'assets/textures/ice/ice-cave-crystal-pack.png';
 
 /**
  * Builds a site's material set from its resolved config and owns what it
- * loaded: textures are fetched when a location is entered and disposed when it
- * is left, never at startup.
+ * loaded: textures (including the on-demand packed CC0 ice-crystal/caustic
+ * atlas) are fetched when a location is entered and disposed when it is left,
+ * never at startup.
  */
 export class LocationMaterials {
   constructor({ baseUrl, anisotropy = 8 }) {
@@ -40,24 +45,55 @@ export class LocationMaterials {
 
   /**
    * @param {Record<string, object>} entries a resolved site's `materials`
-   * @param {{ iceLayers: number }} quality
+   * @param {{ iceLayers: number, iceTransmission?: boolean }} quality
+   * @param {{ usePostMrt?: boolean }} [options]
    * @returns {Promise<Record<string, { material: Material, ice: number }>>} keyed for `LocationBuilder.build`
    */
-  async create(entries, quality) {
+  async create(entries, quality, { usePostMrt = false } = {}) {
+    const hasIce = Object.values(entries).some((entry) => entry.kind === 'ice');
+    const crystalPack = hasIce
+      ? await this.#texture(ICE_CRYSTAL_PACK_PATH, THREE.NoColorSpace).catch(() => null)
+      : null;
+
     const set = {};
     for (const [key, entry] of Object.entries(entries)) {
       let material;
       if (entry.kind === 'glow') {
         material = createGlowMaterial();
+      } else if (entry.kind === 'waterfall') {
+        const noiseMap = await this.#texture(entry.noise, THREE.NoColorSpace);
+        material = createWaterfallMaterial(`location-${key}`, {
+          noiseMap,
+          waterTint: entry.waterTint,
+          foamTint: entry.foamTint,
+          speed: entry.speed,
+        });
       } else if (entry.kind === 'ice') {
         const maps = {
-          ice: await this.#maps(entry.surfaces.ice), cracks: await this.#maps(entry.surfaces.cracks),
+          ice: await this.#maps(entry.surfaces.ice),
+          cracks: await this.#maps(entry.surfaces.cracks),
           snow: await this.#maps(entry.surfaces.snow),
+          crystalPack,
         };
         if (entry.surfaces.rock) maps.rock = await this.#maps(entry.surfaces.rock);
-        material = createGlacierIceMaterial(`location-${key}`, {
-          profile: entry.profile, maps, stoneProfile: entry.bedrock, layers: quality.iceLayers, masked: entry.masked,
-        });
+        if (entry.profile.crystal === true) {
+          material = createIceCrystalMaterial(`location-${key}`, {
+            profile: entry.profile,
+            maps,
+            layers: quality.iceLayers,
+            transmission: quality.iceTransmission !== false,
+            usePostMrt,
+          });
+        } else {
+          material = createGlacierIceMaterial(`location-${key}`, {
+            profile: entry.profile,
+            maps,
+            stoneProfile: entry.bedrock,
+            layers: quality.iceLayers,
+            masked: entry.masked,
+            usePostMrt,
+          });
+        }
       } else {
         const profile = entry.masked ? entry.profile : { ...entry.profile, vertexTint: true };
         const maps = await this.#maps(entry.surfaces.stone);

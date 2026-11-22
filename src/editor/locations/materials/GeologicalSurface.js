@@ -71,7 +71,7 @@ export function applyGeologicalVariation({
   const macroZone = clamp(mix(zone, zoneNoise, float(0.35)).add(zoneWarp), 0, 1);
 
   const contrast = clamp(float(geo.macroContrast ?? 0.22), 0, 0.8);
-  const darkMass = smoothstep(0.45, 0.08, macroZone);
+  const darkMass = smoothstep(0.08, 0.45, macroZone).oneMinus();
   const lightMass = smoothstep(0.58, 0.94, macroZone);
   const warmCool = locationNoise(NOISE.broad, point.mul(0.075).add(vec3(2.9, 8.4, 1.3))).mul(0.5).add(0.5);
 
@@ -190,7 +190,7 @@ export function applyGeologicalVariation({
   if (profile.excavation) {
     const exc = profile.excavation;
     const fresh = smoothstep(0.45, 0.9, freshness);
-    const weathered = smoothstep(0.48, 0.08, freshness);
+    const weathered = smoothstep(0.08, 0.48, freshness).oneMinus();
     const upDust = smoothstep(0.1, 0.7, geometryNormal.y).mul(0.65).add(0.35);
 
     // Freshly cut stone is subtly cleaner and slightly lighter on protruding faces.

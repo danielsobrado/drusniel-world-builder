@@ -7,7 +7,8 @@ import { createRng, fbm3 } from './gen/noise.js';
 import { excavatedTunnel } from './gen/excavatedTunnel.js';
 import { PropOcclusionGrid } from './gen/PropOcclusionGrid.js';
 import { chamber, tunnel } from './gen/shapes.js';
-import { extractSurface, smoothAttribute, splitByColumns } from './gen/SurfaceNets.js';
+import { extractSurface, smoothAttribute, smoothSurfaceTaubin, splitByColumns } from './gen/SurfaceNets.js';
+import { buildLocationCrystalField } from './generators/LocationCrystalField.js';
 import { LocationNav } from './LocationNav.js';
 
 const CULL_COLUMN_METRES = 28;
@@ -77,6 +78,7 @@ export class LocationBuilder {
     this.halos = [];
     this.flames = [];
     this.shafts = [];
+    this.reflectors = [];
     this.props = new Map();
     this.spawns = {};
     this.anchors = {};
@@ -302,6 +304,11 @@ export class LocationBuilder {
     this.shafts.push({ from, to, width, tint, strength });
   }
 
+  /** A polished ceremonial floor plane with real-time WebGPU reflections. */
+  reflector(spec) {
+    this.reflectors.push(spec);
+  }
+
   /**
    * Standable ground under `y` at a plan point: its height, read between cells
    * so a walker does not ride the voxel steps. Null if `y` is inside something,
@@ -362,7 +369,14 @@ export class LocationBuilder {
    * @param {{ resolution?: number, minTransmit?: number, contactStrength?: number }|null} [options.propShadows]
    * @returns {THREE.Group}
    */
-  build({ materials, absorption, bakeGain = 1, indirectBounce = null, propShadows = null }) {
+  build({
+    materials,
+    absorption,
+    bakeGain = 1,
+    indirectBounce = null,
+    propShadows = null,
+    crystalField = null,
+  }) {
     const group = new THREE.Group();
     const preparedProps = [];
     const propGrid = new PropOcclusionGrid(propShadows?.resolution ?? 0.16);
@@ -386,7 +400,7 @@ export class LocationBuilder {
       }
       const geometry = mergeGeometries(parts);
       for (const part of parts) part.dispose();
-      if (key !== 'glow' && key !== 'water') {
+      if (key !== 'glow' && key !== 'water' && key !== 'waterfall') {
         propGrid.addTriangles(geometry.attributes.position.array, {
           excludeLights: pointLights,
           excludeRadius: propShadows?.excludeRadius ?? 0.3,
@@ -396,6 +410,10 @@ export class LocationBuilder {
     }
 
     const surface = extractSurface(this.grid);
+    if (materials.terrain?.ice > 0) {
+      // Feature-preserving Taubin smoothing removes 0.5 m voxel quad faceting on curved ice walls & pillars.
+      smoothSurfaceTaubin(surface, this.grid, { passes: 2, lambda: 0.42, mu: -0.44, creaseCos: 0.72 });
+    }
     const count = surface.positions.length / 3;
     const mask = new Float32Array(count * 4), mask2 = new Float32Array(count * 4), ice = new Float32Array(count);
     const p = { x: 0, y: 0, z: 0 }, n = { x: 0, y: 0, z: 0 };
@@ -451,7 +469,11 @@ export class LocationBuilder {
 
     smoothAttribute(surface.indices, baked.light, 3, 1);
     const rawAO = new Float32Array(count);
-    for (let v = 0; v < count; v += 1) rawAO[v] = baked.shade[v * SHADE_SIZE];
+    const rawSeam = new Float32Array(count);
+    for (let v = 0; v < count; v += 1) {
+      rawAO[v] = baked.shade[v * SHADE_SIZE];
+      rawSeam[v] = baked.shade[v * SHADE_SIZE + 3];
+    }
     smoothAttribute(surface.indices, baked.shade, SHADE_SIZE, 1);
     for (let v = 0; v < count; v += 1) {
       const smoothed = baked.shade[v * SHADE_SIZE];
@@ -459,6 +481,10 @@ export class LocationBuilder {
       baked.shade[v * SHADE_SIZE] = rawAO[v] < smoothed
         ? rawAO[v] * 0.82 + smoothed * 0.18
         : rawAO[v] * 0.55 + smoothed * 0.45;
+      const smoothedSeam = baked.shade[v * SHADE_SIZE + 3];
+      baked.shade[v * SHADE_SIZE + 3] = rawSeam[v] < smoothedSeam
+        ? rawSeam[v] * 0.78 + smoothedSeam * 0.22
+        : rawSeam[v] * 0.50 + smoothedSeam * 0.50;
     }
     const chunks = splitByColumns({
       indices: surface.indices,
@@ -479,13 +505,31 @@ export class LocationBuilder {
       group.add(new THREE.Mesh(geometry, materials.terrain.material));
     }
 
+    if (crystalField && (materials.iceCrystal || materials.clearIce)) {
+      const crystalMat = (materials.iceCrystal ?? materials.clearIce).material;
+      const crystalMeshes = buildLocationCrystalField({
+        surface,
+        baked,
+        mask,
+        nav: this.nav,
+        crystalMaterial: crystalMat,
+        seed: this.seed,
+        maxClusters: crystalField.maxClusters ?? 0,
+        maxNeedles: crystalField.maxNeedles ?? 0,
+      });
+      for (const mesh of crystalMeshes) {
+        mesh.renderOrder = 1;
+        group.add(mesh);
+      }
+    }
+
     for (const { key, entry, geometry } of preparedProps) {
       const at = geometry.attributes.position.array, facing = geometry.attributes.normal.array;
       const vCount = at.length / 3;
       const iceFn = () => entry.ice ?? 0;
       const bucketLights = key === 'glow' ? [] : this.lights;
       const pShadows = { ...(propShadows ?? {}), isProp: true };
-      const pGrid = key === 'glow' ? null : propGrid;
+      const pGrid = key === 'glow' || key === 'waterfall' ? null : propGrid;
 
       const runBake = (posArr, normArr) => {
         const res = bakeLighting({

@@ -1,9 +1,11 @@
 import { coursedMasonryWall, emitRadialArch } from '../gen/dwarvenMasonry.js';
+import { fbm3 } from '../gen/noise.js';
 import { box, coursedWall, hewnBeam, rod, stoneBlock, stoneBox } from '../gen/propKit.js';
 import { hall, shaft } from '../gen/shapes.js';
 import { buildForgeheartInterior } from './forgeheartInterior.js';
 import { brazier, bridge, crate, pillar, stairs } from './kits.js';
 import { buildEntranceHall, buildFloorInlay, buildHeroGateway, buildVaultedCeiling, buildWallBay } from './stoneholdArchitecture.js';
+import { buildHeraldicBanner } from './stoneholdDressing.js';
 import {
   buildAncestorReliefStele,
   buildDropHammerForgePress,
@@ -56,13 +58,21 @@ export function generate(b, params) {
   b.nav.block(lift, 3.9, 4);
 
   const furnaces = [-14, 0, 14].map((x) => P(x, 0, forge.z - 9.6));
+  const smooth01 = (t) => {
+    const c = Math.max(0, Math.min(1, t));
+    return c * c * (3 - 2 * c);
+  };
+  const crownRockY = height + vaultRise * 0.64;
   b.classify = (p, n, mask) => {
     let soot = 0;
     for (const at of furnaces) soot = Math.max(soot, 1 - Math.hypot(p.x - at.x, (p.y - 4) * 0.5, p.z - at.z) / 11);
-    mask[1] = Math.min(1, Math.max(0, (-6 - p.y) / 8));
-    mask[2] = Math.max(0, soot) + (p.z < farZ - 2 ? 0.25 : 0);
-    // Living rock in the chasm and the lift shaft; everything else is dressed.
-    mask[3] = p.y < -0.8 ? 0 : 1;
+    const warp = (fbm3(p.x * 0.16, p.y * 0.18, p.z * 0.16, b.seed + 53, 2) - 0.5) * 1.4;
+    mask[1] = Math.min(1, Math.max(0, (-6 - p.y + warp * 0.8) / 8));
+    mask[2] = Math.min(1, Math.max(0, soot) + (p.z < farZ - 2 ? 0.25 : 0));
+    // Living rock in the chasm, lift shaft, and rugged upper vault crowns; dressed stone feathers organically out of it.
+    const aboveChasm = smooth01((p.y + 1.5 + warp * 0.65) / 1.7);
+    const belowVaultRock = 1 - smooth01((p.y - crownRockY + warp) / 4.2) * 0.55;
+    mask[3] = aboveChasm * belowVaultRock;
     return 0;
   };
 
@@ -260,6 +270,12 @@ export function generate(b, params) {
   // --- Forgeheart Interior & Ore Lift -------------------------------------
   buildHeroGateway(b, farZ, height);
   buildForgeheartInterior(b, { forge, lift, farZ, forgeTint, warmTint: WARM });
+  // Crimson-and-gold Vondari heraldic banners along the ceremonial nave piers & entrance threshold.
+  for (const sign of [-1, 1]) {
+    buildHeraldicBanner(b, P(sign * (rowX - 0.1), 10.6, bays[0] + 1.55), { yaw: 0, width: 1.55, height: 4.4 });
+    buildHeraldicBanner(b, P(sign * (rowX - 0.1), 10.6, bays[3] + 1.55), { yaw: 0, width: 1.55, height: 4.4 });
+    buildHeraldicBanner(b, P(sign * 8.4, 10.8, farZ + 1.15), { yaw: 0, width: 1.65, height: 4.8 });
+  }
   buildAncestorReliefStele(b, P(-6.6, 0, -10.5), Math.PI / 2);
   buildAncestorReliefStele(b, P(6.6, 0, -10.5), -Math.PI / 2);
   buildRunicBrazierPedestal(b, P(-7.8, 0, avenueZ + 12), 0);
@@ -269,5 +285,7 @@ export function generate(b, params) {
   buildIngotCraneTrolley(b, P(14.5, 0, forge.z - 2.2), 0.8);
 
   b.spawn('entry', P(0, 0, 0), 0);
-  b.exit('gate', P(0, 0, 2.2), { radius: 2.6, label: 'Leave by the mountain gate' });
+  b.spawn('throne', P(0, 0, farZ + 7.5), Math.PI);
+  b.exit('gate', P(0, 0, 2.2), { radius: 2.6, label: 'Step out onto the Mountain Gate Causeway' });
+  b.exit('throne', P(0, 0, farZ + 4.0), { radius: 2.8, label: 'Ascend to the High King\'s Throne Hall' });
 }

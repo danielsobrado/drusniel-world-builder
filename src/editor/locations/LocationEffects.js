@@ -1,9 +1,11 @@
 import * as THREE from 'three/webgpu';
 import {
-  abs, attribute, cameraPosition, clamp, color, densityFogFactor, dot, float, Fn, fract, hash, instancedBufferAttribute,
-  instanceIndex, int, length, max, min, mix, normalWorldGeometry, normalize, positionWorld, pow, reference,
-  renderGroup, sin, smoothstep, texture, time, uniform, uv, vec2, vec3,
+  abs, attribute, cameraFar, cameraNear, cameraPosition, clamp, color, densityFogFactor, dot, float, Fn, fract,
+  hash, instancedBufferAttribute, instanceIndex, int, length, linearDepth, max, min, mix, normalWorldGeometry,
+  normalize, positionWorld, pow, reference, renderGroup, screenUV, sin, smoothstep, texture, time, uniform, uv,
+  vec2, vec3, viewportDepthTexture, viewportSafeUV,
 } from 'three/tsl';
+import { REFLECTION_CLASSES, assignMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { acquireWorldNoise } from '../stylized/worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../stylized/worldNoiseLayout.js';
 import { locationLight } from './materials/LocationShading.js';
@@ -93,6 +95,12 @@ export function createGlowMaterial() {
   const heartColor = bodyTint.mul(1.22).add(mix(bodyTint, vec3(bodyLuma), 0.35).mul(0.18));
 
   material.colorNode = mix(edgeColor, heartColor, coreMask).mul(baseFlicker).mul(heatWave);
+  assignMaterialData(material, {
+    roughness: 1,
+    reactive: 0.9,
+    reflectionClass: REFLECTION_CLASSES.NONE,
+    bloomBoost: 0.72,
+  });
   return material;
 }
 
@@ -133,7 +141,7 @@ export function createHalos(halos) {
   const pulse = flicker(instanceIndex.toFloat(), haloFlicker);
   const dist = length(cameraPosition.sub(haloPos));
   const radial = length(uv().sub(0.5)).mul(2.0);
-  const outerFalloff = pow(smoothstep(float(1.0), float(0.04), radial), 2.5);
+  const outerFalloff = pow(smoothstep(float(0.04), float(1.0), radial).oneMinus(), 2.5);
   const coreRelief = smoothstep(float(0.0), float(0.3), radial).mul(0.52).add(0.48);
   const nearFade = smoothstep(float(0.85), float(3.8), dist).mul(0.52).add(0.48);
   const airDepth = fogTransmittance.mul(dist.mul(-0.006).exp());
@@ -283,7 +291,7 @@ export function createParticles(profile) {
  * streaks are the sky layer's wisp field (G) drifting through the beam, so it
  * reads as light in moving haze rather than ruled lines.
  */
-export function createLightShaft({ from, to, width, tint, strength }) {
+export function createLightShaft({ from, to, width, tint, strength, softDepth = false }) {
   const a = new THREE.Vector3(from.x, from.y, from.z), b = new THREE.Vector3(to.x, to.y, to.z);
   const axis = b.clone().sub(a);
   const lengthMetres = axis.length();
@@ -293,15 +301,34 @@ export function createLightShaft({ from, to, width, tint, strength }) {
     name: 'location-shaft', blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false,
     transparent: true,
   });
-  const across = smoothstep(0, 0.5, uv().x).mul(smoothstep(0.5, 1, uv().x).oneMinus());
-  const along = smoothstep(0, 0.15, uv().y).mul(pow(uv().y.oneMinus(), 1.4).add(0.08));
+  const across = pow(smoothstep(0, 0.5, uv().x).mul(smoothstep(0.5, 1, uv().x).oneMinus()), 1.35);
+  const along = smoothstep(0, 0.18, uv().y).mul(pow(uv().y.oneMinus(), 1.35).add(0.06));
+  // Edge-on Fresnel fade eliminates hard vertical quad lines cutting across tunnels.
+  const viewDir = normalize(cameraPosition.sub(positionWorld));
+  const angleFade = pow(clamp(abs(dot(normalize(normalWorldGeometry), viewDir)), 0, 1), 1.6);
+  const nearCamFade = smoothstep(float(1.2), float(4.2), length(cameraPosition.sub(positionWorld)));
   // Each shaft crosses its own patch of haze, picked by where it starts.
   const patch = vec2(from.x * 0.37, from.z * 0.37);
-  const haze = noiseTap(uv().mul(vec2(SHAFT_HAZE.across, SHAFT_HAZE.along)).add(patch)
+  const hazeA = noiseTap(uv().mul(vec2(SHAFT_HAZE.across, SHAFT_HAZE.along)).add(patch)
     .add(vec2(...SHAFT_HAZE.drift).mul(time)), 'sky').g;
-  const streaks = haze.sub(0.5).mul(SHAFT_HAZE.swing).add(0.85);
-  material.colorNode = color(tint).mul(across).mul(along).mul(streaks).mul(strength);
-  for (const roll of [0, Math.PI / 2]) {
+  const hazeB = noiseTap(uv().mul(vec2(SHAFT_HAZE.across * 1.9, SHAFT_HAZE.along * 1.4)).sub(patch)
+    .add(vec2(-SHAFT_HAZE.drift[0] * 0.7, SHAFT_HAZE.drift[1] * 1.3).mul(time)), 'sky').b;
+  const streaks = mix(hazeA, hazeB, 0.42).sub(0.5).mul(SHAFT_HAZE.swing).add(0.85);
+  let depthFade = float(1);
+  if (softDepth) {
+    const depthRange = cameraFar.sub(cameraNear);
+    const beamDist = linearDepth().mul(depthRange).add(cameraNear);
+    const sceneDist = linearDepth(viewportDepthTexture(viewportSafeUV(screenUV))).mul(depthRange).add(cameraNear);
+    depthFade = smoothstep(float(0.05), float(1.8), sceneDist.sub(beamDist));
+  }
+  material.colorNode = color(tint).mul(across).mul(along).mul(angleFade).mul(nearCamFade).mul(depthFade).mul(streaks).mul(strength * 0.85);
+  assignMaterialData(material, {
+    roughness: 1,
+    reactive: 1,
+    reflectionClass: REFLECTION_CLASSES.NONE,
+    bloomBoost: 0.25,
+  });
+  for (const roll of [0, Math.PI / 3, (2 * Math.PI) / 3]) {
     const sheet = new THREE.Mesh(geometry, material);
     // PlaneGeometry's +Y runs along the shaft, source end at v = 1.
     sheet.scale.set(width, lengthMetres, 1);
@@ -311,6 +338,6 @@ export function createLightShaft({ from, to, width, tint, strength }) {
   }
   group.position.copy(a);
   group.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), axis.normalize());
-  group.renderOrder = 1;
+  group.renderOrder = 2;
   return group;
 }

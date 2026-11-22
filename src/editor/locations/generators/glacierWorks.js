@@ -1,3 +1,4 @@
+import { facetedCrystal } from '../gen/iceKit.js';
 import { block, box, hewnBeam, rod, stoneBlock } from '../gen/propKit.js';
 import { sled, woodpile } from './frostgardDressing.js';
 import { DARK, LOG, PALE, STONE, longhall, storehouse, torch } from './frostgardKit.js';
@@ -87,15 +88,31 @@ export function refugeCamp(b, at, hall) {
   for (const [dx, dz] of [[8, 6], [5.6, -1.4]]) torch(b, L(dx, dz));
 }
 
-/** The sealed vault around `at`: black standing stones the ice has grown around but not over. */
+/** The sealed vault around `at`: black standing stones clasped by jagged refractive crystal spires. */
 export function sealedVault(b, at) {
   const L = (dx, dy, dz) => P(at.x + dx, at.y + dy, at.z + dz);
-  for (const [dx, dz, tall, lean] of [[0, -6.6, 6.2, 0.3], [-2.3, -6, 4.2, -0.5], [2.1, -6.2, 3.4, 0.6]]) {
+  const stones = [[0, -6.6, 6.2, 0.3], [-2.3, -6, 4.2, -0.5], [2.1, -6.2, 3.4, 0.6]];
+  stones.forEach(([dx, dz, tall, lean], idx) => {
     const foot = L(dx, -0.3, dz);
-    b.prop('seal', rod(foot, P(foot.x + lean, foot.y + tall, foot.z - 0.4), 1.1, 0.25, 5), 0xffffff);
-    b.prop('clearIce', rod(P(foot.x, foot.y, foot.z + 0.2), P(foot.x + lean * 0.3, foot.y + tall * 0.45, foot.z), 1.7, 0.9, 7), 0xffffff);
+    b.prop('seal', rod(foot, P(foot.x + lean, foot.y + tall, foot.z - 0.4), 1.1, 0.25, 6), 0xffffff);
+    // Clasp each obsidian monolith with a ring of jagged faceted refractive ice crystal spires.
+    const count = idx === 0 ? 7 : 5;
+    for (let k = 0; k < count; k += 1) {
+      const angle = (k / count) * Math.PI * 2 + idx * 0.7;
+      const radial = 0.78 + (k % 2) * 0.28;
+      const h = tall * (0.28 + ((k * 37) % 10) * 0.025);
+      const sx = foot.x + Math.cos(angle) * radial;
+      const sz = foot.z + Math.sin(angle) * radial;
+      const splay = 0.35 + (k % 3) * 0.14;
+      b.prop('clearIce', facetedCrystal(
+        P(sx, foot.y - 0.15, sz),
+        P(sx + Math.cos(angle) * splay + lean * 0.12, foot.y + h, sz + Math.sin(angle) * splay),
+        0.34 + (k % 2) * 0.12,
+        { sides: 6, taper: 0.56, tipRatio: 0.32, seed: idx * 31 + k + 7, flare: 1.18 },
+      ), 0xffffff);
+    }
     b.nav.block(foot, 1.6, 4);
-  }
+  });
   b.light(L(0, 3, -3), '#8fd0ff', 2.2, 15);
   for (const dx of [-3.4, 3.4]) {
     b.prop('masonry', block(0.7, 1.5, 0.7, L(dx, 0, -5.6)), 0xb9b4ad);

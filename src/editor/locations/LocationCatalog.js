@@ -31,6 +31,15 @@ export function resolveLocationCatalog(source, { generatorKeys, quality = null }
 
   const resolveMaterial = (entry, owner) => {
     if (entry.kind === 'glow') return { kind: 'glow' };
+    if (entry.kind === 'waterfall') {
+      return {
+        kind: 'waterfall',
+        noise: entry.noise ?? 'assets/textures/locations/stonehold-waterfall-noise-rgb.png',
+        waterTint: entry.waterTint ?? '#3a6678',
+        foamTint: entry.foamTint ?? '#eef6fc',
+        speed: entry.speed ?? 1.65,
+      };
+    }
     if (entry.kind === 'ice') {
       const profile = need(root.iceProfiles, entry.profile, 'ice profile', owner);
       const bedrock = entry.bedrock ? need(root.materialProfiles, entry.bedrock, 'material profile', owner) : null;

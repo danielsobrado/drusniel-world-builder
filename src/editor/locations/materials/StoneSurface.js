@@ -11,6 +11,7 @@ import {
 } from './LocationShading.js';
 import { NOISE, locationNoise } from './locationNoise.js';
 import { patinate, weatherDressedStone } from './StoneWeathering.js';
+import { applySurfaceSeamBlend } from './SurfaceSeamBlend.js';
 
 /**
  * Rock, masonry, timber and metal: one triplanar PBR layer whose character
@@ -140,7 +141,7 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     f0 = ground.f0;
   } else if (maps.floor) {
     const floorScale = float(profile.floorScale ?? 0.34);
-    const floorMask = smoothstep(0.68, 0.92, geometryNormal.y).mul(smoothstep(-1.2, -0.2, point.y)).mul(dressed);
+    const floorMask = smoothstep(0.68, 0.92, geometryNormal.y).mul(dressed);
     const flColor = triplanarSample(maps.floor.color, point, weights, floorScale).rgb.mul(color(profile.floorTint ?? profile.tint));
     const flNormal = triplanarNormal(maps.floor.normal, point, geometryNormal, weights, floorScale, (profile.normalStrength ?? 1) * 1.15);
     const flRough = triplanarSample(maps.floor.rough, point, weights, floorScale).g.mul(profile.floorRoughness ?? 0.82);
@@ -148,7 +149,7 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     normal = normalize(mix(normal, flNormal, floorMask));
     roughness = mix(roughness, flRough, floorMask);
     if (profile.walkwayWear) {
-      const centerPath = smoothstep(3.6, 2.75, abs(point.x)).mul(floorMask);
+      const centerPath = smoothstep(2.75, 3.6, abs(point.x)).oneMinus().mul(floorMask);
       const wear = centerPath.mul(mix(float(0.65), float(1), grainMix));
       albedo = albedo.mul(mix(float(1), float(0.84), wear.mul(0.6)));
       roughness = roughness.mul(mix(float(1), float(0.72), wear));
@@ -197,7 +198,7 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     const r1 = mx_noise_float(vec3(point.x.mul(1.8), point.z.mul(1.8), point.x.add(point.z).mul(0.35)));
     const r2 = mx_noise_float(vec3(point.x.mul(4.8), point.z.mul(4.8), point.x.sub(point.z).mul(0.6)));
     const r3 = mx_noise_float(vec3(point.x.mul(11.5), point.z.mul(11.5), 2.3));
-    const shore = smoothstep(0.75, 0.25, clamp(bakedShade.x, 0, 1));
+    const shore = smoothstep(0.25, 0.75, clamp(bakedShade.x, 0, 1)).oneMinus();
     normal = bumpNormal(geometryNormal, r1.mul(0.016).add(r2.mul(0.008)).add(r3.mul(0.003)), float(0.85));
     albedo = color(profile.tint).mul(mix(float(0.75), float(1.35), r1.mul(0.5).add(0.5)));
     albedo = mix(albedo, color('#42565a'), shore.mul(0.32));
@@ -315,6 +316,13 @@ export function stoneSurface(profile, maps, mask = null, mask2 = null) {
     roughness = corroded.roughness;
     metalness = corroded.metalness;
   }
+
+  // Unified 3D seam grounding (pillars-to-floor, ribs-to-rock, timbers-to-walls, props-to-ledges).
+  const seamed = applySurfaceSeamBlend({ point, albedo, normal, roughness, metalness, profile });
+  albedo = seamed.albedo;
+  normal = seamed.normal;
+  roughness = seamed.roughness;
+  metalness = seamed.metalness;
 
   if (profile.snow) {
     // Rime: whatever stands in the weather is greyed with frost before any snow settles on it.

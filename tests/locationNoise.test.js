@@ -5,6 +5,7 @@ import yaml from 'js-yaml';
 import * as THREE from 'three/webgpu';
 import { positionWorld } from 'three/tsl';
 import { resolveLocationCatalog } from '../src/editor/locations/LocationCatalog.js';
+import { SHADE_SIZE } from '../src/editor/locations/gen/LightBake.js';
 import { LOCATION_GENERATORS } from '../src/editor/locations/generators/index.js';
 import { createGlacierIceMaterial } from '../src/editor/locations/materials/GlacierIceMaterial.js';
 import { createStoneMaterial } from '../src/editor/locations/materials/StoneSurface.js';
@@ -30,7 +31,7 @@ test('every catalog location material builds over the world-noise taps', () => {
   const catalog = resolveLocationCatalog(source(), { generatorKeys: Object.keys(LOCATION_GENERATORS) });
   const geometry = new THREE.BoxGeometry();
   const count = geometry.attributes.position.count;
-  for (const [name, size] of [['surfMask', 4], ['surfMask2', 4], ['woodMask', 4], ['bakeLight', 3], ['bakeDir', 3], ['bakeShade', 3], ['tint', 3]]) {
+  for (const [name, size] of [['surfMask', 4], ['surfMask2', 4], ['woodMask', 4], ['bakeLight', 3], ['bakeDir', 3], ['bakeShade', SHADE_SIZE], ['tint', 3]]) {
     geometry.setAttribute(name, new THREE.BufferAttribute(new Float32Array(count * size), size));
   }
   let built = 0;
@@ -60,7 +61,7 @@ test('every catalog location material builds over the world-noise taps', () => {
 });
 
 test('colour-only location modules read the world noise, not procedural Perlin', () => {
-  for (const file of ['StoneWeathering.js', 'GeologicalSurface.js', 'GlacierIceMaterial.js', 'ice/IceInterior.js', 'ice/IceStrata.js']) {
+  for (const file of ['StoneWeathering.js', 'SurfaceSeamBlend.js', 'GeologicalSurface.js', 'GlacierIceMaterial.js', 'ice/IceInterior.js', 'ice/IceStrata.js']) {
     const text = fs.readFileSync(new URL(`../src/editor/locations/materials/${file}`, import.meta.url), 'utf8');
     assert.doesNotMatch(text, /mx_(fractal_)?noise_float/, file);
   }

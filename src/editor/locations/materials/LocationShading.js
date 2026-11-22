@@ -36,8 +36,8 @@ export const viewDirection = normalize(cameraPosition.sub(positionWorld));
 export const geometryNormal = normalize(normalWorldGeometry);
 export const bakedLight = attribute('bakeLight', 'vec3');
 export const bakedDirection = attribute('bakeDir', 'vec3');
-/** x: ambient occlusion, y: metres of solid behind the surface, z: open to the sky (see `gen/LightBake.js`). */
-export const bakedShade = attribute('bakeShade', 'vec3');
+/** x: ambient occlusion, y: metres of solid behind the surface, z: open to the sky, w: 3D seam clearance (see `gen/LightBake.js`). */
+export const bakedShade = attribute('bakeShade', 'vec4');
 
 /** Projection weights for world-space texturing; `sharpness` narrows the seams. */
 export function triplanarWeights(normal, sharpness = 5) {
@@ -65,8 +65,12 @@ export function bumpNormal(normal, height, strength) {
   const dpdx = dFdx(positionWorld), dpdy = dFdy(positionWorld);
   const r1 = cross(dpdy, normal), r2 = cross(normal, dpdx);
   const det = dot(dpdx, r1);
+  const absDet = abs(det);
+  // Guard degenerate / grazing triangles so dFdx/dFdy never collapses to a black NaN spike.
+  const safeWeight = smoothstep(float(1e-7), float(1e-5), absDet);
   const gradient = r1.mul(dFdx(height)).add(r2.mul(dFdy(height))).mul(sign(det));
-  return normalize(normal.mul(abs(det)).sub(gradient.mul(strength)));
+  const raw = normal.mul(max(absDet, float(1e-6))).sub(gradient.mul(strength).mul(safeWeight));
+  return normalize(raw.add(normal.mul(1e-6)));
 }
 
 function highlight(normal, toLight, roughness) {
@@ -99,11 +103,13 @@ export function shadeSurface({
   const relight = mix(float(1), clamp(wrapped(normal, toLight).div(max(wrapped(geometryNormal, toLight), 0.22)), 0.35, 1.28),
     directionality);
   const occlusion = clamp(bakedShade.x, 0, 1);
-  // Keep soft bounced fill & cool ambient legible in recessed corners while grounding timber, rails, and crevices.
-  const diffuseAO = mix(float(0.40), float(1), occlusion);
-  const localAO = mix(float(0.45), float(1), occlusion);
-  const ambientAO = mix(float(0.48), float(1), occlusion);
-  const specAO = occlusion.mul(occlusion);
+  const seamContact = clamp(float(1).sub(bakedShade.w), 0, 1);
+  const seamTight = float(1).sub(seamContact.mul(seamContact).mul(0.45));
+  // Keep soft bounced fill & cool ambient legible in recessed corners while grounding pillars, ribs, timbers, and crevices.
+  const diffuseAO = mix(float(0.36), float(1), occlusion).mul(seamTight);
+  const localAO = mix(float(0.42), float(1), occlusion).mul(seamTight);
+  const ambientAO = mix(float(0.44), float(1), occlusion).mul(float(1).sub(seamContact.mul(0.28)));
+  const specAO = occlusion.mul(occlusion).mul(float(1).sub(seamContact.mul(0.72)));
   const ambient = mix(locationLight.ambientDown, locationLight.ambientUp, normal.y.mul(0.5).add(0.5)).mul(ambientAO);
 
   const toCarried = locationLight.carriedPosition.sub(positionWorld);

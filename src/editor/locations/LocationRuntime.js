@@ -129,7 +129,7 @@ export class LocationRuntime {
       session.start('activate');
       // The swap: no await from here until the player stands in the new scene.
       const previous = this.current;
-      this.#takeRenderer(site.lighting.exposure);
+      this.#takeRenderer(site.lighting.exposure, Boolean(next.postProcessing));
       this.current = next;
       this.anchor = anchor;
       next.nav.lastGround = spawn.y;
@@ -205,12 +205,12 @@ export class LocationRuntime {
     return !failed;
   }
 
-  /** The world's post chain owns tone mapping; a location draws straight to the canvas and needs its own. */
-  #takeRenderer(exposure) {
+  /** The world's post chain owns tone mapping; a location with its own post chain does too, otherwise direct ACES. */
+  #takeRenderer(exposure, hasPostProcessing = false) {
     const renderer = this.renderer;
     this.worldRenderer ??= { toneMapping: renderer.toneMapping, exposure: renderer.toneMappingExposure };
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = exposure;
+    renderer.toneMapping = hasPostProcessing ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = hasPostProcessing ? 1 : exposure;
   }
 
   #returnRenderer() {
@@ -226,7 +226,11 @@ export class LocationRuntime {
     view.update(timestamp);
     const camera = view.camera;
     this.current.update(camera);
-    this.renderer.render(this.current.scene, camera);
+    if (this.current.postProcessing) {
+      this.current.postProcessing.render(camera);
+    } else {
+      this.renderer.render(this.current.scene, camera);
+    }
     if (this.state !== INSIDE) return;
     const feet = this.playerController.state;
     const exit = this.current.exitNear(feet.x, feet.footY ?? feet.y, feet.z);

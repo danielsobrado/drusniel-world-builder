@@ -9,7 +9,7 @@ const CRACK_SCALE = [0.5, 0.27, 0.14, 0.08];
 /** Layers that also get bubbles; deeper ones are too dim to pay for them. */
 const DETAILED_LAYERS = 2;
 /** Per-metre loss of the view into clear and into fully aerated ice: bubbly ice is opaque within decimetres. */
-const VEIL_CLEAR = 0.12, VEIL_MILKY = 2.5;
+const VEIL_CLEAR = 0.11, VEIL_MILKY = 2.45;
 /** How much of what lies behind a crack the crack itself hides. */
 const CRACK_COVER = 0.5;
 /** Fracture plane families: a normal and the spacing of parallel planes in metres. */
@@ -20,21 +20,14 @@ const PLANES = [
 /** Patches of a fracture plane per metre: each face is a few metres across. */
 const PLANE_EXTENT = 0.16;
 /** Deepest a fracture face is drawn, metres. */
-const PLANE_DEPTH = 5;
+const PLANE_DEPTH = 5.2;
 /** Below this the ray is too close to parallel with a plane to find where it crosses. */
 const MIN_CROSSING = 0.05;
 /** Cosine of the ice–air critical angle, asin(1 / 1.31): a ray striking a fracture more obliquely is mirrored by it. */
 const CRITICAL_COS = 0.64;
 /** Brightness of the fracture faces: kept below the cracks' so a face reads as a sheet in the ice, never a white shard. */
-const FACE_BASE = 0.15, FACE_PER_FRACTURE = 0.35;
+const FACE_BASE = 0.18, FACE_PER_FRACTURE = 0.42;
 
-/**
- * A fracture face crossing the ice: where the refracted ray meets it, its patch
- * of the plane, and how bright the face is there. Seen past the critical angle a
- * fracture is a mirror of the light inside the ice; seen square-on it all but
- * vanishes. Where it reaches the surface it draws a crack line that fades into
- * the ice on one side only.
- */
 function fracturePlane({ normal, spacing, salt }, { point, into, absorption, veil, threshold }) {
   const across = dot(point, normal).div(spacing);
   const toward = dot(into, normal);
@@ -43,64 +36,62 @@ function fracturePlane({ normal, spacing, salt }, { point, into, absorption, vei
   const distance = ahead.mul(spacing).div(crossing);
   const hit = point.add(into.mul(distance));
   const patch = smoothstep(threshold, threshold.add(0.12), locationNoise(NOISE.patch, hit.mul(PLANE_EXTENT).add(salt)));
-  const mirror = smoothstep(CRITICAL_COS + 0.1, CRITICAL_COS - 0.1, crossing).mul(0.8).add(0.2);
+  const mirror = smoothstep(CRITICAL_COS + 0.1, CRITICAL_COS - 0.1, crossing).mul(0.82).add(0.18);
+  // Subtle chromatic prism glint along critical-angle internal fracture sheets.
+  const prismTint = mix(vec3(0.84, 0.96, 1.08), vec3(1.06, 0.98, 1.12), smoothstep(CRITICAL_COS + 0.04, CRITICAL_COS - 0.12, crossing));
   return exp(absorption.mul(distance.mul(-2))).mul(exp(veil.mul(distance).negate()))
-    .mul(smoothstep(PLANE_DEPTH, PLANE_DEPTH * 0.6, distance)).mul(patch).mul(mirror);
+    .mul(smoothstep(PLANE_DEPTH, PLANE_DEPTH * 0.58, distance)).mul(patch).mul(mirror).mul(prismTint);
 }
 
 /**
- * What can be seen inside the ice: cracks, fracture faces and bubbles, sampled
- * at several depths along the refracted view ray. Each depth is dimmed by the
- * ice in front of it twice over: absorbed (deep layers arrive bluer) and veiled
- * by the cloud and the nearer cracks (deep layers vanish in milky ice). Because
- * each depth is a different point in the world, the layers slide over one
- * another as the camera moves — which is what separates a crack in the ice from
- * a line drawn on it.
- *
- * Crack lines are the slope of a photographed crack network's normal map: thin
- * and connected, where thresholding its colour gives white plates.
- *
- * @param {object} options
- * @param {Node} options.point surface point, world space
- * @param {Node} options.into refracted view direction, pointing into the ice
- * @param {Node} options.weights triplanar weights
- * @param {{ normal: Texture }} options.cracks the crack network set
- * @param {Node} options.absorption per-metre rgb extinction
- * @param {number} options.layers how many depths to sample (quality)
- * @param {number} options.crackGain
- * @param {Node} options.fracture 0..1
- * @param {Node} options.bubbles 0..1
- * @param {Node} options.scatter 0 clear .. 1 white: how far into the ice the eye can see
- * @param {Node} options.near 1 close to the camera, 0 where fine cracks and bubbles would only shimmer
- * @returns {Node} rgb light scattered back toward the eye, before the profile's scatter colour
+ * What can be seen inside the ice: multi-depth parallax cracks, packed CC0
+ * crystalline fracture webs, bubbles and critical-angle mirror fracture sheets,
+ * attenuated by Beer-Lambert absorption and aerated ice veiling.
  */
-export function iceInterior({ point, into, weights, cracks, absorption, layers, crackGain, fracture, bubbles, scatter, near }) {
+export function iceInterior({
+  point,
+  into,
+  weights,
+  cracks,
+  packMap = null,
+  absorption,
+  layers,
+  crackGain,
+  fracture,
+  bubbles,
+  scatter,
+  near,
+}) {
   const count = Math.min(layers, LAYER_DEPTHS.length);
   const veil = mix(VEIL_CLEAR, VEIL_MILKY, scatter);
-  // Cracks gather into fractured zones and leave clear ice between them.
-  const zone = smoothstep(-0.1, 0.35, locationNoise(NOISE.broad, point.mul(0.14))).mul(0.3).add(fracture.mul(1.5));
-  // Bubbles string out along the vertical, the way they rose before the ice closed on them.
-  const cluster = smoothstep(0, 0.45, locationNoise(NOISE.mottle, point.mul(0.9))).mul(bubbles).mul(1.2);
+  const zone = smoothstep(-0.1, 0.35, locationNoise(NOISE.broad, point.mul(0.14))).mul(0.32).add(fracture.mul(1.55));
+  const cluster = smoothstep(0, 0.45, locationNoise(NOISE.mottle, point.mul(0.9))).mul(bubbles).mul(1.25);
+
   let glow = vec3(0);
   let seen = exp(veil.mul(-LAYER_DEPTHS[0]));
   for (let index = 0; index < count; index += 1) {
     const depth = LAYER_DEPTHS[index];
-    // Each layer is shifted so the same crack is never stacked above itself.
     const inside = point.add(into.mul(depth)).add(index * 3.71);
     const slope = length(triplanarSample(cracks.normal, inside, weights, CRACK_SCALE[index]).xy.mul(2).sub(1));
-    const crack = smoothstep(0.035, 0.16, slope).mul(zone).mul(crackGain);
+    let crack = smoothstep(0.035, 0.155, slope).mul(zone).mul(crackGain);
+    if (packMap && index < DETAILED_LAYERS) {
+      // Layer crisp CC0 fracture lines from the packed crystal atlas on shallow depths.
+      const packCrack = triplanarSample(packMap, inside, weights, CRACK_SCALE[index] * 0.72).r;
+      const sharpLine = smoothstep(0.58, 0.88, packCrack).mul(zone).mul(crackGain * 0.75);
+      crack = max(crack, sharpLine);
+    }
     let light = crack;
     if (index < DETAILED_LAYERS) {
       light = light.add(smoothstep(0.42, 0.68, locationNoise(NOISE.pits, inside.mul(vec3(24, 7, 24)))).mul(cluster));
     }
-    // In to the feature and back out again.
-    glow = glow.add(exp(absorption.mul(-2 * depth)).mul(light).mul(seen));
+    // Slight spectral shift with depth: shallow fractures read crisp ice-white/aqua, deep ones rich cyan-cobalt.
+    const depthTint = mix(vec3(0.96, 1.0, 1.04), vec3(0.55, 0.90, 1.18), Math.min(1, depth / 2.2));
+    glow = glow.add(exp(absorption.mul(-2 * depth)).mul(light).mul(seen).mul(depthTint));
     if (index + 1 < count) {
       seen = seen.mul(exp(veil.mul(depth - LAYER_DEPTHS[index + 1]))).mul(crack.mul(CRACK_COVER).clamp(0, 0.6).oneMinus());
     }
   }
-  // A few bold faces, readable well past the fine cracks; how many grows with the fracture amount.
-  const threshold = fracture.mul(-0.45).add(0.35);
+  const threshold = fracture.mul(-0.45).add(0.34);
   let faces = vec3(0);
   for (const plane of PLANES) faces = faces.add(fracturePlane(plane, { point, into, absorption, veil, threshold }));
   return glow.div(count).mul(near).add(faces.mul(fracture.mul(FACE_PER_FRACTURE).add(FACE_BASE)).mul(crackGain));

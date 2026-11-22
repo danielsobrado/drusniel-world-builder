@@ -14,8 +14,8 @@
  *  - `dir`    the dominant light direction scaled by how directional it is (0..1),
  *             so the shader can re-shade detail normals and place a highlight
  *  - `shade`  x: ambient occlusion, y: thickness of solid behind the surface in metres,
- *             z: 1 where nothing stands between the surface and the sky (always 0 in a closed volume) —
- *             where snow can fall and weather can reach
+ *             z: 1 where nothing stands between the surface and the sky (always 0 in a closed volume),
+ *             w: 3D seam clearance (0 right at an intersecting rock/floor/prop junction .. 1 open)
  */
 
 /**
@@ -32,8 +32,8 @@
 const AO_REACH = [1.3, 2.6, 5.2];
 /** Optical depth past which light through a solid is not worth tracing further. */
 const OPAQUE = 7;
-/** Components of the `shade` attribute. */
-export const SHADE_SIZE = 3;
+/** Components of the `shade` attribute: (ao, thickness, skyOpen, seamClearance). */
+export const SHADE_SIZE = 4;
 
 /**
  * @param {object} options
@@ -172,14 +172,23 @@ export function bakeLighting({
     }
     const terrainOccScale = isProp ? 0.45 : 0.76;
     const terrainAO = 1 - terrainOccScale * (occlusion / AO_REACH.length);
-    const contactAO = propGrid
-      ? propGrid.contactAO(px, py, pz, nx, ny, nz, {
+    let contactAO = 1;
+    let seamClearance = 1;
+    if (propGrid) {
+      const metrics = propGrid.contactMetrics(px, py, pz, nx, ny, nz, {
         grid,
         selfClearance: isProp ? Math.max(0.28, propGrid.resolution * 1.75) : 0.16,
         strength: contactStrength,
         minAO: isProp ? 0.38 : 0.26,
-      })
-      : 1;
+        isProp,
+      });
+      contactAO = metrics.ao;
+      seamClearance = metrics.seamClearance;
+    } else if (isProp) {
+      const dist = Math.max(0, grid.sample(px, py, pz));
+      const t = Math.min(1, dist / 0.95);
+      seamClearance = t * t * (3 - 2 * t);
+    }
     shade[v * SHADE_SIZE] = isProp
       ? terrainAO * (0.44 + 0.56 * contactAO)
       : terrainAO * (0.34 + 0.66 * contactAO);
@@ -197,6 +206,7 @@ export function bakeLighting({
       }
       shade[v * SHADE_SIZE + 2] = open;
     }
+    shade[v * SHADE_SIZE + 3] = seamClearance;
   }
   return { light, dir, shade };
 }

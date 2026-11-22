@@ -68,7 +68,106 @@ export function extractSurface(grid) {
   }
   const result = { positions: new Float32Array(positions), normals, indices: new Uint32Array(indices) };
   faceTowardNormals(result);
+  result.indices = removeDegenerateTriangles(result.positions, result.indices);
   return result;
+}
+
+/**
+ * Drops zero-area or hairline sliver triangles so derivative normals (`dFdx`/`dFdy`)
+ * and rasterization never emit black spikes along sharp fracture creases.
+ */
+export function removeDegenerateTriangles(positions, indices, minAreaSq = 1e-8) {
+  const kept = [];
+  for (let t = 0; t < indices.length; t += 3) {
+    const ia = indices[t], ib = indices[t + 1], ic = indices[t + 2];
+    if (ia === ib || ib === ic || ic === ia) continue;
+    const a = ia * 3, b = ib * 3, c = ic * 3;
+    const ux = positions[b] - positions[a], uy = positions[b + 1] - positions[a + 1], uz = positions[b + 2] - positions[a + 2];
+    const vx = positions[c] - positions[a], vy = positions[c + 1] - positions[a + 1], vz = positions[c + 2] - positions[a + 2];
+    const cx = uy * vz - uz * vy;
+    const cy = uz * vx - ux * vz;
+    const cz = ux * vy - uy * vx;
+    if (cx * cx + cy * cy + cz * cz >= minAreaSq) {
+      kept.push(ia, ib, ic);
+    }
+  }
+  return kept.length === indices.length ? indices : new Uint32Array(kept);
+}
+
+/**
+ * Feature-preserving Taubin (λ/μ) surface smoothing for glacial ice volumes.
+ * Eliminates visible voxel quad faceting on curved melt-tubes and pillars while
+ * preserving sharp fracture edges (via neighbor-normal crease weighting) and
+ * locking walkable floor Y height so navigation never drifts.
+ *
+ * @param {{ positions: Float32Array, normals: Float32Array, indices: Uint32Array }} surface
+ * @param {import('./DensityGrid.js').DensityGrid} grid
+ * @param {{ passes?: number, lambda?: number, mu?: number, creaseCos?: number }} [options]
+ */
+export function smoothSurfaceTaubin(surface, grid, {
+  passes = 2,
+  lambda = 0.42,
+  mu = -0.44,
+  creaseCos = 0.72,
+} = {}) {
+  const { positions, normals, indices } = surface;
+  const count = positions.length / 3;
+  const sum = new Float32Array(positions.length);
+  const weight = new Float32Array(count);
+
+  const step = (factor) => {
+    sum.fill(0);
+    weight.fill(0);
+    for (let t = 0; t < indices.length; t += 3) {
+      for (let corner = 0; corner < 3; corner += 1) {
+        const a = indices[t + corner];
+        const b = indices[t + ((corner + 1) % 3)];
+        const a3 = a * 3, b3 = b * 3;
+        const align = normals[a3] * normals[b3] + normals[a3 + 1] * normals[b3 + 1] + normals[a3 + 2] * normals[b3 + 2];
+        if (align < creaseCos) continue;
+        const w = (align - creaseCos) / (1 - creaseCos);
+        sum[a3] += (positions[b3] - positions[a3]) * w;
+        sum[a3 + 1] += (positions[b3 + 1] - positions[a3 + 1]) * w;
+        sum[a3 + 2] += (positions[b3 + 2] - positions[a3 + 2]) * w;
+        weight[a] += w;
+        sum[b3] += (positions[a3] - positions[b3]) * w;
+        sum[b3 + 1] += (positions[a3 + 1] - positions[b3 + 1]) * w;
+        sum[b3 + 2] += (positions[a3 + 2] - positions[b3 + 2]) * w;
+        weight[b] += w;
+      }
+    }
+    for (let v = 0; v < count; v += 1) {
+      if (weight[v] <= 1e-5) continue;
+      const v3 = v * 3;
+      const inv = factor / weight[v];
+      // Preserve walkable floor elevation and clamp step so sharp creases never fold inside-out.
+      const yLock = normals[v3 + 1] > 0.72 ? 0.15 : 1;
+      const maxMove = grid.voxel * 0.22;
+      const dx = Math.max(-maxMove, Math.min(maxMove, sum[v3] * inv));
+      const dy = Math.max(-maxMove, Math.min(maxMove, sum[v3 + 1] * inv * yLock));
+      const dz = Math.max(-maxMove, Math.min(maxMove, sum[v3 + 2] * inv));
+      positions[v3] += dx;
+      positions[v3 + 1] += dy;
+      positions[v3 + 2] += dz;
+    }
+  };
+
+  for (let pass = 0; pass < passes; pass += 1) {
+    step(lambda);
+    step(mu);
+  }
+
+  // Re-evaluate smooth SDF gradient normals at the relaxed positions and re-verify triangle winding.
+  const n = { x: 0, y: 0, z: 0 };
+  for (let v = 0; v < count; v += 1) {
+    const v3 = v * 3;
+    grid.gradient(positions[v3], positions[v3 + 1], positions[v3 + 2], n);
+    normals[v3] = n.x;
+    normals[v3 + 1] = n.y;
+    normals[v3 + 2] = n.z;
+  }
+  faceTowardNormals(surface);
+  surface.indices = removeDegenerateTriangles(positions, indices);
 }
 
 /** Winds every triangle to agree with its vertices' normals. */

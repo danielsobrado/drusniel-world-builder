@@ -24,9 +24,9 @@ instancedLocations:
   quality:
     default: high
     tiers:
-      high: { iceLayers: 4, particleScale: 1, voxelScale: 1 }
-      medium: { iceLayers: 3, particleScale: 0.6, voxelScale: 1.2 }
-      low: { iceLayers: 2, particleScale: 0.3, voxelScale: 1.5 }
+      high: { iceLayers: 4, particleScale: 1, voxelScale: 1, iceTransmission: true, icePost: true, iceSsr: true, crystalScale: 1 }
+      medium: { iceLayers: 3, particleScale: 0.6, voxelScale: 1.2, iceTransmission: true, icePost: true, iceSsr: false, crystalScale: 0.55 }
+      low: { iceLayers: 2, particleScale: 0.3, voxelScale: 1.5, iceTransmission: false, icePost: false, iceSsr: false, crystalScale: 0 }
 
   # Files under the app's base URL. `rough` is read from the green channel, so an
   # AO/roughness/metal map works as well as a plain roughness map.
@@ -154,6 +154,7 @@ instancedLocations:
         freshClean: 0.34
         weatheredDust: 0.22
         dustTint: '#7a736b'
+      seam: { color: '#584e42', strength: 0.72, damp: 0.35 }
     mine_debris:
       surface: cave-rock
       scale: 0.52
@@ -162,6 +163,7 @@ instancedLocations:
       roughness: 0.94
       cavityShade: 0.56
       contactDust: true
+      seam: { color: '#5c5246', strength: 0.78, damp: 0.32 }
     ore_rubble:
       surface: rubble
       scale: 0.72
@@ -169,6 +171,7 @@ instancedLocations:
       roughness: 0.62
       f0: 0.24
       contactDust: true
+      seam: { color: '#5a5043', strength: 0.74, damp: 0.28 }
       vein: { color: '#c48d44', scale: 5.2, sharpness: 10.5, roughness: 0.34, f0: 0.34, glow: 0 }
     still_water:
       surface: iron
@@ -193,6 +196,7 @@ instancedLocations:
       normalStrength: 0.92
       roughness: 0.94
       woodGrain: true
+      seam: { color: '#4c453c', strength: 0.68, damp: 0.32 }
     mine_timber:
       surface: timber
       scale: 0.55
@@ -201,6 +205,7 @@ instancedLocations:
       roughness: 0.92
       woodGrain: true
       contactDust: true
+      seam: { color: '#574c3f', strength: 0.78, damp: 0.42 }
     sod_roof:
       surface: timber
       scale: 0.5
@@ -214,6 +219,7 @@ instancedLocations:
       roughness: 0.52
       metalness: 0.7
       f0: 0.44
+      seam: { color: '#454340', strength: 0.62, soot: 0.35 }
     mine_iron:
       surface: iron
       scale: 0.9
@@ -224,17 +230,20 @@ instancedLocations:
       f0: 0.52
       forgedPatina: true
       contactDust: true
+      seam: { color: '#5b5043', strength: 0.74, damp: 0.25 }
     rubble_masonry:
       surface: rubble
       scale: 0.42
       tint: '#ffffff'
       normalStrength: 1.1
+      seam: { color: '#5b5852', strength: 0.68, damp: 0.25 }
     glacier_bedrock:
       surface: frost-rock
       scale: 0.22
       tint: '#8f9299'
       normalStrength: 1.2
       strata: { frequency: 0.7, warp: 4, dip: 0.15, dark: '#8c8c92', light: '#e6e2dc', relief: 1.2 }
+      seam: { color: '#b7c7d6', strength: 0.58, frost: 0.75 }
     # Frostgard under the sky. `snow` lies on faces at least `from` upright (the normal's Y)
     # that the sky can see; nothing under a roof or inside a hall takes any. `rime` is the
     # frost that greys whatever stands in the weather, 0..1.
@@ -244,6 +253,7 @@ instancedLocations:
       tint: '#ffffff'
       roughness: 0.88
       snow: { amount: 1, from: 0.45, color: '#eef4fa', rime: 0.3 }
+      seam: { color: '#c4d2df', strength: 0.55, frost: 0.7 }
     snow_roof:
       surface: timber
       scale: 0.5
@@ -256,6 +266,7 @@ instancedLocations:
       tint: '#ffffff'
       normalStrength: 1.1
       snow: { amount: 0.9, from: 0.5, color: '#eef4fa', rime: 0.15 }
+      seam: { color: '#b9c8d6', strength: 0.58, frost: 0.72 }
     # The valley's own rock, where the glacier and the snow leave it bare.
     valley_rock:
       surface: frost-rock
@@ -263,6 +274,7 @@ instancedLocations:
       tint: '#b5aea6'
       normalStrength: 1.3
       strata: { frequency: 0.5, warp: 5, dip: 0.2, dark: '#8f8f95', light: '#f0ece6', relief: 1.4 }
+      seam: { color: '#a8b4be', strength: 0.55, frost: 0.65 }
     moraine_boulder:
       surface: frost-rock
       scale: 0.3
@@ -270,6 +282,7 @@ instancedLocations:
       normalStrength: 1.2
       roughness: 0.95
       snow: { amount: 1, from: 0.3, color: '#eef4fa', rime: 0.2 }
+      seam: { color: '#b7c6d4', strength: 0.62, frost: 0.72 }
     plank_floor:
       surface: planks
       scale: 0.42
@@ -278,14 +291,20 @@ instancedLocations:
       roughness: 0.8
     umbra_basalt:
       surface: basalt
+      floorSurface: flagstone
+      floorScale: 0.42
+      floorTint: '#7a8298'
+      floorRoughness: 0.84
       scale: 0.16
       tint: '#c2c6d6'
       normalStrength: 1.2
       roughness: 0.9
+      cavityShade: 0.72
       strata: { frequency: 0.55, warp: 5, dip: 0.05, dark: '#77777f', light: '#c5c7d2', relief: 0.8 }
       # Bioluminescent veins: in a cavern with no sky they are what shows the rock's
       # shape. At glow 0.07 the city's walls read as black (2026-11-16 captures).
       vein: { color: '#7fdcff', scale: 0.9, sharpness: 10, roughness: 0.2, f0: 0.3, glow: 0.85, floor: 0.75 }
+      seam: { color: '#394055', strength: 0.68, damp: 0.35 }
     # Umbra'kor fungus-bed compost; the props' vertex tint carries the loam and its mycelium.
     fungus_loam:
       surface: earth-dry
@@ -293,14 +312,17 @@ instancedLocations:
       tint: '#ffffff'
       normalStrength: 0.8
       roughness: 0.97
+      seam: { color: '#2b2c38', strength: 0.72, damp: 0.4 }
     umbra_ashlar:
       surface: basalt
       scale: 0.34
       tint: '#b9bdd0'
       normalStrength: 1.38
       roughness: 0.68
+      cavityShade: 0.82
       masonry: { courseHeight: 0.55, blockLength: 1.3, jointWidth: 0.035, relief: 1.75 }
       weathering: { tone: 0.55, speckle: 0.62, grime: 0.72, streaks: 0.55, dust: 0.25 }
+      seam: { color: '#353c50', strength: 0.72, damp: 0.3 }
     stonehold_granite:
       surface: granite
       floorSurface: flagstone
@@ -316,6 +338,7 @@ instancedLocations:
       cavityShade: 0.85
       sootColor: '#121112'
       masonry: { courseHeight: 0.82, blockLength: 1.95, jointWidth: 0.036, relief: 1.95 }
+      seam: { color: '#383430', strength: 0.76, soot: 0.45 }
     stonehold_ashlar:
       surface: dressed-stone
       scale: 0.42
@@ -327,6 +350,7 @@ instancedLocations:
       # Age on the stone, 0..1 each: quarry bed tone, mineral flecks, crevice grime,
       # soot and seep streaks down walls, dust on ledges (StoneWeathering.js).
       weathering: { tone: 0.72, speckle: 0.68, grime: 0.82, streaks: 0.62, dust: 0.42 }
+      seam: { color: '#3c3834', strength: 0.76, soot: 0.42 }
     stonehold_carved:
       surface: dressed-stone
       scale: 0.52
@@ -336,6 +360,7 @@ instancedLocations:
       chiselGrain: 0.82
       cavityShade: 0.95
       weathering: { tone: 0.65, speckle: 0.72, grime: 0.85, streaks: 0.52, dust: 0.46 }
+      seam: { color: '#393531', strength: 0.78, soot: 0.48 }
     bronze:
       surface: iron
       scale: 0.75
@@ -345,6 +370,7 @@ instancedLocations:
       roughness: 0.42
       metalness: 0.88
       f0: 0.74
+      seam: { color: '#3e3932', strength: 0.64, soot: 0.3 }
     # Stonehold's working metal: the same iron and bronze, aged in the forge air.
     forge_iron:
       surface: iron
@@ -355,6 +381,7 @@ instancedLocations:
       metalness: 0.7
       f0: 0.44
       patina: { color: '#6a3a1e', amount: 0.55, spread: 0.4 }
+      seam: { color: '#38302a', strength: 0.7, soot: 0.55 }
     forge_bronze:
       surface: iron
       scale: 0.75
@@ -364,6 +391,54 @@ instancedLocations:
       metalness: 0.88
       f0: 0.74
       patina: { color: '#4f8a72', amount: 0.5, spread: 0.3 }
+    stonehold_gold_hoard:
+      surface: iron
+      scale: 0.9
+      tint: '#f2c15a'
+      normalStrength: 0.85
+      roughness: 0.22
+      metalness: 0.94
+      f0: 0.88
+    royal_bronze:
+      surface: iron
+      scale: 0.78
+      tint: '#e2b45c'
+      normalStrength: 0.95
+      roughness: 0.34
+      metalness: 0.88
+      f0: 0.78
+      patina: { color: '#5c4628', amount: 0.14, spread: 0.25 }
+    stonehold_alpine_rock:
+      surface: frost-rock
+      floorSurface: flagstone
+      floorScale: 0.34
+      floorTint: '#9aa0ac'
+      floorRoughness: 0.86
+      scale: 0.16
+      tint: '#4d5563'
+      normalStrength: 1.55
+      roughness: 0.92
+      cavityShade: 0.92
+      strata: { frequency: 0.52, warp: 3.4, dip: 0.18, dark: '#363d48', light: '#7b8390', relief: 1.65 }
+      snow: { from: 0.50, amount: 0.82, rime: 0.16, color: '#edf3fa' }
+    stonehold_alpine_carved:
+      surface: dressed-stone
+      scale: 0.44
+      tint: '#b8bec8'
+      normalStrength: 1.45
+      roughness: 0.80
+      chiselGrain: 0.76
+      cavityShade: 0.92
+      weathering: { tone: 0.62, speckle: 0.68, grime: 0.76, streaks: 0.55, dust: 0.38 }
+      snow: { from: 0.78, amount: 0.42, rime: 0.08, color: '#edf3fa' }
+    stonehold_pine:
+      surface: earth-dry
+      scale: 1.2
+      tint: '#ffffff'
+      normalStrength: 0.7
+      roughness: 0.94
+      snow: { from: 0.52, amount: 0.54, rime: 0.08, color: '#eaf2fa' }
+      seam: { color: '#3d342a', strength: 0.66, soot: 0.42 }
     obsidian_seal:
       surface: frost-rock
       scale: 0.3
@@ -436,6 +511,7 @@ instancedLocations:
       drift: 0
       driftSpeed: 3
       translucency: 1.2
+      caustics: 0.28
       trailColor: '#a9bcd6'
       detailRange: [16, 48]
       banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.3, zones: 0.6, zoneSize: 24 }
@@ -454,23 +530,55 @@ instancedLocations:
       crackGain: 0.3
       depthRate: 0.35
       banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.3, zones: 0.3, zoneSize: 24 }
-    # Meltwater ice: no air to scatter, so the eye goes straight in and every fracture shows.
+    # Meltwater ice: no air to scatter, so the eye refracts straight in with 3-IOR dispersion and every fracture shows.
     clear_polished:
       <<: *ice
-      deepColor: '#16304a'
-      saturation: 0.8
-      roughness: 0.06
-      gloss: 0.45
-      reflection: { gain: 4, horizon: 2.5 }
-      microNormal: 0.1
+      crystal: true
+      transmission: 0.86
+      refractionStrength: 0.056
+      facetSharpness: 0.48
+      iridescence: 0.22
+      absorption: [0.64, 0.14, 0.05]
+      deepColor: '#122e4a'
+      saturation: 0.85
+      roughness: 0.055
+      gloss: 0.52
+      reflection: { gain: 4.2, horizon: 2.5 }
+      microNormal: 0.08
       bubbles: 0.03
-      cloud: 0
-      polish: 0.6
-      crackGain: 0.45
+      cloud: 0.02
+      polish: 0.72
+      crackGain: 0.55
       depthRate: 1.4
       translucency: 1.9
       banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.12, zones: 0.2, zoneSize: 24 }
       scallop: { scale: 0.75, depth: 0.03 }
+    # Pure faceted hexagonal ice crystals & hoarfrost spires: high chromatic dispersion, crisp bevels, jewel-like iridescence.
+    ice_crystal:
+      <<: *ice
+      crystal: true
+      transmission: 0.90
+      refractionStrength: 0.068
+      facetSharpness: 0.78
+      iridescence: 0.26
+      absorption: [0.76, 0.17, 0.05]
+      thinColor: '#aee8ff'
+      deepColor: '#092444'
+      scatterColor: '#8cdbff'
+      saturation: 0.9
+      roughness: 0.045
+      gloss: 0.65
+      reflection: { gain: 4.6, horizon: 2.6 }
+      microNormal: 0.06
+      bubbles: 0.05
+      cloud: 0.03
+      polish: 0.85
+      fracture: 0.45
+      crackGain: 0.82
+      depthRate: 1.6
+      translucency: 2.1
+      banding: { frequency: 0.9, dip: 0.22, fold: 5, strength: 0.08, zones: 0.15, zoneSize: 24 }
+      scallop: { scale: 0.8, depth: 0.02 }
     # Loose pieces carry little baked depth, so depthRate is high to keep them from going pale.
     fractured:
       <<: *ice
@@ -504,6 +612,7 @@ instancedLocations:
       deepColor: '#284a64'
       saturation: 0.7
       absorption: [0.4, 0.08, 0.05]
+      caustics: 0.22
       lightThrough: 0.3
       reflection: { gain: 4, horizon: 2.5 }
       crust: 0.6
@@ -555,20 +664,60 @@ instancedLocations:
     umbra_pale:
       background: '#020308'
       fog: { color: '#151e30', density: 0.005 }
-      ambientUp: '#adbfdf'
-      ambientDown: '#7a90b3'
+      ambientUp: '#7d92b8'
+      ambientDown: '#4d6082'
       carried: { color: '#dce8ff', intensity: 1.25, range: 12 }
       exposure: 2.1
       bakeGain: 2.6
+      indirectBounce: { strength: 0.52, cellSize: 2.2, radius: 16.0, wrap: 0.58, maxEnergy: 2.2 }
+      propShadows: { resolution: 0.24, minTransmit: 0.16, contactStrength: 0.76 }
       absorption: { rock: [5, 5, 5], ice: [0.55, 0.085, 0.03] }
     stonehold_forge:
       background: '#08090c'
-      fog: { color: '#111216', density: 0.0062 }
-      ambientUp: '#2d313c'
-      ambientDown: '#1a191c'
+      fog: { color: '#111216', density: 0.0058 }
+      ambientUp: '#283142'
+      ambientDown: '#1a181c'
       carried: { color: '#ffebd2', intensity: 1.0, range: 13 }
-      exposure: 1.22
+      exposure: 1.28
+      bakeGain: 1.28
+      dynamicGain: 0.30
+      indirectBounce: { strength: 0.62, cellSize: 1.8, radius: 15.0, wrap: 0.56, maxEnergy: 2.4 }
+      propShadows: { resolution: 0.22, minTransmit: 0.14, contactStrength: 0.78 }
       absorption: { rock: [6, 6, 6], ice: [0.55, 0.085, 0.03] }
+    stonehold_throne:
+      background: '#050608'
+      fog: { color: '#0d0c10', density: 0.0072 }
+      ambientUp: '#232b3c'
+      ambientDown: '#141214'
+      carried: { color: '#ffdfb8', intensity: 0.72, range: 12 }
+      exposure: 1.26
+      bakeGain: 1.42
+      dynamicGain: 0.42
+      indirectBounce: { strength: 0.64, cellSize: 1.6, radius: 14.0, wrap: 0.54, maxEnergy: 2.6 }
+      propShadows: { resolution: 0.22, minTransmit: 0.14, contactStrength: 0.76 }
+      absorption: { rock: [6, 6, 6], ice: [0.55, 0.085, 0.03] }
+    stonehold_alpine_daylight:
+      background: '#9db9d4'
+      fog: { color: '#9cb5cc', density: 0.0042 }
+      ambientUp: '#4c6588'
+      ambientDown: '#343b48'
+      carried: { color: '#ffffff', intensity: 0, range: 1 }
+      exposure: 1.02
+      bakeGain: 1.18
+      dynamicGain: 0.36
+      indirectBounce: { strength: 0.42, cellSize: 2.2, radius: 12.0, wrap: 0.56, maxEnergy: 2.0 }
+      propShadows: { resolution: 0.28, minTransmit: 0.18, contactStrength: 0.68 }
+      absorption: { rock: [6, 6, 6], ice: [0.55, 0.085, 0.03] }
+      sky:
+        zenith: '#2864ab'
+        horizon: '#bfd4e8'
+        ground: '#96aec4'
+        sun: { direction: [-0.58, 0.46, 0.67], color: '#ffeed2', intensity: 1.48, disc: 5, glow: 0.95, halo: 0.12 }
+        skylight: { color: '#9fc0e6', intensity: 0.62 }
+        clouds: 0.52
+        cloudColor: '#f2f6fb'
+        stars: 0
+        peaks: { radius: 520, height: 350, seed: 29, rock: '#485262', snow: '#f4f6fa', shade: '#7c93b2', haze: 0.28 }
     frostgard_ice:
       background: '#061423'
       fog: { color: '#0d2740', density: 0.011 }
@@ -577,6 +726,7 @@ instancedLocations:
       carried: { color: '#e4f1ff', intensity: 0.7, range: 9 }
       exposure: 1.15
       indirectBounce: { strength: 0.55, cellSize: 1.5, radius: 10, wrap: 0.6, maxEnergy: 2.2 }
+      propShadows: { resolution: 0.2, minTransmit: 0.18, contactStrength: 0.72 }
       absorption: { rock: [6, 6, 6], ice: [0.55, 0.085, 0.03] }
     # Open-air profiles add `sky`: the dome that is drawn, and the sun and skylight that are baked.
     #   sun.direction points toward the sun; disc and glow shape it on the dome, halo is the
@@ -642,6 +792,15 @@ instancedLocations:
       particles:
         - { count: 450, box: 24, velocity: [0.05, 0.5, 0.03], sway: 0.03, size: [0.015, 0.045], color: '#ff9a4a', opacity: 0.7, additive: true, ambientGain: 0, lampGain: 0.1, glow: 0.8, twinkle: 3 }
         - { count: 400, box: 18, velocity: [0.03, 0.01, 0.02], sway: 0.012, size: [0.012, 0.03], color: '#e6d6c0', opacity: 0.4, additive: true, ambientGain: 2, lampGain: 0.5 }
+      emitters:
+        ember: { perPoint: 16, life: 3.0, velocity: [0.06, 1.35, 0.04], gravity: -0.18, spread: 1.1, size: [0.05, 0.014], color: '#ff9a36', opacity: 0.95, additive: true, ambientGain: 0, glow: 2.5 }
+    stonehold_alpine_air:
+      particles:
+        - { count: 160, box: 54, velocity: [0.35, 0.06, 0.22], sway: 0.35, size: [4.5, 9.5], color: '#d2e2f0', opacity: 0.045, additive: false, ambientGain: 2.2, lampGain: 0.2, wisp: 0.85 }
+        - { count: 320, box: 28, velocity: [0.18, -0.08, 0.14], sway: 0.04, size: [0.016, 0.042], color: '#f2f7fc', opacity: 0.45, additive: true, ambientGain: 2.5, lampGain: 0.2, twinkle: 4, outdoor: true }
+      emitters:
+        mist: { perPoint: 18, life: 6.5, velocity: [0.35, 0.85, 0.45], gravity: -0.02, spread: 5.5, size: [3.2, 11.5], color: '#dce8f4', opacity: 0.17, additive: false, ambientGain: 3.4, glow: 0.04, wisp: 0.85 }
+        ember: { perPoint: 14, life: 2.8, velocity: [0.08, 1.4, 0.06], gravity: -0.15, spread: 0.9, size: [0.05, 0.015], color: '#ff9a36', opacity: 0.95, additive: true, ambientGain: 0, glow: 2.4 }
     frostgard_cold:
       particles:
         - { count: 600, box: 18, velocity: [0.02, -0.03, 0.02], sway: 0.012, size: [0.012, 0.03], color: '#eaf6ff', opacity: 0.8, additive: true, ambientGain: 2.5, lampGain: 0.6, twinkle: 5 }
@@ -694,6 +853,20 @@ instancedLocations:
       tips:
         - The pillars were not raised. They are what the masons left standing.
         - Follow the warm air and you will find the forges.
+    stonehold_gate:
+      title: Stonehold — The Mountain Gate
+      color: '#1e2733'
+      accent: '#e6b468'
+      tips:
+        - Cross the chasm viaduct under the gaze of the stone kings.
+        - The braziers never go out while the mountain stands.
+    stonehold_throne:
+      title: Stonehold — Hall of the High King
+      color: '#1c1512'
+      accent: '#f0b858'
+      tips:
+        - Beneath the great chevrons sits the seat hewn from the heart of the peak.
+        - Dark slate remembers every hearth that ever burned above it.
     frostgard_ice:
       title: Frostgard — Beneath the Ice
       color: '#162737'
@@ -813,11 +986,47 @@ instancedLocations:
         timber: { kind: stone, profile: timber, masked: false }
         iron: { kind: stone, profile: forge_iron, masked: false }
         bronze: { kind: stone, profile: forge_bronze, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
         ore: { kind: stone, profile: ore_rubble, masked: false }
         glow: { kind: glow }
       params:
         avenue: { halfLength: 48, halfWidth: 15, height: 13, vaultRise: 9, pillarSpacing: 12, pillarRadius: 1.9 }
         forgeTint: '#ff7a2a'
+    stonehold_gate_approach:
+      generatorKey: stonehold-gate-approach
+      lightingProfile: stonehold_alpine_daylight
+      atmosphereProfile: stonehold_alpine_air
+      loadingTheme: stonehold_gate
+      loreRealmKey: stonehold
+      voxel: 1.15
+      materials:
+        terrain: { kind: stone, profile: stonehold_alpine_rock }
+        masonry: { kind: stone, profile: stonehold_alpine_carved, masked: false }
+        carved: { kind: stone, profile: stonehold_alpine_carved, masked: false }
+        timber: { kind: stone, profile: timber, masked: false }
+        iron: { kind: stone, profile: forge_iron, masked: false }
+        bronze: { kind: stone, profile: royal_bronze, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
+        pine: { kind: stone, profile: stonehold_pine, masked: false }
+        waterfall: { kind: waterfall, waterTint: '#3f6d80', foamTint: '#f2f8fc', speed: 1.75 }
+        glow: { kind: glow }
+    stonehold_throne_hall:
+      generatorKey: stonehold-throne-hall
+      lightingProfile: stonehold_throne
+      atmosphereProfile: stonehold_industry
+      loadingTheme: stonehold_throne
+      loreRealmKey: stonehold
+      voxel: 0.7
+      materials:
+        terrain: { kind: stone, profile: stonehold_granite }
+        masonry: { kind: stone, profile: stonehold_ashlar, masked: false }
+        carved: { kind: stone, profile: stonehold_carved, masked: false }
+        timber: { kind: stone, profile: timber, masked: false }
+        iron: { kind: stone, profile: forge_iron, masked: false }
+        bronze: { kind: stone, profile: royal_bronze, masked: false }
+        gold: { kind: stone, profile: stonehold_gold_hoard, masked: false }
+        cloth: { kind: stone, profile: trail_cloth, masked: false }
+        glow: { kind: glow }
     frostgard_glacier:
       generatorKey: glacial-cavern
       lightingProfile: frostgard_ice
@@ -828,6 +1037,7 @@ instancedLocations:
       materials:
         terrain: { kind: ice, profile: deep_blue_glacier, bedrock: glacier_bedrock }
         clearIce: { kind: ice, profile: clear_polished, masked: false }
+        iceCrystal: { kind: ice, profile: ice_crystal, masked: false }
         iceBlock: { kind: ice, profile: fractured, masked: false }
         timber: { kind: stone, profile: timber, masked: false }
         iron: { kind: stone, profile: iron, masked: false }
@@ -836,6 +1046,8 @@ instancedLocations:
         seal: { kind: stone, profile: obsidian_seal, masked: false }
         glow: { kind: glow }
       params:
+        # Reinvests grass-free mountain budget into GPU-instanced geological crystal colonies & hoarfrost skirts.
+        crystalField: { clusters: 650, needles: 900 }
         # Attempts; a cluster hangs wherever one finds a roof low enough.
         icicles: 420
         longhall: { length: 13, width: 6, wallHeight: 2.6, roofRise: 3.4 }
@@ -874,6 +1086,7 @@ instancedLocations:
       materials:
         terrain: { kind: ice, profile: weathered_glacier, bedrock: valley_rock }
         clearIce: { kind: ice, profile: clear_polished, masked: false }
+        iceCrystal: { kind: ice, profile: ice_crystal, masked: false }
         iceBlock: { kind: ice, profile: calved_block, masked: false }
         rock: { kind: stone, profile: moraine_boulder, masked: false }
         timber: { kind: stone, profile: frost_timber, masked: false }
@@ -924,6 +1137,7 @@ instancedLocations:
         erratics: [[-7, 15, 2.2], [17, 9, 1.5], [-24, 3, 2.8], [-38, 22, 2]]
         # Strength of the sun shafts through the old wall's openings.
         shafts: 0.08
+        crystalField: { clusters: 450, needles: 700 }
         icicles: 240
         stakes: [[0.6, 20], [2.5, 14], [5.5, 4], [7, -14], [9.5, -24]]
         # A Norths waystation before the arch, and the torches at its mouth ([x, z]).
@@ -981,12 +1195,31 @@ instancedLocations:
       subtitle: Drow cavern settlement — showcase
       seed: 7719
       showcase: true
+    showcase-stonehold-gate:
+      archetype: stonehold_gate_approach
+      title: Stonehold — The Mountain Gate
+      subtitle: Alpine chasm viaduct & mountain fortress approach — showcase
+      seed: 2230
+      showcase: true
+      links:
+        hold: { site: showcase-stonehold-hall, spawn: entry }
     showcase-stonehold-hall:
       archetype: dwarven_mountain_hold
       title: Stonehold Mountain Hall
-      subtitle: Dwarven hold — showcase
+      subtitle: Dwarven hold & Forgeheart — showcase
       seed: 2231
       showcase: true
+      links:
+        gate: { site: showcase-stonehold-gate, spawn: entry }
+        throne: { site: showcase-stonehold-throne, spawn: entry }
+    showcase-stonehold-throne:
+      archetype: stonehold_throne_hall
+      title: Stonehold — High King's Throne Hall
+      subtitle: Royal basalt sanctuary & treasury — showcase
+      seed: 2232
+      showcase: true
+      links:
+        hall: { site: showcase-stonehold-hall, spawn: throne }
     # `links` sends an exit (by the id its generator gave it) to another site's spawn
     # instead of back to the surface.
     showcase-frostgard-glacier:

@@ -306,10 +306,12 @@ export function generate(b, params) {
     const up = clamp01((n.y - 0.25) / 0.45);
     // Bedrock: the knob the refuge stands on, a few metres high under an ice roof; the hall's low west
     // floor shows moraine, because the glacier carries its debris on the valley side.
-    const bed = p.y < REFUGE.y + BED_RISE + (grain - 0.5) * 4 ? clamp01((1 - Math.hypot(p.x - REFUGE.x, p.z - REFUGE.z) / BED_RADIUS) * 2) : 0;
+    const bedVert = clamp01((REFUGE.y + BED_RISE + (grain - 0.5) * 4 - p.y) / 1.8);
+    const bed = bedVert * clamp01((1 - Math.hypot(p.x - REFUGE.x, p.z - REFUGE.z) / BED_RADIUS) * 2);
     const low = clamp01(1 - (p.y - HALL.y) / 4.5) * (1 - inTube(p.z));
     const west = clamp01((HALL.x + 8 - p.x) / 22);
-    const rock = Math.min(1, Math.max(bed, Math.max(0, grain - 0.55) * 3 * low * west * (n.y > 0.5 ? 1 : 0.4)));
+    const moraineSlope = 0.4 + 0.6 * clamp01((n.y - 0.3) / 0.4);
+    const rock = Math.min(1, Math.max(bed, Math.max(0, grain - 0.55) * 3 * low * west * moraineSlope));
     const slot = slotNear(p.x, p.z);
     let snow = snowLie(p.x, p.y, p.z) * 1.2;
     for (const [at, radius] of banks) snow = Math.max(snow, near(p, at, radius * 1.6));

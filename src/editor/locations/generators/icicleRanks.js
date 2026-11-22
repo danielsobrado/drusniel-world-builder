@@ -160,17 +160,17 @@ const ellipse = (u, half, thin, angle) => [
   Math.cos(angle) * half * u.x - Math.sin(angle) * thin * u.z, Math.cos(angle) * half * u.z + Math.sin(angle) * thin * u.x,
 ];
 
-/** The bulb of refrozen seep a rank grows out of: a lumpy lens along it, flush with its highest root, hanging below its lowest. */
+/** The bulb of refrozen seep a rank grows out of: tucked closely into the roof so it never reads as a floating blob. */
 function seep(b, roots, site, rank) {
   if (roots.length < 2) return;
   const offsets = roots.map((root) => root.offset), tops = roots.map((root) => root.top);
   const girth = Math.max(...roots.map((root) => root.radius));
-  const half = (Math.max(...offsets) - Math.min(...offsets)) / 2 + girth * 2, thin = girth * 2.6;
+  const half = (Math.max(...offsets) - Math.min(...offsets)) / 2 + girth * 1.4, thin = girth * 1.65;
   const mid = (Math.max(...offsets) + Math.min(...offsets)) / 2, x = site.x + rank.x * mid, z = site.z + rank.z * mid;
-  const high = Math.max(...tops), low = Math.min(...tops), drop = girth * 2 + b.range(0.05, 0.15), lump = b.range(0, TAU);
-  const shape = (angle) => ellipse(rank, half, thin, angle).map((d) => d * (1 + 0.12 * Math.cos(3 * angle + lump)));
-  b.prop('clearIce', spindle([P(x, high + ROOT_SINK + girth, z), { ...P(x, high, z), r: 1 },
-    { ...P(x, low - drop * 0.5, z), r: 0.75 }, P(x, low - drop, z)], 8, shape), 0xffffff);
+  const high = Math.max(...tops), low = Math.min(...tops), drop = girth * 1.15 + b.range(0.03, 0.09), lump = b.range(0, TAU);
+  const shape = (angle) => ellipse(rank, half, thin, angle).map((d) => d * (1 + 0.10 * Math.cos(3 * angle + lump)));
+  b.prop('clearIce', spindle([P(x, high + ROOT_SINK + girth * 1.4, z), { ...P(x, high + ROOT_SINK * 0.4, z), r: 1 },
+    { ...P(x, low - drop * 0.45, z), r: 0.62 }, P(x, low - drop, z)], 8, shape), 0xffffff);
 }
 
 /** Close neighbours fuse into a sheet hung between them, its lower edge arched up where they part. */

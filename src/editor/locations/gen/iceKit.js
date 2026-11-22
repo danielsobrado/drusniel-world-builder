@@ -190,3 +190,129 @@ function sharpen(geometry, amount) {
   }
   return geometry;
 }
+
+/**
+ * A crisp faceted hexagonal (or n-sided) glacial crystal prism from `base` to `tip`,
+ * with beveled shoulder facets and an asymmetric pyramidal termination so specular
+ * highlights and chromatic refraction catch sharp planar crystal faces instead of
+ * reading as smooth low-poly cylinders.
+ *
+ * @param {{x:number,y:number,z:number}} base
+ * @param {{x:number,y:number,z:number}} tip
+ * @param {number} radius base radius in metres
+ * @param {{ sides?: number, taper?: number, tipRatio?: number, twist?: number, seed?: number, flare?: number }} [options]
+ */
+export function facetedCrystal(base, tip, radius, {
+  sides = 6,
+  taper = 0.72,
+  tipRatio = 0.24,
+  twist = 0.08,
+  seed = 1,
+  flare = 1.12,
+} = {}) {
+  const rng = createRng(seed * 7919 + Math.round(radius * 10007) + 13);
+  const dx = tip.x - base.x, dy = tip.y - base.y, dz = tip.z - base.z;
+  const len = Math.hypot(dx, dy, dz) || 1e-4;
+  const ax = dx / len, ay = dy / len, az = dz / len;
+  const ref = Math.abs(ay) < 0.9 ? { x: 0, y: 1, z: 0 } : { x: 1, y: 0, z: 0 };
+  // Orthonormal frame (u, v, axis)
+  let ux = ay * ref.z - az * ref.y;
+  let uy = az * ref.x - ax * ref.z;
+  let uz = ax * ref.y - ay * ref.x;
+  const uLen = Math.hypot(ux, uy, uz) || 1;
+  ux /= uLen; uy /= uLen; uz /= uLen;
+  const vx = ay * uz - az * uy;
+  const vy = az * ux - ax * uz;
+  const vz = ax * uy - ay * ux;
+
+  // Slightly irregular hexagonal facet radii & tip asymmetry for natural quartz/ice habit.
+  const sideScale = Array.from({ length: sides }, () => 0.84 + rng() * 0.32);
+  const shoulderShift = Array.from({ length: sides }, () => (rng() - 0.5) * tipRatio * 0.45);
+  const roll = rng() * TAU;
+
+  const ringPoint = (alongFrac, radScale, k, extraTwist = 0) => {
+    const angle = roll + (k / sides) * TAU + extraTwist;
+    const r = radius * radScale * sideScale[k % sides];
+    const ca = Math.cos(angle) * r, sa = Math.sin(angle) * r;
+    const h = alongFrac * len;
+    return [
+      base.x + ax * h + ux * ca + vx * sa,
+      base.y + ay * h + uy * ca + vy * sa,
+      base.z + az * h + uz * ca + vz * sa,
+    ];
+  };
+
+  const positions = [];
+  const pushTri = (p0, p1, p2) => {
+    positions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+  };
+
+  const baseCenter = [base.x, base.y, base.z];
+  const tipOffU = (rng() - 0.5) * radius * 0.22;
+  const tipOffV = (rng() - 0.5) * radius * 0.22;
+  const apex = [
+    tip.x + ux * tipOffU + vx * tipOffV,
+    tip.y + uy * tipOffU + vy * tipOffV,
+    tip.z + uz * tipOffU + vz * tipOffV,
+  ];
+  const midFrac = 0.44;
+  const shoulderFrac = Math.max(0.55, 1 - tipRatio);
+
+  for (let k = 0; k < sides; k += 1) {
+    const k1 = (k + 1) % sides;
+    const b0 = ringPoint(0, flare, k, 0);
+    const b1 = ringPoint(0, flare, k1, 0);
+    const m0 = ringPoint(midFrac, 0.5 * (1 + taper), k, twist * 0.5);
+    const m1 = ringPoint(midFrac, 0.5 * (1 + taper), k1, twist * 0.5);
+    const s0 = ringPoint(shoulderFrac + shoulderShift[k], taper, k, twist);
+    const s1 = ringPoint(shoulderFrac + shoulderShift[k1], taper, k1, twist);
+
+    // Lower prism facet
+    pushTri(b0, b1, m1);
+    pushTri(b0, m1, m0);
+    // Upper prism facet
+    pushTri(m0, m1, s1);
+    pushTri(m0, s1, s0);
+    // Pyramidal crystal termination facet
+    pushTri(s0, s1, apex);
+    // Base cap
+    pushTri(baseCenter, b1, b0);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/**
+ * Builds a single local-space multi-crystal cluster (centred at origin, pointing +Y)
+ * suitable for GPU-instanced crystal fields (`LocationCrystalField.js`).
+ *
+ * @param {{ prisms?: number, seed?: number, height?: number, radius?: number }} [options]
+ */
+export function crystalClusterUnit({ prisms = 4, seed = 17, height = 0.85, radius = 0.14 } = {}) {
+  const rng = createRng(seed * 4999 + 31);
+  const parts = [];
+  for (let i = 0; i < prisms; i += 1) {
+    const isHero = i === 0;
+    const angle = (i / Math.max(1, prisms - 1)) * TAU + rng() * 0.55;
+    const tilt = isHero ? 0.08 + rng() * 0.12 : 0.34 + rng() * 0.42;
+    const h = height * (isHero ? 1.0 : 0.48 + rng() * 0.42);
+    const r = radius * (isHero ? 1.0 : 0.56 + rng() * 0.32);
+    const bx = isHero ? 0 : Math.cos(angle) * radius * 0.55;
+    const bz = isHero ? 0 : Math.sin(angle) * radius * 0.55;
+    const tx = bx + Math.cos(angle) * Math.sin(tilt) * h;
+    const ty = Math.cos(tilt) * h;
+    const tz = bz + Math.sin(angle) * Math.sin(tilt) * h;
+    parts.push(facetedCrystal(
+      { x: bx, y: -r * 0.55, z: bz },
+      { x: tx, y: ty, z: tz },
+      r,
+      { sides: 6, taper: 0.68, tipRatio: 0.28, seed: seed + i * 29, flare: 1.08 },
+    ));
+  }
+  const merged = mergeGeometries(parts);
+  for (const part of parts) part.dispose();
+  return merged;
+}

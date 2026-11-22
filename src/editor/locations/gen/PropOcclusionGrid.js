@@ -188,17 +188,35 @@ export class PropOcclusionGrid {
   }
 
   /**
-   * Computes structural contact ambient occlusion (0..1, 1 = unoccluded) around
-   * `(px, py, pz)` with outward normal `(nx, ny, nz)`.
+   * Computes both structural contact ambient occlusion (`ao`, 0..1) and tight
+   * 3D surface-intersection clearance (`seamClearance`, 0 = embedded/touching
+   * an intersecting surface, 1 = open > ~0.95 m away) in a single pass.
    */
-  contactAO(px, py, pz, nx, ny, nz, {
+  contactMetrics(px, py, pz, nx, ny, nz, {
     grid = null,
     selfClearance = 0.16,
     strength = 0.72,
     minAO = 0.26,
+    isProp = false,
   } = {}) {
     const hasProps = this.cellCount > 0;
-    if (!hasProps && !grid) return 1;
+    let rockClearance = 1;
+    if (grid) {
+      if (isProp) {
+        // Signed distance in metres from this prop vertex to the carved cavern rock/floor/ceiling.
+        const dist = Math.max(0, grid.sample(px, py, pz));
+        const t = Math.min(1, dist / 0.95);
+        rockClearance = t * t * (3 - 2 * t);
+      } else {
+        // Natural concave wall-to-floor and wall-to-ceiling creases on carved cavern rock.
+        const probe = 0.55;
+        const s = grid.sample(px + nx * probe, py + ny * probe, pz + nz * probe);
+        const crease = Math.min(1, Math.max(0, 1 - s / probe));
+        rockClearance = 1 - Math.min(0.75, crease * 0.85);
+      }
+    }
+    if (!hasProps && !grid) return { ao: 1, seamClearance: rockClearance };
+
     const [tx, ty, tz, bx, by, bz] = tangentBasis(nx, ny, nz);
     const dirs = [
       [nx, ny, nz, 1.0],
@@ -210,6 +228,8 @@ export class PropOcclusionGrid {
 
     let sumOcc = 0;
     let totalWeight = 0;
+    let sumTightProp = 0;
+    let tightWeight = 0;
     const ox = px + nx * selfClearance;
     const oy = py + ny * selfClearance;
     const oz = pz + nz * selfClearance;
@@ -219,7 +239,8 @@ export class PropOcclusionGrid {
       const len = Math.hypot(dir[0], dir[1], dir[2]) || 1;
       const ux = dir[0] / len, uy = dir[1] / len, uz = dir[2] / len;
       const w = dir[3];
-      for (const reach of CONTACT_DISTANCES) {
+      for (let rIdx = 0; rIdx < CONTACT_DISTANCES.length; rIdx += 1) {
+        const reach = CONTACT_DISTANCES[rIdx];
         const sx = ox + ux * reach;
         const sy = oy + uy * reach;
         const sz = oz + uz * reach;
@@ -229,10 +250,27 @@ export class PropOcclusionGrid {
         const distWeight = w * (1 / (0.6 + reach * 1.4));
         sumOcc += hit * distWeight;
         totalWeight += distWeight;
+        if (rIdx <= 1) {
+          const tw = w * (rIdx === 0 ? 1.4 : 0.75);
+          sumTightProp += propHit * tw;
+          tightWeight += tw;
+        }
       }
     }
 
     const avg = totalWeight > 0 ? sumOcc / totalWeight : 0;
-    return Math.max(minAO, 1 - strength * avg);
+    const ao = Math.max(minAO, 1 - strength * avg);
+    const propProximity = tightWeight > 0 ? Math.min(1, (sumTightProp / tightWeight) * 1.65) : 0;
+    const propClearance = 1 - propProximity * (isProp ? 0.78 : 0.92);
+    const seamClearance = Math.max(0, Math.min(1, Math.min(rockClearance, propClearance)));
+    return { ao, seamClearance };
+  }
+
+  /**
+   * Computes structural contact ambient occlusion (0..1, 1 = unoccluded) around
+   * `(px, py, pz)` with outward normal `(nx, ny, nz)`.
+   */
+  contactAO(px, py, pz, nx, ny, nz, options = {}) {
+    return this.contactMetrics(px, py, pz, nx, ny, nz, options).ao;
   }
 }

@@ -89,15 +89,23 @@ export function generate(b, params) {
   bridge(b, P(9, 8, -90.2), P(21.5, -6, -105.6), 3.2, { footY: LAKE, spans: 2, tint: BASALT, parapet: 1 });
   b.passage(P(-22, -6, -115), P(-48, -8, -129), { width: 4.2, height: 4.6, arch: 0.6 });
 
+  const smooth01 = (t) => {
+    const c = Math.max(0, Math.min(1, t));
+    return c * c * (3 - 2 * c);
+  };
   b.classify = (p, n, mask) => {
     const seam = fbm3(p.x * 0.05, p.y * 0.05, p.z * 0.05, b.seed + 41, 3);
-    // Crystal seams run in the walls and roof, never across a floor.
-    mask[0] = Math.max(0, seam - 0.64) * 3 * (n.y > 0.4 ? 0 : 1);
-    mask[1] = Math.min(1, Math.max(0, (LAKE + 7 - p.y) / 6));
+    const edgeWarp = (fbm3(p.x * 0.22, p.y * 0.22, p.z * 0.22, b.seed + 83, 2) - 0.5) * 0.55;
+    // Crystal seams run in the walls and roof, feathering out smoothly onto horizontal walkways.
+    const wallKeep = 1 - smooth01((n.y - 0.25) / 0.45);
+    mask[0] = Math.max(0, seam - 0.64) * 3 * wallKeep;
+    mask[1] = Math.min(1, Math.max(0, (LAKE + 7 - p.y + edgeWarp * 1.4) / 6));
     mask[2] = 0;
-    // Where people walk, the floor is cut and flagged.
-    const floor = n.y > 0.7 ? b.nav.surfaceAt(p.x, p.z, p.y + 0.5) : null;
-    mask[3] = floor !== null && Math.abs(floor - p.y) < 1.2 ? 1 : 0;
+    // Where people walk, the floor is cut and flagged, feathering softly into raw basalt cliff rims.
+    const floor = n.y > 0.45 ? b.nav.surfaceAt(p.x, p.z, p.y + 0.6) : null;
+    const heightFit = floor !== null ? 1 - smooth01((Math.abs(floor - p.y) - 0.35 + edgeWarp * 0.4) / 0.95) : 0;
+    const flatFit = smooth01((n.y - 0.52) / 0.32);
+    mask[3] = heightFit * flatFit;
     return 0;
   };
 

@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { generateLocation } from './LocationBuilder.js';
 import { createFlames, createHalos, createLightShaft, createParticles } from './LocationEffects.js';
 import { createBreath, createEmitters } from './LocationEmitters.js';
+import { LocationPostProcessing } from './LocationPostProcessing.js';
 import { createSky } from './LocationSky.js';
 import { locationLight } from './materials/LocationShading.js';
 import { LocationMaterials } from './materials/LocationMaterials.js';
@@ -31,10 +32,14 @@ export class LocationScene {
    */
   static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress }) {
     const location = new LocationScene(site);
+    const isIceSite = site.materials?.terrain?.kind === 'ice';
+    const enableIcePost = isIceSite && quality.icePost !== false && Boolean(renderer?.backend);
+    const softShaftDepth = isIceSite && quality.iceTransmission !== false;
+
     try {
       await progress('load-assets');
       location.materials = new LocationMaterials({ baseUrl, anisotropy: renderer.getMaxAnisotropy?.() ?? 8 });
-      const materials = await location.materials.create(site.materials, quality);
+      const materials = await location.materials.create(site.materials, quality, { usePostMrt: enableIcePost });
 
       await progress('build-geometry');
       const builder = generateLocation(site, generator);
@@ -42,19 +47,31 @@ export class LocationScene {
       if (builder.exits.length === 0) throw new Error(`Location "${site.id}" generated no exit.`);
 
       await progress('bake-lighting');
+      const crystalScale = quality.crystalScale ?? 1;
+      const rawCrystalField = site.params?.crystalField ?? null;
+      const crystalField = rawCrystalField && crystalScale > 0
+        ? {
+          maxClusters: Math.round((rawCrystalField.clusters ?? 0) * crystalScale),
+          maxNeedles: Math.round((rawCrystalField.needles ?? 0) * crystalScale),
+        }
+        : null;
+
       location.scene.add(builder.build({
         materials,
         absorption: site.lighting.absorption,
         bakeGain: site.lighting.bakeGain ?? 1,
         indirectBounce: site.lighting.indirectBounce ?? null,
         propShadows: site.lighting.propShadows ?? null,
+        crystalField,
       }));
       location.lightPool = new LocationLightPool(builder.dynamicLights, {
         gain: site.lighting.dynamicGain ?? (site.lighting.indirectBounce ? 0.28 : 0.14),
       });
       if (builder.halos.length > 0) location.scene.add(createHalos(builder.halos));
       if (builder.flames.length > 0) location.scene.add(createFlames(builder.flames));
-      for (const shaft of builder.shafts) location.scene.add(createLightShaft(shaft));
+      for (const shaft of builder.shafts) {
+        location.scene.add(createLightShaft({ ...shaft, softDepth: softShaftDepth }));
+      }
       for (const profile of site.atmosphere.particles ?? []) {
         const anchor = profile.anchor ? builder.anchors[profile.anchor] : null;
         if (profile.anchor && !anchor) throw new Error(`Location "${site.id}" has no "${profile.anchor}" anchor for its particles.`);
@@ -83,7 +100,19 @@ export class LocationScene {
       await progress('prepare-shaders');
       location.applyLighting();
       location.lightPool?.update(builder.spawns.entry, 0);
-      await renderer.compileAsync(location.scene, camera);
+      if (enableIcePost) {
+        location.postProcessing = new LocationPostProcessing({
+          renderer,
+          scene: location.scene,
+          camera,
+          exposure: site.lighting.exposure ?? 1.15,
+          enableSsr: quality.iceSsr !== false,
+          enableAo: true,
+          enableBloom: true,
+        });
+      } else {
+        await renderer.compileAsync(location.scene, camera);
+      }
       return location;
     } catch (error) {
       location.dispose();
@@ -99,6 +128,7 @@ export class LocationScene {
     this.scene.fog = new THREE.FogExp2(site.lighting.fog.color, site.lighting.fog.density);
     this.materials = null;
     this.lightPool = null;
+    this.postProcessing = null;
     this.sky = null;
     this.breath = null;
     this.clockStartMs = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -145,6 +175,8 @@ export class LocationScene {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.postProcessing?.dispose();
+    this.postProcessing = null;
     this.lightPool?.dispose();
     const owned = new Set();
     this.scene.traverse((object) => {

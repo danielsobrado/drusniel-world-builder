@@ -4,6 +4,8 @@ import * as glacierFront from './GlacierFrontGenerator.js';
 import * as glacier from './GlacierGenerator.js';
 import * as mine from './MineGenerator.js';
 import * as mountainHold from './MountainHoldGenerator.js';
+import * as stoneholdGate from './StoneholdGateApproachGenerator.js';
+import * as stoneholdThrone from './StoneholdThroneGenerator.js';
 
 /**
  * Generators by the `generatorKey` an archetype names in
@@ -15,6 +17,8 @@ export const LOCATION_GENERATORS = Object.freeze({
   'mine-network': mine,
   'vertical-cavern-city': cavernCity,
   'mountain-hold': mountainHold,
+  'stonehold-gate-approach': stoneholdGate,
+  'stonehold-throne-hall': stoneholdThrone,
   'glacial-cavern': glacier,
   'glacier-front': glacierFront,
   'frostgard-hold': frostgardHold,
