@@ -8,6 +8,11 @@
  * - A wind-streaked drift pattern creeps downwind while snow falls.
  * - Thawing, sun-facing slopes lose their snow first.
  *
+ * The desert sand field rides the same pass (docs/plans/desert-sand-field-2026-11-22.md):
+ * its gain goes to the alpha channel from the same slope, lee, hollow and drift
+ * terms, and the pass draws while either cover lies. With sand off, alpha stays 1
+ * and the pass compiles as before.
+ *
  * Visual only: nothing is read back, and no CPU twin exists because no gameplay
  * reads it. Off, main never builds this, so no GPU work runs.
  */
@@ -50,9 +55,12 @@ export class SnowFieldPass {
    * @param {Function} [options.prepareBounds] LocalGroundHeight's ground preparation
    * @param {() => unknown} [options.getRevision] terrain revision
    * @param {object} [options.sunDirection] TSL vec3 toward the sun
+   * @param {object} [options.sand] resolved `weatherEffects.sandField`; off or absent draws no sand
    */
-  constructor({ config, getHeight, prepareBounds, getRevision, sunDirection = null }) {
+  constructor({ config, getHeight, prepareBounds, getRevision, sunDirection = null, sand = null }) {
     this.config = config;
+    this.sand = sand?.enabled ? sand : null;
+    this.sandCover = 0;
     const texel = config.windowMetres / config.resolution;
     this.texel = texel;
     this.ground = new LocalGroundHeight({
@@ -100,7 +108,11 @@ export class SnowFieldPass {
 
     this.material = new THREE.NodeMaterial();
     this.material.name = 'storm-snow-field';
-    this.material.fragmentNode = vec4(mix(build, melt, this.uniforms.melting), build, melt, 1);
+    // Sand: the same terrain terms, its own gains, no melt (it blows away evenly).
+    const sandGain = this.sand ? max(float(this.sand.flatGain).add(lee.mul(this.sand.leeGain))
+      .add(hollow.mul(this.sand.hollowGain)).sub(steep.mul(this.sand.steepLoss * this.sand.flatGain))
+      .mul(drift.mul(2).sub(1).mul(this.sand.driftContrast).add(1)), 0) : 1;
+    this.material.fragmentNode = vec4(mix(build, melt, this.uniforms.melting), build, melt, sandGain);
     this.material.toneMapped = false;
     this.material.depthTest = false;
     this.material.depthWrite = false;
@@ -111,19 +123,22 @@ export class SnowFieldPass {
    * @param {number} dt seconds
    * @param {{ x: number, z: number }} cameraRender camera position, render space
    * @param {{ x: number, z: number }} origin floating origin (canonical = render + origin)
-   * @param {object} storm `{ cover, melting, snowFall, snap }`: SnowCover's value and
-   *   phase, this frame's snowfall 0..1, and whether the storm is snapped (QA: drifts hold still)
+   * @param {object} storm `{ cover, melting, snowFall, snap, sandCover, sandFall }`: SnowCover's
+   *   value and phase, this frame's snowfall 0..1, whether the storm is snapped (QA: drifts
+   *   hold still), and SandCover's value and the sandstorm 0..1 blowing now
    */
-  update(dt, cameraRender, origin, { cover, melting, snowFall, snap = false }) {
+  update(dt, cameraRender, origin, { cover, melting, snowFall, snap = false, sandCover = 0, sandFall = 0 }) {
     this.focus.x = cameraRender.x;
     this.focus.z = cameraRender.z;
     this.origin = origin;
-    this.cover = cover;
+    this.cover = this.config.enabled ? cover : 0;
+    this.sandCover = this.sand ? sandCover : 0;
+    const fall = Math.max(snowFall, this.sand ? sandFall : 0);
     this.ground.update(this.focus, origin, yieldAfter(1));
     const step = Math.min(Math.max(Number.isFinite(dt) ? dt : 0, 0), MAX_STEP_SECONDS);
     const wind = worldWindUniforms.prevailing.value;
-    if (!snap && snowFall > 0) {
-      const creep = this.config.driftSpeed * snowFall * worldWindCamera.envelope * step;
+    if (!snap && fall > 0) {
+      const creep = this.config.driftSpeed * fall * worldWindCamera.envelope * step;
       this.offset.x += wind.x * creep;
       this.offset.z += wind.y * creep;
     }
@@ -141,9 +156,9 @@ export class SnowFieldPass {
     this.nextKey = melting > 0 ? null : [snapped.x, snapped.z, u, v, wind.x, wind.y, this.ground.rebuilds].join();
   }
 
-  /** Draw the field when there is snow to place and its inputs moved. Call before the scene. */
+  /** Draw the field when there is snow or sand to place and its inputs moved. Call before the scene. */
   render(renderer) {
-    if (!(this.cover > 0) || !this.ground.ready || (this.nextKey !== null && this.nextKey === this.renderKey)) return;
+    if (!(this.cover > 0 || this.sandCover > 0) || !this.ground.ready || (this.nextKey !== null && this.nextKey === this.renderKey)) return;
     const previousTarget = renderer.getRenderTarget();
     const previousMrt = renderer.getMRT?.() ?? null;
     renderer.setMRT?.(null);
@@ -175,18 +190,20 @@ function yieldAfter(milliseconds) {
 }
 
 /**
- * The field for a terrain view, or null when it is off (then nothing is built).
+ * The field for a terrain view, or null when snow and sand are both off (then nothing is built).
  * @param {object} options
  * @param {object} options.config resolved `weatherEffects.snowField`
+ * @param {object} [options.sand] resolved `weatherEffects.sandField`
  * @param {object} options.terrainView InfiniteTerrainView
  * @param {object} [options.sunDirection] TSL vec3 toward the sun
  */
-export function createSnowFieldPass({ config, terrainView, sunDirection = null }) {
-  if (!config?.enabled) return null;
+export function createSnowFieldPass({ config, sand = null, terrainView, sunDirection = null }) {
+  if (!config?.enabled && !sand?.enabled) return null;
   const { worldStore } = terrainView;
   const sampling = new SettlementSamplingPreparation(worldStore);
   return new SnowFieldPass({
     config,
+    sand,
     sunDirection,
     getHeight: (x, z) => terrainView.getCanonicalHeight(x, z),
     // As the valley mist's patch: tiles are prepared in tile units, z flipped.

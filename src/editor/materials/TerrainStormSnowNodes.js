@@ -13,8 +13,9 @@ import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
  *
  * @param {Node} weights normalized vec4 grass, dirt, rock, snow
  * @param {object} samples the bake samples (terrainShape, canopyWater, macroTint)
+ * @param {object} [field] the material's `stormFieldSample`, when the sand reads it too
  */
-export function withStormSnow(weights, samples) {
+export function withStormSnow(weights, samples, field = null) {
   // terrainShape.r is the gradient (tan): snow slides off past ~35°.
   const upFacing = oneMinus(smoothstep(0.55, 1, samples.terrainShape.r));
   // Open water takes none. A canopy is no shelter from a storm: it sheds what it
@@ -25,7 +26,7 @@ export function withStormSnow(weights, samples) {
   // The snow field (storm-snow-field plan) varies the storm's cover with lee, sun and drifts;
   // under a canopy it builds later, though a heavy fall still reaches the floor.
   const field = snowFieldConfig();
-  let stormCover = stormSnowCoverAt(positionWorld.xz);
+  let stormCover = stormSnowCoverAt(positionWorld.xz, field);
   if (field.enabled) stormCover = stormCover.mul(oneMinus(samples.canopyWater.r.mul(field.canopyShelter)));
   const cover = smoothstep(lateness, lateness.add(0.4), stormCover).mul(upFacing).mul(open);
   const snow = max(weights.a, cover);

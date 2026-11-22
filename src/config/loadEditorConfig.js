@@ -24,6 +24,7 @@ import { registerWetnessField } from '../editor/weather/wetness/wetnessField.js'
 import { resolveSnowCoverConfig } from '../editor/weather/storm/SnowCover.js';
 import { registerSurfaceCoatings, resolveSurfaceCoatings } from '../editor/stylized/surfaceCoatings/SurfaceCoatingConfig.js';
 import { registerSnowFieldConfig, resolveSnowFieldConfig } from '../editor/weather/storm/snowField/snowFieldConfig.js';
+import { registerSandFieldConfig, resolveSandFieldConfig } from '../editor/weather/storm/snowField/sandFieldConfig.js';
 import { resolveAmbientEffectsConfig } from '../editor/stylized/ambient/ambientEffectsConfig.js';
 import {
   applyWaterDomainConfig,
@@ -62,6 +63,8 @@ export function loadEditorConfig() {
   config.weatherEffects = resolveWeatherEffects(structuredClone(weatherEffectsConfigSource));
   config.weatherEffects.snowField = resolveSnowFieldConfig(structuredClone(weatherEffectsConfigSource?.snowField), runtimeSearch());
   registerSnowFieldConfig(config.weatherEffects.snowField);
+  config.weatherEffects.sandField = resolveSandFieldConfig(structuredClone(weatherEffectsConfigSource?.sandField), runtimeSearch());
+  registerSandFieldConfig(config.weatherEffects.sandField);
   config.stylizedSurface.trees.rootFit = config.exploration.treeRoots;
   config.import.azgaarGuidance = structuredClone(azgaarGuidanceConfigSource);
   // Each biome's look (config/biome-looks.yaml) hands the terrain, grass, trees

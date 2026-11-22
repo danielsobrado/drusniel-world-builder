@@ -84,8 +84,9 @@ import { WorldSoundscape } from './editor/audio/world_soundscape.js';
 import { SurfaceWetness } from './editor/weather/surfaceWetness.js';
 import { WetnessFieldPass } from './editor/weather/wetness/WetnessFieldPass.js';
 import { SnowCover } from './editor/weather/storm/SnowCover.js';
+import { SandCover } from './editor/weather/storm/SandCover.js';
 import { createSnowFieldPass } from './editor/weather/storm/snowField/SnowFieldPass.js';
-import { stormLevelUniform, stormRainUniform, stormSnowCoverUniform, stormSnowFallUniform } from './editor/weather/storm/stormGroundUniforms.js';
+import { stormLevelUniform, stormRainUniform, stormSandCoverUniform, stormSnowCoverUniform, stormSnowFallUniform } from './editor/weather/storm/stormGroundUniforms.js';
 import { SkyLookController } from './editor/stylized/sky/SkyLookController.js';
 import { DEFAULT_SKY_PRESET, SKY_PRESETS } from './editor/stylized/sky/SkyPresets.js';
 import { DayNightCycle, TIME_PRESET_ANCHORS } from './editor/stylized/sky/dayNightCycle.js';
@@ -1055,9 +1056,11 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const wetnessField = WetnessFieldPass.forTerrain(terrainView, stylizedSurface.skyView ?? null, config.stylizedSurface.wetness.field);
   if (wetnessField) resources.own(wetnessField);
   const snowCover = new SnowCover(config.stylizedSurface.snowCover);
-  // Where that snow builds and melts first (storm-snow-field plan); null when off.
-  const snowField = createSnowFieldPass({ config: config.weatherEffects.snowField, terrainView,
-    sunDirection: stylizedSurface.skyView?.sunDirection ?? null });
+  // Windblown sand a sandstorm leaves on desert ground (desert-sand-field plan).
+  const sandCover = new SandCover(config.weatherEffects.sandField);
+  // Where that snow and sand build first (storm-snow-field plan); null when both are off.
+  const snowField = createSnowFieldPass({ config: config.weatherEffects.snowField, sand: config.weatherEffects.sandField,
+    terrainView, sunDirection: stylizedSurface.skyView?.sunDirection ?? null });
   if (snowField) resources.own(snowField);
   // A snapped storm (?stormSnap=1) shows the ground it leaves at steady state.
   const groundSnap = readStormOverride(typeof window === 'undefined' ? '' : window.location.search)?.snap === true;
@@ -1505,6 +1508,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       surfaceWetness,
       wetnessField,
       snowCover,
+      sandCover,
       snowField,
       skyLooks,
       fallingLeaves,
@@ -1945,8 +1949,12 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     stormSnowCoverUniform.value = groundSnap
       ? snowCover.snap(groundStorm.snow)
       : snowCover.update(frameDelta, groundStorm.snow, groundStorm.snowShare);
+    const sandstorm = weatherController?.sandstorm ?? 0;
+    stormSandCoverUniform.value = groundSnap ? sandCover.snap(sandstorm) : sandCover.update(frameDelta, sandstorm);
     snowField?.update(frameDelta, viewModeController.camera.position, frameOrigin,
-      { cover: snowCover.value, melting: snowCover.melting, snowFall: Math.min(1, groundStorm.snow), snap: groundSnap });
+      { cover: snowCover.value, melting: snowCover.melting, snowFall: Math.min(1, groundStorm.snow), snap: groundSnap,
+        // A held cover (QA) holds its streaks still too.
+        sandCover: sandCover.value, sandFall: sandCover.frozen ? 0 : Math.min(1, sandstorm) });
     snowField?.render(terrainView.renderer);
     const deformPlayerRender = viewModeController.camera.position;
     gpuSnowDeform.update(

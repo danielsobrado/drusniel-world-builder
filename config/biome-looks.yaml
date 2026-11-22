@@ -21,7 +21,9 @@
 #   snow.fall     regional snowfall (weather-effects.yaml `snowfall`), which
 #                 starts at its `regionalMinCoverage`.
 #   arid          bare ground dressed as rippled `sand` or frost-broken
-#                 `mineral` (materials/AridSubstrateNodes.js).
+#                 `mineral` (materials/AridSubstrateNodes.js). `sand` ground also
+#                 gathers a sandstorm's windblown sand (weather-effects.yaml
+#                 `sandField`, materials/TerrainStormSandNodes.js).
 #   crags         true grows crags and boulder clusters at any height, not only
 #                 on high or snowy ground (stylized/alpine/AlpineRockView.js).
 #   rock          the boulders and stones (stylized/rockWeathering.js): `tint`

@@ -67,3 +67,20 @@ snowField:
   driftSpeed: 0.25
   sunMelt: 0.65
   canopyShelter: 0.3
+# Desert sand field (docs/plans/desert-sand-field-2026-11-22.md): during a
+# sandstorm, windblown sand gathers on `arid: sand` biomes (biome-looks) in lee
+# hollows, at the foot of slopes and outcrops and in streaks along the wind, and
+# blows away slowly afterwards. It rides the storm snow field's pass and texture,
+# and thins the storm's dust in the terrain's lee. Visual only. `enabled: false`
+# compiles every shader as before and draws no sand (`?sandField=0|1` overrides
+# it for QA).
+sandField:
+  enabled: true
+  buildSeconds: 300
+  fadeSeconds: 2400
+  flatGain: 0.55
+  leeGain: 1.1
+  hollowGain: 0.9
+  steepLoss: 1
+  driftContrast: 0.6
+  dustThinning: 0.5

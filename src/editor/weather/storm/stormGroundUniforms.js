@@ -11,3 +11,6 @@ export const stormRainUniform = uniform(0);
 
 /** 0..1 eased storm level (StormState frame `storm`), for what the wind may bend. */
 export const stormLevelUniform = uniform(0);
+
+/** 0..1 windblown sand a sandstorm has laid (SandCover), read by the desert terrain. */
+export const stormSandCoverUniform = uniform(0);

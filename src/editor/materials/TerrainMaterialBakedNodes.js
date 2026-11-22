@@ -23,6 +23,7 @@ import { bilinearLoad } from './TerrainSlotBindings.js';
 import { createTerrainMaterialGenome } from './TerrainMaterialGenomeNodes.js';
 import { createTerrainTransitionState } from './TerrainTransitionNodes.js';
 import { withStormSnow } from './TerrainStormSnowNodes.js';
+import { stormSandFieldSample, withStormSand } from './TerrainStormSandNodes.js';
 import {
   applyTerrainMaterialFeatureColor,
   createTerrainMaterialFeatureState,
@@ -162,7 +163,10 @@ export function createTerrainMaterialBakedSurface({
     localXZ,
     settings: families.transitions,
   });
-  const weights = withStormSnow(transitions.weights, samples);
+  // A sandstorm's windblown sand on desert ground, then storm snow over it; one shared field fetch.
+  const arid = stylizedConfig.biomeLooks?.arid;
+  const field = stormSandFieldSample(arid);
+  const weights = withStormSnow(withStormSand(transitions.weights, samples, tileId, arid, field), samples, field);
   // The snow a storm laid beyond the bake's own (0 in clear weather, so nothing below changes then).
   const stormSnow = weights.a.sub(transitions.weights.a).max(0);
   const genome = createTerrainMaterialGenome({

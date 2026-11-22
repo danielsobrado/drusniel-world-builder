@@ -21,10 +21,13 @@ import {
   smoothstep,
   uniform,
   uv,
+  varying,
   vec2,
   vec3,
   vec4
 } from "three/tsl";
+import { sandFieldConfig } from './storm/snowField/sandFieldConfig.js';
+import { sandShelterAt } from './storm/snowField/snowFieldState.js';
 import { fbm, hash12, hardSplashFragment, waterSplashFragment } from "./rain_node_material_helpers.js";
 import { RAIN_IMPACT_PROFILE } from "./rain_constants.js";
 function makeMat(name, frag, pos) {
@@ -125,6 +128,11 @@ function createSandstormNodeMaterial() {
   const lift = sin(uT.mul(1.65).add(aShp.w.mul(1.37))).mul(mix(0.025, 0.11, wave));
   const center = uC.add(wd.mul(along)).add(sd.mul(aOff.x.add(gust.mul(0.42)))).add(vec3(0, aOff.z.add(lift), 0));
   const wPos = center.add(sd.mul(sPos.x).mul(aShp.x).mul(1.18)).add(vec3(0, sPos.y.mul(aShp.x).mul(0.52), 0)).add(wd.mul(sPos.z).mul(aShp.x).mul(2.65));
+  // Thinner in the terrain's lee, where the sand settles (desert sand field): one
+  // field fetch per vertex, at the puff's centre. Off, the material compiles as before.
+  const sand = sandFieldConfig();
+  const thinned = sand.enabled && sand.dustThinning > 0
+    ? varying(float(1).sub(sandShelterAt(center.xz, sand).mul(sand.dustThinning))) : null;
   const frag = Fn(() => {
     const p = uv().mul(2).sub(1);
     const d = length(vec3(p.x.mul(0.82), p.y.mul(1.18), 0));
@@ -132,7 +140,8 @@ function createSandstormNodeMaterial() {
     const body = float(1).sub(smoothstep(0.12, 0.92, d));
     const soft = float(1).sub(smoothstep(0, 0.46, d));
     const fade = smoothstep(0.02, 0.12, travel).mul(float(1).sub(smoothstep(0.88, 1, travel))).mul(mix(0.16, 1.18, wave));
-    const alpha = body.mul(0.6).add(soft.mul(0.24)).mul(float(0.64).add(sin(aShp.w.mul(11.7).add(p.x.mul(31)).add(p.y.mul(17))).mul(0.36))).mul(aShp.y).mul(fade).mul(uOp).mul(clamp(uI, 0, 1.6));
+    let alpha = body.mul(0.6).add(soft.mul(0.24)).mul(float(0.64).add(sin(aShp.w.mul(11.7).add(p.x.mul(31)).add(p.y.mul(17))).mul(0.36))).mul(aShp.y).mul(fade).mul(uOp).mul(clamp(uI, 0, 1.6));
+    if (thinned) alpha = alpha.mul(thinned);
     alpha.lessThan(0.01).discard();
     return vec4(mix(uCol, vec3(0.93, 0.79, 0.54), soft.mul(0.35)), alpha);
   });
