@@ -38,6 +38,14 @@ fascination, "a long line of traders", unrecorded bandit talk. A stronger model 
 
 **LM Studio** on Windows works the same way: start its local server and set
 `WS_LLM_BASE_URL=http://127.0.0.1:1234/v1` (and `WS_LLM_MODEL` if several models are loaded).
+Its new app, Bionic, is at `F:\Bionic`; its command-line tool is
+`F:\Bionic\resources\app\.webpack-bionic\lms.exe`.
+
+**Inkling 2 Mini** (26B mixture-of-experts, Q4_K_M, 17.5 GB) does not load on this machine
+yet. Bionic's llama.cpp engine (CUDA 12, 2.80.1) asks for one compute buffer of about
+8 GB for its looped layers, whatever the GPU share, context (4K) or batch size (128). With
+the desktop holding 4.5 GB of the 16 GB card, that allocation fails. Try it again after an
+engine update, or pick a model that fits in VRAM.
 
 Two lessons from the first real runs:
 - **Numbers:** the prompts tell the model to put scores and purses into words. Before,
