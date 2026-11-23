@@ -33,12 +33,15 @@ class OpenAICompatible:
     timeout: float
     temperature: float
     seed: int | None
+    reasoning_effort: str | None = None
     name: str = "local-llm"
 
     def complete(self, messages: list[Message], max_tokens: int, kind: str, context: dict[str, Any]) -> str:
         body = {"model": self.model, "messages": messages, "max_tokens": max_tokens, "temperature": self.temperature, "stream": False}
         if self.seed is not None:
             body["seed"] = self.seed
+        if self.reasoning_effort is not None:
+            body["reasoning_effort"] = self.reasoning_effort
         request = urllib.request.Request(f"{self.base_url.rstrip('/')}/chat/completions", data=json.dumps(body).encode(),
                                          headers={"content-type": "application/json"}, method="POST")
         try:
@@ -51,6 +54,9 @@ class OpenAICompatible:
             text = str(choice["message"]["content"]).strip()
         except (KeyError, IndexError, TypeError) as exc:
             raise ProviderError("the local model's answer had no message") from exc
+        if not text:
+            raise ProviderError("the local model returned no text; a thinking model may have spent its tokens reasoning "
+                                "(see reasoningEffort)")
         return last_full_sentence(text) if choice.get("finish_reason") == "length" else text
 
 
@@ -89,7 +95,8 @@ def resolve(cfg: dict[str, Any]) -> tuple[Provider, dict[str, Any]]:
     status: dict[str, Any] = {"baseUrl": cfg.get("baseUrl"), "reachable": models is not None, "models": models or [],
                               "configuredModel": cfg.get("model")}
     if model and models is not None and (not cfg.get("model") or cfg["model"] in models):
-        provider = OpenAICompatible(cfg["baseUrl"], model, cfg["timeoutSeconds"], cfg["temperature"], cfg.get("seed"))
+        provider = OpenAICompatible(cfg["baseUrl"], model, cfg["timeoutSeconds"], cfg["temperature"], cfg.get("seed"),
+                                    cfg.get("reasoningEffort"))
         return provider, {**status, "mode": "llm", "provider": provider.name, "model": model, "hint": None}
     if models is None:
         hint = f"No local model server answered at {cfg.get('baseUrl')}. Start Ollama, LM Studio or llama.cpp, or set WS_LLM_BASE_URL."

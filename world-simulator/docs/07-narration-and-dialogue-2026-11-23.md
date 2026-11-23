@@ -41,6 +41,25 @@ fascination, "a long line of traders", unrecorded bandit talk. A stronger model 
 Its new app, Bionic, is at `F:\Bionic`; its command-line tool is
 `F:\Bionic\resources\app\.webpack-bionic\lms.exe`.
 
+**Recommended: Gemma 4 12B QAT** (`lmstudio-community/gemma-4-12B-it-QAT-GGUF`, Q4_0,
+7 GB) in Bionic, loaded fully on the GPU with an 8K context:
+
+```powershell
+F:\Bionic\resources\app\.webpack-bionic\lms.exe load gemma-4-12b-it-qat --identifier gemma-4-12b --context-length 8192 --parallel 1 --gpu max -y
+$env:WS_LLM_BASE_URL = "http://127.0.0.1:1234/v1"; $env:WS_LLM_MODEL = "gemma-4-12b"; npm run dev
+```
+
+On the same trader and questions as llama3, it raised no fact-check warnings and invented
+nothing. Asked for news, it said it had heard none, which is true at the scenario start.
+Three biographies took 10 s, and each reply about 1 s.
+
+- **Name the model:** Bionic's `/v1/models` lists downloaded models too, not only loaded
+  ones, so set `WS_LLM_MODEL`.
+- **Turn off thinking:** Gemma 4 and Qwen3 "think" before answering. Left on, Gemma spent
+  the whole token budget on reasoning and returned empty text. `reasoningEffort: none` in
+  `llm.yaml` sends `reasoning_effort` to turn that off, and an empty answer is now reported
+  as an error instead of being saved.
+
 **Inkling 2 Mini** (26B mixture-of-experts, Q4_K_M, 17.5 GB) does not load on this machine
 yet. Bionic's llama.cpp engine (CUDA 12, 2.80.1) asks for one compute buffer of about
 8 GB for its looped layers, whatever the GPU share, context (4K) or batch size (128). With

@@ -7,6 +7,7 @@ model: null                        # override with WS_LLM_MODEL; null = the firs
 timeoutSeconds: 180
 temperature: 0.6
 seed: 7                            # sent to servers that support it, for repeatable prose
+reasoningEffort: none              # thinking models (Gemma 4, Qwen3) otherwise spend the token budget reasoning; null = not sent
 maxTokens: { short: 220, detailed: 650, style: 220, self: 320, reply: 260 }
 jobs:
   concurrency: 1                   # local models are slow; one generation at a time
