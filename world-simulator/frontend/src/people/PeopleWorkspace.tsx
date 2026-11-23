@@ -5,6 +5,7 @@ import { fmt } from '../components/format';
 import { Empty, ErrorState, Loading } from '../components/StateViews';
 import { TraitBars } from '../roads/TraderParts';
 import type { Simulation } from '../simulation/useSimulation';
+import { Profile } from './Profile';
 import { occupation, ROLE_LABEL } from './roles';
 
 function Tiles({ meta }: { meta: PeopleMeta }) {
@@ -30,6 +31,7 @@ export function PeopleWorkspace({ sim, onSelect, selectedId }: { sim: Simulation
   const [q, setQ] = useState('');
   const [alive, setAlive] = useState(true);
   const [page, setPage] = useState(1);
+  const [profile, setProfile] = useState<PersonRow | null>(null);
   useEffect(() => setPage(1), [settlement, role, q, alive]);
   const params = new URLSearchParams({ page: String(page), pageSize: '50', alive: String(alive), v: sim.version });
   if (settlement) params.set('settlement', settlement);
@@ -63,7 +65,7 @@ export function PeopleWorkspace({ sim, onSelect, selectedId }: { sim: Simulation
               <table className="grid" aria-label="People">
                 <thead><tr><th>Name</th><th className="num">Age</th><th>Settlement</th><th>Role</th><th>Work</th><th>Personality</th></tr></thead>
                 <tbody>{list.data.map((p) => (
-                  <tr key={p.id} className={p.id === selectedId ? 'selected' : undefined} onClick={() => onSelect(p.id)}>
+                  <tr key={p.id} className={p.id === profile?.id ? 'selected' : undefined} onClick={() => { setProfile(p); onSelect(p.id); }}>
                     <td>{p.name} {p.family}</td><td className="num">{p.age}</td><td>{p.settlementName}</td>
                     <td>{ROLE_LABEL[p.role]}{!p.alive && <span className="muted"> · died ({p.cause})</span>}</td>
                     <td className="muted">{occupation(p)}</td><td><TraitBars personality={p.personality} compact /></td>
@@ -80,6 +82,8 @@ export function PeopleWorkspace({ sim, onSelect, selectedId }: { sim: Simulation
           </div>
         )}
       </section>
+      {profile ? <Profile sim={sim} personId={profile.id} name={`${profile.name} ${profile.family}`} onSelect={onSelect} selectedId={selectedId} />
+        : <section className="section"><p className="muted">Choose someone to open their profile: life, relationships, knowledge and biography facts.</p></section>}
     </>
   );
 }

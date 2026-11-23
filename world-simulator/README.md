@@ -10,6 +10,7 @@ Scenarios, clock, snapshots and the state contract: [docs/02-scenarios-and-basel
 Households, housing, businesses, employment and hardening: [docs/03-households-businesses-employment-2026-11-23.md](docs/03-households-businesses-employment-2026-11-23.md).
 Production, food, markets, prices, caravans, bandits and pirates, guards, trader scorecards and purses, business turnover: [docs/04-economy-and-trade-2026-11-23.md](docs/04-economy-and-trade-2026-11-23.md).
 Persistent named people from the NPC budget: [docs/05-persistent-people-2026-11-23.md](docs/05-persistent-people-2026-11-23.md).
+Life stories, canonical history, relationships and biography context: [docs/06-life-stories-and-history-2026-11-23.md](docs/06-life-stories-and-history-2026-11-23.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -54,14 +55,16 @@ backend/                Python package (pyproject.toml, uv.lock)
     geography/          connectivity (cell-based route graph, components, Dijkstra)
     npc/                budget (NPC allocator)
     pilot/              selector
-    simulation/         contracts (Pydantic state v5), engine, demography, calendar, scope,
+    simulation/         contracts (Pydantic state v6), engine, demography, calendar, scope,
                         households, housing, businesses, employment, needs, society,
                         migrations, store (atomic bundles), manager (run loop, snapshots)
       economy/          contracts, sources (Azgaar production and deals), geography
                         (hinterland, caravan days), baseline, production, market, step,
                         roads, names, trips (traders, smuggling, raids), bandits, escorts,
                         turnover (households, purses, openings and closures)
-      people/           contracts, generate (cast from the NPC budget), life, replace, checks
+      people/           contracts, generate, kinship, relationships, life, family, moves, focus, replace,
+                        backstory, knowledge, outlook, hooks, context, homes, checks
+      history/          contracts, recorder, links, causes, archive (SQLite), validation
     reports/            builder, writer
     api/                app (FastAPI), scenario_routes, settlement_query, errors
     cli/audit.py        canonical.py ids.py config.py log.py server.py
@@ -132,6 +135,8 @@ Writes (`POST`) must send `application/json`. Full table in
 | `GET /api/scenarios/{id}/economy` | settlement economies, markets, caravans, roads, traders (no society payload) |
 | `GET /api/scenarios/{id}/traders/{traderId}` | one caravan master's scorecard and caravans |
 | `GET /api/scenarios/{id}/people` · `/people/{personId}` | paged named people · one person with household and life story |
+| `GET /api/scenarios/{id}/people/{personId}/timeline` · `/relationships` · `/knowledge` · `/context` | a person's events, ties, knowledge and biography context |
+| `GET /api/scenarios/{id}/history/events/{eventId}` | one canonical event with causes and consequences |
 
 ## Configuration
 

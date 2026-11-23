@@ -269,3 +269,45 @@ export interface EconomyView {
   routes: TradeRoute[];
   traders: Trader[];
 }
+
+/* ---- History and character research (PR6) ---- */
+
+export type EventSource = 'simulation' | 'imported' | 'generated-prehistory' | 'inferred';
+export interface HistoryEventView {
+  id: string; seq: number; day: number; date: string; datePrecision: 'day' | 'month' | 'year' | 'approximate'; kind: string;
+  category: string; source: EventSource; settlementId: string | null; locationId: string | null; routeId: string | null;
+  businessId: string | null; caravanId: string | null; householdId: string | null;
+  participants: { personId: string; role: string; name: string }[]; relatedEntities: string[];
+  facts: Record<string, string | number | boolean | null>; causedBy: string[];
+  effects: { entityId: string; kind: string; severity: number }[]; importance: number; visibility: string; summary: string;
+}
+export interface EventDetail extends HistoryEventView { causes: HistoryEventView[]; consequences: HistoryEventView[] }
+export interface RelationshipView {
+  kind: string; direction: 'from' | 'to'; with: string; name: string; alive: boolean; since: string; until: string | null;
+  trust: number; origin: string | null;
+}
+export interface KnowledgeView {
+  firstHand: number;
+  secondHand: { eventId: string; learned: string; how: 'told' | 'rumour'; from: string | null; confidence: number;
+    event: HistoryEventView | null }[];
+}
+export interface Hook { kind: string; text: string; basis: string }
+export interface BiographyContext {
+  personId: string; tier: 'basic' | 'standard' | 'major'; asOf: string;
+  targets: { facts: number[]; milestones: number[]; words: number[] };
+  identity: { name: string; sex: string; age: number | null; born: string; birthplace: string; culture: string | null; home: string;
+    alive: boolean; died: string | null };
+  household: { family: string; kind: string; housing: string; homeId: string | null; members: string[] } | null;
+  relationships: RelationshipView[];
+  work: { role: string; profession: string | null; workplace: string | null;
+    caravanMaster: { reputation: number; trips: number; purse: number; owns: number } | null };
+  circumstances: { townUnemployment: number; foodSecurity: number; idleMonths: number };
+  milestones: { id: string; date: string; precision: string; kind: string; summary: string; source: EventSource; role: string | null }[];
+  settlementHistory: { id: string; date: string; summary: string; kind: string }[];
+  places: string[];
+  knowledge: { event: string; learned: string; how: string; confidence: number; wouldTell: boolean }[];
+  personality: Record<string, number | string | string[]>;
+  outlook: { fears: string[]; ambitions: string[]; concerns: string[]; mood: string };
+  hooks: Hook[];
+  restrictions: string[];
+}

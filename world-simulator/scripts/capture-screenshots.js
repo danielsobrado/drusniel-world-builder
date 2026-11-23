@@ -124,6 +124,19 @@ try {
   await page.getByRole('list', { name: 'Life events' }).waitFor();
   await shot('18-people');
 
+  const profile = page.locator('section[aria-label^="Profile of"]');
+  await profile.getByRole('tab', { name: 'Life' }).click();
+  const life = page.getByRole('list', { name: 'Life timeline' });
+  await life.waitFor();
+  await life.locator('button').last().click();
+  await page.getByText('Caused by').waitFor();
+  await profile.scrollIntoViewIfNeeded();
+  await page.locator('.workspace').evaluate((el) => { const s = el.querySelector('section[aria-label^="Profile of"]'); if (s) el.scrollTop = s.offsetTop - 8; });
+  await shot('19-life-timeline');
+  await profile.getByRole('tab', { name: 'Biography' }).click();
+  await page.getByText('Rules for the narrator').waitFor();
+  await shot('20-biography');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

@@ -119,6 +119,10 @@ the master's person id.
 
 ![People](screenshots/18-people.png)
 
+> Updated by PR6 ([06](06-life-stories-and-history-2026-11-23.md)): named births and deaths now come from the towns'
+> actual births and deaths, vacancies are filled by inhabitants coming into focus, and relationships, marriages,
+> migration, reconstructed pasts and a permanent canonical history were added.
+
 ## Not in PR5
 
 - **Kinship:** relationships beyond the household (parents, siblings in other homes,
