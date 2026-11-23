@@ -26,11 +26,12 @@ def _draw(rng: random.Random, expected: float, cap: int) -> int:
     return min(cap, whole + (1 if rng.random() < expected - whole else 0))
 
 
-def run_month(settlement: SettlementState, *, seed: int, month_index: int, params: dict[str, Any], months_per_year: int) -> SettlementState:
-    """One month for one settlement; returns a new state and keeps births - deaths exactly in the totals."""
+def run_month(settlement: SettlementState, *, seed: int, month_index: int, params: dict[str, Any], months_per_year: int,
+              mortality: float = 1.0) -> SettlementState:
+    """One month for one settlement; `mortality` scales death rates (famine). Births - deaths stay exact in the totals."""
     rng = random.Random(f"{seed}:{month_index}:{settlement.settlementId}")
     c = settlement.cohorts
-    death = params["deathRatePerYear"]
+    death = {band: rate * mortality for band, rate in params["deathRatePerYear"].items()}
     years = params["bandYears"]
     births = _draw(rng, c.adults * params["birthsPerAdultPerYear"] / months_per_year, 10**9)
     dead_children = _draw(rng, c.children * death["children"] / months_per_year, c.children)

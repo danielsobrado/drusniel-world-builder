@@ -11,7 +11,7 @@ frontend to TypeScript. The audit numbers and API contract did not change (see
 
 ## What a scenario is
 
-> Updated by PR3 ([03](03-households-businesses-employment-2026-11-22.md)): the three files below are now one
+> Updated by PR3 ([03](03-households-businesses-employment-2026-11-23.md)): the three files below are now one
 > atomic `scenario.json` bundle, state is schema v2, and scenarios from another source map are read-only.
 
 | Piece | Where |

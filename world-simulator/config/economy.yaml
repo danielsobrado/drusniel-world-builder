@@ -1,0 +1,42 @@
+# Production, markets, prices and caravans (PR4).
+# Production lines, recipes, consumption and outside trade come from the Azgaar map's
+# burg production and deals; every number below is an authored assumption, not
+# calibrated data. Changing them needs no code change; the state checksum changes with them.
+schemaVersion: 1
+
+azgaar:
+  turnDays: 30                  # one Azgaar production or deal turn is read as a month of flow
+
+food:
+  good: Rations                 # the staple diet, counted in daily rations (not an Azgaar good)
+  # Rural cells within this radius (map px) whose nearest settlement is this one feed it.
+  hinterlandRadiusPx: 30
+  ruralSurplusPerPersonDay: 0.2 # rations a rural inhabitant sends to town beyond their own needs
+  granary: { initialDays: 60, targetDays: 60 }   # starting at the target avoids a first-month rush
+  basePrice: 0.6                # value per 1,000 rations (Azgaar grain trades near 0.55 a wain)
+  priceUnit: 1000
+
+settlement:
+  targetMonths: 1.5             # stock kept of every good a settlement consumes or works up
+
+market:
+  targetMonths: 2               # stock a market wants, in months of demand
+  maxStockMonths: 12            # stock beyond this leaves the region
+  initialRationDays: 15         # market granary at baseline, in days of member demand
+  priceElasticity: 0.6          # price factor = (wanted stock / stock) ^ this
+  # Outside sellers and buyers scale their Azgaar-recorded flows by (price / base) ^ these.
+  outsideElasticity: { supply: 0.5, demand: 0.5 }
+  priceBounds: [0.25, 4.0]      # price factor range against the Azgaar base price
+  priceSmoothing: 0.5           # share of the gap to the new price closed each month
+  maxPricePoints: 121           # newest monthly price points kept per market
+
+caravans:
+  milesPerDay: 20
+  offRoadFactor: 1.5            # straight-line distance multiplier where no road connects
+  maxDelivered: 200             # delivered caravans kept in the log
+
+shortage:
+  threshold: 0.95               # obtained / wanted below this is reported as a shortage
+
+famine:
+  mortality: 3.0                # death rates x (1 + mortality x last month's food shortfall)

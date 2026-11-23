@@ -59,7 +59,6 @@ class ScenarioManager:
     def __init__(self, model: WorldModel):
         self.model = model
         self.config = model.config.simulation
-        self.society = model.config.society
         self.limits = self.config["limits"]
         self.store = ScenarioStore(model.config.root / self.config["storage"])
         self.start_year = resolve_start_year(self.config["calendar"], model.audit["sourceSettings"]["year"])
@@ -77,7 +76,7 @@ class ScenarioManager:
         try:
             raw_meta, raw_state, raw_events, file_format = self.store.load(scenario_id)
             foreign = raw_state.get("world", {}).get("sourceFingerprint") != self.fingerprint
-            state, stored_schema = migrate_state(raw_state, self.model, self.society)
+            state, stored_schema = migrate_state(raw_state, self.model)
         except (IncompatibleState, KeyError, ValueError) as exc:
             log.error("scenario cannot be loaded; files left untouched", exc, scenarioId=scenario_id)
             self.unloadable[scenario_id] = str(exc)
@@ -137,7 +136,7 @@ class ScenarioManager:
         # PR2 snapshots carry the 8-hex FNV of their v1 state; newer ones the digest of the parsed state.
         legacy = len(meta.checksum) == 8 and checksum(raw_state) == meta.checksum
         try:
-            state, stored = migrate_state(raw_state, self.model, self.society)
+            state, stored = migrate_state(raw_state, self.model)
         except IncompatibleState as exc:
             raise ApiError(409, "incompatible_snapshot", str(exc), {"id": snapshot_id}) from exc
         if not legacy and (stored != STATE_SCHEMA_VERSION or state_checksum(state) != meta.checksum):
@@ -181,7 +180,7 @@ class ScenarioManager:
             settlement_ids = resolve_scope(self.model, scope, self.limits["maxScopeSettlements"])
             seed = req.seed if req.seed is not None else self.config["baseline"]["seed"]
             state = baseline_state(self.model, scenario_id=scenario_id, settlement_ids=settlement_ids, seed=seed,
-                                   start_year=self.start_year, sim_config=self.config, society_cfg=self.society)
+                                   start_year=self.start_year)
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=scope, seed=seed, createdAt=_now())
             session = Session(meta, state, [])
             businesses = sum(len(s.society.businesses) for s in state.settlements)
@@ -192,11 +191,12 @@ class ScenarioManager:
         return session
 
     def _advance(self, s: Session, days: int) -> None:
-        s.state, months = advance(s.state, days, self.config, self.society)
+        s.state, months = advance(s.state, days, self.model.config.rules)
         for m in months:
             self._event(s, "month", f"{m['label']} closed: {m['births']} births, {m['deaths']} deaths, population {m['population']:,}, "
-                        f"{m['unemployed']:,} without work",
-                        births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"])
+                        f"{m['unemployed']:,} without work, {m['caravans']} caravans, {m['shortages']} shortages",
+                        births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"],
+                        caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"])
         s.dirty = True
 
     def step(self, scenario_id: str, days: int) -> Session:

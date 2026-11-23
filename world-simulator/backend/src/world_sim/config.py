@@ -19,6 +19,12 @@ class Config:
     pilot: dict[str, Any]
     simulation: dict[str, Any]
     society: dict[str, Any]
+    economy: dict[str, Any]
+
+    @property
+    def rules(self) -> dict[str, Any]:
+        """Everything the pure simulation engine reads."""
+        return {"simulation": self.simulation, "society": self.society, "economy": self.economy}
 
     @property
     def class_ids(self) -> list[str]:
@@ -72,6 +78,7 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     pilot = _read_yaml(root / "config/pilot-selection.yaml")
     simulation = _read_yaml(root / "config/simulation.yaml")
     society = _read_yaml(root / "config/society.yaml")
+    economy = _read_yaml(root / "config/economy.yaml")
     _validate_classification(simulator["classification"])
     _validate_npc(npc, [c["id"] for c in simulator["classification"]])
     if not isinstance(pilot.get("roles"), list) or len(pilot["roles"]) != 3:
@@ -84,4 +91,4 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     storage = env.get("WS_SCENARIO_STORAGE")
     if storage:
         simulation["storage"] = storage
-    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society)
+    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society, economy=economy)

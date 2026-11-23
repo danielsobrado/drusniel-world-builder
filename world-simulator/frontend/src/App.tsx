@@ -21,6 +21,7 @@ import { SimulationWorkspace } from './simulation/SimulationWorkspace';
 import { useSimulation } from './simulation/useSimulation';
 import { HouseholdsWorkspace } from './society/HouseholdsWorkspace';
 import { BusinessesWorkspace } from './society/BusinessesWorkspace';
+import { EconomyWorkspace } from './economy/EconomyWorkspace';
 
 export default function App() {
   const { layout, update, reset } = useLayout();
@@ -44,6 +45,7 @@ export default function App() {
     simulation: () => <SimulationWorkspace sim={sim} summary={summary.data} onSelect={select} />,
     households: () => <HouseholdsWorkspace sim={sim} onSelect={select} />,
     businesses: () => <BusinessesWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
+    economy: () => <EconomyWorkspace sim={sim} onSelect={select} />,
   };
   const workspace = views[layout.workspace] ? layout.workspace : 'overview';
 
@@ -53,7 +55,7 @@ export default function App() {
       <WorkspaceBar world={world.data} workspaces={WORKSPACES} active={workspace} onSelect={go} layout={layout} update={update} />
       <div className={`body${layout.leftOpen ? ' left-open' : ''}${layout.rightOpen ? ' right-open' : ''}`}>
         <IconRail workspaces={WORKSPACES} active={workspace} onSelect={go} />
-        {layout.leftOpen && (['simulation', 'households', 'businesses'].includes(workspace)
+        {layout.leftOpen && (['simulation', 'households', 'businesses', 'economy'].includes(workspace)
           ? <ScenarioExplorer sim={sim} />
           : <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />)}
         <main className="workspace" aria-label={WORKSPACES.find((w) => w.id === workspace)?.label}>{views[workspace]()}</main>

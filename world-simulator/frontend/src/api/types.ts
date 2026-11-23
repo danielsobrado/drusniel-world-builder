@@ -168,4 +168,41 @@ export interface SimulationConfig {
   startYear: number;
   scopeTypes: ScenarioScope['type'][];
   limits: { maxScopeSettlements: number };
+  calendar?: { daysPerMonth: number; monthsPerYear: number };
+}
+
+/* ---- Economy and trade (GET /api/scenarios/{id}/economy) ---- */
+
+export interface ProductionLine {
+  good: string; source: 'workshop' | 'extraction' | 'hinterland'; units: number; inputs: Record<string, number>;
+  produced: number; limitedBy: string | null;
+}
+export interface Shortage { good: string; wanted: number; obtained: number }
+export interface FoodBalance {
+  ruralPopulation: number; hinterlandCells: number; local: number; hinterland: number; eaten: number; wanted: number;
+  security: number; selfSufficiency: number;
+}
+export interface SettlementEconomy {
+  marketId: number | null; travelDays: number; baselinePopulation: number; inventory: Record<string, number>;
+  production: ProductionLine[]; consumption: Record<string, number>; bought: Record<string, number>; sold: Record<string, number>;
+  shortages: Shortage[]; food: FoodBalance; treasury: number; tradeBalance: number;
+}
+export interface MarketGood {
+  basePrice: number; price: number; stock: number; outsideSupply: number; outsideDemand: number;
+  demand: number; supplied: number; left: number;
+}
+export interface Market {
+  marketId: number; centerSettlementId: string; centerName: string; centerInScope: boolean;
+  goods: Record<string, MarketGood>; priceHistory: { day: number; prices: Record<string, number> }[];
+}
+export interface Caravan {
+  id: string; kind: 'sale' | 'purchase'; marketId: number; fromId: string; fromName: string; toId: string; toName: string;
+  cargo: Record<string, number>; value: number; departDay: number; arriveDay: number;
+}
+export interface EconomyView {
+  date: CalendarDate;
+  settlements: { settlementId: string; name: string; population: number; economy: SettlementEconomy }[];
+  markets: Market[];
+  caravans: Caravan[];
+  delivered: Caravan[];
 }

@@ -64,6 +64,20 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
                     return reply({**b.model_dump(), "settlementName": s.name})
         raise ApiError(404, "not_found", f"No business {business_id}", {"id": business_id})
 
+    @router.get("/scenarios/{scenario_id}/economy")
+    async def economy(scenario_id: str, delivered: int = Query(50, ge=0, le=200)) -> JSONResponse:
+        """Settlement economies, markets and caravans without the society payload; delivered caravans newest first."""
+        state = manager.session(scenario_id).state
+        newest = state.trade.delivered[len(state.trade.delivered) - delivered:] if delivered else []
+        return reply({
+            "date": state.date.model_dump(),
+            "settlements": [{"settlementId": s.settlementId, "name": s.name, "population": s.population, "economy": s.economy.model_dump()}
+                            for s in state.settlements],
+            "markets": [m.model_dump() for m in state.trade.markets],
+            "caravans": [c.model_dump() for c in state.trade.caravans],
+            "delivered": [c.model_dump() for c in reversed(newest)],
+        })
+
     @router.post("/scenarios/{scenario_id}/step")
     async def step(scenario_id: str, body: StepRequest) -> JSONResponse:
         if (body.days is None) == (body.unit is None):

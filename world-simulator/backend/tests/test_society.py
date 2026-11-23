@@ -20,8 +20,7 @@ from world_sim.simulation.society import check_invariants
 
 def pilot(model, seed=1212):
     ids = [r["settlementId"] for r in model.pilot["roles"]]
-    return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212,
-                          sim_config=model.config.simulation, society_cfg=model.config.society)
+    return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212)
 
 
 def test_baseline_society_accounts_for_every_imported_person(eldara):
@@ -71,9 +70,9 @@ def test_jobs_never_exceed_eligible_labour_and_fill_by_priority():
 
 
 def test_society_stays_consistent_over_a_decade_and_reproduces(eldara):
-    cfg, society = eldara.config.simulation, eldara.config.society
-    first, months = advance(pilot(eldara), 3600, cfg, society)
-    second, _ = advance(pilot(eldara), 3600, cfg, society)
+    rules = eldara.config.rules
+    first, months = advance(pilot(eldara), 3600, rules)
+    second, _ = advance(pilot(eldara), 3600, rules)
     assert state_checksum(first) == state_checksum(second), "same configuration and seed, same result"
     for s in first.settlements:
         assert check_invariants(s.population, s.cohorts, s.society) == []
@@ -81,8 +80,9 @@ def test_society_stays_consistent_over_a_decade_and_reproduces(eldara):
 
 
 def test_history_is_bounded_but_keeps_the_baseline(eldara):
-    cfg = {**eldara.config.simulation, "limits": {**eldara.config.simulation["limits"], "maxHistoryPoints": 5}}
-    state, _ = advance(pilot(eldara), 360, cfg, eldara.config.society)
+    sim = eldara.config.simulation
+    rules = {**eldara.config.rules, "simulation": {**sim, "limits": {**sim["limits"], "maxHistoryPoints": 5}}}
+    state, _ = advance(pilot(eldara), 360, rules)
     assert len(state.history) == 5
     assert state.history[0].day == 0 and state.history[-1].day == 360
 
@@ -113,7 +113,7 @@ def test_v1_scenarios_and_snapshots_migrate_to_one_atomic_bundle(fresh_model):
     folder = _write_legacy(root, fresh_model)
     manager = ScenarioManager(fresh_model)
     session = manager.session("legacy")
-    assert session.state.schemaVersion == 2 and session.read_only is None
+    assert session.state.schemaVersion == 3 and session.read_only is None
     assert session.events[-1].kind == "migrated"
     bundle = json.loads((folder / "scenario.json").read_text())
     assert bundle["formatVersion"] == 2 and set(bundle) == {"formatVersion", "meta", "state", "events"}

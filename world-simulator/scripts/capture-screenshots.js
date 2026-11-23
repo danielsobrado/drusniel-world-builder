@@ -84,6 +84,20 @@ try {
   await page.locator('.workspace').evaluate((el) => { el.scrollTop = 0; });
   await shot('11-businesses');
 
+  await page.getByRole('button', { name: '+Year' }).click();
+  await page.getByText('1214-').first().waitFor();
+  await workspace('Economy & Trade');
+  await page.getByRole('table', { name: 'Production' }).waitFor();
+  await page.getByLabel('Settlement', { exact: true }).selectOption({ label: 'Vhaltha' });
+  await page.getByRole('button', { name: 'Inspect Vhaltha' }).click();
+  await page.locator('.workspace').evaluate((el) => { el.scrollTop = 0; });
+  await shot('12-economy');
+  await page.getByRole('heading', { name: 'Vhaltha market' }).scrollIntoViewIfNeeded();
+  await page.locator('.trend-svg rect').hover({ position: { x: 200, y: 60 } });
+  await shot('13-market');
+  await page.locator('.workspace').evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  await shot('14-caravans');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

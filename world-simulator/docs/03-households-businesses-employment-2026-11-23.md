@@ -88,6 +88,9 @@ critical) and a written reason:
 Food reads *critical* in the towns and city on purpose: the rural hinterland and imports
 are not simulated until PR4.
 
+> Updated by PR4 ([04](04-economy-and-trade-2026-11-23.md)): the Food need now counts the
+> hinterland and the market, and reads *ok* on the pilot. State is schema v3.
+
 **Each month** (`simulation/society.py`), after demography:
 
 1. households regroup from the new cohorts;

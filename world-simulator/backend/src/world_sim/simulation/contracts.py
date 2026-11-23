@@ -1,10 +1,12 @@
-"""Canonical scenario state contracts (schema v2). Everything persisted or exported goes through these."""
+"""Canonical scenario state contracts (schema v3). Everything persisted or exported goes through these."""
 
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-STATE_SCHEMA_VERSION = 2  # v2 (PR3) adds society; v1 states migrate on load
+from .economy.contracts import SettlementEconomy, Trade
+
+STATE_SCHEMA_VERSION = 3  # v2 (PR3) adds society, v3 (PR4) the economy; older states migrate on load
 
 
 class Contract(BaseModel):
@@ -107,6 +109,7 @@ class SettlementState(Contract):
     births: int = 0      # cumulative since the scenario began
     deaths: int = 0
     society: Society
+    economy: SettlementEconomy
 
 
 class CalendarDate(Contract):
@@ -131,6 +134,7 @@ class ScenarioState(Contract):
     date: CalendarDate
     settlements: list[SettlementState]
     history: list[HistoryPoint]
+    trade: Trade
 
 
 class ParentRef(Contract):

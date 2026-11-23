@@ -196,3 +196,5 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .status { font-size: var(--fs-xs); font-weight: 600; }
 .status-ok { color: var(--good); } .status-strained { color: var(--warn); } .status-critical { color: var(--bad); }
 .status::before { content: "● "; }
+.grid td .swatch { display: inline-block; margin-left: 6px; vertical-align: middle; }
+.nowrap { white-space: nowrap; }
