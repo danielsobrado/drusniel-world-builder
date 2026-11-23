@@ -1,0 +1,17 @@
+# Local language model for narration and dialogue (PR7). The LLM only narrates: it writes
+# prose and speech from the biography context and never changes the simulation's facts.
+schemaVersion: 1
+provider: openai-compatible        # any local server with /v1/chat/completions: Ollama, LM Studio, llama.cpp
+baseUrl: http://127.0.0.1:11434/v1 # override with WS_LLM_BASE_URL; only local servers are expected
+model: null                        # override with WS_LLM_MODEL; null = the first model the server lists
+timeoutSeconds: 180
+temperature: 0.6
+seed: 7                            # sent to servers that support it, for repeatable prose
+maxTokens: { short: 220, detailed: 650, style: 220, self: 320, reply: 260 }
+jobs:
+  concurrency: 1                   # local models are slow; one generation at a time
+  maxQueued: 500
+dialogue:
+  historyMessages: 12              # earlier messages of the conversation sent with each turn
+  maxMessageChars: 600
+  memoryItems: 20                  # what the traveller said before, remembered across conversations

@@ -8,7 +8,6 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
-from ..simulation.calendar import date_for
 from ..simulation.history.contracts import HistoryEvent
 from ..simulation.manager import ScenarioManager
 from ..simulation.people.context import ContextBuilder
@@ -20,15 +19,7 @@ def history_router(manager: ScenarioManager, reply: Callable[..., JSONResponse])
 
     def setup(scenario_id: str) -> tuple[Any, Any, Callable[[int], str]]:
         session = manager.session(scenario_id)
-        calendar = manager.config["calendar"]
-        state = session.state
-        year = calendar["daysPerMonth"] * calendar["monthsPerYear"]
-
-        def label(day: int) -> str:
-            """A date for the record; a reconstructed past before the start is only a year."""
-            return date_for(day, state.startYear, calendar).label if day >= 0 else str(state.startYear + day // year)
-
-        return session, state, label
+        return session, session.state, manager.labeller(session.state)
 
     def person_of(state: Any, pid: str) -> Any:
         found = next((p for p in state.cast.people if p.id == pid), None)

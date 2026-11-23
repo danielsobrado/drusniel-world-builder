@@ -2,7 +2,7 @@
 
 import os
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +20,7 @@ class Config:
     simulation: dict[str, Any]
     society: dict[str, Any]
     economy: dict[str, Any]
+    llm: dict[str, Any] = field(default_factory=dict)
 
     @property
     def rules(self) -> dict[str, Any]:
@@ -79,6 +80,9 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     simulation = _read_yaml(root / "config/simulation.yaml")
     society = _read_yaml(root / "config/society.yaml")
     economy = _read_yaml(root / "config/economy.yaml")
+    llm = _read_yaml(root / "config/llm.yaml")
+    llm["baseUrl"] = env.get("WS_LLM_BASE_URL", llm["baseUrl"])
+    llm["model"] = env.get("WS_LLM_MODEL", llm["model"])
     _validate_classification(simulator["classification"])
     _validate_npc(npc, [c["id"] for c in simulator["classification"]])
     if not isinstance(pilot.get("roles"), list) or len(pilot["roles"]) != 3:
@@ -91,4 +95,4 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     storage = env.get("WS_SCENARIO_STORAGE")
     if storage:
         simulation["storage"] = storage
-    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society, economy=economy)
+    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society, economy=economy, llm=llm)

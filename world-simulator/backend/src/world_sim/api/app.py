@@ -14,6 +14,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .. import log
 from ..config import load_config
+from ..narration.providers import Provider
+from ..narration.service import Narrator
 from ..reports.builder import (
     build_budget_comparison,
     build_connectivity_report,
@@ -27,6 +29,7 @@ from ..simulation.manager import ScenarioManager
 from ..world.model import WorldModel, build_world_model
 from .errors import ApiError, failure, ok
 from .history_routes import history_router
+from .narration_routes import narration_router
 from .people_routes import people_router
 from .scenario_routes import scenario_router
 from .settlement_query import parse_settlement_query, query_settlements
@@ -45,9 +48,11 @@ def _json(status: int, body: dict[str, Any]) -> JSONResponse:
     return JSONResponse(body, status_code=status, headers={"cache-control": "no-store"})
 
 
-def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
-    """World payloads are computed once and only read; scenario state lives in the ScenarioManager."""
+def create_app(model: WorldModel, static_dir: Path | None = None, provider: Provider | None = None) -> FastAPI:
+    """World payloads are computed once and only read; scenario state lives in the ScenarioManager.
+    `provider` replaces the configured local LLM (tests use a fake one)."""
     manager = ScenarioManager(model)
+    narrator = Narrator(manager, model.config.llm, provider)
     rows = [settlement_row(model, s) for s in model.audit["settlements"]]
     summary = build_summary(model)
     world = {
@@ -78,6 +83,7 @@ def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
                   lifespan=lifespan)
     app.state.model = model
     app.state.scenarios = manager
+    app.state.narrator = narrator
 
     def reply(data: Any, meta: dict[str, Any] | None = None, status: int = 200) -> JSONResponse:
         return _json(status, ok(envelope_world, data, meta))
@@ -155,6 +161,7 @@ def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
     app.include_router(scenario_router(manager, reply))
     app.include_router(people_router(manager, reply))
     app.include_router(history_router(manager, reply))
+    app.include_router(narration_router(manager, narrator, reply))
 
     if static_dir is not None:
         root = static_dir.resolve()

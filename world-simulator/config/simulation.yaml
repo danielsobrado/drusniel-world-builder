@@ -135,3 +135,4 @@ history:
     friendship: [social, 2, participants]
     rivalry: [social, 3, participants]
     lost-parent: [family, 4, private]
+    met-player: [social, 3, participants]

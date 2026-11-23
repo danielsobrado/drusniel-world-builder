@@ -9,6 +9,7 @@ inspected, never advanced, snapshotted, restored or branched, until it is migrat
 import asyncio
 import contextlib
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -21,6 +22,7 @@ from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
 from .engine import advance, baseline_state, state_checksum
 from .history.archive import HistoryArchive
+from .history.recorder import on_timelines, record
 from .migrations import IncompatibleState, migrate_state
 from .people.backstory import with_backstory
 from .rules import complete, fingerprint, freeze
@@ -218,6 +220,28 @@ class ScenarioManager:
         self.sessions[scenario_id] = session
         self._persist(session)
         return session
+
+    def labeller(self, state: ScenarioState) -> Callable[[int], str]:
+        """Day -> date label; a reconstructed past before the start is only a year."""
+        calendar = self.config["calendar"]
+        year = calendar["daysPerMonth"] * calendar["monthsPerYear"]
+
+        def label(day: int) -> str:
+            return date_for(day, state.startYear, calendar).label if day >= 0 else str(state.startYear + day // year)
+
+        return label
+
+    def record_player_event(self, scenario_id: str, incident: dict[str, Any]) -> None:
+        """Records something the player did with a person (a first meeting) as canonical history, and saves."""
+        s = self.writable(scenario_id)
+        rules = self.rules(s)
+        state = s.state
+        event = record(incident, state.historySeq, state.date.day, rules["simulation"]["history"], source="player", precision="day")
+        self.archive(scenario_id).append([event])
+        cast = on_timelines(state.cast, [event], rules["simulation"]["history"]["timelineMinImportance"])
+        s.state = state.model_copy(update={"cast": cast, "historySeq": state.historySeq + 1})
+        self._event(s, incident["kind"], incident["message"], eventId=event.id, personId=incident.get("person"))
+        self._persist(s)
 
     def archive(self, scenario_id: str) -> HistoryArchive:
         return HistoryArchive(self.store.history_path(scenario_id))
