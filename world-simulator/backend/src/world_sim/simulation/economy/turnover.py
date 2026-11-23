@@ -67,7 +67,10 @@ def turnover(society: Society, econ: SettlementEconomy, traders: list[Trader], *
     tc = cfg["turnover"]
     by_id = {t.id: t for t in traders}
     businesses, closed = _close(society, tc)
-    incidents = [{"kind": "closed", "message": f"{b.name} closed after {b.idleMonths} months with nobody to work it"} for b in closed]
+    incidents = [{"kind": "closed", "message": f"{b.name} closed after {b.idleMonths} months with nobody to work it",
+                  "settlementId": settlement["id"], "businessId": b.id, "trader": b.ownerId,
+                  "facts": {"idleMonths": b.idleMonths}, "effects": [{"entityId": b.id, "kind": "closed", "severity": 1.0}]}
+                 for b in closed]
     for b in closed:
         if b.ownerId in by_id:
             owner = by_id[b.ownerId]
@@ -101,7 +104,9 @@ def turnover(society: Society, econ: SettlementEconomy, traders: list[Trader], *
             econ = econ.model_copy(update={"treasury": round(econ.treasury - cost, 2)})
         funder = f"{owner.name}'s money" if owner else "the town treasury"
         incidents.append({"kind": "opened", "message": f"{business.name} opened with {funder} for {idle:,} people without work",
-                          "trader": owner.id if owner else None, "value": round(cost, 2)})
+                          "trader": owner.id if owner else None, "value": round(cost, 2), "settlementId": settlement["id"],
+                          "businessId": business.id, "facts": {"cost": round(cost, 2), "posts": t["staff"], "idleAtOpening": idle,
+                                                               "fundedBy": "trader" if owner else "town"}})
         idle -= t["staff"]
         opened += 1
     econ = econ.model_copy(update={"businessSeq": seq, "opened": econ.opened + opened, "closed": econ.closed + len(closed)})

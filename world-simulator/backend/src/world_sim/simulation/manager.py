@@ -20,8 +20,9 @@ from ..world.model import WorldModel
 from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
 from .engine import advance, baseline_state, state_checksum
+from .history.archive import HistoryArchive
 from .migrations import IncompatibleState, migrate_state
-from .rules import fingerprint, freeze
+from .rules import complete, fingerprint, freeze
 from .scope import resolve_scope
 from .store import ScenarioStore, slugify
 
@@ -98,6 +99,7 @@ class ScenarioManager:
             self._event(session, "migrated", f"Upgraded saved state from schema v{stored_schema} to v{STATE_SCHEMA_VERSION}",
                         fromSchema=stored_schema)
             self._persist(session)
+        self.archive(scenario_id).cut(state.historySeq)    # heals a crash between appending events and saving the bundle
         self.sessions[scenario_id] = session
 
     # ---- queries -------------------------------------------------------
@@ -188,6 +190,9 @@ class ScenarioManager:
             parent = self.writable(req.fromScenarioId)
             snapshot, snap_state = self._snapshot_state(parent.meta.id, req.fromSnapshotId)
             state = snap_state.model_copy(update={"scenarioId": scenario_id})
+            branch = self.archive(scenario_id)
+            branch.cut(0)
+            self.archive(parent.meta.id).copy_to(branch, state.historySeq)
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=parent.meta.scope, seed=state.seed,
                                 parent=ParentRef(scenarioId=parent.meta.id, snapshotId=snapshot.id), createdAt=_now(),
                                 rules=parent.meta.rules, rulesFingerprint=parent.meta.rulesFingerprint)
@@ -202,6 +207,7 @@ class ScenarioManager:
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=scope, seed=seed, createdAt=_now())
             session = Session(meta, state, [])
             self._freeze(session)
+            self.archive(scenario_id).cut(0)
             businesses = sum(len(s.society.businesses) for s in state.settlements)
             self._event(session, "created",
                         f"Created with {len(settlement_ids)} settlements and {businesses} businesses from the imported world")
@@ -209,13 +215,16 @@ class ScenarioManager:
         self._persist(session)
         return session
 
+    def archive(self, scenario_id: str) -> HistoryArchive:
+        return HistoryArchive(self.store.history_path(scenario_id))
+
     def _freeze(self, s: Session) -> None:
         frozen = freeze(self.model.config.rules)
         s.meta = s.meta.model_copy(update={"rules": frozen, "rulesFingerprint": fingerprint(frozen)})
 
     def rules(self, s: Session) -> dict[str, Any]:
         """The scenario's frozen rules; only a foreign, read-only scenario can lack them, and it never advances."""
-        return s.meta.rules or freeze(self.model.config.rules)
+        return complete(s.meta.rules, self.model.config.rules) if s.meta.rules else freeze(self.model.config.rules)
 
     def _advance(self, s: Session, days: int) -> None:
         self._apply(s, *advance(s.state, days, self.rules(s)))
@@ -231,9 +240,13 @@ class ScenarioManager:
 
     def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]]) -> None:
         s.state = state
+        self.archive(s.meta.id).append([e for m in months for e in m["events"]])
         for m in months:
             for incident in m["incidents"]:     # what happened during the month, then its close
-                self._event(s, incident["kind"], incident["message"], at_day=m["day"], trader=incident.get("trader"),
+                people = incident.get("participants") or []
+                self._event(s, incident["kind"], incident["message"], at_day=m["day"], eventId=incident["eventId"],
+                            personId=people[0]["personId"] if people else incident.get("person"), trader=incident.get("trader"),
+                            **{k: incident.get(k) for k in ("businessId", "routeId", "caravanId", "settlementId")},
                             value=incident.get("value"))
             self._event(s, "month", f"{m['label']} closed: {m['births']} births, {m['deaths']} deaths, population {m['population']:,}, "
                         f"{m['unemployed']:,} without work, {m['caravans']} caravans, {m['shortages']} shortages",
@@ -326,6 +339,7 @@ class ScenarioManager:
             raise ApiError(409, "running", "Pause the scenario before restoring a snapshot")
         meta, state = self._snapshot_state(scenario_id, snapshot_id)
         s.state = state
+        self.archive(scenario_id).cut(state.historySeq)
         self._event(s, "restored", f"Restored snapshot “{meta.label}” ({meta.date.label})", snapshotId=meta.id)
         self._persist(s)
         return s

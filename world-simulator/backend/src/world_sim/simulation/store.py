@@ -44,6 +44,9 @@ class ScenarioStore:
             raise ValueError(f"invalid scenario id {scenario_id!r}")
         return self.root / scenario_id
 
+    def history_path(self, scenario_id: str) -> Path:
+        return self._dir(scenario_id) / "history.sqlite"
+
     def ids(self) -> list[str]:
         return sorted(p.name for p in self.root.iterdir()
                       if p.is_dir() and ID_PATTERN.match(p.name) and (p / "scenario.json").is_file())

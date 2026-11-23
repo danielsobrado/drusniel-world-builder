@@ -101,7 +101,10 @@ def _replace(ctx: TripContext, trader: Trader, route: Route) -> None:
     ctx.traders.append(new_trader(f"npc:trader:{ctx.trader_seq}", name, trader.settlementId, trader.settlementName, route.id,
                                   random.Random(f"{ctx.seed}:hire:{ctx.trader_seq}"), ctx.cfg, ctx.day))
     ctx.incidents.append({"kind": "dismissed", "message": f"{trader.name} of {trader.settlementName} was let go after their "
-                          f"reputation fell to {trader.scorecard.reputation:.0f}; a new master will be taken on", "trader": trader.id})
+                          f"reputation fell to {trader.scorecard.reputation:.0f}; a new master will be taken on", "trader": trader.id,
+                          "settlementId": trader.settlementId, "routeId": route.id,
+                          "facts": {"reputation": trader.scorecard.reputation, "timesCaught": trader.scorecard.caught},
+                          "effects": [{"entityId": trader.id, "kind": "lost-post", "severity": 1.0}]})
 
 
 def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Caravan]:
@@ -155,13 +158,26 @@ def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Ca
     if lost_value:
         band = f" ({route.lair})" if route.lair else ""
         who, way = ("Pirates", "sea lane") if route.mode == "sea" else ("Bandits", "road")
+        raided = [c for c in out if c.lost]
+        carried = sum(c.value for c in out) + lost_value
         ctx.incidents.append({"kind": "raid", "message": f"{who}{band} on the {route.settlementName} {way} robbed {trader.name}'s caravan "
                               f"of {lost_value:,.1f} in goods ({guards} guard{'' if guards == 1 else 's'})",
-                              "trader": trader.id, "value": round(lost_value, 2)})
+                              "trader": trader.id, "value": round(lost_value, 2), "guards": guards,
+                              "settlementId": route.settlementId, "routeId": route.id, "locationId": route.id,
+                              "caravanId": raided[0].id if raided else None, "relatedEntities": [c.id for c in raided],
+                              "facts": {"cargoLost": round(lost_value, 2), "cargoUnit": "market value", "guardsPresent": guards,
+                                        "bandSize": route.bandits, "mode": route.mode},
+                              "effects": [{"entityId": trader.id, "kind": "trade-loss",
+                                           "severity": round(min(1.0, lost_value / carried), 3) if carried else 1.0},
+                                          {"entityId": route.settlementId, "kind": "goods-lost", "severity": 0.1}]})
     if caught:
         ctx.incidents.append({"kind": "smuggling", "message": f"{trader.name} of {trader.settlementName} was caught smuggling at "
                               f"{market.centerName}: goods worth {money['confiscated']:,.1f} confiscated, fined {money['fine']:,.1f}",
-                              "trader": trader.id, "value": round(money["confiscated"], 2)})
+                              "trader": trader.id, "value": round(money["confiscated"], 2),
+                              "settlementId": market.centerSettlementId, "routeId": route.id, "locationId": market.centerSettlementId,
+                              "relatedEntities": [c.id for c in out if c.caught],
+                              "facts": {"confiscated": round(money["confiscated"], 2), "fine": round(money["fine"], 2)},
+                              "effects": [{"entityId": trader.id, "kind": "fined", "severity": 0.5}]})
     if card.reputation < rep["dismissBelow"]:
         _replace(ctx, trader, ctx.routes[route.id])
     return out

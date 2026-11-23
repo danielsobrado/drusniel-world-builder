@@ -51,3 +51,37 @@ people:
   prisonDays: 360
   newbornShare: 0.5             # a death is replaced by a newborn in a family, otherwise by a newcomer
   maxEvents: 24                 # life events kept per person
+
+# Canonical history (PR6). Each kind: [category, importance 1-5, visibility].
+# Importance 5 is life-defining, 3-4 important, 1-2 minor; routine months record nothing.
+history:
+  timelineMinImportance: 3      # events at or above this stay on a person's permanent timeline
+  recentEvents: 24              # the per-person recent-events cache (the archive keeps everything)
+  default: [settlement, 2, settlement]
+  kinds:
+    born: [birth, 5, household]
+    upbringing: [birth, 2, private]
+    promoted: [birth, 1, private]
+    came-of-age: [birth, 2, household]
+    married: [family, 5, settlement]
+    widowed: [family, 5, household]
+    died: [health, 5, settlement]
+    apprenticeship-started: [education, 3, participants]
+    apprenticeship-completed: [education, 3, participants]
+    hired: [career, 3, participants]
+    first-job: [career, 3, private]
+    lost-work: [career, 3, household]
+    retired: [career, 3, household]
+    trader: [career, 4, settlement]
+    dismissed: [career, 4, settlement]
+    opened: [wealth, 3, settlement]
+    closed: [wealth, 3, settlement]
+    moved: [travel, 4, settlement]
+    raid: [conflict, 4, settlement]
+    outlaw: [crime, 4, settlement]
+    caught: [crime, 4, settlement]
+    released: [crime, 3, household]
+    smuggling: [crime, 4, settlement]
+    friendship: [social, 2, participants]
+    rivalry: [social, 3, participants]
+    lost-parent: [family, 4, private]

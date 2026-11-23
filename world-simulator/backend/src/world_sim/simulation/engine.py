@@ -9,6 +9,8 @@ from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, So
 from .demography import initial_cohorts, run_month
 from .economy.baseline import initial_economy
 from .economy.step import economy_month, with_food_need
+from .history.links import link
+from .history.recorder import on_timelines, record
 from .people.checks import check_cast
 from .people.generate import initial_cast
 from .people.life import people_month
@@ -70,6 +72,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
     settlements = list(state.settlements)
     trade = state.trade
     cast = state.cast
+    seq = state.historySeq
     history = list(state.history)
     months: list[dict[str, Any]] = []
     day = state.date.day
@@ -83,8 +86,13 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         deaths_before = sum(s.deaths for s in settlements)
         settlements = [_month(s, seed=state.seed, month_index=month_index, rules=rules) for s in settlements]
         settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
+        linked = link(economy["incidents"], cast, settlements)
         cast, trade, lives = people_month(cast, settlements, trade, day=day, seed=state.seed, rules=rules)
-        economy["incidents"] = [*economy["incidents"], *lives]
+        events = [record(incident, seq + i, day, rules["simulation"]["history"]) for i, incident in enumerate([*linked, *lives])]
+        seq += len(events)
+        cast = on_timelines(cast, events, rules["simulation"]["history"]["timelineMinImportance"])
+        economy["incidents"] = [{**incident, "eventId": e.id} for incident, e in zip([*linked, *lives], events, strict=True)]
+        economy["events"] = events
         broken = check_cast(cast, settlements, trade)
         if broken:
             raise AssertionError(f"people, month {month_index}: {'; '.join(broken)}")
@@ -115,6 +123,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         "history": _bounded(history, rules["simulation"]["limits"]["maxHistoryPoints"]),
         "trade": trade,
         "cast": cast,
+        "historySeq": seq,
     })
     return new_state, months
 

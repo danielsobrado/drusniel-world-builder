@@ -39,7 +39,8 @@ class Person(Contract):
     alive: bool = True
     deathDay: int | None = None
     cause: str | None = None
-    events: list[LifeEvent] = []
+    events: list[LifeEvent] = []      # recent-events cache; the archive keeps everything
+    timeline: list[str] = []          # permanent references to the canonical events that shaped this life
 
 
 class NpcHousehold(Contract):

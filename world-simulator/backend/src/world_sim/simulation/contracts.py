@@ -1,4 +1,4 @@
-"""Canonical scenario state contracts (schema v5). Everything persisted or exported goes through these."""
+"""Canonical scenario state contracts (schema v6). Everything persisted or exported goes through these."""
 
 from typing import Any, Literal
 
@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 5  # v2 society, v3 economy, v4 roads and traders, v5 named people; older states migrate on load
+STATE_SCHEMA_VERSION = 6  # v2 society, v3 economy, v4 roads, v5 people, v6 canonical history; older states migrate on load
 
 
 class Contract(BaseModel):
@@ -143,6 +143,7 @@ class ScenarioState(Contract):
     history: list[HistoryPoint]
     trade: Trade
     cast: Cast
+    historySeq: int = 0                      # next canonical event number; the archive is cut here on restore
 
 
 class ParentRef(Contract):
@@ -176,9 +177,7 @@ class Event(Contract):
     seq: int
     day: int
     date: str
-    kind: Literal["created", "branched", "stepped", "month", "snapshot", "restored", "run", "paused", "error", "migrated",
-                  "raid", "smuggling", "dismissed", "opened", "closed",
-                  "died", "outlaw", "caught", "hired"]
+    kind: str                        # scenario actions (created, stepped, ...) and every canonical history kind
     message: str
     data: dict[str, int | float | str | None] = {}
 

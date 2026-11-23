@@ -76,7 +76,7 @@ def test_v3_states_gain_roads_and_traders(eldara):
     for m in raw["trade"]["markets"]:
         del m["taxRates"], m["taxRevenue"]
     state, stored = migrate_state(raw, eldara)
-    assert stored == 3 and state.schemaVersion == 5
+    assert stored == 3 and state.schemaVersion == 6
     assert len(state.trade.routes) == 2 and len(state.trade.traders) == 6
 
 

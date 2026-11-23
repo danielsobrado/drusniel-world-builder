@@ -58,7 +58,12 @@ def _v4_to_v5(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     return {**raw, "schemaVersion": 5, "cast": cast.model_dump()}
 
 
-STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5}
+def _v5_to_v6(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
+    """v6 adds the canonical history counter and personal timelines; both start empty (the archive starts here)."""
+    return {**raw, "schemaVersion": 6}
+
+
+STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6}
 
 
 def migrate_state(raw: dict[str, Any], model: WorldModel) -> tuple[ScenarioState, int]:

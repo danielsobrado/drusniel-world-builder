@@ -10,12 +10,18 @@ from typing import Any
 from ..canonical import compact_json
 
 # Simulation settings that change outcomes; storage, run speeds and the baseline recipe do not.
-OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "people")
+OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "people", "history")
 
 
 def freeze(rules: dict[str, Any]) -> dict[str, Any]:
     sim = rules["simulation"]
     return {"simulation": {k: sim[k] for k in OUTCOME_KEYS if k in sim}, "society": rules["society"], "economy": rules["economy"]}
+
+
+def complete(frozen: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
+    """A frozen ruleset with settings introduced after it was frozen taken from the current config; its own values win."""
+    now = freeze(current)
+    return {section: {**now[section], **frozen.get(section, {})} for section in now}
 
 
 def fingerprint(frozen: dict[str, Any]) -> str:

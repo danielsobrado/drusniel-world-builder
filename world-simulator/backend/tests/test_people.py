@@ -97,7 +97,7 @@ def test_people_round_trip_and_v4_saves_gain_a_cast(eldara):
     raw["schemaVersion"] = 4
     del raw["cast"]
     migrated, stored = migrate_state(raw, eldara)
-    assert stored == 4 and migrated.schemaVersion == 5 and len(migrated.cast.people) == 86
+    assert stored == 4 and migrated.schemaVersion == 6 and len(migrated.cast.people) == 86
 
 
 def test_people_endpoints(fresh_model):

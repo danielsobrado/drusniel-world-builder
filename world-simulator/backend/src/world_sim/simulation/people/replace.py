@@ -1,21 +1,18 @@
 """Keeping the cast whole: masters taken on from the town's own people, and the dead replaced by newborns or newcomers."""
 
 import random
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from ..contracts import SettlementState
 from ..economy.contracts import Trade
 from ..economy.roads import new_trader, personality
-from .contracts import Cast, LifeEvent, NpcHousehold, Person
+from .contracts import Cast, NpcHousehold, Person
 from .generate import age_years, birth_day
 from .homes import place
+from .notes import note
 
 if TYPE_CHECKING:
     from .life import Month
-
-
-def _event(p: Person, day: int, kind: str, text: str, cfg: dict[str, Any], **update: Any) -> Person:
-    return p.model_copy(update={**update, "events": [*p.events, LifeEvent(day=day, kind=kind, text=text)][-cfg["maxEvents"]:]})
 
 
 def promote_traders(cast: Cast, trade: Trade, settlements: list[SettlementState], m: "Month") -> tuple[Cast, Trade]:
@@ -39,11 +36,11 @@ def promote_traders(cast: Cast, trade: Trade, settlements: list[SettlementState]
         if not pool:
             continue
         pick = min(pool, key=lambda p: (p.role != "unemployed", -(p.personality.honesty + p.personality.caution), p.id))
-        people[pick.id] = _event(pick, m.day, "trader", f"Taken on as caravan master on the {t.settlementName} road", m.cfg,
-                                 role="trader", traderId=t.id, businessId=None, profession="caravan master", idleMonths=0)
+        people[pick.id] = note(pick, m, "trader", f"Taken on as caravan master on the {t.settlementName} road",
+                               message=f"{pick.name} {pick.family} of {names.get(t.settlementId, '')} was taken on as caravan master",
+                               related={"routeId": t.routeId, "relatedEntities": [t.id]},
+                               role="trader", traderId=t.id, businessId=None, profession="caravan master", idleMonths=0)
         traders[i] = t.model_copy(update={"name": pick.name, "personality": pick.personality})
-        m.incidents.append({"kind": "hired", "message": f"{pick.name} {pick.family} of {names.get(t.settlementId, '')} was taken on "
-                            "as caravan master", "person": pick.id, "trader": t.id})
     return cast.model_copy(update={"people": list(people.values())}), trade.model_copy(update={"traders": traders, "traderSeq": seq})
 
 
@@ -53,10 +50,6 @@ def replace_dead(cast: Cast, settlements: list[SettlementState], m: "Month") -> 
     people, households, dwellings = list(cast.people), list(cast.households), list(cast.dwellings)
     seq, births, arrivals = dict(cast.seq), cast.births, cast.arrivals
     died = [p for p in people if p.deathDay == m.day]
-    names = {s.settlementId: s.name for s in settlements}
-    for p in died:
-        m.incidents.append({"kind": "died", "message": f"{p.name} {p.family} of {names.get(p.settlementId, '')} "
-                            f"died at {age_years(p, m.day)} ({p.cause})", "person": p.id})
     for s in settlements:
         sid = s.settlementId
         missing = cast.budget.get(sid, 0) - sum(1 for p in people if p.alive and p.settlementId == sid)
@@ -71,8 +64,10 @@ def replace_dead(cast: Cast, settlements: list[SettlementState], m: "Month") -> 
                 parent = rng.choice(parents)
                 home = next(h for h in households if h.id == parent.householdId)
                 person = Person(id=pid, name=name, family=home.family, sex=rng.choice(("female", "male")), birthDay=m.day, settlementId=sid,
-                                householdId=home.id, role="child", personality=personality(rng),
-                                events=[LifeEvent(day=m.day, kind="born", text=f"Born to {parent.name} {parent.family}")])
+                                householdId=home.id, role="child", personality=personality(rng))
+                person = note(person, m, "born", f"Born to {parent.name} {parent.family}",
+                              related={"householdId": home.id, "participants": [{"personId": pid, "role": "newborn"},
+                                                                                {"personId": parent.id, "role": "parent"}]})
                 births += 1
             else:
                 hid = f"household:{s.sourceId}:n{seq[sid]}"
@@ -82,7 +77,8 @@ def replace_dead(cast: Cast, settlements: list[SettlementState], m: "Month") -> 
                 households.append(home)
                 person = Person(id=pid, name=name, family=home.family, sex=rng.choice(("female", "male")),
                                 birthDay=birth_day(rng, "adult", c["ages"]), settlementId=sid, householdId=home.id, role="unemployed",
-                                personality=personality(rng), events=[LifeEvent(day=m.day, kind="arrived", text=f"Came to {s.name}")])
+                                personality=personality(rng))
+                person = note(person, m, "moved", f"Came to {s.name}", related={"householdId": home.id})
                 arrivals += 1
             people.append(person)
     return cast.model_copy(update={"people": people, "households": households, "dwellings": dwellings, "seq": seq,
