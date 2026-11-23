@@ -9,6 +9,7 @@ someone is recorded in history as a player event.
 import asyncio
 import hashlib
 import time
+from collections import deque
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -18,7 +19,7 @@ from ..simulation.manager import ScenarioManager
 from ..simulation.people.context import ContextBuilder
 from .factcheck import check
 from .prompts import KINDS, biography_messages, dialogue_messages
-from .providers import Provider, ProviderError, resolve
+from .providers import Provider, resolve
 from .store import NarrationStore
 
 STATUS_SECONDS = 15
@@ -57,6 +58,12 @@ class Narrator:
         self.jobs: list[Job] = []
         self.queue: asyncio.Queue[Job] | None = None
         self.workers: list[asyncio.Task] = []
+        self.latency: deque[dict[str, Any]] = deque(maxlen=200)    # recent model calls: kind, seconds, model
+
+    def _timed(self, kind: str, model: str, started: float) -> float:
+        seconds = round(time.perf_counter() - started, 2)
+        self.latency.append({"kind": kind, "seconds": seconds, "model": model})
+        return seconds
 
     # ---- provider ----------------------------------------------------------
     def provider(self) -> tuple[Provider, dict[str, Any]]:
@@ -124,7 +131,9 @@ class Narrator:
         context = self.context(scenario_id, person_id)
         provider, _ = self.provider()
         messages = biography_messages(context, kind)
+        started = time.perf_counter()
         text = await asyncio.to_thread(provider.complete, messages, self.cfg["maxTokens"][kind], kind, context)
+        self._timed(kind, provider.model, started)
         warnings = check(text, context)
         day = self.manager.session(scenario_id).state.date.day
         self.store(scenario_id).save_biography(person_id, kind, text, provider.name, provider.model, facts_hash(context), day, warnings)
@@ -153,10 +162,9 @@ class Narrator:
                    for m in store.messages(conversation_id)][-d["historyMessages"]:]
         messages = dialogue_messages(context, history, store.memory(person, d["memoryItems"]), said)
         provider, _ = self.provider()
-        try:
-            reply = await asyncio.to_thread(provider.complete, messages, self.cfg["maxTokens"]["reply"], "reply", context)
-        except ProviderError:
-            raise
+        started = time.perf_counter()
+        reply = await asyncio.to_thread(provider.complete, messages, self.cfg["maxTokens"]["reply"], "reply", context)
+        self._timed("reply", provider.model, started)
         day = self.manager.session(scenario_id).state.date.day
         mine = store.add_message(conversation_id, "user", said, day)
         theirs = store.add_message(conversation_id, "npc", reply, day, provider.name, provider.model, check(reply, context))

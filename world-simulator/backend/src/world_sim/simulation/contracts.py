@@ -174,6 +174,9 @@ class ScenarioMeta(Contract):
     eventSeq: int = 0
     rules: dict[str, Any] | None = None      # the frozen ruleset it runs under (simulation/rules.py)
     rulesFingerprint: str | None = None
+    # Every change since the baseline, for deterministic replay (simulation/replay.py); None when it cannot be replayed.
+    journal: list[dict[str, Any]] | None = None
+    journalRoot: str | None = None           # the scenario whose baseline the journal starts from (a branch's root)
 
 
 class SnapshotMeta(Contract):
@@ -182,6 +185,7 @@ class SnapshotMeta(Contract):
     date: CalendarDate
     checksum: str
     createdAt: str
+    journalAt: int | None = None             # the journal length at the snapshot, so a restore or branch can cut it
 
 
 class Event(Contract):

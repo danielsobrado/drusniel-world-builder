@@ -74,6 +74,13 @@ class HistoryArchive:
             rows = db.execute(f"SELECT body FROM events WHERE id IN ({','.join('?' * len(ids))}) ORDER BY seq", ids).fetchall()  # noqa: S608
         return [HistoryEvent(**json.loads(r[0])) for r in rows]
 
+    def consequences(self, event: HistoryEvent, limit: int = 20) -> list[HistoryEvent]:
+        """Later events that name this one as a cause."""
+        with closing(self._db()) as db:
+            rows = db.execute("SELECT body FROM events WHERE seq > ? AND body LIKE ? ORDER BY seq LIMIT ?",
+                              (event.seq, f'%"{event.id}"%', limit * 4)).fetchall()
+        return [e for e in (HistoryEvent(**json.loads(r[0])) for r in rows) if event.id in e.causedBy][:limit]
+
     def query(self, *, person: str | None = None, entity: str | None = None, kinds: list[str] | None = None,
               categories: list[str] | None = None, sources: list[str] | None = None, min_importance: int = 1,
               from_day: int | None = None, to_day: int | None = None, before: int | None = None, newest_first: bool = False,

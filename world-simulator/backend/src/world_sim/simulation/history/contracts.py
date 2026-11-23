@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Category = Literal["birth", "family", "education", "career", "wealth", "travel", "social", "crime", "conflict", "health",
                    "settlement", "trade"]
-Source = Literal["simulation", "imported", "generated-prehistory", "inferred", "player"]
+Source = Literal["simulation", "imported", "generated-prehistory", "inferred", "player", "intervention"]
 Precision = Literal["day", "month", "year", "approximate"]
 Visibility = Literal["public", "settlement", "household", "participants", "private"]
 

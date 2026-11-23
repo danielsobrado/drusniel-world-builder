@@ -25,10 +25,12 @@ from ..reports.builder import (
     settlement_row,
     world_identity,
 )
+from ..simulation.lab import Lab
 from ..simulation.manager import ScenarioManager
 from ..world.model import WorldModel, build_world_model
 from .errors import ApiError, failure, ok
 from .history_routes import history_router
+from .lab_routes import lab_router
 from .narration_routes import narration_router
 from .people_routes import people_router
 from .scenario_routes import scenario_router
@@ -162,6 +164,7 @@ def create_app(model: WorldModel, static_dir: Path | None = None, provider: Prov
     app.include_router(people_router(manager, reply))
     app.include_router(history_router(manager, reply))
     app.include_router(narration_router(manager, narrator, reply))
+    app.include_router(lab_router(manager, Lab(manager, narrator.latency), reply))
 
     if static_dir is not None:
         root = static_dir.resolve()

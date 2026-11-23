@@ -9,16 +9,13 @@ from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, So
 from .demography import initial_cohorts, run_month
 from .economy.baseline import initial_economy
 from .economy.step import economy_month, with_food_need
-from .history.causes import link_causes, stamp_cache
+from .history.chronicle import chronicle
 from .history.links import link
-from .history.recorder import on_timelines, record, with_origins
 from .migration import migrate
 from .people.backstory import with_backstory
 from .people.checks import check_cast
 from .people.generate import initial_cast
-from .people.knowledge import spread
 from .people.life import people_month
-from .people.outlook import apply_experience, in_character
 from .society import check_invariants, initial_society, update_society
 
 
@@ -31,8 +28,10 @@ def build_settlements(model: WorldModel, rows: list[tuple[dict[str, Any], dict[s
     return settlements, trade
 
 
-def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[str], seed: int, start_year: int) -> ScenarioState:
-    rules = model.config.rules
+def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[str], seed: int, start_year: int,
+                   rules: dict[str, Any] | None = None) -> ScenarioState:
+    """The state at day 0; a replay passes the scenario's frozen rules, a new scenario takes the current config."""
+    rules = rules or model.config.rules
     rows = []
     for sid in settlement_ids:
         record = model.settlements_by_id[sid]
@@ -70,6 +69,17 @@ def _bounded(history: list[HistoryPoint], limit: int) -> list[HistoryPoint]:
     return history if len(history) <= limit else [history[0], *history[len(history) - limit + 1:]]
 
 
+def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any, rules: dict[str, Any], when: str) -> None:
+    """The accounting rules that must hold after every change; a break stops the step instead of saving a bad state."""
+    broken = check_cast(cast, settlements, trade, rules["simulation"]["people"]["maxOverBudget"])
+    if broken:
+        raise AssertionError(f"people, {when}: {'; '.join(broken)}")
+    for s in settlements:
+        broken = check_invariants(s.population, s.cohorts, s.society)
+        if broken:
+            raise AssertionError(f"{s.settlementId} {when}: {'; '.join(broken)}")
+
+
 def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[ScenarioState, list[dict[str, Any]]]:
     """Advances `days` days; each month close runs demography, society and the economy. Returns month summaries too."""
     calendar = rules["simulation"]["calendar"]
@@ -99,26 +109,13 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
         linked = link(economy["incidents"], cast, settlements)
         cast, trade, lives = people_month(cast, settlements, trade, flows, day=day, seed=state.seed, rules=rules)
-        events = [record(incident, seq + i, day, rules["simulation"]["history"]) for i, incident in enumerate([*linked, *lives])]
+        cast, trade, events = chronicle([*linked, *lives], cast, trade, seq, day, rules)
         seq += len(events)
-        events = link_causes(events, cast)
-        cast = stamp_cache(cast, events, rules["simulation"]["history"]["recentEvents"])
-        cast = on_timelines(cast, events, rules["simulation"]["history"]["timelineMinImportance"])
-        cast = with_origins(cast, [*linked, *lives], events)
-        cast = apply_experience(cast, events, rules["simulation"]["people"]["experience"])
-        trade = in_character(trade, cast)
-        cast = spread(cast, events, trade, day, rules["simulation"]["people"]["knowledge"])
         cast, past = with_backstory(cast, seq, day, settlements, rules, state.seed)     # people who came into focus
         seq += len(past)
         economy["events"] = [*events, *past]
         economy["incidents"] = [{**incident, "eventId": e.id} for incident, e in zip([*linked, *lives], events, strict=True)]
-        broken = check_cast(cast, settlements, trade, rules["simulation"]["people"]["maxOverBudget"])
-        if broken:
-            raise AssertionError(f"people, month {month_index}: {'; '.join(broken)}")
-        for s in settlements:
-            broken = check_invariants(s.population, s.cohorts, s.society)
-            if broken:
-                raise AssertionError(f"{s.settlementId} month {month_index}: {'; '.join(broken)}")
+        assert_consistent(settlements, cast, trade, rules, f"month {month_index}")
         history.append(HistoryPoint(day=day, population={s.settlementId: s.population for s in settlements},
                                     labour={s.settlementId: s.society.employment.labourSupply for s in settlements},
                                     unemployed={s.settlementId: s.society.employment.unemployed for s in settlements},

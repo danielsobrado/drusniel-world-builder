@@ -9,6 +9,7 @@ inspected, never advanced, snapshotted, restored or branched, until it is migrat
 import asyncio
 import contextlib
 import time
+from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -22,9 +23,10 @@ from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
 from .engine import advance, baseline_state, state_checksum
 from .history.archive import HistoryArchive
-from .history.recorder import on_timelines, record
+from .history.contracts import HistoryEvent
+from .interventions import Intervention, InvalidIntervention, intervene
 from .migrations import IncompatibleState, migrate_state
-from .people.backstory import with_backstory
+from .replay import event_digest, player_event, replay, with_past
 from .rules import complete, fingerprint, freeze
 from .scope import resolve_scope
 from .store import ScenarioStore, slugify
@@ -47,6 +49,7 @@ class Session:
     saved_at: float = field(default_factory=time.monotonic)
     error: str | None = None
     busy: bool = False                # a step is being computed off the event loop
+    perf: deque = field(default_factory=lambda: deque(maxlen=200))   # recent step timings
     _digest: tuple[int, str] | None = None
 
     @property
@@ -104,6 +107,7 @@ class ScenarioManager:
             self._persist(session)
         self.archive(scenario_id).cut(state.historySeq)    # heals a crash between appending events and saving the bundle
         if not session.read_only and self._backstory(session):
+            session.meta = session.meta.model_copy(update={"journal": None})    # the past was added outside the journal
             self._persist(session)
         self.sessions[scenario_id] = session
 
@@ -198,9 +202,12 @@ class ScenarioManager:
             branch = self.archive(scenario_id)
             branch.cut(0)
             self.archive(parent.meta.id).copy_to(branch, state.historySeq)
+            replayable = parent.meta.journal is not None and snapshot.journalAt is not None
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=parent.meta.scope, seed=state.seed,
                                 parent=ParentRef(scenarioId=parent.meta.id, snapshotId=snapshot.id), createdAt=_now(),
-                                rules=parent.meta.rules, rulesFingerprint=parent.meta.rulesFingerprint)
+                                rules=parent.meta.rules, rulesFingerprint=parent.meta.rulesFingerprint,
+                                journal=parent.meta.journal[:snapshot.journalAt] if replayable else None,
+                                journalRoot=(parent.meta.journalRoot or parent.meta.id) if replayable else None)
             session = Session(meta, state, [])
             self._event(session, "branched", f"Branched from {parent.meta.name} at snapshot “{snapshot.label}” ({snapshot.date.label})")
         else:
@@ -209,7 +216,8 @@ class ScenarioManager:
             seed = req.seed if req.seed is not None else self.config["baseline"]["seed"]
             state = baseline_state(self.model, scenario_id=scenario_id, settlement_ids=settlement_ids, seed=seed,
                                    start_year=self.start_year)
-            meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=scope, seed=seed, createdAt=_now())
+            meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=scope, seed=seed, createdAt=_now(),
+                                journal=[], journalRoot=scenario_id)
             session = Session(meta, state, [])
             self._freeze(session)
             self.archive(scenario_id).cut(0)
@@ -234,25 +242,64 @@ class ScenarioManager:
     def record_player_event(self, scenario_id: str, incident: dict[str, Any]) -> None:
         """Records something the player did with a person (a first meeting) as canonical history, and saves."""
         s = self.writable(scenario_id)
-        rules = self.rules(s)
-        state = s.state
-        event = record(incident, state.historySeq, state.date.day, rules["simulation"]["history"], source="player", precision="day")
-        self.archive(scenario_id).append([event])
-        cast = on_timelines(state.cast, [event], rules["simulation"]["history"]["timelineMinImportance"])
-        s.state = state.model_copy(update={"cast": cast, "historySeq": state.historySeq + 1})
-        self._event(s, incident["kind"], incident["message"], eventId=event.id, personId=incident.get("person"))
+        s.state, events = player_event(s.state, incident, self.rules(s))
+        self.archive(scenario_id).append(events)
+        self._journal(s, {"op": "player", "incident": incident})
+        self._event(s, incident["kind"], incident["message"], eventId=events[0].id, personId=incident.get("person"))
         self._persist(s)
+
+    def intervene(self, scenario_id: str, spec: Intervention) -> list[HistoryEvent]:
+        """Applies a designer's event at the current day (paused scenarios only) and saves; returns the events recorded."""
+        s = self.writable(scenario_id)
+        if s.running:
+            raise ApiError(409, "running", "Pause the scenario before intervening")
+        try:
+            s.state, events = intervene(s.state, spec, self.rules(s))
+        except InvalidIntervention as exc:
+            raise ApiError(400, "invalid_intervention", str(exc)) from exc
+        self.archive(scenario_id).append(events)
+        self._journal(s, {"op": "intervene", "spec": spec.model_dump()})
+        self._event(s, "intervention", events[0].summary, eventId=events[0].id, settlementId=events[0].settlementId,
+                    businessId=events[0].businessId, routeId=events[0].routeId)
+        self._persist(s)
+        return events
+
+    def _journal(self, s: Session, op: dict[str, Any]) -> None:
+        journal = s.meta.journal
+        if journal is None:
+            return
+        if op["op"] == "advance" and journal and journal[-1]["op"] == "advance":
+            journal = [*journal[:-1], {"op": "advance", "days": journal[-1]["days"] + op["days"]}]   # steps chunk freely
+        else:
+            journal = [*journal, op]
+        s.meta = s.meta.model_copy(update={"journal": journal})
+
+    async def replay(self, scenario_id: str) -> dict[str, Any]:
+        """Rebuilds the scenario from its baseline and journal off the event loop and compares it with the live state."""
+        s = self.session(scenario_id)
+        if s.meta.journal is None:
+            return {"replayable": False, "reason": "This scenario has no complete journal: it was made before journals, "
+                    "migrated, or branched from such a scenario."}
+        meta, state, rules = s.meta, s.state, self.rules(s)       # captured together, so a running scenario compares consistently
+        archived = self.archive(scenario_id).query(before=state.historySeq, limit=None)
+        started = time.perf_counter()
+        replayed, events = await asyncio.to_thread(replay, self.model, meta, state.startYear, rules, meta.journal)
+        seconds = time.perf_counter() - started
+        expected, actual = state_checksum(state), state_checksum(replayed)
+        live, again = event_digest(sorted(archived, key=lambda e: e.seq)), event_digest(sorted(events, key=lambda e: e.seq))
+        return {"replayable": True, "matches": expected == actual and live == again, "seconds": round(seconds, 2),
+                "commands": len(meta.journal), "date": state.date.label,
+                "state": {"live": expected, "replayed": actual, "matches": expected == actual},
+                "history": {"live": live, "replayed": again, "liveCount": len(archived), "replayedCount": len(events),
+                            "matches": live == again}}
 
     def archive(self, scenario_id: str) -> HistoryArchive:
         return HistoryArchive(self.store.history_path(scenario_id))
 
     def _backstory(self, s: Session) -> int:
         """Reconstructs the past of anyone on record without one (everyone, at creation); returns how many events it added."""
-        if all(p.backstory or not p.alive for p in s.state.cast.people):
-            return 0
-        cast, events = with_backstory(s.state.cast, s.state.historySeq, s.state.date.day, s.state.settlements, self.rules(s), s.state.seed)
+        s.state, events = with_past(s.state, self.rules(s))
         self.archive(s.meta.id).append(events)
-        s.state = s.state.model_copy(update={"cast": cast, "historySeq": s.state.historySeq + len(events)})
         return len(events)
 
     def _freeze(self, s: Session) -> None:
@@ -264,19 +311,26 @@ class ScenarioManager:
         return complete(s.meta.rules, self.model.config.rules) if s.meta.rules else freeze(self.model.config.rules)
 
     def _advance(self, s: Session, days: int) -> None:
-        self._apply(s, *advance(s.state, days, self.rules(s)))
+        started = time.perf_counter()
+        state, months = advance(s.state, days, self.rules(s))
+        self._apply(s, state, months, days, time.perf_counter() - started)
 
     async def _advance_off_loop(self, s: Session, days: int) -> None:
         """Computes the step in a worker thread so the API keeps answering; the result is applied back on the loop."""
         s.busy = True
+        started = time.perf_counter()
         try:
             state, months = await asyncio.to_thread(advance, s.state, days, self.rules(s))
         finally:
             s.busy = False
-        self._apply(s, state, months)
+        self._apply(s, state, months, days, time.perf_counter() - started)
 
-    def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]]) -> None:
+    def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]], days: int, seconds: float) -> None:
         s.state = state
+        self._journal(s, {"op": "advance", "days": days})
+        if months:
+            s.perf.append({"day": state.date.day, "days": days, "months": len(months), "ms": round(seconds * 1000, 1),
+                           "events": sum(len(m["events"]) for m in months), "people": len(state.cast.people)})
         self.archive(s.meta.id).append([e for m in months for e in m["events"]])
         for m in months:
             for incident in m["incidents"]:     # what happened during the month, then its close
@@ -363,8 +417,10 @@ class ScenarioManager:
         if len(self.store.snapshots(scenario_id)) >= self.limits["maxSnapshots"]:
             raise ApiError(409, "limit_reached", f"At most {self.limits['maxSnapshots']} snapshots per scenario")
         s.meta = s.meta.model_copy(update={"snapshotSeq": s.meta.snapshotSeq + 1})
+        self._journal(s, {"op": "mark"})     # later steps start a new command, so the snapshot's prefix stays exact
         meta = SnapshotMeta(id=f"snap-{s.meta.snapshotSeq:03d}", label=label.strip() or s.state.date.label, date=s.state.date,
-                            checksum=s.checksum, createdAt=_now())
+                            checksum=s.checksum, createdAt=_now(),
+                            journalAt=len(s.meta.journal) if s.meta.journal is not None else None)
         self.store.save_snapshot(scenario_id, meta.model_dump(), s.state.model_dump())
         self._event(s, "snapshot", f"Snapshot “{meta.label}” saved", snapshotId=meta.id)
         self._persist(s)
@@ -376,6 +432,8 @@ class ScenarioManager:
             raise ApiError(409, "running", "Pause the scenario before restoring a snapshot")
         meta, state = self._snapshot_state(scenario_id, snapshot_id)
         s.state = state
+        journal = s.meta.journal[:meta.journalAt] if s.meta.journal is not None and meta.journalAt is not None else None
+        s.meta = s.meta.model_copy(update={"journal": journal})
         self.archive(scenario_id).cut(state.historySeq)
         self._event(s, "restored", f"Restored snapshot “{meta.label}” ({meta.date.label})", snapshotId=meta.id)
         self._persist(s)

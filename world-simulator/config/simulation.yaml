@@ -137,3 +137,20 @@ history:
     rivalry: [social, 3, participants]
     lost-parent: [family, 4, private]
     met-player: [social, 3, participants]
+
+# Events a designer injects into a scenario (PR8). Each is canonical history with source
+# "intervention"; its consequences then run through the normal simulation.
+interventions:
+  disaster:                     # a business is lost at once: its workers lose work, its output stops
+    category: settlement
+    importance: 5
+    visibility: public
+    causes: { collapse: collapsed, fire: burned down, flood: was flooded }
+  granary-loss:                 # blight or rats spoil part of a town's food store
+    category: settlement
+    importance: 5
+    visibility: public
+  bandit-surge:                 # more outlaws gather on one road or sea lane
+    category: crime
+    importance: 4
+    visibility: public

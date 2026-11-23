@@ -1,8 +1,6 @@
 """History and character research: a person's timeline, relationships, knowledge and biography context, and single events."""
 
-import json
 from collections.abc import Callable
-from contextlib import closing
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Query
@@ -83,11 +81,7 @@ def history_router(manager: ScenarioManager, reply: Callable[..., JSONResponse])
         if found is None:
             raise ApiError(404, "not_found", f"No event {event_id}", {"id": event_id})
         who = names(state)
-        with closing(archive._db()) as db:  # consequences: later events that name this one as a cause
-            rows = db.execute("SELECT body FROM events WHERE seq > ? AND body LIKE ? ORDER BY seq LIMIT 20",
-                              (found.seq, f'%"{event_id}"%')).fetchall()
-        consequences = [e for e in (HistoryEvent(**json.loads(r[0])) for r in rows) if event_id in e.causedBy]
         return reply({**shown(found, label, who), "causes": [shown(e, label, who) for e in archive.many(found.causedBy)],
-                      "consequences": [shown(e, label, who) for e in consequences]})
+                      "consequences": [shown(e, label, who) for e in archive.consequences(found)]})
 
     return router
