@@ -12,6 +12,7 @@ Production, food, markets, prices, caravans, bandits and pirates, guards, trader
 Persistent named people from the NPC budget: [docs/05-persistent-people-2026-11-23.md](docs/05-persistent-people-2026-11-23.md).
 Life stories, canonical history, relationships and biography context: [docs/06-life-stories-and-history-2026-11-23.md](docs/06-life-stories-and-history-2026-11-23.md).
 Local-LLM biographies and the Dialogue Lab: [docs/07-narration-and-dialogue-2026-11-23.md](docs/07-narration-and-dialogue-2026-11-23.md).
+Interventions, deterministic replay, comparison, causal traces and consistency checks: [docs/08-validation-lab-2026-11-23.md](docs/08-validation-lab-2026-11-23.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -144,6 +145,9 @@ Writes (`POST`) must send `application/json`. Full table in
 | `GET /api/scenarios/{id}/history/events/{eventId}` | one canonical event with causes and consequences |
 | `GET /api/llm` · `/api/llm/jobs` | local model status · narration jobs |
 | `…/people/{personId}/biographies` · `…/conversations` · `/conversations/{cid}/messages` | prose · Dialogue Lab |
+| `GET · POST /api/scenarios/{id}/interventions…` · `POST …/replay` | inject an event · replay from the baseline |
+| `GET /api/scenarios/{id}/validation` · `/metrics` · `/history/events/{eventId}/trace` | consistency checks · timings · causal trace |
+| `GET /api/compare?a=&b=&aSnapshot=&bSnapshot=` | compare two scenarios or a scenario and a snapshot |
 
 ## Configuration
 
@@ -153,7 +157,7 @@ Writes (`POST`) must send `application/json`. Full table in
   importance weights.
 - `config/pilot-selection.yaml` — role evidence rules, constraints, pinned ids.
 - `config/simulation.yaml` — scenario storage, calendar, step sizes, speeds, limits,
-  baseline scenario, demography rates.
+  baseline scenario, demography rates, interventions.
 - `config/society.yaml` — household shares, housing types and mix, labour participation
   and sector shares, business templates, need thresholds (all authored assumptions).
 - `config/llm.yaml` — local model server and model, token limits, job concurrency, dialogue memory.
@@ -192,9 +196,9 @@ later exports can join on them.
 
 - Simulated monthly: cohort demography, households, housing occupancy, employment, then
   production, food, market clearing, caravans with their traders, bandits, pirates and
-  guards, traders' households, and business openings and closures. No construction,
-  no scheduled interventions. Named people (PR5) are a sample of the aggregate population
-  kept to the NPC budget; they do not move between settlements. Market members outside
+  guards, traders' households, and business openings and closures. No construction;
+  interventions apply at once, never on a schedule. Named people are a sample of the aggregate
+  population kept to the NPC budget. Market members outside
   the scope are fixed Azgaar flows. All rates are authored assumptions.
 - Pilot roles are hypotheses from Azgaar production records, not specialisations.
 - The atlas draws settlements and routes, not coastlines or terrain.

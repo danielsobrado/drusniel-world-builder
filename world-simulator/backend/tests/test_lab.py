@@ -91,6 +91,8 @@ def test_a_branch_with_a_disaster_compares_against_its_parent_and_replays(fresh_
 
     before = lab.compare({"scenarioId": branch, "snapshotId": None}, {"scenarioId": "baseline-pilot", "snapshotId": snap.id})
     assert not before["dates"]["same"] and before["history"]["afterA"] > 0
+    forked_at = manager._snapshot_state("baseline-pilot", snap.id)[1].historySeq
+    assert before["history"]["shared"] == forked_at and before["history"]["afterB"] == 0, "a snapshot is a prefix of what followed"
 
 
 def test_trace_validation_and_metrics_after_a_collapse(fresh_model):

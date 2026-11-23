@@ -6,6 +6,7 @@ import { ApiView, Empty } from '../components/StateViews';
 const CATEGORIES = ['birth', 'family', 'education', 'career', 'wealth', 'travel', 'social', 'crime', 'conflict', 'health', 'trade'];
 const SOURCE_LABEL: Record<string, string> = {
   simulation: 'simulated', 'generated-prehistory': 'reconstructed past', inferred: 'inferred', imported: 'imported',
+  player: 'with the traveller', intervention: 'intervention',
 };
 
 /** The person's life as canonical events, filterable by category, importance and origin; an event opens in the inspector. */

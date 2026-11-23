@@ -128,7 +128,8 @@ class ScenarioManager:
 
     def status(self, s: Session) -> dict[str, Any]:
         return {
-            **s.meta.model_dump(exclude={"rules"}),
+            **s.meta.model_dump(exclude={"rules", "journal"}),
+            "replayable": s.meta.journal is not None,
             # False when the YAML has changed since the scenario froze its rules; it keeps running under its own.
             "rulesCurrent": s.meta.rulesFingerprint == fingerprint(freeze(self.model.config.rules)),
             "schemaVersion": s.state.schemaVersion,

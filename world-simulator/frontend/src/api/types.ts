@@ -135,6 +135,8 @@ export interface ScenarioStatus {
   settlementIds: string[]; date: CalendarDate; running: boolean; speed: number; population: number;
   checksum: string; snapshots: number; error: string | null; readOnly: string | null; schemaVersion: number;
   rulesFingerprint?: string | null; rulesCurrent?: boolean;
+  /** Has a complete command journal, so it can be replayed from its baseline (PR8). */
+  replayable?: boolean;
 }
 
 export interface Cohorts { children: number; adults: number; elders: number }
@@ -272,7 +274,7 @@ export interface EconomyView {
 
 /* ---- History and character research (PR6) ---- */
 
-export type EventSource = 'simulation' | 'imported' | 'generated-prehistory' | 'inferred';
+export type EventSource = 'simulation' | 'imported' | 'generated-prehistory' | 'inferred' | 'player' | 'intervention';
 export interface HistoryEventView {
   id: string; seq: number; day: number; date: string; datePrecision: 'day' | 'month' | 'year' | 'approximate'; kind: string;
   category: string; source: EventSource; settlementId: string | null; locationId: string | null; routeId: string | null;

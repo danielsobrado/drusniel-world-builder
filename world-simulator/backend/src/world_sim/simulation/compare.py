@@ -33,7 +33,7 @@ def _settlements(a: ScenarioState, b: ScenarioState) -> list[dict[str, Any]]:
         made_a = {line.good: line.produced for line in s.economy.production}
         made_b = {line.good: line.produced for line in t.economy.production}
         production = [{"good": g, **_pair(made_a.get(g, 0.0), made_b.get(g, 0.0))} for g in sorted(set(made_a) | set(made_b))
-                      if abs(made_a.get(g, 0.0) - made_b.get(g, 0.0)) > 1e-6]
+                      if abs(made_a.get(g, 0.0) - made_b.get(g, 0.0)) >= 0.005]      # what shows at two decimals
         rows.append({"settlementId": s.settlementId, "name": s.name, "measures": {k: _pair(ma[k], mb[k]) for k in ma},
                      "production": production})
     return rows

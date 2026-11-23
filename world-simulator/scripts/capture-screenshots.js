@@ -155,6 +155,28 @@ try {
   await page.waitForTimeout(300);
   await shot('22-dialogue');
 
+  // PR8: snapshot, strike the business with most named workers, a month on, replay, trace and compare.
+  await workspace('Simulation');
+  await page.getByLabel('Snapshot label').fill('Before the disaster');
+  await page.getByRole('button', { name: 'Save snapshot' }).click();
+  await page.getByText('Before the disaster').first().waitFor();
+  await workspace('Validation Lab');
+  await page.getByRole('combobox', { name: 'Target' }).waitFor();
+  await page.getByLabel('Note').fill('the lower gallery gave way');
+  await page.getByRole('button', { name: /Apply on/ }).click();
+  await page.locator('.recorded').waitFor();
+  await page.getByRole('button', { name: '+Month' }).click();
+  await page.getByRole('list', { name: 'Causal trace' }).getByText('1 on').waitFor();
+  await page.getByRole('button', { name: 'Replay from the baseline' }).click();
+  await page.getByText('Identical').waitFor({ timeout: 120000 });
+  await page.locator('.workspace').evaluate((el) => { el.scrollTop = 0; });
+  await shot('23-validation-lab');
+  await page.getByRole('button', { name: 'Compare' }).click();
+  await page.getByRole('table', { name: 'Settlements compared' }).waitFor({ timeout: 60000 });
+  await page.getByRole('heading', { name: 'Compare' }).scrollIntoViewIfNeeded();
+  await page.locator('.workspace').evaluate((el) => { const s = el.querySelector('section[aria-label="Comparison"]'); if (s) el.scrollTop = s.offsetTop - 8; });
+  await shot('24-comparison');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

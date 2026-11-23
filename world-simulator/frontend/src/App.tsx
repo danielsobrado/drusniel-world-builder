@@ -26,6 +26,7 @@ import { RoadsWorkspace } from './roads/RoadsWorkspace';
 import { PeopleWorkspace } from './people/PeopleWorkspace';
 import { DialogueLab } from './narration/DialogueLab';
 import { useLlm } from './narration/useLlm';
+import { LabWorkspace } from './lab/LabWorkspace';
 
 export default function App() {
   const { layout, update, reset } = useLayout();
@@ -54,6 +55,7 @@ export default function App() {
     roads: () => <RoadsWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
     people: () => <PeopleWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
     dialogue: () => <DialogueLab sim={sim} llm={llm.status} />,
+    lab: () => <LabWorkspace sim={sim} onSelect={select} />,
   };
   const workspace = views[layout.workspace] ? layout.workspace : 'overview';
 
@@ -63,7 +65,7 @@ export default function App() {
       <WorkspaceBar world={world.data} workspaces={WORKSPACES} active={workspace} onSelect={go} layout={layout} update={update} />
       <div className={`body${layout.leftOpen ? ' left-open' : ''}${layout.rightOpen ? ' right-open' : ''}`}>
         <IconRail workspaces={WORKSPACES} active={workspace} onSelect={go} />
-        {layout.leftOpen && (['simulation', 'households', 'businesses', 'economy', 'roads', 'people', 'dialogue'].includes(workspace)
+        {layout.leftOpen && (['simulation', 'households', 'businesses', 'economy', 'roads', 'people', 'dialogue', 'lab'].includes(workspace)
           ? <ScenarioExplorer sim={sim} />
           : <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />)}
         <main className="workspace" aria-label={WORKSPACES.find((w) => w.id === workspace)?.label}>{views[workspace]()}</main>

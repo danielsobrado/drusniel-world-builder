@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ScenarioStatus, SimulationConfig, SnapshotMeta } from '../api/types';
+import type { HistoryEventView, ScenarioStatus, SimulationConfig, SnapshotMeta } from '../api/types';
 import { ApiRequestError, getJson, postJson, useApi } from '../api/worldApi';
 
 const KEY = 'drusniel-world-simulator.activeScenario.v1';
@@ -23,6 +23,8 @@ export interface Simulation {
   snapshot: (label: string) => Promise<SnapshotMeta | null>;
   restore: (snapshotId: string) => Promise<void>;
   create: (body: Record<string, unknown>) => Promise<ScenarioStatus | null>;
+  /** Injects an event (disaster, granary loss, outlaw surge) at the current day; returns the events recorded. */
+  intervene: (body: Record<string, unknown>) => Promise<HistoryEventView[] | null>;
   clearError: () => void;
 }
 
@@ -92,6 +94,7 @@ export function useSimulation(): Simulation {
       if (created) select(created.id);
       return created;
     },
+    intervene: async (body) => (active ? act<HistoryEventView[]>(`${base}/interventions`, body) : null),
     clearError: () => setError(null),
   };
 }

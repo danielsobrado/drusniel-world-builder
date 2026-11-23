@@ -48,7 +48,9 @@ class Lab:
             name = f"{s.meta.name} · {snap.label}"
         else:
             state, name = s.state, s.meta.name
-        return state, self.manager.archive(scenario_id).query(before=state.historySeq, limit=None), name
+        # In recording order: the archive sorts by day, and reconstructed pasts (negative days) are numbered when recorded.
+        events = sorted(self.manager.archive(scenario_id).query(before=state.historySeq, limit=None), key=lambda e: e.seq)
+        return state, events, name
 
     def compare(self, a: dict[str, str | None], b: dict[str, str | None]) -> dict[str, Any]:
         state_a, events_a, name_a = self._ref(a)

@@ -27,8 +27,8 @@ function fakeSim(extra: Partial<Simulation> = {}): Simulation {
     config: { stepSizes: { day: 1, week: 7, month: 30, year: 360 }, speeds: [1, 7, 30, 120], startYear: 1212, scopeTypes: ['pilot'], limits: { maxScopeSettlements: 120 } },
     scenarios: [status()], active: status(), version: 'v1', busy: false, error: null,
     select: vi.fn(), step: vi.fn(async () => {}), run: vi.fn(async () => {}), pause: vi.fn(async () => {}),
-    snapshot: vi.fn(async () => null), restore: vi.fn(async () => {}), create: vi.fn(async () => null), clearError: vi.fn(),
-    ...extra,
+    snapshot: vi.fn(async () => null), restore: vi.fn(async () => {}), create: vi.fn(async () => null), intervene: vi.fn(async () => null),
+    clearError: vi.fn(), ...extra,
   };
 }
 
