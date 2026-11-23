@@ -79,7 +79,10 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
             broken = check_invariants(s.population, s.cohorts, s.society)
             if broken:
                 raise AssertionError(f"{s.settlementId} month {month_index}: {'; '.join(broken)}")
-        history.append(HistoryPoint(day=day, population={s.settlementId: s.population for s in settlements}))
+        history.append(HistoryPoint(day=day, population={s.settlementId: s.population for s in settlements},
+                                    labour={s.settlementId: s.society.employment.labourSupply for s in settlements},
+                                    unemployed={s.settlementId: s.society.employment.unemployed for s in settlements},
+                                    bandits=sum(r.bandits for r in trade.routes)))
         employed = sum(s.society.employment.employed for s in settlements)
         supply = sum(s.society.employment.labourSupply for s in settlements)
         months.append({

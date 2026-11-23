@@ -16,6 +16,12 @@ A second part puts **roads, bandits and caravan masters** on top of that:
 - named traders whose personality decides how many guards they hire and whether they
   smuggle past the market tax. Each trader keeps a scorecard.
 
+A third part:
+- gives traders purses and households, so they live on their earnings, run into debt
+  and invest;
+- sends ports' cargo by sea, where pirates wait;
+- has towns open businesses for their idle and close the ones nobody works.
+
 State is now schema v4. v1–v3 scenarios and snapshots migrate on load.
 
 ## Sources
@@ -153,8 +159,45 @@ Each month they are resized to the guards the traders asked for, and filled from
 labour pool like any other business. Every guard post is one less idle hand for the
 bandits.
 
-**Incidents.** Raids, arrests and dismissals go into the event log, dated to the month
-they happened.
+**Incidents.** Raids, arrests, dismissals, openings and closures go into the event
+log, dated to the month they happened.
+
+## Traders' money, sea lanes and business turnover
+
+**Purses and households.** Every master has a household (1–2 adults, 0–4 children) and
+a starting purse of 20–80.
+- **Earnings:** commission and evaded tax go into the purse, and fines come out of it.
+- **Upkeep:** each month the household's upkeep is spent in the home town:
+  `0.35 × (adults + children ÷ 2)`, × 0.7–1.3 by greed.
+- **Debt:** a purse below zero is debt, which adds up to 0.6 to the urge to smuggle,
+  reached at a debt of 50. An honest master can be pushed into hiding cargo.
+- **Investment:** a master with more than 60 funds a business in their home town. They
+  own it and draw 0.05 a month per worker from the town.
+- **Accounting:** the scorecard adds upkeep, dividends and money invested; the purse
+  always equals what the scorecard explains (tested).
+
+**Business turnover** (`economy/turnover.py`).
+- **Openings:** when 40 or more people are out of work, a town opens up to two
+  businesses a month in the sector furthest below its share for the town's class.
+  These are generic kinds only; Azgaar-evidenced kinds stay where the map put them.
+- **Funding:** the richest master with savings funds an opening; otherwise the town's
+  treasury, if it stays above 50. An opening costs 8 per post.
+- **Closures:** a business without Azgaar evidence that has had no worker for six months
+  closes.
+- **Result:** unemployment on the pilot now holds near 200 instead of climbing past
+  1,000, and bandit bands stay near 10 instead of 40.
+- **Sshanderi:** its masters earn little and its treasury is thin. It cannot fund
+  openings, so its idle keep a small band on its road, and its masters drift into debt.
+
+**Sea lanes and pirates.**
+- **Choosing the sea:** connectivity now also builds a sea graph from Azgaar's
+  `searoutes`. A port whose market centre is a port sails when the ship (60 miles a
+  day) is quicker than the road.
+- **Pirates:** an Azgaar `pirates` marker within 220 px of the lane founds a crew. It
+  works like a bandit band, recruiting from the idle of both ports, and raids are
+  reported as pirates on the sea lane.
+- **On Eldara:** Qeqashuth → Chix sails in 7 days instead of riding 14, past the pirates
+  sighted at (494, 760). The pilot has no ports, so the pilot has no sea lanes.
 
 **Ten years on the pilot** (seed 1212):
 - Bands grow with unemployment: 6 bandits after a year, about 40 after ten.
@@ -182,6 +225,11 @@ they happened.
 | Raids, guards and smuggling by personality; dismissals | `test_a_decade_of_bandits_guards_and_smugglers` |
 | Saves verify after a reload; v3 saves gain roads | `test_state_round_trips_through_json_unchanged`, `test_v3_states_gain_roads_and_traders` |
 | Scorecards and incidents in the UI | Roads & Traders workspace and the trader inspector (screenshots 15–16) |
+| Openings hold unemployment; traders invest and own | `test_openings_hold_unemployment_and_traders_invest` |
+| Purses account for every flow; debt drives smuggling | `test_a_traders_purse_accounts_for_every_flow`, `test_debt_pushes_an_honest_enough_trader_to_smuggle` |
+| Idle businesses close, evidenced ones never | `test_unstaffed_businesses_without_evidence_close` |
+| Pirates on an Azgaar sea lane | `test_pirates_haunt_a_sea_lane_founded_by_an_azgaar_sighting` |
+| Unemployment views | Businesses & Employment, Unemployment section (screenshot 17) |
 
 ## API
 
@@ -215,6 +263,19 @@ they happened.
 
 The caravan tables gain the master, guards, and any raid or smuggling incident.
 
+**Traders' money in the UI:**
+- Scorecards show each master's purse (debt in warning ink) and the businesses they
+  own.
+- The trader inspector shows their household, purse, upkeep, investments and dividends,
+  with links to the businesses they funded.
+- The business inspector names who funded an opened business and how long it has sat
+  idle.
+
+**Unemployment** (Businesses & Employment):
+- the unemployment rate over time for each settlement;
+- a "Where the idle go" table: labour force, people without work and rate, businesses
+  opened and closed, new posts filled, guard posts, and bandits on the town's road.
+
 The population and price charts now share one `IndexedTrend` component.
 
 ![Economy](screenshots/12-economy.png)
@@ -222,18 +283,17 @@ The population and price charts now share one `IndexedTrend` component.
 ![Caravans](screenshots/14-caravans.png)
 ![Roads and traders](screenshots/15-roads-and-traders.png)
 ![Incidents](screenshots/16-incidents.png)
+![Unemployment](screenshots/17-unemployment.png)
 
 ## Not in PR4
 
 - **Markets as places:** trade goes through the Azgaar market centre. There is no
-  direct settlement-to-settlement trade and no caravan capacity. Bandits work only the
-  roads to market, not the sea; the map's pirate markers are unused.
-- **Traders' money:** commissions and evaded tax are recorded on the scorecard, but
-  traders do not yet spend them or have households. They are the first persistent
-  characters; the rest arrive with PR5.
+  direct settlement-to-settlement trade and no caravan capacity.
+- **Business economics:** businesses have no revenue or costs of their own. New kinds
+  are chosen by sector share, not by demand for goods, and dividends are paid by the
+  town.
 - **Outside the scope:** the other market members are fixed Azgaar flows, and they do
   not eat rations. That is why the pilot's food surplus has no buyer.
-- **No business turnover or construction:** wages are not paid from revenue, and
-  treasuries only record the balance of trade.
+- **No construction:** housing is still the baseline stock.
 - **No scheduled shocks:** shocks are only possible by editing state, as the tests do.
   Interventions belong to a later PR.

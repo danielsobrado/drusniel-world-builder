@@ -11,9 +11,9 @@ import random
 from dataclasses import dataclass, field
 from typing import Any
 
-from .contracts import Caravan, Market, Route, Scorecard, SettlementEconomy, Trader
+from .contracts import Caravan, Market, Route, SettlementEconomy, Trader
 from .production import r4
-from .roads import personality
+from .roads import new_trader
 
 
 @dataclass
@@ -76,7 +76,9 @@ def _gate(ctx: TripContext, trader: Trader, caravan: Caravan, market: Market) ->
     rates = {g: market.taxRates.get(g, s["defaultTaxRate"]) for g in caravan.cargo}
     tax = sum(u * prices[g] * rates[g] for g, u in caravan.cargo.items())
     safety = min(1.5, ctx.safety.get(market.centerSettlementId, 1.0))
-    wish = (p.greed - p.honesty) * 1.5 - p.caution * s["inspection"] * safety
+    t = ctx.cfg["traders"]
+    debt = t["debtPressure"] * min(1.0, max(0.0, -trader.purse) / t["debtScale"])
+    wish = (p.greed - p.honesty) * 1.5 + debt - p.caution * s["inspection"] * safety
     hidden = max(0.0, min(s["maxHidden"], wish)) * s["learning"] ** trader.scorecard.caught
     if hidden <= 0.01:
         return caravan, {"tax": tax, "confiscated": 0.0, "fine": 0.0, "evaded": 0.0}
@@ -96,10 +98,8 @@ def _replace(ctx: TripContext, trader: Trader, route: Route) -> None:
     reserve = list(route.reserve)
     name = reserve.pop(0) if reserve else f"Trader {ctx.trader_seq}"
     ctx.routes[route.id] = ctx.routes[route.id].model_copy(update={"reserve": reserve})
-    ctx.traders.append(Trader(id=f"npc:trader:{ctx.trader_seq}", name=name, settlementId=trader.settlementId,
-                              settlementName=trader.settlementName, routeId=route.id,
-                              personality=personality(random.Random(f"{ctx.seed}:hire:{ctx.trader_seq}")),
-                              scorecard=Scorecard(reputation=ctx.cfg["traders"]["reputation"]["start"]), busyUntil=ctx.day))
+    ctx.traders.append(new_trader(f"npc:trader:{ctx.trader_seq}", name, trader.settlementId, trader.settlementName, route.id,
+                                  random.Random(f"{ctx.seed}:hire:{ctx.trader_seq}"), ctx.cfg, ctx.day))
     ctx.incidents.append({"kind": "dismissed", "message": f"{trader.name} of {trader.settlementName} was let go after their "
                           f"reputation fell to {trader.scorecard.reputation:.0f}; {name} takes over the road", "trader": trader.id})
 
@@ -149,11 +149,13 @@ def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Ca
         "fines": round(card.fines + money["fine"], 2), "raids": card.raids + bool(lost_value),
         "lossesValue": round(card.lossesValue + lost_value, 2), "guardsHired": card.guardsHired + guards,
         "reputation": round(max(0.0, min(100.0, reputation)), 1)})
-    trader = trader.model_copy(update={"scorecard": card, "busyUntil": ctx.day + 2 * route.days})
+    purse = trader.purse + commission + money["evaded"] - money["fine"]
+    trader = trader.model_copy(update={"scorecard": card, "busyUntil": ctx.day + 2 * route.days, "purse": round(purse, 2)})
     ctx.traders = [trader if t.id == trader.id else t for t in ctx.traders]
     if lost_value:
         band = f" ({route.lair})" if route.lair else ""
-        ctx.incidents.append({"kind": "raid", "message": f"Bandits{band} on the {route.settlementName} road robbed {trader.name}'s caravan "
+        who, way = ("Pirates", "sea lane") if route.mode == "sea" else ("Bandits", "road")
+        ctx.incidents.append({"kind": "raid", "message": f"{who}{band} on the {route.settlementName} {way} robbed {trader.name}'s caravan "
                               f"of {lost_value:,.1f} in goods ({guards} guard{'' if guards == 1 else 's'})",
                               "trader": trader.id, "value": round(lost_value, 2)})
     if caught:

@@ -41,10 +41,12 @@ def _v2_to_v3(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
 def _v3_to_v4(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     """v4 adds roads, bandits and traders around the saved economy, and the markets' Azgaar tax rates."""
     trade = Trade(**raw["trade"])
-    members = [(_record(model, s), SettlementEconomy(**s["economy"])) for s in raw["settlements"]]
+    members = [(_record(model, s), SettlementEconomy(**{**s["economy"], "settlementClass": _record(model, s)["class"]}))
+               for s in raw["settlements"]]
     routes, traders, markets = initial_roads(model, members, trade.markets, raw["seed"], model.config.economy)
     trade = trade.model_copy(update={"routes": routes, "traders": traders, "traderSeq": len(traders), "markets": markets})
-    return {**raw, "schemaVersion": 4, "trade": trade.model_dump()}
+    settlements = [{**s, "economy": e.model_dump()} for s, (_, e) in zip(raw["settlements"], members, strict=True)]
+    return {**raw, "schemaVersion": 4, "settlements": settlements, "trade": trade.model_dump()}
 
 
 STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4}

@@ -65,6 +65,9 @@ class Business(Contract):
     wage: int = Field(ge=0)          # copper per worker-day
     filled: int = Field(ge=0)
     evidence: str | None = None      # why it exists, when sourced from Azgaar
+    ownerId: str | None = None       # the trader who funded it, for businesses opened during a run
+    openedDay: int | None = None
+    idleMonths: int = 0              # months in a row with no worker; opened businesses close after a while
 
 
 class Employment(Contract):
@@ -123,6 +126,9 @@ class CalendarDate(Contract):
 class HistoryPoint(Contract):
     day: int
     population: dict[str, int]      # settlementId -> inhabitants at month close
+    labour: dict[str, int] = {}     # settlementId -> labour force (v4 runs onwards)
+    unemployed: dict[str, int] = {}
+    bandits: int = 0                # on every road in scope
 
 
 class ScenarioState(Contract):
@@ -167,7 +173,7 @@ class Event(Contract):
     day: int
     date: str
     kind: Literal["created", "branched", "stepped", "month", "snapshot", "restored", "run", "paused", "error", "migrated",
-                  "raid", "smuggling", "dismissed"]
+                  "raid", "smuggling", "dismissed", "opened", "closed"]
     message: str
     data: dict[str, int | float | str | None] = {}
 

@@ -33,7 +33,8 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
             centres[market] = centre
         rural, cells = hinterland(model, record, e["food"]["hinterlandRadiusPx"])
         econ = SettlementEconomy(
-            marketId=market, travelDays=travel.days(record, centre) if centre else 0, baselinePopulation=record["population"],
+            marketId=market, settlementClass=record["class"], travelDays=travel.days(record, centre) if centre else 0,
+            baselinePopulation=record["population"],
             inventory={}, production=lines, consumption=consumption, food=FoodBalance(ruralPopulation=rural, hinterlandCells=cells),
             treasury=float(az.burgs[record["sourceId"]].get("treasury") or 0))
         local, from_hinterland, wanted = food_flows(econ, society, population, cfg)

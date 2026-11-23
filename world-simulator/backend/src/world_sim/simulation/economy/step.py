@@ -16,6 +16,7 @@ from .escorts import KIND, resize_escorts
 from .market import Clearing, Member
 from .production import run_production, staffing
 from .trips import TripContext, run_trip
+from .turnover import household_month, turnover
 
 TOLERANCE = 1e-3   # per stored quantity: inventories and stock are kept to four decimals
 
@@ -118,13 +119,21 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
     trade, led, incidents = _roads(settlements, trade, econs, new, seed, day, cfg)
     trade = trade.model_copy(update={"caravans": on_road + led})
 
+    filled = {b.id: b.filled for s in settlements for b in s.society.businesses}
+    traders = household_month(trade.traders, econs, filled, cfg["economy"])
     updated = []
     for s in settlements:
         society = resize_escorts(s.society, s.settlementId, s.sourceId, s.name, trade.routes, cfg["economy"])
-        if society is not s.society:
+        restaff = society is not s.society
+        home = {"id": s.settlementId, "sourceId": s.sourceId, "name": s.name, "class": econs[s.settlementId].settlementClass}
+        society, econs[s.settlementId], traders, changes, opened = turnover(
+            society, econs[s.settlementId], traders, settlement=home, day=day, cfg=cfg["economy"], society_cfg=cfg["society"])
+        incidents.extend(changes)
+        if restaff or opened:
             society = update_society(society, s.cohorts, cfg["society"])
         econ = econs[s.settlementId]
         updated.append(s.model_copy(update={"economy": econ, "society": with_food_need(society, econ, cfg)}))
+    trade = trade.model_copy(update={"traders": traders})
 
     after = _totals(list(econs.values()), trade)
     count = sum(len(e.inventory) for e in econs.values()) + sum(len(m.goods) for m in trade.markets) + 4

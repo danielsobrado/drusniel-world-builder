@@ -58,10 +58,12 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
 
     @router.get("/scenarios/{scenario_id}/businesses/{business_id}")
     async def business(scenario_id: str, business_id: str) -> JSONResponse:
-        for s in manager.session(scenario_id).state.settlements:
+        state = manager.session(scenario_id).state
+        owners = {t.id: t.name for t in state.trade.traders}
+        for s in state.settlements:
             for b in s.society.businesses:
                 if b.id == business_id:
-                    return reply({**b.model_dump(), "settlementName": s.name})
+                    return reply({**b.model_dump(), "settlementName": s.name, "ownerName": owners.get(b.ownerId or "")})
         raise ApiError(404, "not_found", f"No business {business_id}", {"id": business_id})
 
     @router.get("/scenarios/{scenario_id}/economy")
@@ -83,13 +85,16 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
     @router.get("/scenarios/{scenario_id}/traders/{trader_id}")
     async def trader(scenario_id: str, trader_id: str) -> JSONResponse:
         """One caravan master's scorecard and the caravans they led that are still on record, newest first."""
-        trade = manager.session(scenario_id).state.trade
+        state = manager.session(scenario_id).state
+        trade = state.trade
         found = next((t for t in trade.traders if t.id == trader_id), None)
         if found is None:
             raise ApiError(404, "not_found", f"No trader {trader_id}", {"id": trader_id})
         led = [c.model_dump() for c in reversed([*trade.delivered, *trade.caravans]) if c.traderId == trader_id]
         route = next((r.model_dump() for r in trade.routes if r.id == found.routeId), None)
-        return reply({**found.model_dump(), "route": route, "caravans": led})
+        owned = [{"id": b.id, "name": b.name, "filled": b.filled, "staff": b.staff}
+                 for s in state.settlements for b in s.society.businesses if b.id in set(found.owns)]
+        return reply({**found.model_dump(), "route": route, "caravans": led, "businesses": owned})
 
     @router.post("/scenarios/{scenario_id}/step")
     async def step(scenario_id: str, body: StepRequest) -> JSONResponse:

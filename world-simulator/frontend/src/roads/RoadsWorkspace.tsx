@@ -5,7 +5,7 @@ import { ApiView, Empty } from '../components/StateViews';
 import type { Simulation } from '../simulation/useSimulation';
 import { Reputation, TraitBars } from './TraderParts';
 
-const INCIDENTS = new Set(['raid', 'smuggling', 'dismissed']);
+const INCIDENTS = new Set(['raid', 'smuggling', 'dismissed', 'opened', 'closed']);
 
 function Tiles({ view }: { view: EconomyView }) {
   const bandits = view.routes.reduce((a, r) => a + r.bandits, 0);
@@ -35,8 +35,9 @@ function RoadsTable({ routes, traders }: { routes: TradeRoute[]; traders: Trader
         <th className="num">Last month ±</th><th className="num">Raids</th><th className="num">Taken</th><th className="num">Guards asked</th><th className="num">Masters</th></tr></thead>
       <tbody>{routes.map((r) => (
         <tr key={r.id}>
-          <td>{r.settlementName} → {r.centerName}</td><td className="num">{r.days}</td><td className="num">{fmt(r.bandits)}</td>
-          <td className="muted">{r.lair ? `${r.lair} (Azgaar lair, never below ${r.floor})` : 'the idle of both towns'}</td>
+          <td>{r.settlementName} → {r.centerName}{r.mode === 'sea' && <span className="chip chip-muted">sea lane</span>}</td>
+          <td className="num">{r.days}</td><td className="num">{fmt(r.bandits)}</td>
+          <td className="muted">{r.lair ? `${r.lair} (Azgaar ${r.mode === 'sea' ? 'sighting' : 'lair'}, never below ${r.floor})` : 'the idle of both towns'}</td>
           <td className="num">{pct(r.raidChance)}</td><td className="num">+{r.recruits} / −{r.removed}</td>
           <td className="num">{fmt(r.raids)}</td><td className="num">{r.lootValue.toFixed(1)}</td><td className="num">{r.guardsWanted}</td>
           <td className="num">{traders.filter((t) => t.routeId === r.id && t.active).length}</td>
@@ -52,7 +53,7 @@ function Scorecards({ traders, selectedId, onSelect }: { traders: Trader[]; sele
     <table className="grid" aria-label="Trader scorecards">
       <thead><tr><th>Caravan master</th><th>Home</th><th>Personality</th><th className="num">Trips</th><th className="num">Carried</th>
         <th className="num">Tax paid</th><th className="num">Evaded</th><th className="num">Caught</th><th className="num">Raided</th>
-        <th className="num">Guards / trip</th><th>Reputation</th></tr></thead>
+        <th className="num">Guards / trip</th><th className="num">Purse</th><th className="num">Owns</th><th>Reputation</th></tr></thead>
       <tbody>{rows.map((t) => {
         const c = t.scorecard;
         return (
@@ -61,7 +62,9 @@ function Scorecards({ traders, selectedId, onSelect }: { traders: Trader[]; sele
             <td><TraitBars personality={t.personality} compact /></td>
             <td className="num">{fmt(c.trips)}</td><td className="num">{c.valueCarried.toFixed(0)}</td><td className="num">{c.taxPaid.toFixed(1)}</td>
             <td className="num">{c.taxEvaded.toFixed(1)}</td><td className="num">{fmt(c.caught)}</td><td className="num">{fmt(c.raids)}</td>
-            <td className="num">{c.trips ? (c.guardsHired / c.trips).toFixed(1) : '—'}</td><td><Reputation value={c.reputation} /></td>
+            <td className="num">{c.trips ? (c.guardsHired / c.trips).toFixed(1) : '—'}</td>
+            <td className={`num${t.purse < 0 ? ' warn-ink' : ''}`}>{t.purse.toFixed(0)}</td><td className="num">{t.owns.length}</td>
+            <td><Reputation value={c.reputation} /></td>
           </tr>
         );
       })}</tbody>
@@ -97,12 +100,12 @@ export function RoadsWorkspace({ sim, onSelect, selectedId }: { sim: Simulation;
           <section className="section">
             <div className="section-head"><h2>Roads to market</h2>
               <span className="muted">bands recruit from the people without work and lose men to patrols</span></div>
-            <RoadsTable routes={v.routes} traders={v.traders} />
+            <div className="table-scroll"><RoadsTable routes={v.routes} traders={v.traders} /></div>
           </section>
           <section className="section">
             <div className="section-head"><h2>Trader scorecards</h2>
               <span className="muted">G greed · C caution · H honesty · click a master for their record</span></div>
-            <Scorecards traders={v.traders} selectedId={selectedId} onSelect={onSelect} />
+            <div className="table-scroll"><Scorecards traders={v.traders} selectedId={selectedId} onSelect={onSelect} /></div>
           </section>
           <section className="section">
             <div className="section-head"><h2>Incidents</h2><span className="muted">newest first</span></div>

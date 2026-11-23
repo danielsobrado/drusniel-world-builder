@@ -108,7 +108,9 @@ def build_settlement_connectivity(audit: dict[str, Any], routes: list[Any] | Non
     by_cell = {s["cell"]: s for s in settlements}
     ctx = {"settlements": settlements, "by_cell": by_cell, "tolerance": config["coordinateTolerance"], "positions": {}}
     graph: Graph = {}
+    sea_graph: Graph = {}            # shipping lanes, kept apart from the roads
     edge_groups: dict[tuple[Key, Key], str] = {}
+    sea_groups_seen: dict[tuple[Key, Key], str] = {}
     links: dict[str, dict[str, list[dict[str, Any]]]] = {"land": {}, "sea": {}}
     route_records: list[dict[str, Any]] = []
     unresolved: list[dict[str, Any]] = []
@@ -119,9 +121,9 @@ def build_settlement_connectivity(audit: dict[str, Any], routes: list[Any] | Non
         if not mode:
             continue
         trace = _trace_route(route, ctx)
-        if mode == "land":
-            for a, b, length in trace["segments"]:
-                _add_edge(graph, edge_groups, a, b, length, route["group"])
+        target, seen = (graph, edge_groups) if mode == "land" else (sea_graph, sea_groups_seen)
+        for a, b, length in trace["segments"]:
+            _add_edge(target, seen, a, b, length, route["group"])
         stops = trace["stops"]
         for a, b in zip(stops, stops[1:], strict=False):
             link = {"routeId": route["i"], "group": route["group"], "lengthPx": _round(b["along"] - a["along"], 2)}
@@ -202,6 +204,7 @@ def build_settlement_connectivity(audit: dict[str, Any], routes: list[Any] | Non
         "distanceUnit": audit["sourceSettings"]["distanceUnit"],
         "distanceScale": unit_scale,
         "landGraph": graph,
+        "seaGraph": sea_graph,
         "edgeGroups": edge_groups,
         "cellPositions": ctx["positions"],
         "settlements": per_settlement,

@@ -208,3 +208,5 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .trait b { font-weight: normal; text-align: right; font-variant-numeric: tabular-nums; }
 .trip-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-sm); }
 .grid tbody tr.muted td { color: var(--muted); }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll .grid { min-width: max-content; }

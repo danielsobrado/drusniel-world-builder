@@ -19,7 +19,10 @@ export function TraderDetails({ id, sim, onSelect }: { id: string; sim: Simulati
           </div>
           <dl className="fields">
             <div className="field"><dt>Home</dt><dd><button type="button" className="link" onClick={() => onSelect(t.settlementId)}>{t.settlementName}</button></dd></div>
-            <div className="field"><dt>Road</dt><dd>{t.route ? `${t.route.settlementName} → ${t.route.centerName}, ${t.route.days} days` : '—'}</dd></div>
+            <div className="field"><dt>Road</dt><dd>{t.route ? `${t.route.settlementName} → ${t.route.centerName}, ${t.route.days} days${t.route.mode === 'sea' ? ' by sea' : ''}` : '—'}</dd></div>
+            <div className="field"><dt>Household</dt><dd>{t.household.adults} adult{t.household.adults === 1 ? '' : 's'}, {t.household.children} children</dd></div>
+            <div className="field"><dt>Purse</dt><dd className={t.purse < 0 ? 'warn-ink' : undefined}>
+              {t.purse < 0 ? `in debt ${(-t.purse).toFixed(1)}, which tempts them to smuggle` : t.purse.toFixed(1)}</dd></div>
             <div className="field"><dt>Status</dt><dd>{!t.active ? `let go on ${dayLabel(t.dismissedDay ?? 0, active.date)}`
               : t.busyUntil > active.date.day ? `on the road until ${dayLabel(t.busyUntil, active.date)}` : 'in town'}</dd></div>
           </dl>
@@ -27,6 +30,12 @@ export function TraderDetails({ id, sim, onSelect }: { id: string; sim: Simulati
           <TraitBars personality={t.personality} />
           <h4>Scorecard</h4>
           <ScorecardFields card={t.scorecard} />
+          {t.businesses.length > 0 && (<>
+            <h4>Businesses funded</h4>
+            <ul className="trip-list">{t.businesses.map((b) => (
+              <li key={b.id}><button type="button" className="link" onClick={() => onSelect(b.id)}>{b.name}</button> · {b.filled} of {b.staff} posts filled</li>
+            ))}</ul>
+          </>)}
           <h4>Recent caravans</h4>
           {t.caravans.length ? (
             <ul className="trip-list">

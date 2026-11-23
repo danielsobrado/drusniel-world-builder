@@ -142,6 +142,7 @@ export interface HousingStock { type: string; label: string; buildings: number; 
 export interface Business {
   id: string; settlementId: string; kind: string; name: string; sector: string; profession: string; good: string | null;
   staff: number; wage: number; filled: number; evidence: string | null; settlementName?: string;
+  ownerId?: string | null; ownerName?: string | null; openedDay?: number | null; idleMonths?: number;
 }
 export interface Employment { labourSupply: number; employed: number; unemployed: number; vacancies: number; wageBillPerMonth: number }
 export interface SectorEmployment { sector: string; businesses: number; demand: number; filled: number }
@@ -153,10 +154,15 @@ export interface Society {
 export interface SettlementSimState {
   settlementId: string; sourceId: number; name: string; population: number; cohorts: Cohorts; births: number; deaths: number;
   society: Society;
+  economy?: SettlementEconomy;
+}
+export interface HistoryPoint {
+  day: number; population: Record<string, number>; labour?: Record<string, number>; unemployed?: Record<string, number>; bandits?: number;
 }
 export interface ScenarioState {
   schemaVersion: number; scenarioId: string; seed: number; startYear: number; date: CalendarDate;
-  settlements: SettlementSimState[]; history: { day: number; population: Record<string, number> }[];
+  settlements: SettlementSimState[]; history: HistoryPoint[];
+  trade?: { routes: TradeRoute[]; traders: Trader[] };
 }
 
 export interface SimEvent { seq: number; day: number; date: string; kind: string; message: string }
@@ -183,10 +189,10 @@ export interface FoodBalance {
   security: number; selfSufficiency: number;
 }
 export interface SettlementEconomy {
-  marketId: number | null; travelDays: number; baselinePopulation: number; inventory: Record<string, number>;
+  marketId: number | null; settlementClass: string; travelDays: number; baselinePopulation: number; inventory: Record<string, number>;
   production: ProductionLine[]; consumption: Record<string, number>; bought: Record<string, number>; sold: Record<string, number>;
   shortages: Shortage[]; food: FoodBalance; treasury: number; tradeBalance: number;
-  taxPaid: number; escortCost: number; lostToBandits: number;
+  taxPaid: number; escortCost: number; lostToBandits: number; businessSeq: number; opened: number; closed: number;
 }
 export interface MarketGood {
   basePrice: number; price: number; stock: number; outsideSupply: number; outsideDemand: number;
@@ -204,7 +210,7 @@ export interface Caravan {
   lost: Record<string, number>; smuggled: number; caught: boolean;
 }
 export interface TradeRoute {
-  id: string; settlementId: string; settlementName: string; marketId: number; centerName: string; days: number;
+  id: string; mode: 'land' | 'sea'; settlementId: string; settlementName: string; marketId: number; centerName: string; days: number;
   bandits: number; floor: number; lair: string | null; raidChance: number; guardsWanted: number; recruits: number; removed: number;
   loot: Record<string, number>; raids: number; lootValue: number; reserve: string[];
 }
@@ -212,12 +218,16 @@ export interface Personality { greed: number; caution: number; honesty: number }
 export interface Scorecard {
   trips: number; valueCarried: number; commission: number; taxPaid: number; taxEvaded: number; smuggled: number; caught: number;
   fines: number; raids: number; lossesValue: number; guardsHired: number; reputation: number;
+  livingCosts: number; dividends: number; invested: number;
 }
 export interface Trader {
   id: string; name: string; settlementId: string; settlementName: string; routeId: string; personality: Personality;
-  scorecard: Scorecard; busyUntil: number; active: boolean; dismissedDay: number | null;
+  scorecard: Scorecard; household: { adults: number; children: number }; purse: number; owns: string[];
+  busyUntil: number; active: boolean; dismissedDay: number | null;
 }
-export interface TraderDetail extends Trader { route: TradeRoute | null; caravans: Caravan[] }
+export interface TraderDetail extends Trader {
+  route: TradeRoute | null; caravans: Caravan[]; businesses: { id: string; name: string; filled: number; staff: number }[];
+}
 export interface EconomyView {
   date: CalendarDate;
   settlements: { settlementId: string; name: string; population: number; economy: SettlementEconomy }[];

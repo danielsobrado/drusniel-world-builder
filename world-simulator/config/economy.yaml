@@ -32,6 +32,7 @@ market:
 
 caravans:
   milesPerDay: 20
+  shipMilesPerDay: 60           # ports joined by an Azgaar sea route sail when that is quicker than the road
   offRoadFactor: 1.5            # straight-line distance multiplier where no road connects
   maxDelivered: 200             # delivered caravans kept in the log
 
@@ -44,6 +45,7 @@ famine:
 # Roads, bandits, caravan guards and traders (PR4b).
 bandits:
   markerRadiusPx: 25            # an Azgaar "brigands" marker this close to a road's ends founds a band there
+  pirateRadiusPx: 220           # an Azgaar "pirates" marker this close to a sea lane founds a crew on it
   markerBand: 24                # bandits such a band starts with; it never shrinks below a third of this
   recruitPerUnemployed: 0.02    # share of a settlement's people without work who take to its road each month
   hungerRecruitment: 4          # recruitment x (1 + this x last month's food shortfall)
@@ -68,6 +70,12 @@ escorts:                        # caravan-guard companies, sized each month to t
 traders:
   perRoute: 3                   # caravan masters per road at baseline
   commission: 0.03              # of the declared value they deliver
+  savings: [20, 80]             # starting purse, drawn per trader
+  livingPerAdultMonth: 0.35     # household upkeep, spent in the home town; children count half
+  lifestyle: [0.7, 1.3]         # upkeep multiplier from no greed to full greed
+  debtPressure: 0.6             # smuggling urge added at full debt
+  debtScale: 50                 # debt at which that pressure is full
+  investAbove: 60               # a trader with more than this funds a business in their home town
   reputation: { start: 50, safeTrip: 2, raided: -3, caught: -15, dismissBelow: 15 }
 
 smuggling:
@@ -76,3 +84,11 @@ smuggling:
   maxHidden: 0.8
   fineMultiplier: 3             # fine = this x the tax the trader tried to evade
   learning: 0.5                 # each time caught, a trader hides this much less
+
+turnover:                       # businesses opening for idle workers and closing when nobody works them
+  minIdle: 40                   # people without work before a town opens a business
+  maxOpeningsPerMonth: 2
+  costPerPost: 8                # value to open a business, per post
+  treasuryReserve: 50           # a town funds an opening itself only above this treasury
+  dividendPerWorkerMonth: 0.05  # paid by the town to the trader who funded the business
+  closeAfterIdleMonths: 6       # only businesses without Azgaar evidence close

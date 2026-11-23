@@ -39,6 +39,8 @@ export function ScorecardFields({ card }: { card: Scorecard }) {
     ['Caught smuggling', `${fmt(card.caught)} times · fined ${card.fines.toFixed(1)}`],
     ['Raided', `${fmt(card.raids)} times · lost ${card.lossesValue.toFixed(1)}`],
     ['Guards hired', `${fmt(card.guardsHired)} (${card.trips ? (card.guardsHired / card.trips).toFixed(1) : '0'} a trip)`],
+    ['Household upkeep', card.livingCosts.toFixed(1)],
+    ['Invested · dividends', `${card.invested.toFixed(1)} · ${card.dividends.toFixed(1)}`],
   ];
   return (
     <dl className="fields">

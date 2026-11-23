@@ -38,6 +38,7 @@ class FoodBalance(Contract):
 
 class SettlementEconomy(Contract):
     marketId: int | None
+    settlementClass: str = ""        # the imported class, which sets the sector shares new businesses aim for
     travelDays: int = Field(ge=0)    # caravan days to the market centre
     baselinePopulation: int
     inventory: dict[str, float]
@@ -52,6 +53,9 @@ class SettlementEconomy(Contract):
     taxPaid: float = 0.0               # last month
     escortCost: float = 0.0            # last month
     lostToBandits: float = 0.0         # last month, value of cargo taken on the road
+    businessSeq: int = 0             # businesses opened during the run, for their ids
+    opened: int = 0                  # cumulative
+    closed: int = 0
 
 
 class MarketGood(Contract):
@@ -103,8 +107,9 @@ class Caravan(Contract):
 
 
 class Route(Contract):
-    """The road between a settlement and its market centre, and the bandits who work it."""
+    """The road, or sea lane, between a settlement and its market centre, and the bandits or pirates who work it."""
     id: str
+    mode: Literal["land", "sea"] = "land"
     settlementId: str
     settlementName: str
     marketId: int
@@ -142,6 +147,14 @@ class Scorecard(Contract):
     lossesValue: float = 0.0
     guardsHired: int = 0
     reputation: float = Field(50.0, ge=0, le=100)
+    livingCosts: float = 0.0
+    dividends: float = 0.0
+    invested: float = 0.0
+
+
+class Household(Contract):
+    adults: int = Field(ge=1)
+    children: int = Field(ge=0)
 
 
 class Trader(Contract):
@@ -153,6 +166,9 @@ class Trader(Contract):
     routeId: str
     personality: Personality
     scorecard: Scorecard = Scorecard()
+    household: Household = Household(adults=1, children=0)
+    purse: float = 0.0                 # savings; below zero is debt, which pushes towards smuggling
+    owns: list[str] = []               # businesses they funded
     busyUntil: int = 0
     active: bool = True
     dismissedDay: int | None = None

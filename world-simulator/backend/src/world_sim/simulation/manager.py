@@ -195,13 +195,13 @@ class ScenarioManager:
     def _advance(self, s: Session, days: int) -> None:
         s.state, months = advance(s.state, days, self.model.config.rules)
         for m in months:
-            self._event(s, "month", f"{m['label']} closed: {m['births']} births, {m['deaths']} deaths, population {m['population']:,}, "
-                        f"{m['unemployed']:,} without work, {m['caravans']} caravans, {m['shortages']} shortages",
-                        births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"],
-                        caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"], bandits=m["bandits"])
-            for incident in m["incidents"]:
+            for incident in m["incidents"]:     # what happened during the month, then its close
                 self._event(s, incident["kind"], incident["message"], at_day=m["day"], trader=incident.get("trader"),
                             value=incident.get("value"))
+            self._event(s, "month", f"{m['label']} closed: {m['births']} births, {m['deaths']} deaths, population {m['population']:,}, "
+                        f"{m['unemployed']:,} without work, {m['caravans']} caravans, {m['shortages']} shortages",
+                        at_day=m["day"], births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"],
+                        caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"], bandits=m["bandits"])
         s.dirty = True
 
     def step(self, scenario_id: str, days: int) -> Session:

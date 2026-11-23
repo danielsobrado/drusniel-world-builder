@@ -5,6 +5,7 @@ import { fmt, pct } from '../components/format';
 import { ApiView, Empty, ErrorState, Loading } from '../components/StateViews';
 import type { Simulation } from '../simulation/useSimulation';
 import { SettlementPicker, ShareBar, useScenarioState } from './SocietyParts';
+import { IdleTable, UnemploymentTrend } from './UnemploymentView';
 
 const SECTORS = ['agriculture', 'extraction', 'crafts', 'trade', 'services', 'security'];
 
@@ -100,7 +101,8 @@ function BusinessTable({ sim, settlement, onSelect, selectedId }: {
                 onKeyDown={(e) => { if (e.key === 'Enter') onSelect(b.id); }}>
                 <td>{b.name}</td><td className="cap">{b.sector}</td><td className="cap">{b.profession}</td>
                 <td className={`num ${b.filled < b.staff ? 'warn-ink' : ''}`}>{b.filled} / {b.staff}</td>
-                <td className="num">{b.wage}</td><td className="muted small">{b.evidence ?? 'generic'}</td>
+                <td className="num">{b.wage}</td>
+                <td className="muted small">{b.evidence ?? (b.openedDay != null ? `opened day ${b.openedDay}${b.ownerId ? ' by a trader' : ' by the town'}` : 'generic')}</td>
               </tr>
             ))}</tbody>
           </table>
@@ -135,6 +137,13 @@ export function BusinessesWorkspace({ sim, onSelect, selectedId }: { sim: Simula
                 <SettlementPicker settlements={st.settlements} value={settlement} onChange={setSettlement} allowAll />
               </div>
               <EmploymentTiles settlements={chosen} />
+            </section>
+            <section className="section">
+              <div className="section-head"><h2>Unemployment</h2>
+                <span className="muted">towns open businesses once 40 are idle; the rest can take to the roads</span></div>
+              <UnemploymentTrend state={st} />
+              <h4>Where the idle go</h4>
+              <IdleTable state={st} />
             </section>
             <div className="split">
               <section className="section"><div className="section-head"><h2>Labour by sector</h2>

@@ -23,6 +23,9 @@ export function BusinessDetails({ id, sim, onSelect }: { id: string; sim: Simula
             {b.good && <div className="field"><dt>Good</dt><dd>{b.good}</dd></div>}
             <div className="field"><dt>Staffing</dt><dd>{b.filled} of {b.staff} posts filled</dd></div>
             <div className="field"><dt>Wage</dt><dd>{b.wage} copper per worker-day · {fmt(b.filled * b.wage * 30)} a month</dd></div>
+            {b.openedDay != null && <div className="field"><dt>Opened</dt><dd>day {b.openedDay}, funded by {b.ownerId
+              ? <button type="button" className="link" onClick={() => onSelect(b.ownerId!)}>{b.ownerName ?? b.ownerId}</button> : 'the town treasury'}</dd></div>}
+            {(b.idleMonths ?? 0) > 0 && <div className="field"><dt>Idle</dt><dd>{b.idleMonths} months without a worker</dd></div>}
             <div className="field"><dt>Why it exists</dt><dd>{b.evidence ?? 'Generic business sized from the labour force (config/society.yaml)'}</dd></div>
           </dl>
           <p className="muted small">Owners and named workers arrive with persistent NPCs (PR5).</p>
