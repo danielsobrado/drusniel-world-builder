@@ -8,7 +8,7 @@ import math
 import random
 from typing import Any
 
-from .contracts import Cohorts, SettlementState
+from .contracts import Cohorts, SettlementState, Vitals
 
 
 def initial_cohorts(population: int, shares: dict[str, float]) -> Cohorts:
@@ -49,4 +49,5 @@ def run_month(settlement: SettlementState, *, seed: int, month_index: int, param
         "population": cohorts.total,
         "births": settlement.births + births,
         "deaths": settlement.deaths + deaths,
+        "vitals": Vitals(births=births, deaths={"children": dead_children, "adults": dead_adults, "elders": dead_elders}),
     })

@@ -14,6 +14,8 @@ from ..economy.roads import personality
 from ..economy.sources import AzgaarEconomy
 from .contracts import Cast, Dwelling, LifeEvent, NamePool, NpcHousehold, Person
 from .homes import place
+from .kinship import initial_ties
+from .outlook import profile_for
 
 # (adults, children, elders) per household kind; children are drawn from childrenPerFamily.
 TEMPLATES = {
@@ -54,12 +56,14 @@ class CastBuilder:
         self.households.append(h)
         return h
 
-    def person(self, h: NpcHousehold, band: str, sex: str, **fields: Any) -> Person:
+    def person(self, h: NpcHousehold, band: str, sex: str, birth: int | None = None, **fields: Any) -> Person:
         fields.setdefault("role", "unemployed")
         ages = {**self.cfg["ages"], "adult": self.cfg["traderAges"]} if fields["role"] == "trader" else self.cfg["ages"]
+        born = birth if birth is not None else birth_day(self.rng, band, ages)
         p = Person(id=f"npc:{self.s.sourceId}:{len(self.people) + 1}", name=fields.pop("name", None) or self.rng.choice(self.pool.given),
-                   family=h.family, sex=sex, birthDay=birth_day(self.rng, band, ages), settlementId=self.s.settlementId,
-                   householdId=h.id, personality=fields.pop("personality", None) or personality(self.rng),
+                   family=h.family, sex=sex, birthDay=born, settlementId=self.s.settlementId, birthplaceId=self.s.settlementId,
+                   householdId=h.id, personality=(traits := fields.pop("personality", None) or personality(self.rng)),
+                   profile=profile_for(traits, self.rng),
                    events=[LifeEvent(day=0, kind="introduced", text=f"Lives in {self.s.name}")], **fields)
         p = self.occupy(p, band)
         self.people.append(p)
@@ -93,12 +97,33 @@ class CastBuilder:
             children = self.rng.randint(*self.cfg["childrenPerFamily"]) if has_children else 0
             h = self.household(kind)
             first = self.rng.choice(("female", "male"))
-            for i, band in enumerate(["adult"] * adults + ["elder"] * elders + ["child"] * children):
+            other = "male" if first == "female" else "female"
+            grown: list[Person] = []
+            for i, band in enumerate(["adult"] * adults + ["elder"] * elders):
                 if self.room() <= 0:
                     break
-                other = "male" if first == "female" else "female"
-                sex = first if i == 0 else other if band != "child" and i == 1 else self.rng.choice(("female", "male"))
-                self.person(h, band, sex)
+                # A partner is within a few years of the first adult; an elder in a family household is a generation older.
+                birth = None if not grown else self.partner_birth(grown[0].birthDay, band)
+                grown.append(self.person(h, band, first if i == 0 else other, birth))
+            for birth in self.child_births(grown, children):
+                if self.room() <= 0:
+                    break
+                self.person(h, "child", self.rng.choice(("female", "male")), birth)
+
+    def partner_birth(self, first: int, band: str) -> int:
+        low, high = self.cfg["ages"][band]
+        age = (0 - first) // YEAR + self.rng.randint(-self.cfg["partnerAgeGap"], self.cfg["partnerAgeGap"])
+        return -(max(low, min(high, age)) * YEAR + self.rng.randint(0, YEAR - 1))
+
+    def child_births(self, grown: list[Person], count: int) -> list[int]:
+        """Children born after the youngest parent was old enough, and young enough to still be children now."""
+        parents = [p for p in grown if age_years(p, 0) < self.cfg["ages"]["elder"][0]] or grown
+        if not parents or not count:
+            return []
+        earliest = max(max(p.birthDay for p in parents) + self.cfg["parentMinAge"] * YEAR, -(self.cfg["ages"]["child"][1] + 1) * YEAR + 1)
+        if earliest > 0:
+            return []
+        return sorted(self.rng.randint(earliest, 0) for _ in range(count))
 
 
 def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], seed: int, cfg: dict[str, Any]) -> Cast:
@@ -121,10 +146,12 @@ def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], 
             b.people[-1] = master.model_copy(update={"events": [*master.events, LifeEvent(
                 day=0, kind="trader", text=f"Caravan master on the road from {s.name}")]})
             if t.household.adults == 2 and b.room() > 0:
-                b.person(h, "adult", "male" if sex == "female" else "female")
+                b.person(h, "adult", "male" if sex == "female" else "female", b.partner_birth(master.birthDay, "adult"))
         b.fill()
         people += b.people
         households += b.households
         dwellings += b.dwellings
         names[s.settlementId], seq[s.settlementId], budget[s.settlementId] = pool, len(b.people), b.budget
-    return Cast(people=people, households=households, dwellings=dwellings, names=names, seq=seq, budget=budget)
+    ties = initial_ties(people, {h.id: h.kind for h in households}, traders, seed, cfg)
+    return Cast(people=people, households=households, dwellings=dwellings, names=names, seq=seq, budget=budget,
+                relationships=ties.items, relSeq=ties.seq)

@@ -10,10 +10,12 @@ from .demography import initial_cohorts, run_month
 from .economy.baseline import initial_economy
 from .economy.step import economy_month, with_food_need
 from .history.links import link
-from .history.recorder import on_timelines, record
+from .history.recorder import on_timelines, record, with_origins
+from .migration import migrate
 from .people.checks import check_cast
 from .people.generate import initial_cast
 from .people.life import people_month
+from .people.outlook import apply_experience, in_character
 from .society import check_invariants, initial_society, update_society
 
 
@@ -85,15 +87,24 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         births_before = sum(s.births for s in settlements)
         deaths_before = sum(s.deaths for s in settlements)
         settlements = [_month(s, seed=state.seed, month_index=month_index, rules=rules) for s in settlements]
+        settlements, flows = migrate(settlements, rules["simulation"]["migration"])
+        if flows:
+            moved = {sid for pair in flows for sid in pair}
+            days = rules["simulation"]["calendar"]["daysPerMonth"]
+            settlements = [s.model_copy(update={"society": update_society(s.society, s.cohorts, rules["society"], days)})
+                           if s.settlementId in moved else s for s in settlements]
         settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
         linked = link(economy["incidents"], cast, settlements)
-        cast, trade, lives = people_month(cast, settlements, trade, day=day, seed=state.seed, rules=rules)
+        cast, trade, lives = people_month(cast, settlements, trade, flows, day=day, seed=state.seed, rules=rules)
         events = [record(incident, seq + i, day, rules["simulation"]["history"]) for i, incident in enumerate([*linked, *lives])]
         seq += len(events)
         cast = on_timelines(cast, events, rules["simulation"]["history"]["timelineMinImportance"])
+        cast = with_origins(cast, [*linked, *lives], events)
+        cast = apply_experience(cast, events, rules["simulation"]["people"]["experience"])
+        trade = in_character(trade, cast)
         economy["incidents"] = [{**incident, "eventId": e.id} for incident, e in zip([*linked, *lives], events, strict=True)]
         economy["events"] = events
-        broken = check_cast(cast, settlements, trade)
+        broken = check_cast(cast, settlements, trade, rules["simulation"]["people"]["maxOverBudget"])
         if broken:
             raise AssertionError(f"people, month {month_index}: {'; '.join(broken)}")
         for s in settlements:

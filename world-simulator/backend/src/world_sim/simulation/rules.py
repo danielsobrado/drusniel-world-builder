@@ -10,7 +10,7 @@ from typing import Any
 from ..canonical import compact_json
 
 # Simulation settings that change outcomes; storage, run speeds and the baseline recipe do not.
-OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "people", "history")
+OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "migration", "people", "history")
 
 
 def freeze(rules: dict[str, Any]) -> dict[str, Any]:

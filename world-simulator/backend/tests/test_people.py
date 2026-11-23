@@ -44,9 +44,11 @@ def test_the_cast_matches_the_npc_budget_and_the_settlements(eldara):
 def test_a_decade_keeps_the_budget_and_tells_life_stories(eldara):
     state, months = advance(pilot(eldara), 3600, eldara.config.rules)
     cast = state.cast
-    assert check_cast(cast, state.settlements, state.trade) == []
-    assert cast.deaths > 5 and cast.births + cast.arrivals == cast.deaths, "every death replaced; the budget holds"
-    assert sum(p.alive for p in cast.people) == 86
+    over = eldara.config.simulation["people"]["maxOverBudget"]
+    assert check_cast(cast, state.settlements, state.trade, over) == []
+    alive = sum(p.alive for p in cast.people)
+    assert cast.deaths > 5 and cast.births + cast.arrivals - cast.deaths == alive - 86, "every named life is accounted for"
+    assert 86 <= alive <= 86 * (1 + over)
     kinds = Counter(e.kind for p in cast.people for e in p.events)
     assert {"died", "came-of-age", "hired"} <= set(kinds)
     assert {"born", "arrived"} & set(kinds)

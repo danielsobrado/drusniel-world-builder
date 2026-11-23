@@ -36,6 +36,12 @@ demography:
   deathRatePerYear: { children: 0.035, adults: 0.012, elders: 0.07 }
   bandYears: { children: 15, adults: 45 }   # years spent in a band before ageing out
 
+# Migration between the scenario's settlements (PR6): idle adults leave a town whose
+# unemployment is above the scope's average by minRateGap for the one with the lowest.
+migration:
+  shareOfIdlePerMonth: 0.04
+  minRateGap: 0.01
+
 # Persistent characters (PR5): each settlement keeps exactly its NPC budget alive
 # (config/npc-population.yaml). Rates are authored assumptions.
 people:
@@ -49,8 +55,29 @@ people:
   loseWorkPerMonth: 0.05        # x the settlement's unemployment rate
   outlaw: { idleMonths: 3, maxHonesty: 0.35, minGreed: 0.55, chance: 0.2, giveUpPerMonth: 0.03 }
   prisonDays: 360
-  newbornShare: 0.5             # a death is replaced by a newborn in a family, otherwise by a newcomer
-  maxEvents: 24                 # life events kept per person
+  # Families and relationships (PR6). A named death or birth is drawn from the town's actual
+  # deaths and births that month; a vacancy is filled by an anonymous inhabitant coming into focus.
+  maxOverBudget: 0.25           # named children of named couples may lift a town this far over its budget
+  parentMinAge: 16
+  marryFromAge: 18
+  marryUntilAge: 40
+  partnerAgeGap: 6              # years either side of a partner's age
+  marriagePerMonth: 0.02        # chance for an unmarried adult to marry a suitable single that month (x3 for a friend)
+  workFromAge: 14
+  maxTenureYears: 25
+  apprenticeUntilAge: 20        # a worker this young has a mentor of the same trade at the same business, if one is named
+  coworkerFriendship: 0.15      # chance two named co-workers start out as friends
+  friendshipPerMonth: 0.01      # chance co-workers of a year or more become friends that month
+  moveScale: 1.5                # a named idle adult moves with the town's outflow x (moveScale - caution)
+  # How experience changes people: kind -> role (or any) -> trait deltas.
+  experience:
+    raid: { caravan-master: { caution: 0.05 }, guard: { caution: 0.04 } }
+    caught: { any: { honesty: 0.1, caution: 0.1 } }
+    released: { any: { honesty: 0.05 } }
+    lost-work: { any: { greed: 0.02 } }
+    died: { widowed: { caution: 0.03 }, child: { caution: 0.02 } }
+    smuggling: { smuggler: { caution: 0.08 } }
+
 
 # Canonical history (PR6). Each kind: [category, importance 1-5, visibility].
 # Importance 5 is life-defining, 3-4 important, 1-2 minor; routine months record nothing.

@@ -39,3 +39,12 @@ def on_timelines(cast: Cast, events: list[HistoryEvent], min_importance: int) ->
     people = [p.model_copy(update={"timeline": [*p.timeline, *[i for i in adds[p.id] if i not in p.timeline]]}) if p.id in adds else p
               for p in cast.people]
     return cast.model_copy(update={"people": people})
+
+
+def with_origins(cast: Cast, incidents: list[dict[str, Any]], events: list[HistoryEvent]) -> Cast:
+    """Points each relationship a month created at the event that created it."""
+    origin = {tie: e.id for incident, e in zip(incidents, events, strict=True) for tie in incident.get("ties") or []}
+    if not origin:
+        return cast
+    rels = [r.model_copy(update={"origin": origin[r.id]}) if r.id in origin else r for r in cast.relationships]
+    return cast.model_copy(update={"relationships": rels})

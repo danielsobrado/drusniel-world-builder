@@ -53,7 +53,7 @@ def test_demography_conserves_accounting_over_ten_years(eldara):
     assert len(months) == 120 and len(state.history) == 121
     for before, after in zip(start.settlements, state.settlements, strict=True):
         assert after.population == after.cohorts.total
-        assert after.population == before.population + after.births - after.deaths
+        assert after.population == before.population + after.births - after.deaths + after.immigrants - after.emigrants
         assert 0.8 < after.population / before.population < 1.3, "authored rates keep a decade plausible"
 
 

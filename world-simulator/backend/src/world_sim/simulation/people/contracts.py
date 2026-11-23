@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..economy.contracts import Personality
+from .relationships import Relationship
 
 Role = Literal["child", "worker", "unemployed", "retired", "trader", "outlaw", "imprisoned"]
 
@@ -19,6 +20,12 @@ class LifeEvent(Contract):
     text: str
 
 
+class Profile(Contract):
+    """Stable character beyond the three traits; fears, ambitions and concerns are derived from circumstances instead."""
+    temperament: Literal["reserved", "sociable", "assertive"]
+    values: list[str]                # two of duty, family, wealth, faith, knowledge, in order
+
+
 class Person(Contract):
     id: str                          # npc:<sourceId>:<n>, stable for later exports
     name: str
@@ -26,6 +33,7 @@ class Person(Contract):
     sex: Literal["female", "male"]
     birthDay: int                    # scenario day; negative for people born before the start
     settlementId: str
+    birthplaceId: str | None = None   # where they were born (an Azgaar settlement), for origins and places known
     householdId: str
     role: Role
     businessId: str | None = None
@@ -33,6 +41,7 @@ class Person(Contract):
     traderId: str | None = None      # the trade record of a caravan master
     routeId: str | None = None       # the road an outlaw works
     personality: Personality
+    profile: Profile | None = None
     idleMonths: int = 0
     releaseDay: int | None = None
     retired: bool = False            # the retirement choice at 60 is made once
@@ -72,6 +81,8 @@ class Cast(Contract):
     dwellings: list[Dwelling] = []
     names: dict[str, NamePool]       # per settlement, for newcomers and newborns
     seq: dict[str, int]              # last person number per settlement
+    relationships: list[Relationship] = []
+    relSeq: int = 0
     budget: dict[str, int]           # people kept alive per settlement
     deaths: int = 0
     births: int = 0

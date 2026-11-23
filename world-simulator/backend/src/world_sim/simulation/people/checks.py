@@ -7,13 +7,14 @@ from ..economy.contracts import Trade
 from .contracts import Cast
 
 
-def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade) -> list[str]:
+def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, max_over: float = 0.0) -> list[str]:
     broken = []
     alive = [p for p in cast.people if p.alive]
     counts = Counter(p.settlementId for p in alive)
     for s in settlements:
-        if counts[s.settlementId] != cast.budget.get(s.settlementId, 0):
-            broken.append(f"{s.name} has {counts[s.settlementId]} named people, budget {cast.budget.get(s.settlementId, 0)}")
+        budget = cast.budget.get(s.settlementId, 0)
+        if not budget <= counts[s.settlementId] <= int(budget * (1 + max_over)):
+            broken.append(f"{s.name} has {counts[s.settlementId]} named people, budget {budget}")
     households = {h.id for h in cast.households}
     if any(p.householdId not in households for p in cast.people):
         broken.append("a person belongs to no household")
@@ -36,4 +37,29 @@ def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade) -> 
         broken.append("a caravan post held twice, or by someone whose post is gone")
     if any((p.role == "trader") != bool(p.traderId) or (p.role == "outlaw") != bool(p.routeId) for p in alive):
         broken.append("a role without its link")
+    broken += check_ties(cast)
+    return broken
+
+
+def check_ties(cast: Cast) -> list[str]:
+    """Relationships stay consistent across deaths, births and household changes."""
+    people = {p.id: p for p in cast.people}
+    broken = []
+    spouses = Counter()
+    for r in cast.relationships:
+        ends = [x for x in (r.a, r.b) if r.kind != "employer" or x == r.b]
+        if any(x not in people for x in ends):
+            broken.append(f"{r.id} links someone who is not in the cast")
+            continue
+        if r.kind == "spouse" and r.active:
+            if not all(people[x].alive for x in (r.a, r.b)):
+                broken.append(f"{r.id} is a marriage that outlived a spouse")
+            spouses.update((r.a, r.b))
+        if r.kind == "parent" and people[r.b].birthDay - people[r.a].birthDay < 14 * 360:
+            broken.append(f"{r.id}: a parent too young for their child")
+        if r.kind in ("employer", "friend", "mentor", "rival", "spouse") and any(
+                people[x].deathDay is not None and r.since > people[x].deathDay for x in ends):
+            broken.append(f"{r.id} began after someone in it had died")
+    if any(n > 1 for n in spouses.values()):
+        broken.append("someone has two living spouses")
     return broken

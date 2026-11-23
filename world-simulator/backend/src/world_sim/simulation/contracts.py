@@ -104,6 +104,14 @@ class Society(Contract):
     needs: list[Need]
 
 
+class Vitals(Contract):
+    """Last month's births, deaths by band and migration: the named people are drawn from exactly these."""
+    births: int = 0
+    deaths: dict[str, int] = {}          # children / adults / elders
+    immigrants: int = 0
+    emigrants: int = 0
+
+
 class SettlementState(Contract):
     settlementId: str
     sourceId: int
@@ -112,6 +120,9 @@ class SettlementState(Contract):
     cohorts: Cohorts
     births: int = 0      # cumulative since the scenario began
     deaths: int = 0
+    immigrants: int = 0
+    emigrants: int = 0
+    vitals: Vitals = Vitals()
     society: Society
     economy: SettlementEconomy
 

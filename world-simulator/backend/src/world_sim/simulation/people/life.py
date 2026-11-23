@@ -1,9 +1,8 @@
 """
-A month in the lives of the named people. They age, come of age and retire; find and
-lose work as their town's labour market allows and as businesses close; the idle and
-dishonest may take to their road with its bandits and be caught; masters lose their
-post when dismissed. The dead are replaced by newborns or newcomers, so each
-settlement keeps exactly its NPC budget.
+A month in the lives of the named people, in order: deaths drawn from the town's actual
+deaths; ageing, work, outlawry and prison; marriages; births drawn from the town's
+actual births; moves with the migration flows; friendships at work; caravan posts; and
+vacancies filled by inhabitants coming into focus.
 """
 
 import random
@@ -14,9 +13,14 @@ from typing import Any
 from ..contracts import Business, SettlementState
 from ..economy.contracts import Route, Trade, Trader
 from .contracts import Cast, Person
-from .generate import age_years, band_of
+from .family import births, bury, deaths, marriages
+from .focus import promote
+from .generate import age_years
+from .homes import leave
+from .moves import moves
 from .notes import note
-from .replace import promote_traders, replace_dead
+from .relationships import Ties
+from .replace import promote_traders
 
 
 @dataclass
@@ -28,7 +32,6 @@ class Town:
     route: Route | None
     outlaws: int
     unemployment: float
-    mortality: float
 
 
 @dataclass
@@ -37,23 +40,56 @@ class Month:
     seed: int
     cfg: dict[str, Any]
     cfg_economy: dict[str, Any]
-    death_rates: dict[str, float]          # per year, by child / adult / elder
     traders: dict[str, Trader]
-    recent: int = 24
+    recent: int
+    ties: Ties
+    seq: dict[str, int]
+    people: dict[str, Person] = field(default_factory=dict)
     incidents: list[dict[str, Any]] = field(default_factory=list)
+    counter: int = 0
+
+    def alive(self, pid: str | None) -> bool:
+        p = self.people.get(pid or "")
+        return bool(p and p.alive)
+
+    def next_id(self, s: SettlementState) -> str:
+        self.seq[s.settlementId] = self.seq.get(s.settlementId, 0) + 1
+        return f"npc:{s.sourceId}:{self.seq[s.settlementId]}"
 
 
-def _towns(cast: Cast, settlements: list[SettlementState], routes: list[Route], famine: float) -> dict[str, Town]:
+def _towns(people: dict[str, Person], settlements: list[SettlementState], routes: list[Route]) -> dict[str, Town]:
     towns = {}
     for s in settlements:
         e = s.society.employment
-        named = Counter(p.businessId for p in cast.people if p.alive and p.settlementId == s.settlementId and p.role == "worker")
+        named = Counter(p.businessId for p in people.values() if p.alive and p.settlementId == s.settlementId and p.role == "worker")
         route = next((r for r in routes if r.settlementId == s.settlementId), None)
-        outlaws = sum(1 for p in cast.people if p.alive and p.role == "outlaw" and route and p.routeId == route.id)
+        outlaws = sum(1 for p in people.values() if p.alive and p.role == "outlaw" and route and p.routeId == route.id)
         towns[s.settlementId] = Town(s, {b.id: b for b in s.society.businesses}, named, route, outlaws,
-                                     e.unemployed / e.labourSupply if e.labourSupply else 0.0,
-                                     1 + famine * max(0.0, 1 - s.economy.food.security))
+                                     e.unemployed / e.labourSupply if e.labourSupply else 0.0)
     return towns
+
+
+def _hire(p: Person, b: Business, town: Town, m: Month) -> Person:
+    town.named[b.id] += 1
+    rel = m.ties.add("employer", b.id, p.id, m.day)
+    p = note(p, m, "hired", f"Hired as {b.profession} at {b.name}", related={"businessId": b.id, "ties": [rel.id],
+             "facts": {"profession": b.profession, "monthsIdle": p.idleMonths}}, role="worker", businessId=b.id, profession=b.profession,
+             idleMonths=0)
+    if age_years(p, m.day) <= m.cfg["apprenticeUntilAge"]:
+        mentor = next((x for x in sorted(m.people.values(), key=lambda x: x.birthDay) if x.alive and x.businessId == b.id
+                       and x.profession == b.profession and age_years(x, m.day) >= 30), None)
+        if mentor:
+            tie = m.ties.add("mentor", mentor.id, p.id, m.day, businessId=b.id)
+            m.incidents.append({"kind": "apprenticeship-started", "message": f"{p.name} {p.family} began learning the {b.profession}'s "
+                                f"trade under {mentor.name} {mentor.family}", "settlementId": p.settlementId, "businessId": b.id,
+                                "participants": [{"personId": p.id, "role": "apprentice"}, {"personId": mentor.id, "role": "mentor"}],
+                                "ties": [tie.id]})
+    return p
+
+
+def _lose(p: Person, m: Month, text: str, related: dict[str, Any]) -> Person:
+    m.ties.end(p.id, m.day, {"employer"}, entity=p.businessId)
+    return note(p, m, "lost-work", text, related=related, role="unemployed", businessId=None, profession=None, idleMonths=0)
 
 
 def _work(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
@@ -63,25 +99,18 @@ def _work(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
         if business is None or town.named[p.businessId] > business.filled:
             town.named[p.businessId] -= 1
             what = f"{business.name} let workers go" if business else "their workplace closed"
-            return note(p, m, "lost-work", f"Lost work: {what}",
-                        related={"businessId": p.businessId, "facts": {"closed": business is None}},
-                        role="unemployed", businessId=None, profession=None, idleMonths=0)
+            return _lose(p, m, f"Lost work: {what}", {"businessId": p.businessId, "facts": {"closed": business is None}})
         if rng.random() < c["loseWorkPerMonth"] * town.unemployment:
             town.named[p.businessId] -= 1
-            return note(p, m, "lost-work", f"Let go by {business.name}", related={"businessId": p.businessId},
-                        role="unemployed", businessId=None, profession=None, idleMonths=0)
+            return _lose(p, m, f"Let go by {business.name}", {"businessId": p.businessId})
         return p
     if p.role != "unemployed":
         return p
     p = p.model_copy(update={"idleMonths": p.idleMonths + 1})
-    if rng.random() < c["findWorkPerMonth"] * (1 - town.unemployment):
+    if rng.random() < c["findWorkPerMonth"] * (1 - town.unemployment) * (0.75 + 0.5 * p.personality.caution):
         posts = [b for b in town.businesses.values() if b.filled > town.named[b.id]]
         if posts:
-            b = rng.choices(posts, weights=[x.filled - town.named[x.id] for x in posts])[0]
-            town.named[b.id] += 1
-            return note(p, m, "hired", f"Hired as {b.profession} at {b.name}",
-                        related={"businessId": b.id, "facts": {"profession": b.profession, "monthsIdle": p.idleMonths}},
-                        role="worker", businessId=b.id, profession=b.profession, idleMonths=0)
+            return _hire(p, rng.choices(posts, weights=[x.filled - town.named[x.id] for x in posts])[0], town, m)
     o, t = c["outlaw"], p.personality
     if (town.route and p.idleMonths >= o["idleMonths"] and t.honesty <= o["maxHonesty"] and t.greed >= o["minGreed"]
             and rng.random() < o["chance"]):
@@ -101,8 +130,7 @@ def _outlaw(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
         town.outlaws -= 1
         return note(p, m, "came-home", "Came home when the band broke up", related={"routeId": p.routeId}, role="unemployed",
                     routeId=None, idleMonths=0)
-    caught = route.removed / max(1, route.bandits + route.removed)
-    if rng.random() < caught:
+    if rng.random() < route.removed / max(1, route.bandits + route.removed):
         town.outlaws -= 1
         return note(p, m, "caught", "Caught by a patrol and imprisoned",
                     message=f"{p.name} {p.family}, outlaw on the {town.settlement.name} road, was caught and imprisoned",
@@ -119,23 +147,14 @@ def _live(p: Person, town: Town, m: Month) -> Person:
     c = m.cfg
     rng = random.Random(f"{m.seed}:{m.day}:{p.id}")
     age = age_years(p, m.day)
-    rate = m.death_rates[band_of(age, c)] / 12 * town.mortality * (2 if p.role == "outlaw" else 1)
-    if rng.random() < rate:
-        if p.role == "worker":
-            town.named[p.businessId] -= 1
-        if p.role == "outlaw":
-            town.outlaws -= 1
-        # Deaths are drawn from rates; no cause is modelled, so none is claimed (a food shortage is only a fact of the time).
-        cause = "while an outlaw" if p.role == "outlaw" else "cause not recorded"
-        return note(p, m, "died", f"Died at {age}", message=f"{p.name} {p.family} died at {age}",
-                    related={"facts": {"age": age, "duringFoodShortage": town.mortality > 1.05}}, alive=False, deathDay=m.day, cause=cause)
     if p.role == "imprisoned" and m.day >= (p.releaseDay or 0):
         return note(p, m, "released", "Released from prison", role="unemployed", releaseDay=None, idleMonths=0)
     if p.role == "child" and age >= c["ages"]["adult"][0]:
         return note(p, m, "came-of-age", f"Came of age at {age}", role="unemployed", idleMonths=0)
     if p.role == "worker" and age >= c["retireFrom"] and not p.retired:
-        if rng.random() < c["retireChance"]:
+        if rng.random() < c["retireChance"] * (1 - 0.5 * p.personality.greed):
             town.named[p.businessId] -= 1
+            m.ties.end(p.id, m.day, {"employer"}, entity=p.businessId)
             return note(p, m, "retired", f"Retired from {p.profession} work at {age}", related={"businessId": p.businessId},
                         role="retired", retired=True, businessId=None, profession=None)
         p = p.model_copy(update={"retired": True})
@@ -148,13 +167,67 @@ def _live(p: Person, town: Town, m: Month) -> Person:
     return _work(p, town, m, rng)
 
 
-def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, *, day: int, seed: int,
+def _friendships(m: Month) -> None:
+    by_business: dict[str, list[Person]] = {}
+    for p in m.people.values():
+        if p.alive and p.role == "worker" and p.businessId:
+            by_business.setdefault(p.businessId, []).append(p)
+    for business, staff in sorted(by_business.items()):
+        staff.sort(key=lambda p: p.id)
+        for i, a in enumerate(staff):
+            for b in staff[i + 1:]:
+                if m.ties.linked(a.id, b.id, "friend") or len(m.ties.of(a.id, "friend")) >= 3 or len(m.ties.of(b.id, "friend")) >= 3:
+                    continue
+                since = [r.since for r in m.ties.items if r.kind == "employer" and r.active and r.b in (a.id, b.id)]
+                if len(since) < 2 or m.day - max(since) < 360:
+                    continue
+                if random.Random(f"{m.seed}:{m.day}:{a.id}:{b.id}:friend").random() < m.cfg["friendshipPerMonth"]:
+                    rel = m.ties.add("friend", a.id, b.id, m.day, businessId=business)
+                    m.incidents.append({"kind": "friendship",
+                                        "message": f"{a.name} {a.family} and {b.name} {b.family} became friends at work",
+                                        "settlementId": a.settlementId, "businessId": business, "ties": [rel.id],
+                                        "participants": [{"personId": a.id, "role": "friend"}, {"personId": b.id, "role": "friend"}]})
+
+
+def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, flows: dict[tuple[str, str], int], *, day: int, seed: int,
                  rules: dict[str, Any]) -> tuple[Cast, Trade, list[dict[str, Any]]]:
-    rates = rules["simulation"]["demography"]["deathRatePerYear"]
-    m = Month(day, seed, rules["simulation"]["people"], rules["economy"],
-              {"child": rates["children"], "adult": rates["adults"], "elder": rates["elders"]}, {t.id: t for t in trade.traders},
-              rules["simulation"]["history"]["recentEvents"])
-    towns = _towns(cast, settlements, trade.routes, rules["economy"]["famine"]["mortality"])
-    people = [_live(p, towns[p.settlementId], m) if p.alive and p.settlementId in towns else p for p in cast.people]
-    cast, trade = promote_traders(cast.model_copy(update={"people": people}), trade, settlements, m)
-    return replace_dead(cast, settlements, m), trade, m.incidents
+    c = rules["simulation"]["people"]
+    m = Month(day, seed, c, rules["economy"], {t.id: t for t in trade.traders}, rules["simulation"]["history"]["recentEvents"],
+              Ties(cast.relationships, cast.relSeq), dict(cast.seq))
+    people = m.people = {p.id: p for p in cast.people}
+    households, dwellings = list(cast.households), list(cast.dwellings)
+    by_id = {s.settlementId: s for s in settlements}
+    died = 0
+    for s in settlements:
+        shortage = s.economy.food.security < 1
+        for pid in sorted(deaths(people, s, m)):
+            people[pid] = bury(people[pid], m, shortage)
+            died += 1
+    towns = _towns(people, settlements, trade.routes)
+    for pid in [p.id for p in people.values() if p.alive and p.settlementId in towns]:
+        people[pid] = _live(people[pid], towns[people[pid].settlementId], m)
+    born = 0
+    for s in settlements:
+        marriages(people, s, m, households, dwellings)
+        alive = sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId)
+        room = int(cast.budget.get(s.settlementId, 0) * (1 + c["maxOverBudget"])) - alive
+        born += births(people, s, m, cast, room)
+    moves(people, flows, by_id, m, households, dwellings)
+    _friendships(m)
+    trade = promote_traders(people, trade, settlements, m)
+    focused = 0
+    named = Counter(p.businessId for p in people.values() if p.alive and p.role == "worker")
+    for s in settlements:
+        while sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId) < cast.budget.get(s.settlementId, 0):
+            promote(people, s, cast, m, households, dwellings, named)
+            focused += 1
+    occupied = {p.householdId for p in people.values() if p.alive}
+    for h in households:
+        if h.homeId and h.id not in occupied:
+            leave(dwellings, h)
+    households = [h.model_copy(update={"homeId": None}) if h.homeId and h.id not in occupied else h for h in households]
+    cast = cast.model_copy(update={
+        "people": list(people.values()), "households": households, "dwellings": dwellings, "seq": m.seq,
+        "relationships": m.ties.items, "relSeq": m.ties.seq, "deaths": cast.deaths + died, "births": cast.births + born,
+        "arrivals": cast.arrivals + focused})
+    return cast, trade, m.incidents
