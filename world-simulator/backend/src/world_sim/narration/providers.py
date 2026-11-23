@@ -52,14 +52,24 @@ class OpenAICompatible:
             raise ProviderError("the local model's answer had no message") from exc
 
 
-def list_models(base_url: str, timeout: float = 3.0) -> list[str] | None:
-    """Model ids the server offers, or None when it cannot be reached."""
+def _get(url: str, timeout: float) -> dict[str, Any] | None:
     try:
-        with urllib.request.urlopen(f"{base_url.rstrip('/')}/models", timeout=timeout) as response:  # noqa: S310
-            data = json.loads(response.read())
+        with urllib.request.urlopen(url, timeout=timeout) as response:  # noqa: S310 - configured local server
+            return json.loads(response.read())
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, ValueError):
         return None
-    return sorted(str(m.get("id")) for m in data.get("data") or [] if isinstance(m, dict) and m.get("id"))
+
+
+def list_models(base_url: str, timeout: float = 3.0) -> list[str] | None:
+    """Model ids the server offers, or None when it cannot be reached. Older Ollama lacks /v1/models but lists /api/tags."""
+    base = base_url.rstrip("/")
+    data = _get(f"{base}/models", timeout)
+    if data is not None:
+        return sorted(str(m.get("id")) for m in data.get("data") or [] if isinstance(m, dict) and m.get("id"))
+    tags = _get(f"{base.removesuffix('/v1')}/api/tags", timeout)
+    if tags is not None:
+        return sorted(str(m.get("name")) for m in tags.get("models") or [] if isinstance(m, dict) and m.get("name"))
+    return None
 
 
 def resolve(cfg: dict[str, Any]) -> tuple[Provider, dict[str, Any]]:
@@ -76,7 +86,7 @@ def resolve(cfg: dict[str, Any]) -> tuple[Provider, dict[str, Any]]:
     if models is None:
         hint = f"No local model server answered at {cfg.get('baseUrl')}. Start Ollama, LM Studio or llama.cpp, or set WS_LLM_BASE_URL."
     elif not models:
-        hint = "The local server has no models. With Ollama, run: ollama pull qwen2.5:3b"
+        hint = "The local server has no models. With Ollama, pull a chat model: ollama pull phi3 (or qwen2.5:3b on Ollama 0.3 or later)"
     else:
         hint = f"Model {cfg.get('model')} is not on the server; it offers {', '.join(models[:5])}."
     return DraftWriter(), {**status, "mode": "draft", "provider": "draft", "model": "draft writer", "hint": hint}

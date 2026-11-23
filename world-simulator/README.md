@@ -11,6 +11,7 @@ Households, housing, businesses, employment and hardening: [docs/03-households-b
 Production, food, markets, prices, caravans, bandits and pirates, guards, trader scorecards and purses, business turnover: [docs/04-economy-and-trade-2026-11-23.md](docs/04-economy-and-trade-2026-11-23.md).
 Persistent named people from the NPC budget: [docs/05-persistent-people-2026-11-23.md](docs/05-persistent-people-2026-11-23.md).
 Life stories, canonical history, relationships and biography context: [docs/06-life-stories-and-history-2026-11-23.md](docs/06-life-stories-and-history-2026-11-23.md).
+Local-LLM biographies and the Dialogue Lab: [docs/07-narration-and-dialogue-2026-11-23.md](docs/07-narration-and-dialogue-2026-11-23.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -66,7 +67,10 @@ backend/                Python package (pyproject.toml, uv.lock)
                         backstory, knowledge, outlook, hooks, context, homes, checks
       history/          contracts, recorder, links, causes, archive (SQLite), validation
     reports/            builder, writer
-    api/                app (FastAPI), scenario_routes, settlement_query, errors
+    narration/          providers (local OpenAI-compatible server, draft writer), prompts, factcheck,
+                        store (SQLite), service (jobs, dialogue)
+    api/                app (FastAPI), scenario_routes, people_routes, history_routes, narration_routes,
+                        settlement_query, summary, errors
     cli/audit.py        canonical.py ids.py config.py log.py server.py
   tests/                pytest
 frontend/               TypeScript + React + Vite
@@ -78,7 +82,8 @@ frontend/               TypeScript + React + Vite
   src/society/          HouseholdsWorkspace, BusinessesWorkspace, BusinessDetails, UnemploymentView
   src/economy/          EconomyWorkspace, SettlementEconomyView, MarketView, CaravanTable
   src/roads/            RoadsWorkspace, TraderDetails, TraderParts (personality, scorecard)
-  src/people/           PeopleWorkspace, PersonDetails, roles
+  src/people/           PeopleWorkspace, Profile, LifeTab, ProfileTabs, EventDetails, PersonDetails, roles
+  src/narration/        useLlm, ProseSection, ChatPanel, DialogueLab
   src/api/              types.ts (API contracts), worldApi.ts (fetch + useApi hook)
   src/styles/           tokens.css (theme variables), shell.css, components.css,
                         marble.css (textured navigation chrome)
@@ -137,6 +142,8 @@ Writes (`POST`) must send `application/json`. Full table in
 | `GET /api/scenarios/{id}/people` · `/people/{personId}` | paged named people · one person with household and life story |
 | `GET /api/scenarios/{id}/people/{personId}/timeline` · `/relationships` · `/knowledge` · `/context` | a person's events, ties, knowledge and biography context |
 | `GET /api/scenarios/{id}/history/events/{eventId}` | one canonical event with causes and consequences |
+| `GET /api/llm` · `/api/llm/jobs` | local model status · narration jobs |
+| `…/people/{personId}/biographies` · `…/conversations` · `/conversations/{cid}/messages` | prose · Dialogue Lab |
 
 ## Configuration
 
@@ -149,6 +156,7 @@ Writes (`POST`) must send `application/json`. Full table in
   baseline scenario, demography rates.
 - `config/society.yaml` — household shares, housing types and mix, labour participation
   and sector shares, business templates, need thresholds (all authored assumptions).
+- `config/llm.yaml` — local model server and model, token limits, job concurrency, dialogue memory.
 - `config/economy.yaml` — turn length, food and hinterland, stock targets, market pricing
   and elasticities, caravan speed, shortage threshold, famine mortality, bandits,
   caravan guards, traders, purses and smuggling, business turnover.

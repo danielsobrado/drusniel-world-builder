@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Simulation } from '../simulation/useSimulation';
+import { ChatPanel } from '../narration/ChatPanel';
 import { LifeTab } from './LifeTab';
 import { BiographyTab, KnowledgeTab, OverviewTab, RelationshipsTab } from './ProfileTabs';
 
@@ -24,8 +25,8 @@ export function Profile({ sim, personId, name, onSelect, selectedId }: {
         {tab === 'Life' && <LifeTab base={versioned} onSelect={onSelect} selectedId={selectedId} />}
         {tab === 'Relationships' && <RelationshipsTab base={versioned} onSelect={onSelect} />}
         {tab === 'Knowledge' && <KnowledgeTab base={versioned} onSelect={onSelect} />}
-        {tab === 'Biography' && <BiographyTab base={versioned} onSelect={onSelect} />}
-        {tab === 'Dialogue' && <p className="muted">Dialogue arrives with the local LLM in the next PR; it will speak from this record only.</p>}
+        {tab === 'Biography' && <BiographyTab base={versioned} onSelect={onSelect} scenarioId={sim.active!.id} personId={personId} />}
+        {tab === 'Dialogue' && <ChatPanel scenarioId={sim.active!.id} personId={personId} name={name} />}
       </div>
     </section>
   );

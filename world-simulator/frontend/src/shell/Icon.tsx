@@ -18,6 +18,7 @@ const PATHS: Record<string, string> = {
   cart: 'M2 6h12v9H2zM14 9h4l4 4v2h-8M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
   shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',
   person: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4.4 3.6-8 8-8s8 3.6 8 8',
+  chat: 'M4 5h16v11H9l-5 4z M8 9h8 M8 12h5',
   clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
   play: 'M7 5l12 7-12 7z',
   pause: 'M8 5v14M16 5v14',

@@ -1,9 +1,12 @@
 import type { Summary } from '../api/types';
+import type { LlmStatus } from '../narration/useLlm';
 import type { ApiResult } from '../api/worldApi';
 import type { Simulation } from '../simulation/useSimulation';
 import { fmt } from '../components/format';
 
-export function StatusBar({ health, summary, sim }: { health: ApiResult<{ status: string }>; summary: ApiResult<Summary>; sim: Simulation }) {
+export function StatusBar({ health, summary, sim, llm }: {
+  health: ApiResult<{ status: string }>; summary: ApiResult<Summary>; sim: Simulation; llm: LlmStatus | null;
+}) {
   const active = sim.active;
   const budget = summary.data?.npcBudget;
   const failed = health.error ?? summary.error;
@@ -20,7 +23,8 @@ export function StatusBar({ health, summary, sim }: { health: ApiResult<{ status
       <span className="appbar-spacer" />
       <span>{active ? `Simulation: ${active.name} · ${active.date.label} · ${active.running ? `running ${active.speed} d/s` : 'paused'}` : 'Simulation: no scenario'}</span>
       <span className="sep" />
-      <span>LLM jobs: none</span>
+      <span>{!llm ? 'LLM jobs: —' : llm.jobs.queued + llm.jobs.running
+        ? `LLM jobs: ${llm.jobs.running} running, ${llm.jobs.queued} queued` : `LLM jobs: none${llm.jobs.failed ? ` · ${llm.jobs.failed} failed` : ''}`}</span>
     </footer>
   );
 }

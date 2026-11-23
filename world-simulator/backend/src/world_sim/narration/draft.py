@@ -66,7 +66,7 @@ class DraftWriter:
             told = [k for k in context["knowledge"] if k["wouldTell"]]
             if told:
                 story = told[-1]["event"]
-                return f"They say {story[0].lower()}{story[1:]}. I had it as a {told[-1]['how']} report, so take it as you will."
+                return f"They say: {story}. I had it as a {told[-1]['how']} report, so take it as you will."
             history = context["settlementHistory"]
             return f"The last I remember: {history[0]['summary']}." if history else "Nothing much I could tell you."
         if any(w in text for w in ("family", "wife", "husband", "children", "son", "daughter")):

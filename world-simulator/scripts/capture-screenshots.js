@@ -137,6 +137,24 @@ try {
   await page.getByText('Rules for the narrator').waitFor();
   await shot('20-biography');
 
+  await profile.getByRole('button', { name: 'Write all' }).click();
+  await profile.getByRole('article', { name: 'Detailed biography' }).locator('.prose-text').waitFor({ timeout: 60000 });
+  await profile.getByRole('article', { name: 'In their own words' }).locator('.prose-text').waitFor({ timeout: 60000 });
+  await shot('21-prose');
+
+  await workspace('Dialogue Lab');
+  const picks = page.getByRole('list', { name: 'People to talk to' });
+  await picks.waitFor();
+  await picks.getByRole('listitem').first().click();
+  for (const line of ['Good day, who are you?', 'Any news from the roads?', 'Tell me about your family.']) {
+    await page.getByRole('textbox', { name: /Say something to/ }).fill(line);
+    await page.getByRole('button', { name: 'Say' }).click();
+    await page.getByRole('log').getByText(line).waitFor();
+    await page.getByRole('button', { name: 'Say' }).waitFor();
+  }
+  await page.waitForTimeout(300);
+  await shot('22-dialogue');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

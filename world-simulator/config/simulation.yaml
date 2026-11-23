@@ -83,6 +83,7 @@ people:
     told: 0.9                   # confidence when told by someone who was there
     friend: 0.8
     rumour: 0.6                 # carried along a road by a caravan master
+    rumourMinImportance: 4      # only weighty news travels the roads (raids, arrests, deaths), not every new market stall
     outdatedAfterDays: 1080
   # Biography context (PR6.6): how much each tier gets; targets, not caps on what can happen.
   biography:

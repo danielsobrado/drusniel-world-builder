@@ -43,7 +43,8 @@ def spread(cast: Cast, events: list[HistoryEvent], trade: Trade, day: int, cfg: 
     centres = {m.marketId: m.centerSettlementId for m in trade.markets}
     holders = {p.traderId: p for p in people.values() if p.alive and p.traderId}
     innkeepers = [p for p in people.values() if p.alive and p.profession == "innkeeper"]
-    public = [e for e in worth if e.visibility in ("settlement", "public") and e.settlementId]
+    public = [e for e in worth if e.visibility in ("settlement", "public") and e.settlementId
+              and e.importance >= cfg.get("rumourMinImportance", cfg["minImportance"])]
     for c in (c for c in trade.caravans if c.departDay == day and c.kind == "sale" and c.traderId in holders):
         master, home, centre = holders[c.traderId], c.fromId, centres.get(c.marketId)
         for e in public:

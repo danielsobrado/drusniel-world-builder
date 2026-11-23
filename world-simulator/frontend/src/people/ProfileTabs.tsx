@@ -2,6 +2,7 @@ import type { BiographyContext, KnowledgeView, RelationshipView } from '../api/t
 import { useApi } from '../api/worldApi';
 import { pct } from '../components/format';
 import { ApiView, Empty } from '../components/StateViews';
+import { ProseSection } from '../narration/ProseSection';
 import { TraitBars } from '../roads/TraderParts';
 
 const KIND: Record<string, string> = {
@@ -62,14 +63,17 @@ export function KnowledgeTab({ base, onSelect }: { base: string; onSelect: (id: 
   );
 }
 
-export function BiographyTab({ base, onSelect }: { base: string; onSelect: (id: string) => void }) {
+export function BiographyTab({ base, onSelect, scenarioId, personId }: {
+  base: string; onSelect: (id: string) => void; scenarioId: string; personId: string;
+}) {
   const result = useApi<BiographyContext>(`${base}/context`);
   return (
     <ApiView result={result} loadingLabel="Assembling the biography context…">
       {(c) => (
         <div className="biography">
-          <p className="muted small">The facts a biography may use ({c.tier} tier: {c.targets.words[0]}–{c.targets.words[1]} words).
-            No local LLM is configured, so no prose is written yet; regenerating prose will never change these facts.</p>
+          <ProseSection scenarioId={scenarioId} personId={personId} />
+          <p className="muted small">The facts the prose was written from ({c.tier} tier: {c.targets.words[0]}–{c.targets.words[1]} words).
+            Regenerating prose never changes these facts.</p>
           <h4>Narrative hooks</h4>
           {c.hooks.length ? <ul className="trip-list">{c.hooks.map((h) => <li key={h.text}>{h.text} <span className="muted small">({h.kind})</span></li>)}</ul>
             : <p className="muted">Nothing pressing.</p>}

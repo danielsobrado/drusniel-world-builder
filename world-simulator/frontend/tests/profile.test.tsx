@@ -40,6 +40,8 @@ describe('Profile', () => {
   it('opens tabs for the life timeline and the biography facts', async () => {
     mockApi({
       [`${base}/context`]: context,
+      [`${base}/biographies`]: [],
+      '/api/llm/jobs': [],
       [`${base}/timeline`]: [event('event:3', 'Rrvhei Formen married Nasharmen Formen'),
         event('event:40', 'Rrvhei Formen: Hired as farmhand', { source: 'simulation', kind: 'hired', category: 'career', causedBy: ['event:39'] })],
     });
@@ -57,7 +59,8 @@ describe('Profile', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Biography' }));
     expect(await screen.findByText('Worried about Haerreghr on the road to Vhaltha')).toBeTruthy();
     expect(screen.getByText('Use only the facts listed here.')).toBeTruthy();
-    expect(screen.getByText(/No local LLM is configured/)).toBeTruthy();
+    expect(screen.getByText(/Regenerating prose never changes these facts/)).toBeTruthy();
+    expect(await screen.findAllByText('Not written yet.')).toHaveLength(4);
   });
 });
 

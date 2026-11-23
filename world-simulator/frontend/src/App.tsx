@@ -24,6 +24,8 @@ import { BusinessesWorkspace } from './society/BusinessesWorkspace';
 import { EconomyWorkspace } from './economy/EconomyWorkspace';
 import { RoadsWorkspace } from './roads/RoadsWorkspace';
 import { PeopleWorkspace } from './people/PeopleWorkspace';
+import { DialogueLab } from './narration/DialogueLab';
+import { useLlm } from './narration/useLlm';
 
 export default function App() {
   const { layout, update, reset } = useLayout();
@@ -32,6 +34,7 @@ export default function App() {
   const world = useApi<World>(paths.world);
   const summary = useApi<Summary>(paths.summary);
   const sim = useSimulation();
+  const llm = useLlm();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const select = useCallback((id: string) => { setSelectedId(id); update({ rightOpen: true }); }, [update]);
@@ -50,23 +53,24 @@ export default function App() {
     economy: () => <EconomyWorkspace sim={sim} onSelect={select} />,
     roads: () => <RoadsWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
     people: () => <PeopleWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
+    dialogue: () => <DialogueLab sim={sim} llm={llm.status} />,
   };
   const workspace = views[layout.workspace] ? layout.workspace : 'overview';
 
   return (
     <div className="app" style={{ '--inspector-width': `${layout.rightWidth}px` } as CSSProperties}>
-      <AppBar world={world.data} summary={summary.data} sim={sim} onResetLayout={reset} />
+      <AppBar world={world.data} summary={summary.data} sim={sim} onResetLayout={reset} llm={llm.status} />
       <WorkspaceBar world={world.data} workspaces={WORKSPACES} active={workspace} onSelect={go} layout={layout} update={update} />
       <div className={`body${layout.leftOpen ? ' left-open' : ''}${layout.rightOpen ? ' right-open' : ''}`}>
         <IconRail workspaces={WORKSPACES} active={workspace} onSelect={go} />
-        {layout.leftOpen && (['simulation', 'households', 'businesses', 'economy', 'roads', 'people'].includes(workspace)
+        {layout.leftOpen && (['simulation', 'households', 'businesses', 'economy', 'roads', 'people', 'dialogue'].includes(workspace)
           ? <ScenarioExplorer sim={sim} />
           : <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />)}
         <main className="workspace" aria-label={WORKSPACES.find((w) => w.id === workspace)?.label}>{views[workspace]()}</main>
         {layout.rightOpen && <Inspector selectedId={selectedId} classes={classes} width={layout.rightWidth} onSelect={select} sim={sim}
           onResize={(rightWidth) => update({ rightWidth })} onClose={() => update({ rightOpen: false })} />}
       </div>
-      <StatusBar health={health} summary={summary} sim={sim} />
+      <StatusBar health={health} summary={summary} sim={sim} llm={llm.status} />
     </div>
   );
 }

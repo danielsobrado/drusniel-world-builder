@@ -1,3 +1,4 @@
+import { llmLabel, type LlmStatus } from '../narration/useLlm';
 import type { Summary, World } from '../api/types';
 import { Icon } from './Icon';
 import { SimulationControls } from '../simulation/SimulationControls';
@@ -5,8 +6,8 @@ import type { Simulation } from '../simulation/useSimulation';
 import { shortHash } from '../components/format';
 
 /** World identity and application controls; PR1 is a read-only audit, so no simulation clock yet. */
-export function AppBar({ world, summary, sim, onResetLayout }: {
-  world: World | null; summary: Summary | null; sim: Simulation; onResetLayout: () => void;
+export function AppBar({ world, summary, sim, onResetLayout, llm }: {
+  world: World | null; summary: Summary | null; sim: Simulation; onResetLayout: () => void; llm: LlmStatus | null;
 }) {
   const settings = summary?.sourceSettings;
   return (
@@ -25,7 +26,7 @@ export function AppBar({ world, summary, sim, onResetLayout }: {
       <SimulationControls sim={sim} />
       <span className="appbar-spacer" />
       <span className="chip chip-muted" title={world?.sourceFingerprint}>Source {shortHash(world?.sourceFingerprint)}</span>
-      <span className="chip chip-muted" title="No local model is configured in this build">Local LLM: not configured</span>
+      <span className={`chip${llm?.mode === 'llm' ? '' : ' chip-muted'}`} title={llm?.hint ?? llm?.baseUrl ?? 'Local model'}>{llmLabel(llm)}</span>
       <button type="button" className="icon-btn" title="Reset panel layout" aria-label="Reset panel layout" onClick={onResetLayout}>
         <Icon name="reset" />
       </button>
