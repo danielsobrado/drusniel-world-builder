@@ -14,27 +14,27 @@ from .housing import build_housing, occupy
 from .needs import assess_needs
 
 
-def _assemble(cohorts: Cohorts, housing, businesses, cfg: dict[str, Any]) -> Society:
+def _assemble(cohorts: Cohorts, housing, businesses, cfg: dict[str, Any], days_per_month: int) -> Society:
     groups = derive_households(cohorts, cfg["households"])
     households = sum(g.households for g in groups)
     housing, overcrowded = occupy(housing, households)
     supply = labour_supply(cohorts, cfg["labour"]["participation"])
-    businesses, employment, sectors = fill_jobs(businesses, supply, cfg["labour"]["priority"])
+    businesses, employment, sectors = fill_jobs(businesses, supply, cfg["labour"]["priority"], days_per_month)
     needs = assess_needs(population=cohorts.total, households=households, overcrowded=overcrowded,
                          businesses=businesses, employment=employment, cfg=cfg["needs"])
     return Society(households=groups, housing=housing, overcrowdedHouseholds=overcrowded, businesses=businesses,
                    employment=employment, sectors=sectors, needs=needs)
 
 
-def initial_society(settlement: dict[str, Any], cohorts: Cohorts, cfg: dict[str, Any]) -> Society:
+def initial_society(settlement: dict[str, Any], cohorts: Cohorts, cfg: dict[str, Any], days_per_month: int) -> Society:
     households = sum(g.households for g in derive_households(cohorts, cfg["households"]))
     housing = build_housing(households, settlement["class"], cfg["housing"])
     businesses = generate_businesses(settlement, labour_supply(cohorts, cfg["labour"]["participation"]), cfg)
-    return _assemble(cohorts, housing, businesses, cfg)
+    return _assemble(cohorts, housing, businesses, cfg, days_per_month)
 
 
-def update_society(society: Society, cohorts: Cohorts, cfg: dict[str, Any]) -> Society:
-    return _assemble(cohorts, society.housing, society.businesses, cfg)
+def update_society(society: Society, cohorts: Cohorts, cfg: dict[str, Any], days_per_month: int) -> Society:
+    return _assemble(cohorts, society.housing, society.businesses, cfg, days_per_month)
 
 
 def check_invariants(population: int, cohorts: Cohorts, society: Society) -> list[str]:

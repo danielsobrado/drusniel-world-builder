@@ -8,6 +8,7 @@ from ..economy.contracts import Trade
 from ..economy.roads import new_trader, personality
 from .contracts import Cast, LifeEvent, NpcHousehold, Person
 from .generate import age_years, birth_day
+from .homes import place
 
 if TYPE_CHECKING:
     from .life import Month
@@ -49,7 +50,7 @@ def promote_traders(cast: Cast, trade: Trade, settlements: list[SettlementState]
 def replace_dead(cast: Cast, settlements: list[SettlementState], m: "Month") -> Cast:
     """Each settlement keeps its budget alive: a newborn in a family with young adults, or else a newcomer."""
     c = m.cfg
-    people, households = list(cast.people), list(cast.households)
+    people, households, dwellings = list(cast.people), list(cast.households), list(cast.dwellings)
     seq, births, arrivals = dict(cast.seq), cast.births, cast.arrivals
     died = [p for p in people if p.deathDay == m.day]
     names = {s.settlementId: s.name for s in settlements}
@@ -74,18 +75,18 @@ def replace_dead(cast: Cast, settlements: list[SettlementState], m: "Month") -> 
                                 events=[LifeEvent(day=m.day, kind="born", text=f"Born to {parent.name} {parent.family}")])
                 births += 1
             else:
-                housing = s.society.housing
-                home = NpcHousehold(id=f"household:{s.sourceId}:n{seq[sid]}", settlementId=sid,
-                                    family=rng.choice(pool.family) if pool else "Newcomer", kind="single",
-                                    housing=rng.choices([h.type for h in housing], weights=[max(1, h.occupied) for h in housing])[0]
-                                    if housing else "cottage")
+                hid = f"household:{s.sourceId}:n{seq[sid]}"
+                dwelling = place(dwellings, s, hid, rng)
+                home = NpcHousehold(id=hid, settlementId=sid, family=rng.choice(pool.family) if pool else "Newcomer", kind="single",
+                                    housing=dwelling.type, homeId=dwelling.id)
                 households.append(home)
                 person = Person(id=pid, name=name, family=home.family, sex=rng.choice(("female", "male")),
                                 birthDay=birth_day(rng, "adult", c["ages"]), settlementId=sid, householdId=home.id, role="unemployed",
                                 personality=personality(rng), events=[LifeEvent(day=m.day, kind="arrived", text=f"Came to {s.name}")])
                 arrivals += 1
             people.append(person)
-    return cast.model_copy(update={"people": people, "households": households, "seq": seq, "births": births, "arrivals": arrivals,
+    return cast.model_copy(update={"people": people, "households": households, "dwellings": dwellings, "seq": seq,
+                                   "births": births, "arrivals": arrivals,
                                    "deaths": cast.deaths + len(died)})
 
 

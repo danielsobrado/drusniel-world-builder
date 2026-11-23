@@ -57,7 +57,7 @@ export function EconomyWorkspace({ sim, onSelect }: { sim: Simulation; onSelect:
                 </label>
                 <button type="button" className="btn btn-compact" onClick={() => onSelect(s.settlementId)}>Inspect {s.name}</button>
               </div>
-              <FoodTiles econ={s.economy} />
+              <FoodTiles econ={s.economy} daysPerMonth={sim.config?.calendar?.daysPerMonth ?? 30} />
               <h4>Production</h4>
               <ProductionTable econ={s.economy} />
               <h4>Stock and trade last month</h4>

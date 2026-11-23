@@ -4,9 +4,9 @@ import { qty } from './format';
 
 const SOURCE = { workshop: 'Workshop', extraction: 'Extraction', hinterland: 'Hinterland' } as const;
 
-export function FoodTiles({ econ }: { econ: SettlementEconomy }) {
+export function FoodTiles({ econ, daysPerMonth }: { econ: SettlementEconomy; daysPerMonth: number }) {
   const f = econ.food;
-  const daily = f.wanted / 30 || 1;
+  const daily = f.wanted / daysPerMonth || 1;
   const granary = econ.inventory.Rations ?? 0;
   return (
     <div className="tiles">

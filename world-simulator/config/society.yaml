@@ -69,3 +69,18 @@ needs:
   rationsPerPersonDay: 1.0
   securityPerThousand: 12           # guards and soldiers per 1,000 inhabitants that count as "safe"
   thresholds: { strained: 0.9, critical: 0.7 }   # need value below which status degrades
+
+# Physical premises (review of PR3): a business is an enterprise; premises are buildings.
+# Rural operations work outside the town; several small urban businesses can share one building.
+premises:
+  rural: [farm, fishery, hunting-lodge, mine, woodcutter, quarry]
+  homeBased: [bakery, tailor, carpentry, healer, workshop]   # worked from the family home, inside a dwelling
+  shared:                           # businesses per building
+    market-stall: { per: 6, building: market hall }
+    watch-post: { per: 2, building: watch house }
+    caravan-guard: { per: 2, building: guardhouse }
+    tavern: { per: 1, building: inn }
+  # Plausibility flags in the diagnostics view.
+  maxUrbanPremisesPerDwelling: 0.35   # urban premises against the town's dwelling buildings
+  minEmployeesPerBusiness: 2.5
+  maxBusinessesPerThousand: 150

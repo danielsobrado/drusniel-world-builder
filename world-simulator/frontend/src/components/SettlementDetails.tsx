@@ -76,7 +76,7 @@ function Connectivity({ c, onSelect }: { c: SettlementDetail['connectivity']; on
 
 function SimulationTab({ sim, id }: { sim: Simulation; id: string }) {
   const active = sim.active!;
-  const state = useApi<ScenarioState>(`/api/scenarios/${encodeURIComponent(active.id)}/state?v=${sim.version}`);
+  const state = useApi<ScenarioState>(`/api/scenarios/${encodeURIComponent(active.id)}/summary?v=${sim.version}`);
   return (
     <ApiView result={state} loadingLabel="Loading scenario state…">
       {(s) => {

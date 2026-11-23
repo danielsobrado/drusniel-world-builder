@@ -116,7 +116,7 @@ function EventLog({ events }: { events: SimEvent[] }) {
 export function SimulationWorkspace({ sim, summary, onSelect }: { sim: Simulation; summary: Summary | null; onSelect: (id: string) => void }) {
   const active = sim.active;
   const path = active ? `/api/scenarios/${encodeURIComponent(active.id)}` : null;
-  const state = useApi<ScenarioState>(path && `${path}/state?v=${sim.version}`);
+  const state = useApi<ScenarioState>(path && `${path}/summary?v=${sim.version}`);
   const events = useApi<SimEvent[]>(path && `${path}/events?limit=60&v=${sim.version}`);
   return (
     <>

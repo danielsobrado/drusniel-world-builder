@@ -31,7 +31,8 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
         record = model.settlements_by_id[sid]
         cohorts = initial_cohorts(record["population"], rules["simulation"]["demography"]["initialShares"])
         fields = {"settlementId": sid, "sourceId": record["sourceId"], "name": record["name"], "population": record["population"]}
-        rows.append((fields, record, cohorts, initial_society(record, cohorts, rules["society"])))
+        society = initial_society(record, cohorts, rules["society"], rules["simulation"]["calendar"]["daysPerMonth"])
+        rows.append((fields, record, cohorts, society))
     settlements, trade = build_settlements(model, rows, rules, seed)
     cast = initial_cast(model, settlements, trade.traders, seed, rules["simulation"]["people"])
     identity = model.audit["identity"]
@@ -53,7 +54,8 @@ def _month(settlement: SettlementState, *, seed: int, month_index: int, rules: d
     shortfall = max(0.0, 1.0 - settlement.economy.food.security)
     after = run_month(settlement, seed=seed, month_index=month_index, params=sim["demography"],
                       months_per_year=sim["calendar"]["monthsPerYear"], mortality=1 + rules["economy"]["famine"]["mortality"] * shortfall)
-    return after.model_copy(update={"society": update_society(after.society, after.cohorts, rules["society"])})
+    return after.model_copy(update={"society": update_society(after.society, after.cohorts, rules["society"],
+                                                                    sim["calendar"]["daysPerMonth"])})
 
 
 def _bounded(history: list[HistoryPoint], limit: int) -> list[HistoryPoint]:

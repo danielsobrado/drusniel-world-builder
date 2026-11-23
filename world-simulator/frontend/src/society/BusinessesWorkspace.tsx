@@ -5,6 +5,7 @@ import { fmt, pct } from '../components/format';
 import { ApiView, Empty, ErrorState, Loading } from '../components/StateViews';
 import type { Simulation } from '../simulation/useSimulation';
 import { SettlementPicker, ShareBar, useScenarioState } from './SocietyParts';
+import { DiagnosticsTable } from './DiagnosticsTable';
 import { IdleTable, UnemploymentTrend } from './UnemploymentView';
 
 const SECTORS = ['agriculture', 'extraction', 'crafts', 'trade', 'services', 'security'];
@@ -53,11 +54,11 @@ function Sectors({ settlements }: { settlements: SettlementSimState[] }) {
 
 function Professions({ settlements }: { settlements: SettlementSimState[] }) {
   const by = new Map<string, { posts: number; filled: number }>();
-  for (const b of settlements.flatMap((s) => s.society.businesses)) {
-    const row = by.get(b.profession) ?? { posts: 0, filled: 0 };
-    row.posts += b.staff;
-    row.filled += b.filled;
-    by.set(b.profession, row);
+  for (const p of settlements.flatMap((s) => s.businessSummary?.professions ?? [])) {
+    const row = by.get(p.profession) ?? { posts: 0, filled: 0 };
+    row.posts += p.posts;
+    row.filled += p.filled;
+    by.set(p.profession, row);
   }
   const rows = [...by.entries()].sort((a, b) => b[1].filled - a[1].filled || a[0].localeCompare(b[0]));
   const max = Math.max(...rows.map(([, r]) => r.posts), 1);
@@ -150,6 +151,11 @@ export function BusinessesWorkspace({ sim, onSelect, selectedId }: { sim: Simula
                 <span className="muted">filled in priority order when labour is short</span></div><Sectors settlements={chosen} /></section>
               <section className="section"><div className="section-head"><h2>Professions</h2></div><Professions settlements={chosen} /></section>
             </div>
+            <section className="section">
+              <div className="section-head"><h2>Plausibility</h2>
+                <span className="muted">enterprises against people and buildings; several may share one building</span></div>
+              <DiagnosticsTable sim={sim} />
+            </section>
             <section className="section">
               <div className="section-head"><h2>Businesses</h2><span className="muted">workshops and mines exist only where Azgaar records the good</span></div>
               <BusinessTable sim={sim} settlement={settlement} onSelect={onSelect} selectedId={selectedId} />

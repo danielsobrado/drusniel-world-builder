@@ -17,6 +17,9 @@ export function SimulationControls({ sim }: { sim: Simulation }) {
         </select>
       </label>
       {active?.readOnly && <span className="chip chip-warn" title={active.readOnly}>read-only</span>}
+      {active && active.rulesCurrent === false && !active.readOnly && (
+        <span className="chip chip-muted" title={`Runs under the rules frozen when it was created (${active.rulesFingerprint?.slice(0, 19)}…); the YAML has changed since`}>
+          frozen rules</span>)}
       <span className="sim-date" title={active ? `Day ${active.date.day}` : undefined}>{active?.date.label ?? '—'}</span>
       {STEPS.map(([unit, label]) => (
         <button key={unit} type="button" className="btn btn-compact" disabled={locked || running}

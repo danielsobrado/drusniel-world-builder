@@ -128,6 +128,7 @@ Writes (`POST`) must send `application/json`. Full table in
 | `POST /api/scenarios/{id}/step` · `/run` · `/pause` · `/restore` | clock control |
 | `GET · POST /api/scenarios/{id}/snapshots` | list · save |
 | `GET /api/scenarios/{id}/businesses` · `/businesses/{businessId}` | paged business list · one business |
+| `GET /api/scenarios/{id}/summary` · `/diagnostics` | state without the business list, cast or caravan log · business plausibility |
 | `GET /api/scenarios/{id}/economy` | settlement economies, markets, caravans, roads, traders (no society payload) |
 | `GET /api/scenarios/{id}/traders/{traderId}` | one caravan master's scorecard and caravans |
 | `GET /api/scenarios/{id}/people` · `/people/{personId}` | paged named people · one person with household and life story |

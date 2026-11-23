@@ -21,6 +21,7 @@ from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
 from .engine import advance, baseline_state, state_checksum
 from .migrations import IncompatibleState, migrate_state
+from .rules import fingerprint, freeze
 from .scope import resolve_scope
 from .store import ScenarioStore, slugify
 
@@ -41,6 +42,7 @@ class Session:
     dirty: bool = False
     saved_at: float = field(default_factory=time.monotonic)
     error: str | None = None
+    busy: bool = False                # a step is being computed off the event loop
     _digest: tuple[int, str] | None = None
 
     @property
@@ -67,10 +69,12 @@ class ScenarioManager:
         self.unloadable: dict[str, str] = {}
         for scenario_id in self.store.ids():
             self._load(scenario_id)
-        if not self.sessions and not self.unloadable:
+        if not self.sessions:
+            # Unloadable saves stay on disk untouched; a fresh baseline is created beside them so the app is usable.
             baseline = self.config["baseline"]
+            baseline_id = baseline["id"] if baseline["id"] not in self.unloadable else None
             self.create(CreateScenario(name=baseline["name"], description=baseline.get("description", ""),
-                                       scope=Scope(**baseline["scope"]), seed=baseline["seed"]), scenario_id=baseline["id"])
+                                       scope=Scope(**baseline["scope"]), seed=baseline["seed"]), scenario_id=baseline_id)
 
     def _load(self, scenario_id: str) -> None:
         try:
@@ -82,6 +86,10 @@ class ScenarioManager:
             self.unloadable[scenario_id] = str(exc)
             return
         session = Session(ScenarioMeta(**raw_meta), state, [Event(**e) for e in raw_events])
+        if session.meta.rules is None and not foreign:
+            self._freeze(session)
+            self._event(session, "migrated", f"Froze the current rules for this scenario ({session.meta.rulesFingerprint[:19]}…)")
+            self._persist(session)
         if foreign:
             session.read_only = ("Saved against a different source map "
                                  f"({state.world.sourceFingerprint[:15]}…); inspect only until migrated.")
@@ -103,11 +111,15 @@ class ScenarioManager:
         s = self.session(scenario_id)
         if s.read_only:
             raise ApiError(409, "read_only", s.read_only, {"id": scenario_id})
+        if s.busy:
+            raise ApiError(409, "busy", "A step is still being computed for this scenario", {"id": scenario_id})
         return s
 
     def status(self, s: Session) -> dict[str, Any]:
         return {
-            **s.meta.model_dump(),
+            **s.meta.model_dump(exclude={"rules"}),
+            # False when the YAML has changed since the scenario froze its rules; it keeps running under its own.
+            "rulesCurrent": s.meta.rulesFingerprint == fingerprint(freeze(self.model.config.rules)),
             "schemaVersion": s.state.schemaVersion,
             "settlementIds": [x.settlementId for x in s.state.settlements],
             "date": s.state.date.model_dump(),
@@ -141,6 +153,9 @@ class ScenarioManager:
             raise ApiError(409, "incompatible_snapshot", str(exc), {"id": snapshot_id}) from exc
         if not legacy and (stored != STATE_SCHEMA_VERSION or state_checksum(state) != meta.checksum):
             raise ApiError(500, "corrupt_snapshot", f"Snapshot {snapshot_id} does not match its checksum")
+        if state.world.sourceFingerprint != self.fingerprint or state.scenarioId != scenario_id:
+            raise ApiError(409, "foreign_snapshot", f"Snapshot {snapshot_id} belongs to another scenario or source map",
+                           {"id": snapshot_id, "scenarioId": state.scenarioId})
         return meta, state
 
     # ---- mutations -----------------------------------------------------
@@ -174,7 +189,8 @@ class ScenarioManager:
             snapshot, snap_state = self._snapshot_state(parent.meta.id, req.fromSnapshotId)
             state = snap_state.model_copy(update={"scenarioId": scenario_id})
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=parent.meta.scope, seed=state.seed,
-                                parent=ParentRef(scenarioId=parent.meta.id, snapshotId=snapshot.id), createdAt=_now())
+                                parent=ParentRef(scenarioId=parent.meta.id, snapshotId=snapshot.id), createdAt=_now(),
+                                rules=parent.meta.rules, rulesFingerprint=parent.meta.rulesFingerprint)
             session = Session(meta, state, [])
             self._event(session, "branched", f"Branched from {parent.meta.name} at snapshot “{snapshot.label}” ({snapshot.date.label})")
         else:
@@ -185,6 +201,7 @@ class ScenarioManager:
                                    start_year=self.start_year)
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=scope, seed=seed, createdAt=_now())
             session = Session(meta, state, [])
+            self._freeze(session)
             businesses = sum(len(s.society.businesses) for s in state.settlements)
             self._event(session, "created",
                         f"Created with {len(settlement_ids)} settlements and {businesses} businesses from the imported world")
@@ -192,8 +209,28 @@ class ScenarioManager:
         self._persist(session)
         return session
 
+    def _freeze(self, s: Session) -> None:
+        frozen = freeze(self.model.config.rules)
+        s.meta = s.meta.model_copy(update={"rules": frozen, "rulesFingerprint": fingerprint(frozen)})
+
+    def rules(self, s: Session) -> dict[str, Any]:
+        """The scenario's frozen rules; only a foreign, read-only scenario can lack them, and it never advances."""
+        return s.meta.rules or freeze(self.model.config.rules)
+
     def _advance(self, s: Session, days: int) -> None:
-        s.state, months = advance(s.state, days, self.model.config.rules)
+        self._apply(s, *advance(s.state, days, self.rules(s)))
+
+    async def _advance_off_loop(self, s: Session, days: int) -> None:
+        """Computes the step in a worker thread so the API keeps answering; the result is applied back on the loop."""
+        s.busy = True
+        try:
+            state, months = await asyncio.to_thread(advance, s.state, days, self.rules(s))
+        finally:
+            s.busy = False
+        self._apply(s, state, months)
+
+    def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]]) -> None:
+        s.state = state
         for m in months:
             for incident in m["incidents"]:     # what happened during the month, then its close
                 self._event(s, incident["kind"], incident["message"], at_day=m["day"], trader=incident.get("trader"),
@@ -204,17 +241,30 @@ class ScenarioManager:
                         caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"], bandits=m["bandits"])
         s.dirty = True
 
-    def step(self, scenario_id: str, days: int) -> Session:
+    def _steppable(self, scenario_id: str, days: int) -> Session:
         s = self.writable(scenario_id)
         if s.running:
             raise ApiError(409, "running", "Pause the scenario before stepping it")
         if not 1 <= days <= self.limits["maxStepDays"]:
             raise ApiError(400, "invalid_parameter", f"days must be 1-{self.limits['maxStepDays']}", {"parameter": "days"})
-        start = s.state.date.label
-        self._advance(s, days)
+        return s
+
+    def _stepped(self, s: Session, days: int, start: str) -> Session:
         self._event(s, "stepped", f"Stepped {days} day{'s' if days != 1 else ''} from {start}", days=days)
         self._persist(s)
         return s
+
+    def step(self, scenario_id: str, days: int) -> Session:
+        s = self._steppable(scenario_id, days)
+        start = s.state.date.label
+        self._advance(s, days)
+        return self._stepped(s, days, start)
+
+    async def step_async(self, scenario_id: str, days: int) -> Session:
+        s = self._steppable(scenario_id, days)
+        start = s.state.date.label
+        await self._advance_off_loop(s, days)
+        return self._stepped(s, days, start)
 
     def run(self, scenario_id: str, speed: float) -> Session:
         s = self.writable(scenario_id)
@@ -235,7 +285,7 @@ class ScenarioManager:
                 s.carry += s.speed * tick
                 days, s.carry = int(s.carry), s.carry - int(s.carry)
                 if days:
-                    self._advance(s, days)
+                    await self._advance_off_loop(s, days)
                 if s.dirty and time.monotonic() - s.saved_at >= 1.0:
                     self._persist(s)
         except asyncio.CancelledError:

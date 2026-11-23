@@ -44,7 +44,7 @@ sold counts as outside demand. With the scoped members trading as recorded, ever
 balances. Without this the market had no wood at all, and every workshop downstream
 stopped.
 
-One Azgaar turn is read as one month of flow (`azgaar.turnDays`).
+One Azgaar turn is read as one calendar month of flow (`calendar.daysPerMonth` days).
 
 ## Food
 

@@ -52,7 +52,9 @@ def test_a_decade_of_bandits_guards_and_smugglers(eldara):
     traders = state.trade.traders
     for road in state.trade.routes:
         assert sum(t.scorecard.guardsHired for t in traders if t.routeId == road.id) > 0, "escort demand becomes guard jobs"
-    assert all(t.scorecard.reputation < 15 and t.scorecard.caught for t in traders if not t.active)
+    died = {p.traderId for p in state.cast.people if not p.alive and p.traderId}
+    assert all((t.scorecard.reputation < 15 and t.scorecard.caught) or t.id in died for t in traders if not t.active), \
+        "a master leaves the post only when dismissed or dead"
     assert len([t for t in traders if t.active]) == 6, "every dismissed master is replaced"
     working = [t for t in traders if t.scorecard.trips]
     reckless = min(working, key=lambda t: t.personality.caution)

@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..economy.contracts import Personality
 
@@ -48,6 +48,16 @@ class NpcHousehold(Contract):
     family: str
     kind: str                        # the household group it belongs to
     housing: str                     # the building type it lives in
+    homeId: str | None = None        # its dwelling, while anyone in it is alive
+
+
+class Dwelling(Contract):
+    """One materialised building of the aggregate housing stock, home to named households."""
+    id: str
+    settlementId: str
+    type: str
+    capacity: int = Field(ge=1)      # households it holds
+    households: list[str]
 
 
 class NamePool(Contract):
@@ -58,6 +68,7 @@ class NamePool(Contract):
 class Cast(Contract):
     people: list[Person]
     households: list[NpcHousehold]
+    dwellings: list[Dwelling] = []
     names: dict[str, NamePool]       # per settlement, for newcomers and newborns
     seq: dict[str, int]              # last person number per settlement
     budget: dict[str, int]           # people kept alive per settlement

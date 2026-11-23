@@ -3,10 +3,10 @@ import { useApi, type ApiResult } from '../api/worldApi';
 import { pct } from '../components/format';
 import type { Simulation } from '../simulation/useSimulation';
 
-/** The active scenario's canonical state, refetched whenever the scenario changes. */
+/** The active scenario's state summary (no business list or cast), refetched whenever the scenario changes. */
 export function useScenarioState(sim: Simulation): ApiResult<ScenarioState> {
   const active = sim.active;
-  return useApi<ScenarioState>(active ? `/api/scenarios/${encodeURIComponent(active.id)}/state?v=${sim.version}` : null);
+  return useApi<ScenarioState>(active ? `/api/scenarios/${encodeURIComponent(active.id)}/summary?v=${sim.version}` : null);
 }
 
 const STATUS_ICON = { ok: '✓', strained: '!', critical: '✕' } as const;

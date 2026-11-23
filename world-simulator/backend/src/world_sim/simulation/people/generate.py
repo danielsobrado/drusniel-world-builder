@@ -12,7 +12,8 @@ from ...world.model import WorldModel
 from ..economy.names import generator_for
 from ..economy.roads import personality
 from ..economy.sources import AzgaarEconomy
-from .contracts import Cast, LifeEvent, NamePool, NpcHousehold, Person
+from .contracts import Cast, Dwelling, LifeEvent, NamePool, NpcHousehold, Person
+from .homes import place
 
 # (adults, children, elders) per household kind; children are drawn from childrenPerFamily.
 TEMPLATES = {
@@ -42,13 +43,14 @@ class CastBuilder:
         self.s, self.pool, self.budget, self.rng, self.cfg = settlement, pool, budget, rng, cfg
         self.people: list[Person] = []
         self.households: list[NpcHousehold] = []
+        self.dwellings: list[Dwelling] = []
         self.named: dict[str, int] = defaultdict(int)     # named workers per business
 
     def household(self, kind: str) -> NpcHousehold:
-        housing = self.s.society.housing
-        choice = self.rng.choices([h.type for h in housing], weights=[max(1, h.occupied) for h in housing])[0] if housing else "cottage"
-        h = NpcHousehold(id=f"household:{self.s.sourceId}:{len(self.households) + 1}", settlementId=self.s.settlementId,
-                         family=self.rng.choice(self.pool.family), kind=kind, housing=choice)
+        hid = f"household:{self.s.sourceId}:{len(self.households) + 1}"
+        home = place(self.dwellings, self.s, hid, self.rng)
+        h = NpcHousehold(id=hid, settlementId=self.s.settlementId, family=self.rng.choice(self.pool.family), kind=kind,
+                         housing=home.type, homeId=home.id)
         self.households.append(h)
         return h
 
@@ -101,7 +103,7 @@ class CastBuilder:
 
 def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], seed: int, cfg: dict[str, Any]) -> Cast:
     az = AzgaarEconomy(model)
-    people, households, names, seq, budget = [], [], {}, {}, {}
+    people, households, dwellings, names, seq, budget = [], [], [], {}, {}, {}
     for s in settlements:
         rng = random.Random(f"{seed}:people:{s.settlementId}")
         gen = generator_for(model.document, az.culture_of(s.sourceId))
@@ -123,5 +125,6 @@ def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], 
         b.fill()
         people += b.people
         households += b.households
+        dwellings += b.dwellings
         names[s.settlementId], seq[s.settlementId], budget[s.settlementId] = pool, len(b.people), b.budget
-    return Cast(people=people, households=households, names=names, seq=seq, budget=budget)
+    return Cast(people=people, households=households, dwellings=dwellings, names=names, seq=seq, budget=budget)

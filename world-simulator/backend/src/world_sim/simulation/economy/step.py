@@ -60,7 +60,7 @@ def _deliver(trade: Trade, econs: dict[str, SettlementEconomy], day: int, keep: 
 
 
 def food_need(food: FoodBalance, granary: float, cfg: dict[str, Any]) -> Need:
-    daily = food.wanted / cfg["economy"]["azgaar"]["turnDays"] if food.wanted else 0
+    daily = food.wanted / cfg["simulation"]["calendar"]["daysPerMonth"] if food.wanted else 0
     days = f"{granary / daily:,.0f}" if daily else "—"
     return Need(id="food", label="Food", value=food.security, status=status(food.security, cfg["society"]["needs"]["thresholds"]),
                 explanation=f"Ate {food.eaten:,} of {food.wanted:,} rations: {food.local:,} grown in town, {food.hinterland:,} sent by "
@@ -130,7 +130,7 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
             society, econs[s.settlementId], traders, settlement=home, day=day, cfg=cfg["economy"], society_cfg=cfg["society"])
         incidents.extend(changes)
         if restaff or opened:
-            society = update_society(society, s.cohorts, cfg["society"])
+            society = update_society(society, s.cohorts, cfg["society"], cfg["simulation"]["calendar"]["daysPerMonth"])
         econ = econs[s.settlementId]
         updated.append(s.model_copy(update={"economy": econ, "society": with_food_need(society, econ, cfg)}))
     trade = trade.model_copy(update={"traders": traders})

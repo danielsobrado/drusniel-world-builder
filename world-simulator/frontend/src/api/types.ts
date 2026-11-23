@@ -134,6 +134,7 @@ export interface ScenarioStatus {
   parent: { scenarioId: string; snapshotId: string } | null; createdAt: string; snapshotSeq: number; eventSeq: number;
   settlementIds: string[]; date: CalendarDate; running: boolean; speed: number; population: number;
   checksum: string; snapshots: number; error: string | null; readOnly: string | null; schemaVersion: number;
+  rulesFingerprint?: string | null; rulesCurrent?: boolean;
 }
 
 export interface Cohorts { children: number; adults: number; elders: number }
@@ -143,7 +144,7 @@ export interface Business {
   id: string; settlementId: string; kind: string; name: string; sector: string; profession: string; good: string | null;
   staff: number; wage: number; filled: number; evidence: string | null; settlementName?: string;
   ownerId?: string | null; ownerName?: string | null; openedDay?: number | null; idleMonths?: number;
-  workers?: { id: string; name: string }[];
+  workers?: { id: string; name: string }[]; premisesId?: string | null;
 }
 export interface Employment { labourSupply: number; employed: number; unemployed: number; vacancies: number; wageBillPerMonth: number }
 export interface SectorEmployment { sector: string; businesses: number; demand: number; filled: number }
@@ -156,6 +157,16 @@ export interface SettlementSimState {
   settlementId: string; sourceId: number; name: string; population: number; cohorts: Cohorts; births: number; deaths: number;
   society: Society;
   economy?: SettlementEconomy;
+  /** From the summary endpoint, which sends this instead of the business list. */
+  businessSummary?: BusinessSummary;
+}
+export interface Diagnostics {
+  settlementId: string; name: string; businesses: number; ruralOperations: number; homeWorkshops: number; urbanPremises: number;
+  dwellingBuildings: number; employeesPerBusiness: number; businessesPerThousand: number; urbanPremisesPerDwelling: number; flags: string[];
+}
+export interface BusinessSummary {
+  count: number; professions: { profession: string; posts: number; filled: number }[];
+  opened: { posts: number; filled: number }; guardPosts: number;
 }
 export interface HistoryPoint {
   day: number; population: Record<string, number>; labour?: Record<string, number>; unemployed?: Record<string, number>; bandits?: number;

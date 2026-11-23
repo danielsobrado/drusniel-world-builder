@@ -57,7 +57,7 @@ describe('SimulationControls', () => {
 describe('SimulationWorkspace', () => {
   it('shows settlement state, events and snapshots, and restores a snapshot', async () => {
     mockApi({
-      '/api/scenarios/baseline-pilot/state': state,
+      '/api/scenarios/baseline-pilot/summary': state,
       '/api/scenarios/baseline-pilot/events': [{ seq: 2, day: 60, date: '1212-03-01', kind: 'month', message: '1212-02 closed: 4 births' }],
       '/api/scenarios/baseline-pilot/snapshots': [{ id: 'snap-001', label: 'Spring', date: date(60), checksum: 'ffff0000', createdAt: '' }],
     });

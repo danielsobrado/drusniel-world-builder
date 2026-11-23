@@ -19,7 +19,7 @@ const state: ScenarioState = {
 
 describe('HouseholdsWorkspace', () => {
   it('shows household composition, housing occupancy and needs with their reasons', async () => {
-    mockApi({ '/api/scenarios/baseline-pilot/state': state });
+    mockApi({ '/api/scenarios/baseline-pilot/summary': state });
     render(<HouseholdsWorkspace sim={sim} onSelect={() => {}} />);
     await screen.findByText('Couple with children');
     expect(screen.getByText('Cottage')).toBeTruthy();
@@ -34,7 +34,7 @@ describe('HouseholdsWorkspace', () => {
 describe('BusinessesWorkspace', () => {
   it('lists businesses from the paged API and selects one into the inspector', async () => {
     const calls = mockApi({
-      '/api/scenarios/baseline-pilot/state': state,
+      '/api/scenarios/baseline-pilot/summary': state,
       '/api/scenarios/baseline-pilot/businesses': {
         data: society().businesses, meta: { page: { page: 1, pageSize: 50, totalItems: 2, totalPages: 1 } },
       },

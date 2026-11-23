@@ -8,7 +8,9 @@ from fastapi.responses import JSONResponse
 
 from ..simulation.contracts import CreateScenario, RestoreRequest, RunRequest, SnapshotRequest, StepRequest
 from ..simulation.manager import ScenarioManager
+from ..simulation.premises import diagnostics, premises
 from .errors import ApiError
+from .summary import state_summary
 
 
 def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]) -> APIRouter:
@@ -44,6 +46,18 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
     async def get_state(scenario_id: str) -> JSONResponse:
         return reply(manager.session(scenario_id).state.model_dump())
 
+    @router.get("/scenarios/{scenario_id}/summary")
+    async def get_summary(scenario_id: str) -> JSONResponse:
+        """The state without the business list, cast and caravan log; what the workbench polls."""
+        return reply(state_summary(manager.session(scenario_id).state))
+
+    @router.get("/scenarios/{scenario_id}/diagnostics")
+    async def get_diagnostics(scenario_id: str) -> JSONResponse:
+        """Plausibility of each settlement's businesses against its people and buildings."""
+        state = manager.session(scenario_id).state
+        rules = manager.rules(manager.session(scenario_id))
+        return reply([diagnostics(s, rules["society"]["premises"]) for s in state.settlements])
+
     @router.get("/scenarios/{scenario_id}/businesses")
     async def businesses(scenario_id: str, settlement: str | None = None, sector: str | None = None, q: str | None = None,
                          page: int = Query(1, ge=1), pageSize: int = Query(50, ge=1, le=200)) -> JSONResponse:  # noqa: N803
@@ -64,7 +78,9 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
             for b in s.society.businesses:
                 if b.id == business_id:
                     workers = [{"id": p.id, "name": f"{p.name} {p.family}"} for p in state.cast.people if p.alive and p.businessId == b.id]
-                    return reply({**b.model_dump(), "settlementName": s.name, "ownerName": owners.get(b.ownerId or ""), "workers": workers})
+                    place = premises(s, manager.rules(manager.session(scenario_id))["society"]["premises"])[b.id]
+                    return reply({**b.model_dump(), "settlementName": s.name, "ownerName": owners.get(b.ownerId or ""),
+                                  "workers": workers, "premisesId": place})
         raise ApiError(404, "not_found", f"No business {business_id}", {"id": business_id})
 
     @router.get("/scenarios/{scenario_id}/economy")
@@ -103,7 +119,7 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
         if (body.days is None) == (body.unit is None):
             raise ApiError(400, "invalid_parameter", "Give exactly one of days or unit", {"parameter": "days"})
         days = body.days if body.days is not None else config["stepSizes"][body.unit]
-        return reply(manager.status(manager.step(scenario_id, days)))
+        return reply(manager.status(await manager.step_async(scenario_id, days)))
 
     @router.post("/scenarios/{scenario_id}/run")
     async def run(scenario_id: str, body: RunRequest) -> JSONResponse:

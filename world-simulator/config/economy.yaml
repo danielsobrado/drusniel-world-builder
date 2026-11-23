@@ -4,8 +4,7 @@
 # calibrated data. Changing them needs no code change; the state checksum changes with them.
 schemaVersion: 1
 
-azgaar:
-  turnDays: 30                  # one Azgaar production or deal turn is read as a month of flow
+# One Azgaar production or deal turn is read as one calendar month of flow.
 
 food:
   good: Rations                 # the staple diet, counted in daily rations (not an Azgaar good)

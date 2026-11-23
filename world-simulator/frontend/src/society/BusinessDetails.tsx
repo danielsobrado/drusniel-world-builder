@@ -22,7 +22,9 @@ export function BusinessDetails({ id, sim, onSelect }: { id: string; sim: Simula
             <div className="field"><dt>Profession</dt><dd className="cap">{b.profession}</dd></div>
             {b.good && <div className="field"><dt>Good</dt><dd>{b.good}</dd></div>}
             <div className="field"><dt>Staffing</dt><dd>{b.filled} of {b.staff} posts filled</dd></div>
-            <div className="field"><dt>Wage</dt><dd>{b.wage} copper per worker-day · {fmt(b.filled * b.wage * 30)} a month</dd></div>
+            <div className="field"><dt>Wage</dt><dd>{b.wage} copper per worker-day · {fmt(b.filled * b.wage * (sim.config?.calendar?.daysPerMonth ?? 30))} a month</dd></div>
+            <div className="field"><dt>Premises</dt><dd>{b.premisesId == null ? 'works the land outside the town'
+              : b.premisesId.startsWith('home:') ? 'worked from the family home' : b.premisesId}</dd></div>
             {b.openedDay != null && <div className="field"><dt>Opened</dt><dd>day {b.openedDay}, funded by {b.ownerId
               ? <button type="button" className="link" onClick={() => onSelect(b.ownerId!)}>{b.ownerName ?? b.ownerId}</button> : 'the town treasury'}</dd></div>}
             {(b.idleMonths ?? 0) > 0 && <div className="field"><dt>Idle</dt><dd>{b.idleMonths} months without a worker</dd></div>}

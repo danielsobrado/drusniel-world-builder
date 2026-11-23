@@ -62,10 +62,10 @@ def test_jobs_never_exceed_eligible_labour_and_fill_by_priority():
         return Business(id=f"b{i}", settlementId="s", kind=sector, name=sector, sector=sector, profession="x",
                         staff=staff, wage=1, filled=0)
     businesses = [biz(1, "trade", 10), biz(2, "agriculture", 10), biz(3, "crafts", 10)]
-    updated, employment, sectors = fill_jobs(businesses, 15, ["agriculture", "crafts", "trade"])
+    updated, employment, sectors = fill_jobs(businesses, 15, ["agriculture", "crafts", "trade"], 30)
     assert employment.employed == 15 and employment.unemployed == 0 and employment.vacancies == 15
     assert [b.filled for b in updated] == [0, 10, 5], "agriculture first, then crafts, trade last"
-    _, plenty, _ = fill_jobs(businesses, 100, ["agriculture", "crafts", "trade"])
+    _, plenty, _ = fill_jobs(businesses, 100, ["agriculture", "crafts", "trade"], 30)
     assert plenty.employed == 30 and plenty.unemployed == 70
 
 
@@ -148,9 +148,11 @@ def test_scenarios_from_another_source_map_are_read_only(fresh_model):
 def test_newer_schema_is_reported_not_loaded(fresh_model):
     root = fresh_model.config.root / fresh_model.config.simulation["storage"]
     _write_legacy(root, fresh_model, schema=99)
+    before = {p.name: p.read_bytes() for p in (root / "legacy").rglob("*.json")}
     manager = ScenarioManager(fresh_model)
     assert "legacy" in manager.unloadable and "legacy" not in manager.sessions
-    assert "baseline-pilot" not in manager.sessions, "no baseline is invented over unreadable data"
+    assert "baseline-pilot" in manager.sessions, "a fresh baseline is created beside the unreadable save, so the app is usable"
+    assert {p.name: p.read_bytes() for p in (root / "legacy").rglob("*.json")} == before, "the unreadable files are left untouched"
 
 
 def test_state_files_are_compact_json(fresh_model):

@@ -39,7 +39,7 @@ def monthly_use(econ: SettlementEconomy, population: int, ratios: dict[str, floa
 
 def food_flows(econ: SettlementEconomy, society: Society, population: int, cfg: dict[str, Any]) -> tuple[int, int, int]:
     """(local, hinterland, wanted) rations for one month."""
-    days = cfg["economy"]["azgaar"]["turnDays"]
+    days = cfg["simulation"]["calendar"]["daysPerMonth"]
     needs = cfg["society"]["needs"]
     farm = sum(b.filled for b in society.businesses if b.sector == "agriculture")
     local = round(farm * needs["rationsPerFarmWorkerDay"] * days)

@@ -9,7 +9,8 @@ def labour_supply(cohorts: Cohorts, participation: dict[str, float]) -> int:
     return math.floor(cohorts.adults * participation["adults"] + cohorts.elders * participation["elders"])
 
 
-def fill_jobs(businesses: list[Business], supply: int, priority: list[str]) -> tuple[list[Business], Employment, list[SectorEmployment]]:
+def fill_jobs(businesses: list[Business], supply: int, priority: list[str],
+              days_per_month: int) -> tuple[list[Business], Employment, list[SectorEmployment]]:
     """Sectors fill in priority order, businesses in id order; never more workers than the supply."""
     rank = {sector: i for i, sector in enumerate(priority)}
     order = sorted(range(len(businesses)), key=lambda i: (rank.get(businesses[i].sector, len(rank)), businesses[i].id))
@@ -26,6 +27,6 @@ def fill_jobs(businesses: list[Business], supply: int, priority: list[str]) -> t
         members = [b for b in updated if b.sector == sector]
         sectors.append(SectorEmployment(sector=sector, businesses=len(members), demand=sum(b.staff for b in members),
                                         filled=sum(b.filled for b in members)))
-    wage_bill = sum(b.filled * b.wage for b in updated) * 30
+    wage_bill = sum(b.filled * b.wage for b in updated) * days_per_month
     return updated, Employment(labourSupply=supply, employed=employed, unemployed=supply - employed,
                                vacancies=demand - employed, wageBillPerMonth=wage_bill), sectors

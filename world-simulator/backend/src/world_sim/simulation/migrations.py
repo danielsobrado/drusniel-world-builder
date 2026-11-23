@@ -25,7 +25,8 @@ def _record(model: WorldModel, settlement: dict[str, Any]) -> dict[str, Any]:
 def _v1_to_v2(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     """v2 adds society, derived from each settlement's v1 cohorts and its imported record."""
     society_cfg = model.config.society
-    settlements = [{**s, "society": initial_society(_record(model, s), Cohorts(**s["cohorts"]), society_cfg).model_dump()}
+    settlements = [{**s, "society": initial_society(_record(model, s), Cohorts(**s["cohorts"]), society_cfg,
+                                                    model.config.simulation["calendar"]["daysPerMonth"]).model_dump()}
                    for s in raw["settlements"]]
     return {**raw, "schemaVersion": 2, "settlements": settlements}
 

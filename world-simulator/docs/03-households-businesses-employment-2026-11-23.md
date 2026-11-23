@@ -167,3 +167,19 @@ scenarios in `meta.unloadable`.
   groups and business ids above.
 - NumPy, SciPy and OR-Tools were not needed. Derivation is exact integer arithmetic, and
   the priority fill already satisfies the labour constraint.
+
+## Review follow-ups
+
+These address a code review of PR3. Each item has a test in `backend/tests/test_review.py`.
+
+| Finding | Change |
+|---|---|
+| A saved scenario changed behaviour when the YAML changed | Each scenario freezes the rules that affect outcomes (calendar, limits, demography, people, society, economy) and stores their fingerprint. It always advances under them, branches inherit them, and older saves freeze the current rules once on load. Status reports `rulesCurrent`, and the app bar shows a "frozen rules" chip when the YAML has moved on |
+| Households and buildings had no identities | Named households live in identified dwellings, `building:<sourceId>:<type>:<n>`, numbered within the aggregate stock. No type gets more dwellings than the stock has buildings, and no dwelling holds more households than its type allows (both checked monthly) |
+| A snapshot from another scenario or map could be restored | Restoring checks the snapshot's source fingerprint and scenario id; a mismatch returns 409 `foreign_snapshot` |
+| Monthly wages assumed 30 days | The wage bill, rations and granary days use `calendar.daysPerMonth`. Azgaar production turns are read as one calendar month |
+| The UI pulled the full ~1 MB state | `GET /api/scenarios/{id}/summary` drops the business list, cast and caravan log, and sends per-settlement business totals (`businessSummary`) instead. Steps and runs are computed in a worker thread, and a busy scenario refuses conflicting changes with 409 `busy` |
+| Business counts needed plausibility checks | Businesses and premises are now distinct: rural operations work outside the town, small trades work from the family home, and market stalls and guard companies share buildings. `GET /api/scenarios/{id}/diagnostics` reports workers per business, businesses per 1,000 inhabitants, and urban premises per dwelling building, with configurable flags. On the pilot, Vhaltha uses 0.15 urban premises per dwelling building |
+| An unloadable save prevented a baseline | The save stays on disk untouched and is reported, and a fresh baseline is created beside it |
+
+**Bug found by the new tests:** the baseline granary was stored as an integer, so a snapshot taken at day 0 failed its checksum after reload. It is now a float.

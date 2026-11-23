@@ -34,9 +34,7 @@ export function IdleTable({ state }: { state: ScenarioState }) {
         <th className="num">On the road as bandits</th></tr></thead>
       <tbody>{state.settlements.map((s) => {
         const e = s.society.employment;
-        const businesses = s.society.businesses;
-        const fresh = businesses.filter((b) => b.openedDay != null);
-        const guards = businesses.filter((b) => b.kind === 'caravan-guard');
+        const summary = s.businessSummary;
         const bands = routes.filter((r) => r.settlementId === s.settlementId).reduce((a, r) => a + r.bandits, 0);
         const rate = e.labourSupply ? e.unemployed / e.labourSupply : 0;
         return (
@@ -44,8 +42,8 @@ export function IdleTable({ state }: { state: ScenarioState }) {
             <td>{s.name}</td><td className="num">{fmt(e.labourSupply)}</td><td className="num">{fmt(e.unemployed)}</td>
             <td className={`num${rate > 0.05 ? ' warn-ink' : ''}`}>{pct(rate)}</td>
             <td className="num">{fmt(s.economy?.opened ?? 0)}</td><td className="num">{fmt(s.economy?.closed ?? 0)}</td>
-            <td className="num">{fmt(fresh.reduce((a, b) => a + b.filled, 0))} / {fmt(fresh.reduce((a, b) => a + b.staff, 0))}</td>
-            <td className="num">{fmt(guards.reduce((a, b) => a + b.filled, 0))}</td>
+            <td className="num">{fmt(summary?.opened.filled ?? 0)} / {fmt(summary?.opened.posts ?? 0)}</td>
+            <td className="num">{fmt(summary?.guardPosts ?? 0)}</td>
             <td className="num">{routes.some((r) => r.settlementId === s.settlementId) ? fmt(bands) : '—'}</td>
           </tr>
         );

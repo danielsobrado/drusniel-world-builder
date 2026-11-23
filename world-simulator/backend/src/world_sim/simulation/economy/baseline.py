@@ -39,7 +39,7 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
             treasury=float(az.burgs[record["sourceId"]].get("treasury") or 0))
         local, from_hinterland, wanted = food_flows(econ, society, population, cfg)
         stock = {g: r4(u * e["settlement"]["targetMonths"]) for g, u in monthly_use(econ, population, staffing(society)).items()}
-        stock[rations] = round(wanted / e["azgaar"]["turnDays"] * e["food"]["granary"]["initialDays"])
+        stock[rations] = float(round(wanted / cfg["simulation"]["calendar"]["daysPerMonth"] * e["food"]["granary"]["initialDays"]))
         food = econ.food.model_copy(update={"local": local, "hinterland": from_hinterland, "eaten": wanted, "wanted": wanted,
                                             "selfSufficiency": round((local + from_hinterland) / wanted, 4) if wanted else 1.0})
         econs.append(econ.model_copy(update={"inventory": dict(sorted(stock.items())), "food": food}))

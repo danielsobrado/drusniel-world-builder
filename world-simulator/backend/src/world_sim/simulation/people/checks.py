@@ -17,6 +17,15 @@ def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade) -> 
     households = {h.id for h in cast.households}
     if any(p.householdId not in households for p in cast.people):
         broken.append("a person belongs to no household")
+    stock = {(s.settlementId, h.type): h for s in settlements for h in s.society.housing}
+    built = Counter((d.settlementId, d.type) for d in cast.dwellings)
+    if any(n > stock[k].buildings for k, n in built.items() if k in stock) or any(k not in stock for k in built):
+        broken.append("more named dwellings than the housing stock has buildings")
+    if any(len(d.households) > d.capacity for d in cast.dwellings):
+        broken.append("a dwelling holds more households than it has room for")
+    homes = {d.id for d in cast.dwellings}
+    if any(h.homeId and h.homeId not in homes for h in cast.households):
+        broken.append("a household lives in a dwelling that does not exist")
     filled = {b.id: b.filled for s in settlements for b in s.society.businesses}
     named = Counter(p.businessId for p in alive if p.role == "worker")
     if any(b not in filled or n > filled[b] for b, n in named.items()):

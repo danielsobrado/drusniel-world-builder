@@ -1,6 +1,6 @@
 """Canonical scenario state contracts (schema v5). Everything persisted or exported goes through these."""
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -160,6 +160,8 @@ class ScenarioMeta(Contract):
     createdAt: str
     snapshotSeq: int = 0
     eventSeq: int = 0
+    rules: dict[str, Any] | None = None      # the frozen ruleset it runs under (simulation/rules.py)
+    rulesFingerprint: str | None = None
 
 
 class SnapshotMeta(Contract):
