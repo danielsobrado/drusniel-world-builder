@@ -14,8 +14,9 @@ with someone is recorded in history as a player event.
 | Setting | Default |
 |---|---|
 | `provider` | `openai-compatible`: Ollama, LM Studio, llama.cpp or any local server with `/v1/chat/completions` |
-| `baseUrl` | `http://127.0.0.1:11434/v1` (Ollama) |
-| `model` | `null` = the first model the server lists |
+| `baseUrl` | `http://127.0.0.1:1234/v1` (Bionic / LM Studio; Ollama is `http://127.0.0.1:11434/v1`) |
+| `model` | `gemma-4-12b-it-qat`; `null` = the first model the server lists |
+| `reasoningEffort` | `none`: thinking models answer straight away (`null` = not sent) |
 | `temperature`, `seed` | 0.6, 7 (sent where supported, for repeatable prose) |
 | `maxTokens` | per kind: short 220, detailed 650, style 220, self 320, reply 260 |
 | `jobs.concurrency` | 1 (local models are slow) |
@@ -36,25 +37,26 @@ On this machine Ollama 0.1.33 runs inside WSL (upgrading it needs sudo there), w
 keeps to the restrictions well enough, but still embellishes: an invented childhood
 fascination, "a long line of traders", unrecorded bandit talk. A stronger model is the fix.
 
-**LM Studio** on Windows works the same way: start its local server and set
-`WS_LLM_BASE_URL=http://127.0.0.1:1234/v1` (and `WS_LLM_MODEL` if several models are loaded).
-Its new app, Bionic, is at `F:\Bionic`; its command-line tool is
-`F:\Bionic\resources\app\.webpack-bionic\lms.exe`.
-
-**Recommended: Gemma 4 12B QAT** (`lmstudio-community/gemma-4-12B-it-QAT-GGUF`, Q4_0,
-7 GB) in Bionic, loaded fully on the GPU with an 8K context:
+**Default: Gemma 4 12B QAT in Bionic.** Bionic is LM Studio's new app, at `F:\Bionic`; its
+command-line tool is `F:\Bionic\resources\app\.webpack-bionic\lms.exe`. The model is
+`lmstudio-community/gemma-4-12B-it-QAT-GGUF` (Q4_0, 7 GB). With Bionic's server running, load
+it once per session, fully on the GPU with an 8K context, then start the simulator as usual:
 
 ```powershell
-F:\Bionic\resources\app\.webpack-bionic\lms.exe load gemma-4-12b-it-qat --identifier gemma-4-12b --context-length 8192 --parallel 1 --gpu max -y
-$env:WS_LLM_BASE_URL = "http://127.0.0.1:1234/v1"; $env:WS_LLM_MODEL = "gemma-4-12b"; npm run dev
+F:\Bionic\resources\app\.webpack-bionic\lms.exe load gemma-4-12b-it-qat --context-length 8192 --parallel 1 --gpu max -y
 ```
+
+Bionic does not load it by itself on request: its default load settings do not fit, and the
+chat then fails with Bionic's "Failed to load model", which the simulator now passes on.
+Ollama still works: set `WS_LLM_BASE_URL=http://127.0.0.1:11434/v1` and
+`WS_LLM_MODEL=llama3`.
 
 On the same trader and questions as llama3, it raised no fact-check warnings and invented
 nothing. Asked for news, it said it had heard none, which is true at the scenario start.
 Three biographies took 10 s, and each reply about 1 s.
 
 - **Name the model:** Bionic's `/v1/models` lists downloaded models too, not only loaded
-  ones, so set `WS_LLM_MODEL`.
+  ones, so `model` is set rather than left to the first listed.
 - **Turn off thinking:** Gemma 4 and Qwen3 "think" before answering. Left on, Gemma spent
   the whole token budget on reasoning and returned empty text. `reasoningEffort: none` in
   `llm.yaml` sends `reasoning_effort` to turn that off, and an empty answer is now reported

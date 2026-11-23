@@ -51,8 +51,10 @@ def test_status_reports_the_model_or_the_draft_writer(monkeypatch, config):
     monkeypatch.setattr(providers, "list_models", lambda url, timeout=3.0: [])
     assert "ollama pull" in resolve(config.llm)[1]["hint"]
     monkeypatch.setattr(providers, "list_models", lambda url, timeout=3.0: ["qwen2.5:3b"])
-    provider, status = resolve(config.llm)
-    assert status["mode"] == "llm" and provider.model == "qwen2.5:3b", "the first model the server lists is used"
+    provider, status = resolve({**config.llm, "model": None})
+    assert status["mode"] == "llm" and provider.model == "qwen2.5:3b", "with no model set, the first one listed is used"
+    provider, status = resolve({**config.llm, "model": "gemma-4-12b-it-qat"})
+    assert status["mode"] == "draft" and "not on the server" in status["hint"], "a configured model must be on the server"
 
 
 def create_app_for(config, provider):

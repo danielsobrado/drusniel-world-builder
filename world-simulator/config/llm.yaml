@@ -2,8 +2,8 @@
 # prose and speech from the biography context and never changes the simulation's facts.
 schemaVersion: 1
 provider: openai-compatible        # any local server with /v1/chat/completions: Ollama, LM Studio, llama.cpp
-baseUrl: http://127.0.0.1:11434/v1 # override with WS_LLM_BASE_URL; only local servers are expected
-model: null                        # override with WS_LLM_MODEL; null = the first model the server lists
+baseUrl: http://127.0.0.1:1234/v1  # Bionic / LM Studio; Ollama is http://127.0.0.1:11434/v1. Override with WS_LLM_BASE_URL
+model: gemma-4-12b-it-qat          # override with WS_LLM_MODEL; null = the first model the server lists
 timeoutSeconds: 180
 temperature: 0.6
 seed: 7                            # sent to servers that support it, for repeatable prose

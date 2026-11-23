@@ -47,6 +47,10 @@ class OpenAICompatible:
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:  # noqa: S310 - configured local server
                 data = json.loads(response.read())
+        except urllib.error.HTTPError as exc:
+            # The server's own reason (e.g. Bionic's "Failed to load model") says what to do; "HTTP Error 400" does not.
+            reason = exc.read().decode(errors="replace")[:300]
+            raise ProviderError(f"the local model server refused ({exc.code}): {reason}") from exc
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
             raise ProviderError(f"the local model did not answer: {exc}") from exc
         try:
@@ -99,9 +103,11 @@ def resolve(cfg: dict[str, Any]) -> tuple[Provider, dict[str, Any]]:
                                     cfg.get("reasoningEffort"))
         return provider, {**status, "mode": "llm", "provider": provider.name, "model": model, "hint": None}
     if models is None:
-        hint = f"No local model server answered at {cfg.get('baseUrl')}. Start Ollama, LM Studio or llama.cpp, or set WS_LLM_BASE_URL."
+        hint = (f"No local model server answered at {cfg.get('baseUrl')}. Start Bionic (LM Studio) and its server, "
+                "or Ollama or llama.cpp with WS_LLM_BASE_URL.")
     elif not models:
         hint = "The local server has no models. With Ollama, pull a chat model: ollama pull phi3 (or qwen2.5:3b on Ollama 0.3 or later)"
     else:
-        hint = f"Model {cfg.get('model')} is not on the server; it offers {', '.join(models[:5])}."
+        hint = (f"Model {cfg.get('model')} is not on the server; it offers {', '.join(models[:5])}. "
+                "Download it, or set WS_LLM_MODEL.")
     return DraftWriter(), {**status, "mode": "draft", "provider": "draft", "model": "draft writer", "hint": hint}
