@@ -69,6 +69,29 @@ people:
   coworkerFriendship: 0.15      # chance two named co-workers start out as friends
   friendshipPerMonth: 0.01      # chance co-workers of a year or more become friends that month
   moveScale: 1.5                # a named idle adult moves with the town's outflow x (moveScale - caution)
+  # Origins and reconstructed pasts (PR6). Generated facts are labelled generated-prehistory.
+  originLocalShare: 0.7         # adults born in the town they live in; the rest in a nearby town of the same culture
+  originCandidates: 6
+  apprenticeTrades: [artisan, smith, carpenter, baker, tailor, healer, merchant, trader, innkeeper, cleric]
+  apprenticeFromAge: 12
+  apprenticeYears: 3
+  moveAge: [16, 25]
+  lostParentFromAge: 30         # an adult this old without a named parent may have lost one (chance = age / 100)
+  knowledge:
+    maxEntries: 40              # stored second-hand knowledge per person (newest kept); first-hand is derived
+    minImportance: 3            # events worth telling
+    told: 0.9                   # confidence when told by someone who was there
+    friend: 0.8
+    rumour: 0.6                 # carried along a road by a caravan master
+    outdatedAfterDays: 1080
+  # Biography context (PR6.6): how much each tier gets; targets, not caps on what can happen.
+  biography:
+    tiers:
+      basic:    { facts: [3, 5],  milestones: [2, 5],   words: [60, 100] }
+      standard: { facts: [5, 8],  milestones: [5, 10],  words: [100, 180] }
+      major:    { facts: [8, 15], milestones: [10, 25], words: [180, 350] }
+    majorFromTimeline: 10       # a timeline this long makes anyone major; caravan masters always are
+    settlementHistory: 8        # notable town events in the context
   # How experience changes people: kind -> role (or any) -> trait deltas.
   experience:
     raid: { caravan-master: { caution: 0.05 }, guard: { caution: 0.04 } }

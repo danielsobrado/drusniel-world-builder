@@ -25,8 +25,11 @@ def decade(model):
 def test_every_event_is_canonical_valid_and_numbered(eldara):
     state, events, known = decade(eldara)
     assert [e.seq for e in events] == list(range(len(events))) and state.historySeq == len(events)
-    assert all(e.id == f"event:{e.seq}" and e.datePrecision == "month" for e in events)
-    assert {e.source for e in events} <= {"simulation", "inferred"}, "only someone coming into focus is inferred, not observed"
+    assert all(e.id == f"event:{e.seq}" for e in events)
+    assert all(e.datePrecision == "month" for e in events if e.source != "generated-prehistory")
+    assert {e.source for e in events} <= {"simulation", "inferred", "generated-prehistory"}
+    past = [e for e in events if e.source == "generated-prehistory"]
+    assert past and all(e.datePrecision in ("year", "approximate") for e in past), "a reconstructed past claims no exact day"
     assert check_events(events, state, known) == []
     kinds = {e.kind for e in events}
     assert {"died", "hired", "opened", "raid"} <= kinds

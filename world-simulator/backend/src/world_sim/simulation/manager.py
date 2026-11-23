@@ -22,6 +22,7 @@ from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, S
 from .engine import advance, baseline_state, state_checksum
 from .history.archive import HistoryArchive
 from .migrations import IncompatibleState, migrate_state
+from .people.backstory import with_backstory
 from .rules import complete, fingerprint, freeze
 from .scope import resolve_scope
 from .store import ScenarioStore, slugify
@@ -100,6 +101,8 @@ class ScenarioManager:
                         fromSchema=stored_schema)
             self._persist(session)
         self.archive(scenario_id).cut(state.historySeq)    # heals a crash between appending events and saving the bundle
+        if not session.read_only and self._backstory(session):
+            self._persist(session)
         self.sessions[scenario_id] = session
 
     # ---- queries -------------------------------------------------------
@@ -208,6 +211,7 @@ class ScenarioManager:
             session = Session(meta, state, [])
             self._freeze(session)
             self.archive(scenario_id).cut(0)
+            self._backstory(session)
             businesses = sum(len(s.society.businesses) for s in state.settlements)
             self._event(session, "created",
                         f"Created with {len(settlement_ids)} settlements and {businesses} businesses from the imported world")
@@ -217,6 +221,15 @@ class ScenarioManager:
 
     def archive(self, scenario_id: str) -> HistoryArchive:
         return HistoryArchive(self.store.history_path(scenario_id))
+
+    def _backstory(self, s: Session) -> int:
+        """Reconstructs the past of anyone on record without one (everyone, at creation); returns how many events it added."""
+        if all(p.backstory or not p.alive for p in s.state.cast.people):
+            return 0
+        cast, events = with_backstory(s.state.cast, s.state.historySeq, s.state.date.day, s.state.settlements, self.rules(s), s.state.seed)
+        self.archive(s.meta.id).append(events)
+        s.state = s.state.model_copy(update={"cast": cast, "historySeq": s.state.historySeq + len(events)})
+        return len(events)
 
     def _freeze(self, s: Session) -> None:
         frozen = freeze(self.model.config.rules)

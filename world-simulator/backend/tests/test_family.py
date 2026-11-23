@@ -25,10 +25,11 @@ def test_named_births_and_deaths_are_drawn_from_the_towns_own(eldara):
         events = months[0]["events"]
         for s in state.settlements:
             dead = Counter(band_of(age_years(before[e.participants[0].personId], state.date.day), cfg) for e in events
-                           if e.kind == "died" and before[e.participants[0].personId].settlementId == s.settlementId)
+                           if e.source == "simulation" and e.kind == "died"
+                           and before[e.participants[0].personId].settlementId == s.settlementId)
             for band, n in dead.items():
                 assert n <= s.vitals.deaths[BANDS[band]], f"{s.name}: more named {band} deaths than the town had"
-            born = [e for e in events if e.kind == "born" and e.settlementId == s.settlementId]
+            born = [e for e in events if e.kind == "born" and e.settlementId == s.settlementId and e.source == "simulation"]
             assert len(born) <= s.vitals.births
             for e in born:
                 roles = {p.role: p.personId for p in e.participants}
@@ -54,7 +55,7 @@ def test_relationships_are_explicit_and_stay_consistent(eldara):
     assert made, "relationships formed during the run point at the event that formed them"
     for r in made:
         assert {r.a, r.b} - {p.personId for p in events[r.origin].participants} <= {r.a} if r.kind == "employer" else True
-    for e in (e for e in events.values() if e.kind == "married"):
+    for e in (e for e in events.values() if e.kind == "married" and e.source == "simulation"):
         spouses = [p.personId for p in e.participants if p.role == "spouse"]
         homes = {next(p for p in state.cast.people if p.id == x).householdId for x in spouses}
         assert len(spouses) == 2 and e.householdId in {h.id for h in state.cast.households}
@@ -76,7 +77,7 @@ def test_households_move_with_the_migration_flows(eldara):
     state, months = advance(state, 720, eldara.config.rules)
     assert sum(s.immigrants for s in state.settlements) == sum(s.emigrants for s in state.settlements) > 0
     assert sum(s.population for s in state.settlements) == total + sum(m["births"] - m["deaths"] for m in months)
-    moved = [e for m in months for e in m["events"] if e.kind == "moved"]
+    moved = [e for m in months for e in m["events"] if e.kind == "moved" and e.source == "simulation"]
     assert moved, "named households follow the flows"
     people = {p.id: p for p in state.cast.people}
     homes = {d.id: d for d in state.cast.dwellings}

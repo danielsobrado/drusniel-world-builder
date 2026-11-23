@@ -9,11 +9,14 @@ from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, So
 from .demography import initial_cohorts, run_month
 from .economy.baseline import initial_economy
 from .economy.step import economy_month, with_food_need
+from .history.causes import link_causes, stamp_cache
 from .history.links import link
 from .history.recorder import on_timelines, record, with_origins
 from .migration import migrate
+from .people.backstory import with_backstory
 from .people.checks import check_cast
 from .people.generate import initial_cast
+from .people.knowledge import spread
 from .people.life import people_month
 from .people.outlook import apply_experience, in_character
 from .society import check_invariants, initial_society, update_society
@@ -98,12 +101,17 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         cast, trade, lives = people_month(cast, settlements, trade, flows, day=day, seed=state.seed, rules=rules)
         events = [record(incident, seq + i, day, rules["simulation"]["history"]) for i, incident in enumerate([*linked, *lives])]
         seq += len(events)
+        events = link_causes(events, cast)
+        cast = stamp_cache(cast, events, rules["simulation"]["history"]["recentEvents"])
         cast = on_timelines(cast, events, rules["simulation"]["history"]["timelineMinImportance"])
         cast = with_origins(cast, [*linked, *lives], events)
         cast = apply_experience(cast, events, rules["simulation"]["people"]["experience"])
         trade = in_character(trade, cast)
+        cast = spread(cast, events, trade, day, rules["simulation"]["people"]["knowledge"])
+        cast, past = with_backstory(cast, seq, day, settlements, rules, state.seed)     # people who came into focus
+        seq += len(past)
+        economy["events"] = [*events, *past]
         economy["incidents"] = [{**incident, "eventId": e.id} for incident, e in zip([*linked, *lives], events, strict=True)]
-        economy["events"] = events
         broken = check_cast(cast, settlements, trade, rules["simulation"]["people"]["maxOverBudget"])
         if broken:
             raise AssertionError(f"people, month {month_index}: {'; '.join(broken)}")

@@ -152,6 +152,27 @@ def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], 
         households += b.households
         dwellings += b.dwellings
         names[s.settlementId], seq[s.settlementId], budget[s.settlementId] = pool, len(b.people), b.budget
+    people, places = origins(model, people, seed, cfg)
     ties = initial_ties(people, {h.id: h.kind for h in households}, traders, seed, cfg)
-    return Cast(people=people, households=households, dwellings=dwellings, names=names, seq=seq, budget=budget,
+    return Cast(people=people, households=households, dwellings=dwellings, names=names, seq=seq, budget=budget, places=places,
                 relationships=ties.items, relSeq=ties.seq)
+
+
+def origins(model: WorldModel, people: list[Person], seed: int, cfg: dict[str, Any]) -> tuple[list[Person], dict[str, str]]:
+    """Some adults were born elsewhere: in one of the nearest settlements of the same culture on the map."""
+    towns = model.audit["settlements"]
+    rng = random.Random(f"{seed}:origins")
+    places: dict[str, str] = {}
+    out = []
+    for p in people:
+        here = model.settlements_by_id[p.settlementId]
+        if p.role != "child" and rng.random() >= cfg["originLocalShare"]:
+            others = [t for t in towns if t["id"] != here["id"]]
+            kin = [t for t in others if t["cultureId"] == here["cultureId"]] or others
+            near = sorted(kin, key=lambda t: ((t["x"] - here["x"]) ** 2 + (t["y"] - here["y"]) ** 2,
+                                              t["sourceId"]))[:cfg["originCandidates"]]
+            birthplace = rng.choice(near)
+            places[birthplace["id"]] = birthplace["name"]
+            p = p.model_copy(update={"birthplaceId": birthplace["id"]})
+        out.append(p)
+    return out, places

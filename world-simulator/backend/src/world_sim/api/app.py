@@ -26,6 +26,7 @@ from ..reports.builder import (
 from ..simulation.manager import ScenarioManager
 from ..world.model import WorldModel, build_world_model
 from .errors import ApiError, failure, ok
+from .history_routes import history_router
 from .people_routes import people_router
 from .scenario_routes import scenario_router
 from .settlement_query import parse_settlement_query, query_settlements
@@ -153,6 +154,7 @@ def create_app(model: WorldModel, static_dir: Path | None = None) -> FastAPI:
 
     app.include_router(scenario_router(manager, reply))
     app.include_router(people_router(manager, reply))
+    app.include_router(history_router(manager, reply))
 
     if static_dir is not None:
         root = static_dir.resolve()

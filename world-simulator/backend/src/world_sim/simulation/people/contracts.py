@@ -18,6 +18,16 @@ class LifeEvent(Contract):
     day: int
     kind: str
     text: str
+    eventId: str | None = None       # the canonical event, once recorded
+
+
+class Knowledge(Contract):
+    """Something a person learned second-hand. First-hand and local knowledge are derived, not stored."""
+    eventId: str
+    learnedDay: int
+    how: Literal["told", "rumour"]
+    fromId: str | None = None        # who told them, when known
+    confidence: float = Field(ge=0, le=1)
 
 
 class Profile(Contract):
@@ -45,11 +55,13 @@ class Person(Contract):
     idleMonths: int = 0
     releaseDay: int | None = None
     retired: bool = False            # the retirement choice at 60 is made once
+    backstory: bool = False          # their past before entering the record has been reconstructed
     alive: bool = True
     deathDay: int | None = None
     cause: str | None = None
     events: list[LifeEvent] = []      # recent-events cache; the archive keeps everything
     timeline: list[str] = []          # permanent references to the canonical events that shaped this life
+    knowledge: list[Knowledge] = []   # second-hand only, newest kept
 
 
 class NpcHousehold(Contract):
@@ -81,6 +93,7 @@ class Cast(Contract):
     dwellings: list[Dwelling] = []
     names: dict[str, NamePool]       # per settlement, for newcomers and newborns
     seq: dict[str, int]              # last person number per settlement
+    places: dict[str, str] = {}      # names of birthplaces outside the scenario's scope
     relationships: list[Relationship] = []
     relSeq: int = 0
     budget: dict[str, int]           # people kept alive per settlement
