@@ -17,18 +17,20 @@ class NameGenerator:
             for i in range(len(padded) - 2):
                 self.chain[padded[i:i + 2]].append(padded[i + 2])
 
-    def name(self, rng: random.Random) -> str:
+    def name(self, rng: random.Random, limit: int | None = None) -> str:
+        """A new name in the base's style, at most `limit` letters when given (people's names run shorter than towns')."""
+        top = min(self.max, limit) if limit else self.max
         if not self.chain:
             return f"Trader {rng.randint(100, 999)}"
         for _ in range(50):
             out, key = "", "^^"
-            while len(out) < self.max:
+            while len(out) < top:
                 nxt = rng.choice(self.chain.get(key) or ["$"])
                 if nxt == "$":
                     break
                 out += nxt
                 key = key[1] + nxt
-            if self.min <= len(out) <= self.max and out not in self.words:
+            if min(self.min, top) <= len(out) <= top and out not in self.words:
                 return out.capitalize()
         return out.capitalize() or "Nameless"
 

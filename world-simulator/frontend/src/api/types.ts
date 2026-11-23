@@ -143,6 +143,7 @@ export interface Business {
   id: string; settlementId: string; kind: string; name: string; sector: string; profession: string; good: string | null;
   staff: number; wage: number; filled: number; evidence: string | null; settlementName?: string;
   ownerId?: string | null; ownerName?: string | null; openedDay?: number | null; idleMonths?: number;
+  workers?: { id: string; name: string }[];
 }
 export interface Employment { labourSupply: number; employed: number; unemployed: number; vacancies: number; wageBillPerMonth: number }
 export interface SectorEmployment { sector: string; businesses: number; demand: number; filled: number }
@@ -227,6 +228,26 @@ export interface Trader {
 }
 export interface TraderDetail extends Trader {
   route: TradeRoute | null; caravans: Caravan[]; businesses: { id: string; name: string; filled: number; staff: number }[];
+  personId?: string | null;
+}
+
+/* ---- Named people (GET /api/scenarios/{id}/people) ---- */
+
+export type PersonRole = 'child' | 'worker' | 'unemployed' | 'retired' | 'trader' | 'outlaw' | 'imprisoned';
+export interface PersonRow {
+  id: string; name: string; family: string; sex: 'female' | 'male'; birthDay: number; age: number; settlementId: string;
+  settlementName: string; householdId: string; role: PersonRole; businessId: string | null; workplace: string | null;
+  profession: string | null; traderId: string | null; routeId: string | null; personality: Personality; idleMonths: number;
+  releaseDay: number | null; alive: boolean; deathDay: number | null; cause: string | null;
+}
+export interface PeopleMeta extends PageMeta {
+  roles: Record<string, number>; deaths: number; births: number; arrivals: number;
+  settlements: { id: string; name: string; budget: number }[];
+}
+export interface PersonDetail extends PersonRow {
+  events: { day: number; kind: string; text: string }[];
+  household: { id: string; family: string; kind: string; housing: string; members: { id: string; name: string; age: number; role: string; alive: boolean }[] };
+  route: TradeRoute | null;
 }
 export interface EconomyView {
   date: CalendarDate;

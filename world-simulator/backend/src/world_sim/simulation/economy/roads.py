@@ -60,9 +60,10 @@ def initial_roads(model: WorldModel, members: list[tuple[dict[str, Any], Settlem
         route = Route(id=f"route:{record['sourceId']}:market:{market.marketId}", mode=mode,
                       settlementId=record["id"], settlementName=record["name"],
                       marketId=market.marketId, centerName=market.centerName, days=econ.travelDays, bandits=band,
-                      floor=band // 3, lair=lair, reserve=[names.name(rng) for _ in range(RESERVE_NAMES)])
+                      floor=band // 3, lair=lair, reserve=[names.name(rng, cfg["traders"]["nameLength"]) for _ in range(RESERVE_NAMES)])
         for _ in range(cfg["traders"]["perRoute"]):
-            traders.append(new_trader(f"npc:trader:{len(traders) + 1}", names.name(rng), record["id"], record["name"], route.id, rng, cfg))
+            name = names.name(rng, cfg["traders"]["nameLength"])
+            traders.append(new_trader(f"npc:trader:{len(traders) + 1}", name, record["id"], record["name"], route.id, rng, cfg))
         routes.append(route)
     taxed = [m.model_copy(update={"taxRates": az.tax_rates(m.marketId)}) for m in markets]
     return routes, traders, taxed

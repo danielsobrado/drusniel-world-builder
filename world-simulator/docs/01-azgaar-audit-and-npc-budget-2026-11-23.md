@@ -139,5 +139,6 @@ the network, and Vhaltha, through route junctions.
   canonical state for the pilot.
 - **PR3 — Households, buildings, jobs** for the three pilot settlements.
 - **PR4 — Economy and trade**, starting from Azgaar's recorded production and deals.
-- **PR5 — Persistent NPC identities** from the allocation above.
+- **PR5 — Persistent NPC identities** from the allocation above
+  ([05](05-persistent-people-2026-11-23.md)).
 - **PR6+ — History, knowledge, local LLM biographies, Dialogue Lab, game export.**

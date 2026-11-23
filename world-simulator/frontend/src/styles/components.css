@@ -210,3 +210,4 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .grid tbody tr.muted td { color: var(--muted); }
 .table-scroll { overflow-x: auto; max-width: 100%; }
 .table-scroll .grid { min-width: max-content; }
+.life { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--fs-sm); }

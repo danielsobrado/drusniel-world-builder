@@ -117,6 +117,13 @@ try {
   await page.getByRole('heading', { name: 'Unemployment' }).scrollIntoViewIfNeeded();
   await shot('17-unemployment');
 
+  await workspace('People');
+  const people = page.getByRole('table', { name: 'People' });
+  await people.waitFor();
+  await people.getByRole('row').nth(3).click();
+  await page.getByRole('list', { name: 'Life events' }).waitFor();
+  await shot('18-people');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

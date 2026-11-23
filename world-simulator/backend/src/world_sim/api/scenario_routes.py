@@ -63,7 +63,8 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
         for s in state.settlements:
             for b in s.society.businesses:
                 if b.id == business_id:
-                    return reply({**b.model_dump(), "settlementName": s.name, "ownerName": owners.get(b.ownerId or "")})
+                    workers = [{"id": p.id, "name": f"{p.name} {p.family}"} for p in state.cast.people if p.alive and p.businessId == b.id]
+                    return reply({**b.model_dump(), "settlementName": s.name, "ownerName": owners.get(b.ownerId or ""), "workers": workers})
         raise ApiError(404, "not_found", f"No business {business_id}", {"id": business_id})
 
     @router.get("/scenarios/{scenario_id}/economy")
@@ -94,7 +95,8 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
         route = next((r.model_dump() for r in trade.routes if r.id == found.routeId), None)
         owned = [{"id": b.id, "name": b.name, "filled": b.filled, "staff": b.staff}
                  for s in state.settlements for b in s.society.businesses if b.id in set(found.owns)]
-        return reply({**found.model_dump(), "route": route, "caravans": led, "businesses": owned})
+        person = next((p.id for p in state.cast.people if p.traderId == trader_id), None)
+        return reply({**found.model_dump(), "route": route, "caravans": led, "businesses": owned, "personId": person})
 
     @router.post("/scenarios/{scenario_id}/step")
     async def step(scenario_id: str, body: StepRequest) -> JSONResponse:

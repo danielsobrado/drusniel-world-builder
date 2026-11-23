@@ -35,3 +35,19 @@ demography:
   birthsPerAdultPerYear: 0.065
   deathRatePerYear: { children: 0.035, adults: 0.012, elders: 0.07 }
   bandYears: { children: 15, adults: 45 }   # years spent in a band before ageing out
+
+# Persistent characters (PR5): each settlement keeps exactly its NPC budget alive
+# (config/npc-population.yaml). Rates are authored assumptions.
+people:
+  namePool: { given: 60, family: 30, maxLength: 9 }   # names per settlement, from its culture's Azgaar name base
+  ages: { child: [0, 14], adult: [15, 59], elder: [60, 80] }
+  traderAges: [22, 55]
+  childrenPerFamily: [1, 3]
+  retireFrom: 60
+  retireChance: 0.75            # once, at 60, for a worker
+  findWorkPerMonth: 0.25        # x the settlement's employment rate
+  loseWorkPerMonth: 0.05        # x the settlement's unemployment rate
+  outlaw: { idleMonths: 3, maxHonesty: 0.35, minGreed: 0.55, chance: 0.2, giveUpPerMonth: 0.03 }
+  prisonDays: 360
+  newbornShare: 0.5             # a death is replaced by a newborn in a family, otherwise by a newcomer
+  maxEvents: 24                 # life events kept per person

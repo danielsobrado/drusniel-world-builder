@@ -69,6 +69,7 @@ escorts:                        # caravan-guard companies, sized each month to t
 
 traders:
   perRoute: 3                   # caravan masters per road at baseline
+  nameLength: 9                 # longest generated given name
   commission: 0.03              # of the declared value they deliver
   savings: [20, 80]             # starting purse, drawn per trader
   livingPerAdultMonth: 0.35     # household upkeep, spent in the home town; children count half

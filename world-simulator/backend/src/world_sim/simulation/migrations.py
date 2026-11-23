@@ -7,6 +7,7 @@ from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, Society
 from .economy.contracts import SettlementEconomy, Trade
 from .economy.roads import initial_roads
 from .engine import build_settlements
+from .people.generate import initial_cast
 from .society import initial_society
 
 
@@ -34,7 +35,7 @@ def _v2_to_v3(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     rows = [({k: s[k] for k in ("settlementId", "sourceId", "name", "population", "births", "deaths")}, _record(model, s),
              Cohorts(**s["cohorts"]), Society(**s["society"])) for s in raw["settlements"]]
     settlements, trade = build_settlements(model, rows, model.config.rules, raw["seed"])
-    # The economy is built at the current schema, roads included, so this skips the v3 -> v4 step.
+    # The economy is built with its roads, so this skips the v3 -> v4 step.
     return {**raw, "schemaVersion": 4, "settlements": [s.model_dump() for s in settlements], "trade": trade.model_dump()}
 
 
@@ -49,7 +50,14 @@ def _v3_to_v4(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     return {**raw, "schemaVersion": 4, "settlements": settlements, "trade": trade.model_dump()}
 
 
-STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4}
+def _v4_to_v5(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
+    """v5 adds the named people, drawn from the saved settlements and traders."""
+    state = ScenarioState(**{**raw, "schemaVersion": 5, "cast": {"people": [], "households": [], "names": {}, "seq": {}, "budget": {}}})
+    cast = initial_cast(model, state.settlements, state.trade.traders, raw["seed"], model.config.simulation["people"])
+    return {**raw, "schemaVersion": 5, "cast": cast.model_dump()}
+
+
+STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5}
 
 
 def migrate_state(raw: dict[str, Any], model: WorldModel) -> tuple[ScenarioState, int]:

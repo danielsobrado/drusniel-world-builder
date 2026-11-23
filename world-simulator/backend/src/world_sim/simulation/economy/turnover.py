@@ -37,7 +37,8 @@ def household_month(traders: list[Trader], econs: dict[str, SettlementEconomy], 
 def _close(society: Society, cfg: dict[str, Any]) -> tuple[list[Business], list[Business]]:
     keep, closed = [], []
     for b in society.businesses:
-        b = b.model_copy(update={"idleMonths": b.idleMonths + 1 if b.filled == 0 else 0})
+        idle = b.idleMonths + 1 if b.filled == 0 else 0
+        b = b if idle == b.idleMonths else b.model_copy(update={"idleMonths": idle})
         evidenced = b.evidence is not None or b.kind == ESCORTS
         (closed if not evidenced and b.idleMonths >= cfg["closeAfterIdleMonths"] else keep).append(b)
     return keep, closed

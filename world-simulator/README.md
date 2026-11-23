@@ -5,10 +5,11 @@ map straight from the parent repository, audits it (settlements, population, roa
 a persistent-NPC budget, a three-settlement pilot) and runs deterministic, snapshotable
 simulation scenarios over it. It runs without the game or its renderer.
 
-Findings, method and pilot ids: [docs/01-azgaar-audit-and-npc-budget-2026-11-22.md](docs/01-azgaar-audit-and-npc-budget-2026-11-22.md).
+Findings, method and pilot ids: [docs/01-azgaar-audit-and-npc-budget-2026-11-23.md](docs/01-azgaar-audit-and-npc-budget-2026-11-23.md).
 Scenarios, clock, snapshots and the state contract: [docs/02-scenarios-and-baseline-state-2026-11-23.md](docs/02-scenarios-and-baseline-state-2026-11-23.md).
 Households, housing, businesses, employment and hardening: [docs/03-households-businesses-employment-2026-11-23.md](docs/03-households-businesses-employment-2026-11-23.md).
 Production, food, markets, prices, caravans, bandits and pirates, guards, trader scorecards and purses, business turnover: [docs/04-economy-and-trade-2026-11-23.md](docs/04-economy-and-trade-2026-11-23.md).
+Persistent named people from the NPC budget: [docs/05-persistent-people-2026-11-23.md](docs/05-persistent-people-2026-11-23.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -53,13 +54,14 @@ backend/                Python package (pyproject.toml, uv.lock)
     geography/          connectivity (cell-based route graph, components, Dijkstra)
     npc/                budget (NPC allocator)
     pilot/              selector
-    simulation/         contracts (Pydantic state v4), engine, demography, calendar, scope,
+    simulation/         contracts (Pydantic state v5), engine, demography, calendar, scope,
                         households, housing, businesses, employment, needs, society,
                         migrations, store (atomic bundles), manager (run loop, snapshots)
       economy/          contracts, sources (Azgaar production and deals), geography
                         (hinterland, caravan days), baseline, production, market, step,
                         roads, names, trips (traders, smuggling, raids), bandits, escorts,
                         turnover (households, purses, openings and closures)
+      people/           contracts, generate (cast from the NPC budget), life, replace, checks
     reports/            builder, writer
     api/                app (FastAPI), scenario_routes, settlement_query, errors
     cli/audit.py        canonical.py ids.py config.py log.py server.py
@@ -73,6 +75,7 @@ frontend/               TypeScript + React + Vite
   src/society/          HouseholdsWorkspace, BusinessesWorkspace, BusinessDetails, UnemploymentView
   src/economy/          EconomyWorkspace, SettlementEconomyView, MarketView, CaravanTable
   src/roads/            RoadsWorkspace, TraderDetails, TraderParts (personality, scorecard)
+  src/people/           PeopleWorkspace, PersonDetails, roles
   src/api/              types.ts (API contracts), worldApi.ts (fetch + useApi hook)
   src/styles/           tokens.css (theme variables), shell.css, components.css,
                         marble.css (textured navigation chrome)
@@ -127,6 +130,7 @@ Writes (`POST`) must send `application/json`. Full table in
 | `GET /api/scenarios/{id}/businesses` · `/businesses/{businessId}` | paged business list · one business |
 | `GET /api/scenarios/{id}/economy` | settlement economies, markets, caravans, roads, traders (no society payload) |
 | `GET /api/scenarios/{id}/traders/{traderId}` | one caravan master's scorecard and caravans |
+| `GET /api/scenarios/{id}/people` · `/people/{personId}` | paged named people · one person with household and life story |
 
 ## Configuration
 
@@ -175,7 +179,8 @@ later exports can join on them.
 - Simulated monthly: cohort demography, households, housing occupancy, employment, then
   production, food, market clearing, caravans with their traders, bandits, pirates and
   guards, traders' households, and business openings and closures. No construction,
-  no scheduled interventions, and no persistent NPCs yet (PR5). Market members outside
+  no scheduled interventions. Named people (PR5) are a sample of the aggregate population
+  kept to the NPC budget; they do not move between settlements. Market members outside
   the scope are fixed Azgaar flows. All rates are authored assumptions.
 - Pilot roles are hypotheses from Azgaar production records, not specialisations.
 - The atlas draws settlements and routes, not coastlines or terrain.

@@ -7,7 +7,7 @@ global clock controls in the app bar.
 
 Before PR2 the backend moved from Node to Python (FastAPI, Pydantic, uv) and the
 frontend to TypeScript. The audit numbers and API contract did not change (see
-[01](01-azgaar-audit-and-npc-budget-2026-11-22.md)).
+[01](01-azgaar-audit-and-npc-budget-2026-11-23.md)).
 
 ## What a scenario is
 

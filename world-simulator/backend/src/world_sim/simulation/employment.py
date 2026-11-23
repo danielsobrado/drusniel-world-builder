@@ -18,7 +18,7 @@ def fill_jobs(businesses: list[Business], supply: int, priority: list[str]) -> t
     for i in order:
         take = min(left, businesses[i].staff)
         filled[i], left = take, left - take
-    updated = [b.model_copy(update={"filled": f}) for b, f in zip(businesses, filled, strict=True)]
+    updated = [b if b.filled == f else b.model_copy(update={"filled": f}) for b, f in zip(businesses, filled, strict=True)]
     employed = supply - left
     demand = sum(b.staff for b in businesses)
     sectors = []

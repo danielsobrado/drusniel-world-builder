@@ -101,7 +101,7 @@ def _replace(ctx: TripContext, trader: Trader, route: Route) -> None:
     ctx.traders.append(new_trader(f"npc:trader:{ctx.trader_seq}", name, trader.settlementId, trader.settlementName, route.id,
                                   random.Random(f"{ctx.seed}:hire:{ctx.trader_seq}"), ctx.cfg, ctx.day))
     ctx.incidents.append({"kind": "dismissed", "message": f"{trader.name} of {trader.settlementName} was let go after their "
-                          f"reputation fell to {trader.scorecard.reputation:.0f}; {name} takes over the road", "trader": trader.id})
+                          f"reputation fell to {trader.scorecard.reputation:.0f}; a new master will be taken on", "trader": trader.id})
 
 
 def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Caravan]:

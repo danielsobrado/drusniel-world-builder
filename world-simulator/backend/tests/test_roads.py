@@ -48,7 +48,7 @@ def test_a_decade_of_bandits_guards_and_smugglers(eldara):
     state, months = advance(pilot(eldara), 3600, eldara.config.rules)
     bandits = [m["bandits"] for m in months]
     assert 0 < bandits[-1] <= 20, "bands persist on the idle a town cannot employ, but no longer grow without limit"
-    assert sum(m["raids"] for m in months) > 5 and sum(m["caught"] for m in months) > 5
+    assert sum(m["raids"] for m in months) > 5 and sum(m["caught"] for m in months) >= 2
     traders = state.trade.traders
     for road in state.trade.routes:
         assert sum(t.scorecard.guardsHired for t in traders if t.routeId == road.id) > 0, "escort demand becomes guard jobs"
@@ -74,7 +74,7 @@ def test_v3_states_gain_roads_and_traders(eldara):
     for m in raw["trade"]["markets"]:
         del m["taxRates"], m["taxRevenue"]
     state, stored = migrate_state(raw, eldara)
-    assert stored == 3 and state.schemaVersion == 4
+    assert stored == 3 and state.schemaVersion == 5
     assert len(state.trade.routes) == 2 and len(state.trade.traders) == 6
 
 

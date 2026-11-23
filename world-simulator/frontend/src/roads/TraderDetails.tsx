@@ -20,6 +20,8 @@ export function TraderDetails({ id, sim, onSelect }: { id: string; sim: Simulati
           <dl className="fields">
             <div className="field"><dt>Home</dt><dd><button type="button" className="link" onClick={() => onSelect(t.settlementId)}>{t.settlementName}</button></dd></div>
             <div className="field"><dt>Road</dt><dd>{t.route ? `${t.route.settlementName} → ${t.route.centerName}, ${t.route.days} days${t.route.mode === 'sea' ? ' by sea' : ''}` : '—'}</dd></div>
+            {t.personId && <div className="field"><dt>Person</dt><dd><button type="button" className="link" onClick={() => onSelect(t.personId!)}>
+              life story and household</button></dd></div>}
             <div className="field"><dt>Household</dt><dd>{t.household.adults} adult{t.household.adults === 1 ? '' : 's'}, {t.household.children} children</dd></div>
             <div className="field"><dt>Purse</dt><dd className={t.purse < 0 ? 'warn-ink' : undefined}>
               {t.purse < 0 ? `in debt ${(-t.purse).toFixed(1)}, which tempts them to smuggle` : t.purse.toFixed(1)}</dd></div>

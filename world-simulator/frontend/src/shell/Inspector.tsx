@@ -3,6 +3,7 @@ import type { SettlementClass } from '../api/types';
 import type { Simulation } from '../simulation/useSimulation';
 import { BusinessDetails } from '../society/BusinessDetails';
 import { TraderDetails } from '../roads/TraderDetails';
+import { PersonDetails } from '../people/PersonDetails';
 import { Icon } from './Icon';
 import { SettlementDetails } from '../components/SettlementDetails';
 import { Empty } from '../components/StateViews';
@@ -33,9 +34,10 @@ export function Inspector({ selectedId, classes, width, onResize, onClose, onSel
         <button type="button" className="icon-btn" aria-label="Close inspector" onClick={onClose}><Icon name="close" size={15} /></button>
       </div>
       <div className="inspector-body">
-        {!selectedId ? <Empty>Select a settlement, business or trader anywhere in the workbench.</Empty>
+        {!selectedId ? <Empty>Select a settlement, business, trader or person anywhere in the workbench.</Empty>
           : selectedId.startsWith('business:') && sim?.active ? <BusinessDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('npc:trader:') && sim?.active ? <TraderDetails id={selectedId} sim={sim} onSelect={onSelect} />
+          : selectedId.startsWith('npc:') && sim?.active ? <PersonDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : <SettlementDetails id={selectedId} classes={classes} onSelect={onSelect} sim={sim} />}
       </div>
     </aside>

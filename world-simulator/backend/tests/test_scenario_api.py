@@ -28,7 +28,7 @@ def test_scenario_lifecycle_over_http(client):
     stepped = data(client.post("/api/scenarios/baseline-pilot/step", json={"unit": "year"}))
     assert stepped["date"]["label"] == "1213-01-01"
     state = data(client.get("/api/scenarios/baseline-pilot/state"))
-    assert state["schemaVersion"] == 4 and len(state["history"]) == 13
+    assert state["schemaVersion"] == 5 and len(state["history"]) == 13
     assert [e["kind"] for e in data(client.get("/api/scenarios/baseline-pilot/events?limit=2"))] == ["stepped", "month"]
 
     snap = data(client.post("/api/scenarios/baseline-pilot/snapshots", json={"label": "Year one"}), 201)

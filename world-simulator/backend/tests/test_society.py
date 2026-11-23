@@ -113,7 +113,7 @@ def test_v1_scenarios_and_snapshots_migrate_to_one_atomic_bundle(fresh_model):
     folder = _write_legacy(root, fresh_model)
     manager = ScenarioManager(fresh_model)
     session = manager.session("legacy")
-    assert session.state.schemaVersion == 4 and session.read_only is None
+    assert session.state.schemaVersion == 5 and session.read_only is None
     assert session.events[-1].kind == "migrated"
     bundle = json.loads((folder / "scenario.json").read_text())
     assert bundle["formatVersion"] == 2 and set(bundle) == {"formatVersion", "meta", "state", "events"}

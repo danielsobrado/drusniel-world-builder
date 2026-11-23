@@ -28,7 +28,12 @@ export function BusinessDetails({ id, sim, onSelect }: { id: string; sim: Simula
             {(b.idleMonths ?? 0) > 0 && <div className="field"><dt>Idle</dt><dd>{b.idleMonths} months without a worker</dd></div>}
             <div className="field"><dt>Why it exists</dt><dd>{b.evidence ?? 'Generic business sized from the labour force (config/society.yaml)'}</dd></div>
           </dl>
-          <p className="muted small">Owners and named workers arrive with persistent NPCs (PR5).</p>
+          {b.workers && b.workers.length > 0 && (<>
+            <h4>Named workers</h4>
+            <ul className="trip-list">{b.workers.map((w) => (
+              <li key={w.id}><button type="button" className="link" onClick={() => onSelect(w.id)}>{w.name}</button></li>
+            ))}</ul>
+          </>)}
         </div>
       )}
     </ApiView>

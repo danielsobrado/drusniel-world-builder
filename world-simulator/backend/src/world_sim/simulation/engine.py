@@ -9,6 +9,9 @@ from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, So
 from .demography import initial_cohorts, run_month
 from .economy.baseline import initial_economy
 from .economy.step import economy_month, with_food_need
+from .people.checks import check_cast
+from .people.generate import initial_cast
+from .people.life import people_month
 from .society import check_invariants, initial_society, update_society
 
 
@@ -30,6 +33,7 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
         fields = {"settlementId": sid, "sourceId": record["sourceId"], "name": record["name"], "population": record["population"]}
         rows.append((fields, record, cohorts, initial_society(record, cohorts, rules["society"])))
     settlements, trade = build_settlements(model, rows, rules, seed)
+    cast = initial_cast(model, settlements, trade.traders, seed, rules["simulation"]["people"])
     identity = model.audit["identity"]
     return ScenarioState(
         scenarioId=scenario_id,
@@ -40,6 +44,7 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
         settlements=settlements,
         history=[HistoryPoint(day=0, population={s.settlementId: s.population for s in settlements})],
         trade=trade,
+        cast=cast,
     )
 
 
@@ -62,6 +67,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
     per_month = calendar["daysPerMonth"]
     settlements = list(state.settlements)
     trade = state.trade
+    cast = state.cast
     history = list(state.history)
     months: list[dict[str, Any]] = []
     day = state.date.day
@@ -75,6 +81,11 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         deaths_before = sum(s.deaths for s in settlements)
         settlements = [_month(s, seed=state.seed, month_index=month_index, rules=rules) for s in settlements]
         settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
+        cast, trade, lives = people_month(cast, settlements, trade, day=day, seed=state.seed, rules=rules)
+        economy["incidents"] = [*economy["incidents"], *lives]
+        broken = check_cast(cast, settlements, trade)
+        if broken:
+            raise AssertionError(f"people, month {month_index}: {'; '.join(broken)}")
         for s in settlements:
             broken = check_invariants(s.population, s.cohorts, s.society)
             if broken:
@@ -101,6 +112,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         "settlements": settlements,
         "history": _bounded(history, rules["simulation"]["limits"]["maxHistoryPoints"]),
         "trade": trade,
+        "cast": cast,
     })
     return new_state, months
 
