@@ -234,9 +234,9 @@ water:
       # beds fading in over the depth band below (per pixel; not the blend above, whose
       # floor is too deep to show caustics). The caustic web stays in the shallows and
       # inland. Off builds the original underwater shader. Strength scales the excess
-      # light against the web's. Off until its native QA passes.
+      # light against the web's. Enable after native validation for visual review.
       caustics:
-        enabled: false
+        enabled: true
         strength: 1
         depthStartMeters: 2
         depthEndMeters: 6
