@@ -31,8 +31,19 @@ sentences only from the context: a baseline that cannot invent anything, always 
 answered, the server has no models (with the `ollama pull` command to run), or the
 configured model is missing.
 
-On this machine Ollama 0.1.33 is running with no models, so the screenshots show the
-draft writer. Ollama 0.1.33 can run `phi3`; `qwen2.5` needs Ollama 0.3 or later.
+On this machine Ollama 0.1.33 runs inside WSL (upgrading it needs sudo there), with
+`llama3` (8B) pulled. Three biographies take about 12 s and a reply 2–4 s on an RTX 4080. It
+keeps to the restrictions well enough, but still embellishes: an invented childhood
+fascination, "a long line of traders", unrecorded bandit talk. A stronger model is the fix.
+
+**LM Studio** on Windows works the same way: start its local server and set
+`WS_LLM_BASE_URL=http://127.0.0.1:1234/v1` (and `WS_LLM_MODEL` if several models are loaded).
+
+Two lessons from the first real runs:
+- **Numbers:** the prompts tell the model to put scores and purses into words. Before,
+  llama3 wrote "a reputation of 50.0".
+- **Cut-off replies:** a reply cut off by the token limit (`finish_reason: length`) is ended
+  at its last complete sentence.
 
 ## Biographies
 
@@ -64,7 +75,9 @@ prose and never touches the facts.
 - children, a spouse, a war or magic the record does not support.
 
 A claim word the person's own record uses (for example "a couple with children
-household") is not flagged. Warnings show under each text, so it can be judged and
+household") is not flagged. Possessives count as the name, while contractions ("I'm") and
+capitalised words that open a sentence or line are not treated as names. "As a child" is
+not a claim about children. Warnings show under each text, so it can be judged and
 regenerated.
 
 ## Dialogue Lab

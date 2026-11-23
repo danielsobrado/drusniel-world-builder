@@ -8,8 +8,8 @@ from fastapi.testclient import TestClient
 from world_sim.api.app import create_app
 from world_sim.narration import providers
 from world_sim.narration.draft import DraftWriter
-from world_sim.narration.factcheck import check
-from world_sim.narration.providers import ProviderError, resolve
+from world_sim.narration.factcheck import check, unknown_names
+from world_sim.narration.providers import ProviderError, last_full_sentence, resolve
 
 
 class FakeModel:
@@ -109,6 +109,22 @@ def test_the_fact_check_flags_invented_people_and_children(fresh_model):
     assert any("war" in w for w in warnings)
     assert has_child or any("children" in w for w in warnings)
     assert check(f"{context['identity']['name']} was born in {context['identity']['birthplace']}.", context) == []
+
+
+def test_possessives_contractions_and_sentence_openers_are_not_names():
+    known = {"abraethei", "sshanderi"}
+    text = "Abraethei's trade grew.\n\nUpon her return I'm told Sshanderi’s market thrived. She met Zorblax's brother."
+    assert unknown_names(text, known) == {"Zorblax"}
+
+
+def test_childhood_is_not_a_child_and_cut_replies_end_on_a_sentence():
+    context = {"identity": {"name": "Abraethei Dormaen", "birthplace": "Sshanderi", "culture": "Darkhold", "home": "Sshanderi"},
+               "work": {"workplace": None, "profession": None, "role": "trader"}, "relationships": [], "places": [],
+               "milestones": [], "settlementHistory": [], "knowledge": [], "hooks": [], "household": None}
+    assert check("As a child she watched the caravans.", context) == []
+    assert check("She raised two sons.", context) == ["mentions children the record does not have"]
+    assert last_full_sentence("I trade wool. What brings you to Ssh") == "I trade wool."
+    assert last_full_sentence("No full stop here") == "No full stop here"
 
 
 def test_the_draft_writer_only_states_recorded_facts(fresh_model):

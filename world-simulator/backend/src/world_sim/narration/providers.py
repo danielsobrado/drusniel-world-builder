@@ -47,9 +47,17 @@ class OpenAICompatible:
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
             raise ProviderError(f"the local model did not answer: {exc}") from exc
         try:
-            return str(data["choices"][0]["message"]["content"]).strip()
+            choice = data["choices"][0]
+            text = str(choice["message"]["content"]).strip()
         except (KeyError, IndexError, TypeError) as exc:
             raise ProviderError("the local model's answer had no message") from exc
+        return last_full_sentence(text) if choice.get("finish_reason") == "length" else text
+
+
+def last_full_sentence(text: str) -> str:
+    """A reply cut off by the token limit, ended at its last complete sentence (unchanged when none ends)."""
+    end = max(text.rfind(p) for p in (".", "!", "?", "…", '."', '!"', '?"'))
+    return text[: end + 1].rstrip() if end > 0 else text
 
 
 def _get(url: str, timeout: float) -> dict[str, Any] | None:

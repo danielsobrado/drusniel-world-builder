@@ -25,13 +25,17 @@ def _facts(context: dict[str, Any]) -> str:
     return json.dumps(keep, ensure_ascii=False, separators=(",", ":"))
 
 
+# Scores and purses are simulation numbers; a person would never say "reputation 50.0".
+NO_SCORES = "- Never quote scores, ratings or coin amounts as numbers; describe them in words (well regarded, comfortably off)."
+
+
 def biography_messages(context: dict[str, Any], kind: str) -> list[Message]:
     low, high = context["targets"]["words"]
     words = f"{low}-{high}" if kind == "detailed" else f"{max(40, low // 2)}-{low}"
     rules = "\n".join(f"- {r}" for r in context["restrictions"])
     return [
         {"role": "system", "content": "You write character biographies for a fantasy world simulation. You only narrate facts you are "
-                                      f"given.\nRules:\n{rules}\n- Write plain prose with no headings or lists."},
+                                      f"given.\nRules:\n{rules}\n- Write plain prose with no headings or lists.\n{NO_SCORES}"},
         {"role": "user", "content": f"{KINDS[kind].format(words=words)}\nFacts (JSON):\n{_facts(context)}"},
     ]
 
@@ -46,6 +50,7 @@ def dialogue_messages(context: dict[str, Any], history: list[Message], memory: l
         f"Everything you know about yourself and your world is in these facts (JSON):\n{_facts(context)}\n"
         f"Rules:\n{rules}\n- If asked about something not in the facts, say you do not know or change the subject; never make it up.\n"
         "- Speak about what you were told or heard as hearsay, with the uncertainty it deserves.\n"
+        f"{NO_SCORES}\n"
         + (f"- You also know of {len(secrets)} matters you keep to yourself; do not reveal them.\n" if secrets else "")
         + ("What the traveller told you before:\n" + "\n".join(f"- {m}" for m in memory) + "\n" if memory else "")
     )

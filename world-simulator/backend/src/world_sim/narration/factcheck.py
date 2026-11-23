@@ -43,17 +43,30 @@ def vocabulary(context: dict[str, Any]) -> set[str]:
     return words
 
 
+def unknown_names(text: str, known: set[str]) -> set[str]:
+    """Capitalised words mid-sentence that the record does not know. Possessives count as the name; contractions ("I'm") are skipped."""
+    names = set()
+    for m in re.finditer(r"\b[A-Z][a-z'’\-]{2,}", text):
+        if re.search(r"(^|[.!?:;\"“]\s*|\n\s*)$", text[:m.start()]):
+            continue        # opens a sentence or a line, so the capital says nothing
+        word = re.sub(r"['’]s$", "", m.group())
+        if "'" not in word and "’" not in word and word.lower() not in known:
+            names.add(word)
+    return names
+
+
 def check(text: str, context: dict[str, Any]) -> list[str]:
     known = vocabulary(context) | COMMON
     warnings = []
-    names = {w for w in re.findall(r"(?<![.!?]\s)(?<!^)\b([A-Z][a-z'\-]{2,})", text) if w.lower() not in known}
+    names = unknown_names(text, known)
     if names:
         warnings.append("names the record does not know: " + ", ".join(sorted(names)[:8]))
     kinds = {r["kind"] for r in context["relationships"]}
     has_child = any(r["kind"] == "parent" and r["direction"] == "from" for r in context["relationships"])
     recorded = vocabulary(context)
+    about_them = re.sub(r"\b(as an?|since|when (?:she|he|they|I) was an?)\s+(child|boy|girl|young\w*)\b", "", text, flags=re.IGNORECASE)
     for pattern, needs, message in CLAIMS:
-        said = {m.lower() for m in re.findall(pattern, text, re.IGNORECASE)}
+        said = {m.lower() for m in re.findall(pattern, about_them, re.IGNORECASE)}
         if not said or said <= recorded:
             continue        # absent, or the person's own record uses these very words
         supported = has_child if needs == "child" else (needs in kinds if needs else False)
