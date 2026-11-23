@@ -8,7 +8,7 @@ simulation scenarios over it. It runs without the game or its renderer.
 Findings, method and pilot ids: [docs/01-azgaar-audit-and-npc-budget-2026-11-22.md](docs/01-azgaar-audit-and-npc-budget-2026-11-22.md).
 Scenarios, clock, snapshots and the state contract: [docs/02-scenarios-and-baseline-state-2026-11-23.md](docs/02-scenarios-and-baseline-state-2026-11-23.md).
 Households, housing, businesses, employment and hardening: [docs/03-households-businesses-employment-2026-11-23.md](docs/03-households-businesses-employment-2026-11-23.md).
-Production, food, markets, prices and caravans: [docs/04-economy-and-trade-2026-11-23.md](docs/04-economy-and-trade-2026-11-23.md).
+Production, food, markets, prices, caravans, bandits, guards and trader scorecards: [docs/04-economy-and-trade-2026-11-23.md](docs/04-economy-and-trade-2026-11-23.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -53,11 +53,12 @@ backend/                Python package (pyproject.toml, uv.lock)
     geography/          connectivity (cell-based route graph, components, Dijkstra)
     npc/                budget (NPC allocator)
     pilot/              selector
-    simulation/         contracts (Pydantic state v3), engine, demography, calendar, scope,
+    simulation/         contracts (Pydantic state v4), engine, demography, calendar, scope,
                         households, housing, businesses, employment, needs, society,
                         migrations, store (atomic bundles), manager (run loop, snapshots)
       economy/          contracts, sources (Azgaar production and deals), geography
-                        (hinterland, caravan days), baseline, production, market, step
+                        (hinterland, caravan days), baseline, production, market, step,
+                        roads, names, trips (traders, smuggling, raids), bandits, escorts
     reports/            builder, writer
     api/                app (FastAPI), scenario_routes, settlement_query, errors
     cli/audit.py        canonical.py ids.py config.py log.py server.py
@@ -70,6 +71,7 @@ frontend/               TypeScript + React + Vite
                         ScenarioExplorer, PopulationTrend
   src/society/          HouseholdsWorkspace, BusinessesWorkspace, BusinessDetails
   src/economy/          EconomyWorkspace, SettlementEconomyView, MarketView, CaravanTable
+  src/roads/            RoadsWorkspace, TraderDetails, TraderParts (personality, scorecard)
   src/api/              types.ts (API contracts), worldApi.ts (fetch + useApi hook)
   src/styles/           tokens.css (theme variables), shell.css, components.css,
                         marble.css (textured navigation chrome)
@@ -122,7 +124,8 @@ Writes (`POST`) must send `application/json`. Full table in
 | `POST /api/scenarios/{id}/step` · `/run` · `/pause` · `/restore` | clock control |
 | `GET · POST /api/scenarios/{id}/snapshots` | list · save |
 | `GET /api/scenarios/{id}/businesses` · `/businesses/{businessId}` | paged business list · one business |
-| `GET /api/scenarios/{id}/economy` | settlement economies, markets, caravans (no society payload) |
+| `GET /api/scenarios/{id}/economy` | settlement economies, markets, caravans, roads, traders (no society payload) |
+| `GET /api/scenarios/{id}/traders/{traderId}` | one caravan master's scorecard and caravans |
 
 ## Configuration
 
@@ -136,7 +139,8 @@ Writes (`POST`) must send `application/json`. Full table in
 - `config/society.yaml` — household shares, housing types and mix, labour participation
   and sector shares, business templates, need thresholds (all authored assumptions).
 - `config/economy.yaml` — turn length, food and hinterland, stock targets, market pricing
-  and elasticities, caravan speed, shortage threshold, famine mortality.
+  and elasticities, caravan speed, shortage threshold, famine mortality, bandits,
+  caravan guards, traders and smuggling.
 
 Environment overrides: `WS_BACKEND_HOST`, `WS_BACKEND_PORT`, `WS_FRONTEND_PORT`,
 `WS_MAP_ID`, `WS_SCENARIO_STORAGE`. Another Azgaar Full JSON is added by listing it in `../maps/manifest.json`
@@ -155,7 +159,7 @@ status bar. Selecting a settlement anywhere (table, map, tree, pilot, inspector 
 updates the same inspector. Inspector fields are marked `src` (imported Azgaar fact)
 or `calc` (computed from config).
 
-Shortcuts: `1`–`9` switch workspace, `[` and `]` toggle the side panels, `/` focuses
+Shortcuts: `1`–`9` switch to the first nine workspaces, `[` and `]` toggle the side panels, `/` focuses
 search. Panel layout is remembered per browser.
 
 ## Relationship to the game
@@ -168,7 +172,8 @@ later exports can join on them.
 ## Current limitations
 
 - Simulated monthly: cohort demography, households, housing occupancy, employment, then
-  production, food, market clearing and caravans. No construction or business turnover,
+  production, food, market clearing, caravans with their traders, bandits and guards.
+  No construction or business turnover beyond caravan-guard companies,
   no scheduled interventions, and no persistent NPCs yet (PR5). Market members outside
   the scope are fixed Azgaar flows. All rates are authored assumptions.
 - Pilot roles are hypotheses from Azgaar production records, not specialisations.

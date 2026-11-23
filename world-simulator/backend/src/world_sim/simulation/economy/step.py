@@ -1,13 +1,21 @@
-"""One month of the economy for every settlement in scope: caravans arrive, settlements produce and consume, markets clear."""
+"""
+One month of the economy for every settlement in scope: caravans arrive and loot is
+fenced, settlements produce and consume, markets clear, traders take caravans on the
+road, bandit bands grow or shrink, and caravan-guard companies resize.
+"""
 
 from collections import defaultdict
 from typing import Any
 
 from ..contracts import Need, SettlementState, Society
 from ..needs import status
-from .contracts import FoodBalance, SettlementEconomy, Trade
+from ..society import update_society
+from .bandits import fence, update_bands
+from .contracts import Caravan, FoodBalance, SettlementEconomy, Trade
+from .escorts import KIND, resize_escorts
 from .market import Clearing, Member
 from .production import run_production, staffing
+from .trips import TripContext, run_trip
 
 TOLERANCE = 1e-3   # per stored quantity: inventories and stock are kept to four decimals
 
@@ -22,6 +30,9 @@ def _totals(econs: list[SettlementEconomy], trade: Trade) -> dict[str, float]:
             total[g] += mg.stock
     for c in trade.caravans:
         for g, u in c.cargo.items():
+            total[g] += u
+    for r in trade.routes:
+        for g, u in r.loot.items():
             total[g] += u
     return total
 
@@ -60,11 +71,36 @@ def with_food_need(society: Society, econ: SettlementEconomy, cfg: dict[str, Any
     return society.model_copy(update={"needs": [need, *(n for n in society.needs if n.id != "food")]})
 
 
-def economy_month(settlements: list[SettlementState], trade: Trade, day: int,
-                  cfg: dict[str, Any]) -> tuple[list[SettlementState], Trade, dict[str, Any]]:
+def _roads(settlements: list[SettlementState], trade: Trade, econs: dict[str, SettlementEconomy], new: list[Caravan], seed: int,
+           day: int, cfg: dict[str, Any]) -> tuple[Trade, list[Caravan], list[dict[str, Any]]]:
+    """Traders lead this month's caravans; returns the trade, the caravans as they left, and the incidents."""
+    ctx = TripContext(seed=seed, day=day, cfg=cfg["economy"], markets={m.marketId: m for m in trade.markets}, econs=econs,
+                      escorts_filled={s.settlementId: sum(b.filled for b in s.society.businesses if b.kind == KIND) for s in settlements},
+                      safety={s.settlementId: next((n.value for n in s.society.needs if n.id == "safety"), 1.0) for s in settlements},
+                      routes={r.id: r for r in trade.routes}, traders=list(trade.traders), trader_seq=trade.traderSeq)
+    by_route: dict[str, list[Caravan]] = defaultdict(list)
+    route_of = {(r.settlementId, r.marketId): r.id for r in trade.routes}
+    for c in new:
+        home = c.fromId if c.kind == "sale" else c.toId
+        by_route[route_of.get((home, c.marketId), "")].append(c)
+    led = [c for route_id, group in by_route.items() for c in (run_trip(ctx, ctx.routes[route_id], group) if route_id else group)]
+    loot_before = {r.id: r.lootValue for r in trade.routes}
+    markets = [m.model_copy(update={"taxRevenue": round(ctx.tax.get(m.marketId, 0.0), 2)}) for m in trade.markets]
+    routes = list(ctx.routes.values())
+    by_id = {s.settlementId: s.model_copy(update={"economy": econs[s.settlementId]}) for s in settlements}
+    loot = {r.id: r.lootValue - loot_before[r.id] for r in routes}
+    routes = update_bands(routes, by_id, {m.marketId: m for m in markets}, loot, seed, day, cfg["economy"])
+    trade = trade.model_copy(update={"markets": markets, "routes": routes, "traders": ctx.traders, "traderSeq": ctx.trader_seq})
+    return trade, led, ctx.incidents
+
+
+def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cfg: dict[str, Any],
+                  seed: int = 0) -> tuple[list[SettlementState], Trade, dict[str, Any]]:
     before = _totals([s.economy for s in settlements], trade)
     econs = {s.settlementId: s.economy for s in settlements}
     trade = _deliver(trade, econs, day, cfg["economy"]["caravans"]["maxDelivered"])
+    routes, markets = fence(trade.routes, trade.markets)
+    trade = trade.model_copy(update={"routes": routes, "markets": markets})
     flows: dict[str, float] = defaultdict(float)
     members = []
     for s in settlements:
@@ -76,22 +112,35 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int,
     clearing = Clearing(trade, day, cfg)
     markets = [clearing.clear(market, [m for m in members if m.econ.marketId == market.marketId]) for market in trade.markets]
     dispatched = clearing.seq - trade.caravanSeq
-    trade = trade.model_copy(update={"markets": markets, "caravans": clearing.caravans, "caravanSeq": clearing.seq})
-    by_id = {m.settlement_id: m.econ for m in members}
-    updated = [s.model_copy(update={"economy": by_id[s.settlementId], "society": with_food_need(s.society, by_id[s.settlementId], cfg)})
-               for s in settlements]
+    on_road, new = clearing.caravans[:len(clearing.caravans) - dispatched], clearing.caravans[len(clearing.caravans) - dispatched:]
+    trade = trade.model_copy(update={"markets": markets, "caravanSeq": clearing.seq})
+    econs = {m.settlement_id: m.econ.model_copy(update={"taxPaid": 0.0, "escortCost": 0.0, "lostToBandits": 0.0}) for m in members}
+    trade, led, incidents = _roads(settlements, trade, econs, new, seed, day, cfg)
+    trade = trade.model_copy(update={"caravans": on_road + led})
 
-    after = _totals(list(by_id.values()), trade)
-    count = sum(len(e.inventory) for e in by_id.values()) + sum(len(m.goods) for m in markets) + 4
+    updated = []
+    for s in settlements:
+        society = resize_escorts(s.society, s.settlementId, s.sourceId, s.name, trade.routes, cfg["economy"])
+        if society is not s.society:
+            society = update_society(society, s.cohorts, cfg["society"])
+        econ = econs[s.settlementId]
+        updated.append(s.model_copy(update={"economy": econ, "society": with_food_need(society, econ, cfg)}))
+
+    after = _totals(list(econs.values()), trade)
+    count = sum(len(e.inventory) for e in econs.values()) + sum(len(m.goods) for m in trade.markets) + 4
     for g in set(before) | set(after):
         drift = after.get(g, 0.0) - before.get(g, 0.0) - flows.get(g, 0.0) - clearing.outside.get(g, 0.0)
         if abs(drift) > TOLERANCE * count:
             raise AssertionError(f"economy month {day}: {g} not conserved (drift {drift:.4f})")
-    if any(u < 0 for e in by_id.values() for u in e.inventory.values()):
+    if any(u < 0 for e in econs.values() for u in e.inventory.values()):
         raise AssertionError(f"economy month {day}: negative inventory")
     return updated, trade, {
-        "shortages": sum(len(e.shortages) for e in by_id.values()),
+        "shortages": sum(len(e.shortages) for e in econs.values()),
         "caravans": dispatched,
-        "tradeValue": round(sum(c.value for c in clearing.caravans[len(clearing.caravans) - dispatched:]), 2) if dispatched else 0,
-        "foodSecurity": round(min((e.food.security for e in by_id.values()), default=1.0), 4),
+        "tradeValue": round(sum(c.value for c in led), 2),
+        "foodSecurity": round(min((e.food.security for e in econs.values()), default=1.0), 4),
+        "bandits": sum(r.bandits for r in trade.routes),
+        "raids": sum(1 for i in incidents if i["kind"] == "raid"),
+        "caught": sum(1 for i in incidents if i["kind"] == "smuggling"),
+        "incidents": incidents,
     }

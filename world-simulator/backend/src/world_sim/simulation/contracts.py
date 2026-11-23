@@ -1,4 +1,4 @@
-"""Canonical scenario state contracts (schema v3). Everything persisted or exported goes through these."""
+"""Canonical scenario state contracts (schema v4). Everything persisted or exported goes through these."""
 
 from typing import Literal
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .economy.contracts import SettlementEconomy, Trade
 
-STATE_SCHEMA_VERSION = 3  # v2 (PR3) adds society, v3 (PR4) the economy; older states migrate on load
+STATE_SCHEMA_VERSION = 4  # v2 society, v3 economy, v4 roads, bandits and traders; older states migrate on load
 
 
 class Contract(BaseModel):
@@ -166,7 +166,8 @@ class Event(Contract):
     seq: int
     day: int
     date: str
-    kind: Literal["created", "branched", "stepped", "month", "snapshot", "restored", "run", "paused", "error", "migrated"]
+    kind: Literal["created", "branched", "stepped", "month", "snapshot", "restored", "run", "paused", "error", "migrated",
+                  "raid", "smuggling", "dismissed"]
     message: str
     data: dict[str, int | float | str | None] = {}
 

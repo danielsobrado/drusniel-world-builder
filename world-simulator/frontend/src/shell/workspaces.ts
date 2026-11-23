@@ -11,4 +11,5 @@ export const WORKSPACES: readonly Workspace[] = Object.freeze([
   { id: 'households', label: 'Households & Buildings', icon: 'home' },
   { id: 'businesses', label: 'Businesses & Employment', icon: 'briefcase' },
   { id: 'economy', label: 'Economy & Trade', icon: 'cart' },
+  { id: 'roads', label: 'Roads & Traders', icon: 'shield' },
 ]);

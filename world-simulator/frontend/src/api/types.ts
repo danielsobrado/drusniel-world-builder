@@ -186,6 +186,7 @@ export interface SettlementEconomy {
   marketId: number | null; travelDays: number; baselinePopulation: number; inventory: Record<string, number>;
   production: ProductionLine[]; consumption: Record<string, number>; bought: Record<string, number>; sold: Record<string, number>;
   shortages: Shortage[]; food: FoodBalance; treasury: number; tradeBalance: number;
+  taxPaid: number; escortCost: number; lostToBandits: number;
 }
 export interface MarketGood {
   basePrice: number; price: number; stock: number; outsideSupply: number; outsideDemand: number;
@@ -194,15 +195,35 @@ export interface MarketGood {
 export interface Market {
   marketId: number; centerSettlementId: string; centerName: string; centerInScope: boolean;
   goods: Record<string, MarketGood>; priceHistory: { day: number; prices: Record<string, number> }[];
+  taxRates: Record<string, number>; taxRevenue: number;
 }
 export interface Caravan {
   id: string; kind: 'sale' | 'purchase'; marketId: number; fromId: string; fromName: string; toId: string; toName: string;
   cargo: Record<string, number>; value: number; departDay: number; arriveDay: number;
+  routeId: string | null; traderId: string | null; traderName: string | null; guards: number;
+  lost: Record<string, number>; smuggled: number; caught: boolean;
 }
+export interface TradeRoute {
+  id: string; settlementId: string; settlementName: string; marketId: number; centerName: string; days: number;
+  bandits: number; floor: number; lair: string | null; raidChance: number; guardsWanted: number; recruits: number; removed: number;
+  loot: Record<string, number>; raids: number; lootValue: number; reserve: string[];
+}
+export interface Personality { greed: number; caution: number; honesty: number }
+export interface Scorecard {
+  trips: number; valueCarried: number; commission: number; taxPaid: number; taxEvaded: number; smuggled: number; caught: number;
+  fines: number; raids: number; lossesValue: number; guardsHired: number; reputation: number;
+}
+export interface Trader {
+  id: string; name: string; settlementId: string; settlementName: string; routeId: string; personality: Personality;
+  scorecard: Scorecard; busyUntil: number; active: boolean; dismissedDay: number | null;
+}
+export interface TraderDetail extends Trader { route: TradeRoute | null; caravans: Caravan[] }
 export interface EconomyView {
   date: CalendarDate;
   settlements: { settlementId: string; name: string; population: number; economy: SettlementEconomy }[];
   markets: Market[];
   caravans: Caravan[];
   delivered: Caravan[];
+  routes: TradeRoute[];
+  traders: Trader[];
 }

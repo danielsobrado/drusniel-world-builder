@@ -17,7 +17,7 @@ from .. import log
 from ..api.errors import ApiError
 from ..canonical import checksum
 from ..world.model import WorldModel
-from .calendar import resolve_start_year
+from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
 from .engine import advance, baseline_state, state_checksum
 from .migrations import IncompatibleState, migrate_state
@@ -144,9 +144,11 @@ class ScenarioManager:
         return meta, state
 
     # ---- mutations -----------------------------------------------------
-    def _event(self, s: Session, kind: str, message: str, **data: Any) -> None:
+    def _event(self, s: Session, kind: str, message: str, at_day: int | None = None, **data: Any) -> None:
+        """Logs an event, dated `at_day` (a month close inside a longer step) or the scenario's current date."""
+        date = s.state.date if at_day is None else date_for(at_day, s.state.startYear, self.config["calendar"])
         s.meta = s.meta.model_copy(update={"eventSeq": s.meta.eventSeq + 1})
-        s.events.append(Event(seq=s.meta.eventSeq, day=s.state.date.day, date=s.state.date.label, kind=kind, message=message, data=data))
+        s.events.append(Event(seq=s.meta.eventSeq, day=date.day, date=date.label, kind=kind, message=message, data=data))
         del s.events[: max(0, len(s.events) - self.limits["maxEvents"])]
         s.dirty = True
 
@@ -196,7 +198,10 @@ class ScenarioManager:
             self._event(s, "month", f"{m['label']} closed: {m['births']} births, {m['deaths']} deaths, population {m['population']:,}, "
                         f"{m['unemployed']:,} without work, {m['caravans']} caravans, {m['shortages']} shortages",
                         births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"],
-                        caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"])
+                        caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"], bandits=m["bandits"])
+            for incident in m["incidents"]:
+                self._event(s, incident["kind"], incident["message"], at_day=m["day"], trader=incident.get("trader"),
+                            value=incident.get("value"))
         s.dirty = True
 
     def step(self, scenario_id: str, days: int) -> Session:

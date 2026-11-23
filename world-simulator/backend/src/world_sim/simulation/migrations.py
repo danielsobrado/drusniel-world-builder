@@ -4,6 +4,8 @@ from typing import Any
 
 from ..world.model import WorldModel
 from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, Society
+from .economy.contracts import SettlementEconomy, Trade
+from .economy.roads import initial_roads
 from .engine import build_settlements
 from .society import initial_society
 
@@ -28,14 +30,24 @@ def _v1_to_v2(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
 
 
 def _v2_to_v3(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
-    """v3 adds the economy, read from the imported map as at a baseline, around the saved society."""
+    """v3 adds the economy (and v4 its roads), read from the imported map as at a baseline, around the saved society."""
     rows = [({k: s[k] for k in ("settlementId", "sourceId", "name", "population", "births", "deaths")}, _record(model, s),
              Cohorts(**s["cohorts"]), Society(**s["society"])) for s in raw["settlements"]]
-    settlements, trade = build_settlements(model, rows, model.config.rules)
-    return {**raw, "schemaVersion": 3, "settlements": [s.model_dump() for s in settlements], "trade": trade.model_dump()}
+    settlements, trade = build_settlements(model, rows, model.config.rules, raw["seed"])
+    # The economy is built at the current schema, roads included, so this skips the v3 -> v4 step.
+    return {**raw, "schemaVersion": 4, "settlements": [s.model_dump() for s in settlements], "trade": trade.model_dump()}
 
 
-STEPS = {1: _v1_to_v2, 2: _v2_to_v3}
+def _v3_to_v4(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
+    """v4 adds roads, bandits and traders around the saved economy, and the markets' Azgaar tax rates."""
+    trade = Trade(**raw["trade"])
+    members = [(_record(model, s), SettlementEconomy(**s["economy"])) for s in raw["settlements"]]
+    routes, traders, markets = initial_roads(model, members, trade.markets, raw["seed"], model.config.economy)
+    trade = trade.model_copy(update={"routes": routes, "traders": traders, "traderSeq": len(traders), "markets": markets})
+    return {**raw, "schemaVersion": 4, "trade": trade.model_dump()}
+
+
+STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4}
 
 
 def migrate_state(raw: dict[str, Any], model: WorldModel) -> tuple[ScenarioState, int]:

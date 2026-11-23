@@ -13,9 +13,9 @@ from .society import check_invariants, initial_society, update_society
 
 
 def build_settlements(model: WorldModel, rows: list[tuple[dict[str, Any], dict[str, Any], Cohorts, Society]],
-                      rules: dict[str, Any]) -> tuple[list[SettlementState], Any]:
+                      rules: dict[str, Any], seed: int) -> tuple[list[SettlementState], Any]:
     """`rows` holds (settlement fields, imported record, cohorts, society); adds the baseline economy and trade."""
-    econs, trade = initial_economy(model, [(record, cohorts.total, society) for _, record, cohorts, society in rows], rules)
+    econs, trade = initial_economy(model, [(record, cohorts.total, society) for _, record, cohorts, society in rows], rules, seed)
     settlements = [SettlementState(**fields, cohorts=cohorts, society=with_food_need(society, econ, rules), economy=econ)
                    for (fields, _, cohorts, society), econ in zip(rows, econs, strict=True)]
     return settlements, trade
@@ -29,7 +29,7 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
         cohorts = initial_cohorts(record["population"], rules["simulation"]["demography"]["initialShares"])
         fields = {"settlementId": sid, "sourceId": record["sourceId"], "name": record["name"], "population": record["population"]}
         rows.append((fields, record, cohorts, initial_society(record, cohorts, rules["society"])))
-    settlements, trade = build_settlements(model, rows, rules)
+    settlements, trade = build_settlements(model, rows, rules, seed)
     identity = model.audit["identity"]
     return ScenarioState(
         scenarioId=scenario_id,
@@ -74,7 +74,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         births_before = sum(s.births for s in settlements)
         deaths_before = sum(s.deaths for s in settlements)
         settlements = [_month(s, seed=state.seed, month_index=month_index, rules=rules) for s in settlements]
-        settlements, trade, economy = economy_month(settlements, trade, day, rules)
+        settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
         for s in settlements:
             broken = check_invariants(s.population, s.cohorts, s.society)
             if broken:

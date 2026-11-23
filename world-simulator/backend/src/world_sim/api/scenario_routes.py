@@ -76,7 +76,20 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
             "markets": [m.model_dump() for m in state.trade.markets],
             "caravans": [c.model_dump() for c in state.trade.caravans],
             "delivered": [c.model_dump() for c in reversed(newest)],
+            "routes": [r.model_dump() for r in state.trade.routes],
+            "traders": [t.model_dump() for t in state.trade.traders],
         })
+
+    @router.get("/scenarios/{scenario_id}/traders/{trader_id}")
+    async def trader(scenario_id: str, trader_id: str) -> JSONResponse:
+        """One caravan master's scorecard and the caravans they led that are still on record, newest first."""
+        trade = manager.session(scenario_id).state.trade
+        found = next((t for t in trade.traders if t.id == trader_id), None)
+        if found is None:
+            raise ApiError(404, "not_found", f"No trader {trader_id}", {"id": trader_id})
+        led = [c.model_dump() for c in reversed([*trade.delivered, *trade.caravans]) if c.traderId == trader_id]
+        route = next((r.model_dump() for r in trade.routes if r.id == found.routeId), None)
+        return reply({**found.model_dump(), "route": route, "caravans": led})
 
     @router.post("/scenarios/{scenario_id}/step")
     async def step(scenario_id: str, body: StepRequest) -> JSONResponse:

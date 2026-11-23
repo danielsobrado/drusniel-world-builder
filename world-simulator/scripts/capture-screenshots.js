@@ -98,6 +98,20 @@ try {
   await page.locator('.workspace').evaluate((el) => { el.scrollTop = el.scrollHeight; });
   await shot('14-caravans');
 
+  for (const year of ['1215-', '1216-', '1217-', '1218-', '1219-']) {
+    await page.getByRole('button', { name: '+Year' }).click();
+    await page.getByText(year).first().waitFor();
+  }
+  await workspace('Roads & Traders');
+  const cards = page.getByRole('table', { name: 'Trader scorecards' });
+  await cards.waitFor();
+  await cards.getByRole('row').nth(1).click();
+  await page.getByText('Recent caravans').waitFor();
+  await page.locator('.workspace').evaluate((el) => { el.scrollTop = 0; });
+  await shot('15-roads-and-traders');
+  await page.getByRole('heading', { name: 'Incidents' }).scrollIntoViewIfNeeded();
+  await shot('16-incidents');
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await phone.goto(url);
   await phone.getByText('Reference counts verified').waitFor();

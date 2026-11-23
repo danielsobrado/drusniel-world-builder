@@ -88,3 +88,17 @@ class AzgaarEconomy:
         recorded = (self.markets[market_id].get("goods") or {}).get(str(good_id)) or {}
         price = recorded.get("price") or self.goods[good_id].get("value") or 1
         return float(price), float(recorded.get("stock") or 0)
+
+    def tax_rates(self, market_id: int) -> dict[str, float]:
+        """Tax as a share of value on the sales members made to the market, per good."""
+        taxed: dict[str, list[float]] = defaultdict(lambda: [0.0, 0.0])
+        for d in self.deals:
+            if d["buyerType"] == "market" and d["buyer"] == market_id and d["sellerType"] == "burg":
+                value = d["units"] * d["price"]
+                if value > 0:
+                    taxed[self.name(d["good"])][0] += d.get("tax") or 0
+                    taxed[self.name(d["good"])][1] += value
+        return {g: round(t / v, 4) for g, (t, v) in sorted(taxed.items()) if v > 0}
+
+    def culture_of(self, source_id: int) -> int | None:
+        return self.burgs.get(source_id, {}).get("culture")

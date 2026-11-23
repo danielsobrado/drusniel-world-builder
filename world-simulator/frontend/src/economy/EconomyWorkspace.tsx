@@ -72,11 +72,11 @@ export function EconomyWorkspace({ sim, onSelect }: { sim: Simulation; onSelect:
             )}
             <section className="section">
               <div className="section-head"><h2>Caravans on the road</h2></div>
-              <CaravanTable caravans={view.caravans} date={view.date} delivered={false} label="Caravans on the road" />
+              <CaravanTable caravans={view.caravans} date={view.date} delivered={false} label="Caravans on the road" onSelect={onSelect} />
             </section>
             <section className="section">
               <div className="section-head"><h2>Recently arrived</h2><span className="muted">newest first</span></div>
-              <CaravanTable caravans={view.delivered} date={view.date} delivered label="Recently arrived caravans" />
+              <CaravanTable caravans={view.delivered} date={view.date} delivered label="Recently arrived caravans" onSelect={onSelect} />
             </section>
           </>
         );

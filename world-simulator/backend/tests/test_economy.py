@@ -41,9 +41,13 @@ def test_baseline_economy_follows_azgaar_production_and_deals(eldara):
         assert [n.id for n in settlement.society.needs] == ["food", "housing", "livelihood", "safety"]
 
 
-def test_a_decade_trades_without_shortages_and_keeps_prices_near_azgaar(eldara):
+def test_a_decade_trades_with_rare_shortages_and_keeps_prices_near_azgaar(eldara):
     state, months = advance(pilot(eldara), 3600, eldara.config.rules)
-    assert all(m["shortages"] == 0 and m["foodSecurity"] == 1.0 for m in months[1:])
+    assert all(m["foodSecurity"] == 1.0 for m in months)
+    short = [i for i, m in enumerate(months) if m["shortages"]]
+    assert len(short) <= 12, "goods run short only now and then, after bandits take a caravan's cargo"
+    raided = {i for i, m in enumerate(months) if m["raids"]}
+    assert all(any(j in raided for j in range(i - 3, i + 1)) for i in short)
     assert sum(m["caravans"] for m in months) > 200 and state.trade.delivered
     [market] = state.trade.markets
     for good, mg in market.goods.items():

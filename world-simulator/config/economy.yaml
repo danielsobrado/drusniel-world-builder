@@ -40,3 +40,39 @@ shortage:
 
 famine:
   mortality: 3.0                # death rates x (1 + mortality x last month's food shortfall)
+
+# Roads, bandits, caravan guards and traders (PR4b).
+bandits:
+  markerRadiusPx: 25            # an Azgaar "brigands" marker this close to a road's ends founds a band there
+  markerBand: 24                # bandits such a band starts with; it never shrinks below a third of this
+  recruitPerUnemployed: 0.02    # share of a settlement's people without work who take to its road each month
+  hungerRecruitment: 4          # recruitment x (1 + this x last month's food shortfall)
+  lootRecruitment: 0.02         # extra recruits per unit of value looted last month
+  patrolPerSecurityWorker: 0.002   # share of bandits removed each month per security worker at the road's ends
+  maxPatrolShare: 0.5
+  desertion: 0.03               # share of bandits who drift away each month
+  raidPerBanditDay: 0.002       # raid chance = 1 - exp(-this x bandits x days / (1 + deterrence x guards))
+  guardDeterrence: 0.5
+  lootShare: 0.6                # cargo taken from an unguarded caravan; less as guards outnumber bandits
+  guardStrength: 1.5            # one guard counts as this many bandits when cargo is fought over
+
+escorts:                        # caravan-guard companies, sized each month to the guards traders hired
+  label: Caravan guards
+  profession: caravan guard
+  staff: 6
+  wage: 5                       # copper per worker-day, like other businesses
+  base: 2                       # guards a fully cautious trader takes on an empty road
+  perBandit: 0.4                # extra guards per bandit on the road, scaled by caution
+  feePerGuardDay: 0.05          # value a settlement pays per guard per day on the road (both ways)
+
+traders:
+  perRoute: 3                   # caravan masters per road at baseline
+  commission: 0.03              # of the declared value they deliver
+  reputation: { start: 50, safeTrip: 2, raided: -3, caught: -15, dismissBelow: 15 }
+
+smuggling:
+  defaultTaxRate: 0.08          # where Azgaar records no taxed sale of a good
+  inspection: 0.3               # catch chance = this x the centre's safety (max 1.5) x sqrt(hidden share)
+  maxHidden: 0.8
+  fineMultiplier: 3             # fine = this x the tax the trader tried to evade
+  learning: 0.5                 # each time caught, a trader hides this much less

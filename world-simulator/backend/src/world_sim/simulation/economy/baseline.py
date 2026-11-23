@@ -9,11 +9,12 @@ from ..contracts import Society
 from .contracts import FoodBalance, Market, MarketGood, PricePoint, SettlementEconomy, Trade
 from .geography import TravelTimes, hinterland
 from .production import food_flows, monthly_use, r4, staffing
+from .roads import initial_roads
 from .sources import AzgaarEconomy
 
 
 def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], int, Society]],
-                    cfg: dict[str, Any]) -> tuple[list[SettlementEconomy], Trade]:
+                    cfg: dict[str, Any], seed: int) -> tuple[list[SettlementEconomy], Trade]:
     """`settlements` holds (imported record, current population, society) for each settlement in scope."""
     e = cfg["economy"]
     rations = e["food"]["good"]
@@ -69,4 +70,6 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
         markets.append(Market(marketId=market_id, centerSettlementId=centre["id"], centerName=centre["name"],
                               centerInScope=centre["sourceId"] in scoped, goods=priced,
                               priceHistory=[PricePoint(day=0, prices={g: mg.price for g, mg in priced.items()})]))
-    return econs, Trade(markets=markets, caravans=[], delivered=[])
+    routes, traders, markets = initial_roads(model, [(record, econ) for (record, _, _), econ in zip(settlements, econs, strict=True)],
+                                             markets, seed, e)
+    return econs, Trade(markets=markets, caravans=[], delivered=[], routes=routes, traders=traders, traderSeq=len(traders))
