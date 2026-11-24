@@ -1,0 +1,2739 @@
+{
+  "startedAt": "2026-11-24T23:48:51.123Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "noGates": true,
+  "shots": [
+    {
+      "name": "core-taiga-snow-12",
+      "requestedPose": {
+        "id": "core-taiga",
+        "world": "procedural",
+        "x": -6951,
+        "z": 10379,
+        "yaw": 0.785,
+        "pitch": -0.08,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68,
+        "tileId": 9,
+        "canopy": true
+      },
+      "gates": [
+        {
+          "gate": "full.meanMin",
+          "value": 116.35930072981614,
+          "limit": 25,
+          "passed": true
+        },
+        {
+          "gate": "full.meanMax",
+          "value": 116.35930072981614,
+          "limit": 235,
+          "passed": true
+        },
+        {
+          "gate": "ground.meanMin",
+          "value": 107.32275574461067,
+          "limit": 150,
+          "passed": false
+        }
+      ],
+      "pose": {
+        "id": "core-taiga",
+        "world": "procedural",
+        "x": -7047,
+        "z": 10475,
+        "yaw": 0.785,
+        "pitch": -0.08,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68,
+        "tileId": 9,
+        "canopy": true,
+        "patchCoverage": 0.8736699759155028
+      },
+      "preparation": {
+        "groundPreparation": null,
+        "readiness": {
+          "waitedMs": 7221.20000000298,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 1533.3000000044703,
+            "capacity": 49,
+            "focusChunk": "-56:-82|-56:-82",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 0,
+              "baseTerrainKind": null
+            },
+            "origin": {
+              "x": -6912,
+              "z": 10368
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 38,
+                "advanced": 38,
+                "blocked": 341,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 43,
+                "advanced": 47,
+                "blocked": 0,
+                "cancelled": 90
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 2,
+                "advanced": 6,
+                "blocked": 60,
+                "cancelled": 13
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 3,
+                "advanced": 51,
+                "blocked": 577,
+                "cancelled": 21
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 31,
+                "advanced": 97,
+                "blocked": 784,
+                "cancelled": 398
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 56,
+                "advanced": 227,
+                "blocked": 923,
+                "cancelled": 49
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 90,
+                "advanced": 264,
+                "blocked": 695,
+                "cancelled": 0
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "weatherWarmup": {
+        "simulationSeconds": 8,
+        "wetness": 0,
+        "wallMs": 7998.10000000149
+      },
+      "actualBiomeId": 9,
+      "habitat": {
+        "tileId": 9,
+        "profileKey": "taiga",
+        "patchCoverage": 0.8736699759155028,
+        "patchEdge": 0.2872132637152044,
+        "elevationWeight": 1
+      },
+      "cameraHeight": 7.393685339692904,
+      "storm": {
+        "storm": 1,
+        "cloud": 1,
+        "wind": 1,
+        "precip": 1,
+        "rain": 0,
+        "snow": 1,
+        "lightning": 0,
+        "snowShare": 1,
+        "gain": 1
+      },
+      "snowCover": 1,
+      "stormSnowCoverUniform": 1,
+      "sky": {
+        "fogColor": "#d6dde5",
+        "groundLightColor": "#636461",
+        "mist": 0.5197529538218593,
+        "nightness": 0
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 1533.3000000044703,
+          "capacity": 49,
+          "focusChunk": "-56:-82|-56:-82",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 0,
+            "baseTerrainKind": null
+          },
+          "origin": {
+            "x": -6912,
+            "z": 10368
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 38,
+              "advanced": 38,
+              "blocked": 341,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 43,
+              "advanced": 47,
+              "blocked": 0,
+              "cancelled": 90
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 2,
+              "advanced": 6,
+              "blocked": 60,
+              "cancelled": 13
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 3,
+              "advanced": 51,
+              "blocked": 577,
+              "cancelled": 21
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 31,
+              "advanced": 97,
+              "blocked": 784,
+              "cancelled": 398
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 56,
+              "advanced": 227,
+              "blocked": 923,
+              "cancelled": 49
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 90,
+              "advanced": 264,
+              "blocked": 695,
+              "cancelled": 0
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-6246a38a",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "metrics": {
+        "full": {
+          "mean": 116.35930072981614,
+          "p05": 41.584,
+          "p95": 225.8596,
+          "sd": 54.87115719773218,
+          "sat": 0.08585206751498875,
+          "hue": 202.91887026659333
+        },
+        "sky": {
+          "mean": 141.44350022120253,
+          "p05": 46.7966,
+          "p95": 226.647,
+          "sd": 73.05383472898737,
+          "sat": 0.0342697720875493,
+          "hue": 167.6696447844331
+        },
+        "ground": {
+          "mean": 107.32275574461067,
+          "p05": 73.08539999999999,
+          "p95": 125.02119999999998,
+          "sd": 16.304232543521945,
+          "sat": 0.14766060776977286,
+          "hue": 212.03957427672015
+        },
+        "band": {
+          "mean": 103.15421626930438,
+          "p05": 30.2258,
+          "p95": 141.298,
+          "sd": 36.45552027647842,
+          "sat": 0.12283643842506985,
+          "hue": 208.14061432865572
+        },
+        "horizon": {
+          "mean": 102.63317689393898,
+          "p05": 27.0814,
+          "p95": 226.647,
+          "sd": 70.8492986266389,
+          "sat": 0.05153955298443794,
+          "hue": 180.1784576163161
+        },
+        "groundContrast": 51.935799999999986,
+        "maxRowStep": 1.6394512500001355,
+        "warmth": 0.8771635615749301,
+        "redShare": 0,
+        "mudShare": 0.0003935185185185185,
+        "satP95": 0.19230769230769232,
+        "chromaSd": 1.3568856139688008
+      },
+      "passed": false
+    },
+    {
+      "name": "tundra-off-12",
+      "requestedPose": {
+        "id": "tundra",
+        "world": "eldara",
+        "x": 151523,
+        "z": -49043,
+        "yaw": 0.6,
+        "pitch": -0.12,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "gates": [
+        {
+          "gate": "full.meanMin",
+          "value": 193.79269425926583,
+          "limit": 25,
+          "passed": true
+        },
+        {
+          "gate": "full.meanMax",
+          "value": 193.79269425926583,
+          "limit": 235,
+          "passed": true
+        }
+      ],
+      "pose": {
+        "id": "tundra",
+        "world": "eldara",
+        "x": 151523,
+        "z": -49043,
+        "yaw": 0.6,
+        "pitch": -0.12,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "preparation": {
+        "groundPreparation": null,
+        "readiness": {
+          "waitedMs": 17886.80000000447,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 5.899999998509884,
+            "capacity": 49,
+            "focusChunk": "1183:383|1183:383",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 57,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 1,
+              "baseTerrainKind": "azgaar-macro-v2"
+            },
+            "origin": {
+              "x": 151424,
+              "z": -49024
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true,
+              "samplingRing": null,
+              "shadingRing": null
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 63,
+                "advanced": 63,
+                "blocked": 566,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 92,
+                "advanced": 96,
+                "blocked": 0,
+                "cancelled": 157
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 3,
+                "advanced": 8,
+                "blocked": 118,
+                "cancelled": 16
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 79,
+                "blocked": 1288,
+                "cancelled": 23
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 108,
+                "advanced": 185,
+                "blocked": 1170,
+                "cancelled": 1036
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 177,
+                "advanced": 519,
+                "blocked": 4477,
+                "cancelled": 98
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 259,
+                "advanced": 948,
+                "blocked": 1920,
+                "cancelled": 81
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "actualBiomeId": 10,
+      "habitat": {
+        "tileId": 10,
+        "profileKey": "tundra",
+        "patchCoverage": 0,
+        "patchEdge": 0,
+        "elevationWeight": 1
+      },
+      "cameraHeight": 592.8690915692089,
+      "storm": {
+        "storm": 0,
+        "cloud": 0,
+        "wind": 0,
+        "precip": 0,
+        "rain": 0,
+        "snow": 0,
+        "lightning": 0,
+        "snowShare": 1,
+        "gain": 1
+      },
+      "snowCover": 0,
+      "stormSnowCoverUniform": 0,
+      "sky": {
+        "fogColor": "#a2b8c9",
+        "groundLightColor": "#6a6b52",
+        "mist": 0.1615765401019287,
+        "nightness": 0
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 5.899999998509884,
+          "capacity": 49,
+          "focusChunk": "1183:383|1183:383",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 57,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 1,
+            "baseTerrainKind": "azgaar-macro-v2"
+          },
+          "origin": {
+            "x": 151424,
+            "z": -49024
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true,
+            "samplingRing": null,
+            "shadingRing": null
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 63,
+              "advanced": 63,
+              "blocked": 566,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 92,
+              "advanced": 96,
+              "blocked": 0,
+              "cancelled": 157
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 3,
+              "advanced": 8,
+              "blocked": 118,
+              "cancelled": 16
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 4,
+              "advanced": 79,
+              "blocked": 1288,
+              "cancelled": 23
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 108,
+              "advanced": 185,
+              "blocked": 1170,
+              "cancelled": 1036
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 177,
+              "advanced": 519,
+              "blocked": 4477,
+              "cancelled": 98
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 259,
+              "advanced": 948,
+              "blocked": 1920,
+              "cancelled": 81
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-6246a38a",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "metrics": {
+        "full": {
+          "mean": 193.79269425926583,
+          "p05": 142.6012,
+          "p95": 216.28079999999997,
+          "sd": 21.847270938401365,
+          "sat": 0.11031735194804548,
+          "hue": 207.53548650725338
+        },
+        "sky": {
+          "mean": 185.90219949586898,
+          "p05": 182.2184,
+          "p95": 194.5542,
+          "sd": 8.793156228246751,
+          "sat": 0.25455869019492905,
+          "hue": 207.92481477494516
+        },
+        "ground": {
+          "mean": 203.91286496147995,
+          "p05": 192.29799999999997,
+          "p95": 215.2808,
+          "sd": 7.072742590881729,
+          "sat": 0.030046846793847205,
+          "hue": 206.8794572322563
+        },
+        "band": {
+          "mean": 198.15712041669227,
+          "p05": 122.22579999999999,
+          "p95": 218.7874,
+          "sd": 26.675555742128395,
+          "sat": 0.028541253702346368,
+          "hue": 204.36791501378332
+        },
+        "horizon": {
+          "mean": 173.02322795455083,
+          "p05": 103.8768,
+          "p95": 211.31119999999999,
+          "sd": 39.00407342707222,
+          "sat": 0.093328898321098,
+          "hue": 206.1254266782678
+        },
+        "groundContrast": 22.982800000000026,
+        "maxRowStep": 0.5362829166668632,
+        "warmth": 0.9714587462976536,
+        "redShare": 0,
+        "mudShare": 0.00013117283950617284,
+        "satP95": 0.2777777777777778,
+        "chromaSd": 1.4910572507530266
+      },
+      "passed": true
+    },
+    {
+      "name": "glacier-off-12",
+      "requestedPose": {
+        "id": "glacier",
+        "world": "eldara",
+        "x": -282505,
+        "z": -389567,
+        "yaw": 1.2,
+        "pitch": -0.25,
+        "mode": "fly",
+        "heightAboveGround": 25
+      },
+      "gates": [
+        {
+          "gate": "full.meanMin",
+          "value": 199.28635641201114,
+          "limit": 25,
+          "passed": true
+        },
+        {
+          "gate": "full.meanMax",
+          "value": 199.28635641201114,
+          "limit": 235,
+          "passed": true
+        }
+      ],
+      "pose": {
+        "id": "glacier",
+        "world": "eldara",
+        "x": -282505,
+        "z": -389567,
+        "yaw": 1.2,
+        "pitch": -0.25,
+        "mode": "fly",
+        "heightAboveGround": 25
+      },
+      "preparation": {
+        "groundPreparation": {
+          "waitedMs": 20407.89999999851,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 23.5,
+            "capacity": 49,
+            "focusChunk": "-2208:3043|-2208:3043",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 1,
+              "baseTerrainKind": "azgaar-macro-v2"
+            },
+            "origin": {
+              "x": -282496,
+              "z": -389504
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true,
+              "samplingRing": null,
+              "shadingRing": null
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 88,
+                "advanced": 88,
+                "blocked": 1088,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 153,
+                "advanced": 157,
+                "blocked": 0,
+                "cancelled": 202
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 10,
+                "blocked": 202,
+                "cancelled": 20
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 5,
+                "advanced": 106,
+                "blocked": 2287,
+                "cancelled": 27
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 174,
+                "advanced": 260,
+                "blocked": 1634,
+                "cancelled": 1445
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 298,
+                "advanced": 758,
+                "blocked": 8261,
+                "cancelled": 98
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 428,
+                "advanced": 1728,
+                "blocked": 4580,
+                "cancelled": 81
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        },
+        "readiness": {
+          "waitedMs": 6409.70000000298,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 23.5,
+            "capacity": 49,
+            "focusChunk": "-2208:3043|-2208:3043",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 1,
+              "baseTerrainKind": "azgaar-macro-v2"
+            },
+            "origin": {
+              "x": -282496,
+              "z": -389504
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true,
+              "samplingRing": null,
+              "shadingRing": null
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 88,
+                "advanced": 88,
+                "blocked": 1088,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 153,
+                "advanced": 157,
+                "blocked": 0,
+                "cancelled": 202
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 4,
+                "advanced": 10,
+                "blocked": 202,
+                "cancelled": 20
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 5,
+                "advanced": 106,
+                "blocked": 2287,
+                "cancelled": 27
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 174,
+                "advanced": 260,
+                "blocked": 1634,
+                "cancelled": 1445
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 298,
+                "advanced": 758,
+                "blocked": 8261,
+                "cancelled": 98
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 428,
+                "advanced": 1728,
+                "blocked": 4580,
+                "cancelled": 81
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "actualBiomeId": 10,
+      "habitat": {
+        "tileId": 10,
+        "profileKey": "tundra",
+        "patchCoverage": 0,
+        "patchEdge": 0,
+        "elevationWeight": 0
+      },
+      "cameraHeight": 1259.3509256208902,
+      "storm": {
+        "storm": 0,
+        "cloud": 0,
+        "wind": 0,
+        "precip": 0,
+        "rain": 0,
+        "snow": 0,
+        "lightning": 0,
+        "snowShare": 1,
+        "gain": 1
+      },
+      "snowCover": 0,
+      "stormSnowCoverUniform": 0,
+      "sky": {
+        "fogColor": "#a3bacc",
+        "groundLightColor": "#696b53",
+        "mist": 0,
+        "nightness": 0
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 23.5,
+          "capacity": 49,
+          "focusChunk": "-2208:3043|-2208:3043",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 1,
+            "baseTerrainKind": "azgaar-macro-v2"
+          },
+          "origin": {
+            "x": -282496,
+            "z": -389504
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true,
+            "samplingRing": null,
+            "shadingRing": null
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 88,
+              "advanced": 88,
+              "blocked": 1088,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 153,
+              "advanced": 157,
+              "blocked": 0,
+              "cancelled": 202
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 4,
+              "advanced": 10,
+              "blocked": 202,
+              "cancelled": 20
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 5,
+              "advanced": 106,
+              "blocked": 2287,
+              "cancelled": 27
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 174,
+              "advanced": 260,
+              "blocked": 1634,
+              "cancelled": 1445
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 298,
+              "advanced": 758,
+              "blocked": 8261,
+              "cancelled": 98
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 428,
+              "advanced": 1728,
+              "blocked": 4580,
+              "cancelled": 81
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-6246a38a",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "metrics": {
+        "full": {
+          "mean": 199.28635641201114,
+          "p05": 139.08939999999998,
+          "p95": 219.5066,
+          "sd": 24.852344759540298,
+          "sat": 0.07432941130536878,
+          "hue": 206.88040005222774
+        },
+        "sky": {
+          "mean": 186.39295690329502,
+          "p05": 112.4516,
+          "p95": 213.945,
+          "sd": 27.877578401246126,
+          "sat": 0.1708680295437781,
+          "hue": 208.0749132873501
+        },
+        "ground": {
+          "mean": 205.85089240737219,
+          "p05": 140.945,
+          "p95": 219.647,
+          "sd": 23.671670153826827,
+          "sat": 0.027745044161268623,
+          "hue": 203.62328110009594
+        },
+        "band": {
+          "mean": 209.59173731094612,
+          "p05": 194.0854,
+          "p95": 220.57479999999998,
+          "sd": 12.863128501767706,
+          "sat": 0.02779863569834315,
+          "hue": 203.55650325399438
+        },
+        "horizon": {
+          "mean": 199.05186856060993,
+          "p05": 172.38339999999997,
+          "p95": 220.85959999999997,
+          "sd": 18.005305111938675,
+          "sat": 0.04782544741813208,
+          "hue": 205.38479450459886
+        },
+        "groundContrast": 78.702,
+        "maxRowStep": 2.2173158333330605,
+        "warmth": 0.9722013643016568,
+        "redShare": 0,
+        "mudShare": 0.00033179012345679014,
+        "satP95": 0.271889400921659,
+        "chromaSd": 1.7044329379577972
+      },
+      "passed": true
+    },
+    {
+      "name": "snow-eye-off-12",
+      "requestedPose": {
+        "id": "snow-eye",
+        "world": "eldara",
+        "x": -3291493,
+        "z": -210747,
+        "yaw": 2,
+        "pitch": 0.05,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "gates": [
+        {
+          "gate": "full.meanMin",
+          "value": 196.91906102625876,
+          "limit": 25,
+          "passed": true
+        },
+        {
+          "gate": "full.meanMax",
+          "value": 196.91906102625876,
+          "limit": 235,
+          "passed": true
+        }
+      ],
+      "pose": {
+        "id": "snow-eye",
+        "world": "eldara",
+        "x": -3291493,
+        "z": -210747,
+        "yaw": 2,
+        "pitch": 0.05,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "preparation": {
+        "groundPreparation": null,
+        "readiness": {
+          "waitedMs": 7376.60000000149,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 81,
+            "capacity": 49,
+            "focusChunk": "-25715:1646|-25715:1646",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 1,
+              "baseTerrainKind": "azgaar-macro-v2"
+            },
+            "origin": {
+              "x": -3291392,
+              "z": -210816
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true,
+              "samplingRing": null,
+              "shadingRing": null
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 113,
+                "advanced": 113,
+                "blocked": 1660,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 187,
+                "advanced": 194,
+                "blocked": 0,
+                "cancelled": 252
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 6,
+                "advanced": 14,
+                "blocked": 241,
+                "cancelled": 22
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 6,
+                "advanced": 108,
+                "blocked": 2375,
+                "cancelled": 29
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 183,
+                "advanced": 277,
+                "blocked": 2297,
+                "cancelled": 1847
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 419,
+                "advanced": 927,
+                "blocked": 12087,
+                "cancelled": 98
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 597,
+                "advanced": 1942,
+                "blocked": 16151,
+                "cancelled": 81
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "actualBiomeId": 11,
+      "habitat": {
+        "tileId": 11,
+        "profileKey": null,
+        "patchCoverage": 0,
+        "patchEdge": 0,
+        "elevationWeight": 0
+      },
+      "cameraHeight": 1031.3379694997286,
+      "storm": {
+        "storm": 0,
+        "cloud": 0,
+        "wind": 0,
+        "precip": 0,
+        "rain": 0,
+        "snow": 0,
+        "lightning": 0,
+        "snowShare": 1,
+        "gain": 1
+      },
+      "snowCover": 0,
+      "stormSnowCoverUniform": 0,
+      "sky": {
+        "fogColor": "#a2b9cd",
+        "groundLightColor": "#686b54",
+        "mist": 0,
+        "nightness": 0
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 81,
+          "capacity": 49,
+          "focusChunk": "-25715:1646|-25715:1646",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 1,
+            "baseTerrainKind": "azgaar-macro-v2"
+          },
+          "origin": {
+            "x": -3291392,
+            "z": -210816
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true,
+            "samplingRing": null,
+            "shadingRing": null
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 113,
+              "advanced": 113,
+              "blocked": 1660,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 187,
+              "advanced": 194,
+              "blocked": 0,
+              "cancelled": 252
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 6,
+              "advanced": 14,
+              "blocked": 241,
+              "cancelled": 22
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 6,
+              "advanced": 108,
+              "blocked": 2375,
+              "cancelled": 29
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 183,
+              "advanced": 277,
+              "blocked": 2297,
+              "cancelled": 1847
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 419,
+              "advanced": 927,
+              "blocked": 12087,
+              "cancelled": 98
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 597,
+              "advanced": 1942,
+              "blocked": 16151,
+              "cancelled": 81
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-6246a38a",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "metrics": {
+        "full": {
+          "mean": 196.91906102625876,
+          "p05": 168.7834,
+          "p95": 220.78739999999996,
+          "sd": 19.891611461914803,
+          "sat": 0.11707080318001278,
+          "hue": 206.89124073275025
+        },
+        "sky": {
+          "mean": 193.70263084877746,
+          "p05": 183.0058,
+          "p95": 211.87679999999997,
+          "sd": 9.309009816910466,
+          "sat": 0.20511712875085036,
+          "hue": 208.5042163249351
+        },
+        "ground": {
+          "mean": 197.70435135420976,
+          "p05": 171.0934,
+          "p95": 218.647,
+          "sd": 16.12423568188907,
+          "sat": 0.07025885127396365,
+          "hue": 203.83188204562543
+        },
+        "band": {
+          "mean": 205.499259135816,
+          "p05": 144.9634,
+          "p95": 226.1404,
+          "sd": 24.39405053293591,
+          "sat": 0.03601436898543262,
+          "hue": 201.74641810318326
+        },
+        "horizon": {
+          "mean": 189.12731363636547,
+          "p05": 111.5198,
+          "p95": 218.7874,
+          "sd": 30.971178625620272,
+          "sat": 0.14494932571794136,
+          "hue": 208.16883315102643
+        },
+        "groundContrast": 47.55359999999999,
+        "maxRowStep": 1.399159583333443,
+        "warmth": 0.9639856310145674,
+        "redShare": 0,
+        "mudShare": 0,
+        "satP95": 0.2777777777777778,
+        "chromaSd": 12.248035282553909
+      },
+      "passed": true
+    },
+    {
+      "name": "tundra-snow-12",
+      "requestedPose": {
+        "id": "tundra",
+        "world": "eldara",
+        "x": 151523,
+        "z": -49043,
+        "yaw": 0.6,
+        "pitch": -0.12,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "gates": [
+        {
+          "gate": "full.meanMin",
+          "value": 208.9639338350606,
+          "limit": 25,
+          "passed": true
+        },
+        {
+          "gate": "full.meanMax",
+          "value": 208.9639338350606,
+          "limit": 235,
+          "passed": true
+        },
+        {
+          "gate": "groundContrastMin",
+          "value": 33.20860000000002,
+          "limit": 30,
+          "passed": true
+        },
+        {
+          "gate": "full.sdMin",
+          "value": 15.93093569154992,
+          "limit": 12,
+          "passed": true
+        }
+      ],
+      "pose": {
+        "id": "tundra",
+        "world": "eldara",
+        "x": 151523,
+        "z": -49043,
+        "yaw": 0.6,
+        "pitch": -0.12,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "preparation": {
+        "groundPreparation": null,
+        "readiness": {
+          "waitedMs": 17762.20000000298,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 81,
+            "capacity": 49,
+            "focusChunk": "1183:383|1183:383",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 1,
+              "baseTerrainKind": "azgaar-macro-v2"
+            },
+            "origin": {
+              "x": 151424,
+              "z": -49152
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true,
+              "samplingRing": null,
+              "shadingRing": null
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 138,
+                "advanced": 138,
+                "blocked": 1682,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 190,
+                "advanced": 197,
+                "blocked": 0,
+                "cancelled": 258
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 10,
+                "advanced": 19,
+                "blocked": 241,
+                "cancelled": 25
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 9,
+                "advanced": 137,
+                "blocked": 3300,
+                "cancelled": 33
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 194,
+                "advanced": 297,
+                "blocked": 2670,
+                "cancelled": 1852
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 419,
+                "advanced": 927,
+                "blocked": 12087,
+                "cancelled": 98
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 597,
+                "advanced": 1942,
+                "blocked": 16151,
+                "cancelled": 81
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "weatherWarmup": {
+        "simulationSeconds": 8,
+        "wetness": 0,
+        "wallMs": 7997
+      },
+      "actualBiomeId": 10,
+      "habitat": {
+        "tileId": 10,
+        "profileKey": "tundra",
+        "patchCoverage": 0,
+        "patchEdge": 0,
+        "elevationWeight": 1
+      },
+      "cameraHeight": 592.8690915692089,
+      "storm": {
+        "storm": 1,
+        "cloud": 1,
+        "wind": 1,
+        "precip": 1,
+        "rain": 0,
+        "snow": 1,
+        "lightning": 0,
+        "snowShare": 1,
+        "gain": 1
+      },
+      "snowCover": 1,
+      "stormSnowCoverUniform": 1,
+      "sky": {
+        "fogColor": "#d6dde5",
+        "groundLightColor": "#646561",
+        "mist": 0.4615765401019287,
+        "nightness": 0
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 81,
+          "capacity": 49,
+          "focusChunk": "1183:383|1183:383",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 1,
+            "baseTerrainKind": "azgaar-macro-v2"
+          },
+          "origin": {
+            "x": 151424,
+            "z": -49152
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true,
+            "samplingRing": null,
+            "shadingRing": null
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 138,
+              "advanced": 138,
+              "blocked": 1682,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 190,
+              "advanced": 197,
+              "blocked": 0,
+              "cancelled": 258
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 10,
+              "advanced": 19,
+              "blocked": 241,
+              "cancelled": 25
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 9,
+              "advanced": 137,
+              "blocked": 3300,
+              "cancelled": 33
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 194,
+              "advanced": 297,
+              "blocked": 2670,
+              "cancelled": 1852
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 419,
+              "advanced": 927,
+              "blocked": 12087,
+              "cancelled": 98
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 597,
+              "advanced": 1942,
+              "blocked": 16151,
+              "cancelled": 81
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-6246a38a",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "metrics": {
+        "full": {
+          "mean": 208.9639338350606,
+          "p05": 180.4384,
+          "p95": 225.9318,
+          "sd": 15.93093569154992,
+          "sat": 0.02115767595151759,
+          "hue": 210.0921211661439
+        },
+        "sky": {
+          "mean": 224.8798614146734,
+          "p05": 222.8596,
+          "p95": 226.647,
+          "sd": 2.5521162075424764,
+          "sat": 0.010326036961597368,
+          "hue": 209.31781392122105
+        },
+        "ground": {
+          "mean": 192.28831185577928,
+          "p05": 175.51059999999998,
+          "p95": 208.7192,
+          "sd": 10.08144777292155,
+          "sat": 0.034126775025709974,
+          "hue": 210.51794045687575
+        },
+        "band": {
+          "mean": 206.17408584892326,
+          "p05": 191.65099999999998,
+          "p95": 217.9318,
+          "sd": 7.8985915644165585,
+          "sat": 0.023469511715555176,
+          "hue": 209.97144475385846
+        },
+        "horizon": {
+          "mean": 218.63903482955237,
+          "p05": 211.5066,
+          "p95": 226.85959999999997,
+          "sd": 5.724871653674728,
+          "sat": 0.014182510829058356,
+          "hue": 209.12109552519155
+        },
+        "groundContrast": 33.20860000000002,
+        "maxRowStep": 0.43887458333341556,
+        "warmth": 0.9765304882844448,
+        "redShare": 0,
+        "mudShare": 0,
+        "satP95": 0.043243243243243246,
+        "chromaSd": 0.6986965050092655
+      },
+      "passed": true
+    },
+    {
+      "name": "snow-eye-snow-12",
+      "requestedPose": {
+        "id": "snow-eye",
+        "world": "eldara",
+        "x": -3291493,
+        "z": -210747,
+        "yaw": 2,
+        "pitch": 0.05,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "gates": [
+        {
+          "gate": "full.meanMin",
+          "value": 207.18932332580096,
+          "limit": 25,
+          "passed": true
+        },
+        {
+          "gate": "full.meanMax",
+          "value": 207.18932332580096,
+          "limit": 235,
+          "passed": true
+        },
+        {
+          "gate": "groundContrastMin",
+          "value": 36.2808,
+          "limit": 30,
+          "passed": true
+        }
+      ],
+      "pose": {
+        "id": "snow-eye",
+        "world": "eldara",
+        "x": -3291493,
+        "z": -210747,
+        "yaw": 2,
+        "pitch": 0.05,
+        "mode": "player",
+        "heightAboveGround": 1.7
+      },
+      "preparation": {
+        "groundPreparation": null,
+        "readiness": {
+          "waitedMs": 6413.5,
+          "readyFrames": 60,
+          "ready": true,
+          "terrain": {
+            "resident": 49,
+            "loading": 0,
+            "pendingCommits": 0,
+            "maxQueuedCommitAgeMs": 142.69999999552965,
+            "capacity": 49,
+            "focusChunk": "-25715:1646|-25715:1646",
+            "unavailableReason": null,
+            "cache": {
+              "cacheSize": 81,
+              "cacheLimit": 81,
+              "tileOverrideCount": 0,
+              "heightOverrideCount": 0,
+              "revision": 1,
+              "baseTerrainKind": "azgaar-macro-v2"
+            },
+            "origin": {
+              "x": -3291392,
+              "z": -210688
+            }
+          },
+          "scenery": {
+            "ready": true,
+            "settlements": {
+              "ready": true,
+              "enabled": true,
+              "registry": 0,
+              "skyline": {
+                "ready": true,
+                "expected": 0,
+                "installed": 0,
+                "pending": 0,
+                "failed": 0,
+                "errors": []
+              },
+              "plans": 0,
+              "selection": 0,
+              "sites": 0,
+              "surfaces": 0,
+              "installation": 0,
+              "variants": 0,
+              "compilation": 0,
+              "reveal": 0,
+              "requestedBuildings": 0,
+              "requestedProps": 0,
+              "visibleBuildings": 0,
+              "visibleProps": 0,
+              "residentSites": 0,
+              "errors": []
+            },
+            "towns": {
+              "ready": true
+            },
+            "objects": 0,
+            "farTerrain": {
+              "ready": true,
+              "samplingRing": null,
+              "shadingRing": null
+            },
+            "ambientGround": false,
+            "valleyGround": false,
+            "minimap": false,
+            "queueDepth": 0,
+            "fields": 0,
+            "meadow": 0,
+            "draws": 0,
+            "variants": 0,
+            "waterObstacles": 0,
+            "staged": 0,
+            "queues": {
+              "grass": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 0,
+                "advanced": 0,
+                "blocked": 0,
+                "cancelled": 0
+              },
+              "flower": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 163,
+                "advanced": 163,
+                "blocked": 1682,
+                "cancelled": 0
+              },
+              "tree": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 197,
+                "advanced": 207,
+                "blocked": 0,
+                "cancelled": 261
+              },
+              "rock": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 15,
+                "advanced": 25,
+                "blocked": 241,
+                "cancelled": 27
+              },
+              "bush": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 12,
+                "advanced": 141,
+                "blocked": 3317,
+                "cancelled": 38
+              },
+              "detail": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 202,
+                "advanced": 313,
+                "blocked": 2999,
+                "cancelled": 1857
+              },
+              "treeManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 419,
+                "advanced": 927,
+                "blocked": 12087,
+                "cancelled": 98
+              },
+              "rockManifest": {
+                "depth": 0,
+                "oldestAgeMs": 0,
+                "completed": 597,
+                "advanced": 1942,
+                "blocked": 16151,
+                "cancelled": 81
+              }
+            },
+            "errors": [],
+            "blockedJobs": [],
+            "materials": 0
+          },
+          "collision": true,
+          "construction": true
+        }
+      },
+      "weatherWarmup": {
+        "simulationSeconds": 8.000099999999975,
+        "wetness": 0,
+        "wallMs": 7997.69999999553
+      },
+      "actualBiomeId": 11,
+      "habitat": {
+        "tileId": 11,
+        "profileKey": null,
+        "patchCoverage": 0,
+        "patchEdge": 0,
+        "elevationWeight": 0
+      },
+      "cameraHeight": 1031.3379694997286,
+      "storm": {
+        "storm": 1,
+        "cloud": 1,
+        "wind": 1,
+        "precip": 1,
+        "rain": 0,
+        "snow": 1,
+        "lightning": 0,
+        "snowShare": 1,
+        "gain": 1
+      },
+      "snowCover": 1,
+      "stormSnowCoverUniform": 1,
+      "sky": {
+        "fogColor": "#d6dde5",
+        "groundLightColor": "#636461",
+        "mist": 0.3,
+        "nightness": 0
+      },
+      "readiness": {
+        "ready": true,
+        "terrain": {
+          "resident": 49,
+          "loading": 0,
+          "pendingCommits": 0,
+          "maxQueuedCommitAgeMs": 142.69999999552965,
+          "capacity": 49,
+          "focusChunk": "-25715:1646|-25715:1646",
+          "unavailableReason": null,
+          "cache": {
+            "cacheSize": 81,
+            "cacheLimit": 81,
+            "tileOverrideCount": 0,
+            "heightOverrideCount": 0,
+            "revision": 1,
+            "baseTerrainKind": "azgaar-macro-v2"
+          },
+          "origin": {
+            "x": -3291392,
+            "z": -210688
+          }
+        },
+        "scenery": {
+          "ready": true,
+          "settlements": {
+            "ready": true,
+            "enabled": true,
+            "registry": 0,
+            "skyline": {
+              "ready": true,
+              "expected": 0,
+              "installed": 0,
+              "pending": 0,
+              "failed": 0,
+              "errors": []
+            },
+            "plans": 0,
+            "selection": 0,
+            "sites": 0,
+            "surfaces": 0,
+            "installation": 0,
+            "variants": 0,
+            "compilation": 0,
+            "reveal": 0,
+            "requestedBuildings": 0,
+            "requestedProps": 0,
+            "visibleBuildings": 0,
+            "visibleProps": 0,
+            "residentSites": 0,
+            "errors": []
+          },
+          "towns": {
+            "ready": true
+          },
+          "objects": 0,
+          "farTerrain": {
+            "ready": true,
+            "samplingRing": null,
+            "shadingRing": null
+          },
+          "ambientGround": false,
+          "valleyGround": false,
+          "minimap": false,
+          "queueDepth": 0,
+          "fields": 0,
+          "meadow": 0,
+          "draws": 0,
+          "variants": 0,
+          "waterObstacles": 0,
+          "staged": 0,
+          "queues": {
+            "grass": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 0,
+              "advanced": 0,
+              "blocked": 0,
+              "cancelled": 0
+            },
+            "flower": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 163,
+              "advanced": 163,
+              "blocked": 1682,
+              "cancelled": 0
+            },
+            "tree": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 197,
+              "advanced": 207,
+              "blocked": 0,
+              "cancelled": 261
+            },
+            "rock": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 15,
+              "advanced": 25,
+              "blocked": 241,
+              "cancelled": 27
+            },
+            "bush": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 12,
+              "advanced": 141,
+              "blocked": 3317,
+              "cancelled": 38
+            },
+            "detail": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 202,
+              "advanced": 313,
+              "blocked": 2999,
+              "cancelled": 1857
+            },
+            "treeManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 419,
+              "advanced": 927,
+              "blocked": 12087,
+              "cancelled": 98
+            },
+            "rockManifest": {
+              "depth": 0,
+              "oldestAgeMs": 0,
+              "completed": 597,
+              "advanced": 1942,
+              "blocked": 16151,
+              "cancelled": 81
+            }
+          },
+          "errors": [],
+          "blockedJobs": [],
+          "materials": 0
+        },
+        "collision": true,
+        "construction": true
+      },
+      "assetIntegrity": {
+        "ready": true,
+        "expected": true,
+        "prototypeCount": 40,
+        "atlasCount": 40,
+        "batchCount": 40,
+        "runtimeSignature": "tree-impostor-v10-6246a38a",
+        "sources": [
+          "asset"
+        ],
+        "failure": null
+      },
+      "metrics": {
+        "full": {
+          "mean": 207.18932332580096,
+          "p05": 174.4384,
+          "p95": 225.8596,
+          "sd": 18.186063016675483,
+          "sat": 0.021750965624162334,
+          "hue": 209.95622096827924
+        },
+        "sky": {
+          "mean": 224.71210819450604,
+          "p05": 222.8596,
+          "p95": 225.8596,
+          "sd": 2.6557356508856516,
+          "sat": 0.009470461348142402,
+          "hue": 209.38294163611226
+        },
+        "ground": {
+          "mean": 188.02621089126418,
+          "p05": 169.51059999999998,
+          "p95": 205.79139999999998,
+          "sd": 11.31928240508536,
+          "sat": 0.03762020077677691,
+          "hue": 210.38428597728387
+        },
+        "band": {
+          "mean": 204.40003913981073,
+          "p05": 187.57879999999997,
+          "p95": 224.8596,
+          "sd": 9.970524858881541,
+          "sat": 0.023508228024140963,
+          "hue": 209.68164875602577
+        },
+        "horizon": {
+          "mean": 220.15946636365368,
+          "p05": 208.7192,
+          "p95": 226.85959999999997,
+          "sd": 7.25520298705151,
+          "sat": 0.012398279345741295,
+          "hue": 208.66041896361628
+        },
+        "groundContrast": 36.2808,
+        "maxRowStep": 0.46882291666682363,
+        "warmth": 0.976491771975859,
+        "redShare": 0,
+        "mudShare": 0,
+        "satP95": 0.05102040816326531,
+        "chromaSd": 0.9754080937826257
+      },
+      "passed": true
+    }
+  ],
+  "source": {
+    "sourceSha": "b0f4f2df90898a649c10ae335d9a83a9bbff379d",
+    "dirtyFiles": []
+  },
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "sourceAfterCapture": {
+    "sourceSha": "b0f4f2df90898a649c10ae335d9a83a9bbff379d",
+    "dirtyFiles": []
+  },
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "finishedAt": "2026-11-24T23:54:49.096Z",
+  "passed": false
+}
