@@ -9,10 +9,10 @@ from ..peoples.contracts import CivicIdentity
 from ..peoples.culture import environment, infrastructure
 from ..peoples.population import established
 from ..world.model import WorldModel
-from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, SettlementState, Society
 from .climate import for_month
-from .finance import HouseholdFinances
+from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, SettlementState, Society
 from .economy.contracts import FoodBalance, SettlementEconomy, Trade
+from .finance import HouseholdFinances
 from .economy.roads import initial_roads
 from .engine import build_settlements
 from .people.generate import initial_cast

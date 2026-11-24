@@ -41,9 +41,9 @@ def baseline(households: int, cfg: dict) -> HouseholdFinances:
     if not cfg.get("enabled", False):
         return HouseholdFinances()
     sizes = _sizes(households, cfg)
-    tiers = [FinanceTier(name=name, households=count,
-                         savings=round(count * item["initialSavings"], 2))
-             for name, item in cfg["tiers"].items() for count in [sizes[name]]]
+    tiers = [FinanceTier(name=name, households=sizes[name],
+                         savings=round(sizes[name] * item["initialSavings"], 2))
+             for name, item in cfg["tiers"].items()]
     return HouseholdFinances(tiers=tiers)
 
 
@@ -54,8 +54,7 @@ def month(previous: HouseholdFinances, *, households: int, population: int, inco
         return previous
     counts = _sizes(households, cfg)
     old = {tier.name: tier for tier in previous.tiers}
-    weights = {name: count * item["wageWeight"] for name, item in cfg["tiers"].items()
-               for count in [counts[name]]}
+    weights = {name: counts[name] * item["wageWeight"] for name, item in cfg["tiers"].items()}
     weight_total = sum(weights.values())
     full_food = population * ration_multiplier * rations_per_person_day * days
     full_food_cost = full_food * ration_price * cfg["copperPerTradeValue"]
