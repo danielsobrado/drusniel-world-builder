@@ -1,6 +1,7 @@
 import { hash32 } from '../stylized/scatterMath.js';
 import { resolvePlaceIdentity } from '../../worldIdentity/PlaceIdentityResolver.js';
 import { resolveSceneRecipe } from '../../worldIdentity/SceneRecipeResolver.js';
+import { namedResidents } from './NamedResidents.js';
 
 /**
  * Stable cosmetic representatives; never increments the authoritative population.
@@ -10,10 +11,19 @@ import { resolveSceneRecipe } from '../../worldIdentity/SceneRecipeResolver.js';
  * Each resident receives a deterministic regional `profession`, `professionTitle`,
  * `role`, `district`, `loreRealm`, `cultureKey`, and `localBranch` from the
  * settlement's `PlaceIdentity` and `SceneRecipe`.
+ *
+ * With the World Simulator's export for the settlement (`named`, see WorldSimRoster) the
+ * residents are its named people instead, by the same count (NamedResidents).
  */
-export function residentManifest(settlement, { tileSize, worldSeed, settings, population = settlement.population, spots = null }) {
+export function residentManifest(settlement, {
+  tileSize, worldSeed, settings, population = settlement.population, spots = null, named = null,
+}) {
   if (!(population > 0)) return [];
   const count = Math.min(settings.maxPerSettlement, Math.max(1, Math.ceil(Math.log2(1 + population)) * 4 + 2));
+  if (named?.residents?.length) {
+    const centre = { x: (settlement.cellX + 0.5) * tileSize, z: -(settlement.cellZ + 0.5) * tileSize };
+    return namedResidents(settlement, named, { count, spots: spots ?? [], settings, centre });
+  }
   const identity = resolvePlaceIdentity(settlement);
   const recipe = resolveSceneRecipe(identity);
   const professions = recipe.residentProfessions ?? [];

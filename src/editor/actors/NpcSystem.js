@@ -57,7 +57,7 @@ export class NpcSystem {
     const actions = Object.fromEntries(clips.map(clip => [clip.name, mixer.clipAction(clip)]));
     if (idle) actions.idle = mixer.clipAction(idle);
     const entry = { record, model, root, mixer, actions, meshes, lodLevel: 0, current: null,
-      x: record.x, z: record.z, random: createSeededRandom(record.seed), wait: 1,
+      x: record.x, z: record.z, random: createSeededRandom(record.seed), wait: 1, leg: 0, walks: 0,
       definition, target: { x: record.x, z: record.z }, speed: definition.targetHeight * 0.75 };
     this.entries.set(record.id, entry); this.fade(entry, 'idle'); this.place(entry);
     this.onInstalled?.(root);
@@ -67,20 +67,31 @@ export class NpcSystem {
     if (!next || entry.current === next) return;
     next.reset().fadeIn(CLIP_FADE).play(); entry.current?.fadeOut(CLIP_FADE); entry.current = next;
   }
+  /** Dry ground clear of buildings the whole way, sampled at least every three metres. */
+  clearPath(entry, target) {
+    const steps = Math.max(6, Math.ceil(Math.hypot(target.x - entry.x, target.z - entry.z) / 3));
+    for (let step = 0; step <= steps; step++) {
+      const t = step / steps, x = entry.x + (target.x - entry.x) * t, z = entry.z + (target.z - entry.z) * t;
+      const height = this.terrainView.getCanonicalHeight(x, z);
+      if (!Number.isFinite(height) || !this.canStand(x, z)) return false;
+      const water = this.terrainView.getCanonicalWater?.(x, z);
+      if (water?.coverage > 0.5 && water.surfaceHeight > height + 0.2) return false;
+    }
+    return true;
+  }
   pickTarget(entry) {
     const { record, random } = entry;
+    // A named resident's route: every third walk crosses to the next place on it (work, then the square, and back).
+    if (record.route?.length > 1 && entry.walks++ % 3 === 2) {
+      const leg = (entry.leg + 1) % record.route.length, point = record.route[leg];
+      const target = { x: point.x + (random() - 0.5) * 2, z: point.z + (random() - 0.5) * 2 };
+      if (this.clearPath(entry, target)) { entry.leg = leg; return target; }
+    }
+    const centre = record.route?.[entry.leg] ?? record;
     for (let i = 0; i < 16; i++) {
       const angle = random() * Math.PI * 2, radius = Math.sqrt(random()) * record.wander;
-      const target = { x: record.x + Math.cos(angle) * radius, z: record.z + Math.sin(angle) * radius };
-      let dry = true;
-      for (let step = 0; step <= 6; step++) {
-        const t = step / 6, x = entry.x + (target.x - entry.x) * t, z = entry.z + (target.z - entry.z) * t;
-        const height = this.terrainView.getCanonicalHeight(x, z);
-        if (!Number.isFinite(height) || !this.canStand(x, z)) { dry = false; break; }
-        const water = this.terrainView.getCanonicalWater?.(x, z);
-        if (water?.coverage > 0.5 && water.surfaceHeight > height + 0.2) { dry = false; break; }
-      }
-      if (dry) return target;
+      const target = { x: centre.x + Math.cos(angle) * radius, z: centre.z + Math.sin(angle) * radius };
+      if (this.clearPath(entry, target)) return target;
     }
     return { x: entry.x, z: entry.z };
   }

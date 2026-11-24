@@ -1,0 +1,37 @@
+{
+ "schema": "drusniel-world-sim-game-export",
+ "version": 1,
+ "mapId": "eldara-2026",
+ "sourceFingerprint": "sha256:128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a",
+ "scenarioId": "baseline-pilot",
+ "scenarioName": "Pilot baseline",
+ "date": "1212-01-01",
+ "day": 0,
+ "stateChecksum": "cf64bd0ea10478c9",
+ "settlements": [
+  {
+   "settlementId": "settlement:azgaar-burg:60",
+   "sourceId": 60,
+   "name": "Sshanderi",
+   "population": 8560,
+   "residents": 27,
+   "file": "settlements/60.json"
+  },
+  {
+   "settlementId": "settlement:azgaar-burg:113",
+   "sourceId": 113,
+   "name": "Falanenerwin",
+   "population": 6256,
+   "residents": 18,
+   "file": "settlements/113.json"
+  },
+  {
+   "settlementId": "settlement:azgaar-burg:238",
+   "sourceId": 238,
+   "name": "Vhaltha",
+   "population": 15747,
+   "residents": 41,
+   "file": "settlements/238.json"
+  }
+ ]
+}

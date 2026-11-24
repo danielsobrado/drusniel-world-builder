@@ -43,3 +43,8 @@ api:
 
 output:
   directory: data/generated
+
+# The game export (PR9): JSON the game loads on approach to a settlement. Written by
+# POST /api/scenarios/{id}/export/game; override with WS_GAME_EXPORT_DIR.
+gameExport:
+  directory: ../public/world-sim

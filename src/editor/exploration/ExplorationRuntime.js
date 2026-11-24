@@ -1,5 +1,6 @@
 import { PLAYER_MODE_WALK } from '../player/playerConstants.js';
 import { SettlementResidents } from '../actors/SettlementResidents.js';
+import { ResidentNameplate } from '../actors/ResidentNameplate.js';
 import { SerpentSystem } from '../wildlife/SerpentSystem.js';
 import { MobileControls } from '../player/MobileControls.js';
 import { usesMobileProfile } from './MobileProfile.js';
@@ -9,13 +10,18 @@ import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 /** Owns the transplanted exploration systems and their viewport UI. */
 export class ExplorationRuntime {
-  constructor({ config, terrainView, viewModeController, container, sceneLoader = null, onInstalled, invalidateHistory, grass = () => null }) {
+  constructor({ config, terrainView, viewModeController, container, sceneLoader = null, onInstalled, invalidateHistory, grass = () => null,
+    hud = null }) {
     // `grass()` is the meadow field, read each frame: it is rebuilt with the world.
     Object.assign(this, { config, terrainView, viewModeController, grass });
     this.lastTimestamp = null; this.mobile = null;
     this.residents = new SettlementResidents({ scene: terrainView.scene, terrainView,
       roster: config.character.roster, settings: config.exploration.residents,
-      baseUrl: import.meta.env.BASE_URL, loader: sceneLoader, onInstalled });
+      baseUrl: import.meta.env.BASE_URL, loader: sceneLoader, onInstalled,
+      worldSim: config.exploration.worldSim.enabled ? config.exploration.worldSim : null });
+    // Named people get a nameplate in the walking HUD when the player stands beside them.
+    this.nameplate = hud && config.exploration.worldSim.enabled
+      ? new ResidentNameplate({ parent: hud.element, settings: config.exploration.worldSim }) : null;
     this.serpents = new SerpentSystem({ scene: terrainView.scene, terrainView, settings: config.exploration.serpents, onInstalled });
     this.tour = new ScenicTour({ terrainView, viewModeController, settings: config.exploration.tour, container, invalidateHistory });
     viewModeController.onBeforeModeChange = () => this.tour.stop();
@@ -46,6 +52,7 @@ export class ExplorationRuntime {
   update(timestamp, focus, playerBody, budget = null) {
     const camera = this.viewModeController.camera;
     this.residents.update(this.deltaSeconds, camera, focus, timestamp, budget);
+    this.nameplate?.update(this.residents.npcs.entries.values(), focus);
     this.serpents.update(this.deltaSeconds, camera, focus, playerBody, timestamp);
     const grass = this.grass();
     PerfCounters.set('creatureGrassPresses', grass ? pressGrassUnderCreatures({
@@ -56,7 +63,7 @@ export class ExplorationRuntime {
   }
   shiftWorld(x, z) { this.residents.shiftWorld(); this.serpents.shiftWorld(); this.tour.shiftWorld(x, z); }
   dispose() {
-    window.removeEventListener('resize', this.onResize); this.mobile?.destroy(); this.mobile = null;
+    window.removeEventListener('resize', this.onResize); this.mobile?.destroy(); this.mobile = null; this.nameplate?.dispose();
     this.viewModeController.playerController.setMobileInput({ enabled: false });
     this.tour.dispose(); this.residents.dispose(); this.serpents.dispose();
     this.viewModeController.onBeforeModeChange = null;

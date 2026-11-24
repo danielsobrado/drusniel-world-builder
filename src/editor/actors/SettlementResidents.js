@@ -1,15 +1,21 @@
 import { ResidentAssets } from './ResidentAssets.js';
 import { NpcSystem } from './NpcSystem.js';
 import { residentManifest, nearbySettlements } from './ResidentManifest.js';
+import { WorldSimRoster } from './WorldSimRoster.js';
 import { rectContains } from '../world/settlements/SettlementGeometry.js';
 import { gatheringSpots } from '../world/settlements/SettlementGathering.js';
 import { settlementPreparationFor } from '../world/settlements/SettlementPreparation.js';
 import { SettlementSamplingPreparation } from '../world/settlements/SettlementSamplingPreparation.js';
 
-/** Cosmetic residents project existing burg populations, without authoring entities. */
+/**
+ * Residents project existing burg populations, without authoring entities: cosmetic ones,
+ * or the World Simulator's named people where its export covers the settlement.
+ */
 export class SettlementResidents {
-  constructor({ scene, terrainView, roster, settings, baseUrl, loader = null, onInstalled, populationProvider = null }) {
+  constructor({ scene, terrainView, roster, settings, baseUrl, loader = null, onInstalled, populationProvider = null,
+    worldSim = null, people = null }) {
     Object.assign(this, { terrainView, settings, populationProvider });
+    this.people = people ?? (worldSim ? new WorldSimRoster({ baseUrl, settings: worldSim }) : null);
     const assets = new ResidentAssets({ renderer: terrainView.renderer, roster, baseUrl, loader });
     this.npcs = new NpcSystem({ scene, terrainView, assets, onInstalled,
       canStand: (x, z) => this.canStand(x, z) });
@@ -30,19 +36,22 @@ export class SettlementResidents {
   }
   refresh(focus) {
     const field = this.generator?.ensureSettlementField?.();
-    const records = [], currentKeys = new Set();
+    const records = [], currentKeys = new Set(), nearby = new Set();
     for (const settlement of nearbySettlements(field, focus, this.settings.radiusMeters)) {
-      const population = this.populationProvider?.(settlement.id) ?? settlement.population;
-      const key = `${settlement.id}:${population}`;
+      nearby.add(settlement.id);
+      const named = this.people?.settlement(settlement.id) ?? null;
+      const population = named?.population ?? this.populationProvider?.(settlement.id) ?? settlement.population;
+      const key = `${settlement.id}:${population}:${named?.stateChecksum ?? 'cosmetic'}`;
       if (!this.manifests.has(key)) {
         const entry = field.findById?.(settlement.id) ?? field.entries.find(candidate => candidate.settlement === settlement);
         const spots = entry ? gatheringSpots(settlement, field.ensurePlan(entry).plan, field.tileSize) : null;
         const manifest = residentManifest(settlement, { tileSize: this.terrainView.worldStore.tileSize,
-          worldSeed: this.generator.worldSeed ?? this.generator.seed ?? 1, settings: this.settings, population, spots });
+          worldSeed: this.generator.worldSeed ?? this.generator.seed ?? 1, settings: this.settings, population, spots, named });
         for (const record of manifest) {
           if (this.canStand(record.x, record.z)) continue;
           record.x = (settlement.cellX + 0.5) * field.tileSize;
           record.z = -(settlement.cellZ + 0.5) * field.tileSize;
+          if (record.route) record.route[0] = { x: record.x, z: record.z };
         }
         this.manifests.set(key, manifest);
       }
@@ -52,6 +61,7 @@ export class SettlementResidents {
     }
     // The cache follows residency too; travelling the whole world cannot grow it.
     for (const key of this.manifests.keys()) if (!currentKeys.has(key)) this.manifests.delete(key);
+    this.people?.retain(nearby);
     this.npcs.setManifest(records.slice(0, this.settings.maxResidents));
   }
   prepareSampling(focus, shouldYield) {

@@ -1,0 +1,977 @@
+{
+ "schema": "drusniel-world-sim-game-export",
+ "version": 1,
+ "mapId": "eldara-2026",
+ "sourceFingerprint": "sha256:128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a",
+ "scenarioId": "baseline-pilot",
+ "scenarioName": "Pilot baseline",
+ "date": "1212-01-01",
+ "day": 0,
+ "stateChecksum": "cf64bd0ea10478c9",
+ "settlementId": "settlement:azgaar-burg:238",
+ "sourceId": 238,
+ "name": "Vhaltha",
+ "population": 15747,
+ "residents": [
+  {
+   "id": "npc:238:1",
+   "name": "Lidheas",
+   "family": "Faladaess",
+   "sex": "female",
+   "age": 31,
+   "role": "worker",
+   "profession": "innkeeper",
+   "tier": "standard",
+   "householdId": "household:238:1",
+   "home": "building:238:townhouse:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:tavern:68",
+    "name": "Vhaltha Tavern 68",
+    "kind": "tavern",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Lidheas Faladaess, innkeeper of Vhaltha, born 1180 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:10",
+   "name": "Jaaladald",
+   "family": "Mundilryn",
+   "sex": "female",
+   "age": 42,
+   "role": "worker",
+   "profession": "innkeeper",
+   "tier": "standard",
+   "householdId": "household:238:5",
+   "home": "building:238:cottage:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:tavern:17",
+    "name": "Vhaltha Tavern 17",
+    "kind": "tavern",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Jaaladald Mundilryn, innkeeper of Vhaltha, born 1169 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:11",
+   "name": "Orcaethel",
+   "family": "Mundilryn",
+   "sex": "male",
+   "age": 46,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:238:5",
+   "home": "building:238:cottage:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:workshop-beer:16",
+    "name": "Vhaltha Beer workshop 16",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Orcaethel Mundilryn, artisan of Vhaltha, born 1165 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:14",
+   "name": "Ssheanzob",
+   "family": "Edhetaldr",
+   "sex": "female",
+   "age": 49,
+   "role": "worker",
+   "profession": "innkeeper",
+   "tier": "standard",
+   "householdId": "household:238:6",
+   "home": "building:238:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:238:tavern:32",
+    "name": "Vhaltha Tavern 32",
+    "kind": "tavern",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Ssheanzob Edhetaldr, innkeeper of Vhaltha, born 1162 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:15",
+   "name": "Inferi",
+   "family": "Edhetaldr",
+   "sex": "male",
+   "age": 52,
+   "role": "worker",
+   "profession": "baker",
+   "tier": "standard",
+   "householdId": "household:238:6",
+   "home": "building:238:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:238:bakery:19",
+    "name": "Vhaltha Bakery 19",
+    "kind": "bakery",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Inferi Edhetaldr, baker of Vhaltha, born 1159 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:17",
+   "name": "Chellond",
+   "family": "Zithymath",
+   "sex": "male",
+   "age": 32,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:238:8",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:workshop-beer:40",
+    "name": "Vhaltha Beer workshop 40",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Chellond Zithymath, artisan of Vhaltha, born 1179 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:18",
+   "name": "Chilra",
+   "family": "Zithymath",
+   "sex": "female",
+   "age": 32,
+   "role": "worker",
+   "profession": "watchman",
+   "tier": "standard",
+   "householdId": "household:238:8",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:watch-post:42",
+    "name": "Vhaltha Watch post 42",
+    "kind": "watch-post",
+    "sector": "security"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Chilra Zithymath, watchman of Vhaltha, born 1179 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:19",
+   "name": "Abalmath",
+   "family": "Gnathauls",
+   "sex": "male",
+   "age": 48,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:238:9",
+   "home": "building:238:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:238:farm:204",
+    "name": "Vhaltha Farm 204",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Abalmath Gnathauls, farmhand of Vhaltha, born 1163 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:2",
+   "name": "Darith",
+   "family": "Naughei",
+   "sex": "male",
+   "age": 29,
+   "role": "worker",
+   "profession": "healer",
+   "tier": "standard",
+   "householdId": "household:238:2",
+   "home": "building:238:townhouse:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:healer:291",
+    "name": "Vhaltha Healer 291",
+    "kind": "healer",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Darith Naughei, healer of Vhaltha, born 1182 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:20",
+   "name": "Cyrabraet",
+   "family": "Gnathauls",
+   "sex": "female",
+   "age": 49,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:238:9",
+   "home": "building:238:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:238:market-stall:104",
+    "name": "Vhaltha Market stall 104",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Cyrabraet Gnathauls, trader of Vhaltha, born 1162 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:21",
+   "name": "Marizex",
+   "family": "Gnathauls",
+   "sex": "female",
+   "age": 60,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:238:9",
+   "home": "building:238:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:238:workshop-beer:75",
+    "name": "Vhaltha Beer workshop 75",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Marizex Gnathauls, artisan of Vhaltha, born 1151 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:25",
+   "name": "Marizex",
+   "family": "Sshembena",
+   "sex": "male",
+   "age": 38,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:238:10",
+   "home": "building:238:townhouse:4",
+   "workplace": {
+    "id": "business:azgaar-burg:238:workshop-cloth:65",
+    "name": "Vhaltha Cloth workshop 65",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Marizex Sshembena, artisan of Vhaltha, born 1173 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:26",
+   "name": "Shlidurth",
+   "family": "Sshembena",
+   "sex": "female",
+   "age": 36,
+   "role": "worker",
+   "profession": "tailor",
+   "tier": "standard",
+   "householdId": "household:238:10",
+   "home": "building:238:townhouse:4",
+   "workplace": {
+    "id": "business:azgaar-burg:238:tailor:37",
+    "name": "Vhaltha Tailor 37",
+    "kind": "tailor",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Shlidurth Sshembena, tailor of Vhaltha, born 1175 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:3",
+   "name": "Eraugh",
+   "family": "Naughei",
+   "sex": "female",
+   "age": 24,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:238:2",
+   "home": "building:238:townhouse:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:farm:112",
+    "name": "Vhaltha Farm 112",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Eraugh Naughei, farmhand of Vhaltha, born 1187 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:30",
+   "name": "Karkaajha",
+   "family": "Lidurtha",
+   "sex": "female",
+   "age": 52,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:238:11",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:farm:301",
+    "name": "Vhaltha Farm 301",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Karkaajha Lidurtha, farmhand of Vhaltha, born 1159 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:31",
+   "name": "Jaaladald",
+   "family": "Lidurtha",
+   "sex": "male",
+   "age": 51,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:238:11",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:market-stall:63",
+    "name": "Vhaltha Market stall 63",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Jaaladald Lidurtha, trader of Vhaltha, born 1160 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:32",
+   "name": "Haugar",
+   "family": "Szobethan",
+   "sex": "male",
+   "age": 34,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:238:12",
+   "home": "building:238:cottage:2",
+   "workplace": {
+    "id": "business:azgaar-burg:238:market-stall:306",
+    "name": "Vhaltha Market stall 306",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Haugar Szobethan, trader of Vhaltha, born 1177 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:33",
+   "name": "Hlolwe",
+   "family": "Szobethan",
+   "sex": "female",
+   "age": 28,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:238:12",
+   "home": "building:238:cottage:2",
+   "workplace": {
+    "id": "business:azgaar-burg:238:market-stall:40",
+    "name": "Vhaltha Market stall 40",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Hlolwe Szobethan, trader of Vhaltha, born 1183 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:34",
+   "name": "Drashin",
+   "family": "Zithymath",
+   "sex": "male",
+   "age": 65,
+   "role": "worker",
+   "profession": "innkeeper",
+   "tier": "standard",
+   "householdId": "household:238:13",
+   "home": "building:238:cottage:3",
+   "workplace": {
+    "id": "business:azgaar-burg:238:tavern:40",
+    "name": "Vhaltha Tavern 40",
+    "kind": "tavern",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Drashin Zithymath, innkeeper of Vhaltha, born 1146 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:35",
+   "name": "Clothethe",
+   "family": "Edhetaldr",
+   "sex": "male",
+   "age": 16,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:238:14",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:farm:39",
+    "name": "Vhaltha Farm 39",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Clothethe Edhetaldr, farmhand of Vhaltha, born 1195 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:36",
+   "name": "Baeriustn",
+   "family": "Edhetaldr",
+   "sex": "female",
+   "age": 15,
+   "role": "worker",
+   "profession": "baker",
+   "tier": "standard",
+   "householdId": "household:238:14",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:bakery:62",
+    "name": "Vhaltha Bakery 62",
+    "kind": "bakery",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Baeriustn Edhetaldr, baker of Vhaltha, born 1196 in Olraharit.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:37",
+   "name": "Peluiadil",
+   "family": "Szobeth",
+   "sex": "female",
+   "age": 57,
+   "role": "worker",
+   "profession": "innkeeper",
+   "tier": "standard",
+   "householdId": "household:238:15",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:tavern:33",
+    "name": "Vhaltha Tavern 33",
+    "kind": "tavern",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Peluiadil Szobeth, innkeeper of Vhaltha, born 1154 in Veldrynn.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:38",
+   "name": "Maethetha",
+   "family": "Szobeth",
+   "sex": "male",
+   "age": 59,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:238:15",
+   "home": "building:238:tenement:1",
+   "workplace": {
+    "id": "business:azgaar-burg:238:workshop-beer:71",
+    "name": "Vhaltha Beer workshop 71",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Maethetha Szobeth, artisan of Vhaltha, born 1152 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:39",
+   "name": "Drashin",
+   "family": "Zithymath",
+   "sex": "male",
+   "age": 17,
+   "role": "worker",
+   "profession": "smith",
+   "tier": "standard",
+   "householdId": "household:238:16",
+   "home": "building:238:townhouse:4",
+   "workplace": {
+    "id": "business:azgaar-burg:238:smithy:48",
+    "name": "Vhaltha Smithy 48",
+    "kind": "smithy",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Drashin Zithymath, smith of Vhaltha, born 1194 in Llurtheneadhet.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:40",
+   "name": "Chellond",
+   "family": "Zithymath",
+   "sex": "female",
+   "age": 16,
+   "role": "worker",
+   "profession": "carpenter",
+   "tier": "standard",
+   "householdId": "household:238:16",
+   "home": "building:238:townhouse:4",
+   "workplace": {
+    "id": "business:azgaar-burg:238:carpentry:47",
+    "name": "Vhaltha Carpentry 47",
+    "kind": "carpentry",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Chellond Zithymath, carpenter of Vhaltha, born 1195 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:7",
+   "name": "Buibeth",
+   "family": "Szithdrei",
+   "sex": "female",
+   "age": 33,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:238:3",
+   "home": "building:238:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:238:market-stall:257",
+    "name": "Vhaltha Market stall 257",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Buibeth Szithdrei, trader of Vhaltha, born 1178 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:8",
+   "name": "Karimydry",
+   "family": "Hamethuul",
+   "sex": "male",
+   "age": 42,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:238:4",
+   "home": "building:238:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:238:workshop-cloth:33",
+    "name": "Vhaltha Cloth workshop 33",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Karimydry Hamethuul, artisan of Vhaltha, born 1169 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:9",
+   "name": "Seydras",
+   "family": "Hamethuul",
+   "sex": "female",
+   "age": 44,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:238:4",
+   "home": "building:238:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:238:market-stall:124",
+    "name": "Vhaltha Market stall 124",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Seydras Hamethuul, trader of Vhaltha, born 1167 in Veldrynn.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:27",
+   "name": "Cyrabraet",
+   "family": "Sshembena",
+   "sex": "female",
+   "age": 60,
+   "role": "retired",
+   "profession": null,
+   "tier": "standard",
+   "householdId": "household:238:10",
+   "home": "building:238:townhouse:4",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Cyrabraet Sshembena, of Vhaltha, retired, born 1151 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:41",
+   "name": "Halashe",
+   "family": "Zithymath",
+   "sex": "female",
+   "age": 60,
+   "role": "retired",
+   "profession": null,
+   "tier": "standard",
+   "householdId": "household:238:16",
+   "home": "building:238:townhouse:4",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Halashe Zithymath, of Vhaltha, retired, born 1151 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:16",
+   "name": "Navenzoba",
+   "family": "Mundilryn",
+   "sex": "female",
+   "age": 78,
+   "role": "retired",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:7",
+   "home": "building:238:tenement:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Navenzoba Mundilryn, of Vhaltha, retired, born 1133 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:12",
+   "name": "Kelddrius",
+   "family": "Mundilryn",
+   "sex": "female",
+   "age": 14,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:5",
+   "home": "building:238:cottage:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Kelddrius Mundilryn, of Vhaltha, a young one, born 1197 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:13",
+   "name": "Lidurthyr",
+   "family": "Mundilryn",
+   "sex": "male",
+   "age": 4,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:5",
+   "home": "building:238:cottage:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Lidurthyr Mundilryn, of Vhaltha, a young one, born 1207 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:22",
+   "name": "Karimydry",
+   "family": "Gnathauls",
+   "sex": "female",
+   "age": 9,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:9",
+   "home": "building:238:townhouse:3",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Karimydry Gnathauls, of Vhaltha, a young one, born 1202 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:23",
+   "name": "Lidurthyr",
+   "family": "Gnathauls",
+   "sex": "male",
+   "age": 6,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:9",
+   "home": "building:238:townhouse:3",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Lidurthyr Gnathauls, of Vhaltha, a young one, born 1205 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:24",
+   "name": "Fethaldre",
+   "family": "Gnathauls",
+   "sex": "male",
+   "age": 2,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:9",
+   "home": "building:238:townhouse:3",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Fethaldre Gnathauls, of Vhaltha, a young one, born 1209 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:28",
+   "name": "Haugar",
+   "family": "Sshembena",
+   "sex": "male",
+   "age": 10,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:10",
+   "home": "building:238:townhouse:4",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Haugar Sshembena, of Vhaltha, a young one, born 1201 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:29",
+   "name": "Telddraly",
+   "family": "Sshembena",
+   "sex": "male",
+   "age": 0,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:10",
+   "home": "building:238:townhouse:4",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Telddraly Sshembena, of Vhaltha, a young one, born 1211 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:4",
+   "name": "Draeth",
+   "family": "Naughei",
+   "sex": "female",
+   "age": 7,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:2",
+   "home": "building:238:townhouse:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Draeth Naughei, of Vhaltha, a young one, born 1204 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:5",
+   "name": "Karimydry",
+   "family": "Naughei",
+   "sex": "female",
+   "age": 6,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:2",
+   "home": "building:238:townhouse:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Karimydry Naughei, of Vhaltha, a young one, born 1205 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:238:6",
+   "name": "Olwenth",
+   "family": "Naughei",
+   "sex": "male",
+   "age": 6,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:238:2",
+   "home": "building:238:townhouse:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Olwenth Naughei, of Vhaltha, a young one, born 1205 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  }
+ ]
+}

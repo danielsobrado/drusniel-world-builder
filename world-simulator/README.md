@@ -13,6 +13,7 @@ Persistent named people from the NPC budget: [docs/05-persistent-people-2026-11-
 Life stories, canonical history, relationships and biography context: [docs/06-life-stories-and-history-2026-11-23.md](docs/06-life-stories-and-history-2026-11-23.md).
 Local-LLM biographies and the Dialogue Lab: [docs/07-narration-and-dialogue-2026-11-23.md](docs/07-narration-and-dialogue-2026-11-23.md).
 Interventions, deterministic replay, comparison, causal traces and consistency checks: [docs/08-validation-lab-2026-11-23.md](docs/08-validation-lab-2026-11-23.md).
+The game export, so the game's residents are the named people: [docs/09-game-export-2026-11-24.md](docs/09-game-export-2026-11-24.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 
@@ -148,6 +149,7 @@ Writes (`POST`) must send `application/json`. Full table in
 | `GET · POST /api/scenarios/{id}/interventions…` · `POST …/replay` | inject an event · replay from the baseline |
 | `GET /api/scenarios/{id}/validation` · `/metrics` · `/history/events/{eventId}/trace` | consistency checks · timings · causal trace |
 | `GET /api/compare?a=&b=&aSnapshot=&bSnapshot=` | compare two scenarios or a scenario and a snapshot |
+| `GET · POST /api/scenarios/{id}/export/game` | preview · write the game export to `public/world-sim/` |
 
 ## Configuration
 
@@ -189,8 +191,8 @@ search. Panel layout is remembered per browser.
 
 The simulator only reads `../maps/`. It does not import or change the game's
 settlement rendering, terrain or NPC code, and never writes the map or game saves.
-Settlement ids match the game's sim projection (`settlement:azgaar-burg:<i>`), so
-later exports can join on them.
+Settlement ids match the game's sim projection (`settlement:azgaar-burg:<i>`). The one thing it
+writes outside itself is the game export in `../public/world-sim/` (doc 09), on request.
 
 ## Current limitations
 

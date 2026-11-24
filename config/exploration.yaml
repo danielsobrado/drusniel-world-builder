@@ -24,6 +24,10 @@ residents:
   maxPerSettlement: 22
   wanderRadius: 18
   refreshSeconds: 0.5
+worldSim:
+  enabled: true            # residents become the World Simulator's named people where its export covers a town
+  path: world-sim          # under public/; written by the simulator's POST /api/scenarios/{id}/export/game
+  nameplateMeters: 4       # how close the player must be to see who someone is
 serpents:
   enabled: true
   maxResident: 2

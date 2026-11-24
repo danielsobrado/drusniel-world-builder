@@ -95,4 +95,5 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     storage = env.get("WS_SCENARIO_STORAGE")
     if storage:
         simulation["storage"] = storage
+    simulator["gameExport"]["directory"] = env.get("WS_GAME_EXPORT_DIR", simulator["gameExport"]["directory"])
     return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society, economy=economy, llm=llm)

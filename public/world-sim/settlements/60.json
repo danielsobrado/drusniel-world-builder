@@ -1,0 +1,652 @@
+{
+ "schema": "drusniel-world-sim-game-export",
+ "version": 1,
+ "mapId": "eldara-2026",
+ "sourceFingerprint": "sha256:128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a",
+ "scenarioId": "baseline-pilot",
+ "scenarioName": "Pilot baseline",
+ "date": "1212-01-01",
+ "day": 0,
+ "stateChecksum": "cf64bd0ea10478c9",
+ "settlementId": "settlement:azgaar-burg:60",
+ "sourceId": 60,
+ "name": "Sshanderi",
+ "population": 8560,
+ "residents": [
+  {
+   "id": "npc:60:1",
+   "name": "Abraethei",
+   "family": "Dormaen",
+   "sex": "female",
+   "age": 27,
+   "role": "trader",
+   "profession": "caravan master",
+   "tier": "major",
+   "householdId": "household:60:1",
+   "home": "building:60:townhouse:1",
+   "workplace": null,
+   "mood": "hopeful",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Abraethei Dormaen, caravan master of Sshanderi, born 1184 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:3",
+   "name": "Sinergarq",
+   "family": "Mathand",
+   "sex": "female",
+   "age": 49,
+   "role": "trader",
+   "profession": "caravan master",
+   "tier": "major",
+   "householdId": "household:60:2",
+   "home": "building:60:townhouse:1",
+   "workplace": null,
+   "mood": "hopeful",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Sinergarq Mathand, caravan master of Sshanderi, born 1162 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:5",
+   "name": "Fethlaund",
+   "family": "Veneas",
+   "sex": "male",
+   "age": 53,
+   "role": "trader",
+   "profession": "caravan master",
+   "tier": "major",
+   "householdId": "household:60:3",
+   "home": "building:60:townhouse:2",
+   "workplace": null,
+   "mood": "hopeful",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Fethlaund Veneas, caravan master of Sshanderi, born 1158 in Llurtheneadhet.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:10",
+   "name": "Durthuith",
+   "family": "Tellorth",
+   "sex": "female",
+   "age": 32,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:60:6",
+   "home": "building:60:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:60:workshop-vinegar:33",
+    "name": "Sshanderi Vinegar workshop 33",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Durthuith Tellorth, artisan of Sshanderi, born 1179 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:11",
+   "name": "Uharog",
+   "family": "Olarra",
+   "sex": "male",
+   "age": 36,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:60:7",
+   "home": "building:60:cottage:2",
+   "workplace": {
+    "id": "business:azgaar-burg:60:market-stall:241",
+    "name": "Sshanderi Market stall 241",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Uharog Olarra, trader of Sshanderi, born 1175 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:12",
+   "name": "Draugheas",
+   "family": "Olarra",
+   "sex": "female",
+   "age": 36,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:7",
+   "home": "building:60:cottage:2",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:32",
+    "name": "Sshanderi Farm 32",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Draugheas Olarra, farmhand of Sshanderi, born 1175 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:16",
+   "name": "Draugheas",
+   "family": "Undeen",
+   "sex": "male",
+   "age": 44,
+   "role": "worker",
+   "profession": "watchman",
+   "tier": "standard",
+   "householdId": "household:60:8",
+   "home": "building:60:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:60:watch-post:2",
+    "name": "Sshanderi Watch post 2",
+    "kind": "watch-post",
+    "sector": "security"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Draugheas Undeen, watchman of Sshanderi, born 1167 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:17",
+   "name": "Rimyvanza",
+   "family": "Undeen",
+   "sex": "female",
+   "age": 38,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:8",
+   "home": "building:60:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:4",
+    "name": "Sshanderi Farm 4",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Rimyvanza Undeen, farmhand of Sshanderi, born 1173 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:2",
+   "name": "Chathl",
+   "family": "Dormaen",
+   "sex": "male",
+   "age": 26,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:60:1",
+   "home": "building:60:townhouse:1",
+   "workplace": {
+    "id": "business:azgaar-burg:60:market-stall:71",
+    "name": "Sshanderi Market stall 71",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Chathl Dormaen, trader of Sshanderi, born 1185 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:20",
+   "name": "Chaggauth",
+   "family": "Glammorui",
+   "sex": "female",
+   "age": 25,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:60:11",
+   "home": "building:60:farmstead:4",
+   "workplace": {
+    "id": "business:azgaar-burg:60:workshop-vinegar:11",
+    "name": "Sshanderi Vinegar workshop 11",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Chaggauth Glammorui, artisan of Sshanderi, born 1186 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:21",
+   "name": "Karmenar",
+   "family": "Glammorui",
+   "sex": "male",
+   "age": 27,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:60:11",
+   "home": "building:60:farmstead:4",
+   "workplace": {
+    "id": "business:azgaar-burg:60:market-stall:74",
+    "name": "Sshanderi Market stall 74",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Karmenar Glammorui, trader of Sshanderi, born 1184 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:22",
+   "name": "Hamorcaet",
+   "family": "Abblyndyl",
+   "sex": "female",
+   "age": 42,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:12",
+   "home": "building:60:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:56",
+    "name": "Sshanderi Farm 56",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Hamorcaet Abblyndyl, farmhand of Sshanderi, born 1169 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:23",
+   "name": "Guallmeth",
+   "family": "Abblyndyl",
+   "sex": "male",
+   "age": 48,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:12",
+   "home": "building:60:townhouse:3",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:40",
+    "name": "Sshanderi Farm 40",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Guallmeth Abblyndyl, farmhand of Sshanderi, born 1163 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:24",
+   "name": "Kalddrait",
+   "family": "Shagithym",
+   "sex": "female",
+   "age": 29,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:13",
+   "home": "building:60:townhouse:4",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:154",
+    "name": "Sshanderi Farm 154",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Kalddrait Shagithym, farmhand of Sshanderi, born 1182 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:25",
+   "name": "Vojhammor",
+   "family": "Shagithym",
+   "sex": "male",
+   "age": 24,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:13",
+   "home": "building:60:townhouse:4",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:89",
+    "name": "Sshanderi Farm 89",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Vojhammor Shagithym, farmhand of Sshanderi, born 1187 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:26",
+   "name": "Drarmorio",
+   "family": "Dormaen",
+   "sex": "female",
+   "age": 29,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:14",
+   "home": "building:60:cottage:3",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:212",
+    "name": "Sshanderi Farm 212",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Drarmorio Dormaen, farmhand of Sshanderi, born 1182 in Haggheihauiy.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:27",
+   "name": "Chyrast",
+   "family": "Dormaen",
+   "sex": "male",
+   "age": 24,
+   "role": "worker",
+   "profession": "healer",
+   "tier": "standard",
+   "householdId": "household:60:14",
+   "home": "building:60:cottage:3",
+   "workplace": {
+    "id": "business:azgaar-burg:60:healer:150",
+    "name": "Sshanderi Healer 150",
+    "kind": "healer",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Chyrast Dormaen, healer of Sshanderi, born 1187 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:4",
+   "name": "Jaallas",
+   "family": "Mathand",
+   "sex": "male",
+   "age": 49,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:60:2",
+   "home": "building:60:townhouse:1",
+   "workplace": {
+    "id": "business:azgaar-burg:60:workshop-boots:27",
+    "name": "Sshanderi Boots workshop 27",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Jaallas Mathand, artisan of Sshanderi, born 1162 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:6",
+   "name": "Ashachara",
+   "family": "Veneas",
+   "sex": "female",
+   "age": 57,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:3",
+   "home": "building:60:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:129",
+    "name": "Sshanderi Farm 129",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Ashachara Veneas, farmhand of Sshanderi, born 1154 in Llurtheneadhet.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:7",
+   "name": "Guallmeth",
+   "family": "Caessin",
+   "sex": "female",
+   "age": 47,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:4",
+   "home": "building:60:farmstead:1",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:98",
+    "name": "Sshanderi Farm 98",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Guallmeth Caessin, farmhand of Sshanderi, born 1164 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:8",
+   "name": "Abblyn",
+   "family": "Caessin",
+   "sex": "male",
+   "age": 45,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:60:4",
+   "home": "building:60:farmstead:1",
+   "workplace": {
+    "id": "business:azgaar-burg:60:farm:209",
+    "name": "Sshanderi Farm 209",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Abblyn Caessin, farmhand of Sshanderi, born 1166 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:9",
+   "name": "Karmenar",
+   "family": "Dormaen",
+   "sex": "male",
+   "age": 61,
+   "role": "worker",
+   "profession": "healer",
+   "tier": "standard",
+   "householdId": "household:60:5",
+   "home": "building:60:cottage:1",
+   "workplace": {
+    "id": "business:azgaar-burg:60:healer:125",
+    "name": "Sshanderi Healer 125",
+    "kind": "healer",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Karmenar Dormaen, healer of Sshanderi, born 1150 in Veldrynn.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:19",
+   "name": "Mydran",
+   "family": "Doloth",
+   "sex": "male",
+   "age": 67,
+   "role": "retired",
+   "profession": null,
+   "tier": "standard",
+   "householdId": "household:60:10",
+   "home": "building:60:farmstead:3",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Mydran Doloth, of Sshanderi, retired, born 1144 in Vhaltha.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:18",
+   "name": "Gulssadri",
+   "family": "Ofalat",
+   "sex": "female",
+   "age": 74,
+   "role": "retired",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:60:9",
+   "home": "building:60:farmstead:2",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Gulssadri Ofalat, of Sshanderi, retired, born 1137 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:13",
+   "name": "Drarmorio",
+   "family": "Olarra",
+   "sex": "female",
+   "age": 9,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:60:7",
+   "home": "building:60:cottage:2",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Drarmorio Olarra, of Sshanderi, a young one, born 1202 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:14",
+   "name": "Mundrauth",
+   "family": "Olarra",
+   "sex": "male",
+   "age": 6,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:60:7",
+   "home": "building:60:cottage:2",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Mundrauth Olarra, of Sshanderi, a young one, born 1205 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:60:15",
+   "name": "Xaalaugua",
+   "family": "Olarra",
+   "sex": "female",
+   "age": 2,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:60:7",
+   "home": "building:60:cottage:2",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Xaalaugua Olarra, of Sshanderi, a young one, born 1209 in Sshanderi.",
+    "model": "draft writer"
+   },
+   "biography": null
+  }
+ ]
+}

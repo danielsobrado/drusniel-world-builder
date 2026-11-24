@@ -1601,6 +1601,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const exploration = new ExplorationRuntime({ config, terrainView, viewModeController, container: ui.viewport,
     sceneLoader: stylizedSurface.sceneAssets?.loader,
     grass: () => stylizedSurface.meadowGrass ?? null,
+    hud: viewModeUi.hud,
     onInstalled: (root) => drawPreparation.register(root),
     invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.ACTIVE_CAMERA_REPLACED) });
   resources.own(exploration);

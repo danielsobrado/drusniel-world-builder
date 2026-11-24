@@ -5,6 +5,8 @@ const DEFAULTS = {
   drawPreparation: { enabled: true, meshesPerFrame: 2 },
   residents: { enabled: true, radiusMeters: 220, maxResidents: 24, maxPerSettlement: 8,
     wanderRadius: 18, refreshSeconds: 0.5 },
+  // The World Simulator's game export: named people as residents (world-simulator/docs/09).
+  worldSim: { enabled: true, path: 'world-sim', nameplateMeters: 4 },
   serpents: { enabled: true, maxResident: 2, regionSize: 256, loadRadius: 180,
     unloadRadius: 260, spawnChance: 0.12, tileIds: [5, 7], sizeScale: 0.06, entries: [] },
   tour: { enabled: true, durationSeconds: 45, radiusMeters: 180, clearanceMeters: 18,

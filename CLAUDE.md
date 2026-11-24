@@ -125,6 +125,11 @@ timber) neutral, because the workshop's vertex colours already carry the hue.
 Procedural sets are generated in GPU memory from PTL recipes: keep that to one
 asynchronously compiled pass, and add only presets that generate in seconds.
 
+Residents are the World Simulator's named people wherever its export in
+`public/world-sim/` covers a town, loaded on approach — see
+[world-sim residents](docs/world-sim-residents-2026-11-24.md). They keep the
+simulator's person ids; towns the export does not cover keep cosmetic residents.
+
 ## Noise textures
 
 A CC0 library of tileable noise textures for shaders and VFX lives in

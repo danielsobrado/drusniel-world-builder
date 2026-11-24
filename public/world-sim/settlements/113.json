@@ -1,0 +1,427 @@
+{
+ "schema": "drusniel-world-sim-game-export",
+ "version": 1,
+ "mapId": "eldara-2026",
+ "sourceFingerprint": "sha256:128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a",
+ "scenarioId": "baseline-pilot",
+ "scenarioName": "Pilot baseline",
+ "date": "1212-01-01",
+ "day": 0,
+ "stateChecksum": "cf64bd0ea10478c9",
+ "settlementId": "settlement:azgaar-burg:113",
+ "sourceId": 113,
+ "name": "Falanenerwin",
+ "population": 6256,
+ "residents": [
+  {
+   "id": "npc:113:1",
+   "name": "Haerreghr",
+   "family": "Yuethe",
+   "sex": "female",
+   "age": 55,
+   "role": "trader",
+   "profession": "caravan master",
+   "tier": "major",
+   "householdId": "household:113:1",
+   "home": "building:113:townhouse:1",
+   "workplace": null,
+   "mood": "hopeful",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Haerreghr Yuethe, caravan master of Falanenerwin, born 1156 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:3",
+   "name": "Waethdrau",
+   "family": "Lothinaal",
+   "sex": "male",
+   "age": 47,
+   "role": "trader",
+   "profession": "caravan master",
+   "tier": "major",
+   "householdId": "household:113:2",
+   "home": "building:113:cottage:1",
+   "workplace": null,
+   "mood": "hopeful",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Waethdrau Lothinaal, caravan master of Falanenerwin, born 1164 in Llurtheneadhet.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:5",
+   "name": "Tellorabb",
+   "family": "Khuulssis",
+   "sex": "male",
+   "age": 54,
+   "role": "trader",
+   "profession": "caravan master",
+   "tier": "major",
+   "householdId": "household:113:3",
+   "home": "building:113:cottage:2",
+   "workplace": null,
+   "mood": "hopeful",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Tellorabb Khuulssis, caravan master of Falanenerwin, born 1157 in Wetheirillu.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:11",
+   "name": "Baethedra",
+   "family": "Dragganth",
+   "sex": "female",
+   "age": 26,
+   "role": "worker",
+   "profession": "healer",
+   "tier": "standard",
+   "householdId": "household:113:6",
+   "home": "building:113:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:113:healer:18",
+    "name": "Falanenerwin Healer 18",
+    "kind": "healer",
+    "sector": "services"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Baethedra Dragganth, healer of Falanenerwin, born 1185 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:12",
+   "name": "Gnanleasa",
+   "family": "Dolthleen",
+   "sex": "male",
+   "age": 53,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:113:7",
+   "home": "building:113:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:113:market-stall:112",
+    "name": "Falanenerwin Market stall 112",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Gnanleasa Dolthleen, trader of Falanenerwin, born 1158 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:13",
+   "name": "Mendranav",
+   "family": "Dolthleen",
+   "sex": "female",
+   "age": 52,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:113:7",
+   "home": "building:113:townhouse:2",
+   "workplace": {
+    "id": "business:azgaar-burg:113:market-stall:172",
+    "name": "Falanenerwin Market stall 172",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Mendranav Dolthleen, trader of Falanenerwin, born 1159 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:16",
+   "name": "Orthin",
+   "family": "Yeelluith",
+   "sex": "male",
+   "age": 24,
+   "role": "worker",
+   "profession": "trader",
+   "tier": "standard",
+   "householdId": "household:113:8",
+   "home": "building:113:farmstead:1",
+   "workplace": {
+    "id": "business:azgaar-burg:113:market-stall:21",
+    "name": "Falanenerwin Market stall 21",
+    "kind": "market-stall",
+    "sector": "trade"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Orthin Yeelluith, trader of Falanenerwin, born 1187 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:17",
+   "name": "Yuenzobae",
+   "family": "Yeelluith",
+   "sex": "female",
+   "age": 29,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:113:8",
+   "home": "building:113:farmstead:1",
+   "workplace": {
+    "id": "business:azgaar-burg:113:farm:11",
+    "name": "Falanenerwin Farm 11",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Yuenzobae Yeelluith, farmhand of Falanenerwin, born 1182 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:2",
+   "name": "Norcaef",
+   "family": "Yuethe",
+   "sex": "male",
+   "age": 55,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:113:1",
+   "home": "building:113:townhouse:1",
+   "workplace": {
+    "id": "business:azgaar-burg:113:farm:131",
+    "name": "Falanenerwin Farm 131",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Norcaef Yuethe, farmhand of Falanenerwin, born 1156 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:4",
+   "name": "Sshaneash",
+   "family": "Lothinaal",
+   "sex": "female",
+   "age": 48,
+   "role": "worker",
+   "profession": "artisan",
+   "tier": "standard",
+   "householdId": "household:113:2",
+   "home": "building:113:cottage:1",
+   "workplace": {
+    "id": "business:azgaar-burg:113:workshop-coal:15",
+    "name": "Falanenerwin Coal workshop 15",
+    "kind": "workshop",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Sshaneash Lothinaal, artisan of Falanenerwin, born 1163 in Haggheihauiy.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:6",
+   "name": "Sklytlath",
+   "family": "Khuulssis",
+   "sex": "female",
+   "age": 57,
+   "role": "worker",
+   "profession": "tailor",
+   "tier": "standard",
+   "householdId": "household:113:3",
+   "home": "building:113:cottage:2",
+   "workplace": {
+    "id": "business:azgaar-burg:113:tailor:12",
+    "name": "Falanenerwin Tailor 12",
+    "kind": "tailor",
+    "sector": "crafts"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Sklytlath Khuulssis, tailor of Falanenerwin, born 1154 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:7",
+   "name": "Loirnat",
+   "family": "Szobenas",
+   "sex": "male",
+   "age": 55,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:113:4",
+   "home": "building:113:cottage:3",
+   "workplace": {
+    "id": "business:azgaar-burg:113:farm:139",
+    "name": "Falanenerwin Farm 139",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Loirnat Szobenas, farmhand of Falanenerwin, born 1156 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:8",
+   "name": "Pelauthil",
+   "family": "Szobenas",
+   "sex": "female",
+   "age": 54,
+   "role": "worker",
+   "profession": "farmhand",
+   "tier": "standard",
+   "householdId": "household:113:4",
+   "home": "building:113:cottage:3",
+   "workplace": {
+    "id": "business:azgaar-burg:113:farm:133",
+    "name": "Falanenerwin Farm 133",
+    "kind": "farm",
+    "sector": "agriculture"
+   },
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Pelauthil Szobenas, farmhand of Falanenerwin, born 1157 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:10",
+   "name": "Sklytlath",
+   "family": "Rastnatha",
+   "sex": "male",
+   "age": 71,
+   "role": "retired",
+   "profession": null,
+   "tier": "standard",
+   "householdId": "household:113:5",
+   "home": "building:113:townhouse:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Sklytlath Rastnatha, of Falanenerwin, retired, born 1140 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:9",
+   "name": "Dryndra",
+   "family": "Rastnatha",
+   "sex": "female",
+   "age": 66,
+   "role": "retired",
+   "profession": null,
+   "tier": "standard",
+   "householdId": "household:113:5",
+   "home": "building:113:townhouse:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Dryndra Rastnatha, of Falanenerwin, retired, born 1145 in Olraharit.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:14",
+   "name": "Loirnat",
+   "family": "Dolthleen",
+   "sex": "female",
+   "age": 60,
+   "role": "retired",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:113:7",
+   "home": "building:113:townhouse:2",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Loirnat Dolthleen, of Falanenerwin, retired, born 1151 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:15",
+   "name": "Abrane",
+   "family": "Dolthleen",
+   "sex": "female",
+   "age": 8,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:113:7",
+   "home": "building:113:townhouse:2",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Abrane Dolthleen, of Falanenerwin, a young one, born 1203 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  },
+  {
+   "id": "npc:113:18",
+   "name": "Forcaeth",
+   "family": "Yeelluith",
+   "sex": "male",
+   "age": 5,
+   "role": "child",
+   "profession": null,
+   "tier": "basic",
+   "householdId": "household:113:8",
+   "home": "building:113:farmstead:1",
+   "workplace": null,
+   "mood": "settled",
+   "hooks": [],
+   "introduction": {
+    "text": "I am Forcaeth Yeelluith, of Falanenerwin, a young one, born 1206 in Falanenerwin.",
+    "model": "draft writer"
+   },
+   "biography": null
+  }
+ ]
+}
