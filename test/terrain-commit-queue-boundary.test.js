@@ -83,3 +83,14 @@ test('terrain commit queue preserves replacement insertion order for equal prior
 
   assert.deepEqual(committed, ['second', 'first-new']);
 });
+
+test('terrain publication limits cumulative upload bytes while allowing one oversized page', () => {
+  const queue = new TerrainCommitQueue({ now: () => 0 });
+  for (let i = 0; i < 3; i++) queue.enqueue({ ...createJob(i), page: { heights: new Float32Array(4) } });
+  const committed = [];
+  queue.flush(job => committed.push(job.slot.slotIndex), null, { maxCommits: 3, maxUploadBytes: 20 });
+  assert.deepEqual(committed, [0]);
+  queue.flush(job => committed.push(job.slot.slotIndex), null, { maxCommits: 3, maxUploadBytes: 8 });
+  assert.deepEqual(committed, [0, 1]);
+  assert.equal(queue.size, 1);
+});

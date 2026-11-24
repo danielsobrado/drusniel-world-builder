@@ -37,8 +37,9 @@ export class StreamedDrawPreparation {
   flushBudgeted(camera, budget) {
     const reservation = this.reservation;
     this.reservation = null;
-    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield));
-    else budget.tryRun(() => this.flush(camera, budget.shouldYield), 6);
+    const bytes = Math.min(INITIAL_UPLOAD_BYTES_PER_FRAME, budget.remainingUploadBytes?.() ?? Infinity);
+    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes));
+    else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes), 6);
   }
   register(root, { uploadBytes = 0, uploadAttributes = null } = {}) {
     this.discover(root);
@@ -71,7 +72,7 @@ export class StreamedDrawPreparation {
   isMaterialReady(mesh, material) {
     return !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material) === true;
   }
-  flush(camera, shouldYield = null) {
+  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME) {
     this.revealPending();
     if (shouldYield?.()) return;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) return;
@@ -95,18 +96,18 @@ export class StreamedDrawPreparation {
         const budgeted = attributes && this.attributeInitialization.supported;
         if (budgeted) {
           const result = this.attributeInitialization.advance(attributes,
-            INITIAL_UPLOAD_BYTES_PER_FRAME - uploadBytes, shouldYield);
+            byteLimit - uploadBytes, shouldYield);
           uploadBytes += result.bytes;
           budgetedBytes += result.bytes;
           if (!result.ready) break;
         }
         const bytes = budgeted ? 0 : this.initialUploadBytes.get(mesh) ?? 0;
         // One oversized allocation may progress alone, never stacked with another draw.
-        if (targets.length && uploadBytes + bytes > INITIAL_UPLOAD_BYTES_PER_FRAME) break;
+        if (uploadBytes + bytes > byteLimit && (targets.length || byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME)) break;
         this.pending.delete(mesh);
         uploadBytes += bytes;
         targets.push(mesh);
-        if (targets.length >= this.settings.meshesPerFrame || uploadBytes >= INITIAL_UPLOAD_BYTES_PER_FRAME) break;
+        if (targets.length >= this.settings.meshesPerFrame || uploadBytes >= byteLimit) break;
       }
       PerfCounters.inc('streamedInitialUploadCpuMs', performance.now() - uploadStarted);
       PerfCounters.set('meadowInitialGpuUploadMaxFrameBytes',

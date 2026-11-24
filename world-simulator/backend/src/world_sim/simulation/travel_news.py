@@ -14,6 +14,8 @@ def assign_carriers(trade: Trade, cast: Cast) -> Trade:
 
 
 def remember(state: TravelState, events: list[HistoryEvent], minimum: int, keep: int) -> TravelState:
+    if not events:
+        return state
     news = dict(state.news)
     witnesses = dict(state.newsWitnesses)
     for e in events:
@@ -30,6 +32,10 @@ def propagate(state: TravelState, cast: Cast, trade: Trade, journeys: list[Journ
     news = dict(state.news)
     trade = assign_carriers(trade, cast)
     people = {p.id: p for p in cast.people}
+    innkeepers: dict[str, list[str]] = {}
+    for p in people.values():
+        if p.alive and not p.journeyId and p.profession == "innkeeper":
+            innkeepers.setdefault(p.settlementId, []).append(p.id)
     changed = set()
     delivered = [(j.originId if j.status == "returned" else j.destinationId, j.news, j.personIds[0] if j.personIds else None)
                  for j in journeys]
@@ -51,9 +57,10 @@ def propagate(state: TravelState, cast: Cast, trade: Trade, journeys: list[Journ
         if not fresh:
             continue
         news[town] = [*known, *fresh][-travel_cfg["newsPerSettlement"]:]
-        for p in people.values():
-            if not p.alive or p.journeyId or p.id == carrier or p.settlementId != town or p.profession != "innkeeper":
+        for pid in innkeepers.get(town, ()):
+            if pid == carrier:
                 continue
+            p = people[pid]
             personal = {k.eventId for k in p.knowledge}
             additions = [Knowledge(eventId=item, learnedDay=day, how="rumour", fromId=carrier, confidence=cfg["rumour"])
                          for item in fresh if item not in personal and p.id not in state.newsWitnesses.get(item, [])]

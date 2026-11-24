@@ -4,6 +4,7 @@ import math
 import random
 from collections import Counter
 from dataclasses import dataclass, field
+from functools import cached_property
 
 from ..geography.paths import TravelPath
 from ..peoples.catalog import NEUTRAL
@@ -27,9 +28,17 @@ def _vacant(town: SettlementState) -> int:
     return sum(h.vacant for h in town.society.housing)
 
 
-def _risk(route: TravelPath, trade: Trade) -> int:
-    roads = set(route.sourceRouteIds)
-    return max((r.bandits for r in trade.routes if r.path and roads.intersection(r.path.sourceRouteIds)), default=0)
+def _route_risks(trade: Trade) -> dict[str, int]:
+    risks: dict[str, int] = {}
+    for route in trade.routes:
+        if route.path:
+            for road in route.path.sourceRouteIds:
+                risks[road] = max(route.bandits, risks.get(road, route.bandits))
+    return risks
+
+
+def _risk(route: TravelPath, risks: dict[str, int]) -> int:
+    return max((risks[road] for road in route.sourceRouteIds if road in risks), default=0)
 
 
 def _wage(town: SettlementState) -> float:
@@ -83,9 +92,17 @@ class TravelDay:
     incidents: list[dict] = field(default_factory=list)
     arrivals: list[Journey] = field(default_factory=list)
 
-    def __post_init__(self):
-        self.towns = {s.settlementId: s for s in self.settlements}
-        self.routes = {r.id: r for r in self.state.routes}
+    @cached_property
+    def towns(self) -> dict[str, SettlementState]:
+        return {s.settlementId: s for s in self.settlements}
+
+    @cached_property
+    def routes(self) -> dict[str, TravelPath]:
+        return {r.id: r for r in self.state.routes}
+
+    @cached_property
+    def route_risks(self) -> dict[str, int]:
+        return _route_risks(self.trade)
 
     def _change(self, town: SettlementState, groups: dict[str, Cohorts], *, arrivals: int = 0, departures: int = 0) -> SettlementState:
         cohorts = combined(groups)
@@ -113,7 +130,7 @@ class TravelDay:
         if disruption:
             kind, delay = disruption
         else:
-            risk = min(1.0, _risk(route, self.trade) * cfg["banditChancePerBandit"])
+            risk = min(1.0, _risk(route, self.route_risks) * cfg["banditChancePerBandit"])
             if random.Random(f"{self.seed}:{journey.id}:bandits").random() >= risk:
                 return journey
             kind, delay = "bandits", cfg["delays"]["bandits"]
@@ -193,7 +210,7 @@ class TravelDay:
                 reserved_population[j.destinationId] += j.population
         connections = {}
         for route in self.routes.values():
-            bandits = _risk(route, self.trade)
+            bandits = _risk(route, self.route_risks)
             connections.setdefault(route.fromId, []).append((route, bandits))
             connections.setdefault(route.toId, []).append((route.reverse(), bandits))
         for sid in sorted(connections):
@@ -241,7 +258,7 @@ class TravelDay:
             self.state = self.state.model_copy(update={"journeys": [*self.state.journeys, *planned], "sequence": sequence})
 
     def result(self) -> list[SettlementState]:
-        return list(self.towns.values())
+        return list(self.towns.values()) if "towns" in self.__dict__ else self.settlements
 
 
 

@@ -2,6 +2,8 @@ import { FrameSlack } from './FrameSlack.js';
 import { PerfCounters } from './qa/PerfCounters.js';
 import { PreparationPressure, hasPreparationBacklog } from './PreparationPressure.js';
 
+const UPLOAD_COUNTERS = ['textureBytesUploaded', 'waterUploadBytes', 'streamedDrawInitialUploadBytes'];
+
 /** One shared allowance; collision/physics remain mandatory work. */
 export class DeferredWorkBudget {
   constructor(settings) {
@@ -9,6 +11,8 @@ export class DeferredWorkBudget {
     this.provider = max => this.available(max);
     this.runner = work => this.run(work);
     this.maximumMs = settings.maximumMs ?? 1.2;
+    this.maxUploadBytes = settings.maxUploadBytes ?? 2 * 1024 * 1024;
+    this.uploadBaseline = 0;
     this.pressure = new PreparationPressure({ minimumMs: settings.minimumMs, maximumMs: this.maximumMs });
     this.shouldYield = () => this.peek(Number.POSITIVE_INFINITY) <= 0;
     this.boundQueues = new WeakSet();
@@ -18,6 +22,17 @@ export class DeferredWorkBudget {
   beginFrame() {
     this.pressure.update(this.slack.now(), hasPreparationBacklog(this.preparationSurface));
     this.slack.beginFrame();
+    this.uploadBaseline = this.uploadBytes();
+  }
+  uploadBytes() {
+    let total = 0;
+    for (const counter of UPLOAD_COUNTERS) total += PerfCounters.get(counter);
+    return total;
+  }
+  remainingUploadBytes() {
+    return this.settings.enabled
+      ? Math.max(0, this.maxUploadBytes - Math.max(0, this.uploadBytes() - this.uploadBaseline))
+      : Number.POSITIVE_INFINITY;
   }
   available(maxMs) {
     return this.settings.enabled
@@ -50,6 +65,7 @@ export class DeferredWorkBudget {
       ? this.slack.peek(Math.min(this.pressure.floorMs, maxMs), maxMs) : maxMs;
   }
   endFrame() {
+    PerfCounters.set('framePublicationUploadBytes', Math.max(0, this.uploadBytes() - this.uploadBaseline));
     PerfCounters.set('framePreparationBacklogAgeMs', this.pressure.ageMs);
     PerfCounters.set('frameDeferredPressureFloorMs', this.pressure.floorMs);
     PerfCounters.set('frameFixedCpuMs', this.slack.endFrame());

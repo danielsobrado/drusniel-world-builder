@@ -1,7 +1,7 @@
 const DEFAULTS = {
   speedBoost: { enabled: true, speedMultiplier: 3, doubleTapWindowMs: 300 },
   freeFly: { enabled: true, moveSpeed: 24, fastMultiplier: 4, lookSensitivity: 0.003 },
-  frameBudget: { enabled: true, targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, maximumMs: 1.2 },
+  frameBudget: { enabled: true, targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, maximumMs: 1.2, maxUploadBytes: 2097152 },
   drawPreparation: { enabled: true, meshesPerFrame: 2 },
   residents: { enabled: true, radiusMeters: 220, maxResidents: 24, maxPerSettlement: 8,
     wanderRadius: 18, refreshSeconds: 0.5 },
@@ -38,7 +38,7 @@ export function resolveExplorationConfig(source = {}) {
     }
     result[section] = block;
   }
-  for (const [section, key] of [['drawPreparation', 'meshesPerFrame'], ['residents', 'maxResidents'],
+  for (const [section, key] of [['frameBudget', 'maxUploadBytes'], ['drawPreparation', 'meshesPerFrame'], ['residents', 'maxResidents'],
     ['residents', 'maxPerSettlement'], ['serpents', 'maxResident']]) {
     if (!Number.isSafeInteger(result[section][key])) throw new Error(`exploration.${section}.${key} must be an integer.`);
   }

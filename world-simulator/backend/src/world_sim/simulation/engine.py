@@ -128,13 +128,26 @@ def advance_frames(state: ScenarioState, days: int, rules: dict[str, Any]) -> tu
     travel_cfg = rules["simulation"]["travel"]
     knowledge = rules["simulation"]["people"]["knowledge"]
     min_news = knowledge.get("rumourMinImportance", knowledge["minImportance"])
+    next_incident = min((i["day"] for i in travel.pendingIncidents), default=float("inf"))
+    caravan_schedule = None
+    next_arrival = float("inf")
+    departures: set[int] = set()
     for _ in range(days):
         day += 1
         before = sum(s.population for s in settlements) + travel.population
-        settlements, trade, convoys = deliver_day(settlements, trade, day, rules["economy"]["caravans"]["maxDelivered"])
-        due = [i for i in travel.pendingIncidents if i["day"] <= day]
-        if due:
-            travel = travel.model_copy(update={"pendingIncidents": [i for i in travel.pendingIncidents if i["day"] > day]})
+        if caravan_schedule is not trade.caravans:
+            caravan_schedule = trade.caravans
+            next_arrival = min((c.arriveDay for c in caravan_schedule), default=float("inf"))
+            departures = {c.departDay for c in caravan_schedule}
+        convoys = []
+        if day >= next_arrival:
+            settlements, trade, convoys = deliver_day(settlements, trade, day, rules["economy"]["caravans"]["maxDelivered"])
+        due = []
+        if day >= next_incident:
+            due = [i for i in travel.pendingIncidents if i["day"] <= day]
+            pending = [i for i in travel.pendingIncidents if i["day"] > day]
+            travel = travel.model_copy(update={"pendingIncidents": pending})
+            next_incident = min((i["day"] for i in pending), default=float("inf"))
         today = TravelDay(travel, settlements, cast, trade, rules, state.seed, day)
         today.tick()
         settlements, cast = today.result(), today.cast
@@ -155,6 +168,7 @@ def advance_frames(state: ScenarioState, days: int, rules: dict[str, Any]) -> tu
             linked = [i for i in linked if i.get("day", day) <= day]
             if scheduled:
                 today.state = today.state.model_copy(update={"pendingIncidents": [*today.state.pendingIncidents, *scheduled]})
+                next_incident = min(next_incident, min(i["day"] for i in scheduled))
             reservations: Counter = Counter()
             for party in today.state.journeys:
                 if party.active and party.status != "returning":
@@ -174,7 +188,7 @@ def advance_frames(state: ScenarioState, days: int, rules: dict[str, Any]) -> tu
             cast, trade, events = chronicle(incidents, cast, trade, seq, day, rules)
             seq += len(events)
         travel = remember(today.state, events, min_news, travel_cfg["newsPerSettlement"])
-        if arrivals or convoys or month_close or any(c.departDay == day for c in trade.caravans):
+        if arrivals or convoys or month_close or day in departures:
             travel, cast, trade = propagate(travel, cast, trade, arrivals, convoys, day=day, cfg=knowledge, travel_cfg=travel_cfg)
         if month_close:
             cast, past = with_backstory(cast, seq, day, settlements, rules, state.seed)

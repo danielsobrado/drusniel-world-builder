@@ -14,6 +14,7 @@ frameBudget:
   reserveMs: 0.5
   minimumMs: 0.25
   maximumMs: 3
+  maxUploadBytes: 2097152
 drawPreparation:
   enabled: true
   meshesPerFrame: 2

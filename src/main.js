@@ -1711,6 +1711,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         deferredWork.run(() => terrainView.flushUploadQueue({
           maxCommits: terrainView.adaptiveCommitBudget(),
           budgetMs: commitBudgetMs,
+          maxUploadBytes: deferredWork.remainingUploadBytes(),
         }));
       }
     }

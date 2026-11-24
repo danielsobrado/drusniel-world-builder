@@ -1,8 +1,8 @@
 import {
-  projectedPixelHeight,
+  projectedPixelHeightAt,
   quantizeFade,
-  selectProjectedLod,
-  updateLodTransition,
+  selectLodBand,
+  advanceLodTransition,
 } from './stylized/lod/projectedLod.js';
 import { InstanceLodRows } from './stylized/lod/InstanceLodRows.js';
 import { PerfCounters } from './performance/qa/PerfCounters.js';
@@ -21,21 +21,18 @@ const OBJECT_TO_SOURCE_BAND = Object.freeze({
   shell: 'impostor',
 });
 
-const CAMERA_STATE_SIZE = 10;
+const CAMERA_STATE_SIZE = 8;
 
 function writeCameraState(camera, viewportHeight, target) {
   const position = camera.position;
-  const quaternion = camera.quaternion;
   target[0] = Math.round(position.x * 2);
   target[1] = Math.round(position.y * 2);
   target[2] = Math.round(position.z * 2);
-  target[3] = Math.round(quaternion.x * 1000);
-  target[4] = Math.round(quaternion.y * 1000);
-  target[5] = Math.round(quaternion.z * 1000);
-  target[6] = Math.round(quaternion.w * 1000);
-  target[7] = Math.round((camera.zoom ?? 1) * 10);
-  target[8] = Math.round((camera.fov ?? 0) * 10);
-  target[9] = Math.round(viewportHeight * 10);
+  target[3] = Math.round((camera.zoom ?? 1) * 10);
+  target[4] = Math.round((camera.fov ?? 0) * 10);
+  target[5] = Math.round(viewportHeight * 10);
+  target[6] = Number(Boolean(camera.isOrthographicCamera));
+  target[7] = camera.isOrthographicCamera ? Math.abs(camera.top - camera.bottom) : 0;
 }
 
 function cameraStatesEqual(left, right) {
@@ -135,13 +132,11 @@ export class ObjectLodController {
     const objectId = placement.object.id;
     const previousState = this.states.get(objectId) ?? null;
     const previousObjectBand = SOURCE_TO_OBJECT_BAND[previousState?.target] ?? null;
-    const pixels = projectedPixelHeight({ camera, worldPosition: placement.worldPosition,
-      worldHeight: placement.worldHeight, viewportHeight });
-    const band = objectId === selectedObjectId ? 'near' : SOURCE_TO_OBJECT_BAND[selectProjectedLod({
-      pixels, previous: previousObjectBand ? OBJECT_TO_SOURCE_BAND[previousObjectBand] : null, ...this.thresholds,
-    })];
-    const state = updateLodTransition({ state: previousState,
-      target: OBJECT_TO_SOURCE_BAND[band] ?? 'impostor', timestamp, durationMs: this.transitionMs });
+    const pixels = projectedPixelHeightAt(camera, placement.worldPosition, placement.worldHeight, viewportHeight);
+    const band = objectId === selectedObjectId ? 'near' : SOURCE_TO_OBJECT_BAND[selectLodBand(
+      pixels, previousObjectBand ? OBJECT_TO_SOURCE_BAND[previousObjectBand] : null, this.thresholds, this.thresholds.hysteresisRatio,
+    )];
+    const state = advanceLodTransition(previousState, OBJECT_TO_SOURCE_BAND[band] ?? 'impostor', timestamp, this.transitionMs);
     this.states.set(objectId, state);
     if (state.complete) this.transitionIds.delete(objectId); else this.transitionIds.add(objectId);
     let seed = this.seeds.get(objectId);
