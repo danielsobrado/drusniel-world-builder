@@ -160,6 +160,7 @@ history:
   recentEvents: 24              # the per-person recent-events cache (the archive keeps everything)
   default: [settlement, 2, settlement]
   kinds:
+    harvest-shortfall: [settlement, 4, public]
     born: [birth, 5, household]
     upbringing: [birth, 2, private]
     promoted: [birth, 1, private]

@@ -11,7 +11,7 @@ from ..peoples.population import established
 from ..world.model import WorldModel
 from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, SettlementState, Society
 from .climate import for_month
-from .economy.contracts import SettlementEconomy, Trade
+from .economy.contracts import FoodBalance, SettlementEconomy, Trade
 from .economy.roads import initial_roads
 from .engine import build_settlements
 from .people.generate import initial_cast
@@ -136,6 +136,15 @@ def _v9_to_v10(raw: dict, rules: dict) -> dict:
     return {**raw, "schemaVersion": 10, "settlements": settlements}
 
 
+def _v10_to_v11(raw: dict) -> dict:
+    settlements = []
+    for row in raw["settlements"]:
+        econ = row["economy"]
+        food = FoodBalance(**econ["food"]).model_dump()
+        settlements.append({**row, "economy": {**econ, "food": food}})
+    return {**raw, "schemaVersion": 11, "settlements": settlements}
+
+
 STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7}
 
 
@@ -152,6 +161,8 @@ def migrate_state(raw: dict[str, Any], model: WorldModel, rules: dict | None = N
             raw = _v8_to_v9(raw, model, rules or model.config.rules)
         elif version == 9:
             raw = _v9_to_v10(raw, rules or model.config.rules)
+        elif version == 10:
+            raw = _v10_to_v11(raw)
         else:
             raw = STEPS[version](raw, model)
     return ScenarioState(**raw), stored

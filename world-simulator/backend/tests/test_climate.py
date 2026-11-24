@@ -35,3 +35,32 @@ def test_old_frozen_scenarios_keep_neutral_climate(eldara):
     assert not rules["simulation"]["climate"]["enabled"]
     assert for_month("Hot desert", month_index=5, months_per_year=12, seed=7,
                      settlement_id="town", cfg=rules["simulation"]["climate"]).yieldFactor == 1
+
+
+def test_seasonal_harvest_and_spoilage_balance_food(eldara):
+    from world_sim.simulation.economy.production import run_production
+
+    state = baseline_state(eldara, scenario_id="seasonal-food", settlement_ids=sorted(eldara.pilot_ids),
+                           seed=7, start_year=1212)
+    town = state.settlements[0]
+    args = (town.economy, town.society, town.population, eldara.config.rules)
+    low, low_flow = run_production(*args, harvest_factor=0.35)
+    high, _ = run_production(*args, harvest_factor=1.5)
+    assert low.food.local <= high.food.local
+    assert low.food.hinterland < high.food.hinterland
+    assert low.food.spoiled > 0
+    rations = eldara.config.economy["food"]["good"]
+    assert abs(low.inventory[rations] - (town.economy.inventory[rations] + low_flow[rations])) < 0.01
+    assert high.food.yieldFactor == 1.5
+
+
+def test_legacy_economy_keeps_food_without_seasonal_rules(eldara):
+    from world_sim.simulation.economy.production import run_production
+
+    state = baseline_state(eldara, scenario_id="old-food", settlement_ids=sorted(eldara.pilot_ids),
+                           seed=4, start_year=1212)
+    town = state.settlements[0]
+    old = {**eldara.config.rules, "economy": {k: v for k, v in eldara.config.economy.items() if k != "agriculture"}}
+    econ, _ = run_production(town.economy, town.society, town.population, old, harvest_factor=0.1)
+    assert econ.food.spoiled == 0
+    assert econ.food.yieldFactor == 1

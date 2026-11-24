@@ -38,18 +38,18 @@ def monthly_use(econ: SettlementEconomy, population: int, ratios: dict[str, floa
 
 
 def food_flows(econ: SettlementEconomy, society: Society, population: int, cfg: dict[str, Any],
-               ration_multiplier: float = 1) -> tuple[int, int, int]:
+               ration_multiplier: float = 1, harvest_factor: float = 1.0) -> tuple[int, int, int]:
     """(local, hinterland, wanted) rations for one month."""
     days = cfg["simulation"]["calendar"]["daysPerMonth"]
     needs = cfg["society"]["needs"]
     farm = sum(b.filled for b in society.businesses if b.sector == "agriculture")
-    local = round(farm * needs["rationsPerFarmWorkerDay"] * days)
-    hinterland = round(econ.food.ruralPopulation * cfg["economy"]["food"]["ruralSurplusPerPersonDay"] * days)
+    local = round(farm * needs["rationsPerFarmWorkerDay"] * days * harvest_factor)
+    hinterland = round(econ.food.ruralPopulation * cfg["economy"]["food"]["ruralSurplusPerPersonDay"] * days * harvest_factor)
     return local, hinterland, round(population * needs["rationsPerPersonDay"] * days * ration_multiplier)
 
 
 def run_production(econ: SettlementEconomy, society: Society, population: int,
-                   cfg: dict[str, Any], ration_multiplier: float = 1) -> tuple[SettlementEconomy, dict[str, float]]:
+                   cfg: dict[str, Any], ration_multiplier: float = 1, harvest_factor: float = 1.0) -> tuple[SettlementEconomy, dict[str, float]]:
     """Returns the updated economy and the month's net flow per good (produced minus used and eaten)."""
     rations = cfg["economy"]["food"]["good"]
     inv: dict[str, float] = defaultdict(float, econ.inventory)
@@ -78,7 +78,12 @@ def run_production(econ: SettlementEconomy, society: Society, population: int,
         flow[line.good] += out
         lines.append(line.model_copy(update={"produced": r4(out), "limitedBy": limited}))
 
-    local, hinterland, ration_need = food_flows(econ, society, population, cfg, ration_multiplier)
+    agriculture = cfg["economy"].get("agriculture", {})
+    seasonal = harvest_factor if agriculture.get("enabled", False) else 1.0
+    spoiled = min(inv[rations], r4(inv[rations] * agriculture.get("granarySpoilagePerMonth", 0)))
+    inv[rations] -= spoiled
+    flow[rations] -= spoiled
+    local, hinterland, ration_need = food_flows(econ, society, population, cfg, ration_multiplier, seasonal)
     inv[rations] += local + hinterland
     flow[rations] += local + hinterland
     scale = population / econ.baselinePopulation if econ.baselinePopulation else 0
@@ -95,6 +100,7 @@ def run_production(econ: SettlementEconomy, society: Society, population: int,
     eaten = round(got[rations])
     food = econ.food.model_copy(update={
         "local": local, "hinterland": hinterland, "eaten": eaten, "wanted": ration_need,
+        "yieldFactor": seasonal, "spoiled": spoiled,
         "security": round(eaten / ration_need, 4) if ration_need else 1.0,
         "selfSufficiency": round((local + hinterland) / ration_need, 4) if ration_need else 1.0,
     })

@@ -120,7 +120,8 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
     peoples = cfg.get("peoples", {})
     for s in settlements:
         multiplier = food_multiplier(peoples.get("ancestries", {}), s.ancestries)
-        econ, flow = run_production(econs[s.settlementId], s.society, s.population, cfg, multiplier)
+        econ, flow = run_production(econs[s.settlementId], s.society, s.population, cfg, multiplier,
+                                    s.climate.yieldFactor)
         for g, u in flow.items():
             flows[g] += u
         members.append(Member(s.settlementId, s.name, s.population, staffing(s.society), econ, multiplier))
@@ -145,6 +146,14 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
             society, econs[s.settlementId], traders, settlement=home, day=day, cfg=cfg["economy"], society_cfg=cfg["society"],
             preferences=peoples.get("profiles", {}).get(profile_key(s.identity), {}).get("preferences", {}))
         incidents.extend(changes)
+        threshold = cfg["economy"].get("agriculture", {}).get("severeHarvestThreshold", 0)
+        if s.climate.hazard and econ.food.yieldFactor < threshold:
+            incidents.append({
+                "kind": "harvest-shortfall", "day": day, "settlementId": s.settlementId,
+                "message": f"{s.name} suffered a poor harvest during {s.climate.hazard}",
+                "facts": {"weather": s.climate.hazard, "yieldFactor": econ.food.yieldFactor,
+                          "rationsHarvested": econ.food.local + econ.food.hinterland},
+            })
         if restaff or opened:
             society = update_society(society, s.cohorts, cfg["society"], cfg["simulation"]["calendar"]["daysPerMonth"])
         econ = econs[s.settlementId]

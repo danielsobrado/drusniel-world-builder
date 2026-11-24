@@ -36,6 +36,8 @@ class FoodBalance(Contract):
     wanted: int = 0
     security: float = 1.0    # eaten / wanted last month; drives famine mortality
     selfSufficiency: float = 1.0   # (local + hinterland) / wanted
+    yieldFactor: float = Field(default=1.0, ge=0)
+    spoiled: float = Field(default=0.0, ge=0)
 
 
 class SettlementEconomy(Contract):

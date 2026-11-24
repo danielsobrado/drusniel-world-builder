@@ -10,7 +10,7 @@ from .climate import ClimateState
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 10
+STATE_SCHEMA_VERSION = 11
 
 
 class Contract(BaseModel):

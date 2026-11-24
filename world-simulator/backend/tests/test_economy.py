@@ -42,7 +42,10 @@ def test_baseline_economy_follows_azgaar_production_and_deals(eldara):
 
 
 def test_a_decade_trades_with_rare_shortages_and_keeps_prices_near_azgaar(eldara):
-    state, months = advance(pilot(eldara), 3600, eldara.config.rules)
+    no_harvest = {**eldara.config.rules,
+                  "economy": {k: v for k, v in eldara.config.economy.items() if k != "agriculture"},
+                  "simulation": {**eldara.config.simulation, "climate": {"enabled": False}}}
+    state, months = advance(pilot(eldara), 3600, no_harvest)
     assert all(m["foodSecurity"] == 1.0 for m in months)
     short = [i for i, m in enumerate(months) if m["shortages"]]
     assert len(short) <= 12, "goods run short only now and then, after bandits take a caravan's cargo"

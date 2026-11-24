@@ -15,6 +15,12 @@ food:
   basePrice: 0.6                # value per 1,000 rations (Azgaar grain trades near 0.55 a wain)
   priceUnit: 1000
 
+# Seasonal agricultural yields and physical granary losses.
+agriculture:
+  enabled: true
+  granarySpoilagePerMonth: 0.01
+  severeHarvestThreshold: 0.70
+
 settlement:
   targetMonths: 1.5             # stock kept of every good a settlement consumes or works up
 
