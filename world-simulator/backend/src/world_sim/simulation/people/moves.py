@@ -1,7 +1,8 @@
 """
 Named people moving between towns, drawn from the month's aggregate migration flows. An
 idle adult follows their town's outflow with a chance that falls with caution, and takes
-their household along: everyone moves into a dwelling of the new town, and those who
+their household along, as the aggregate flow takes children with their adults; a household
+with an elder stays, as elders do in the aggregate: everyone moves into a dwelling of the new town, and those who
 worked leave their posts.
 """
 
@@ -10,6 +11,7 @@ from typing import TYPE_CHECKING
 
 from ..contracts import SettlementState
 from .contracts import NpcHousehold, Person
+from .generate import age_years, band_of
 from .homes import leave, place
 from .notes import note
 
@@ -29,7 +31,7 @@ def moves(people: dict[str, Person], flows: dict[tuple[str, str], int], towns: d
             if not people[p.id].alive or people[p.id].settlementId != origin:
                 continue        # already moved with their household
             members = [x for x in people.values() if x.alive and x.householdId == p.householdId]
-            if any(x.role in STAY or x.settlementId != origin for x in members):
+            if any(x.role in STAY or x.settlementId != origin or band_of(age_years(x, m.day, m.cfg), m.cfg) == "elder" for x in members):
                 continue
             rng = random.Random(f"{m.seed}:{m.day}:{p.id}:move")
             if rng.random() >= movers / idle * max(0.0, m.cfg["moveScale"] - p.personality.caution):

@@ -29,7 +29,7 @@ def promote_traders(people: dict[str, Person], trade: Trade, settlements: list[S
         if not t.active or any(p.traderId == t.id and p.alive for p in people.values()):
             continue
         pool = [p for p in people.values() if p.alive and p.settlementId == t.settlementId and p.role in ("unemployed", "worker")
-                and age_years(p, m.day) >= 18 and not any(e.kind == "dismissed" for e in p.events)]   # no second chances
+                and age_years(p, m.day, m.cfg) >= 18 and not any(e.kind == "dismissed" for e in p.events)]   # no second chances
         if not pool:
             continue
         pick = min(pool, key=lambda p: (p.role != "unemployed", -(p.personality.honesty + p.personality.caution), p.id))

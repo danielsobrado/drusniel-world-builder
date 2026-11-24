@@ -1,13 +1,16 @@
 """Rules the cast must keep after every month; returns the broken ones."""
 
 from collections import Counter
+from typing import Any
 
 from ..contracts import SettlementState
 from ..economy.contracts import Trade
 from .contracts import Cast
 
 
-def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, max_over: float = 0.0) -> list[str]:
+def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, cfg: dict[str, Any]) -> list[str]:
+    """`cfg` is the people rules: the budget allowance (`maxOverBudget`) and the calendar's `daysPerYear`."""
+    max_over = cfg["maxOverBudget"]
     broken = []
     alive = [p for p in cast.people if p.alive]
     counts = Counter(p.settlementId for p in alive)
@@ -37,11 +40,11 @@ def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, max
         broken.append("a caravan post held twice, or by someone whose post is gone")
     if any((p.role == "trader") != bool(p.traderId) or (p.role == "outlaw") != bool(p.routeId) for p in alive):
         broken.append("a role without its link")
-    broken += check_ties(cast)
+    broken += check_ties(cast, cfg["daysPerYear"])
     return broken
 
 
-def check_ties(cast: Cast) -> list[str]:
+def check_ties(cast: Cast, year: int) -> list[str]:
     """Relationships stay consistent across deaths, births and household changes."""
     people = {p.id: p for p in cast.people}
     broken = []
@@ -55,7 +58,7 @@ def check_ties(cast: Cast) -> list[str]:
             if not all(people[x].alive for x in (r.a, r.b)):
                 broken.append(f"{r.id} is a marriage that outlived a spouse")
             spouses.update((r.a, r.b))
-        if r.kind == "parent" and people[r.b].birthDay - people[r.a].birthDay < 14 * 360:
+        if r.kind == "parent" and people[r.b].birthDay - people[r.a].birthDay < 14 * year:
             broken.append(f"{r.id}: a parent too young for their child")
         if r.kind in ("employer", "friend", "mentor", "rival", "spouse") and any(
                 people[x].deathDay is not None and r.since > people[x].deathDay for x in ends):

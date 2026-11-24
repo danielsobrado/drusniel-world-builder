@@ -16,6 +16,7 @@ from .people.backstory import with_backstory
 from .people.checks import check_cast
 from .people.generate import initial_cast
 from .people.life import people_month
+from .rules import ready
 from .society import check_invariants, initial_society, update_society
 
 
@@ -31,7 +32,7 @@ def build_settlements(model: WorldModel, rows: list[tuple[dict[str, Any], dict[s
 def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[str], seed: int, start_year: int,
                    rules: dict[str, Any] | None = None) -> ScenarioState:
     """The state at day 0; a replay passes the scenario's frozen rules, a new scenario takes the current config."""
-    rules = rules or model.config.rules
+    rules = ready(rules or model.config.rules)
     rows = []
     for sid in settlement_ids:
         record = model.settlements_by_id[sid]
@@ -71,7 +72,7 @@ def _bounded(history: list[HistoryPoint], limit: int) -> list[HistoryPoint]:
 
 def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any, rules: dict[str, Any], when: str) -> None:
     """The accounting rules that must hold after every change; a break stops the step instead of saving a bad state."""
-    broken = check_cast(cast, settlements, trade, rules["simulation"]["people"]["maxOverBudget"])
+    broken = check_cast(cast, settlements, trade, rules["simulation"]["people"])
     if broken:
         raise AssertionError(f"people, {when}: {'; '.join(broken)}")
     for s in settlements:
@@ -82,6 +83,7 @@ def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any,
 
 def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[ScenarioState, list[dict[str, Any]]]:
     """Advances `days` days; each month close runs demography, society and the economy. Returns month summaries too."""
+    rules = ready(rules)        # derived settings (the calendar's year) for any caller; unchanged for completed rules
     calendar = rules["simulation"]["calendar"]
     per_month = calendar["daysPerMonth"]
     settlements = list(state.settlements)

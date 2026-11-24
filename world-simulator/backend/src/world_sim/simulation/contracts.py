@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 6  # v2 society, v3 economy, v4 roads, v5 people, v6 canonical history; older states migrate on load
+STATE_SCHEMA_VERSION = 7  # v2 society, v3 economy, v4 roads, v5 people, v6 canonical history, v7 news on caravans; older states migrate
 
 
 class Contract(BaseModel):

@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS entities (seq INTEGER, entity TEXT);
 CREATE INDEX IF NOT EXISTS participants_person ON participants (person, seq);
 CREATE INDEX IF NOT EXISTS entities_entity ON entities (entity, seq);
 CREATE INDEX IF NOT EXISTS events_day ON events (day, seq);
+CREATE TABLE IF NOT EXISTS causes (seq INTEGER, cause TEXT);
+CREATE INDEX IF NOT EXISTS causes_cause ON causes (cause, seq);
 """
+CAUSES_VERSION = 1      # PRAGMA user_version once the causes table is filled for an archive made before it
 
 
 class HistoryArchive:
@@ -31,6 +34,11 @@ class HistoryArchive:
         path.parent.mkdir(parents=True, exist_ok=True)
         with closing(self._db()) as db, db:
             db.executescript(SCHEMA)
+            if db.execute("PRAGMA user_version").fetchone()[0] < CAUSES_VERSION:      # an archive from before the index
+                rows = db.execute("SELECT seq, body FROM events").fetchall()
+                links = [(seq, c) for seq, body in rows for c in json.loads(body).get("causedBy", [])]
+                db.executemany("INSERT INTO causes VALUES (?, ?)", links)
+                db.execute(f"PRAGMA user_version = {CAUSES_VERSION}")
 
     def _db(self) -> sqlite3.Connection:
         return sqlite3.connect(self.path)
@@ -47,11 +55,12 @@ class HistoryArchive:
             entities = [(e.seq, x) for e in events for x in {e.settlementId, e.routeId, e.businessId, e.caravanId, e.householdId,
                                                               e.locationId, *e.relatedEntities} if x]
             db.executemany("INSERT INTO entities VALUES (?, ?)", entities)
+            db.executemany("INSERT INTO causes VALUES (?, ?)", [(e.seq, c) for e in events for c in e.causedBy])
 
     def cut(self, seq: int) -> None:
         """Forgets every event numbered `seq` or later."""
         with closing(self._db()) as db, db:
-            for table in ("events", "participants", "entities"):
+            for table in ("events", "participants", "entities", "causes"):
                 db.execute(f"DELETE FROM {table} WHERE seq >= ?", (seq,))  # noqa: S608 - fixed table names
 
     def copy_to(self, other: "HistoryArchive", seq: int) -> None:
@@ -77,9 +86,9 @@ class HistoryArchive:
     def consequences(self, event: HistoryEvent, limit: int = 20) -> list[HistoryEvent]:
         """Later events that name this one as a cause."""
         with closing(self._db()) as db:
-            rows = db.execute("SELECT body FROM events WHERE seq > ? AND body LIKE ? ORDER BY seq LIMIT ?",
-                              (event.seq, f'%"{event.id}"%', limit * 4)).fetchall()
-        return [e for e in (HistoryEvent(**json.loads(r[0])) for r in rows) if event.id in e.causedBy][:limit]
+            rows = db.execute("SELECT e.body FROM causes c JOIN events e ON e.seq = c.seq WHERE c.cause = ? ORDER BY c.seq LIMIT ?",
+                              (event.id, limit)).fetchall()
+        return [HistoryEvent(**json.loads(r[0])) for r in rows]
 
     def query(self, *, person: str | None = None, entity: str | None = None, kinds: list[str] | None = None,
               categories: list[str] | None = None, sources: list[str] | None = None, min_importance: int = 1,

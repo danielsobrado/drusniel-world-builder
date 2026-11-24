@@ -14,29 +14,29 @@ from typing import Any
 from .contracts import Person
 from .relationships import Ties
 
-YEAR = 360
 FAMILY_KINDS = {"multigenerational", "couple-with-children", "couple", "elder-couple", "single-parent"}
 COUPLE_KINDS = {"multigenerational", "couple-with-children", "couple", "elder-couple"}
 
 
-def years(p: Person, day: int = 0) -> int:
-    return (day - p.birthDay) // YEAR
+def years(p: Person, cfg: dict[str, Any], day: int = 0) -> int:
+    return (day - p.birthDay) // cfg["daysPerYear"]
 
 
 def _household_ties(ties: Ties, members: list[Person], kind: str, cfg: dict[str, Any]) -> None:
+    year = cfg["daysPerYear"]
     grown = sorted((p for p in members if p.role != "child"), key=lambda p: p.birthDay)
     children = [p for p in members if p.role == "child"]
-    gap = cfg["parentMinAge"] * YEAR
+    gap = cfg["parentMinAge"] * year
     elder_parent = None
-    if kind == "multigenerational" and len(grown) >= 2 and years(grown[0]) >= 60:
+    if kind == "multigenerational" and len(grown) >= 2 and years(grown[0], cfg) >= 60:
         elder_parent, grown = grown[0], grown[1:]
     couple = grown[:2]
-    fits = len(couple) == 2 and couple[0].sex != couple[1].sex and abs(couple[0].birthDay - couple[1].birthDay) <= 15 * YEAR
+    fits = len(couple) == 2 and couple[0].sex != couple[1].sex and abs(couple[0].birthDay - couple[1].birthDay) <= 15 * year
     if kind in COUPLE_KINDS and fits:
         younger = max(couple, key=lambda p: p.birthDay)
         first_child = min((c.birthDay for c in children), default=0)
-        married = min(first_child - YEAR, younger.birthDay + cfg["marryFromAge"] * YEAR + YEAR)
-        ties.add("spouse", couple[0].id, couple[1].id, max(married, younger.birthDay + cfg["marryFromAge"] * YEAR), "generated")
+        married = min(first_child - year, younger.birthDay + cfg["marryFromAge"] * year + year)
+        ties.add("spouse", couple[0].id, couple[1].id, max(married, younger.birthDay + cfg["marryFromAge"] * year), "generated")
     if elder_parent is not None and grown and grown[0].birthDay - elder_parent.birthDay >= gap:
         ties.add("parent", elder_parent.id, grown[0].id, grown[0].birthDay, "generated")
     if kind in FAMILY_KINDS:
@@ -50,11 +50,12 @@ def _household_ties(ties: Ties, members: list[Person], kind: str, cfg: dict[str,
 
 
 def _work_ties(ties: Ties, people: list[Person], rng: random.Random, cfg: dict[str, Any]) -> None:
+    year = cfg["daysPerYear"]
     starts: dict[str, int] = {}
     for p in people:
         if p.role == "worker" and p.businessId:
-            earliest = p.birthDay + cfg["workFromAge"] * YEAR
-            start = max(earliest, -rng.randint(0, cfg["maxTenureYears"]) * YEAR - rng.randint(0, YEAR - 1))
+            earliest = p.birthDay + cfg["workFromAge"] * year
+            start = max(earliest, -rng.randint(0, cfg["maxTenureYears"]) * year - rng.randint(0, year - 1))
             starts[p.id] = min(start, 0)
             ties.add("employer", p.businessId, p.id, starts[p.id], "generated")
     by_business: dict[str, list[Person]] = {}
@@ -62,8 +63,9 @@ def _work_ties(ties: Ties, people: list[Person], rng: random.Random, cfg: dict[s
         if p.id in starts:
             by_business.setdefault(p.businessId or "", []).append(p)
     for staff in by_business.values():
-        for young in (p for p in staff if years(p) <= cfg["apprenticeUntilAge"]):
-            mentor = next((p for p in sorted(staff, key=lambda p: p.birthDay) if years(p) >= 30 and p.profession == young.profession), None)
+        for young in (p for p in staff if years(p, cfg) <= cfg["apprenticeUntilAge"]):
+            mentor = next((p for p in sorted(staff, key=lambda p: p.birthDay) if years(p, cfg) >= 30 and p.profession == young.profession),
+                          None)
             if mentor:
                 ties.add("mentor", mentor.id, young.id, starts[young.id], "generated", businessId=young.businessId)
         for a, b in combinations(sorted(staff, key=lambda p: p.id), 2):
@@ -73,6 +75,7 @@ def _work_ties(ties: Ties, people: list[Person], rng: random.Random, cfg: dict[s
 
 def initial_ties(people: list[Person], households: dict[str, str], traders: list[Any], seed: int, cfg: dict[str, Any]) -> Ties:
     """`households` maps household id to its kind."""
+    year = cfg["daysPerYear"]
     ties = Ties([], 0)
     for hid, kind in sorted(households.items()):
         _household_ties(ties, [p for p in people if p.householdId == hid], kind, cfg)
@@ -80,5 +83,5 @@ def initial_ties(people: list[Person], households: dict[str, str], traders: list
     holders = {p.traderId: p for p in people if p.traderId}
     for a, b in combinations(sorted((t for t in traders if t.id in holders), key=lambda t: t.id), 2):
         if a.routeId == b.routeId and a.personality.greed >= 0.6 and b.personality.greed >= 0.6:
-            ties.add("rival", holders[a.id].id, holders[b.id].id, -YEAR, "generated", routeId=a.routeId)
+            ties.add("rival", holders[a.id].id, holders[b.id].id, -year, "generated", routeId=a.routeId)
     return ties

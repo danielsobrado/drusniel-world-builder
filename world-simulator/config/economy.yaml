@@ -28,6 +28,7 @@ market:
   priceBounds: [0.25, 4.0]      # price factor range against the Azgaar base price
   priceSmoothing: 0.5           # share of the gap to the new price closed each month
   maxPricePoints: 121           # newest monthly price points kept per market
+  credit: 0                     # coins a town may owe the market; purchases stop at treasury + this month's sales + this
 
 caravans:
   milesPerDay: 20

@@ -11,6 +11,7 @@ from world_sim.simulation.history.contracts import HistoryEvent
 from world_sim.simulation.manager import ScenarioManager
 from world_sim.simulation.people.contracts import Cast, Person
 from world_sim.simulation.people.generate import age_years
+from world_sim.simulation.rules import ready
 
 
 def test_everyone_at_the_start_has_a_checked_past(fresh_model):
@@ -21,7 +22,7 @@ def test_everyone_at_the_start_has_a_checked_past(fresh_model):
     assert all(p.backstory for p in state.cast.people) and state.historySeq == len(past)
     people = {p.id: p for p in state.cast.people}
     facts = Counter(x.personId for e in past for x in e.participants)
-    adults = [p for p in state.cast.people if age_years(p, 0) >= 18]
+    adults = [p for p in state.cast.people if age_years(p, 0, ready(fresh_model.config.rules)["simulation"]["people"]) >= 18]
     assert sum(facts[p.id] for p in adults) / len(adults) >= 3, "an ordinary adult has a few established facts"
     for e in past:
         assert e.datePrecision in ("year", "approximate") and e.day <= 0

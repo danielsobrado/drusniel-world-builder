@@ -12,14 +12,14 @@ from .contracts import Cast, Person
 from .generate import age_years
 from .relationships import Ties
 
-RECENT = 360
 
-
-def _recent(p: Person, kinds: set[str], day: int, within: int = RECENT) -> list[Any]:
+def _recent(p: Person, kinds: set[str], day: int, within: int) -> list[Any]:
     return [e for e in p.events if e.kind in kinds and day - e.day <= within]
 
 
-def hooks(p: Person, cast: Cast, trade: Trade, settlement: Any, day: int) -> list[dict[str, str]]:
+def hooks(p: Person, cast: Cast, trade: Trade, settlement: Any, day: int, cfg: dict[str, Any]) -> list[dict[str, str]]:
+    """`cfg` is the people rules: `daysPerYear` sets what counts as recent (within a year) and ages."""
+    year = cfg["daysPerYear"]
     ties = Ties(cast.relationships, cast.relSeq)
     people = {x.id: x for x in cast.people}
     family = {*ties.parents(p.id), *ties.children(p.id), *(x for x in [ties.spouse(p.id)] if x),
@@ -33,7 +33,7 @@ def hooks(p: Person, cast: Cast, trade: Trade, settlement: Any, day: int) -> lis
 
     if p.role == "outlaw" and p.routeId in routes:
         add("outlaw", f"Lives outside the law on the road to {routes[p.routeId].centerName}", "role")
-    if p.role == "unemployed" and age_years(p, day) >= 15:
+    if p.role == "unemployed" and age_years(p, day, cfg) >= 15:
         add("work", f"Looking for work, {p.idleMonths} months without it" if p.idleMonths else "Looking for work", "role")
     for x in sorted(family):
         relative = people.get(x)
@@ -45,14 +45,14 @@ def hooks(p: Person, cast: Cast, trade: Trade, settlement: Any, day: int) -> lis
             if road and road.bandits:
                 add("family-danger", f"Worried about {relative.name} on the road to {road.centerName}, where {road.bandits} bandits ride",
                     f"relative:{x}")
-    grief = [e for e in cast.people if e.id in family and not e.alive and e.deathDay is not None and day - e.deathDay <= 2 * RECENT]
+    grief = [e for e in cast.people if e.id in family and not e.alive and e.deathDay is not None and day - e.deathDay <= 2 * year]
     for x in grief:
         add("grief", f"Mourning {x.name} {x.family}", f"relative:{x.id}")
-    if _recent(p, {"married"}, day):
+    if _recent(p, {"married"}, day, year):
         spouse = people.get(ties.spouse(p.id) or "")
         if spouse:
             add("new-family", f"Newly married to {spouse.name}", "event")
-    if _recent(p, {"moved", "promoted"}, day) and p.role != "child":
+    if _recent(p, {"moved", "promoted"}, day, year) and p.role != "child":
         add("newcomer", f"Making a new life in {settlement.name}", "event")
     mentor = next((r for r in ties.of(p.id, "mentor") if r.b == p.id), None)
     if mentor and mentor.a in people:
@@ -60,7 +60,7 @@ def hooks(p: Person, cast: Cast, trade: Trade, settlement: Any, day: int) -> lis
     if trader:
         if trader.purse < 0:
             add("debt", f"Owes {-trader.purse:.0f} and is tempted by riskier dealings", "purse")
-        if trader.scorecard.lossesValue and _recent(p, {"raid"}, day):
+        if trader.scorecard.lossesValue and _recent(p, {"raid"}, day, year):
             add("loss", "Wants to recover what bandits took from the caravan", "event")
         if trader.owns:
             add("ambition", "Hoping to expand the businesses they funded", "ownership")

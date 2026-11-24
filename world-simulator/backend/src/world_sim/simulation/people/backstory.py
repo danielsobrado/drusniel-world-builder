@@ -16,8 +16,6 @@ from ..history.recorder import on_timelines, record, with_origins
 from .contracts import Cast, Person
 from .relationships import Ties
 
-YEAR = 360
-
 
 def _year(rng: random.Random, low: int, high: int) -> int:
     return rng.randint(low, high) if high >= low else low
@@ -30,6 +28,7 @@ class Past:
                  cfg: dict[str, Any], seed: int, done: set[str]):
         self.p, self.cast, self.ties, self.names, self.businesses = p, cast, ties, names, businesses
         self.now, self.cfg, self.done = now, cfg, done
+        self.year = cfg["daysPerYear"]
         self.rng = random.Random(f"{seed}:backstory:{p.id}")
         self.out: list[dict[str, Any]] = []
         self.who = f"{p.name} {p.family}"
@@ -52,14 +51,14 @@ class Past:
         if self.age() < 25:
             h = next((h for h in self.cast.households if h.id == self.p.householdId), None)
             kind = (h.kind if h else "single").replace("-", " ")
-            self.add("upbringing", self.p.birthDay + 5 * YEAR, f"{self.who} grew up in a {kind} household in {place}",
+            self.add("upbringing", self.p.birthDay + 5 * self.year, f"{self.who} grew up in a {kind} household in {place}",
                      facts={"household": kind}, householdId=self.p.householdId)
 
     def person(self, pid: str) -> Person:
         return next(x for x in self.cast.people if x.id == pid)
 
     def age(self) -> int:
-        return (self.now - self.p.birthDay) // YEAR
+        return (self.now - self.p.birthDay) // self.year
 
     def first_steps(self) -> int:
         """Apprenticeship and the move to town, in an order that fits; returns the earliest day of working life here."""
@@ -71,7 +70,7 @@ class Past:
         settled = min(anchors, default=self.now)
         trade = self.p.profession if self.p.role == "worker" else "caravan" if self.p.role == "trader" else None
         if trade and (trade in c["apprenticeTrades"] or self.p.role == "trader"):
-            start = self.p.birthDay + _year(self.rng, c["apprenticeFromAge"], c["apprenticeFromAge"] + 2) * YEAR
+            start = self.p.birthDay + _year(self.rng, c["apprenticeFromAge"], c["apprenticeFromAge"] + 2) * self.year
             mentor = next((r for r in self.ties.of(self.p.id, "mentor") if r.b == self.p.id), None)
             if mentor:
                 start = mentor.since
@@ -81,14 +80,15 @@ class Past:
                 self.add("apprenticeship-started", start, f"{self.who} {learned}",
                          participants=[{"personId": self.p.id, "role": "apprentice"}, *master], facts={"trade": trade},
                          ties=[mentor.id] if mentor else [])
-                if start + c["apprenticeYears"] * YEAR < self.now:
-                    self.add("apprenticeship-completed", start + c["apprenticeYears"] * YEAR, f"{self.who} finished their apprenticeship",
+                if start + c["apprenticeYears"] * self.year < self.now:
+                    finished = start + c["apprenticeYears"] * self.year
+                    self.add("apprenticeship-completed", finished, f"{self.who} finished their apprenticeship",
                              participants=[{"personId": self.p.id, "role": "apprentice"}, *master], facts={"trade": trade})
         if self.p.birthplaceId and self.p.birthplaceId != self.p.settlementId:
-            low = self.p.birthDay + c["moveAge"][0] * YEAR
-            high = min(self.p.birthDay + c["moveAge"][1] * YEAR, settled - 30)
+            low = self.p.birthDay + c["moveAge"][0] * self.year
+            high = min(self.p.birthDay + c["moveAge"][1] * self.year, settled - 30)
             with_family = high < low
-            day = self.p.birthDay + _year(self.rng, 2, 12) * YEAR if with_family else self.rng.randint(low, high)
+            day = self.p.birthDay + _year(self.rng, 2, 12) * self.year if with_family else self.rng.randint(low, high)
             day = min(day, settled - 30)
             here = self.names.get(self.p.settlementId, "town")
             self.add("moved", day, f"{self.who} {'moved with their family' if with_family else 'moved'} from "
@@ -104,11 +104,11 @@ class Past:
             self.add("hired", job.since, f"{self.who} began working as {b.profession} at {b.name}", "year", businessId=b.id,
                      settlementId=self.p.settlementId, ties=[job.id], facts={"profession": b.profession})
         if self.p.role == "trader":
-            since = max(self.p.birthDay + 22 * YEAR, self.now - _year(self.rng, 1, 10) * YEAR)
+            since = max(self.p.birthDay + 22 * self.year, self.now - _year(self.rng, 1, 10) * self.year)
             self.add("trader", since, f"{self.who} became a caravan master of {self.names.get(self.p.settlementId, 'their town')}",
                      settlementId=self.p.settlementId, relatedEntities=[self.p.traderId] if self.p.traderId else [])
         if self.p.role == "retired" and self.age() >= 60:
-            self.add("retired", self.p.birthDay + _year(self.rng, 60, self.age()) * YEAR, f"{self.who} stopped working",
+            self.add("retired", self.p.birthDay + _year(self.rng, 60, self.age()) * self.year, f"{self.who} stopped working",
                      settlementId=self.p.settlementId)
 
     def family(self) -> None:
@@ -122,7 +122,7 @@ class Past:
         c = self.cfg
         if self.age() >= c["lostParentFromAge"] and not self.ties.parents(self.p.id) and self.rng.random() < self.age() / 100:
             relation = self.rng.choice(("mother", "father"))
-            self.add("lost-parent", self.p.birthDay + _year(self.rng, 20, self.age()) * YEAR, f"{self.who} lost their {relation}",
+            self.add("lost-parent", self.p.birthDay + _year(self.rng, 20, self.age()) * self.year, f"{self.who} lost their {relation}",
                      participants=[{"personId": self.p.id, "role": "child"}], facts={"relation": relation})
 
 

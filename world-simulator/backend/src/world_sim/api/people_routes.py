@@ -15,9 +15,13 @@ from .errors import ApiError
 def people_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]) -> APIRouter:
     router = APIRouter(prefix="/api")
 
-    def summary(p: Person, day: int, places: dict[str, str], workplaces: dict[str, str]) -> dict[str, Any]:
+    def calendar(scenario_id: str) -> dict[str, Any]:
+        """The scenario's people rules, whose `daysPerYear` comes from its frozen calendar."""
+        return manager.rules(manager.session(scenario_id))["simulation"]["people"]
+
+    def summary(p: Person, day: int, places: dict[str, str], workplaces: dict[str, str], cfg: dict[str, Any]) -> dict[str, Any]:
         row = p.model_dump(exclude={"events"})
-        return {**row, "age": age_years(p, p.deathDay if not p.alive and p.deathDay is not None else day),
+        return {**row, "age": age_years(p, p.deathDay if not p.alive and p.deathDay is not None else day, cfg),
                 "settlementName": places.get(p.settlementId, ""), "workplace": workplaces.get(p.businessId or "")}
 
     @router.get("/scenarios/{scenario_id}/people")
@@ -36,7 +40,8 @@ def people_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]) 
                 "deaths": state.cast.deaths, "births": state.cast.births, "arrivals": state.cast.arrivals,
                 "settlements": [{"id": s.settlementId, "name": s.name, "budget": state.cast.budget.get(s.settlementId, 0)}
                                 for s in state.settlements]}
-        return reply([summary(p, state.date.day, places, workplaces) for p in rows[start:start + pageSize]], meta)
+        cfg = calendar(scenario_id)
+        return reply([summary(p, state.date.day, places, workplaces, cfg) for p in rows[start:start + pageSize]], meta)
 
     @router.get("/scenarios/{scenario_id}/people/{person_id}")
     async def person(scenario_id: str, person_id: str) -> JSONResponse:
@@ -47,10 +52,11 @@ def people_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]) 
         places = {s.settlementId: s.name for s in state.settlements}
         workplaces = {b.id: b.name for s in state.settlements for b in s.society.businesses}
         household = next(h for h in state.cast.households if h.id == found.householdId)
-        members = [{"id": p.id, "name": p.name, "age": age_years(p, state.date.day), "role": p.role, "alive": p.alive}
+        cfg = calendar(scenario_id)
+        members = [{"id": p.id, "name": p.name, "age": age_years(p, state.date.day, cfg), "role": p.role, "alive": p.alive}
                    for p in state.cast.people if p.householdId == household.id and p.id != found.id]
         route = next((r.model_dump() for r in state.trade.routes if r.id == found.routeId), None)
-        return reply({**summary(found, state.date.day, places, workplaces), "events": [e.model_dump() for e in reversed(found.events)],
+        return reply({**summary(found, state.date.day, places, workplaces, cfg), "events": [e.model_dump() for e in reversed(found.events)],
                       "household": {**household.model_dump(), "members": members}, "route": route})
 
     return router

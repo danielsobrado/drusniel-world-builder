@@ -7,6 +7,7 @@ from world_sim.simulation.history.contracts import HistoryEvent
 from world_sim.simulation.people.checks import check_ties
 from world_sim.simulation.people.generate import age_years, band_of
 from world_sim.simulation.people.outlook import apply_experience
+from world_sim.simulation.rules import ready
 
 BANDS = {"child": "children", "adult": "adults", "elder": "elders"}
 
@@ -18,13 +19,13 @@ def pilot(model, seed=1212):
 
 def test_named_births_and_deaths_are_drawn_from_the_towns_own(eldara):
     state = pilot(eldara)
-    cfg = eldara.config.simulation["people"]
+    cfg = ready(eldara.config.rules)["simulation"]["people"]
     for _ in range(60):
         before = {p.id: p for p in state.cast.people}
         state, months = advance(state, 30, eldara.config.rules)
         events = months[0]["events"]
         for s in state.settlements:
-            dead = Counter(band_of(age_years(before[e.participants[0].personId], state.date.day), cfg) for e in events
+            dead = Counter(band_of(age_years(before[e.participants[0].personId], state.date.day, cfg), cfg) for e in events
                            if e.source == "simulation" and e.kind == "died"
                            and before[e.participants[0].personId].settlementId == s.settlementId)
             for band, n in dead.items():
@@ -35,12 +36,12 @@ def test_named_births_and_deaths_are_drawn_from_the_towns_own(eldara):
                 roles = {p.role: p.personId for p in e.participants}
                 assert {"newborn", "mother", "father"} <= set(roles)
                 mother = next(p for p in state.cast.people if p.id == roles["mother"])
-                assert age_years(mother, e.day) >= cfg["parentMinAge"], "no child before a valid age"
+                assert age_years(mother, e.day, cfg) >= cfg["parentMinAge"], "no child before a valid age"
 
 
 def test_relationships_are_explicit_and_stay_consistent(eldara):
     start = pilot(eldara)
-    assert check_ties(start.cast) == []
+    assert check_ties(start.cast, 360) == []
     kinds = Counter(r.kind for r in start.cast.relationships)
     assert kinds["spouse"] and kinds["parent"] and kinds["employer"], kinds
     assert all(r.origin == "generated" for r in start.cast.relationships), "the past at the start is reconstructed, not observed"
@@ -49,7 +50,7 @@ def test_relationships_are_explicit_and_stay_consistent(eldara):
         if r.kind == "parent":
             assert people[r.b].birthDay - people[r.a].birthDay >= 16 * 360
     state, months = advance(start, 3600, eldara.config.rules)
-    assert check_ties(state.cast) == []
+    assert check_ties(state.cast, 360) == []
     events = {e.id: e for m in months for e in m["events"]}
     made = [r for r in state.cast.relationships if r.origin and r.origin.startswith("event:")]
     assert made, "relationships formed during the run point at the event that formed them"

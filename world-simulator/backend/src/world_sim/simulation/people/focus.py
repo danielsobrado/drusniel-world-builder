@@ -40,7 +40,7 @@ def promote(people: dict[str, Person], s: SettlementState, cast: Cast, m: "Month
     if business:
         named_workers[business.id] = named_workers.get(business.id, 0) + 1
     person = Person(id=pid, name=rng.choice(pool.given), family=family, sex=rng.choice(("female", "male")),
-                    birthDay=birth_day(rng, band, m.cfg["ages"]), settlementId=s.settlementId, householdId=hid, role=role,
+                    birthDay=birth_day(rng, band, m.cfg), settlementId=s.settlementId, householdId=hid, role=role,
                     businessId=business.id if business else None, profession=business.profession if business else None,
                     retired=role == "retired", personality=traits, profile=profile_for(traits, rng))
     if business:

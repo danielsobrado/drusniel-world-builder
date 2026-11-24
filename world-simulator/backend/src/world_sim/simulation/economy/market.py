@@ -1,6 +1,7 @@
 """
 Monthly market clearing. Each Azgaar market sits at its centre burg. Members sell what
-they hold above their target stock and buy what they lack; every sale and purchase
+they hold above their target stock and buy what they lack, as far as their treasury, this
+month's sales and their credit allow (food first); every sale and purchase
 travels as a caravan unless the member is the centre itself. Members outside the
 scenario's scope and other markets trade as Azgaar recorded them, more or less as
 prices move. Scarce stock is shared pro rata, and prices follow stock against demand.
@@ -29,6 +30,20 @@ def targets(m: Member, cfg: dict[str, Any]) -> dict[str, float]:
     out = {g: u * months for g, u in monthly_use(m.econ, m.population, m.ratios).items()}
     out[e["food"]["good"]] = m.population * cfg["society"]["needs"]["rationsPerPersonDay"] * e["food"]["granary"]["targetDays"]
     return out
+
+
+def affordable(want: dict[str, float], prices: dict[str, float], budget: float, food: str) -> dict[str, float]:
+    """What a member can pay for out of `budget`: food first, then every other good scaled down alike."""
+    if sum(u * prices[g] for g, u in want.items()) <= budget:
+        return want
+    out = {}
+    if food in want:
+        out[food] = min(want[food], max(0.0, budget) / prices[food])
+        budget -= out[food] * prices[food]
+    rest = sum(u * prices[g] for g, u in want.items() if g != food)
+    scale = min(1.0, max(0.0, budget) / rest) if rest > EPS else 0.0
+    out |= {g: u * scale for g, u in want.items() if g != food}
+    return {g: u for g, u in out.items() if u > EPS}
 
 
 def _new_price(good: MarketGood, demand: float, stock: float, mc: dict[str, Any]) -> float:
@@ -80,6 +95,9 @@ class Clearing:
                     inv[g] = r4(have - sale[g])
                 elif keep - have > EPS:
                     want[g] = keep - have
+            if mc.get("credit") is not None:     # absent in rules frozen before it existed: unlimited, as they ran
+                budget = m.econ.treasury + mc["credit"] + sum(u * prices[g] for g, u in sale.items())
+                want = affordable(want, prices, budget, self.cfg["economy"]["food"]["good"])
             if sale and m.econ.travelDays == 0:
                 for g, u in sale.items():
                     stock[g] += u

@@ -30,7 +30,7 @@ def deaths(people: dict[str, Person], s: SettlementState, m: "Month") -> set[str
         if not toll:
             continue
         pool = sorted((p for p in people.values() if p.alive and p.settlementId == s.settlementId
-                       and band_of(age_years(p, m.day), m.cfg) == band), key=lambda p: p.id)
+                       and band_of(age_years(p, m.day, m.cfg), m.cfg) == band), key=lambda p: p.id)
         rate = toll / max(1, getattr(s.cohorts, key) + toll)
         taken = 0
         for p in pool:
@@ -45,7 +45,7 @@ def deaths(people: dict[str, Person], s: SettlementState, m: "Month") -> set[str
 def bury(p: Person, m: "Month", food_shortage: bool) -> Person:
     """Records the death once, with the relatives it bereaves, and ends the person's ties."""
     ties = m.ties
-    age = age_years(p, m.day)
+    age = age_years(p, m.day, m.cfg)
     spouse = ties.spouse(p.id)
     parts = [{"personId": p.id, "role": "deceased"}]
     parts += [{"personId": spouse, "role": "widowed"}] if spouse else []
@@ -69,7 +69,7 @@ def _new_household(cast_households: list[NpcHousehold], dwellings: list, s: Sett
 def marriages(people: dict[str, Person], s: SettlementState, m: "Month", households: list[NpcHousehold], dwellings: list) -> None:
     c, ties = m.cfg, m.ties
     singles = sorted((p for p in people.values() if p.alive and p.settlementId == s.settlementId
-                      and c["marryFromAge"] <= age_years(p, m.day) <= c["marryUntilAge"]
+                      and c["marryFromAge"] <= age_years(p, m.day, m.cfg) <= c["marryUntilAge"]
                       and p.role not in ("outlaw", "imprisoned", "child") and ties.spouse(p.id) is None), key=lambda p: p.id)
     taken: set[str] = set()
     for p in singles:
@@ -77,7 +77,7 @@ def marriages(people: dict[str, Person], s: SettlementState, m: "Month", househo
             continue
         rng = random.Random(f"{m.seed}:{m.day}:{p.id}:marry")
         options = [q for q in singles if q.id not in taken and q.id != p.id and q.sex != p.sex
-                   and abs(q.birthDay - p.birthDay) <= c["partnerAgeGap"] * 360]
+                   and abs(q.birthDay - p.birthDay) <= c["partnerAgeGap"] * c["daysPerYear"]]
         if not options:
             continue
         friends = [q for q in options if ties.linked(p.id, q.id, "friend")]
@@ -101,18 +101,26 @@ def marriages(people: dict[str, Person], s: SettlementState, m: "Month", househo
                                 householdId=h.id)
 
 
-def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast, room: int) -> int:
-    """Named children of named couples, within the town's births this month and the budget's allowance; returns how many."""
+def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast, room: int, households: list[NpcHousehold]) -> int:
+    """Named children of named couples, within the town's births this month and the budget's allowance; returns how many.
+    `households` is the month's working list, so a couple married earlier this month is found. A child comes at least
+    `pregnancyMonths` after the marriage and after the mother's previous child."""
     c, ties = m.cfg, m.ties
+    carried = c.get("pregnancyMonths", 0) * c["daysPerMonth"]     # 0 in rules frozen before it existed: they replay unchanged
+    families = {h.id: h.family for h in households}
     if s.vitals.births <= 0 or room <= 0:
         return 0
     rate = s.vitals.births / max(1, s.cohorts.adults / 2)
     born = 0
     mothers = sorted((p for p in people.values() if p.alive and p.sex == "female" and p.settlementId == s.settlementId
-                      and c["parentMinAge"] <= age_years(p, m.day) <= 45 and ties.spouse(p.id)), key=lambda p: p.id)
+                      and c["parentMinAge"] <= age_years(p, m.day, m.cfg) <= 45 and ties.spouse(p.id)), key=lambda p: p.id)
     for mother in mothers:
         father_id = ties.spouse(mother.id)
         if born >= min(room, s.vitals.births) or not m.alive(father_id) or people[father_id].householdId != mother.householdId:
+            continue
+        married = ties.of(mother.id, "spouse")[0].since
+        last = max((people[x].birthDay for x in ties.children(mother.id) if x in people), default=None)
+        if m.day - married < carried or (last is not None and m.day - last < carried):
             continue
         rng = random.Random(f"{m.seed}:{m.day}:{mother.id}:birth")
         if rng.random() >= rate:
@@ -120,8 +128,8 @@ def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast
         father = people[father_id]
         cast_seq = m.next_id(s)
         traits = personality(rng)
-        child = Person(id=cast_seq, name=rng.choice(cast.names[s.settlementId].given), family=next(
-            h.family for h in cast.households if h.id == mother.householdId), sex=rng.choice(("female", "male")), birthDay=m.day,
+        child = Person(id=cast_seq, name=rng.choice(cast.names[s.settlementId].given), family=families[mother.householdId],
+            sex=rng.choice(("female", "male")), birthDay=m.day,
             settlementId=s.settlementId, birthplaceId=s.settlementId, householdId=mother.householdId, role="child",
             personality=traits, profile=profile_for(traits, rng))
         siblings = [x for x in ties.children(mother.id) if x in ties.children(father.id) and m.alive(x)]

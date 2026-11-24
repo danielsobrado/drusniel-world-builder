@@ -104,9 +104,10 @@ class Lab:
         checks = [
             _check("accounting", "Population, households and jobs add up in every settlement", accounting, len(state.settlements)),
             _check("people", "Named people fit each town's budget and belong to households",
-                   check_cast(state.cast, state.settlements, state.trade, rules["simulation"]["people"]["maxOverBudget"]),
+                   check_cast(state.cast, state.settlements, state.trade, rules["simulation"]["people"]),
                    len(state.cast.people)),
-            _check("relationships", "Relationships are consistent (spouses, parents, employers)", check_ties(state.cast),
+            _check("relationships", "Relationships are consistent (spouses, parents, employers)",
+                   check_ties(state.cast, rules["simulation"]["people"]["daysPerYear"]),
                    len(state.cast.relationships)),
             _check("archive", "The history archive is complete up to the state's event counter", archive, len(events)),
             _check("history", "Every event names people, places and businesses that exist, at a time they could",

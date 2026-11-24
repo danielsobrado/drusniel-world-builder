@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from world_sim.api.app import create_app
+from world_sim.simulation.contracts import STATE_SCHEMA_VERSION
 
 
 @pytest.fixture
@@ -28,7 +29,7 @@ def test_scenario_lifecycle_over_http(client):
     stepped = data(client.post("/api/scenarios/baseline-pilot/step", json={"unit": "year"}))
     assert stepped["date"]["label"] == "1213-01-01"
     state = data(client.get("/api/scenarios/baseline-pilot/state"))
-    assert state["schemaVersion"] == 6 and len(state["history"]) == 13
+    assert state["schemaVersion"] == STATE_SCHEMA_VERSION and len(state["history"]) == 13
     assert [e["kind"] for e in data(client.get("/api/scenarios/baseline-pilot/events?limit=2"))] == ["stepped", "month"]
 
     snap = data(client.post("/api/scenarios/baseline-pilot/snapshots", json={"label": "Year one"}), 201)

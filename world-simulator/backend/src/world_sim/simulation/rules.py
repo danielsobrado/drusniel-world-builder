@@ -19,9 +19,20 @@ def freeze(rules: dict[str, Any]) -> dict[str, Any]:
 
 
 def complete(frozen: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
-    """A frozen ruleset with settings introduced after it was frozen taken from the current config; its own values win."""
+    """A frozen ruleset with settings introduced after it was frozen taken from the current config; its own values win.
+    The people rules gain `daysPerMonth` and `daysPerYear` from the same frozen calendar, so every age and span
+    follows the scenario's own year."""
     now = freeze(current)
-    return {section: {**now[section], **frozen.get(section, {})} for section in now}
+    rules = {section: {**now[section], **frozen.get(section, {})} for section in now}
+    calendar = rules["simulation"]["calendar"]
+    people = {**rules["simulation"]["people"], "daysPerMonth": calendar["daysPerMonth"],
+              "daysPerYear": calendar["daysPerMonth"] * calendar["monthsPerYear"]}
+    return {**rules, "simulation": {**rules["simulation"], "people": people}}
+
+
+def ready(rules: dict[str, Any]) -> dict[str, Any]:
+    """The current config as a scenario would run it (a new scenario's rules before they are frozen)."""
+    return complete(freeze(rules), rules)
 
 
 def fingerprint(frozen: dict[str, Any]) -> str:

@@ -22,16 +22,14 @@ TEMPLATES = {
     "multigenerational": (2, True, 1), "couple-with-children": (2, True, 0), "single-parent": (1, True, 0),
     "couple": (2, False, 0), "single": (1, False, 0), "elder-couple": (0, False, 2), "elder-single": (0, False, 1),
 }
-YEAR = 360
+def birth_day(rng: random.Random, band: str, cfg: dict[str, Any]) -> int:
+    low, high, year = *cfg["ages"][band], cfg["daysPerYear"]
+    return -(rng.randint(low, high) * year + rng.randint(0, year - 1))
 
 
-def birth_day(rng: random.Random, band: str, ages: dict[str, list[int]]) -> int:
-    low, high = ages[band]
-    return -(rng.randint(low, high) * YEAR + rng.randint(0, YEAR - 1))
-
-
-def age_years(person: Person, day: int) -> int:
-    return (day - person.birthDay) // YEAR
+def age_years(person: Person, day: int, cfg: dict[str, Any]) -> int:
+    """Whole years of the scenario's calendar (`cfg` is the people rules, with `daysPerYear`)."""
+    return (day - person.birthDay) // cfg["daysPerYear"]
 
 
 def band_of(age: int, cfg: dict[str, Any]) -> str:
@@ -59,7 +57,7 @@ class CastBuilder:
     def person(self, h: NpcHousehold, band: str, sex: str, birth: int | None = None, **fields: Any) -> Person:
         fields.setdefault("role", "unemployed")
         ages = {**self.cfg["ages"], "adult": self.cfg["traderAges"]} if fields["role"] == "trader" else self.cfg["ages"]
-        born = birth if birth is not None else birth_day(self.rng, band, ages)
+        born = birth if birth is not None else birth_day(self.rng, band, {**self.cfg, "ages": ages})
         p = Person(id=f"npc:{self.s.sourceId}:{len(self.people) + 1}", name=fields.pop("name", None) or self.rng.choice(self.pool.given),
                    family=h.family, sex=sex, birthDay=born, settlementId=self.s.settlementId, birthplaceId=self.s.settlementId,
                    householdId=h.id, personality=(traits := fields.pop("personality", None) or personality(self.rng)),
@@ -112,15 +110,17 @@ class CastBuilder:
 
     def partner_birth(self, first: int, band: str) -> int:
         low, high = self.cfg["ages"][band]
-        age = (0 - first) // YEAR + self.rng.randint(-self.cfg["partnerAgeGap"], self.cfg["partnerAgeGap"])
-        return -(max(low, min(high, age)) * YEAR + self.rng.randint(0, YEAR - 1))
+        year = self.cfg["daysPerYear"]
+        age = (0 - first) // year + self.rng.randint(-self.cfg["partnerAgeGap"], self.cfg["partnerAgeGap"])
+        return -(max(low, min(high, age)) * year + self.rng.randint(0, year - 1))
 
     def child_births(self, grown: list[Person], count: int) -> list[int]:
         """Children born after the youngest parent was old enough, and young enough to still be children now."""
-        parents = [p for p in grown if age_years(p, 0) < self.cfg["ages"]["elder"][0]] or grown
+        parents = [p for p in grown if age_years(p, 0, self.cfg) < self.cfg["ages"]["elder"][0]] or grown
         if not parents or not count:
             return []
-        earliest = max(max(p.birthDay for p in parents) + self.cfg["parentMinAge"] * YEAR, -(self.cfg["ages"]["child"][1] + 1) * YEAR + 1)
+        year = self.cfg["daysPerYear"]
+        earliest = max(max(p.birthDay for p in parents) + self.cfg["parentMinAge"] * year, -(self.cfg["ages"]["child"][1] + 1) * year + 1)
         if earliest > 0:
             return []
         return sorted(self.rng.randint(earliest, 0) for _ in range(count))

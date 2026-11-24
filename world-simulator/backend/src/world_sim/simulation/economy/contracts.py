@@ -104,6 +104,7 @@ class Caravan(Contract):
     lost: dict[str, float] = {}      # taken by bandits on the road
     smuggled: float = 0.0              # value hidden from the market tax
     caught: bool = False             # smuggled goods confiscated at the gate
+    news: list[str] = []             # events from home the master carries as rumour, told on arrival (v7)
 
 
 class Route(Contract):

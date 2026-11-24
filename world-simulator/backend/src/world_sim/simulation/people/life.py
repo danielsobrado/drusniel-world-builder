@@ -29,8 +29,8 @@ class Town:
     settlement: SettlementState
     businesses: dict[str, Business]
     named: Counter
-    route: Route | None
-    outlaws: int
+    routes: dict[str, Route]       # every road or sea lane out of the town, by id
+    outlaws: Counter               # named outlaws per route
     unemployment: float
 
 
@@ -62,9 +62,9 @@ def _towns(people: dict[str, Person], settlements: list[SettlementState], routes
     for s in settlements:
         e = s.society.employment
         named = Counter(p.businessId for p in people.values() if p.alive and p.settlementId == s.settlementId and p.role == "worker")
-        route = next((r for r in routes if r.settlementId == s.settlementId), None)
-        outlaws = sum(1 for p in people.values() if p.alive and p.role == "outlaw" and route and p.routeId == route.id)
-        towns[s.settlementId] = Town(s, {b.id: b for b in s.society.businesses}, named, route, outlaws,
+        own = {r.id: r for r in routes if r.settlementId == s.settlementId}
+        outlaws = Counter(p.routeId for p in people.values() if p.alive and p.role == "outlaw" and p.routeId in own)
+        towns[s.settlementId] = Town(s, {b.id: b for b in s.society.businesses}, named, own, outlaws,
                                      e.unemployed / e.labourSupply if e.labourSupply else 0.0)
     return towns
 
@@ -75,9 +75,9 @@ def _hire(p: Person, b: Business, town: Town, m: Month) -> Person:
     p = note(p, m, "hired", f"Hired as {b.profession} at {b.name}", related={"businessId": b.id, "ties": [rel.id],
              "facts": {"profession": b.profession, "monthsIdle": p.idleMonths}}, role="worker", businessId=b.id, profession=b.profession,
              idleMonths=0)
-    if age_years(p, m.day) <= m.cfg["apprenticeUntilAge"]:
+    if age_years(p, m.day, m.cfg) <= m.cfg["apprenticeUntilAge"]:
         mentor = next((x for x in sorted(m.people.values(), key=lambda x: x.birthDay) if x.alive and x.businessId == b.id
-                       and x.profession == b.profession and age_years(x, m.day) >= 30), None)
+                       and x.profession == b.profession and age_years(x, m.day, m.cfg) >= 30), None)
         if mentor:
             tie = m.ties.add("mentor", mentor.id, p.id, m.day, businessId=b.id)
             m.incidents.append({"kind": "apprenticeship-started", "message": f"{p.name} {p.family} began learning the {b.profession}'s "
@@ -112,32 +112,34 @@ def _work(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
         if posts:
             return _hire(p, rng.choices(posts, weights=[x.filled - town.named[x.id] for x in posts])[0], town, m)
     o, t = c["outlaw"], p.personality
-    if (town.route and p.idleMonths >= o["idleMonths"] and t.honesty <= o["maxHonesty"] and t.greed >= o["minGreed"]
+    if (town.routes and p.idleMonths >= o["idleMonths"] and t.honesty <= o["maxHonesty"] and t.greed >= o["minGreed"]
             and rng.random() < o["chance"]):
-        town.outlaws += 1
-        way = "sea lane" if town.route.mode == "sea" else "road"
+        # The band with the most room for another named member draws them.
+        route = max(town.routes.values(), key=lambda r: (r.bandits - town.outlaws[r.id], r.id))
+        town.outlaws[route.id] += 1
+        way = "sea lane" if route.mode == "sea" else "road"
         band = "pirates" if way == "sea lane" else "bandits"
         return note(p, m, "outlaw", f"Took to the {way} with the {band}",
-                    message=f"{p.name} {p.family} of {town.settlement.name} took to the {way} to {town.route.centerName} after "
+                    message=f"{p.name} {p.family} of {town.settlement.name} took to the {way} to {route.centerName} after "
                             f"{p.idleMonths} months without work",
-                    related={"routeId": town.route.id, "facts": {"monthsIdle": p.idleMonths}}, role="outlaw", routeId=town.route.id)
+                    related={"routeId": route.id, "facts": {"monthsIdle": p.idleMonths}}, role="outlaw", routeId=route.id)
     return p
 
 
 def _outlaw(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
-    c, route = m.cfg, town.route
-    if route is None or route.id != p.routeId or route.bandits < town.outlaws:
-        town.outlaws -= 1
+    c, route = m.cfg, town.routes.get(p.routeId or "")
+    if route is None or route.bandits < town.outlaws[p.routeId]:
+        town.outlaws[p.routeId] -= 1
         return note(p, m, "came-home", "Came home when the band broke up", related={"routeId": p.routeId}, role="unemployed",
                     routeId=None, idleMonths=0)
     if rng.random() < route.removed / max(1, route.bandits + route.removed):
-        town.outlaws -= 1
+        town.outlaws[route.id] -= 1
         return note(p, m, "caught", "Caught by a patrol and imprisoned",
                     message=f"{p.name} {p.family}, outlaw on the {town.settlement.name} road, was caught and imprisoned",
                     related={"routeId": route.id, "facts": {"prisonDays": c["prisonDays"]}}, role="imprisoned", routeId=None,
                     releaseDay=m.day + c["prisonDays"])
     if rng.random() < c["outlaw"]["giveUpPerMonth"]:
-        town.outlaws -= 1
+        town.outlaws[route.id] -= 1
         return note(p, m, "came-home", "Gave up the outlaw's life and came home", related={"routeId": p.routeId}, role="unemployed",
                     routeId=None, idleMonths=0)
     return p
@@ -146,7 +148,7 @@ def _outlaw(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
 def _live(p: Person, town: Town, m: Month) -> Person:
     c = m.cfg
     rng = random.Random(f"{m.seed}:{m.day}:{p.id}")
-    age = age_years(p, m.day)
+    age = age_years(p, m.day, m.cfg)
     if p.role == "imprisoned" and m.day >= (p.releaseDay or 0):
         return note(p, m, "released", "Released from prison", role="unemployed", releaseDay=None, idleMonths=0)
     if p.role == "child" and age >= c["ages"]["adult"][0]:
@@ -179,7 +181,7 @@ def _friendships(m: Month) -> None:
                 if m.ties.linked(a.id, b.id, "friend") or len(m.ties.of(a.id, "friend")) >= 3 or len(m.ties.of(b.id, "friend")) >= 3:
                     continue
                 since = [r.since for r in m.ties.items if r.kind == "employer" and r.active and r.b in (a.id, b.id)]
-                if len(since) < 2 or m.day - max(since) < 360:
+                if len(since) < 2 or m.day - max(since) < m.cfg["daysPerYear"]:
                     continue
                 if random.Random(f"{m.seed}:{m.day}:{a.id}:{b.id}:friend").random() < m.cfg["friendshipPerMonth"]:
                     rel = m.ties.add("friend", a.id, b.id, m.day, businessId=business)
@@ -211,7 +213,7 @@ def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, f
         marriages(people, s, m, households, dwellings)
         alive = sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId)
         room = int(cast.budget.get(s.settlementId, 0) * (1 + c["maxOverBudget"])) - alive
-        born += births(people, s, m, cast, room)
+        born += births(people, s, m, cast, room, households)
     moves(people, flows, by_id, m, households, dwellings)
     _friendships(m)
     trade = promote_traders(people, trade, settlements, m)

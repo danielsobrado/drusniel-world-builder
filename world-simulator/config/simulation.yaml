@@ -49,6 +49,7 @@ people:
   ages: { child: [0, 14], adult: [15, 59], elder: [60, 80] }
   traderAges: [22, 55]
   childrenPerFamily: [1, 3]
+  pregnancyMonths: 9          # a named child comes this long after the marriage, and after the mother's last child
   retireFrom: 60
   retireChance: 0.75            # once, at 60, for a worker
   findWorkPerMonth: 0.25        # x the settlement's employment rate

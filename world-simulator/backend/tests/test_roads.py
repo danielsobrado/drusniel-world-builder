@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from world_sim.api.app import create_app
 from world_sim.canonical import compact_json
-from world_sim.simulation.contracts import ScenarioState
+from world_sim.simulation.contracts import STATE_SCHEMA_VERSION, ScenarioState
 from world_sim.simulation.engine import advance, baseline_state, state_checksum
 from world_sim.simulation.migrations import migrate_state
 
@@ -76,7 +76,7 @@ def test_v3_states_gain_roads_and_traders(eldara):
     for m in raw["trade"]["markets"]:
         del m["taxRates"], m["taxRevenue"]
     state, stored = migrate_state(raw, eldara)
-    assert stored == 3 and state.schemaVersion == 6
+    assert stored == 3 and state.schemaVersion == STATE_SCHEMA_VERSION
     assert len(state.trade.routes) == 2 and len(state.trade.traders) == 6
 
 

@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from world_sim.api.app import create_app
 from world_sim.api.errors import ApiError
 from world_sim.canonical import checksum, compact_json
-from world_sim.simulation.contracts import Business, Cohorts, CreateScenario
+from world_sim.simulation.contracts import STATE_SCHEMA_VERSION, Business, Cohorts, CreateScenario
 from world_sim.simulation.employment import fill_jobs
 from world_sim.simulation.engine import advance, baseline_state, state_checksum
 from world_sim.simulation.households import derive_households
@@ -113,7 +113,7 @@ def test_v1_scenarios_and_snapshots_migrate_to_one_atomic_bundle(fresh_model):
     folder = _write_legacy(root, fresh_model)
     manager = ScenarioManager(fresh_model)
     session = manager.session("legacy")
-    assert session.state.schemaVersion == 6 and session.read_only is None
+    assert session.state.schemaVersion == STATE_SCHEMA_VERSION and session.read_only is None
     assert session.events[-1].kind == "migrated"
     bundle = json.loads((folder / "scenario.json").read_text())
     assert bundle["formatVersion"] == 2 and set(bundle) == {"formatVersion", "meta", "state", "events"}

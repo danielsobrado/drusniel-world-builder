@@ -40,6 +40,7 @@ class ContextBuilder:
                  label: Callable[[int], str]):
         self.state, self.archive, self.world, self.label = state, archive, world, label
         self.cfg = rules["simulation"]["people"]["biography"]
+        self.people_cfg = rules["simulation"]["people"]
         self.people = {p.id: p for p in state.cast.people}
         self.ties = Ties(state.cast.relationships, state.cast.relSeq)
 
@@ -71,7 +72,7 @@ class ContextBuilder:
                                                       newest_first=True, limit=40)
                         if e.visibility in ("settlement", "public") and pid not in {x.personId for x in e.participants}]
         trader = next((t for t in state.trade.traders if t.id == p.traderId), None)
-        hooks_now = hooks(p, cast, state.trade, town, state.date.day)
+        hooks_now = hooks(p, cast, state.trade, town, state.date.day, self.people_cfg)
         learned = self.archive.many([k.eventId for k in p.knowledge][-10:])
         sources = {k.eventId: k for k in p.knowledge}
         places = {x for x in (p.birthplaceId, p.settlementId) if x}
@@ -80,7 +81,8 @@ class ContextBuilder:
         employment = town.society.employment
         return {
             "personId": pid, "tier": level, "targets": target, "asOf": state.date.label,
-            "identity": {"name": f"{p.name} {p.family}", "sex": p.sex, "age": age_years(p, state.date.day) if p.alive else None,
+            "identity": {"name": f"{p.name} {p.family}", "sex": p.sex,
+                         "age": age_years(p, state.date.day, self.people_cfg) if p.alive else None,
                          "born": self.label(p.birthDay), "birthplace": self.place(p.birthplaceId or p.settlementId),
                          "culture": (self.world.get(p.settlementId) or {}).get("cultureName"), "home": town.name, "alive": p.alive,
                          "died": self.label(p.deathDay) if p.deathDay is not None else None},

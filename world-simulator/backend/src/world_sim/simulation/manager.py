@@ -17,7 +17,7 @@ from typing import Any
 
 from .. import log
 from ..api.errors import ApiError
-from ..canonical import checksum
+from ..canonical import checksum, state_digest
 from ..world.model import WorldModel
 from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
@@ -157,14 +157,15 @@ class ScenarioManager:
             raise ApiError(404, "not_found", f"No snapshot {snapshot_id}", {"id": snapshot_id})
         raw_meta, raw_state = found
         meta = SnapshotMeta(**raw_meta)
-        # PR2 snapshots carry the 8-hex FNV of their v1 state; newer ones the digest of the parsed state.
-        legacy = len(meta.checksum) == 8 and checksum(raw_state) == meta.checksum
+        # The stored state is checked before migrating, so a snapshot from an older schema stays usable. PR2 snapshots carry
+        # the 8-hex FNV of their v1 state; newer ones the digest of the state as saved.
+        intact = (checksum(raw_state) if len(meta.checksum) == 8 else state_digest(raw_state)) == meta.checksum
+        if not intact:
+            raise ApiError(500, "corrupt_snapshot", f"Snapshot {snapshot_id} does not match its checksum")
         try:
-            state, stored = migrate_state(raw_state, self.model)
+            state, _ = migrate_state(raw_state, self.model)
         except IncompatibleState as exc:
             raise ApiError(409, "incompatible_snapshot", str(exc), {"id": snapshot_id}) from exc
-        if not legacy and (stored != STATE_SCHEMA_VERSION or state_checksum(state) != meta.checksum):
-            raise ApiError(500, "corrupt_snapshot", f"Snapshot {snapshot_id} does not match its checksum")
         if state.world.sourceFingerprint != self.fingerprint or state.scenarioId != scenario_id:
             raise ApiError(409, "foreign_snapshot", f"Snapshot {snapshot_id} belongs to another scenario or source map",
                            {"id": snapshot_id, "scenarioId": state.scenarioId})
@@ -173,7 +174,7 @@ class ScenarioManager:
     # ---- mutations -----------------------------------------------------
     def _event(self, s: Session, kind: str, message: str, at_day: int | None = None, **data: Any) -> None:
         """Logs an event, dated `at_day` (a month close inside a longer step) or the scenario's current date."""
-        date = s.state.date if at_day is None else date_for(at_day, s.state.startYear, self.config["calendar"])
+        date = s.state.date if at_day is None else date_for(at_day, s.state.startYear, self.rules(s)["simulation"]["calendar"])
         s.meta = s.meta.model_copy(update={"eventSeq": s.meta.eventSeq + 1})
         s.events.append(Event(seq=s.meta.eventSeq, day=date.day, date=date.label, kind=kind, message=message, data=data))
         del s.events[: max(0, len(s.events) - self.limits["maxEvents"])]
@@ -231,8 +232,9 @@ class ScenarioManager:
         return session
 
     def labeller(self, state: ScenarioState) -> Callable[[int], str]:
-        """Day -> date label; a reconstructed past before the start is only a year."""
-        calendar = self.config["calendar"]
+        """Day -> date label under the scenario's frozen calendar; a reconstructed past before the start is only a year."""
+        session = self.sessions.get(state.scenarioId)
+        calendar = self.rules(session)["simulation"]["calendar"] if session else self.config["calendar"]
         year = calendar["daysPerMonth"] * calendar["monthsPerYear"]
 
         def label(day: int) -> str:
@@ -309,7 +311,7 @@ class ScenarioManager:
 
     def rules(self, s: Session) -> dict[str, Any]:
         """The scenario's frozen rules; only a foreign, read-only scenario can lack them, and it never advances."""
-        return complete(s.meta.rules, self.model.config.rules) if s.meta.rules else freeze(self.model.config.rules)
+        return complete(s.meta.rules or freeze(self.model.config.rules), self.model.config.rules)
 
     def _advance(self, s: Session, days: int) -> None:
         started = time.perf_counter()

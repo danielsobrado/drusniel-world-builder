@@ -14,6 +14,7 @@ Life stories, canonical history, relationships and biography context: [docs/06-l
 Local-LLM biographies and the Dialogue Lab: [docs/07-narration-and-dialogue-2026-11-23.md](docs/07-narration-and-dialogue-2026-11-23.md).
 Interventions, deterministic replay, comparison, causal traces and consistency checks: [docs/08-validation-lab-2026-11-23.md](docs/08-validation-lab-2026-11-23.md).
 The game export, so the game's residents are the named people: [docs/09-game-export-2026-11-24.md](docs/09-game-export-2026-11-24.md).
+Correctness hardening from the 2026-11-23 review (births, frozen calendar, migration, rumours in transit, purchase credit, causality index): [docs/10-correctness-hardening-2026-11-24.md](docs/10-correctness-hardening-2026-11-24.md).
 
 ![World overview](docs/screenshots/01-world-overview.png)
 

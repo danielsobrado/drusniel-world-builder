@@ -8,6 +8,7 @@ from .economy.contracts import SettlementEconomy, Trade
 from .economy.roads import initial_roads
 from .engine import build_settlements
 from .people.generate import initial_cast
+from .rules import ready
 from .society import initial_society
 
 
@@ -54,7 +55,7 @@ def _v3_to_v4(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
 def _v4_to_v5(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     """v5 adds the named people, drawn from the saved settlements and traders."""
     state = ScenarioState(**{**raw, "schemaVersion": 5, "cast": {"people": [], "households": [], "names": {}, "seq": {}, "budget": {}}})
-    cast = initial_cast(model, state.settlements, state.trade.traders, raw["seed"], model.config.simulation["people"])
+    cast = initial_cast(model, state.settlements, state.trade.traders, raw["seed"], ready(model.config.rules)["simulation"]["people"])
     return {**raw, "schemaVersion": 5, "cast": cast.model_dump()}
 
 
@@ -63,7 +64,12 @@ def _v5_to_v6(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     return {**raw, "schemaVersion": 6}
 
 
-STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6}
+def _v6_to_v7(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
+    """v7 lets caravans carry news; caravans already on the road carry none."""
+    return {**raw, "schemaVersion": 7}
+
+
+STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7}
 
 
 def migrate_state(raw: dict[str, Any], model: WorldModel) -> tuple[ScenarioState, int]:

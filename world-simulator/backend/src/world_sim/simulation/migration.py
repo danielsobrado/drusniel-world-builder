@@ -1,8 +1,9 @@
 """
 Migration between the settlements of a scenario. Each month a town whose unemployment
 is clearly above the scope's average sends a share of its idle adults to the town with
-the lowest unemployment. Cohorts and population move with them, so the totals stay
-exact; the named people who move are drawn from these flows.
+the lowest unemployment. Their children go with them, in the town's proportion of
+children to adults; elders stay. Cohorts and population move with them, so the totals stay
+exact; the named people who move are drawn from these flows, whole households without elders.
 """
 
 from typing import Any
@@ -16,7 +17,7 @@ def _rate(s: SettlementState) -> float:
 
 
 def migrate(settlements: list[SettlementState], cfg: dict[str, Any]) -> tuple[list[SettlementState], dict[tuple[str, str], int]]:
-    """Returns the settlements after this month's moves and the flows {(from, to): adults}."""
+    """Returns the settlements after this month's moves and the flows {(from, to): adults}; children follow their adults."""
     if len(settlements) < 2:
         return settlements, {}
     rates = {s.settlementId: _rate(s) for s in settlements}
@@ -31,6 +32,9 @@ def migrate(settlements: list[SettlementState], cfg: dict[str, Any]) -> tuple[li
             flows[(s.settlementId, target.settlementId)] = movers
     if not flows:
         return settlements, {}
+    by_id = {s.settlementId: s for s in settlements}
+    kids = {pair: min(by_id[pair[0]].cohorts.children, round(n * by_id[pair[0]].cohorts.children / max(1, by_id[pair[0]].cohorts.adults)))
+            for pair, n in flows.items()}
     out = []
     for s in settlements:
         gone = sum(n for (a, _), n in flows.items() if a == s.settlementId)
@@ -38,7 +42,10 @@ def migrate(settlements: list[SettlementState], cfg: dict[str, Any]) -> tuple[li
         if not gone and not came:
             out.append(s)
             continue
-        cohorts = Cohorts(children=s.cohorts.children, adults=s.cohorts.adults - gone + came, elders=s.cohorts.elders)
+        left = sum(n for (a, _), n in kids.items() if a == s.settlementId)
+        arrived = sum(n for (_, b), n in kids.items() if b == s.settlementId)
+        cohorts = Cohorts(children=s.cohorts.children - left + arrived, adults=s.cohorts.adults - gone + came, elders=s.cohorts.elders)
+        came, gone = came + arrived, gone + left
         vitals = s.vitals.model_copy(update={"immigrants": came, "emigrants": gone})
         out.append(s.model_copy(update={"cohorts": cohorts, "population": cohorts.total, "immigrants": s.immigrants + came,
                                         "emigrants": s.emigrants + gone, "vitals": vitals}))

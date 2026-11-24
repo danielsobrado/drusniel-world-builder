@@ -7,11 +7,12 @@ from fastapi.testclient import TestClient
 
 from world_sim.api.app import create_app
 from world_sim.canonical import compact_json
-from world_sim.simulation.contracts import ScenarioState
+from world_sim.simulation.contracts import STATE_SCHEMA_VERSION, ScenarioState
 from world_sim.simulation.engine import advance, baseline_state, state_checksum
 from world_sim.simulation.migrations import migrate_state
 from world_sim.simulation.people.checks import check_cast
 from world_sim.simulation.people.generate import age_years
+from world_sim.simulation.rules import ready
 
 
 def pilot(model, seed=1212):
@@ -24,12 +25,13 @@ def test_the_cast_matches_the_npc_budget_and_the_settlements(eldara):
     cast = state.cast
     counts = Counter(p.settlementId for p in cast.people)
     assert {eldara.settlements_by_id[s]["name"]: n for s, n in counts.items()} == {"Falanenerwin": 18, "Sshanderi": 27, "Vhaltha": 41}
-    assert check_cast(cast, state.settlements, state.trade) == []
+    people = ready(eldara.config.rules)["simulation"]["people"]
+    assert check_cast(cast, state.settlements, state.trade, people) == []
     ids = [p.id for p in cast.people]
     assert len(ids) == len(set(ids)) and all(i.startswith("npc:") for i in ids)
     traders = {t.id: t for t in state.trade.traders}
     for p in cast.people:
-        age = age_years(p, 0)
+        age = age_years(p, 0, people)
         assert (p.role == "child") == (age < 15)
         assert len(p.name) <= 9 and p.name.isalpha()
         if p.role == "trader":
@@ -44,11 +46,10 @@ def test_the_cast_matches_the_npc_budget_and_the_settlements(eldara):
 def test_a_decade_keeps_the_budget_and_tells_life_stories(eldara):
     state, months = advance(pilot(eldara), 3600, eldara.config.rules)
     cast = state.cast
-    over = eldara.config.simulation["people"]["maxOverBudget"]
-    assert check_cast(cast, state.settlements, state.trade, over) == []
+    assert check_cast(cast, state.settlements, state.trade, ready(eldara.config.rules)["simulation"]["people"]) == []
     alive = sum(p.alive for p in cast.people)
     assert cast.deaths > 5 and cast.births + cast.arrivals - cast.deaths == alive - 86, "every named life is accounted for"
-    assert 86 <= alive <= 86 * (1 + over)
+    assert 86 <= alive <= 86 * (1 + eldara.config.simulation["people"]["maxOverBudget"])
     kinds = Counter(e.kind for p in cast.people for e in p.events)
     assert {"died", "came-of-age", "hired"} <= set(kinds)
     assert {"born", "arrived"} & set(kinds)
@@ -99,7 +100,7 @@ def test_people_round_trip_and_v4_saves_gain_a_cast(eldara):
     raw["schemaVersion"] = 4
     del raw["cast"]
     migrated, stored = migrate_state(raw, eldara)
-    assert stored == 4 and migrated.schemaVersion == 6 and len(migrated.cast.people) == 86
+    assert stored == 4 and migrated.schemaVersion == STATE_SCHEMA_VERSION and len(migrated.cast.people) == 86
 
 
 def test_people_endpoints(fresh_model):
