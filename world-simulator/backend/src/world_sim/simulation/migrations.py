@@ -12,9 +12,9 @@ from ..world.model import WorldModel
 from .climate import for_month
 from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, SettlementState, Society
 from .economy.contracts import FoodBalance, SettlementEconomy, Trade
-from .finance import HouseholdFinances
 from .economy.roads import initial_roads
 from .engine import build_settlements
+from .finance import HouseholdFinances
 from .people.generate import initial_cast
 from .rules import ready
 from .society import initial_society
