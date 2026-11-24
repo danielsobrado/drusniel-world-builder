@@ -10,7 +10,7 @@ from typing import Any
 from ..canonical import compact_json
 
 # Simulation settings that change outcomes; storage, run speeds and the baseline recipe do not.
-OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "migration", "travel", "people", "history", "interventions")
+OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "migration", "travel", "climate", "people", "history", "interventions")
 
 
 def freeze(rules: dict[str, Any]) -> dict[str, Any]:
@@ -25,6 +25,8 @@ def complete(frozen: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
     follows the scenario's own year."""
     now = freeze(current)
     rules = {section: {**now[section], **frozen.get(section, {})} for section in now}
+    if "climate" not in frozen.get("simulation", {}):
+        rules["simulation"]["climate"] = {"enabled": False}
     calendar = rules["simulation"]["calendar"]
     people = {**rules["simulation"]["people"], "ancestries": rules["peoples"].get("ancestries", {}),
               "cultureProfiles": rules["peoples"].get("profiles", {}), "daysPerMonth": calendar["daysPerMonth"],

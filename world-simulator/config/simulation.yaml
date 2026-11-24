@@ -60,6 +60,37 @@ travel:
   banditChancePerBandit: 0.002
   delays: { storm: 4, road-closure: 3, bandits: 2 }
 
+# Seasonal yield curves and weather assumptions, indexed over a year.
+climate:
+  enabled: true
+  seasons: [winter, winter, spring, spring, spring, summer, summer, summer, autumn, autumn, autumn, winter]
+  defaultProfile: temperate
+  biomeProfiles:
+    desert: arid
+    tundra: cold
+    glacier: cold
+    taiga: cold
+    snowy: cold
+    wetland: humid
+    swamp: humid
+    rainforest: humid
+    tropical: humid
+    savanna: warm
+    grassland: temperate
+    forest: temperate
+  profiles:
+    temperate: [0.45, 0.55, 0.85, 1.10, 1.35, 1.50, 1.45, 1.30, 1.15, 0.95, 0.75, 0.60]
+    warm: [0.75, 0.80, 1.00, 1.10, 1.20, 1.25, 1.20, 1.15, 1.05, 1.00, 0.90, 0.80]
+    cold: [0.20, 0.20, 0.40, 0.75, 1.20, 1.65, 1.70, 1.45, 1.05, 0.65, 0.35, 0.20]
+    humid: [0.95, 0.95, 1.00, 1.05, 1.10, 1.10, 1.05, 1.00, 0.95, 0.95, 0.95, 0.95]
+    arid: [0.60, 0.65, 0.85, 1.05, 1.15, 1.15, 1.10, 1.00, 0.90, 0.80, 0.70, 0.65]
+  rainfallVariability: 0.36
+  rainfallSensitivity: 0.65
+  droughtThreshold: 0.70
+  floodThreshold: 1.32
+  minimumYield: 0.12
+  maximumYield: 1.80
+
 # Persistent characters (PR5): each settlement keeps exactly its NPC budget alive
 # (config/npc-population.yaml). Rates are authored assumptions.
 people:

@@ -10,6 +10,7 @@ from ..peoples.culture import environment, infrastructure
 from ..peoples.population import established
 from ..world.model import WorldModel
 from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, SettlementState, Society
+from .climate import for_month
 from .economy.contracts import SettlementEconomy, Trade
 from .economy.roads import initial_roads
 from .engine import build_settlements
@@ -122,6 +123,19 @@ def _v8_to_v9(raw: dict, model: WorldModel, rules: dict) -> dict:
             "trade": {**raw["trade"], "routes": roads}, "settlements": list(settlements.values())}
 
 
+def _v9_to_v10(raw: dict, rules: dict) -> dict:
+    sim = rules["simulation"]
+    month_index = max(0, (raw["date"]["day"] - 1) // sim["calendar"]["daysPerMonth"])
+    settlements = [
+        {**row, "climate": for_month(row.get("environment"), month_index=month_index,
+                                     months_per_year=sim["calendar"]["monthsPerYear"],
+                                     seed=raw["seed"], settlement_id=row["settlementId"],
+                                     cfg=sim.get("climate", {"enabled": False})).model_dump()}
+        for row in raw["settlements"]
+    ]
+    return {**raw, "schemaVersion": 10, "settlements": settlements}
+
+
 STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7}
 
 
@@ -136,6 +150,8 @@ def migrate_state(raw: dict[str, Any], model: WorldModel, rules: dict | None = N
             raw = _v7_to_v8(raw, model, rules or model.config.rules)
         elif version == 8:
             raw = _v8_to_v9(raw, model, rules or model.config.rules)
+        elif version == 9:
+            raw = _v9_to_v10(raw, rules or model.config.rules)
         else:
             raw = STEPS[version](raw, model)
     return ScenarioState(**raw), stored

@@ -6,10 +6,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ..geography.paths import TravelPath
 from ..peoples.contracts import Assignment, CivicIdentity, Infrastructure
+from .climate import ClimateState
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 9
+STATE_SCHEMA_VERSION = 10
 
 
 class Contract(BaseModel):
@@ -177,6 +178,7 @@ class SettlementState(Contract):
     ancestries: dict[str, Cohorts] = {}
     infrastructure: list[Infrastructure] = []
     environment: str | None = None
+    climate: ClimateState = ClimateState()
 
 
 class CalendarDate(Contract):

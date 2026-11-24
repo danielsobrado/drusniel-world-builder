@@ -11,6 +11,7 @@ from ..peoples.physiology import food_multiplier
 from ..peoples.population import ancestry_counts, combined, initial
 from ..world.model import WorldModel
 from .calendar import date_for
+from .climate import for_month
 from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, Society, TravelState, WorldRef
 from .demography import run_month
 from .economy.baseline import initial_economy
@@ -56,7 +57,10 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
         counts = initial(record["population"], weights, ancestries, rules["simulation"]["demography"])
         cohorts = combined(counts)
         fields = {"settlementId": sid, "sourceId": record["sourceId"], "name": record["name"], "population": record["population"]}
-        fields.update(identity=civic, ancestries=counts, environment=environment(record))
+        biome = environment(record)
+        fields.update(identity=civic, ancestries=counts, environment=biome,
+                      climate=for_month(biome, month_index=0, months_per_year=rules["simulation"]["calendar"]["monthsPerYear"],
+                                        seed=seed, settlement_id=sid, cfg=rules["simulation"]["climate"]))
         society = initial_society(record, cohorts, rules["society"], rules["simulation"]["calendar"]["daysPerMonth"])
         rows.append((fields, record, cohorts, society))
     settlements, trade = build_settlements(model, rows, rules, seed)
@@ -79,10 +83,13 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
 def _month(settlement: SettlementState, *, seed: int, month_index: int, rules: dict[str, Any]) -> SettlementState:
     sim = rules["simulation"]
     shortfall = max(0.0, 1.0 - settlement.economy.food.security)
+    climate = for_month(settlement.environment, month_index=month_index,
+                        months_per_year=sim["calendar"]["monthsPerYear"], seed=seed,
+                        settlement_id=settlement.settlementId, cfg=sim["climate"])
     after = run_month(settlement, seed=seed, month_index=month_index, params=sim["demography"],
                       months_per_year=sim["calendar"]["monthsPerYear"], ancestries=rules["peoples"].get("ancestries", {}),
                       mortality=1 + rules["economy"]["famine"]["mortality"] * shortfall)
-    return after.model_copy(update={"society": update_society(after.society, after.cohorts, rules["society"],
+    return after.model_copy(update={"climate": climate, "society": update_society(after.society, after.cohorts, rules["society"],
                                                                     sim["calendar"]["daysPerMonth"])})
 
 
