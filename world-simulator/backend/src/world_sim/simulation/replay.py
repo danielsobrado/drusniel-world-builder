@@ -10,14 +10,16 @@ import hashlib
 from collections.abc import Iterable
 from typing import Any
 
+from ..canonical import compact_json
 from ..world.model import WorldModel
 from .contracts import ScenarioMeta, ScenarioState
-from .engine import advance, baseline_state
+from .engine import advance_frames, baseline_state
 from .history.contracts import HistoryEvent
 from .history.recorder import on_timelines, record
 from .interventions import Intervention, intervene
 from .people.backstory import with_backstory
 from .scope import resolve_scope
+from .travel_news import remember
 
 
 def player_event(state: ScenarioState, incident: dict[str, Any], rules: dict[str, Any]) -> tuple[ScenarioState, list[HistoryEvent]]:
@@ -25,7 +27,10 @@ def player_event(state: ScenarioState, incident: dict[str, Any], rules: dict[str
     history = rules["simulation"]["history"]
     event = record(incident, state.historySeq, state.date.day, history, source="player", precision="day")
     cast = on_timelines(state.cast, [event], history["timelineMinImportance"])
-    return state.model_copy(update={"cast": cast, "historySeq": state.historySeq + 1}), [event]
+    knowledge = rules["simulation"]["people"]["knowledge"]
+    travel = remember(state.travel, [event], knowledge.get("rumourMinImportance", knowledge["minImportance"]),
+                      rules["simulation"]["travel"]["newsPerSettlement"])
+    return state.model_copy(update={"cast": cast, "travel": travel, "historySeq": state.historySeq + 1}), [event]
 
 
 def with_past(state: ScenarioState, rules: dict[str, Any]) -> tuple[ScenarioState, list[HistoryEvent]]:
@@ -42,7 +47,7 @@ Applied = tuple[ScenarioState, list[HistoryEvent], list[dict[str, Any]]]
 def apply(state: ScenarioState, op: dict[str, Any], rules: dict[str, Any]) -> Applied:
     """One journal command; returns the state, its events and (for an advance) the month summaries."""
     if op["op"] == "advance":
-        state, months = advance(state, op["days"], rules)
+        state, months = advance_frames(state, op["days"], rules)
         return state, [e for m in months for e in m["events"]], months
     if op["op"] == "intervene":
         state, events = intervene(state, Intervention(**op["spec"]), rules)
@@ -56,7 +61,7 @@ def apply(state: ScenarioState, op: dict[str, Any], rules: dict[str, Any]) -> Ap
 def event_digest(events: Iterable[HistoryEvent]) -> str:
     h = hashlib.sha256()
     for e in events:
-        h.update(e.model_dump_json().encode())
+        h.update(compact_json(e.model_dump(mode="json")).encode())
     return "sha256:" + h.hexdigest()
 
 

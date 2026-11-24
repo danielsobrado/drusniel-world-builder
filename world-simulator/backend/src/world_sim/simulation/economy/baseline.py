@@ -3,11 +3,12 @@
 from collections import defaultdict
 from typing import Any
 
+from ...geography.paths import RoutePlanner
 from ...ids import settlement_id
 from ...world.model import WorldModel
 from ..contracts import Society
 from .contracts import FoodBalance, Market, MarketGood, PricePoint, SettlementEconomy, Trade
-from .geography import TravelTimes, hinterland
+from .geography import hinterland
 from .production import food_flows, monthly_use, r4, staffing
 from .roads import initial_roads
 from .sources import AzgaarEconomy
@@ -19,7 +20,7 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
     e = cfg["economy"]
     rations = e["food"]["good"]
     az = AzgaarEconomy(model)
-    travel = TravelTimes(model, e["caravans"])
+    travel = RoutePlanner(model, {**cfg["simulation"].get("travel", {}), **e["caravans"]})
     econs: list[SettlementEconomy] = []
     centres: dict[int, dict[str, Any]] = {}
     for record, population, society in settlements:
@@ -27,13 +28,14 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
         consumption = az.consumption(record["sourceId"], lines)
         market = az.market_of(record["sourceId"])
         centre = model.settlements_by_id.get(settlement_id(az.markets[market]["centerBurgId"])) if market else None
-        if centre is None:
+        path = travel.route(record, centre, off_road=True) if centre and centre["id"] != record["id"] else None
+        if centre is None or (centre["id"] != record["id"] and path is None):
             market = None
         else:
             centres[market] = centre
         rural, cells = hinterland(model, record, e["food"]["hinterlandRadiusPx"])
         econ = SettlementEconomy(
-            marketId=market, settlementClass=record["class"], travelDays=travel.days(record, centre) if centre else 0,
+            marketId=market, settlementClass=record["class"], travelDays=path.days if path else 0,
             baselinePopulation=record["population"],
             inventory={}, production=lines, consumption=consumption, food=FoodBalance(ruralPopulation=rural, hinterlandCells=cells),
             treasury=float(az.burgs[record["sourceId"]].get("treasury") or 0))
@@ -73,5 +75,5 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
                               centerInScope=centre["sourceId"] in scoped, goods=priced,
                               priceHistory=[PricePoint(day=0, prices={g: mg.price for g, mg in priced.items()})]))
     routes, traders, markets = initial_roads(model, [(record, econ) for (record, _, _), econ in zip(settlements, econs, strict=True)],
-                                             markets, seed, e)
+                                             markets, seed, e, planner=travel)
     return econs, Trade(markets=markets, caravans=[], delivered=[], routes=routes, traders=traders, traderSeq=len(traders))

@@ -4,11 +4,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..geography.paths import TravelPath
 from ..peoples.contracts import Assignment, CivicIdentity, Infrastructure
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 8
+STATE_SCHEMA_VERSION = 9
 
 
 class Contract(BaseModel):
@@ -34,6 +35,49 @@ class Cohorts(Contract):
     @property
     def total(self) -> int:
         return self.children + self.adults + self.elders
+
+
+class TravelIncident(Contract):
+    day: int
+    kind: Literal["bandits", "storm", "road-closure", "destination-full"]
+    delayDays: int = 0
+
+
+class Journey(Contract):
+    id: str
+    routeId: str
+    originId: str
+    destinationId: str
+    reason: str
+    departDay: int
+    arriveDay: int
+    status: Literal["departing", "traveling", "delayed", "returning", "arrived", "returned"] = "departing"
+    ancestries: dict[str, Cohorts]
+    householdSlots: int
+    personIds: list[str] = []
+    incidents: list[TravelIncident] = []
+    news: list[str] = []
+
+    @property
+    def active(self) -> bool:
+        return self.status not in ("arrived", "returned")
+
+    @property
+    def population(self) -> int:
+        return sum(c.total for c in self.ancestries.values())
+
+
+class TravelState(Contract):
+    routes: list[TravelPath] = []
+    journeys: list[Journey] = []
+    sequence: int = 0
+    news: dict[str, list[str]] = {}
+    newsWitnesses: dict[str, list[str]] = {}
+    pendingIncidents: list[dict[str, Any]] = []
+
+    @property
+    def population(self) -> int:
+        return sum(j.population for j in self.journeys if j.active)
 
 
 class HouseholdGroup(Contract):
@@ -148,6 +192,7 @@ class HistoryPoint(Contract):
     population: dict[str, int]      # settlementId -> inhabitants at month close
     labour: dict[str, int] = {}     # settlementId -> labour force (v4 runs onwards)
     unemployed: dict[str, int] = {}
+    inTransit: int = 0
     ancestryPopulation: dict[str, dict[str, int]] = {}
     bandits: int = 0                # on every road in scope
 
@@ -163,6 +208,7 @@ class ScenarioState(Contract):
     history: list[HistoryPoint]
     trade: Trade
     cast: Cast
+    travel: TravelState = TravelState()
     historySeq: int = 0                      # next canonical event number; the archive is cut here on restore
 
 

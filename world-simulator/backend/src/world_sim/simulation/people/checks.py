@@ -8,7 +8,7 @@ from ..economy.contracts import Trade
 from .contracts import Cast
 
 
-def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, cfg: dict[str, Any]) -> list[str]:
+def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, cfg: dict[str, Any], *, minimum: bool = True) -> list[str]:
     """`cfg` is the people rules: the budget allowance (`maxOverBudget`) and the calendar's `daysPerYear`."""
     max_over = cfg["maxOverBudget"]
     broken = []
@@ -16,7 +16,7 @@ def check_cast(cast: Cast, settlements: list[SettlementState], trade: Trade, cfg
     counts = Counter(p.settlementId for p in alive)
     for s in settlements:
         budget = cast.budget.get(s.settlementId, 0)
-        if not budget <= counts[s.settlementId] <= int(budget * (1 + max_over)):
+        if (minimum and counts[s.settlementId] < budget) or counts[s.settlementId] > int(budget * (1 + max_over)):
             broken.append(f"{s.name} has {counts[s.settlementId]} named people, budget {budget}")
     households = {h.id for h in cast.households}
     if any(p.householdId not in households for p in cast.people):

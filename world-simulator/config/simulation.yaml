@@ -36,11 +36,29 @@ demography:
   deathRatePerYear: { children: 0.035, adults: 0.012, elders: 0.07 }
   bandYears: { children: 15, adults: 45 }   # years spent in a band before ageing out
 
-# Migration between the scenario's settlements (PR6): idle adults leave a town whose
-# unemployment is above the scope's average by minRateGap for the one with the lowest.
+# Migration is constrained by reachable roads, ports and available housing.
 migration:
   shareOfIdlePerMonth: 0.04
   minRateGap: 0.01
+  settlementSharePerMonth: 0.025
+  vacantHousingShare: 0.65
+  householdSize: 4
+  minBenefit: 0.025
+
+travel:
+  walkingMilesPerDay: 12
+  shipMilesPerDay: 60
+  maxDays: 60
+  portTransferDays: 0.25
+  mountainHeight: 60
+  mountainPenalty: 0.012
+  maxCompleted: 240
+  newsPerSettlement: 24
+  newsPerTrip: 8
+  stormChance: 0.08
+  closureChance: 0.04
+  banditChancePerBandit: 0.002
+  delays: { storm: 4, road-closure: 3, bandits: 2 }
 
 # Persistent characters (PR5): each settlement keeps exactly its NPC budget alive
 # (config/npc-population.yaml). Rates are authored assumptions.
@@ -129,6 +147,12 @@ history:
     opened: [wealth, 3, settlement]
     closed: [wealth, 3, settlement]
     moved: [travel, 4, settlement]
+    departed: [travel, 3, settlement]
+    migration-arrived: [travel, 2, settlement]
+    travel-delayed: [travel, 3, participants]
+    caravan-delayed: [travel, 3, participants]
+    travel-returning: [travel, 3, participants]
+    travel-returned: [travel, 4, settlement]
     raid: [conflict, 4, settlement]
     outlaw: [crime, 4, settlement]
     caught: [crime, 4, settlement]

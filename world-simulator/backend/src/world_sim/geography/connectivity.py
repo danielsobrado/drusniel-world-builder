@@ -113,6 +113,7 @@ def build_settlement_connectivity(audit: dict[str, Any], routes: list[Any] | Non
     sea_groups_seen: dict[tuple[Key, Key], str] = {}
     links: dict[str, dict[str, list[dict[str, Any]]]] = {"land": {}, "sea": {}}
     route_records: list[dict[str, Any]] = []
+    edge_sources = {}
     unresolved: list[dict[str, Any]] = []
 
     valid = [r for r in routes or [] if isinstance(r, dict) and isinstance(r.get("i"), int) and isinstance(r.get("points"), list)]
@@ -123,6 +124,8 @@ def build_settlement_connectivity(audit: dict[str, Any], routes: list[Any] | Non
         trace = _trace_route(route, ctx)
         target, seen = (graph, edge_groups) if mode == "land" else (sea_graph, sea_groups_seen)
         for a, b, length in trace["segments"]:
+            if a != b and length < target.get(a, {}).get(b, math.inf):
+                edge_sources[(mode, a, b)] = edge_sources[(mode, b, a)] = route["i"]
             _add_edge(target, seen, a, b, length, route["group"])
         stops = trace["stops"]
         for a, b in zip(stops, stops[1:], strict=False):
@@ -206,6 +209,7 @@ def build_settlement_connectivity(audit: dict[str, Any], routes: list[Any] | Non
         "landGraph": graph,
         "seaGraph": sea_graph,
         "edgeGroups": edge_groups,
+        "edgeSources": edge_sources,
         "cellPositions": ctx["positions"],
         "settlements": per_settlement,
         "components": [{

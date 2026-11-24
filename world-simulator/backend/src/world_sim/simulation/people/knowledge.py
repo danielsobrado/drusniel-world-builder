@@ -1,24 +1,15 @@
-"""
-Second-hand knowledge. What a person took part in is known first-hand (from the event's
-participants) and what is public in their town is local knowledge (from visibility);
-neither is stored. Stored here is only what reached them otherwise: told by someone in
-their household or a friend who was there, or a rumour carried along a road by a caravan
-master, each with when, from whom and how sure they are.
-"""
+"""Second-hand accounts shared among witnesses and nearby family and friends."""
 
 from typing import Any
 
 from ...peoples.decisions import Opportunity, preferences, rank
-from ..economy.contracts import Trade
 from ..history.contracts import HistoryEvent
 from .contracts import Cast, Knowledge
 from .relationships import Ties
 
 
-def spread(cast: Cast, events: list[HistoryEvent], trade: Trade, day: int, cfg: dict[str, Any], month: int,
-           profiles: dict | None = None) -> tuple[Cast, Trade]:
-    """Second-hand knowledge from this batch of events; returns the cast and the trade (caravans pick up news as they leave).
-    `month` is the calendar's month length: caravans that arrived within the last one deliver what they carry."""
+def spread(cast: Cast, events: list[HistoryEvent], day: int, cfg: dict[str, Any], profiles: dict) -> Cast:
+    """Hear an account directly from a witness who is physically present."""
     people = {p.id: p for p in cast.people}
     ties = Ties(cast.relationships, cast.relSeq)
     learned: dict[str, list[Knowledge]] = {}
@@ -43,39 +34,18 @@ def spread(cast: Cast, events: list[HistoryEvent], trade: Trade, day: int, cfg: 
                     tell(other.id, e.id, "told", teller.id, cfg["told"], witnesses)
             if e.importance >= 4:
                 for rel in ties.of(teller.id, "friend"):
-                    weights = preferences(teller.identity, teller.upbringing, None, profiles or {})
+                    listener = people.get(ties.other(rel, teller.id))
+                    if not listener or listener.settlementId != teller.settlementId or listener.journeyId != teller.journeyId:
+                        continue
+                    weights = preferences(teller.identity, teller.upbringing, None, profiles)
                     share = Opportunity("share", 0.3, 0.10, relationship=rel.trust)
                     keep = Opportunity("keep", 0, 0, {"discretion": 0.85})
                     if e.visibility == "public" or rank([share, keep], weights, greed=teller.personality.greed,
                                                         caution=teller.personality.caution,
                                                         trust=teller.personality.honesty)[0]["id"] == "share":
                         tell(ties.other(rel, teller.id), e.id, "told", teller.id, cfg["friend"], witnesses)
-    # Rumours travel with caravans: a master leaving home takes its public news along, and on reaching the market centre
-    # tells its innkeepers and hears the centre's own news. Nothing arrives before the caravan does.
-    centres = {m.marketId: m.centerSettlementId for m in trade.markets}
-    holders = {p.traderId: p for p in people.values() if p.alive and p.traderId}
-    innkeepers = [p for p in people.values() if p.alive and p.profession == "innkeeper"]
-    public = [e for e in worth if e.visibility in ("settlement", "public") and e.settlementId
-              and e.importance >= cfg.get("rumourMinImportance", cfg["minImportance"])]
-    caravans = []
-    for c in trade.caravans:
-        if c.departDay == day and c.kind == "sale" and c.traderId in holders:
-            carried = [e.id for e in public if e.settlementId == c.fromId and e.id not in c.news]
-            c = c.model_copy(update={"news": [*c.news, *carried]}) if carried else c
-        caravans.append(c)
-    for c in trade.delivered:
-        if not (day - month < c.arriveDay <= day and c.kind == "sale" and c.traderId in holders):
-            continue
-        master, centre = holders[c.traderId], centres.get(c.marketId)
-        for e in public:
-            if e.settlementId == centre:
-                tell(master.id, e.id, "rumour", None, cfg["rumour"], frozenset(x.personId for x in e.participants))
-        for event_id in c.news:
-            for inn in (p for p in innkeepers if p.settlementId == centre):
-                tell(inn.id, event_id, "rumour", master.id, cfg["rumour"])
-    trade = trade.model_copy(update={"caravans": caravans}) if caravans != trade.caravans else trade
     if not learned:
-        return cast, trade
+        return cast
     keep = cfg["maxEntries"]
     return cast.model_copy(update={"people": [p.model_copy(update={"knowledge": [*p.knowledge, *learned[p.id]][-keep:]}) if p.id in learned
-                                              else p for p in cast.people]}), trade
+                                              else p for p in cast.people]})

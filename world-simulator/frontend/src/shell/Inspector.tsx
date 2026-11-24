@@ -5,6 +5,7 @@ import { BusinessDetails } from '../society/BusinessDetails';
 import { TraderDetails } from '../roads/TraderDetails';
 import { PersonDetails } from '../people/PersonDetails';
 import { EventDetails } from '../people/EventDetails';
+import { TravelDetails } from '../travel/TravelDetails';
 import { Icon } from './Icon';
 import { SettlementDetails } from '../components/SettlementDetails';
 import { Empty } from '../components/StateViews';
@@ -36,6 +37,8 @@ export function Inspector({ selectedId, classes, width, onResize, onClose, onSel
       </div>
       <div className="inspector-body">
         {content ?? (!selectedId ? <Empty>Select a settlement, business, trader or person anywhere in the workbench.</Empty>
+          : ['journey:', 'travel:', 'caravan:', 'route:'].some((prefix) => selectedId.startsWith(prefix)) && sim?.active
+            ? <TravelDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('business:') && sim?.active ? <BusinessDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('npc:trader:') && sim?.active ? <TraderDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('npc:') && sim?.active ? <PersonDetails id={selectedId} sim={sim} onSelect={onSelect} />

@@ -26,7 +26,9 @@ def test_every_event_is_canonical_valid_and_numbered(eldara):
     state, events, known = decade(eldara)
     assert [e.seq for e in events] == list(range(len(events))) and state.historySeq == len(events)
     assert all(e.id == f"event:{e.seq}" for e in events)
-    assert all(e.datePrecision == "month" for e in events if e.source != "generated-prehistory")
+    exact = {"raid", "smuggling", "caravan-delayed", "departed", "moved", "migration-arrived", "travel-delayed", "travel-returning",
+             "travel-returned"}
+    assert all(e.datePrecision == ("day" if e.kind in exact else "month") for e in events if e.source != "generated-prehistory")
     assert {e.source for e in events} <= {"simulation", "inferred", "generated-prehistory"}
     past = [e for e in events if e.source == "generated-prehistory"]
     assert past and all(e.datePrecision in ("year", "approximate") for e in past), "a reconstructed past claims no exact day"

@@ -17,6 +17,7 @@ from .contracts import ScenarioState
 from .history.contracts import HistoryEvent
 from .history.validation import check_events
 from .manager import ScenarioManager
+from .migration import check_travel
 from .people.checks import check_cast, check_ties
 from .society import check_invariants
 
@@ -106,8 +107,11 @@ class Lab:
             f"the state expects 0–{state.historySeq - 1}"]
         checks = [
             _check("accounting", "Population, households and jobs add up in every settlement", accounting, len(state.settlements)),
+            _check("travel", "Migration totals and active journey records agree",
+                   check_travel(state.travel, state.settlements, state.cast, state.date.day), len(state.travel.journeys)),
             _check("people", "Named people fit each town's budget and belong to households",
-                   check_cast(state.cast, state.settlements, state.trade, rules["simulation"]["people"]),
+                   check_cast(state.cast, state.settlements, state.trade, rules["simulation"]["people"],
+                              minimum=state.date.dayOfMonth == 1),
                    len(state.cast.people)),
             _check("relationships", "Relationships are consistent (spouses, parents, employers)",
                    check_ties(state.cast, rules["simulation"]["people"]["daysPerYear"]),

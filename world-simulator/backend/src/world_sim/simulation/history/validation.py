@@ -9,7 +9,7 @@ from .contracts import HistoryEvent
 def check_events(events: Iterable[HistoryEvent], state: Any, known_businesses: set[str] | None = None) -> list[str]:
     people = {p.id: p for p in state.cast.people}
     settlements = {s.settlementId for s in state.settlements} | {m.centerSettlementId for m in state.trade.markets}
-    routes = {r.id for r in state.trade.routes}
+    routes = {r.id for r in state.trade.routes} | {r.id for r in state.travel.routes}
     businesses = (known_businesses or set()) | {b.id for s in state.settlements for b in s.society.businesses}
     problems = []
     for e in events:

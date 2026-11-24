@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ...geography.paths import TravelPath
+
 
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -104,6 +106,10 @@ class Caravan(Contract):
     lost: dict[str, float] = {}      # taken by bandits on the road
     smuggled: float = 0.0              # value hidden from the market tax
     caught: bool = False             # smuggled goods confiscated at the gate
+    repositioning: bool = False
+    carrierId: str | None = None
+    delayDays: int = 0
+    delayReason: str | None = None
     news: list[str] = []             # events from home the master carries as rumour, told on arrival (v7)
 
 
@@ -116,6 +122,7 @@ class Route(Contract):
     marketId: int
     centerName: str
     days: int
+    path: TravelPath | None = None
     bandits: int = Field(ge=0)
     floor: int = Field(ge=0)          # a band founded by an Azgaar brigands marker never shrinks below this
     lair: str | None = None           # that marker's name

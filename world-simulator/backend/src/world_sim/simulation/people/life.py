@@ -19,7 +19,6 @@ from .family import births, bury, deaths, marriages
 from .focus import promote
 from .generate import age_years
 from .homes import leave
-from .moves import moves
 from .notes import note
 from .relationships import Ties
 from .replace import promote_traders
@@ -212,14 +211,13 @@ def _friendships(m: Month) -> None:
                                         "participants": [{"personId": a.id, "role": "friend"}, {"personId": b.id, "role": "friend"}]})
 
 
-def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, flows: dict[tuple[str, str], int], *, day: int, seed: int,
-                 rules: dict[str, Any]) -> tuple[Cast, Trade, list[dict[str, Any]]]:
+def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, *, day: int, seed: int,
+                 rules: dict[str, Any], reservations: Counter | None = None) -> tuple[Cast, Trade, list[dict[str, Any]]]:
     c = rules["simulation"]["people"]
     m = Month(day, seed, c, rules["economy"], {t.id: t for t in trade.traders}, rules["simulation"]["history"]["recentEvents"],
               Ties(cast.relationships, cast.relSeq), dict(cast.seq))
     people = m.people = {p.id: p for p in cast.people}
     households, dwellings = list(cast.households), list(cast.dwellings)
-    by_id = {s.settlementId: s for s in settlements}
     died = 0
     for s in settlements:
         shortage = s.economy.food.security < 1
@@ -227,15 +225,15 @@ def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, f
             people[pid] = bury(people[pid], m, shortage)
             died += 1
     towns = _towns(people, settlements, trade.routes)
-    for pid in [p.id for p in people.values() if p.alive and p.settlementId in towns]:
+    for pid in [p.id for p in people.values() if p.alive and not p.journeyId and p.settlementId in towns]:
         people[pid] = _live(people[pid], towns[people[pid].settlementId], m)
     born = 0
     for s in settlements:
         marriages(people, s, m, households, dwellings)
         alive = sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId)
         room = int(cast.budget.get(s.settlementId, 0) * (1 + c["maxOverBudget"])) - alive
+        room -= (reservations or {}).get(s.settlementId, 0)
         born += births(people, s, m, cast, room, households)
-    moves(people, flows, by_id, m, households, dwellings, cast.budget)
     _friendships(m)
     trade = promote_traders(people, trade, settlements, m)
     focused = 0

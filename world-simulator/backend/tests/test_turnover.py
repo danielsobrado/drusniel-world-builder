@@ -78,7 +78,7 @@ def test_pirates_haunt_a_sea_lane_founded_by_an_azgaar_sighting(fresh_model):
     state = baseline_state(fresh_model, scenario_id="sea", settlement_ids=ids, seed=7, start_year=1212)
     [lane] = state.trade.routes
     assert (lane.mode, lane.settlementName, lane.centerName) == ("sea", "Qeqashuth", "Chix")
-    assert lane.lair == "Pirates" and lane.bandits == 24 and lane.days == 7, "quicker by ship than the 14-day road"
+    assert lane.lair == "Pirates" and lane.bandits == 24 and lane.days == 8, "still quicker than the 14-day road"
     state, months = advance(state, 1800, fresh_model.config.rules)
     raids = [i["message"] for m in months for i in m["incidents"] if i["kind"] == "raid"]
     assert raids and all(r.startswith("Pirates") and "sea lane" in r for r in raids)

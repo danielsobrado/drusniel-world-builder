@@ -279,3 +279,15 @@ h5 { margin: 6px 0 4px; font-size: var(--fs-sm); }
 .peoples-relations ul { padding-left: 12px; border-left: 1px solid var(--accent); list-style: none; }
 .peoples-relations li { padding: 6px 10px; border-bottom: 1px solid var(--border); }
 .peoples-parameters { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.travel-workspace { display: grid; gap: 12px; }
+.travel-map { display: block; width: 100%; max-height: 400px; background: var(--sea); border: 1px solid var(--border); }
+.travel-path { fill: none; stroke: var(--muted); stroke-width: 2px; cursor: pointer; }
+.travel-path.sea, .travel-path.mixed { stroke: #50899e; stroke-dasharray: 5 3; }
+.travel-path.off-road { stroke-dasharray: 3 5; }
+.travel-path.selected { stroke: var(--accent-strong); stroke-width: 4px; }
+.travel-marker { fill: var(--accent-strong); stroke: var(--surface-2); stroke-width: 1px; vector-effect: non-scaling-stroke; cursor: pointer; }
+.travel-marker.caravan { fill: #509cae; }
+.travel-marker.selected, .travel-marker:focus { stroke: var(--accent-strong); stroke-width: 3px; }
+.travel-town { fill: var(--text); pointer-events: none; }
+.travel-town text { paint-order: stroke; stroke: var(--sea); stroke-width: 2px; vector-effect: non-scaling-stroke; }

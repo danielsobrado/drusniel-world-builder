@@ -4,6 +4,7 @@ import { ApiView } from '../components/StateViews';
 import { dayLabel } from '../economy/format';
 import { TraitBars } from '../roads/TraderParts';
 import type { Simulation } from '../simulation/useSimulation';
+import { TravelDetails } from '../travel/TravelDetails';
 import { occupation, ROLE_LABEL } from './roles';
 
 /** Inspector view of one named person: who they are, their household and work, and the story of their life so far. */
@@ -30,6 +31,10 @@ export function PersonDetails({ id, sim, onSelect }: { id: string; sim: Simulati
             {p.releaseDay != null && <div className="field"><dt>Release</dt><dd>{dayLabel(p.releaseDay, active.date)}</dd></div>}
             <div className="field"><dt>Household</dt><dd>The {p.household.family} household · {p.household.housing}</dd></div>
           </dl>
+          {(p.journeyId ?? p.activeCaravanId) && <>
+            <h4>Current journey</h4>
+            <TravelDetails id={(p.journeyId ?? p.activeCaravanId)!} sim={sim} onSelect={onSelect} />
+          </>}
           {p.household.members.length > 0 && (<>
             <h4>Lives with</h4>
             <ul className="trip-list">{p.household.members.map((m) => (

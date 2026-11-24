@@ -4,9 +4,9 @@ import math
 import random
 from typing import Any
 
+from ...geography.paths import RoutePlanner
 from ...world.model import WorldModel
 from .contracts import Household, Market, Personality, Route, SettlementEconomy, Trader
-from .geography import TravelTimes
 from .names import generator_for
 from .sources import AzgaarEconomy
 
@@ -41,10 +41,10 @@ def new_trader(trader_id: str, name: str, settlement_id: str, settlement_name: s
 
 
 def initial_roads(model: WorldModel, members: list[tuple[dict[str, Any], SettlementEconomy]], markets: list[Market],
-                  seed: int, cfg: dict[str, Any]) -> tuple[list[Route], list[Trader], list[Market]]:
+                  seed: int, cfg: dict[str, Any], *, planner: RoutePlanner | None = None) -> tuple[list[Route], list[Trader], list[Market]]:
     """One road per settlement that trades by caravan; `perRoute` traders on each; Azgaar tax rates on each market."""
     az = AzgaarEconomy(model)
-    travel = TravelTimes(model, cfg["caravans"])
+    travel = planner or RoutePlanner(model, cfg["caravans"])
     by_market = {m.marketId: m for m in markets}
     routes: list[Route] = []
     traders: list[Trader] = []
@@ -53,13 +53,14 @@ def initial_roads(model: WorldModel, members: list[tuple[dict[str, Any], Settlem
         if market is None or econ.travelDays == 0:
             continue
         centre = model.settlements_by_id[market.centerSettlementId]
-        mode, _, path = travel.trip(record, centre)
-        band, lair = _lair(model, mode, path, cfg["bandits"])
+        path = travel.route(record, centre, off_road=True)
+        mode = "sea" if path and path.mode in ("sea", "mixed") else "land"
+        band, lair = _lair(model, mode, path.points if path else [], cfg["bandits"])
         names = generator_for(model.document, az.culture_of(record["sourceId"]))
         rng = random.Random(f"{seed}:road:{record['id']}")
         route = Route(id=f"route:{record['sourceId']}:market:{market.marketId}", mode=mode,
                       settlementId=record["id"], settlementName=record["name"],
-                      marketId=market.marketId, centerName=market.centerName, days=econ.travelDays, bandits=band,
+                      marketId=market.marketId, centerName=market.centerName, days=econ.travelDays, path=path, bandits=band,
                       floor=band // 3, lair=lair, reserve=[names.name(rng, cfg["traders"]["nameLength"]) for _ in range(RESERVE_NAMES)])
         for _ in range(cfg["traders"]["perRoute"]):
             name = names.name(rng, cfg["traders"]["nameLength"])

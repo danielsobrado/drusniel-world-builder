@@ -61,6 +61,16 @@ def _deliver(trade: Trade, econs: dict[str, SettlementEconomy], day: int, keep: 
     })
 
 
+def deliver_day(settlements: list[SettlementState], trade: Trade, day: int,
+                keep: int) -> tuple[list[SettlementState], Trade, list[Caravan]]:
+    due = [c for c in trade.caravans if c.arriveDay <= day]
+    if not due:
+        return settlements, trade, []
+    econs = {s.settlementId: s.economy for s in settlements}
+    trade = _deliver(trade, econs, day, keep)
+    return [s.model_copy(update={"economy": econs[s.settlementId]}) for s in settlements], trade, due
+
+
 def food_need(food: FoodBalance, granary: float, cfg: dict[str, Any]) -> Need:
     daily = food.wanted / cfg["simulation"]["calendar"]["daysPerMonth"] if food.wanted else 0
     days = f"{granary / daily:,.0f}" if daily else "—"
@@ -80,7 +90,8 @@ def _roads(settlements: list[SettlementState], trade: Trade, econs: dict[str, Se
     ctx = TripContext(seed=seed, day=day, cfg=cfg["economy"], markets={m.marketId: m for m in trade.markets}, econs=econs,
                       escorts_filled={s.settlementId: sum(b.filled for b in s.society.businesses if b.kind == KIND) for s in settlements},
                       safety={s.settlementId: next((n.value for n in s.society.needs if n.id == "safety"), 1.0) for s in settlements},
-                      routes={r.id: r for r in trade.routes}, traders=list(trade.traders), trader_seq=trade.traderSeq)
+                      routes={r.id: r for r in trade.routes}, traders=list(trade.traders), trader_seq=trade.traderSeq,
+                      travel=cfg["simulation"].get("travel", {}))
     by_route: dict[str, list[Caravan]] = defaultdict(list)
     route_of = {(r.settlementId, r.marketId): r.id for r in trade.routes}
     for c in new:

@@ -30,6 +30,7 @@ import { PeoplesExplorer } from './peoples/PeoplesExplorer';
 import { PeoplesInspector } from './peoples/PeoplesInspector';
 import { PeoplesWorkspace } from './peoples/PeoplesWorkspace';
 import type { PeoplesData, PeoplesSelection } from './peoples/types';
+import { TravelWorkspace } from './travel/TravelWorkspace';
 import { LabWorkspace } from './lab/LabWorkspace';
 
 export default function App() {
@@ -65,6 +66,7 @@ export default function App() {
     businesses: () => <BusinessesWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
     economy: () => <EconomyWorkspace sim={sim} onSelect={select} />,
     roads: () => <RoadsWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
+    travel: () => <TravelWorkspace sim={sim} selectedId={selectedId} onSelect={select} />,
     people: () => <PeopleWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
     peoples: () => <PeoplesWorkspace result={peoples} sim={sim} world={world.data} selection={peoplesSelection} onSelect={select} />,
     dialogue: () => <DialogueLab sim={sim} llm={llm.status} />,
@@ -80,7 +82,7 @@ export default function App() {
         <IconRail workspaces={WORKSPACES} active={workspace} onSelect={go} />
         {layout.leftOpen && (workspace === 'peoples'
           ? <PeoplesExplorer data={peoples.data} selection={peoplesSelection} onSelect={selectPeoples} />
-          : ['simulation', 'households', 'businesses', 'economy', 'roads', 'people', 'dialogue', 'lab'].includes(workspace)
+          : ['simulation', 'households', 'businesses', 'economy', 'roads', 'travel', 'people', 'dialogue', 'lab'].includes(workspace)
           ? <ScenarioExplorer sim={sim} />
           : <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />)}
         <main className="workspace" aria-label={WORKSPACES.find((w) => w.id === workspace)?.label}>{views[workspace]()}</main>

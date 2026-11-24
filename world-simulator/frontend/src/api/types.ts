@@ -249,7 +249,7 @@ export interface TraderDetail extends Trader {
 export type PersonRole = 'child' | 'worker' | 'unemployed' | 'retired' | 'trader' | 'outlaw' | 'imprisoned';
 export interface PersonRow {
   id: string; name: string; family: string; sex: 'female' | 'male'; birthDay: number; age: number; settlementId: string;
-  settlementName: string; householdId: string; role: PersonRole; businessId: string | null; workplace: string | null;
+  settlementName: string; householdId: string; journeyId?: string | null; role: PersonRole; businessId: string | null; workplace: string | null;
   profession: string | null; traderId: string | null; routeId: string | null; personality: Personality; idleMonths: number;
   releaseDay: number | null; alive: boolean; deathDay: number | null; cause: string | null;
 }
@@ -258,6 +258,7 @@ export interface PeopleMeta extends PageMeta {
   settlements: { id: string; name: string; budget: number }[];
 }
 export interface PersonDetail extends PersonRow {
+  activeCaravanId?: string | null;
   events: { day: number; kind: string; text: string }[];
   household: { id: string; family: string; kind: string; housing: string; members: { id: string; name: string; age: number; role: string; alive: boolean }[] };
   route: TradeRoute | null;

@@ -10,14 +10,14 @@ from world_sim.simulation.engine import advance, baseline_state
 from world_sim.simulation.history.archive import HistoryArchive
 from world_sim.simulation.history.contracts import HistoryEvent
 from world_sim.simulation.manager import ScenarioManager
-from world_sim.simulation.migration import migrate
+from world_sim.simulation.migration import TravelDay
 from world_sim.simulation.people.contracts import NpcHousehold
 from world_sim.simulation.people.family import births
 from world_sim.simulation.people.generate import age_years
-from world_sim.simulation.people.knowledge import spread
 from world_sim.simulation.people.life import Month, _towns, _work
 from world_sim.simulation.people.relationships import Ties
 from world_sim.simulation.rules import complete, freeze, ready
+from world_sim.simulation.travel_news import propagate, remember
 
 
 def pilot(model):
@@ -92,21 +92,22 @@ def test_children_move_with_their_adults_and_elders_stay(eldara):
     towns = sorted(state.settlements, key=lambda s: s.settlementId)
     idle = towns[0].society.employment.model_copy(update={"unemployed": towns[0].society.employment.labourSupply // 2})
     towns[0] = towns[0].model_copy(update={"society": towns[0].society.model_copy(update={"employment": idle})})
-    after, flows = migrate(towns, rules["simulation"]["migration"])
-    assert flows, "the idle town sends people"
+    travel = TravelDay(state.travel, towns, state.cast, state.trade, rules, state.seed, 30)
+    travel.dispatch()
+    assert travel.state.journeys, "the idle town sends people"
     before = {s.settlementId: s.cohorts for s in towns}
-    moved = {s.settlementId: s.cohorts for s in after}
+    moved = {s.settlementId: s.cohorts for s in travel.result()}
     origin = towns[0].settlementId
     adults = before[origin].adults - moved[origin].adults
     children = before[origin].children - moved[origin].children
     assert children > 0 and abs(children - adults * before[origin].children / before[origin].adults) <= 1
     assert all(moved[s].elders == before[s].elders for s in before), "elders stay"
-    assert sum(s.population for s in after) == sum(s.population for s in towns)
+    assert sum(s.population for s in travel.result()) + travel.state.population == sum(s.population for s in towns)
 
 
 def test_rumours_arrive_with_the_caravan_not_when_it_leaves(eldara):
     state, rules = pilot(eldara)
-    knowledge, length = rules["simulation"]["people"]["knowledge"], rules["simulation"]["calendar"]["daysPerMonth"]
+    knowledge, travel_cfg = rules["simulation"]["people"]["knowledge"], rules["simulation"]["travel"]
     master = next(p for p in state.cast.people if p.traderId)
     trader = next(t for t in state.trade.traders if t.id == master.traderId)
     market = next(mk for mk in state.trade.markets if mk.centerSettlementId != master.settlementId)
@@ -120,15 +121,16 @@ def test_rumours_arrive_with_the_caravan_not_when_it_leaves(eldara):
                       toId=market.centerSettlementId, toName=market.centerName, cargo={}, value=0.0, departDay=60, arriveDay=67,
                       traderId=trader.id)
     trade = state.trade.model_copy(update={"caravans": [leaving], "delivered": []})
-    cast, trade = spread(cast, [news], trade, 60, knowledge, length)
+    travel = remember(state.travel, [news], 4, travel_cfg["newsPerSettlement"])
+    travel, cast, trade = propagate(travel, cast, trade, [], [], day=60, cfg=knowledge, travel_cfg=travel_cfg)
     told = {p.id: p.knowledge for p in cast.people}
     assert not any(k.eventId == news.id for k in told[inn.id]), "nobody at the market knows when the caravan leaves"
     assert trade.caravans[0].news == [news.id]
 
     arrived = trade.model_copy(update={"caravans": [], "delivered": [trade.caravans[0]]})
-    cast, _ = spread(cast, [], arrived, 90, knowledge, length)
+    _, cast, _ = propagate(travel, cast, arrived, [], arrived.delivered, day=67, cfg=knowledge, travel_cfg=travel_cfg)
     heard = next(k for k in next(p for p in cast.people if p.id == inn.id).knowledge if k.eventId == news.id)
-    assert heard.how == "rumour" and heard.fromId == master.id and heard.learnedDay == 90
+    assert heard.how == "rumour" and heard.fromId == master.id and heard.learnedDay == 67
 
 
 def test_a_town_buys_no_more_than_it_can_pay_for_food_first(eldara):

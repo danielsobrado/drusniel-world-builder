@@ -18,6 +18,7 @@ from .history.contracts import HistoryEvent
 from .people.notes import note
 from .people.relationships import Ties
 from .society import update_society
+from .travel_news import remember
 
 
 class Intervention(BaseModel):
@@ -139,6 +140,10 @@ def intervene(state: ScenarioState, spec: Intervention, rules: dict[str, Any]) -
                                     precision="day")
     cast, trade, more = chronicle(incidents[1:], cast, trade, seq + 1, state.date.day, rules, precision="day")
     events += more
-    state = state.model_copy(update={"cast": cast, "trade": trade, "historySeq": seq + len(events)})
-    assert_consistent(state.settlements, state.cast, state.trade, rules, f"after {spec.kind}")
+    sim = rules["simulation"]
+    knowledge = sim["people"]["knowledge"]
+    travel = remember(state.travel, events, knowledge.get("rumourMinImportance", knowledge["minImportance"]),
+                      sim["travel"]["newsPerSettlement"])
+    state = state.model_copy(update={"cast": cast, "trade": trade, "travel": travel, "historySeq": seq + len(events)})
+    assert_consistent(state.settlements, state.cast, state.trade, rules, f"after {spec.kind}", month_close=state.date.dayOfMonth == 1)
     return state, events

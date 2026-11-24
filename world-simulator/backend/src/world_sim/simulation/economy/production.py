@@ -62,7 +62,8 @@ def run_production(econ: SettlementEconomy, society: Society, population: int,
         target = line.units * ratios.get(line.good, 1.0)
         limited = "staff" if target < line.units - EPS else None
         frac = 1.0
-        for good, units in line.inputs.items():
+        # A restored snapshot orders dictionary keys canonically. Break equally scarce inputs the same way.
+        for good, units in sorted(line.inputs.items()):
             need = units * target / line.units if line.units else 0
             wanted[good] += need
             if need > EPS and inv[good] < need * frac:

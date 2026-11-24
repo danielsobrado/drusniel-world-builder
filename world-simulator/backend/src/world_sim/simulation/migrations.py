@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from ..geography.paths import RoutePlanner, build_routes
 from ..ids import settlement_id
 from ..peoples.catalog import NEUTRAL, choose_ancestry, map_matches, person_identity, settlement_identity
 from ..peoples.contracts import CivicIdentity
@@ -98,6 +99,27 @@ def _v7_to_v8(raw: dict[str, Any], model: WorldModel, rules: dict) -> dict:
     return {**raw, "schemaVersion": 8, "settlements": settlements, "cast": {**raw["cast"], "people": people}}
 
 
+def _v8_to_v9(raw: dict, model: WorldModel, rules: dict) -> dict:
+    if not map_matches(raw["world"], model.audit["identity"]):
+        return {**raw, "schemaVersion": 9}
+    settlements = {row["settlementId"]: row for row in raw["settlements"]}
+    travel = build_routes(model, list(settlements), rules["simulation"]["travel"])
+    markets = {m["marketId"]: m["centerSettlementId"] for m in raw["trade"]["markets"]}
+    planner = RoutePlanner(model, {**rules["simulation"]["travel"], **rules["economy"]["caravans"]})
+    roads = []
+    for road in raw["trade"].get("routes", []):
+        origin = model.settlements_by_id.get(road["settlementId"])
+        destination = model.settlements_by_id.get(markets.get(road["marketId"]))
+        path = planner.route(origin, destination, off_road=True) if origin and destination else None
+        if path:
+            road = {**road, "path": path.model_dump(), "days": path.days, "mode": "sea" if path.mode in ("sea", "mixed") else "land"}
+            row = settlements[road["settlementId"]]
+            settlements[road["settlementId"]] = {**row, "economy": {**row["economy"], "travelDays": path.days}}
+        roads.append(road)
+    return {**raw, "schemaVersion": 9, "travel": {"routes": [r.model_dump() for r in travel]},
+            "trade": {**raw["trade"], "routes": roads}, "settlements": list(settlements.values())}
+
+
 STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7}
 
 
@@ -108,5 +130,10 @@ def migrate_state(raw: dict[str, Any], model: WorldModel, rules: dict | None = N
         raise IncompatibleState(f"state schema {stored} is newer than this simulator ({STATE_SCHEMA_VERSION})")
     while int(raw.get("schemaVersion", 1)) < STATE_SCHEMA_VERSION:
         version = int(raw.get("schemaVersion", 1))
-        raw = _v7_to_v8(raw, model, rules or model.config.rules) if version == 7 else STEPS[version](raw, model)
+        if version == 7:
+            raw = _v7_to_v8(raw, model, rules or model.config.rules)
+        elif version == 8:
+            raw = _v8_to_v9(raw, model, rules or model.config.rules)
+        else:
+            raw = STEPS[version](raw, model)
     return ScenarioState(**raw), stored

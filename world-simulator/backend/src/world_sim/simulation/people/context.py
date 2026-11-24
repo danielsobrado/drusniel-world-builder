@@ -79,9 +79,8 @@ class ContextBuilder:
         hooks_now = hooks(p, cast, state.trade, town, state.date.day, self.people_cfg)
         learned = self.archive.many([k.eventId for k in p.knowledge][-10:])
         sources = {k.eventId: k for k in p.knowledge}
-        places = {x for x in (p.birthplaceId, p.settlementId) if x}
+        places = {x for x in (p.birthplaceId, p.settlementId, *p.visited) if x}
         places |= {e.facts.get("from") for e in mine if e.kind == "moved" and isinstance(e.facts.get("from"), str)}
-        roads = [r.centerName for r in state.trade.routes if trader and r.id == trader.routeId]
         employment = town.society.employment
         definitions = self.peoples_cfg.get("cultures", {})
         culture = definitions.get(p.identity.cultureId, {})
@@ -108,6 +107,8 @@ class ContextBuilder:
                           "members": [f"{x.name} {x.family}" for x in self.people.values()
                                       if x.householdId == p.householdId and x.id != pid and x.alive]} if household else None,
             "relationships": self.relationships(pid),
+            "journeys": [{"kind": e.kind, "date": self.label(e.day), "summary": e.summary}
+                         for e in mine if e.category == "travel" and e.source == "simulation"][-12:],
             "work": {"role": p.role, "profession": p.profession,
                      "workplace": next((b.name for b in town.society.businesses if b.id == p.businessId), None),
                      "caravanMaster": {"reputation": trader.scorecard.reputation, "trips": trader.scorecard.trips, "purse": trader.purse,
@@ -117,7 +118,7 @@ class ContextBuilder:
             "milestones": [_event(e, pid, self.label) for e in sorted(milestones, key=lambda e: e.day)],
             "settlementHistory": [{"id": e.id, "date": self.label(e.day), "summary": e.summary, "kind": e.kind}
                                   for e in town_history[: self.cfg["settlementHistory"]]],
-            "places": sorted({*(self.place(x) for x in places), *roads}),
+            "places": sorted({self.place(x) for x in places}),
             "knowledge": [{"event": e.summary, "learned": self.label(sources[e.id].learnedDay), "how": sources[e.id].how,
                            "confidence": sources[e.id].confidence,
                            "wouldTell": p.personality.honesty > 0.4 + discretion * 0.35 or e.visibility == "public"

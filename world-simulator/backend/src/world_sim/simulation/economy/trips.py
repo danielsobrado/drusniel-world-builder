@@ -11,6 +11,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..travel_conditions import route_delay
 from .contracts import Caravan, Market, Route, SettlementEconomy, Trader
 from .production import r4
 from .roads import new_trader
@@ -28,6 +29,7 @@ class TripContext:
     routes: dict[str, Route]
     traders: list[Trader]
     trader_seq: int
+    travel: dict[str, Any] = field(default_factory=dict)
     tax: dict[int, float] = field(default_factory=dict)
     incidents: list[dict[str, Any]] = field(default_factory=list)
 
@@ -107,6 +109,22 @@ def _replace(ctx: TripContext, trader: Trader, route: Route) -> None:
                           "effects": [{"entityId": trader.id, "kind": "lost-post", "severity": 1.0}]})
 
 
+def _itinerary(ctx: TripContext, route: Route, caravan: Caravan, departure: int, outbound_delay: int) -> Caravan:
+    depart = departure if caravan.kind == "sale" else departure + route.days + outbound_delay
+    disruption = route_delay(route.path, ctx.seed, depart + max(1, route.days // 2), ctx.travel) if route.path else None
+    kind, delay = disruption if disruption else (None, 0)
+    return caravan.model_copy(update={"departDay": depart, "arriveDay": depart + route.days + delay,
+                                      "delayDays": delay, "delayReason": kind})
+
+
+def _reposition(c: Caravan) -> Caravan:
+    """The master travels empty when only one direction has freight."""
+    return Caravan(id=f"{c.id}:empty", kind="sale" if c.kind == "purchase" else "purchase", marketId=c.marketId,
+                   fromId=c.toId, fromName=c.toName, toId=c.fromId, toName=c.fromName, cargo={}, value=0,
+                   departDay=c.departDay, arriveDay=c.arriveDay, repositioning=True)
+
+
+
 def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Caravan]:
     """Leads this month's caravans on one road; updates economies, the road, the market's tax and the trader."""
     cfg, e = ctx.cfg, ctx.cfg["escorts"]
@@ -121,8 +139,23 @@ def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Ca
     _charge(ctx, sid, guards * e["feePerGuardDay"] * 2 * route.days, escortCost=guards * e["feePerGuardDay"] * 2 * route.days)
 
     out, lost_value, delivered, money = [], 0.0, 0.0, {"tax": 0.0, "confiscated": 0.0, "fine": 0.0, "evaded": 0.0}
-    for caravan in caravans:
+    departure = max(ctx.day, trader.busyUntil)
+    outbound_delay = 0
+    legs = caravans if len(caravans) > 1 else [caravans[0], _reposition(caravans[0])]
+    for caravan in sorted(legs, key=lambda c: c.kind != "sale"):
+        caravan = _itinerary(ctx, route, caravan, departure, outbound_delay)
+        if caravan.kind == "sale":
+            outbound_delay = caravan.delayDays
+        if caravan.delayDays:
+            ctx.incidents.append({"kind": "caravan-delayed", "precision": "day",
+                                  "day": caravan.departDay + max(1, route.days // 2), "settlementId": route.settlementId,
+                                  "message": f"{trader.name}'s caravan was delayed by {caravan.delayReason.replace('-', ' ')}",
+                                  "trader": trader.id, "routeId": route.id, "caravanId": caravan.id,
+                                  "facts": {"cause": caravan.delayReason, "delayDays": caravan.delayDays}})
         caravan = caravan.model_copy(update={"routeId": route.id, "traderId": trader.id, "traderName": trader.name, "guards": guards})
+        if caravan.repositioning:
+            out.append(caravan)
+            continue
         caravan, lost = _raid(ctx, ctx.routes[route.id], caravan, guards, prices)
         lost_value += lost
         if caravan.kind == "sale":
@@ -153,14 +186,17 @@ def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Ca
         "lossesValue": round(card.lossesValue + lost_value, 2), "guardsHired": card.guardsHired + guards,
         "reputation": round(max(0.0, min(100.0, reputation)), 1)})
     purse = trader.purse + commission + money["evaded"] - money["fine"]
-    trader = trader.model_copy(update={"scorecard": card, "busyUntil": ctx.day + 2 * route.days, "purse": round(purse, 2)})
+    busy = max(departure + route.days * 2 + outbound_delay, *(c.arriveDay for c in out))
+    trader = trader.model_copy(update={"scorecard": card, "busyUntil": busy, "purse": round(purse, 2)})
     ctx.traders = [trader if t.id == trader.id else t for t in ctx.traders]
     if lost_value:
         band = f" ({route.lair})" if route.lair else ""
         who, way = ("Pirates", "sea lane") if route.mode == "sea" else ("Bandits", "road")
         raided = [c for c in out if c.lost]
         carried = sum(c.value for c in out) + lost_value
-        ctx.incidents.append({"kind": "raid", "message": f"{who}{band} on the {route.settlementName} {way} robbed {trader.name}'s caravan "
+        raid_day = min(c.departDay + max(1, route.days // 2) for c in raided)
+        ctx.incidents.append({"kind": "raid", "day": raid_day, "precision": "day",
+                              "message": f"{who}{band} on the {route.settlementName} {way} robbed {trader.name}'s caravan "
                               f"of {lost_value:,.1f} in goods ({guards} guard{'' if guards == 1 else 's'})",
                               "trader": trader.id, "value": round(lost_value, 2), "guards": guards,
                               "settlementId": route.settlementId, "routeId": route.id, "locationId": route.id,
@@ -171,7 +207,9 @@ def run_trip(ctx: TripContext, route: Route, caravans: list[Caravan]) -> list[Ca
                                            "severity": round(min(1.0, lost_value / carried), 3) if carried else 1.0},
                                           {"entityId": route.settlementId, "kind": "goods-lost", "severity": 0.1}]})
     if caught:
-        ctx.incidents.append({"kind": "smuggling", "message": f"{trader.name} of {trader.settlementName} was caught smuggling at "
+        gate_day = next(c.arriveDay for c in out if c.caught)
+        ctx.incidents.append({"kind": "smuggling", "day": gate_day, "precision": "day",
+                              "message": f"{trader.name} of {trader.settlementName} was caught smuggling at "
                               f"{market.centerName}: goods worth {money['confiscated']:,.1f} confiscated, fined {money['fine']:,.1f}",
                               "trader": trader.id, "value": round(money["confiscated"], 2),
                               "settlementId": market.centerSettlementId, "routeId": route.id, "locationId": market.centerSettlementId,

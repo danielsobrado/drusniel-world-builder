@@ -33,7 +33,7 @@ def deaths(people: dict[str, Person], s: SettlementState, m: "Month") -> set[str
             toll = deaths_by_band.get(key, 0)
             if not toll:
                 continue
-            pool = sorted((p for p in people.values() if p.alive and p.settlementId == s.settlementId
+            pool = sorted((p for p in people.values() if p.alive and not p.journeyId and p.settlementId == s.settlementId
                            and (ancestry is None or p.identity.ancestryId == ancestry)
                            and band_of(age_years(p, m.day, m.cfg), person_rules(m.cfg, p.identity.ancestryId)) == band),
                           key=lambda p: p.id)
@@ -74,7 +74,7 @@ def _new_household(cast_households: list[NpcHousehold], dwellings: list, s: Sett
 
 def marriages(people: dict[str, Person], s: SettlementState, m: "Month", households: list[NpcHousehold], dwellings: list) -> None:
     c, ties = m.cfg, m.ties
-    singles = sorted((p for p in people.values() if p.alive and p.settlementId == s.settlementId
+    singles = sorted((p for p in people.values() if p.alive and not p.journeyId and p.settlementId == s.settlementId
                       and c["marryFromAge"] <= age_years(p, m.day, m.cfg) <= c["marryUntilAge"]
                       and p.role not in ("outlaw", "imprisoned", "child") and ties.spouse(p.id) is None), key=lambda p: p.id)
     taken: set[str] = set()
@@ -125,7 +125,7 @@ def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast
     rate = s.vitals.births / max(1, s.cohorts.adults / 2)
     born = 0
     remaining = dict(s.vitals.birthsByAncestry)
-    mothers = sorted((p for p in people.values() if p.alive and p.sex == "female" and p.settlementId == s.settlementId
+    mothers = sorted((p for p in people.values() if p.alive and not p.journeyId and p.sex == "female" and p.settlementId == s.settlementId
                       and p.role != "child" and _fertile(p, m) and ties.spouse(p.id)), key=lambda p: p.id)
     for mother in mothers:
         ancestry = mother.identity.ancestryId

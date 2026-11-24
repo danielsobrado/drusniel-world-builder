@@ -46,6 +46,8 @@ class Person(Contract):
     settlementId: str
     birthplaceId: str | None = None   # where they were born (an Azgaar settlement), for origins and places known
     householdId: str
+    journeyId: str | None = None
+    visited: dict[str, int] = {}
     identity: Identity = Identity()
     upbringing: Upbringing = Upbringing()
     role: Role

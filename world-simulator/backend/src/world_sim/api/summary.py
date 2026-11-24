@@ -27,4 +27,5 @@ def state_summary(state: ScenarioState) -> dict[str, Any]:
         row["society"]["businesses"] = []
         settlements.append({**row, "businessSummary": business_summary(s)})
     trade = {"routes": [r.model_dump() for r in state.trade.routes], "traders": [t.model_dump() for t in state.trade.traders]}
-    return {**state.model_dump(exclude={"settlements", "trade", "cast"}), "settlements": settlements, "trade": trade}
+    return {**state.model_dump(exclude={"settlements", "trade", "cast", "travel"}),
+            "settlements": settlements, "trade": trade, "populationInTransit": state.travel.population}

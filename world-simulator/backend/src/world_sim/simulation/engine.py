@@ -1,27 +1,30 @@
 """Pure scenario engine: build the baseline state and advance it day by day. No I/O."""
 
+from collections import Counter
 from typing import Any
 
 from ..canonical import state_digest
+from ..geography.paths import build_routes
 from ..peoples.catalog import settlement_identity
 from ..peoples.culture import environment, infrastructure
 from ..peoples.physiology import food_multiplier
 from ..peoples.population import ancestry_counts, combined, initial
 from ..world.model import WorldModel
 from .calendar import date_for
-from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, Society, WorldRef
+from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, Society, TravelState, WorldRef
 from .demography import run_month
 from .economy.baseline import initial_economy
-from .economy.step import economy_month, with_food_need
+from .economy.step import deliver_day, economy_month, with_food_need
 from .history.chronicle import chronicle
 from .history.links import link
-from .migration import migrate
+from .migration import TravelDay, check_travel
 from .people.backstory import with_backstory
 from .people.checks import check_cast
 from .people.generate import initial_cast
 from .people.life import people_month
 from .rules import ready
 from .society import check_invariants, initial_society, update_society
+from .travel_news import assign_carriers, propagate, remember
 
 
 def build_settlements(model: WorldModel, rows: list[tuple[dict[str, Any], dict[str, Any], Cohorts, Society]],
@@ -69,6 +72,7 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
                               ancestryPopulation=ancestry_counts(settlements))],
         trade=trade,
         cast=cast,
+        travel=TravelState(routes=build_routes(model, settlement_ids, rules["simulation"]["travel"])),
     )
 
 
@@ -87,9 +91,10 @@ def _bounded(history: list[HistoryPoint], limit: int) -> list[HistoryPoint]:
     return history if len(history) <= limit else [history[0], *history[len(history) - limit + 1:]]
 
 
-def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any, rules: dict[str, Any], when: str) -> None:
+def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any, rules: dict[str, Any],
+                      when: str, *, month_close: bool = True) -> None:
     """The accounting rules that must hold after every change; a break stops the step instead of saving a bad state."""
-    broken = check_cast(cast, settlements, trade, rules["simulation"]["people"])
+    broken = check_cast(cast, settlements, trade, rules["simulation"]["people"], minimum=month_close)
     if broken:
         raise AssertionError(f"people, {when}: {'; '.join(broken)}")
     for s in settlements:
@@ -100,7 +105,7 @@ def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any,
             raise AssertionError(f"{s.settlementId} {when}: {'; '.join(broken)}")
 
 
-def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[ScenarioState, list[dict[str, Any]]]:
+def advance_frames(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[ScenarioState, list[dict[str, Any]]]:
     """Advances `days` days; each month close runs demography, society and the economy. Returns month summaries too."""
     rules = ready(rules)        # derived settings (the calendar's year) for any caller; unchanged for completed rules
     calendar = rules["simulation"]["calendar"]
@@ -112,46 +117,92 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
     history = list(state.history)
     months: list[dict[str, Any]] = []
     day = state.date.day
+    travel = state.travel
+    travel_cfg = rules["simulation"]["travel"]
+    knowledge = rules["simulation"]["people"]["knowledge"]
+    min_news = knowledge.get("rumourMinImportance", knowledge["minImportance"])
     for _ in range(days):
         day += 1
-        if day % per_month:
-            continue
-        month_index = day // per_month - 1
-        before = sum(s.population for s in settlements)
+        before = sum(s.population for s in settlements) + travel.population
+        settlements, trade, convoys = deliver_day(settlements, trade, day, rules["economy"]["caravans"]["maxDelivered"])
+        due = [i for i in travel.pendingIncidents if i["day"] <= day]
+        if due:
+            travel = travel.model_copy(update={"pendingIncidents": [i for i in travel.pendingIncidents if i["day"] > day]})
+        today = TravelDay(travel, settlements, cast, trade, rules, state.seed, day)
+        today.tick()
+        settlements, cast = today.result(), today.cast
+        travel_incidents = today.incidents
+        arrivals = today.arrivals
+        month_close = day % per_month == 0
+        economy = {}
+        linked, lives, past = [], [], []
         births_before = sum(s.births for s in settlements)
         deaths_before = sum(s.deaths for s in settlements)
-        settlements = [_month(s, seed=state.seed, month_index=month_index, rules=rules) for s in settlements]
-        settlements, flows = migrate(settlements, rules["simulation"]["migration"])
-        if flows:
-            moved = {sid for pair in flows for sid in pair}
-            days = rules["simulation"]["calendar"]["daysPerMonth"]
-            settlements = [s.model_copy(update={"society": update_society(s.society, s.cohorts, rules["society"], days)})
-                           if s.settlementId in moved else s for s in settlements]
-        settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
-        settlements = [_with_infrastructure(s, rules) for s in settlements]
-        linked = link(economy["incidents"], cast, settlements)
-        cast, trade, lives = people_month(cast, settlements, trade, flows, day=day, seed=state.seed, rules=rules)
-        cast, trade, events = chronicle([*linked, *lives], cast, trade, seq, day, rules)
-        seq += len(events)
-        cast, past = with_backstory(cast, seq, day, settlements, rules, state.seed)     # people who came into focus
-        seq += len(past)
+        if month_close:
+            month_index = day // per_month - 1
+            settlements = [_month(s, seed=state.seed, month_index=month_index, rules=rules) for s in settlements]
+            settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
+            trade = assign_carriers(trade, cast)
+            linked = link(economy["incidents"], cast, settlements)
+            scheduled = [i for i in linked if i.get("day", day) > day]
+            linked = [i for i in linked if i.get("day", day) <= day]
+            if scheduled:
+                today.state = today.state.model_copy(update={"pendingIncidents": [*today.state.pendingIncidents, *scheduled]})
+            reservations: Counter = Counter()
+            for party in today.state.journeys:
+                if party.active and party.status != "returning":
+                    reservations[party.destinationId] += len(party.personIds)
+            cast, trade, lives = people_month(cast, settlements, trade, day=day, seed=state.seed, rules=rules,
+                                              reservations=reservations)
+            today = TravelDay(today.state, settlements, cast, trade, rules, state.seed, day, travel_incidents)
+            today.dispatch()
+            settlements, cast = today.result(), today.cast
+            settlements = [_with_infrastructure(s, rules) for s in settlements]
+        if due:
+            alive = {p.id for p in cast.people if p.alive or p.deathDay == day}
+            due = [{**i, "participants": [p for p in i.get("participants", []) if p["personId"] in alive]} for i in due]
+        incidents = [*due, *linked, *lives, *travel_incidents]
+        events = []
+        if incidents:
+            cast, trade, events = chronicle(incidents, cast, trade, seq, day, rules)
+            seq += len(events)
+        travel = remember(today.state, events, min_news, travel_cfg["newsPerSettlement"])
+        if arrivals or convoys or month_close or any(c.departDay == day for c in trade.caravans):
+            travel, cast, trade = propagate(travel, cast, trade, arrivals, convoys, day=day, cfg=knowledge, travel_cfg=travel_cfg)
+        if month_close:
+            cast, past = with_backstory(cast, seq, day, settlements, rules, state.seed)
+            seq += len(past)
+        if not month_close and not events:
+            continue
         economy["events"] = [*events, *past]
-        economy["incidents"] = [{**incident, "eventId": e.id} for incident, e in zip([*linked, *lives], events, strict=True)]
-        assert_consistent(settlements, cast, trade, rules, f"month {month_index}")
+        economy["incidents"] = [{**incident, "eventId": e.id} for incident, e in zip(incidents, events, strict=True)]
+        after = sum(s.population for s in settlements) + travel.population
+        births = sum(s.births for s in settlements) - births_before
+        deaths = sum(s.deaths for s in settlements) - deaths_before
+        if after != before + births - deaths:
+            raise AssertionError(f"travel population accounting failed on day {day}")
+        assert_consistent(settlements, cast, trade, rules, f"day {day}", month_close=month_close)
+        problems = check_travel(travel, settlements, cast, day)
+        if problems:
+            raise AssertionError(f"travel, day {day}: {'; '.join(problems)}")
+        if not month_close:
+            months.append({"day": day, "births": 0, "deaths": 0, "monthClose": False, **economy})
+            continue
         history.append(HistoryPoint(day=day, population={s.settlementId: s.population for s in settlements},
                                     labour={s.settlementId: s.society.employment.labourSupply for s in settlements},
                                     unemployed={s.settlementId: s.society.employment.unemployed for s in settlements},
-                                    ancestryPopulation=ancestry_counts(settlements),
+                                    ancestryPopulation=ancestry_counts(settlements), inTransit=travel.population,
                                     bandits=sum(r.bandits for r in trade.routes)))
         employed = sum(s.society.employment.employed for s in settlements)
         supply = sum(s.society.employment.labourSupply for s in settlements)
         months.append({
             "day": day,
             "label": date_for(day - 1, state.startYear, calendar).label[:7],
-            "births": sum(s.births for s in settlements) - births_before,
-            "deaths": sum(s.deaths for s in settlements) - deaths_before,
-            "population": sum(s.population for s in settlements),
-            "change": sum(s.population for s in settlements) - before,
+            "births": births,
+            "deaths": deaths,
+            "population": after,
+            "inTransit": travel.population,
+            "change": after - before,
             "employed": employed,
             "unemployed": supply - employed,
             **economy,
@@ -162,9 +213,24 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         "history": _bounded(history, rules["simulation"]["limits"]["maxHistoryPoints"]),
         "trade": trade,
         "cast": cast,
+        "travel": travel,
         "historySeq": seq,
     })
     return new_state, months
+
+
+def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[ScenarioState, list[dict[str, Any]]]:
+    """The original monthly reporting API. Each summary includes canonical events since the preceding close."""
+    state, frames = advance_frames(state, days, rules)
+    months = []
+    events, incidents = [], []
+    for frame in frames:
+        events.extend(frame["events"])
+        incidents.extend(frame["incidents"])
+        if frame.get("monthClose", True):
+            months.append({**frame, "events": events, "incidents": incidents})
+            events, incidents = [], []
+    return state, months
 
 
 def state_checksum(state: ScenarioState) -> str:

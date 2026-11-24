@@ -38,6 +38,7 @@ from .people_routes import people_router
 from .peoples_routes import peoples_router
 from .scenario_routes import scenario_router
 from .settlement_query import parse_settlement_query, query_settlements
+from .travel_routes import travel_router
 
 LIST_FIELDS = ("id", "sourceId", "name", "stateId", "stateName", "cultureId", "cultureName", "population", "class",
                "capital", "port", "npcs", "pilot")
@@ -166,6 +167,7 @@ def create_app(model: WorldModel, static_dir: Path | None = None, provider: Prov
     app.include_router(scenario_router(manager, reply))
     app.include_router(people_router(manager, reply))
     app.include_router(peoples_router(manager, reply))
+    app.include_router(travel_router(manager, reply))
     app.include_router(history_router(manager, reply))
     app.include_router(narration_router(manager, narrator, reply))
     app.include_router(lab_router(manager, Lab(manager, narrator.latency), reply))

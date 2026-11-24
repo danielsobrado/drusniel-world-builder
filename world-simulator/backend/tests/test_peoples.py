@@ -4,7 +4,7 @@ from dataclasses import replace
 from fastapi.testclient import TestClient
 
 from world_sim.api.app import create_app
-from world_sim.simulation.contracts import CreateScenario, Scope
+from world_sim.simulation.contracts import STATE_SCHEMA_VERSION, CreateScenario, Scope
 from world_sim.simulation.engine import advance, baseline_state, state_checksum
 from world_sim.simulation.manager import ScenarioManager
 from world_sim.simulation.migrations import migrate_state
@@ -56,7 +56,7 @@ def test_unmapped_map_and_v7_migration_preserve_character_records(eldara):
     for p in raw["cast"]["people"]:
         del p["identity"], p["upbringing"]
     upgraded, version = migrate_state(raw, foreign)
-    assert version == 7 and upgraded.schemaVersion == 8
+    assert version == 7 and upgraded.schemaVersion == STATE_SCHEMA_VERSION
     assert upgraded.cast.households == neutral.cast.households
     assert upgraded.cast.people == neutral.cast.people
 
@@ -114,10 +114,8 @@ def test_an_affordable_exclusive_patron_can_outweigh_a_preference_for_diversific
 def test_named_migrant_retains_upbringing_and_ancestry_and_takes_local_polity(eldara):
     from world_sim.peoples.assignments import assigned_rules
     from world_sim.peoples.contracts import Assignment
-    from world_sim.simulation.contracts import Cohorts, Vitals
-    from world_sim.simulation.people.life import Month
-    from world_sim.simulation.people.moves import moves
-    from world_sim.simulation.people.relationships import Ties
+    from world_sim.simulation.contracts import Cohorts, Journey
+    from world_sim.simulation.people.journeys import embark, settle
     from world_sim.simulation.rules import ready
 
     origin, destination = [role["settlementId"] for role in eldara.pilot["roles"][:2]]
@@ -131,14 +129,15 @@ def test_named_migrant_retains_upbringing_and_ancestry_and_takes_local_polity(el
                                        "personality": person.personality.model_copy(update={"greed": 1.0, "caution": 0.0})})
     cfg = ready(rules)["simulation"]["people"]
     cfg = {**cfg, "moveScale": 1000, "cultureProfiles": {}}
-    month = Month(30, 42, cfg, rules["economy"], {}, 10, Ties([], 0), {})
-    month.people = {person.id: person}
     origin_state, host_state = state.settlements
-    vitals = Vitals(emigrantsByAncestry={"goblin": Cohorts(adults=1, children=0, elders=0)})
-    origin_state = origin_state.model_copy(update={"vitals": vitals})
-    moves(month.people, {(origin, destination): 1}, {origin: origin_state, destination: host_state}, month,
-          list(state.cast.households), list(state.cast.dwellings), state.cast.budget)
-    moved = month.people[person.id]
+    cast = state.cast.model_copy(update={"people": [person]})
+    journey = Journey(id="journey:1", routeId=state.travel.routes[0].id, originId=origin, destinationId=destination,
+                      reason="work", departDay=30, arriveDay=45, householdSlots=1,
+                      ancestries={"goblin": Cohorts(children=0, adults=1, elders=0)})
+    cast, people = embark(cast, journey, origin_state, host_state, seed=42, cfg=cfg, reserved=0, distance_days=15, risk=0)
+    [traveling] = cast.people
+    assert traveling.journeyId == journey.id and traveling.settlementId == origin
+    [moved] = settle(cast, journey.model_copy(update={"personIds": people}), host_state, 42).people
     assert moved.settlementId == destination
     assert moved.identity.ancestryId == "goblin"
     assert moved.identity.polityId == "host" and moved.identity.cultureId == "vondari"

@@ -61,10 +61,14 @@ def test_a_decade_trades_with_rare_shortages_and_keeps_prices_near_azgaar(eldara
 def test_caravans_carry_purchases_after_their_travel_time(eldara):
     state, _ = advance(pilot(eldara), 30, eldara.config.rules)
     purchases = {c.toName: c for c in state.trade.caravans if c.kind == "purchase"}
-    assert purchases["Falanenerwin"].arriveDay == 37 and purchases["Falanenerwin"].fromName == "Vhaltha"
+    purchase = purchases["Falanenerwin"]
+    assert purchase.fromName == "Vhaltha" and purchase.departDay == 37 and purchase.arriveDay == 44
     assert "Vhaltha" not in purchases, "the market centre trades without caravans"
-    state, _ = advance(state, 30, eldara.config.rules)
-    assert any(c.id == purchases["Falanenerwin"].id for c in state.trade.delivered)
+    state, _ = advance(state, 13, eldara.config.rules)
+    assert all(c.id != purchase.id for c in state.trade.delivered)
+    state, _ = advance(state, 1, eldara.config.rules)
+    assert any(c.id == purchase.id for c in state.trade.delivered)
+
 
 
 def test_a_cut_supply_chain_stops_its_product_and_reroutes_the_next_one(eldara):

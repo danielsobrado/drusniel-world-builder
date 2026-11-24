@@ -56,7 +56,10 @@ def people_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]) 
         members = [{"id": p.id, "name": p.name, "age": age_years(p, state.date.day, cfg), "role": p.role, "alive": p.alive}
                    for p in state.cast.people if p.householdId == household.id and p.id != found.id]
         route = next((r.model_dump() for r in state.trade.routes if r.id == found.routeId), None)
-        return reply({**summary(found, state.date.day, places, workplaces, cfg), "events": [e.model_dump() for e in reversed(found.events)],
+        caravan = next((c.id for c in state.trade.caravans
+                        if c.carrierId == found.id and c.departDay <= state.date.day < c.arriveDay), None)
+        return reply({"activeCaravanId": caravan, **summary(found, state.date.day, places, workplaces, cfg),
+                      "events": [e.model_dump() for e in reversed(found.events)],
                       "household": {**household.model_dump(), "members": members}, "route": route})
 
     return router

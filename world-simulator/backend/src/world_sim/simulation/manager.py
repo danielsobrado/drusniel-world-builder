@@ -22,7 +22,7 @@ from ..peoples.assignments import assigned_rules
 from ..world.model import WorldModel
 from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
-from .engine import advance, baseline_state, state_checksum
+from .engine import advance_frames, baseline_state, state_checksum
 from .history.archive import HistoryArchive
 from .history.contracts import HistoryEvent
 from .interventions import Intervention, InvalidIntervention, intervene
@@ -96,8 +96,7 @@ class ScenarioManager:
             return
         session = Session(ScenarioMeta(**raw_meta), state, [Event(**e) for e in raw_events])
         if not foreign and stored_schema < STATE_SCHEMA_VERSION and session.meta.rules is not None:
-            if "peoples" not in session.meta.rules:
-                self._freeze(session, rules)
+            self._freeze(session, rules)
             session.meta = session.meta.model_copy(update={"journal": None})
         if session.meta.rules is None and not foreign:
             self._freeze(session)
@@ -143,7 +142,8 @@ class ScenarioManager:
             "date": s.state.date.model_dump(),
             "running": s.running,
             "speed": s.speed if s.running else 0,
-            "population": sum(x.population for x in s.state.settlements),
+            "population": sum(x.population for x in s.state.settlements) + s.state.travel.population,
+            "populationInTransit": s.state.travel.population,
             "checksum": s.checksum,
             "snapshots": len(self.store.snapshots(s.meta.id)),
             "readOnly": s.read_only,
@@ -324,7 +324,7 @@ class ScenarioManager:
 
     def _advance(self, s: Session, days: int) -> None:
         started = time.perf_counter()
-        state, months = advance(s.state, days, self.rules(s))
+        state, months = advance_frames(s.state, days, self.rules(s))
         self._apply(s, state, months, days, time.perf_counter() - started)
 
     async def _advance_off_loop(self, s: Session, days: int) -> None:
@@ -332,7 +332,7 @@ class ScenarioManager:
         s.busy = True
         started = time.perf_counter()
         try:
-            state, months = await asyncio.to_thread(advance, s.state, days, self.rules(s))
+            state, months = await asyncio.to_thread(advance_frames, s.state, days, self.rules(s))
         finally:
             s.busy = False
         self._apply(s, state, months, days, time.perf_counter() - started)
@@ -341,7 +341,8 @@ class ScenarioManager:
         s.state = state
         self._journal(s, {"op": "advance", "days": days})
         if months:
-            s.perf.append({"day": state.date.day, "days": days, "months": len(months), "ms": round(seconds * 1000, 1),
+            s.perf.append({"day": state.date.day, "days": days, "months": sum(m.get("monthClose", True) for m in months),
+                           "ms": round(seconds * 1000, 1),
                            "events": sum(len(m["events"]) for m in months), "people": len(state.cast.people)})
         self.archive(s.meta.id).append([e for m in months for e in m["events"]])
         for m in months:
@@ -351,6 +352,8 @@ class ScenarioManager:
                             personId=people[0]["personId"] if people else incident.get("person"), trader=incident.get("trader"),
                             **{k: incident.get(k) for k in ("businessId", "routeId", "caravanId", "settlementId")},
                             value=incident.get("value"))
+            if not m.get("monthClose", True):
+                continue
             self._event(s, "month", f"{m['label']} closed: {m['births']} births, {m['deaths']} deaths, population {m['population']:,}, "
                         f"{m['unemployed']:,} without work, {m['caravans']} caravans, {m['shortages']} shortages",
                         at_day=m["day"], births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"],

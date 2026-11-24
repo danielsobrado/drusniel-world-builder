@@ -59,7 +59,8 @@ class GameExport:
         files, listed = {}, []
         for s in state.settlements:
             businesses = {b.id: b for b in s.society.businesses}
-            people = [p for p in state.cast.people if p.alive and p.settlementId == s.settlementId and p.role in IN_TOWN]
+            people = [p for p in state.cast.people
+                      if p.alive and not p.journeyId and p.settlementId == s.settlementId and p.role in IN_TOWN]
             rows = sorted((self._resident(scenario_id, p, businesses) for p in people),
                           key=lambda r: (TIERS.get(r["tier"], 3), IN_TOWN.index(r["role"]), r["id"]))
             name = f"settlements/{s.sourceId}.json"

@@ -20,6 +20,8 @@ KINDS = {
 def _facts(context: dict[str, Any]) -> str:
     keep = {k: context[k] for k in ("identity", "household", "work", "circumstances", "milestones", "settlementHistory", "places",
                                     "personality", "outlook", "hooks")}
+    if "journeys" in context:
+        keep["journeys"] = context["journeys"]
     if "culturalContext" in context:
         keep["culturalContext"] = context["culturalContext"]
     keep["relationships"] = [{k: r[k] for k in ("kind", "direction", "name", "alive", "since", "until")} for r in context["relationships"]]

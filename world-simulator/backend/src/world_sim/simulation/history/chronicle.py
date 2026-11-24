@@ -26,6 +26,6 @@ def chronicle(incidents: list[dict[str, Any]], cast: Cast, trade: Trade, seq: in
     cast = with_origins(cast, incidents, events)
     cast = apply_experience(cast, events, rules["simulation"]["people"]["experience"])
     trade = in_character(trade, cast)
-    knowledge, month = rules["simulation"]["people"]["knowledge"], rules["simulation"]["calendar"]["daysPerMonth"]
-    cast, trade = spread(cast, events, trade, day, knowledge, month, rules.get("peoples", {}).get("profiles", {}))
+    knowledge = rules["simulation"]["people"]["knowledge"]
+    cast = spread(cast, events, day, knowledge, rules.get("peoples", {}).get("profiles", {}))
     return cast, trade, events
