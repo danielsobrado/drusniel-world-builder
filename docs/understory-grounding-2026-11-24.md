@@ -1,7 +1,7 @@
 # Understory grounding
 
 Shrubs, ferns and ground plants read as pasted on: pale and flat beside the grass,
-with near-black stems and a dark pool at their foot. Three causes, all in the
+with near-black stems and a dark pool at their foot. Five causes, mostly in the
 shared understory material path (`stylized/AuthoredFoliageMaterial.js`,
 `BushRenderAssets.js`, `flora/biomeUnderstoryPrototypes.js`, `forest/foliageLight.js`).
 
