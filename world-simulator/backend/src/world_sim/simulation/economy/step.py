@@ -128,7 +128,10 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
         members.append(Member(s.settlementId, s.name, s.population, staffing(s.society), econ, multiplier))
 
     clearing = Clearing(trade, day, cfg)
-    markets = [clearing.clear(market, [m for m in members if m.econ.marketId == market.marketId]) for market in trade.markets]
+    by_market = defaultdict(list)
+    for member in members:
+        by_market[member.econ.marketId].append(member)
+    markets = [clearing.clear(market, by_market[market.marketId]) for market in trade.markets]
     dispatched = clearing.seq - trade.caravanSeq
     on_road, new = clearing.caravans[:len(clearing.caravans) - dispatched], clearing.caravans[len(clearing.caravans) - dispatched:]
     trade = trade.model_copy(update={"markets": markets, "caravanSeq": clearing.seq})

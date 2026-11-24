@@ -6,7 +6,7 @@ vacancies filled by inhabitants coming into focus.
 """
 
 import random
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -60,11 +60,21 @@ class Month:
 
 def _towns(people: dict[str, Person], settlements: list[SettlementState], routes: list[Route]) -> dict[str, Town]:
     towns = {}
+    workers = defaultdict(Counter)
+    outlaw_counts = Counter()
+    routes_by_town = defaultdict(dict)
+    for p in people.values():
+        if p.alive and p.role == "worker":
+            workers[p.settlementId][p.businessId] += 1
+        elif p.alive and p.role == "outlaw":
+            outlaw_counts[p.routeId] += 1
+    for r in routes:
+        routes_by_town[r.settlementId][r.id] = r
     for s in settlements:
         e = s.society.employment
-        named = Counter(p.businessId for p in people.values() if p.alive and p.settlementId == s.settlementId and p.role == "worker")
-        own = {r.id: r for r in routes if r.settlementId == s.settlementId}
-        outlaws = Counter(p.routeId for p in people.values() if p.alive and p.role == "outlaw" and p.routeId in own)
+        named = workers[s.settlementId]
+        own = routes_by_town[s.settlementId]
+        outlaws = Counter({rid: outlaw_counts[rid] for rid in own if outlaw_counts[rid]})
         towns[s.settlementId] = Town(s, {b.id: b for b in s.society.businesses}, named, own, outlaws,
                                      e.unemployed / e.labourSupply if e.labourSupply else 0.0)
     return towns
@@ -77,8 +87,9 @@ def _hire(p: Person, b: Business, town: Town, m: Month) -> Person:
              "facts": {"profession": b.profession, "monthsIdle": p.idleMonths}}, role="worker", businessId=b.id, profession=b.profession,
              idleMonths=0)
     if age_years(p, m.day, m.cfg) <= m.cfg["apprenticeUntilAge"]:
-        mentor = next((x for x in sorted(m.people.values(), key=lambda x: x.birthDay) if x.alive and x.businessId == b.id
-                       and x.profession == b.profession and age_years(x, m.day, m.cfg) >= 30), None)
+        mentor = min((x for x in m.people.values() if x.alive and x.businessId == b.id
+                      and x.profession == b.profession and age_years(x, m.day, m.cfg) >= 30),
+                     key=lambda x: x.birthDay, default=None)
         if mentor:
             tie = m.ties.add("mentor", mentor.id, p.id, m.day, businessId=b.id)
             m.incidents.append({"kind": "apprenticeship-started", "message": f"{p.name} {p.family} began learning the {b.profession}'s "
@@ -196,15 +207,24 @@ def _friendships(m: Month) -> None:
             by_business.setdefault(p.businessId, []).append(p)
     for business, staff in sorted(by_business.items()):
         staff.sort(key=lambda p: p.id)
+        friends = {p.id: len(m.ties.of(p.id, "friend")) for p in staff}
+        tenure = {p.id: [r.since for r in m.ties.of(p.id, "employer") if r.b == p.id] for p in staff}
         for i, a in enumerate(staff):
-            for b in staff[i + 1:]:
-                if m.ties.linked(a.id, b.id, "friend") or len(m.ties.of(a.id, "friend")) >= 3 or len(m.ties.of(b.id, "friend")) >= 3:
+            if friends[a.id] >= 3:
+                continue
+            for j in range(i + 1, len(staff)):
+                if friends[a.id] >= 3:
+                    break
+                b = staff[j]
+                if friends[b.id] >= 3 or m.ties.linked(a.id, b.id, "friend"):
                     continue
-                since = [r.since for r in m.ties.items if r.kind == "employer" and r.active and r.b in (a.id, b.id)]
+                since = tenure[a.id] + tenure[b.id]
                 if len(since) < 2 or m.day - max(since) < m.cfg["daysPerYear"]:
                     continue
                 if random.Random(f"{m.seed}:{m.day}:{a.id}:{b.id}:friend").random() < m.cfg["friendshipPerMonth"]:
                     rel = m.ties.add("friend", a.id, b.id, m.day, businessId=business)
+                    friends[a.id] += 1
+                    friends[b.id] += 1
                     m.incidents.append({"kind": "friendship",
                                         "message": f"{a.name} {a.family} and {b.name} {b.family} became friends at work",
                                         "settlementId": a.settlementId, "businessId": business, "ties": [rel.id],
@@ -218,28 +238,39 @@ def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, *
               Ties(cast.relationships, cast.relSeq), dict(cast.seq))
     people = m.people = {p.id: p for p in cast.people}
     households, dwellings = list(cast.households), list(cast.dwellings)
+    residents = defaultdict(dict)
+    for person in people.values():
+        residents[person.settlementId][person.id] = person
     died = 0
     for s in settlements:
         shortage = s.economy.food.security < 1
-        for pid in sorted(deaths(people, s, m)):
+        for pid in sorted(deaths(residents[s.settlementId], s, m)):
             people[pid] = bury(people[pid], m, shortage)
             died += 1
     towns = _towns(people, settlements, trade.routes)
     for pid in [p.id for p in people.values() if p.alive and not p.journeyId and p.settlementId in towns]:
         people[pid] = _live(people[pid], towns[people[pid].settlementId], m)
     born = 0
+    residents = defaultdict(list)
+    alive_counts = Counter()
+    for person in people.values():
+        residents[person.settlementId].append(person.id)
+        if person.alive:
+            alive_counts[person.settlementId] += 1
     for s in settlements:
-        marriages(people, s, m, households, dwellings)
-        alive = sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId)
+        resident_ids = residents[s.settlementId]
+        marriages(people, s, m, households, dwellings, resident_ids=resident_ids)
+        alive = alive_counts[s.settlementId]
         room = int(cast.budget.get(s.settlementId, 0) * (1 + c["maxOverBudget"])) - alive
         room -= (reservations or {}).get(s.settlementId, 0)
-        born += births(people, s, m, cast, room, households)
+        born += births(people, s, m, cast, room, households, resident_ids=resident_ids)
     _friendships(m)
     trade = promote_traders(people, trade, settlements, m)
     focused = 0
     named = Counter(p.businessId for p in people.values() if p.alive and p.role == "worker")
+    alive_counts = Counter(p.settlementId for p in people.values() if p.alive)
     for s in settlements:
-        while sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId) < cast.budget.get(s.settlementId, 0):
+        for _ in range(max(0, cast.budget.get(s.settlementId, 0) - alive_counts[s.settlementId])):
             promote(people, s, cast, m, households, dwellings, named)
             focused += 1
     occupied = {p.householdId for p in people.values() if p.alive}

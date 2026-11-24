@@ -72,9 +72,11 @@ def _new_household(cast_households: list[NpcHousehold], dwellings: list, s: Sett
     return h
 
 
-def marriages(people: dict[str, Person], s: SettlementState, m: "Month", households: list[NpcHousehold], dwellings: list) -> None:
+def marriages(people: dict[str, Person], s: SettlementState, m: "Month", households: list[NpcHousehold], dwellings: list,
+              *, resident_ids: list[str] | None = None) -> None:
     c, ties = m.cfg, m.ties
-    singles = sorted((p for p in people.values() if p.alive and not p.journeyId and p.settlementId == s.settlementId
+    residents = people.values() if resident_ids is None else (people[pid] for pid in resident_ids)
+    singles = sorted((p for p in residents if p.alive and not p.journeyId and p.settlementId == s.settlementId
                       and c["marryFromAge"] <= age_years(p, m.day, m.cfg) <= c["marryUntilAge"]
                       and p.role not in ("outlaw", "imprisoned", "child") and ties.spouse(p.id) is None), key=lambda p: p.id)
     taken: set[str] = set()
@@ -113,7 +115,7 @@ def _fertile(person: Person, month: "Month") -> bool:
     return low <= age_years(person, month.day, cfg) <= high
 
 
-def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast, room: int, households: list[NpcHousehold]) -> int:
+def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast, room: int, households: list[NpcHousehold], *, resident_ids: list[str] | None = None) -> int:
     """Named children of named couples, within the town's births this month and the budget's allowance; returns how many.
     `households` is the month's working list, so a couple married earlier this month is found. A child comes at least
     `pregnancyMonths` after the marriage and after the mother's previous child."""
@@ -125,7 +127,8 @@ def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast
     rate = s.vitals.births / max(1, s.cohorts.adults / 2)
     born = 0
     remaining = dict(s.vitals.birthsByAncestry)
-    mothers = sorted((p for p in people.values() if p.alive and not p.journeyId and p.sex == "female" and p.settlementId == s.settlementId
+    residents = people.values() if resident_ids is None else (people[pid] for pid in resident_ids)
+    mothers = sorted((p for p in residents if p.alive and not p.journeyId and p.sex == "female" and p.settlementId == s.settlementId
                       and p.role != "child" and _fertile(p, m) and ties.spouse(p.id)), key=lambda p: p.id)
     for mother in mothers:
         ancestry = mother.identity.ancestryId

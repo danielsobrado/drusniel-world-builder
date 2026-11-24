@@ -8,6 +8,7 @@ Raw dicts go in and out; schema migration happens in the manager.
 import json
 import os
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,7 @@ def _read(path: Path) -> Any:
 class ScenarioStore:
     def __init__(self, root: Path):
         self.root = root
+        self._snapshot_meta: dict[Path, tuple[tuple[int, int, int], dict[str, Any]]] = {}
         root.mkdir(parents=True, exist_ok=True)
 
     def _dir(self, scenario_id: str) -> Path:
@@ -73,7 +75,20 @@ class ScenarioStore:
         folder = self._dir(scenario_id) / "snapshots"
         if not folder.is_dir():
             return []
-        return sorted((_read(p)["meta"] for p in folder.glob("*.json")), key=lambda m: m["id"])
+        paths = set(folder.glob("*.json"))
+        for path in list(self._snapshot_meta):
+            if path.parent == folder and path not in paths:
+                del self._snapshot_meta[path]
+        rows = []
+        for path in paths:
+            stat = path.stat()
+            signature = (stat.st_mtime_ns, stat.st_size, stat.st_ino)
+            cached = self._snapshot_meta.get(path)
+            if cached is None or cached[0] != signature:
+                cached = (signature, _read(path)["meta"])
+                self._snapshot_meta[path] = cached
+            rows.append(deepcopy(cached[1]))
+        return sorted(rows, key=lambda m: m["id"])
 
     def load_snapshot(self, scenario_id: str, snapshot_id: str) -> tuple[dict[str, Any], dict[str, Any]] | None:
         if not ID_PATTERN.match(snapshot_id):
