@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ...geography.paths import TravelPath
+from ..finance import HouseholdFinances
 
 
 class Contract(BaseModel):
@@ -52,6 +53,7 @@ class SettlementEconomy(Contract):
     sold: dict[str, float] = {}
     shortages: list[Shortage] = []
     food: FoodBalance
+    finances: HouseholdFinances = Field(default_factory=HouseholdFinances)
     treasury: float                  # starts at the Azgaar burg treasury
     tradeBalance: float = 0.0          # last month: sales minus purchases, tax, escorts, confiscations and losses
     taxPaid: float = 0.0               # last month

@@ -10,6 +10,7 @@ from typing import Any
 from ...peoples.catalog import profile_key
 from ...peoples.physiology import food_multiplier
 from ..contracts import Need, SettlementState, Society
+from ..finance import month as finances_month
 from ..needs import status
 from ..society import update_society
 from .bandits import fence, update_bands
@@ -138,6 +139,9 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
     filled = {b.id: b.filled for s in settlements for b in s.society.businesses}
     traders = household_month(trade.traders, econs, filled, cfg["economy"])
     updated = []
+    price_by_market = {m.marketId: m.goods[cfg["economy"]["food"]["good"]].price
+                       for m in markets if cfg["economy"]["food"]["good"] in m.goods}
+    base_ration_price = cfg["economy"]["food"]["basePrice"] / cfg["economy"]["food"]["priceUnit"]
     for s in settlements:
         society = resize_escorts(s.society, s.settlementId, s.sourceId, s.name, trade.routes, cfg["economy"])
         restaff = society is not s.society
@@ -157,6 +161,16 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
         if restaff or opened:
             society = update_society(society, s.cohorts, cfg["society"], cfg["simulation"]["calendar"]["daysPerMonth"])
         econ = econs[s.settlementId]
+        finances = finances_month(
+            econ.finances, households=sum(h.households for h in society.households), population=s.population,
+            income=society.employment.wageBillPerMonth,
+            ration_price=price_by_market.get(econ.marketId, base_ration_price),
+            ration_multiplier=food_multiplier(peoples.get("ancestries", {}), s.ancestries),
+            rations_per_person_day=cfg["society"]["needs"]["rationsPerPersonDay"],
+            days=cfg["simulation"]["calendar"]["daysPerMonth"],
+            cfg=cfg["economy"].get("householdFinances", {}),
+        )
+        econ = econ.model_copy(update={"finances": finances})
         updated.append(s.model_copy(update={"economy": econ, "society": with_food_need(society, econ, cfg)}))
     trade = trade.model_copy(update={"traders": traders})
 

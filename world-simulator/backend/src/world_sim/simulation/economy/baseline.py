@@ -7,6 +7,7 @@ from ...geography.paths import RoutePlanner
 from ...ids import settlement_id
 from ...world.model import WorldModel
 from ..contracts import Society
+from ..finance import baseline as initial_finances
 from .contracts import FoodBalance, Market, MarketGood, PricePoint, SettlementEconomy, Trade
 from .geography import hinterland
 from .production import food_flows, monthly_use, r4, staffing
@@ -38,6 +39,7 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
             marketId=market, settlementClass=record["class"], travelDays=path.days if path else 0,
             baselinePopulation=record["population"],
             inventory={}, production=lines, consumption=consumption, food=FoodBalance(ruralPopulation=rural, hinterlandCells=cells),
+            finances=initial_finances(sum(h.households for h in society.households), e.get("householdFinances", {})),
             treasury=float(az.burgs[record["sourceId"]].get("treasury") or 0))
         local, from_hinterland, wanted = food_flows(econ, society, population, cfg, record.get("rationMultiplier", 1))
         stock = {g: r4(u * e["settlement"]["targetMonths"]) for g, u in monthly_use(econ, population, staffing(society)).items()}

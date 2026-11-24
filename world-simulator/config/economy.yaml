@@ -21,6 +21,19 @@ agriculture:
   granarySpoilagePerMonth: 0.01
   severeHarvestThreshold: 0.70
 
+# Aggregate household budgets in copper; separate from the Azgaar trade treasury.
+# Income comes from filled wage posts; employer cash-flow accounting is future work.
+householdFinances:
+  enabled: true
+  copperPerTradeValue: 1000
+  housingCostPerHousehold: 10
+  debtRepaymentShare: 0.30
+  maxArrearsPerHousehold: 250
+  tiers:
+    vulnerable: {share: 0.40, wageWeight: 0.65, initialSavings: 25}
+    working: {share: 0.45, wageWeight: 1.00, initialSavings: 100}
+    prosperous: {share: 0.15, wageWeight: 1.90, initialSavings: 300}
+
 settlement:
   targetMonths: 1.5             # stock kept of every good a settlement consumes or works up
 
