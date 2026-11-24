@@ -58,6 +58,9 @@ export function foliageMaterialClass(Base) {
       this.foliageNeedleDirectionNode = null;
       this.foliageShapeNormalNode = null;
       this.foliageNormalBlendNode = null;
+      /** World-space ground normal and the share of it a plant's foot takes (applySkywardNormal). */
+      this.foliageGroundNormalNode = null;
+      this.foliageGroundNormalWeightNode = null;
       this.foliageAbsorptionNode = null;
       this.foliageWetRoughnessNode = null;
       this.foliageDryRoughnessNode = null;

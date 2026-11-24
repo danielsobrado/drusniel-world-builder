@@ -64,3 +64,12 @@ test('understory bushes and proxies receive GPU puff normals, wrapped diffuse, a
   assert.ok(bush.opacityNode, 'cutout bush cards carry GPU grazing fade opacity');
   assert.equal(proxy.flatShading, false, 'bush proxies shade smoothly as soft puffs');
 });
+
+test('lit plants are dielectric even when the glTF left metallicFactor at its default of 1', () => {
+  const source = new THREE.MeshStandardMaterial({ color: '#448822', metalness: 1, metalnessMap: new THREE.Texture() });
+  const material = cloneAuthoredNodeMaterial(source, { lit: true });
+  assert.equal(material.metalness, 0);
+  assert.equal(material.metalnessMap, null);
+  assert.equal(source.metalness, 1, 'source asset remains unchanged');
+  assert.equal(cloneAuthoredNodeMaterial(source).metalness, 1, 'unlit clones keep authored channels');
+});

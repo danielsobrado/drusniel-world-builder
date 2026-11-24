@@ -12,7 +12,15 @@ import {
 } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { assignBushFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
-import { applyUnderstoryPalette, authoredFoliageColor, biomeUnderstoryColor, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
+import {
+  applyUnderstoryPalette,
+  authoredFoliageColor,
+  biomeUnderstoryColor,
+  cloneAuthoredNodeMaterial,
+  seatPlantNormal,
+  UNDERSTORY_FOOT_FILL,
+  understoryFootShade,
+} from './AuthoredFoliageMaterial.js';
 import { applyPlantMotion } from './PlantMotionNodes.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
 import { applySkywardNormal, understoryShadeEmission } from './forest/foliageLight.js';
@@ -201,15 +209,15 @@ export function createBushProxyMaterial(sourceMaterial, {
   const worldHeightT = positionWorld.y.sub(groundContact.height).div(Math.max(0.35, height)).clamp(0, 1);
   const baseT = mix(heightMix, worldHeightT, groundContact.inside);
   const baseRamp = smoothstep(0.0, 0.30, baseT);
-  const baseAo = mix(float(0.60), float(1.0), baseRamp)
-    .mul(float(1).sub(groundContact.contact.mul(0.24)).clamp(0.65, 1));
-  const soilMask = smoothstep(0.0, 0.14, baseT).oneMinus().mul(0.24).mul(groundContact.inside);
+  const baseAo = understoryFootShade(baseRamp, groundContact);
+  const soilMask = smoothstep(0.0, 0.22, baseT).oneMinus().mul(0.30).mul(groundContact.inside);
   const groundedProxy = mix(shadedColor, groundContact.soilColor, soilMask).mul(baseAo);
   material.colorNode = groundedProxy;
-  material.emissiveNode = understoryShadeEmission(groundedProxy).mul(mix(float(0.42), float(1.0), baseRamp));
+  material.emissiveNode = understoryShadeEmission(groundedProxy).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
   material.foliageTransmissionNode = float(0.2).mul(mix(float(0.28), float(1.0), baseRamp));
   material.foliageWrapDiffuseNode = float(0.32);
   material.foliageRimGlowNode = float(0.14).mul(baseRamp);
+  seatPlantNormal(material, baseT, groundContact);
   if (bounds) {
     material.foliageShapeNormalNode = crownPuffNormalNode(bounds, 0.34, 0.12);
     material.foliageNormalBlendNode = float(0.72);

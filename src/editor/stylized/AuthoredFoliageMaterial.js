@@ -17,6 +17,26 @@ import { sampleGroundContactVarying } from './groundContact/GroundContactState.j
 /** Roughness of a fully rain-wet leaf. */
 const WET_LEAF_ROUGHNESS = 0.34;
 
+/** Share of the sky fill a plant's foot keeps (was 0.42: on top of the AO it drew a black base). */
+export const UNDERSTORY_FOOT_FILL = 0.7;
+
+/**
+ * Foot darkening and canopy shade for a plant, as the grass takes them
+ * (meadowPigment's groundAo): deep only where the ground field says the floor
+ * is occluded, so an isolated shrub on open ground does not stand in a black
+ * pool. A fixed 0.60 floor times the contact term made every base read as a hole.
+ */
+export function understoryFootShade(baseRamp, groundContact) {
+  const foot = float(0.86).sub(groundContact.contact.mul(0.26));
+  return mix(foot, float(1), baseRamp).mul(float(1).sub(groundContact.canopy.mul(0.14)));
+}
+
+/** The lower part of a plant takes the terrain's normal (applySkywardNormal), fading out by 40% of its height. */
+export function seatPlantNormal(material, baseT, groundContact) {
+  material.foliageGroundNormalNode = groundContact.normal;
+  material.foliageGroundNormalWeightNode = smoothstep(0.0, 0.4, baseT).oneMinus().mul(0.8).mul(groundContact.inside);
+}
+
 /** Clone authored channels into a node material before assigning foliage nodes. */
 export function cloneAuthoredNodeMaterial(source, { lit = false } = {}) {
   let material;
@@ -34,6 +54,13 @@ export function cloneAuthoredNodeMaterial(source, { lit = false } = {}) {
   // Several authored plant GLBs declare KHR_materials_unlit. Their albedo and
   // cutouts belong to the asset; their lighting belongs to the outdoor scene.
   if (promote) material.lights = true;
+  // Plants are dielectric. glTF's default metallicFactor is 1, so a bush GLB that
+  // never set it lost its diffuse term and took no sun, only sky fill (2026-11-24).
+  // A small authored value is a deliberate sheen and stays.
+  if (lit && material.metalness > 0.5) {
+    material.metalness = 0;
+    material.metalnessMap = null;
+  }
   // NodeMaterial.copy skips inherited accessors such as Material.alphaTest.
   // Keep the authored cutoff when adding output effects or foliage nodes.
   material.alphaTest = source.alphaTest ?? 0;
@@ -108,10 +135,9 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const worldHeightT = positionWorld.y.sub(groundContact.height).div(Math.max(0.35, spanY)).clamp(0, 1);
   const baseT = mix(localHeightT, worldHeightT, groundContact.inside);
   const baseRamp = smoothstep(0.0, 0.30, baseT);
-  const baseAo = mix(float(0.60), float(1.0), baseRamp)
-    .mul(float(1).sub(groundContact.contact.mul(0.24)).clamp(0.65, 1));
-  const soilMask = smoothstep(0.0, 0.14, baseT).oneMinus()
-    .mul(mix(float(0.50), float(0.20), plantGreen))
+  const baseAo = understoryFootShade(baseRamp, groundContact);
+  const soilMask = smoothstep(0.0, 0.22, baseT).oneMinus()
+    .mul(mix(float(0.55), float(0.30), plantGreen))
     .mul(groundContact.inside);
   const groundedColor = blossom ? color.mul(mix(float(0.82), float(1.0), baseRamp)) : mix(color, groundContact.soilColor, soilMask).mul(baseAo);
   // Cutout shrub/understory cards get GPU edge-on grazing fade + soft horizon-air fringe.
@@ -128,12 +154,13 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
     if (material.opacity < 1) opacity = opacity.mul(material.opacity);
     material.opacityNode = opacity;
   }
-  const fillAttenuation = mix(float(0.42), float(1.0), baseRamp);
+  const fillAttenuation = mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp);
   const fill = understoryShadeEmission(groundedColor, { blossom, airRim: edge?.airRim ?? null }).mul(fillAttenuation);
   material.foliageTransmissionNode = (blossom
     ? float(0.16)
     : mix(float(0.02), float(0.22), plantGreen)).mul(mix(float(0.28), float(1.0), baseRamp));
   if (!blossom) {
+    seatPlantNormal(material, baseT, groundContact);
     material.foliageWrapDiffuseNode = mix(float(0.08), float(0.32), plantGreen);
     material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen).mul(baseRamp);
     if (bounds) {

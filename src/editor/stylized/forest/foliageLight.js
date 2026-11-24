@@ -121,7 +121,7 @@ export function applySkywardNormal(material) {
   // Materials with 3D GPU puff normals already carry smooth volumetric shading;
   // double-bending them straight up aims every sunlit shrub into the noon sun.
   if (material.foliageShapeNormalNode) {
-    material.normalNode = withAuthoredNormalMap(material, authored);
+    material.normalNode = withAuthoredNormalMap(material, groundedNormal(material, authored));
     return material;
   }
   const up = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz;
@@ -135,8 +135,20 @@ export function applySkywardNormal(material) {
       clamp(sample.g.sub(max(sample.r, sample.b)).mul(8.0), 0.0, 1.0),
     )
     : float(SKYWARD_FOLIAGE_NORMAL);
-  material.normalNode = withAuthoredNormalMap(material, mix(authored, up, skywardBlend).normalize());
+  material.normalNode = withAuthoredNormalMap(material, groundedNormal(material, mix(authored, up, skywardBlend).normalize()));
   return material;
+}
+
+/**
+ * A plant's foot shades as the ground it stands in: its view normal leans to the
+ * terrain's. Stem cards stand vertical, so a high sun only grazed them and every
+ * shrub stood on a black bar in sunlit grass (2026-11-24 captures).
+ */
+function groundedNormal(material, normal) {
+  const ground = material.foliageGroundNormalNode;
+  if (!ground) return normal;
+  const groundView = cameraViewMatrix.mul(vec4(ground, 0)).xyz.normalize();
+  return mix(normal, groundView, material.foliageGroundNormalWeightNode).normalize();
 }
 
 /**

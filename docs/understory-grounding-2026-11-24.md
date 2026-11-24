@@ -1,0 +1,72 @@
+# Understory grounding
+
+Shrubs, ferns and ground plants read as pasted on: pale and flat beside the grass,
+with near-black stems and a dark pool at their foot. Three causes, all in the
+shared understory material path (`stylized/AuthoredFoliageMaterial.js`,
+`BushRenderAssets.js`, `flora/biomeUnderstoryPrototypes.js`, `forest/foliageLight.js`).
+
+## Causes and fixes
+
+1. **Authored bushes were metallic.** glTF's `metallicFactor` defaults to 1, and the
+   bush GLBs (`bush.glb`, `stylized_bush.glb`, the juniper, thorn and hibiscus
+   bushes) never set it; the sapling also packs metalness into its ORM texture.
+   Metal has no diffuse term, so those shrubs took no sun and were lit by the sky
+   fill and the HDR reflection alone: flat, pale and cool next to the Lambert
+   grass. `cloneAuthoredNodeMaterial(…, { lit: true })` now makes every lit plant
+   dielectric (`metalness = 0`, no `metalnessMap`).
+2. **The foot was darkened three times.** A fixed 0.60 AO floor, times the
+   ground-contact term, times a sky fill cut to 0.42 at the base, drew a black
+   base under every plant, even alone on open ground. `understoryFootShade`
+   now follows the grass (`meadowPigment`'s `groundAo`): the foot darkens only as
+   far as the ground field's contact shade says, and the whole plant takes the
+   same canopy shade the grass takes under crowns. The foot keeps 0.7 of the
+   fill, and the soil tint covers the lowest 22% of the plant at up to 55%.
+3. **Stem cards stood vertical under a high sun.** The sapling's trunk is a
+   vertical card; at noon the sun only grazed it, and with the puff normal barely
+   bent at the bottom it stayed a black bar in sunlit grass (with a flat grey
+   albedo and no emission it still rendered at sRGB ~46). The lower 40% of a
+   plant now leans its normal to the terrain's (`seatPlantNormal`, read from the
+   existing ground-contact field, applied in `applySkywardNormal`), so the foot
+   shades like the ground it stands in. Bush proxies get the same seat.
+
+No new texture, sampler, varying family, scene light or `viewport*Texture` node:
+the ground normal and contact shade come from varyings the material already had.
+
+## Not changed
+
+Understory leaves stay on the configured meadow palette ramp (blue/green ≈ 0.6),
+while the grass's own pigment pipeline (ground style, stand tones, straw seeds,
+warm transmission) renders the sward warmer (≈ 0.43–0.45). Matching that would
+mean sharing the meadow's ground-style uniforms with every plant material.
+
+The pine crowns (`stylized-pine-near-*`) carry a physical material with
+roughness 0; they are trees, outside this change.
+
+## Captures
+
+`qa:look` at noon, clear (`--only forest-off-12,grassland-off-12,core-deciduous-off-12,core-rainforest-off-12 --no-gates`),
+before on `10f1b931`, after with the change; left before, right after:
+
+- [Grassland](qa/understory-grounding-2026-11-24/grassland-detail.jpg) — stem bases lit like the ground and blended into it, no black pool.
+- [Forest](qa/understory-grounding-2026-11-24/forest-detail.jpg) — the shrub now sits in the grass's value range.
+- [Rainforest](qa/understory-grounding-2026-11-24/core-rainforest-detail.jpg) — plant bases less of a dark blob.
+- Full frames: [grassland](qa/understory-grounding-2026-11-24/grassland-before-after.jpg),
+  [forest](qa/understory-grounding-2026-11-24/forest-before-after.jpg),
+  [rainforest](qa/understory-grounding-2026-11-24/core-rainforest-before-after.jpg),
+  [deciduous](qa/understory-grounding-2026-11-24/core-deciduous-before-after.jpg).
+
+## Performance
+
+`qa:perf --headed --qa chunk-cross --warmup 8 --duration 12 --settle --x 2005 --z 2941`
+(rainforest start), A/B/A/B on the same dev server, A = the five shader files at
+`HEAD`, NVIDIA Lovelace WebGPU, no fallback adapter:
+
+| Run | Avg FPS | dt p50 / p95 / p99 ms | Hitches |
+| --- | --- | --- | --- |
+| B1 (change) | 72.2 | 13.5 / 24.5 / 33.0 | 8 |
+| A1 (base) | 72.6 | 13.4 / 26.8 / 32.3 | 4 |
+| B2 (change) | 72.3 | 13.5 / 27.0 / 32.6 | 3 |
+| A2 (base) | 71.2 | 13.6 / 29.2 / 33.5 | 12 |
+
+Neutral, above the 60 FPS floor. Absolute FPS sits below the usual band for this
+route: other sessions shared the GPU, equally in both arms.

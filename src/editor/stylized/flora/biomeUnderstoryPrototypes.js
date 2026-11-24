@@ -20,7 +20,7 @@ import {
 import { LOOK_SNOW_STEPS } from '../../biomes/BiomeLooks.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { applyPlantMotion } from '../PlantMotionNodes.js';
-import { biomeUnderstoryColor } from '../AuthoredFoliageMaterial.js';
+import { biomeUnderstoryColor, UNDERSTORY_FOOT_FILL, understoryFootShade } from '../AuthoredFoliageMaterial.js';
 import { barkBumpNormal, barkPackedNormal } from '../forest/TreeBarkMaterial.js';
 import { acquireDeadwoodNoise } from '../forest/deadwoodNoise.js';
 import { authoredGreenMask, gradePlantPart, resolveFoliagePalette } from '../forest/foliagePalette.js';
@@ -82,8 +82,7 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
   const soilWave = microField.g.sub(0.5).mul(0.06);
   const groundTouch = smoothstep(-0.03, 0.11, heightAbove.add(soilWave)).oneMinus();
   const baseRamp = smoothstep(0.0, 0.24, heightAbove);
-  const contactAO = mix(float(0.58), float(1), baseRamp)
-    .mul(float(1).sub(groundContact.contact.mul(0.24)).clamp(0.65, 1));
+  const contactAO = understoryFootShade(baseRamp, groundContact);
   const fallbackSoil = color(environment.soilColor ?? '#5c4a30');
   const soilTone = mix(fallbackSoil, groundContact.soilColor, groundContact.inside)
     .mul(mix(0.84, 1.12, grainSample.r));
@@ -91,7 +90,7 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
 
   const finalColor = biomeUnderstoryColor(groundedColor);
   const blossom = entry.kind === 'blossom';
-  const fill = understoryShadeEmission(finalColor, { blossom }).mul(mix(float(0.45), float(1.0), baseRamp));
+  const fill = understoryShadeEmission(finalColor, { blossom }).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
 
   // Normal relief from vein height + organic noise texture, blending smoothly into the terrain normal at the foot.
   const reliefHeight = mix(grainSample.r, veinRib, plantGreen.mul(0.45)).mul(0.01);
