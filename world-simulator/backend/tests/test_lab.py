@@ -110,11 +110,13 @@ def test_trace_validation_and_metrics_after_a_collapse(fresh_model):
 
     report = lab.validate("baseline-pilot")
     assert report["passed"], [c for c in report["checks"] if not c["passed"]]
-    assert {c["id"] for c in report["checks"]} >= {"accounting", "people", "history", "references", "archive"}
+    assert {c["id"] for c in report["checks"]} >= {"accounting", "people", "history", "references", "archive", "household-economy"}
 
     metrics = lab.metrics("baseline-pilot")
     assert metrics["steps"]["months"] == 4 and metrics["steps"]["msPerMonth"]["mean"] > 0
     assert metrics["size"]["events"] == manager.session("baseline-pilot").state.historySeq
+    assert 0 <= metrics["economic"]["foodAccess"] <= 1
+    assert metrics["economic"]["spoiledRationsLastMonth"] >= 0
 
 
 def test_affected_people_town_and_strangers_know_the_disaster_differently(fresh_model):

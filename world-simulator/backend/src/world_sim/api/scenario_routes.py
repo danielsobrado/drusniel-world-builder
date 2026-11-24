@@ -90,7 +90,8 @@ def scenario_router(manager: ScenarioManager, reply: Callable[..., JSONResponse]
         newest = state.trade.delivered[len(state.trade.delivered) - delivered:] if delivered else []
         return reply({
             "date": state.date.model_dump(),
-            "settlements": [{"settlementId": s.settlementId, "name": s.name, "population": s.population, "economy": s.economy.model_dump()}
+            "settlements": [{"settlementId": s.settlementId, "name": s.name, "population": s.population,
+                             "climate": s.climate.model_dump(), "economy": s.economy.model_dump()}
                             for s in state.settlements],
             "markets": [m.model_dump() for m in state.trade.markets],
             "caravans": [c.model_dump() for c in state.trade.caravans],

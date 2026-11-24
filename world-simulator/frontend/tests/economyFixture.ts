@@ -8,7 +8,8 @@ const good = (basePrice: number, price: number, demand: number) =>
 export const economyView: EconomyView = {
   date,
   settlements: [{
-    settlementId: 'settlement:azgaar-burg:238', name: 'Vhaltha', population: 15747, economy: {
+    settlementId: 'settlement:azgaar-burg:238', name: 'Vhaltha', population: 15747,
+    climate: { month: 3, profile: 'temperate', season: 'spring', rainfall: 0.72, yieldFactor: 0.85, hazard: null }, economy: {
       marketId: 15, settlementClass: 'city', travelDays: 0, baselinePopulation: 15747, inventory: { Hemp: 0, Cloth: 2, Rations: 900000 },
       production: [
         { good: 'Cloth', source: 'workshop', units: 6, inputs: { Hemp: 6 }, produced: 0, limitedBy: 'Hemp' },
@@ -16,7 +17,11 @@ export const economyView: EconomyView = {
       ],
       consumption: {}, bought: { Cloth: 5.75 }, sold: { Sails: 4 }, shortages: [{ good: 'Hemp', wanted: 6, obtained: 0 }],
       food: { ruralPopulation: 44619, hinterlandCells: 5, local: 238080, hinterland: 267714, eaten: 472410, wanted: 472410,
-        security: 1, selfSufficiency: 1.07 },
+        security: 1, selfSufficiency: 1.07, yieldFactor: 0.85, spoiled: 400 },
+      finances: { foodAccess: 0.85, strugglingHouseholds: 15, hardshipMonths: 2, tiers: [
+        { name: 'vulnerable', households: 40, savings: 250, arrears: 30, income: 500, spent: 600, foodAccess: 0.7 },
+        { name: 'working', households: 60, savings: 1200, arrears: 0, income: 2400, spent: 1800, foodAccess: 0.95 },
+      ] },
       treasury: 120.5, tradeBalance: -3.2, taxPaid: 0, escortCost: 0, lostToBandits: 0, businessSeq: 3, opened: 3, closed: 1,
     },
   }],

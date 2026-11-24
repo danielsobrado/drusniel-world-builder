@@ -21,6 +21,12 @@ describe('EconomyWorkspace', () => {
     expect(within(production).getByText('full output')).toBeTruthy();
     expect(screen.getByText('short: 0 of 6')).toBeTruthy();
     expect(screen.getByText(/44,619 rural inhabitants/)).toBeTruthy();
+    expect(screen.getByText('Growing conditions')).toBeTruthy();
+    expect(screen.getByText('Granary loss')).toBeTruthy();
+    expect(screen.getByText('Food affordability')).toBeTruthy();
+    expect(screen.getByText('Housing arrears')).toBeTruthy();
+    const finances = screen.getByRole('table', { name: 'Household financial tiers' });
+    expect(within(finances).getByText('vulnerable')).toBeTruthy();
 
     const market = screen.getByRole('table', { name: 'Vhaltha market goods' });
     expect(within(market).getByText('+300%')).toBeTruthy();

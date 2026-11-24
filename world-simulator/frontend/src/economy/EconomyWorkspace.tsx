@@ -5,6 +5,7 @@ import { fmt, pct } from '../components/format';
 import { ApiView, Empty } from '../components/StateViews';
 import type { Simulation } from '../simulation/useSimulation';
 import { CaravanTable } from './CaravanTable';
+import { ClimateFinanceView } from './ClimateFinanceView';
 import { MarketView } from './MarketView';
 import { FoodTiles, ProductionTable, StockTable } from './SettlementEconomyView';
 
@@ -58,6 +59,7 @@ export function EconomyWorkspace({ sim, onSelect }: { sim: Simulation; onSelect:
                 <button type="button" className="btn btn-compact" onClick={() => onSelect(s.settlementId)}>Inspect {s.name}</button>
               </div>
               <FoodTiles econ={s.economy} daysPerMonth={sim.config?.calendar?.daysPerMonth ?? 30} />
+              <ClimateFinanceView climate={s.climate} finances={s.economy.finances} food={s.economy.food} />
               <h4>Production</h4>
               <ProductionTable econ={s.economy} />
               <h4>Stock and trade last month</h4>

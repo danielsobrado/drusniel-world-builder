@@ -200,12 +200,21 @@ export interface ProductionLine {
 export interface Shortage { good: string; wanted: number; obtained: number }
 export interface FoodBalance {
   ruralPopulation: number; hinterlandCells: number; local: number; hinterland: number; eaten: number; wanted: number;
-  security: number; selfSufficiency: number;
+  security: number; selfSufficiency: number; yieldFactor: number; spoiled: number;
+}
+export interface ClimateState {
+  month: number; profile: string; season: string; rainfall: number; yieldFactor: number; hazard: string | null;
+}
+export interface FinanceTier {
+  name: string; households: number; savings: number; arrears: number; income: number; spent: number; foodAccess: number;
+}
+export interface HouseholdFinances {
+  tiers: FinanceTier[]; foodAccess: number; strugglingHouseholds: number; hardshipMonths: number;
 }
 export interface SettlementEconomy {
   marketId: number | null; settlementClass: string; travelDays: number; baselinePopulation: number; inventory: Record<string, number>;
   production: ProductionLine[]; consumption: Record<string, number>; bought: Record<string, number>; sold: Record<string, number>;
-  shortages: Shortage[]; food: FoodBalance; treasury: number; tradeBalance: number;
+  shortages: Shortage[]; food: FoodBalance; finances: HouseholdFinances; treasury: number; tradeBalance: number;
   taxPaid: number; escortCost: number; lostToBandits: number; businessSeq: number; opened: number; closed: number;
 }
 export interface MarketGood {
@@ -265,7 +274,7 @@ export interface PersonDetail extends PersonRow {
 }
 export interface EconomyView {
   date: CalendarDate;
-  settlements: { settlementId: string; name: string; population: number; economy: SettlementEconomy }[];
+  settlements: { settlementId: string; name: string; population: number; climate: ClimateState; economy: SettlementEconomy }[];
   markets: Market[];
   caravans: Caravan[];
   delivered: Caravan[];

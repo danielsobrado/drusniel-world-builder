@@ -96,6 +96,19 @@ class Lab:
         accounting = [f"{x.name}: {p}" for x in state.settlements for p in check_invariants(x.population, x.cohorts, x.society)]
         accounting += [f"{x.name}: ancestry cohorts do not match the settlement cohorts"
                        for x in state.settlements if x.ancestries and combined(x.ancestries) != x.cohorts]
+        economy_problems = []
+        for town in state.settlements:
+            finances = town.economy.finances
+            if finances.tiers:
+                households = sum(t.households for t in finances.tiers)
+                if finances.strugglingHouseholds > households:
+                    economy_problems.append(f"{town.name}: more struggling households than tracked households")
+                if any(t.savings < 0 or t.arrears < 0 or not 0 <= t.foodAccess <= 1 for t in finances.tiers):
+                    economy_problems.append(f"{town.name}: invalid household balances or food access")
+            if not 0 <= finances.foodAccess <= 1 or town.economy.food.spoiled < 0:
+                economy_problems.append(f"{town.name}: invalid affordability or storage losses")
+            if town.climate.yieldFactor < 0 or town.climate.rainfall < 0:
+                economy_problems.append(f"{town.name}: invalid climate conditions")
         named = {e.businessId for e in events if e.businessId}
         refs = [f"{p.name} {p.family}: timeline {i}" for p in state.cast.people for i in p.timeline if i not in ids]
         refs += [f"{p.name} {p.family}: knows of {k.eventId}" for p in state.cast.people for k in p.knowledge if k.eventId not in ids]
@@ -107,6 +120,8 @@ class Lab:
             f"the state expects 0–{state.historySeq - 1}"]
         checks = [
             _check("accounting", "Population, households and jobs add up in every settlement", accounting, len(state.settlements)),
+            _check("household-economy", "Climate, granary and aggregate household balances are valid",
+                   economy_problems, len(state.settlements)),
             _check("travel", "Migration totals and active journey records agree",
                    check_travel(state.travel, state.settlements, state.cast, state.date.day), len(state.travel.journeys)),
             _check("people", "Named people fit each town's budget and belong to households",
@@ -140,6 +155,12 @@ class Lab:
                      "relationships": len(state.cast.relationships), "events": state.historySeq,
                      "stateKb": round(len(json.dumps(state.model_dump(), separators=(",", ":"))) / 1024, 1),
                      "journal": len(s.meta.journal) if s.meta.journal is not None else None},
+            "economic": {
+                "foodAccess": min((s.economy.finances.foodAccess for s in state.settlements), default=1.0),
+                "strugglingHouseholds": sum(s.economy.finances.strugglingHouseholds for s in state.settlements),
+                "spoiledRationsLastMonth": round(sum(s.economy.food.spoiled for s in state.settlements), 2),
+                "activeHarvestShocks": sum(s.climate.hazard is not None for s in state.settlements),
+            },
             "llm": {"calls": len(calls), "byKind": {k: {"count": sum(c["kind"] == k for c in calls),
                                                          **_stats([c["seconds"] for c in calls if c["kind"] == k])} for k in kinds},
                     "recent": calls[-20:]},
