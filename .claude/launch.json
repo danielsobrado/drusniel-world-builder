@@ -232,10 +232,21 @@
       "runtimeExecutable": "node",
       "runtimeArgs": [
         "scripts/serve-world-visual-snapshot.mjs",
-        "37857853",
+        "c94afa0b",
         "5261"
       ],
       "port": 5261,
+      "autoPort": false
+    },
+    {
+      "name": "grass-lod-change",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "1c507d7c",
+        "5262"
+      ],
+      "port": 5262,
       "autoPort": false
     }
   ]
