@@ -4,6 +4,7 @@ import { meadowMicrohabitatNumber } from '../../src/editor/stylized/meadow/meado
 import { MEADOW_STAND_DEFAULT } from '../../src/editor/stylized/meadow/meadowStandProfiles.js';
 import {
   MEADOW_CARD_HEIGHT_CONTRAST,
+  MEADOW_CARD_STATURE,
   MEADOW_GAP_RAMP,
   MEADOW_SHORT_FLOOR,
   MEADOW_SHORT_STAND,
@@ -79,9 +80,9 @@ export function meadowRenderedHeightReference(profile, x, z, {
   const micro = meadowMicrohabitatNumber(crowned, area, profile.microhabitat);
   const share = cards ? lerp(0.5, micro.share, MEADOW_CARD_HEIGHT_CONTRAST) : micro.share;
   const short = profile.shortHeight * MEADOW_SHORT_FLOOR;
-  const stand = cards ? { height: 1.125 } : meadowSpeciesHeightReference(x, z, rank, profile.stand);
+  const stand = cards ? { height: MEADOW_CARD_STATURE } : meadowSpeciesHeightReference(x, z, rank, profile.stand);
   const shortness = 1 - smooth(...MEADOW_SHORT_STAND, profile.tallHeight);
-  const gap = cards ? 1 : lerp(1, smooth(...MEADOW_GAP_RAMP, occupancy), tuftSettings.gapCut * shortness);
+  const gap = lerp(1, smooth(...MEADOW_GAP_RAMP, occupancy), tuftSettings.gapCut * shortness);
   return {
     height: lerp(short, profile.tallHeight, share) * stand.height * area.height * gap * plant[2],
     micro, area, stand, accentHeight: plant[2], accentWidth: plant[3],

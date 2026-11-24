@@ -8,7 +8,7 @@ import { meadowGrowthHeight } from '../src/editor/stylized/meadow/meadowGrowthMa
 import { meadowGrowthSignature as directGrowthSignature } from '../src/editor/stylized/meadow/meadowGrowthProfiles.js';
 import { meadowGrowthSignature as updatedGrowthSignature } from '../src/editor/stylized/meadow/MeadowGrowthUpdates.js';
 import { MEADOW_STAND_MAX_HEIGHT } from '../src/editor/stylized/meadow/meadowStandNodes.js';
-import { MEADOW_CARD_HEIGHT_CONTRAST } from '../src/editor/stylized/meadow/meadowTuftField.js';
+import { MEADOW_CARD_HEIGHT_CONTRAST, MEADOW_CARD_STATURE } from '../src/editor/stylized/meadow/meadowTuftField.js';
 import {
   meadowAreaStyleReference, meadowRenderedHeightReference, meadowSpeciesHeightReference,
 } from './helpers/meadow-growth-reference.js';
@@ -85,7 +85,7 @@ test('near blades and far cards remain inside species and accent height envelope
           rank: i, cards, tuftSettings: settings.tufts,
           areaStrength: settings.appearance.groundStyle,
         });
-        const bound = profile.tallHeight * accentMax * (cards ? 1.125 : MEADOW_STAND_MAX_HEIGHT);
+        const bound = profile.tallHeight * accentMax * (cards ? MEADOW_CARD_STATURE : MEADOW_STAND_MAX_HEIGHT);
         assert.ok(result.height >= 0 && result.height <= bound + 1e-9,
           `biome ${id}: ${result.height} over ${bound}`);
         assert.ok(result.micro.share >= 0 && result.micro.share <= 1);

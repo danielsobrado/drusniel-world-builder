@@ -77,17 +77,21 @@ test('far cards fade away completely and a lone blade layer keeps its ordinary d
   }
 });
 
-test('cards cover the sparse blade bands before the outgoing blades begin dissolving', () => {
+test('cards arrive across the sparse blade bands and are whole before the blades begin dissolving', () => {
   const uniforms = createMeadowUniforms(resolveMeadowGrassConfig({}));
   const cards = mask(uniforms.cardFadeIn, uniforms.farFade);
   const blades = mask(null, uniforms.handoff);
-  for (const distance of [14.01, 20, 30, 39, 40, 45, 49, 51]) {
+  const coverage = distance => Array.from({ length: 100 }, (_, i) => evaluate(cards, distance, i / 100)).filter(Boolean).length;
+  let previous = 0;
+  for (const distance of [14, 20, 26, 32, 38]) {
+    const share = coverage(distance);
+    assert.ok(share >= previous && share < 100, `cards still arriving at ${distance} m`);
+    previous = share;
     for (let sample = 0; sample < 100; sample++) {
-      const noise = sample / 100;
-      assert.equal(evaluate(cards, distance, noise), true, `card coverage at ${distance} m`);
-      if (distance < 40) assert.equal(evaluate(blades, distance, noise), true, 'blades retain their original range');
+      assert.equal(evaluate(blades, distance, sample / 100), true, 'blades retain their original range');
     }
   }
+  for (const distance of [40, 45, 49, 51]) assert.equal(coverage(distance), 100, `card coverage at ${distance} m`);
   assert.equal(evaluate(cards, 8, 0.99), false, 'close grass stays blade geometry');
 });
 
@@ -106,7 +110,7 @@ test('the field streams small card tiles inside the overlap and its material use
     while (publishedMask.isVarNode || publishedMask.isConvertNode) publishedMask = publishedMask.node;
     const distanceMask = publishedMask.aNode;
     for (let sample = 0; sample < 100; sample++) {
-      assert.equal(evaluate(distanceMask, 20, sample / 100), true);
+      assert.equal(evaluate(distanceMask, 45, sample / 100), true);
       assert.equal(evaluate(distanceMask, 180, sample / 100), false);
     }
   } finally { field.dispose(); }
@@ -120,7 +124,7 @@ test('card overlap follows custom LOD distances and stays finite for endpoint ha
     assert.ok(range.y <= Math.max(0.001, transitionStart * 100));
   }
   const settings = resolveMeadowGrassConfig({ maxDistance: 100 });
-  assert.ok(Math.abs(createMeadowUniforms(settings).cardFadeIn.value.y - 28) < 1e-9);
+  assert.ok(Math.abs(createMeadowUniforms(settings).cardFadeIn.value.y - 80) < 1e-9);
 });
 
 test('blade rings collapse onto the next template before each geometry swap', t => {

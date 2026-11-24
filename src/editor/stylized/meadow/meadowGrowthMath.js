@@ -1,5 +1,6 @@
 import {
   MEADOW_CARD_HEIGHT_CONTRAST,
+  MEADOW_CARD_STATURE,
   MEADOW_MOUND_CROWN_RAMP,
   MEADOW_MOUND_SHOULDER_FALL,
   MEADOW_MOUND_SHOULDER_RISE,
@@ -64,5 +65,5 @@ export function meadowGrowthHeight(
   );
   const tall=cards?.5+(share-.5)*MEADOW_CARD_HEIGHT_CONTRAST:share;
   const short=profile.shortHeight*MEADOW_SHORT_FLOOR;
-  return (short+(profile.tallHeight-short)*tall)*(cards?1.125:1);
+  return (short+(profile.tallHeight-short)*tall)*(cards?MEADOW_CARD_STATURE:1);
 }

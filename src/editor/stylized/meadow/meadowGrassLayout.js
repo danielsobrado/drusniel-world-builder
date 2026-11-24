@@ -66,17 +66,19 @@ export function lodBandVectors({ tileSize, maxDistance, lod }) {
 }
 
 /**
- * Cards fill the first density reduction, before the sparse blade bands and
- * their final dissolve. Independent roots/silhouettes cannot partition screen
- * pixels like two copies of one surface: simultaneous fades leave a bare ring.
- * Keep blades at full coverage until their configured outgoing handoff.
+ * Cards arrive with the first density reduction and grow to full coverage
+ * across the sparse blade bands, reaching it where the blades begin their own
+ * dissolve. Independent roots/silhouettes cannot partition screen pixels like
+ * two copies of one surface: simultaneous fades leave a bare ring, so blades
+ * keep full coverage until then. Arriving over the whole thinning range, not
+ * one band's window, keeps the card layer from showing as a ring of its own.
  */
 export function meadowCardFadeRange(settings) {
   const bladeStart = settings.maxDistance * (settings.far?.transitionStart ?? 0.8);
   const thinning = lodBandVectors(settings).slice(0, -1).find(([, count, next]) => next < count);
-  const end = Math.max(0.001, Math.min(bladeStart, thinning?.[0] ?? bladeStart));
-  const window = thinning?.[3] ?? settings.tileSize;
-  return [Math.max(0, end - window), end];
+  const end = Math.max(0.001, bladeStart);
+  const start = (thinning?.[0] ?? bladeStart) - (thinning?.[3] ?? settings.tileSize);
+  return [Math.max(0, Math.min(start, end - 0.001)), end];
 }
 
 function positiveInteger(value) {

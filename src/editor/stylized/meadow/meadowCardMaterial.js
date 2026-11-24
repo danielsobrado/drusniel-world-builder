@@ -15,6 +15,7 @@ import {
   positionWorld,
   pow,
   sin,
+  smoothstep,
   sqrt,
   texture,
   uv,
@@ -76,7 +77,10 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
       cardPlant.assign(profile.plant.shape.greaterThan(3.5)
         .select(float(1), profile.plant.shape.min(2)).round());
       // The clump is whichever plant grows at its foot (the blades' accents).
-      const height = profile.height.mul(card.strength).mul(profile.plant.height);
+      // Cards rise out of the stand across their incoming range rather than
+      // arriving at full height: the dissolve alone shows as a moving ring.
+      const arrival = smoothstep(uniforms.cardFadeIn.x, uniforms.cardFadeIn.y, card.base.xz.sub(cameraPosition.xz).length());
+      const height = profile.height.mul(card.strength).mul(profile.plant.height).mul(mix(0.4, 1, arrival));
       const width = uniforms.cardWidth.mul(sqrt(card.strength));
       local.x.assign(positionLocal.x.mul(toward.y).mul(width));
       local.z.assign(positionLocal.x.mul(toward.x.negate()).mul(width));

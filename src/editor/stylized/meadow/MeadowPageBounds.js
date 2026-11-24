@@ -1,5 +1,6 @@
 import { Box3, Sphere } from 'three/webgpu';
 import { MEADOW_STAND_MAX_HEIGHT } from './meadowStandNodes.js';
+import { MEADOW_CARD_STATURE } from './meadowTuftField.js';
 import { MEADOW_FLUTTER_MAX_GAIN } from './meadowWindConfig.js';
 
 /** Shader displacement envelopes, including live tuning and body interaction. */
@@ -28,7 +29,7 @@ export function meadowBladeBoundsPadding(uniforms, tuning, dirtCut = 0) {
 }
 
 export function meadowCardBoundsPadding(uniforms) {
-  return Math.abs(uniforms.cardWidth.value) / 2 + (uniforms.growth?.maxHeight ? uniforms.growth.maxHeight * 1.125 : Math.abs(uniforms.cardHeight.value) * 1.25) + 0.01;
+  return Math.abs(uniforms.cardWidth.value) / 2 + (uniforms.growth?.maxHeight ? uniforms.growth.maxHeight * MEADOW_CARD_STATURE : Math.abs(uniforms.cardHeight.value) * 1.25) + 0.01;
 }
 
 /** Render-space bounds; each camera can cull the page independently. */

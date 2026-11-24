@@ -46,6 +46,12 @@ export const MEADOW_TALL_RAMP = Object.freeze([0.4, 0.8]);
 export const MEADOW_CARD_HEIGHT_CONTRAST = 0.35;
 
 /**
+ * A card's height against the blades it replaces. Matched to the blade field's
+ * mean stature, so the far meadow neither rises nor sinks where the blades hand over.
+ */
+export const MEADOW_CARD_STATURE = 0.85;
+
+/**
  * Share of the tuft weight a fully tall patch gives up, so a tall swath keeps
  * its silhouette while the short stand is the one the tufts reshape.
  */

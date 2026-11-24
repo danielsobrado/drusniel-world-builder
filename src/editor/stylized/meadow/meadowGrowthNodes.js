@@ -6,7 +6,7 @@ import { meadowNoise } from './meadowNoise.js';
 import { meadowStandNodes } from './meadowStandNodes.js';
 import { meadowPlantNodes } from './meadowPlantNodes.js';
 import { meadowPlantMotionNodes } from './meadowPlantMotionNodes.js';
-import { MEADOW_CARD_HEIGHT_CONTRAST, MEADOW_GAP_RAMP, MEADOW_SHORT_FLOOR, MEADOW_SHORT_STAND, MEADOW_TALL_RAMP, MEADOW_TALL_TUFT_RELIEF } from './meadowTuftField.js';
+import { MEADOW_CARD_HEIGHT_CONTRAST, MEADOW_CARD_STATURE, MEADOW_GAP_RAMP, MEADOW_SHORT_FLOOR, MEADOW_SHORT_STAND, MEADOW_TALL_RAMP, MEADOW_TALL_TUFT_RELIEF } from './meadowTuftField.js';
 import { meadowTuftNodes } from './meadowTuftNodes.js';
 /** 1 in a short stand, 0 in a sward tall enough to shade its own roots. */
 export function meadowShortStand(tallHeight) {
@@ -38,11 +38,12 @@ export function meadowGrowthNodes(uniforms,instance,cards=false) {
   const species=cards?null:meadowStandNodes(
     instance.canonical,instance.rank,uniforms.growth.accents.element(instance.growth.toInt().add(32)),
   );
-  const stand=cards?1.125:species.height;
+  const stand=cards?MEADOW_CARD_STATURE:species.height;
   const areaHeight=area?.height??1;
   // A short stand gathers into plants: stragglers between tufts drop out rather
   // than standing as an even speckle of spikes over bare ground.
-  const gap=cards?1:mix(1,smoothstep(MEADOW_GAP_RAMP[0],MEADOW_GAP_RAMP[1],tuft.occupancy),uniforms.tufts.gapCut.mul(meadowShortStand(dimensions.y)));
+  // Cards keep the same cut, so a short stand stays patchy past the blades.
+  const gap=mix(1,smoothstep(MEADOW_GAP_RAMP[0],MEADOW_GAP_RAMP[1],tuft.occupancy),uniforms.tufts.gapCut.mul(meadowShortStand(dimensions.y)));
   // Storm snow (SnowCover) weighs a stand down, as biome frost does (applyBiomeLooks SNOW_FLATTEN).
   const stormSettle=stormSnowCoverAtCanonical(instance.canonical).mul(-.4).add(1);
   return {height:mix(dimensions.x.mul(MEADOW_SHORT_FLOOR),dimensions.y,share).mul(stand).mul(areaHeight).mul(gap).mul(stormSettle),

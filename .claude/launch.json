@@ -226,6 +226,17 @@
         "dev:frontend"
       ],
       "port": 5180
+    },
+    {
+      "name": "grass-lod-base",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-world-visual-snapshot.mjs",
+        "37857853",
+        "5261"
+      ],
+      "port": 5261,
+      "autoPort": false
     }
   ]
 }
