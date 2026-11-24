@@ -16,6 +16,9 @@ def test_eldara_canonical_identity_and_seed_boundaries(eldara):
     state = baseline_state(eldara, scenario_id="peoples", settlement_ids=ids, seed=42, start_year=1212)
     goblin, vondari, elenori, umbra = state.settlements
     assert goblin.identity.cultureId is None and goblin.identity.cultureSeedId == "goblin-peoples"
+    assert set(goblin.ancestries) == {"goblin"}
+    assert goblin.ancestries["goblin"].total == goblin.population
+    assert all(p.identity.ancestryId == "goblin" for p in state.cast.people if p.settlementId == goblin.settlementId)
     assert {entry.assetId for entry in goblin.infrastructure} == {"grukmar/raised-marsh-boardwalk", "grukmar/bog-stilt-dwelling"}
     assert [s.identity.cultureId for s in (vondari, elenori, umbra)] == ["vondari", "elenori", "umbra-kori"]
     assert all(sum(c.total for c in s.ancestries.values()) == s.population for s in state.settlements)
@@ -58,7 +61,36 @@ def test_unmapped_map_and_v7_migration_preserve_character_records(eldara):
     upgraded, version = migrate_state(raw, foreign)
     assert version == 7 and upgraded.schemaVersion == STATE_SCHEMA_VERSION
     assert upgraded.cast.households == neutral.cast.households
-    assert upgraded.cast.people == neutral.cast.people
+    assert [p.model_dump(exclude={"identity", "upbringing"}) for p in upgraded.cast.people] == [
+        p.model_dump(exclude={"identity", "upbringing"}) for p in neutral.cast.people
+    ]
+    assert all(p.upbringing.settlementId == p.birthplaceId for p in upgraded.cast.people)
+
+
+
+def test_v7_migration_uses_recorded_birthplace_for_upbringing(eldara):
+    origin = "settlement:azgaar-burg:345"
+    birthplace = "settlement:azgaar-burg:213"
+    baseline = baseline_state(eldara, scenario_id="birthplace-migration",
+                              settlement_ids=[origin, birthplace], seed=7, start_year=1212)
+    raw = baseline.model_dump()
+    raw["schemaVersion"] = 7
+    for settlement in raw["settlements"]:
+        del settlement["identity"], settlement["ancestries"]
+    original = next(p for p in raw["cast"]["people"] if p["settlementId"] == origin)
+    original["birthplaceId"] = birthplace
+    for person in raw["cast"]["people"]:
+        del person["identity"], person["upbringing"]
+
+    migrated, stored = migrate_state(raw, eldara)
+    updated = next(p for p in migrated.cast.people if p.id == original["id"])
+    home = next(s for s in baseline.settlements if s.settlementId == origin)
+    assert stored == 7
+    assert updated.birthplaceId == birthplace
+    assert updated.upbringing.settlementId == birthplace
+    assert updated.upbringing.cultureId == "elenori"
+    assert updated.identity.cultureId == "elenori"
+    assert updated.identity.polityId == home.identity.polityId
 
 
 def test_peoples_api_compares_identical_opportunities_and_shows_provenance(fresh_model):

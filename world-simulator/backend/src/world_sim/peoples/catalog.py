@@ -63,7 +63,10 @@ def settlement_identity(record: dict, world: dict, rules: dict) -> tuple[CivicId
     if "cultureId" in explicit or "cultureSeedId" in explicit:
         key = explicit.get("cultureId") or explicit.get("cultureSeedId")
     definition = definitions.get(key, {})
-    weights = explicit.get("ancestryWeights") or definition.get("ancestryWeights") or {NEUTRAL: 1.0}
+    source_weights = definition.get("ancestryWeights")
+    if source_weights is None and definition.get("status") == "seed":
+        source_weights = {definition["ancestry"]: 1.0}
+    weights = explicit.get("ancestryWeights") or source_weights or {NEUTRAL: 1.0}
     identity = CivicIdentity(cultureId=key if definition.get("status") == "core" else None,
                              cultureSeedId=key if definition.get("status") == "seed" else None,
                              polityId=explicit.get("polityId", record.get("stateId")),

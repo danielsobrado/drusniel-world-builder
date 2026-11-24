@@ -91,7 +91,9 @@ def _v7_to_v8(raw: dict[str, Any], model: WorldModel, rules: dict) -> dict:
     people = []
     for row in raw["cast"]["people"]:
         source = row["id"].split(":")
-        origin = settlement_id(int(source[1])) if len(source) == 3 and source[1].isdigit() else row.get("birthplaceId")
+        origin = row.get("birthplaceId")
+        if not origin and len(source) == 3 and source[1].isdigit():
+            origin = settlement_id(int(source[1]))
         learned, weights = known.get(origin, neutral)
         home, _ = known.get(row["settlementId"], neutral)
         identity = person_identity(choose_ancestry(weights, raw["seed"], row["id"]), learned, home, origin, row["householdId"])
