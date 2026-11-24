@@ -37,7 +37,7 @@ export class StreamedDrawPreparation {
   flushBudgeted(camera, budget) {
     const reservation = this.reservation;
     this.reservation = null;
-    if (reservation) reservation.run(() => this.flush(camera));
+    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield));
     else budget.tryRun(() => this.flush(camera, budget.shouldYield), 6);
   }
   register(root, { uploadBytes = 0, uploadAttributes = null } = {}) {
@@ -83,6 +83,7 @@ export class StreamedDrawPreparation {
     let budgetedBytes = 0;
     try {
       for (const mesh of this.pending) {
+        if (shouldYield?.()) break;
         let root = mesh;
         while (root.parent) root = root.parent;
         if (root !== this.scene) {

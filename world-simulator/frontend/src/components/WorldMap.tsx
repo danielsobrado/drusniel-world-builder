@@ -58,14 +58,30 @@ export function WorldMap({ world, states, filters, selectedId, onSelect }: {
     if (d.moved) setView({ ...d.view, x: d.view.x - dx, y: d.view.y - dy });
   };
   const pick = (id: string) => () => { if (!drag.current?.moved) onSelect(id); };
-  const routes = connectivity.data?.routes ?? [];
+  const routes = useMemo(() => (connectivity.data?.routes ?? []).map((route) => ({
+    ...route,
+    svgPoints: route.points.map((point) => point.join(',')).join(' '),
+    bounds: route.points.reduce((b, point) => ({
+      minX: Math.min(b.minX, point[0]), minY: Math.min(b.minY, point[1]),
+      maxX: Math.max(b.maxX, point[0]), maxY: Math.max(b.maxY, point[1]),
+    }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }),
+  })), [connectivity.data]);
+  const matchingIds = useMemo(() => new Set(world.markers.filter((m) => matchesFilters(m, filters)).map((m) => m.id)),
+    [world.markers, filters]);
+  // Preserve edge labels and marker rings when panning across the viewport.
+  const padding = 160 * px;
+  const left = view.x - padding, top = view.y - padding;
+  const right = view.x + view.w + padding, bottom = view.y + view.h + padding;
+  const visibleMarkers = world.markers.filter((m) => m.x >= left && m.x <= right && m.y >= top && m.y <= bottom);
+  const visibleRoutes = routes.filter((r) => layers[r.mode] && r.bounds.maxX >= left && r.bounds.minX <= right
+    && r.bounds.maxY >= top && r.bounds.minY <= bottom);
   const showAllLabels = view.w < width / 4;
 
   return (
     <section className="section section-fill map-section">
       <div className="section-head">
         <h2>Atlas</h2>
-        <span className="muted">{fmt(world.markers.filter((m) => matchesFilters(m, filters)).length)} of {fmt(world.markers.length)} settlements shown</span>
+        <span className="muted">{fmt(matchingIds.size)} of {fmt(world.markers.length)} settlements shown</span>
         <span className="appbar-spacer" />
         {([['land', 'Roads & trails'], ['sea', 'Sea routes'], ['labels', 'Labels']] as const).map(([key, label]) => (
           <label key={key} className="toggle"><input type="checkbox" checked={layers[key]} onChange={() => setLayers((l) => ({ ...l, [key]: !l[key] }))} />{label}</label>
@@ -83,12 +99,12 @@ export function WorldMap({ world, states, filters, selectedId, onSelect }: {
           onWheel={(e) => zoom(e.deltaY > 0 ? 1.15 : 1 / 1.15, toMap(e))}
           onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={() => { setTimeout(() => { drag.current = null; }); }}>
           <rect x="0" y="0" width={width} height={height} className="map-sea" />
-          {routes.filter((r) => layers[r.mode]).map((r) => (
-            <polyline key={r.routeId} className={`route route-${r.group}`} points={r.points.map((p) => p.join(',')).join(' ')}
+          {visibleRoutes.map((r) => (
+            <polyline key={r.routeId} className={`route route-${r.group}`} points={r.svgPoints}
               style={{ strokeWidth: (r.group === 'roads' ? 2 : 1.1) * px }} />
           ))}
-          {world.markers.map((m) => {
-            const visible = matchesFilters(m, filters);
+          {visibleMarkers.map((m) => {
+            const visible = matchingIds.has(m.id);
             const r = RADIUS[m.class] * px;
             const label = layers.labels && visible && (showAllLabels || m.capital || m.pilot || m.id === selectedId);
             return (

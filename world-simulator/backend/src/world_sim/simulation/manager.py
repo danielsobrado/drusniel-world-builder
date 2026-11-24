@@ -7,7 +7,6 @@ inspected, never advanced, snapshotted, restored or branched, until it is migrat
 """
 
 import asyncio
-import contextlib
 import time
 from collections import deque
 from collections.abc import Callable
@@ -49,6 +48,7 @@ class Session:
     dirty: bool = False
     saved_at: float = field(default_factory=time.monotonic)
     error: str | None = None
+    stopping: bool = False
     busy: bool = False                # a step is being computed off the event loop
     perf: deque = field(default_factory=lambda: deque(maxlen=200))   # recent step timings
     _digest: tuple[int, str] | None = None
@@ -74,6 +74,7 @@ class ScenarioManager:
         self.start_year = resolve_start_year(self.config["calendar"], model.audit["sourceSettings"]["year"])
         self.fingerprint = model.audit["identity"]["sourceFingerprint"]
         self.sessions: dict[str, Session] = {}
+        self._archives: dict[str, HistoryArchive] = {}
         self.unloadable: dict[str, str] = {}
         for scenario_id in self.store.ids():
             self._load(scenario_id)
@@ -127,7 +128,7 @@ class ScenarioManager:
         s = self.session(scenario_id)
         if s.read_only:
             raise ApiError(409, "read_only", s.read_only, {"id": scenario_id})
-        if s.busy:
+        if s.busy or s.stopping:
             raise ApiError(409, "busy", "A step is still being computed for this scenario", {"id": scenario_id})
         return s
 
@@ -186,9 +187,21 @@ class ScenarioManager:
         del s.events[: max(0, len(s.events) - self.limits["maxEvents"])]
         s.dirty = True
 
+    def _save(self, meta: ScenarioMeta, state: ScenarioState, events: tuple[Event, ...]) -> None:
+        self.store.save(meta.id, meta.model_dump(), state.model_dump(), [e.model_dump() for e in events])
+
     def _persist(self, s: Session) -> None:
-        self.store.save(s.meta.id, s.meta.model_dump(), s.state.model_dump(), [e.model_dump() for e in s.events])
+        self._save(s.meta, s.state, tuple(s.events))
         s.dirty, s.saved_at = False, time.monotonic()
+
+    async def _persist_async(self, s: Session) -> None:
+        # The session remains write-locked until its immutable snapshot is durable.
+        s.busy = True
+        try:
+            await asyncio.to_thread(self._save, s.meta, s.state, tuple(s.events))
+            s.dirty, s.saved_at = False, time.monotonic()
+        finally:
+            s.busy = False
 
     def _new_id(self, name: str) -> str:
         base = slugify(name)
@@ -306,7 +319,9 @@ class ScenarioManager:
                             "matches": live == again}}
 
     def archive(self, scenario_id: str) -> HistoryArchive:
-        return HistoryArchive(self.store.history_path(scenario_id))
+        if scenario_id not in self._archives:
+            self._archives[scenario_id] = HistoryArchive(self.store.history_path(scenario_id))
+        return self._archives[scenario_id]
 
     def _backstory(self, s: Session) -> int:
         """Reconstructs the past of anyone on record without one (everyone, at creation); returns how many events it added."""
@@ -383,7 +398,9 @@ class ScenarioManager:
         s = self._steppable(scenario_id, days)
         start = s.state.date.label
         await self._advance_off_loop(s, days)
-        return self._stepped(s, days, start)
+        self._event(s, "stepped", f"Stepped {days} day{'s' if days != 1 else ''} from {start}", days=days)
+        await self._persist_async(s)
+        return s
 
     def run(self, scenario_id: str, speed: float) -> Session:
         s = self.writable(scenario_id)
@@ -391,6 +408,7 @@ class ScenarioManager:
             raise ApiError(400, "invalid_parameter", f"speed must be one of {self.config['speeds']}", {"parameter": "speed"})
         s.speed, s.error = speed, None
         if not s.running:
+            s.stopping = False
             s.carry = 0.0
             s.task = asyncio.get_running_loop().create_task(self._run_loop(s))
             self._event(s, "run", f"Running at {speed:g} days per second", speed=speed)
@@ -399,33 +417,39 @@ class ScenarioManager:
     async def _run_loop(self, s: Session) -> None:
         tick = self.config["runner"]["tickSeconds"]
         try:
-            while True:
+            while not s.stopping:
                 await asyncio.sleep(tick)
+                if s.stopping:
+                    break
                 s.carry += s.speed * tick
                 days, s.carry = int(s.carry), s.carry - int(s.carry)
                 if days:
                     await self._advance_off_loop(s, days)
                 if s.dirty and time.monotonic() - s.saved_at >= 1.0:
-                    self._persist(s)
+                    await self._persist_async(s)
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # noqa: BLE001 - a failing run stops with its reason recorded, never silently
             log.error("scenario run failed", exc, scenarioId=s.meta.id)
             s.error = str(exc)
             self._event(s, "error", f"Run stopped: {exc}")
-            self._persist(s)
+            await self._persist_async(s)
 
     async def pause(self, scenario_id: str) -> Session:
         s = self.session(scenario_id)
-        if s.running:
-            s.task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
+        if s.stopping or (s.busy and not s.running):
+            raise ApiError(409, "busy", "A scenario operation is still completing")
+        s.stopping = True
+        try:
+            if s.running:
                 await s.task
-            self._event(s, "paused", f"Paused at {s.state.date.label}")
-        s.task = None
-        if not s.read_only:
-            self._persist(s)
-        return s
+                self._event(s, "paused", f"Paused at {s.state.date.label}")
+            s.task = None
+            if not s.read_only:
+                await self._persist_async(s)
+            return s
+        finally:
+            s.stopping = False
 
     def snapshot(self, scenario_id: str, label: str) -> SnapshotMeta:
         s = self.writable(scenario_id)
@@ -459,4 +483,4 @@ class ScenarioManager:
             if s.running:
                 await self.pause(scenario_id)
             elif s.dirty and not s.read_only:
-                self._persist(s)
+                await self._persist_async(s)

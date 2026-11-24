@@ -74,19 +74,10 @@ export function withDrawPreparation(scene, targets, render) {
 
   const objects = new Map();
   const geometries = new Map();
-  scene.traverse((object) => {
-    objects.set(object, {
-      visible: object.visible,
-      frustumCulled: object.frustumCulled,
-      autoUpdate: object.isLOD ? object.autoUpdate : undefined,
-      count: object.isInstancedMesh ? object.count : undefined,
-    });
-  });
-
   const keep = new Set();
   let prepared = 0;
   for (const target of targets) {
-    if (!target || !objects.has(target)) continue;
+    if (!target || !isInScene(target, scene)) continue;
     prepared += 1;
     keepBranch(target, keep);
     target.traverse((child) => {
@@ -106,9 +97,21 @@ export function withDrawPreparation(scene, targets, render) {
   // lighting present during preparation has to be the lighting that was already
   // active. A light under a hidden ancestor was contributing nothing and must
   // stay dark, exactly as withSceneWarmup treats it.
-  for (const object of objects.keys()) {
-    if (object.isLight && activeLights.has(object)) keepBranch(object, keep);
-  }
+  for (const light of activeLights) keepBranch(light, keep);
+
+  // A hidden branch is already excluded by Three's visibility traversal.
+  // Save only nodes on retained paths and the roots of excluded branches.
+  const collect = object => {
+    if (!keep.has(object) && !object.visible) return;
+    objects.set(object, {
+      visible: object.visible,
+      frustumCulled: object.frustumCulled,
+      autoUpdate: object.isLOD ? object.autoUpdate : undefined,
+      count: object.isInstancedMesh ? object.count : undefined,
+    });
+    if (keep.has(object)) for (const child of object.children) collect(child);
+  };
+  collect(scene);
 
   const visibilityUpdater = scene.userData.updateCoastalJungleVisibility;
   try {

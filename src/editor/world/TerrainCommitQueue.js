@@ -113,20 +113,33 @@ export class TerrainCommitQueue {
   flush(commit, isCurrent = null, {
     maxCommits = this.maxCommitsPerFrame,
     budgetMs = this.commitBudgetMs,
+    maxUploadBytes = Number.POSITIVE_INFINITY,
   } = {}) {
     assertMaxCommits(maxCommits, { allowInfinity: true });
     assertBudgetMs(budgetMs, { allowInfinity: true });
     const startedAt = this.now();
+    assertBudgetMs(maxUploadBytes, { allowInfinity: true });
     let committed = 0;
+    let uploadBytes = 0;
     this.sortQueue();
     while (
       this.queue.length > 0
       && committed < maxCommits
       && this.now() - startedAt < budgetMs
     ) {
-      const job = this.queue.pop();
+      const job = this.queue[this.queue.length - 1];
+      if (isCurrent && !isCurrent(job)) {
+        this.queue.pop();
+        this.entriesBySlot.delete(job.slot.slotIndex);
+        continue;
+      }
+      const bytes = (job.page?.tilePixels?.byteLength ?? 0)
+        + (job.page?.surfaceMaskPixels?.byteLength ?? 0) + (job.page?.heights?.byteLength ?? 0);
+      // Allow one indivisible oversized page so the queue cannot deadlock.
+      if (committed > 0 && uploadBytes + bytes > maxUploadBytes) break;
+      this.queue.pop();
       this.entriesBySlot.delete(job.slot.slotIndex);
-      if (isCurrent && !isCurrent(job)) continue;
+      uploadBytes += bytes;
       this.maxQueuedAgeMs = Math.max(this.maxQueuedAgeMs, this.now() - job.enqueuedAt);
       commit(job);
       committed += 1;

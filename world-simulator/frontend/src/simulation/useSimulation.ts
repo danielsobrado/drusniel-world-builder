@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { HistoryEventView, ScenarioStatus, SimulationConfig, SnapshotMeta } from '../api/types';
 import { ApiRequestError, getJson, postJson, useApi } from '../api/worldApi';
 
@@ -36,12 +36,14 @@ export function useSimulation(): Simulation {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiRequestError | null>(null);
 
+  const refreshId = useRef(0);
   const refresh = useCallback(async () => {
+    const id = ++refreshId.current;
     try {
       const { data } = await getJson<ScenarioStatus[]>('/api/scenarios');
-      setScenarios(data);
+      if (id === refreshId.current) setScenarios(data);
     } catch (e) {
-      setError(e instanceof ApiRequestError ? e : new ApiRequestError(0, 'network_error', String(e)));
+      if (id === refreshId.current) setError(e instanceof ApiRequestError ? e : new ApiRequestError(0, 'network_error', String(e)));
     }
   }, []);
 
@@ -50,8 +52,14 @@ export function useSimulation(): Simulation {
   const running = Boolean(active?.running);
   useEffect(() => {
     if (!running) return undefined;
-    const timer = setInterval(() => { void refresh(); }, 1000);
-    return () => clearInterval(timer);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      await refresh();
+      if (!cancelled) timer = setTimeout(poll, 1000);
+    };
+    timer = setTimeout(poll, 1000);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [running, refresh]);
 
   const select = useCallback((id: string) => {

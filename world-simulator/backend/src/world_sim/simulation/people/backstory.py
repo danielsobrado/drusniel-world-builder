@@ -47,7 +47,7 @@ class Past:
         self.add("born", self.p.birthDay, f"{self.who} was born in {place}", "year",
                  settlementId=self.home if self.home in self.scope else None,
                  locationId=self.home, participants=[{"personId": self.p.id, "role": "newborn"}, *roles],
-                 ties=[r.id for r in self.ties.items if r.kind == "parent" and r.b == self.p.id and r.origin == "generated"])
+                 ties=[r.id for r in self.ties.of(self.p.id, "parent", active=False) if r.b == self.p.id and r.origin == "generated"])
         if self.age() < 25:
             h = next((h for h in self.cast.households if h.id == self.p.householdId), None)
             kind = (h.kind if h else "single").replace("-", " ")

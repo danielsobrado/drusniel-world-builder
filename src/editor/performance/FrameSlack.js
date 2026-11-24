@@ -61,7 +61,11 @@ export class FrameSlack {
       this.deferredMs -= amount;
       return true;
     };
-    return { cancel: release, run: work => release() ? this.defer(work) : undefined };
+    return { cancel: release, run: work => {
+      if (!release()) return undefined;
+      const deadline = this.now() + amount;
+      return this.defer(() => work(() => this.now() >= deadline));
+    } };
   }
 
   strictAvailable(maxMs = Infinity) {
