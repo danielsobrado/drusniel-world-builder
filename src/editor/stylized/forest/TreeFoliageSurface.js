@@ -1,5 +1,5 @@
 import { Color } from 'three/webgpu';
-import { attribute, cos, float, materialAO, materialRoughness, mix, normalWorld, positionGeometry, positionView, sin, uv, vec3 } from 'three/tsl';
+import { attribute, cos, float, materialAO, materialRoughness, mix, normalWorld, positionGeometry, positionView, sin, smoothstep, uv, vec3 } from 'three/tsl';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { resolveTreeFoliageSettings } from './treeSurfaceSettings.js';
 import { setRuntimeUserData } from '../../../render/materials/runtimeUserData.js';
@@ -27,6 +27,20 @@ export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.34) 
   ).mul(0.32);
   const combined = macroDir.add(puff.add(subPuff).mul(puffStrength));
   return combined.div(combined.length().max(0.00001));
+}
+
+/**
+ * Analytic sky visibility for a crown with no baked one (shrubs): leaves deep in
+ * the bounds ellipsoid and on its underside see less sky, as the trees' baked
+ * `canopyVisibility` does. Per vertex; 1 on the outer shell, `floor` at the core.
+ */
+export function crownInteriorVisibilityNode(bounds, floor = 0.45) {
+  const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
+  const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
+  const rel = positionGeometry.sub(center).div(half);
+  const shell = smoothstep(0.2, 0.95, rel.length());
+  const top = smoothstep(-0.9, 0.5, rel.y);
+  return mix(float(floor), float(1), shell).mul(mix(0.72, 1, top)).toVarying('crownInteriorVisibility');
 }
 
 /** Occlusion has a floor, retaining readable crown interiors and donor AO. */

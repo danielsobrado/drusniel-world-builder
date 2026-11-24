@@ -1,7 +1,7 @@
 # Understory grounding
 
 Shrubs, ferns and ground plants read as pasted on: pale and flat beside the grass,
-with near-black stems and a dark pool at their foot. Five causes, mostly in the
+with near-black stems and a dark pool at their foot. Six causes, mostly in the
 shared understory material path (`stylized/AuthoredFoliageMaterial.js`,
 `BushRenderAssets.js`, `flora/biomeUnderstoryPrototypes.js`, `forest/foliageLight.js`).
 
@@ -44,7 +44,19 @@ shared understory material path (`stylized/AuthoredFoliageMaterial.js`,
    0.45). `resolveFoliagePalette` keeps 0.68 of the ramp's linear blue, which
    covers near plants, bush proxies and floating leaves in one place.
 
-No new texture, sampler, varying family, scene light or `viewport*Texture` node:
+6. **Flat crowns.** Shrubs cast no shadow on themselves and have no baked sky
+   visibility, so inner and underside leaves took the same sun and sky as the
+   shell and a crown read as one flat sheet. `crownInteriorVisibilityNode`
+   (`forest/TreeFoliageSurface.js`) estimates it per vertex from the bounds
+   ellipsoid: 1 on the shell, 0.45 at the core, and up to 28% less on the
+   underside. It scales the sky fill and ambient occlusion, gates transmission
+   (`foliageVisibilityNode`, as the trees' baked visibility does) and takes half
+   of it off the albedo in place of self-shadow (`CROWN_SELF_SHADE`). Bush
+   proxies use the same, so the LOD swap keeps the depth. It stays moderate:
+   stronger, the stems inside a crown go black again.
+
+No new texture, sampler, scene light or `viewport*Texture` node, and one float
+varying per material: scene light or `viewport*Texture` node:
 the ground normal and contact shade come from varyings the material already had.
 
 ## Not changed
@@ -64,6 +76,10 @@ before on `10f1b931`, after with the change; left before, right after:
   [forest](qa/understory-grounding-2026-11-24/forest-before-after.jpg),
   [rainforest](qa/understory-grounding-2026-11-24/core-rainforest-before-after.jpg),
   [deciduous](qa/understory-grounding-2026-11-24/core-deciduous-before-after.jpg).
+- Crown interior (item 6), captured back to back with only its files swapped, since
+  other sessions share this checkout and runs minutes apart differ in scatter:
+  [grassland](qa/understory-grounding-2026-11-24/grassland-crown.jpg),
+  [forest](qa/understory-grounding-2026-11-24/forest-crown.jpg).
 
 ## Performance
 
@@ -92,3 +108,14 @@ Shade and hue (items 4 and 5), same route and warmup, A = `a196e531`:
 
 Within run noise: two shader constants and a larger painted footprint, no new
 work per frame.
+
+Crown interior (item 6), same route and warmup, A = `9aea7b80`:
+
+| Run | Avg FPS | dt p50 / p95 / p99 ms | Hitches |
+| --- | --- | --- | --- |
+| B1 (change) | 72.9 | 13.5 / 24.6 / 32.4 | 5 |
+| A1 (base) | 72.4 | 13.5 / 25.6 / 31.9 | 2 |
+| B2 (change) | 73.6 | 13.2 / 23.4 / 32.3 | 2 |
+| A2 (base) | 73.2 | 13.5 / 22.0 / 32.3 | 3 |
+
+Neutral.

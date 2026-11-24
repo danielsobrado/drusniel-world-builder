@@ -73,3 +73,15 @@ test('lit plants are dielectric even when the glTF left metallicFactor at its de
   assert.equal(source.metalness, 1, 'source asset remains unchanged');
   assert.equal(cloneAuthoredNodeMaterial(source).metalness, 1, 'unlit clones keep authored channels');
 });
+
+test('a shrub crown is darker at its core and underside than on its sunlit shell', async () => {
+  const { positionGeometry } = await import('three/tsl');
+  const { crownInteriorVisibilityNode } = await import('../src/editor/stylized/forest/TreeFoliageSurface.js');
+  const { evaluateShaderNode } = await import('./helpers/evaluateShaderNode.js');
+  const node = crownInteriorVisibilityNode({ min: [-1, 0, -1], max: [1, 2, 1] }, 0.45);
+  const at = (point) => evaluateShaderNode(node.node.node, { values: new Map([[positionGeometry, point]]) });
+  const top = at([0, 2, 0]), core = at([0, 1, 0]), under = at([0, 0.05, 0.4]);
+  assert.ok(Math.abs(top - 1) < 1e-6, `shell top ${top}`);
+  assert.ok(core < 0.5, `core ${core}`);
+  assert.ok(under < top && under > core, `underside ${under}`);
+});

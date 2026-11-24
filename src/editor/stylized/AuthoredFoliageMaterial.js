@@ -1,12 +1,12 @@
 import * as THREE from 'three/webgpu';
-import { attribute, dot, float, materialRoughness, mix, mx_noise_float, normalWorld, positionGeometry, positionWorld, sin, smoothstep, vec3 } from 'three/tsl';
+import { attribute, dot, float, materialAO, materialRoughness, mix, mx_noise_float, normalWorld, positionGeometry, positionWorld, sin, smoothstep, vec3 } from 'three/tsl';
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
 import { LOOK_SNOW_STEPS } from '../biomes/BiomeLooks.js';
 import { authoredTexture } from './AuthoredTextureNode.js';
 import { authoredGreenMask, gradePlantPart, resolveFoliagePalette } from './forest/foliagePalette.js';
 import { understoryShadeEmission } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
-import { crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
+import { crownInteriorVisibilityNode, crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
 import { understoryEdgeNodes } from './forest/crownEdge.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { meadowPatchOnPlant } from './understoryPatch.js';
@@ -19,6 +19,8 @@ const WET_LEAF_ROUGHNESS = 0.34;
 
 /** Share of the sky fill a plant's foot keeps (was 0.42: on top of the AO it drew a black base). */
 export const UNDERSTORY_FOOT_FILL = 0.7;
+/** Share of a crown's interior visibility that also dims its albedo, standing in for self-shadow. */
+export const CROWN_SELF_SHADE = 0.5;
 
 /**
  * Foot darkening and canopy shade for a plant, as the grass takes them
@@ -139,7 +141,12 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const soilMask = smoothstep(0.0, 0.22, baseT).oneMinus()
     .mul(mix(float(0.55), float(0.30), plantGreen))
     .mul(groundContact.inside);
-  const groundedColor = blossom ? color.mul(mix(float(0.82), float(1.0), baseRamp)) : mix(color, groundContact.soilColor, soilMask).mul(baseAo);
+  // Shrubs cast no shadow on themselves: inner and underside leaves lose part of
+  // the sun here and their sky light below, or the crown reads as one flat sheet.
+  const interior = bounds && !blossom ? crownInteriorVisibilityNode(bounds) : float(1);
+  const groundedColor = blossom
+    ? color.mul(mix(float(0.82), float(1.0), baseRamp))
+    : mix(color, groundContact.soilColor, soilMask).mul(baseAo).mul(mix(float(1), interior, CROWN_SELF_SHADE));
   // Cutout shrub/understory cards get GPU edge-on grazing fade + soft horizon-air fringe.
   const edge = softEdges && material.map && !blossom
     ? understoryEdgeNodes(authoredTexture(material.map).a, {
@@ -155,7 +162,10 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
     material.opacityNode = opacity;
   }
   const fillAttenuation = mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp);
-  const fill = understoryShadeEmission(groundedColor, { blossom, airRim: edge?.airRim ?? null }).mul(fillAttenuation);
+  const fill = understoryShadeEmission(groundedColor, { blossom, airRim: edge?.airRim ?? null })
+    .mul(fillAttenuation).mul(interior);
+  material.aoNode = (material.aoNode ?? materialAO).mul(interior);
+  material.foliageVisibilityNode = interior;
   material.foliageTransmissionNode = (blossom
     ? float(0.16)
     : mix(float(0.02), float(0.22), plantGreen)).mul(mix(float(0.28), float(1.0), baseRamp));

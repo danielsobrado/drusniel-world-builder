@@ -17,6 +17,7 @@ import {
   authoredFoliageColor,
   biomeUnderstoryColor,
   cloneAuthoredNodeMaterial,
+  CROWN_SELF_SHADE,
   seatPlantNormal,
   UNDERSTORY_FOOT_FILL,
   understoryFootShade,
@@ -25,7 +26,7 @@ import { applyPlantMotion } from './PlantMotionNodes.js';
 import { resolveFoliagePalette } from './forest/foliagePalette.js';
 import { applySkywardNormal, understoryShadeEmission } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
-import { crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
+import { crownInteriorVisibilityNode, crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
 import { applyCloudShadow } from './CloudShadow.js';
 import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
 
@@ -211,9 +212,15 @@ export function createBushProxyMaterial(sourceMaterial, {
   const baseRamp = smoothstep(0.0, 0.30, baseT);
   const baseAo = understoryFootShade(baseRamp, groundContact);
   const soilMask = smoothstep(0.0, 0.22, baseT).oneMinus().mul(0.30).mul(groundContact.inside);
-  const groundedProxy = mix(shadedColor, groundContact.soilColor, soilMask).mul(baseAo);
+  // The same crown interior shade as the near bush, so the LOD swap keeps its depth.
+  const interior = bounds ? crownInteriorVisibilityNode(bounds) : float(1);
+  const groundedProxy = mix(shadedColor, groundContact.soilColor, soilMask).mul(baseAo)
+    .mul(mix(float(1), interior, CROWN_SELF_SHADE));
   material.colorNode = groundedProxy;
-  material.emissiveNode = understoryShadeEmission(groundedProxy).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
+  material.emissiveNode = understoryShadeEmission(groundedProxy)
+    .mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp)).mul(interior);
+  material.aoNode = interior;
+  material.foliageVisibilityNode = interior;
   material.foliageTransmissionNode = float(0.2).mul(mix(float(0.28), float(1.0), baseRamp));
   material.foliageWrapDiffuseNode = float(0.32);
   material.foliageRimGlowNode = float(0.14).mul(baseRamp);
