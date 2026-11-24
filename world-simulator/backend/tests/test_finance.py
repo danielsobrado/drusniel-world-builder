@@ -27,3 +27,16 @@ def test_aggregate_finances_survive_replay_and_legacy_migration(eldara):
     migrated, version = migrate_state(raw, eldara, eldara.config.rules)
     assert version == 11
     assert all(not s.economy.finances.tiers for s in migrated.settlements)
+
+
+def test_prolonged_unaffordable_food_enters_canonical_history(eldara):
+    economy = {**eldara.config.economy}
+    finance_cfg = {**economy["householdFinances"], "copperPerTradeValue": 1000000}
+    economy["householdFinances"] = finance_cfg
+    rules = {**eldara.config.rules, "economy": economy}
+    state = baseline_state(eldara, scenario_id="hardship", settlement_ids=sorted(eldara.pilot_ids),
+                           seed=9, start_year=1212, rules=rules)
+    after, months = advance(state, 60, rules)
+    kinds = [event.kind for summary in months for event in summary["events"]]
+    assert "household-hardship" in kinds
+    assert any(s.economy.finances.hardshipMonths == 2 for s in after.settlements)

@@ -114,7 +114,8 @@ class ContextBuilder:
                      "caravanMaster": {"reputation": trader.scorecard.reputation, "trips": trader.scorecard.trips, "purse": trader.purse,
                                        "owns": len(trader.owns)} if trader else None},
             "circumstances": {"townUnemployment": round(employment.unemployed / max(1, employment.labourSupply), 3),
-                              "foodSecurity": town.economy.food.security, "idleMonths": p.idleMonths},
+                              "foodSecurity": town.economy.food.security, "foodAffordability": town.economy.finances.foodAccess,
+                              "idleMonths": p.idleMonths},
             "milestones": [_event(e, pid, self.label) for e in sorted(milestones, key=lambda e: e.day)],
             "settlementHistory": [{"id": e.id, "date": self.label(e.day), "summary": e.summary, "kind": e.kind}
                                   for e in town_history[: self.cfg["settlementHistory"]]],

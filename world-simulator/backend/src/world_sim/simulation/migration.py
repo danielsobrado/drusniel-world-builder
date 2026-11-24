@@ -48,7 +48,8 @@ def _benefit(origin: SettlementState, destination: SettlementState, route: Trave
     wage = (_wage(destination) - _wage(origin)) / max(1, _wage(origin))
     vacancy = _vacant(destination) / max(1, sum(h.capacity for h in destination.society.housing))
     safety = {t.settlementId: next((n.value for n in t.society.needs if n.id == "safety"), 1.0) for t in (origin, destination)}
-    return (_idle(origin) - _idle(destination) + 0.2 * wage + 0.45 * vacancy + culture
+    affordability = 0.15 * (destination.economy.finances.foodAccess - origin.economy.finances.foodAccess)
+    return (_idle(origin) - _idle(destination) + 0.2 * wage + 0.45 * vacancy + culture + affordability
             + 0.1 * (safety[destination.settlementId] - safety[origin.settlementId])
             - route.days / 250 - min(0.4, bandits * 0.003))
 

@@ -68,6 +68,7 @@ bandits:
   markerBand: 24                # bandits such a band starts with; it never shrinks below a third of this
   recruitPerUnemployed: 0.02    # share of a settlement's people without work who take to its road each month
   hungerRecruitment: 4          # recruitment x (1 + this x last month's food shortfall)
+  affordabilityRecruitment: 1.5 # additional pressure when working families cannot afford food
   lootRecruitment: 0.02         # extra recruits per unit of value looted last month
   patrolPerSecurityWorker: 0.002   # share of bandits removed each month per security worker at the road's ends
   maxPatrolShare: 0.5

@@ -170,6 +170,20 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
             days=cfg["simulation"]["calendar"]["daysPerMonth"],
             cfg=cfg["economy"].get("householdFinances", {}),
         )
+        if finances.tiers and finances.hardshipMonths == 2:
+            incidents.append({
+                "kind": "household-hardship", "day": day, "settlementId": s.settlementId,
+                "message": f"Families in {s.name} struggled to afford food for two months",
+                "facts": {"foodAccess": finances.foodAccess,
+                          "strugglingHouseholds": finances.strugglingHouseholds,
+                          "rationPrice": price_by_market.get(econ.marketId, base_ration_price)},
+            })
+        elif econ.finances.hardshipMonths >= 2 and finances.hardshipMonths == 0:
+            incidents.append({
+                "kind": "hardship-relieved", "day": day, "settlementId": s.settlementId,
+                "message": f"Food became more affordable for families in {s.name}",
+                "facts": {"foodAccess": finances.foodAccess},
+            })
         econ = econ.model_copy(update={"finances": finances})
         updated.append(s.model_copy(update={"economy": econ, "society": with_food_need(society, econ, cfg)}))
     trade = trade.model_copy(update={"traders": traders})

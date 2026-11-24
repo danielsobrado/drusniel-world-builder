@@ -66,6 +66,8 @@ def hooks(p: Person, cast: Cast, trade: Trade, settlement: Any, day: int, cfg: d
             add("ambition", "Hoping to expand the businesses they funded", "ownership")
     if settlement.economy.food.security < 1:
         add("hunger", "Worried about food: the town is short of rations", "settlement")
+    if settlement.economy.finances.tiers and settlement.economy.finances.foodAccess < 0.95:
+        add("affordability", "Families in town are finding food difficult to afford", "settlement-economy")
     return out[:3]
 
 

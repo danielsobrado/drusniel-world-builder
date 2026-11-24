@@ -44,7 +44,9 @@ def update_bands(routes: list[Route], settlements: dict[str, SettlementState], m
         centre = settlements.get(markets[r.marketId].centerSettlementId)
         unemployed = home.society.employment.unemployed + (centre.society.employment.unemployed // roads_to[r.marketId] if centre else 0)
         shortfall = max(0.0, 1 - home.economy.food.security)
-        recruits = _draw(rng, unemployed * b["recruitPerUnemployed"] * (1 + b["hungerRecruitment"] * shortfall)
+        affordability = max(0.0, 1 - home.economy.finances.foodAccess)
+        pressure = 1 + b["hungerRecruitment"] * shortfall + b.get("affordabilityRecruitment", 0) * affordability
+        recruits = _draw(rng, unemployed * b["recruitPerUnemployed"] * pressure
                          + b["lootRecruitment"] * loot.get(r.id, 0.0))
         guards = security_workers(home) + (security_workers(centre) if centre else 0)
         hazard = min(b["maxPatrolShare"], b["patrolPerSecurityWorker"] * guards) + b["desertion"]
