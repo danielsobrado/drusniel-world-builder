@@ -42,6 +42,8 @@ export const SETTLEMENT_VIEW = Object.freeze({
   cullTolerance: 0.02,
   /** Frames a queued build may be starved of frame budget before it runs anyway. */
   starvationFrames: 2,
+  /** Milliseconds of work a starved slice may still do. */
+  starvedSliceMs: 2,
 });
 
 /**
@@ -93,9 +95,10 @@ export class SettlementView {
     this.frustum = new Frustum();
     this.viewProjection = new Matrix4();
     this.culledWith = new Matrix4().makeScale(0, 0, 0);
+    /** The camera this frame, which a finished pass's coverage is checked against (SettlementSelection). */
+    this.cameraMatrix = null;
     this.sphere = new Sphere();
     this.disposed = false;
-    this.coverageEpoch = 0;
   }
 
   reset() {
@@ -168,8 +171,12 @@ export class SettlementView {
     const starving = shouldYield();
     if (starving && ++this.starved < SETTLEMENT_VIEW.starvationFrames) return;
     this.starved = 0;
-    let forced = 0;
-    const yieldNow = starving ? () => forced++ > 0 : shouldYield;
+    // A starved slice gets a short time budget, not one `yieldNow` call: the checks
+    // between stages used to spend that one call, so a city's site never advanced.
+    const sliceEnd = performance.now() + SETTLEMENT_VIEW.starvedSliceMs;
+    const yieldNow = starving ? () => performance.now() >= sliceEnd : shouldYield;
+    // The worker generates variants while the site still prepares; installing waits below.
+    this.pool.dispatch();
     this.plans.advance(yieldNow);
     if (yieldNow()) return;
     this.skyline.advance(yieldNow);
@@ -228,6 +235,7 @@ export class SettlementView {
     if (!camera) return false;
     this.viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
     this.frustum.setFromProjectionMatrix(this.viewProjection, camera.coordinateSystem, camera.reversedDepth);
+    (this.cameraMatrix ??= new Matrix4()).copy(camera.matrixWorld);
     const now = camera.matrixWorld.elements;
     const then = this.culledWith.elements;
     let change = 0;
@@ -274,7 +282,7 @@ export class SettlementView {
     }
     const moved = Math.hypot(focus.x - this.selected.x, focus.z - this.selected.z) > SETTLEMENT_VIEW.reselectMetres;
     const turned = this.aim(camera);
-    if (moved || turned) { this.coverageEpoch++; this.dirty = true; }
+    if (moved || turned) this.dirty = true;
     this.skyline.update(focus, origin);
     if (this.sites.size === 0 && this.rows.size === 0 && this.plans.pending === 0 && this.registry.pending === 0 && this.skyline.pending === 0) return;
 

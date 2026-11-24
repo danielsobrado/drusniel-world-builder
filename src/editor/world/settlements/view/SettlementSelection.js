@@ -5,12 +5,26 @@ import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 
 const SLICE = 32;
 let passes = 0;
+/**
+ * How far the camera may turn (unit-vector change, ~15°) or move (metres) from
+ * where a pass started before that pass no longer says what is in view. A city's
+ * pass spans hundreds of frames; when any camera motion voided it, a walk through
+ * one never handed its massing over to the houses.
+ */
+const COVERAGE_TURN = 0.25, COVERAGE_METRES = 80;
+
+function cameraDrifted(then, now) {
+  if (!then) return true;
+  const a = then.elements, b = now.elements;
+  for (let index = 0; index < 12; index += 1) if (Math.abs(a[index] - b[index]) > COVERAGE_TURN) return true;
+  return Math.hypot(a[12] - b[12], a[13] - b[13], a[14] - b[14]) > COVERAGE_METRES;
+}
 
 /** A paved site is not a replacement for its still-loading building silhouettes. */
 export function settlementSiteDrawn(view, site) {
   const coverage = site?.buildingCoverage;
   if (!site?.surfaces || site.job || !site.pavingReady || !coverage?.complete
-      || coverage.epoch !== (view.coverageEpoch ?? 0)) return false;
+      || (view.cameraMatrix && cameraDrifted(coverage.camera, view.cameraMatrix))) return false;
   for (const [key, bands] of coverage.required) {
     const entry = view.pool.get(key);
     if (!entry) return false;
@@ -50,15 +64,17 @@ function publish(view, key, changes) {
 export function* settlementSelectionJob(view, focus, timestamp, settings) {
   // Rows remember the pass that last saw each id: a per-pass set of ids was garbage on every placement.
   const pass = ++passes, pending = new Map();
-  const epoch = view.coverageEpoch ?? 0;
+  const camera = view.cameraMatrix?.clone() ?? null;
   let fading = false, shown = 0, buildings = 0, props = 0, units = 0;
   const flush = function* () {
-    for (const [key, changes] of pending) { publish(view, key, changes); yield; }
+    // Every ready key is flushed each slice, mostly with no changes: yielding for
+    // those stretched a city's pass over seconds, so its coverage was always stale.
+    for (const [key, changes] of pending) { publish(view, key, changes); if (changes.size) yield; }
     pending.clear();
   };
   for (const site of view.sites.values()) {
     if (!site.surfaces) continue;
-    const coverage = { epoch, complete: Boolean(site.placements) && !site.job, required: new Map() };
+    const coverage = { camera, complete: Boolean(site.placements) && !site.job, required: new Map() };
     const source = { style: site.plan.profile.style, kind: '', variant: 0, surfaces: site.surfaces };
     const placements = site.placements ?? [];
     for (let index = 0; index < placements.length; index += 1) {

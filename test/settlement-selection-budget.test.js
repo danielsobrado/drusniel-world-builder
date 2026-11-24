@@ -105,7 +105,7 @@ test('skyline handover waits for this site buildings, fades and published tiers'
   delete tier.publication;
   f.entries.set('unrelated-town', { state: 'queued' });
   assert.equal(settlementSiteDrawn(f.view, site), true, 'unrelated content does not hold the skyline');
-  f.view.coverageEpoch = 1;
+  f.view.cameraMatrix = new Matrix4().makeRotationY(Math.PI / 2);
   assert.equal(settlementSiteDrawn(f.view, site), false, 'a camera turn invalidates old coverage');
   f.entries.get('house-0').state = 'failed';
   run(f.view, 800);
