@@ -394,6 +394,7 @@ instancedLocations:
       metalness: 0.88
       f0: 0.74
       patina: { color: '#4f8a72', amount: 0.5, spread: 0.3 }
+      seam: { color: '#3a332c', strength: 0.64, soot: 0.5 }
     stonehold_gold_hoard:
       surface: rubble
       scale: 2.6
@@ -413,6 +414,7 @@ instancedLocations:
       metalness: 0.86
       f0: 0.76
       patina: { color: '#456a5a', amount: 0.24, spread: 0.30 }
+      seam: { color: '#3e3932', strength: 0.6, soot: 0.22 }
     stonehold_alpine_rock:
       surface: frost-rock
       floorSurface: flagstone

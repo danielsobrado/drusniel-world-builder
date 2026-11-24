@@ -55,9 +55,13 @@ test('beach species cluster on damp coastal slopes and reject water, cliffs and 
 
 test('boulders seat toward their lowest support and reject unsupported cliffs at their actual size', () => {
   const placement = { x: 10, z: 4, scale: 2 };
-  assert.deepEqual(fitRockToGround(placement, 3, () => 6), { groundFitHeight: 6 });
+  const flat = fitRockToGround(placement, 3, () => 6);
+  assert.equal(flat.groundFitHeight, 6);
+  assert.deepEqual(flat.groundNormal.map(value => value + 0), [0, 1, 0], 'flat ground seats upright');
   const result = fitRockToGround(placement, 3, x => x * 0.5);
   assert.ok(Math.abs(result.groundFitHeight - (5 - 2.7 * 0.5 * 0.7)) < 1e-12);
+  // A partial tilt toward the slope, leaning downhill (-x on ground rising with x).
+  assert.ok(result.groundNormal[0] < 0 && result.groundNormal[1] > 0.9);
   assert.equal(fitRockToGround(placement, 3, x => x < 10 ? -10 : 10), null);
   assert.equal(fitRockToGround(placement, 3, () => NaN), null);
 });

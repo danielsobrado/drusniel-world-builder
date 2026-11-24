@@ -6,6 +6,7 @@ import {
   FOREST_LEAF_TINT_UNTINTED,
   createForestLeafTintTable,
 } from '../src/editor/stylized/forest/forestLeafTint.js';
+import { resolveCanopyGrade } from '../src/editor/stylized/forest/canopyGrade.js';
 import { FOREST_SPECIES_PALETTES } from '../src/editor/stylized/forest/ForestSpeciesGeometry.js';
 import { loadBiomeLooks } from './helpers/biomeLooks.js';
 
@@ -159,16 +160,22 @@ test('biomes outside the table and unknown species stay untinted', () => {
 
 test('textured crowns take their tints against the canopy grade, and only a nudge of biome hue', () => {
   const table = createForestLeafTintTable({ config: config(1) });
-  const gradeLight = new THREE.Color('#90b566');
+  const gradeLight = new THREE.Color(resolveCanopyGrade(config(1).trees?.canopyGrade).light);
   // Autumn still lands exactly on its target from the grade's light colour.
   const autumn = table.tintFor('broadleaf_tall', 0.1, null, false, true);
   const target = new THREE.Color(FOREST_AUTUMN_TARGETS.broadleaf_tall[0]);
   assert.ok(Math.abs(gradeLight.r * autumn[0] - target.r) < 0.01);
   // A biome tint on a graded crown stays near neutral; the palette crown's is a full recolour.
   const greenTable = createForestLeafTintTable({ config: config(0) });
-  for (const tileId of Object.keys(FOREST_BIOME_TARGETS).map(Number)) {
-    const graded = greenTable.tintFor('broadleaf_tall', 0.5, tileId, false, true);
-    for (const channel of graded) assert.ok(channel > 0.55 && channel < 1.6, `tile ${tileId}: ${graded}`);
+  // Graded: the biome's ratio to the grade's light, raised to one fractional power,
+  // so every channel moves part of the way and none past the target.
+  for (const [tileId, target] of Object.entries(FOREST_BIOME_TARGETS)) {
+    const graded = greenTable.tintFor('broadleaf_tall', 0.5, Number(tileId), false, true);
+    const full = new THREE.Color(target).toArray().map((channel, i) => channel / gradeLight.toArray()[i]);
+    const shares = full.map((ratio, i) => Math.log(graded[i]) / Math.log(ratio))
+      .filter((_, i) => Math.abs(Math.log(full[i])) > 0.05);
+    for (const share of shares) assert.ok(share > 0 && share < 1, `tile ${tileId}: ${graded} vs ${full}`);
+    for (const share of shares) assert.ok(Math.abs(share - shares[0]) < 1e-6, `tile ${tileId}: one strength for all channels`);
   }
   const palette = greenTable.tintFor('broadleaf_tall', 0.5, 9);
   const graded = greenTable.tintFor('broadleaf_tall', 0.5, 9, false, true);

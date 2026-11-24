@@ -109,7 +109,9 @@ test('bush proxies use fitted volumetric foliage clusters', () => {
   assert.ok(proxySize.distanceTo(sourceSize) < 1e-6);
   assert.equal(proxy.geometry.userData.proxyKind, 'clustered-low-poly-canopy');
   assert.ok(proxy.material.colorNode);
-  assert.equal(proxy.material.flatShading, true);
+  // Smooth shading under GPU puff normals: faceted lobes read as cut gems at range.
+  assert.equal(proxy.material.flatShading, false);
+  assert.ok(proxy.material.foliageShapeNormalNode);
   assert.equal(BUSH_CAST_SHADOW, false);
 
   proxy.geometry.dispose();

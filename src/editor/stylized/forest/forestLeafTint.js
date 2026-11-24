@@ -104,7 +104,7 @@ export function createForestLeafTintTable({
   ]);
   // One set of ratios per anchor: the species palette, and the graded crown.
   // A graded crown already carries its donor's look; its biome hue is a nudge
-  // (ratio^0.3), not a recolour — at full strength the saturated biome greens
+  // (ratio^GRADED_BIOME_STRENGTH), not a recolour — at full strength the saturated biome greens
   // stripped the grade's warm light end back to kelly green.
   const soften = (ratio) => Object.freeze(ratio.map((channel) => channel ** GRADED_BIOME_STRENGTH));
   const buildTables = (baseFor, biomeShape = (ratio) => ratio) => {
