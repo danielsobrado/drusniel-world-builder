@@ -64,3 +64,22 @@ def test_legacy_economy_keeps_food_without_seasonal_rules(eldara):
     econ, _ = run_production(town.economy, town.society, town.population, old, harvest_factor=0.1)
     assert econ.food.spoiled == 0
     assert econ.food.yieldFactor == 1
+
+
+def test_harvest_event_is_scoped_to_its_own_settlement(eldara):
+    from world_sim.simulation.economy.step import economy_month
+
+    state = baseline_state(eldara, scenario_id="harvest-scope", settlement_ids=sorted(eldara.pilot_ids),
+                           seed=10, start_year=1212)
+    first = state.settlements[0]
+    changed = [
+        s.model_copy(update={"climate": s.climate.model_copy(update={
+            "yieldFactor": 0.20 if s.settlementId == first.settlementId else 1.0,
+            "hazard": "drought" if s.settlementId == first.settlementId else None})})
+        for s in state.settlements
+    ]
+    _, _, result = economy_month(changed, state.trade, 30, eldara.config.rules, seed=10)
+    shortfalls = [i for i in result["incidents"] if i["kind"] == "harvest-shortfall"]
+    assert len(shortfalls) == 1
+    assert shortfalls[0]["settlementId"] == first.settlementId
+    assert shortfalls[0]["facts"]["yieldFactor"] == 0.20

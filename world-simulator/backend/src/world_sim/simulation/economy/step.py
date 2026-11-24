@@ -151,12 +151,12 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
             preferences=peoples.get("profiles", {}).get(profile_key(s.identity), {}).get("preferences", {}))
         incidents.extend(changes)
         threshold = cfg["economy"].get("agriculture", {}).get("severeHarvestThreshold", 0)
-        if s.climate.hazard and econ.food.yieldFactor < threshold:
+        if s.climate.hazard and econs[s.settlementId].food.yieldFactor < threshold:
             incidents.append({
                 "kind": "harvest-shortfall", "day": day, "settlementId": s.settlementId,
                 "message": f"{s.name} suffered a poor harvest during {s.climate.hazard}",
-                "facts": {"weather": s.climate.hazard, "yieldFactor": econ.food.yieldFactor,
-                          "rationsHarvested": econ.food.local + econ.food.hinterland},
+                "facts": {"weather": s.climate.hazard, "yieldFactor": econs[s.settlementId].food.yieldFactor,
+                          "rationsHarvested": econs[s.settlementId].food.local + econs[s.settlementId].food.hinterland},
             })
         if restaff or opened:
             society = update_society(society, s.cohorts, cfg["society"], cfg["simulation"]["calendar"]["daysPerMonth"])
