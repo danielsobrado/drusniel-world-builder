@@ -22,7 +22,7 @@ const event = (id: string, summary: string, extra: Partial<HistoryEventView> = {
 
 const context: BiographyContext = {
   personId: 'npc:113:7', tier: 'standard', asOf: '1213-01-01', targets: { facts: [5, 8], milestones: [5, 10], words: [100, 180] },
-  identity: { name: 'Rrvhei Formen', sex: 'male', age: 48, born: '1164', birthplace: 'Olraharit', culture: 'Darkhold', home: 'Falanenerwin',
+  identity: { name: 'Rrvhei Formen', sex: 'male', age: 48, born: '1164', birthplace: 'Olraharit', culture: 'Umbra’kori', ancestry: 'Dark elf', home: 'Falanenerwin',
     alive: true, died: null },
   household: { family: 'Formen', kind: 'couple', housing: 'cottage', homeId: 'building:113:cottage:4', members: ['Nasharmen Formen'] },
   relationships: [], work: { role: 'worker', profession: 'farmhand', workplace: 'Falanenerwin Farm 1', caravanMaster: null },
@@ -47,7 +47,9 @@ describe('Profile', () => {
     });
     const onSelect = vi.fn();
     render(<Profile sim={sim} personId="npc:113:7" name="Rrvhei Formen" onSelect={onSelect} selectedId={null} />);
-    expect(await screen.findByText(/Olraharit · Darkhold/)).toBeTruthy();
+    expect(await screen.findByText(/1164 in Olraharit/)).toBeTruthy();
+    expect(screen.getByText('Umbra’kori')).toBeTruthy();
+    expect(screen.getByText('Dark elf')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Life' }));
     const life = await screen.findByRole('list', { name: 'Life timeline' });

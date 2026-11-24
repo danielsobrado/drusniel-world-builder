@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ...peoples.contracts import Identity, Upbringing
 from ..economy.contracts import Personality
 from .relationships import Relationship
 
@@ -45,6 +46,8 @@ class Person(Contract):
     settlementId: str
     birthplaceId: str | None = None   # where they were born (an Azgaar settlement), for origins and places known
     householdId: str
+    identity: Identity = Identity()
+    upbringing: Upbringing = Upbringing()
     role: Role
     businessId: str | None = None
     profession: str | None = None

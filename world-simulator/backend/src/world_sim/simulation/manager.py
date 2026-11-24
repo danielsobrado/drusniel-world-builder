@@ -18,6 +18,7 @@ from typing import Any
 from .. import log
 from ..api.errors import ApiError
 from ..canonical import checksum, state_digest
+from ..peoples.assignments import assigned_rules
 from ..world.model import WorldModel
 from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
@@ -87,12 +88,17 @@ class ScenarioManager:
         try:
             raw_meta, raw_state, raw_events, file_format = self.store.load(scenario_id)
             foreign = raw_state.get("world", {}).get("sourceFingerprint") != self.fingerprint
-            state, stored_schema = migrate_state(raw_state, self.model)
+            rules = complete(raw_meta.get("rules") or {}, self.model.config.rules)
+            state, stored_schema = migrate_state(raw_state, self.model, rules)
         except (IncompatibleState, KeyError, ValueError) as exc:
             log.error("scenario cannot be loaded; files left untouched", exc, scenarioId=scenario_id)
             self.unloadable[scenario_id] = str(exc)
             return
         session = Session(ScenarioMeta(**raw_meta), state, [Event(**e) for e in raw_events])
+        if not foreign and stored_schema < STATE_SCHEMA_VERSION and session.meta.rules is not None:
+            if "peoples" not in session.meta.rules:
+                self._freeze(session, rules)
+            session.meta = session.meta.model_copy(update={"journal": None})
         if session.meta.rules is None and not foreign:
             self._freeze(session)
             self._event(session, "migrated", f"Froze the current rules for this scenario ({session.meta.rulesFingerprint[:19]}…)")
@@ -163,7 +169,7 @@ class ScenarioManager:
         if not intact:
             raise ApiError(500, "corrupt_snapshot", f"Snapshot {snapshot_id} does not match its checksum")
         try:
-            state, _ = migrate_state(raw_state, self.model)
+            state, _ = migrate_state(raw_state, self.model, self.rules(self.session(scenario_id)))
         except IncompatibleState as exc:
             raise ApiError(409, "incompatible_snapshot", str(exc), {"id": snapshot_id}) from exc
         if state.world.sourceFingerprint != self.fingerprint or state.scenarioId != scenario_id:
@@ -196,6 +202,8 @@ class ScenarioManager:
             raise ApiError(409, "limit_reached", f"At most {self.limits['maxScenarios']} scenarios are kept")
         scenario_id = scenario_id or self._new_id(req.name)
         if req.fromScenarioId:
+            if req.peoples:
+                raise ApiError(400, "invalid_assignment", "Branches inherit their snapshot’s identity assignments")
             if not req.fromSnapshotId:
                 raise ApiError(400, "invalid_request", "Branching needs fromSnapshotId", {"parameter": "fromSnapshotId"})
             parent = self.writable(req.fromScenarioId)
@@ -216,12 +224,13 @@ class ScenarioManager:
             scope = req.scope or Scope(type="pilot")
             settlement_ids = resolve_scope(self.model, scope, self.limits["maxScopeSettlements"])
             seed = req.seed if req.seed is not None else self.config["baseline"]["seed"]
+            rules = assigned_rules(self.model.config.rules, req.peoples, settlement_ids)
             state = baseline_state(self.model, scenario_id=scenario_id, settlement_ids=settlement_ids, seed=seed,
-                                   start_year=self.start_year)
+                                   start_year=self.start_year, rules=rules)
             meta = ScenarioMeta(id=scenario_id, name=req.name, description=req.description, scope=scope, seed=seed, createdAt=_now(),
                                 journal=[], journalRoot=scenario_id)
             session = Session(meta, state, [])
-            self._freeze(session)
+            self._freeze(session, rules)
             self.archive(scenario_id).cut(0)
             self._backstory(session)
             businesses = sum(len(s.society.businesses) for s in state.settlements)
@@ -305,8 +314,8 @@ class ScenarioManager:
         self.archive(s.meta.id).append(events)
         return len(events)
 
-    def _freeze(self, s: Session) -> None:
-        frozen = freeze(self.model.config.rules)
+    def _freeze(self, s: Session, rules: dict | None = None) -> None:
+        frozen = freeze(rules or self.model.config.rules)
         s.meta = s.meta.model_copy(update={"rules": frozen, "rulesFingerprint": fingerprint(frozen)})
 
     def rules(self, s: Session) -> dict[str, Any]:

@@ -42,7 +42,7 @@ class GameExport:
         return {
             "id": person.id, "name": person.name, "family": person.family, "sex": person.sex, "age": context["identity"]["age"],
             "role": person.role, "profession": person.profession or ("caravan master" if person.traderId else None),
-            "tier": context["tier"],
+            "tier": context["tier"], "identity": person.identity.model_dump(), "upbringing": person.upbringing.model_dump(),
             "householdId": person.householdId, "home": (context["household"] or {}).get("homeId"),
             "workplace": {"id": work.id, "name": work.name, "kind": work.kind, "sector": work.sector} if work else None,
             "mood": context["outlook"]["mood"], "hooks": [h["text"] for h in context["hooks"][:3]],
@@ -64,6 +64,7 @@ class GameExport:
                           key=lambda r: (TIERS.get(r["tier"], 3), IN_TOWN.index(r["role"]), r["id"]))
             name = f"settlements/{s.sourceId}.json"
             files[name] = {**header, "settlementId": s.settlementId, "sourceId": s.sourceId, "name": s.name, "population": s.population,
+                           "identity": s.identity.model_dump(), "infrastructure": [x.model_dump() for x in s.infrastructure],
                            "residents": rows}
             listed.append({"settlementId": s.settlementId, "sourceId": s.sourceId, "name": s.name, "population": s.population,
                            "residents": len(rows), "file": name})

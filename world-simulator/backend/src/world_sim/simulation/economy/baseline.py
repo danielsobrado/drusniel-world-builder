@@ -37,7 +37,7 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
             baselinePopulation=record["population"],
             inventory={}, production=lines, consumption=consumption, food=FoodBalance(ruralPopulation=rural, hinterlandCells=cells),
             treasury=float(az.burgs[record["sourceId"]].get("treasury") or 0))
-        local, from_hinterland, wanted = food_flows(econ, society, population, cfg)
+        local, from_hinterland, wanted = food_flows(econ, society, population, cfg, record.get("rationMultiplier", 1))
         stock = {g: r4(u * e["settlement"]["targetMonths"]) for g, u in monthly_use(econ, population, staffing(society)).items()}
         stock[rations] = float(round(wanted / cfg["simulation"]["calendar"]["daysPerMonth"] * e["food"]["granary"]["initialDays"]))
         food = econ.food.model_copy(update={"local": local, "hinterland": from_hinterland, "eaten": wanted, "wanted": wanted,
@@ -47,7 +47,8 @@ def initial_economy(model: WorldModel, settlements: list[tuple[dict[str, Any], i
     scoped = {record["sourceId"] for record, _, _ in settlements}
     markets = []
     for market_id in sorted(centres):
-        members = [(econ, pop) for econ, (_, pop, _) in zip(econs, settlements, strict=True) if econ.marketId == market_id]
+        members = [(econ, pop * record.get("rationMultiplier", 1)) for econ, (record, pop, _)
+                   in zip(econs, settlements, strict=True) if econ.marketId == market_id]
         goods = {g for econ, _ in members for line in econ.production for g in (line.good, *line.inputs)}
         goods |= {g for econ, _ in members for g in econ.consumption}
         flows = az.outside_flows(market_id, scoped, goods)

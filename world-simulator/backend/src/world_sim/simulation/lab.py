@@ -11,6 +11,7 @@ import time
 from collections import deque
 from typing import Any
 
+from ..peoples.population import combined
 from .compare import compare
 from .contracts import ScenarioState
 from .history.contracts import HistoryEvent
@@ -92,6 +93,8 @@ class Lab:
         events = self.manager.archive(scenario_id).query(limit=None)
         ids = {e.id for e in events}
         accounting = [f"{x.name}: {p}" for x in state.settlements for p in check_invariants(x.population, x.cohorts, x.society)]
+        accounting += [f"{x.name}: ancestry cohorts do not match the settlement cohorts"
+                       for x in state.settlements if x.ancestries and combined(x.ancestries) != x.cohorts]
         named = {e.businessId for e in events if e.businessId}
         refs = [f"{p.name} {p.family}: timeline {i}" for p in state.cast.people for i in p.timeline if i not in ids]
         refs += [f"{p.name} {p.family}: knows of {k.eventId}" for p in state.cast.people for k in p.knowledge if k.eventId not in ids]

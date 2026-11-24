@@ -1,13 +1,14 @@
-"""Canonical scenario state contracts (schema v6). Everything persisted or exported goes through these."""
+"""Canonical persisted scenario state and request contracts."""
 
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..peoples.contracts import Assignment, CivicIdentity, Infrastructure
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 7  # v2 society, v3 economy, v4 roads, v5 people, v6 canonical history, v7 news on caravans; older states migrate
+STATE_SCHEMA_VERSION = 8
 
 
 class Contract(BaseModel):
@@ -110,6 +111,9 @@ class Vitals(Contract):
     deaths: dict[str, int] = {}          # children / adults / elders
     immigrants: int = 0
     emigrants: int = 0
+    birthsByAncestry: dict[str, int] = {}
+    deathsByAncestry: dict[str, dict[str, int]] = {}
+    emigrantsByAncestry: dict[str, Cohorts] = {}
 
 
 class SettlementState(Contract):
@@ -125,6 +129,10 @@ class SettlementState(Contract):
     vitals: Vitals = Vitals()
     society: Society
     economy: SettlementEconomy
+    identity: CivicIdentity = CivicIdentity()
+    ancestries: dict[str, Cohorts] = {}
+    infrastructure: list[Infrastructure] = []
+    environment: str | None = None
 
 
 class CalendarDate(Contract):
@@ -140,6 +148,7 @@ class HistoryPoint(Contract):
     population: dict[str, int]      # settlementId -> inhabitants at month close
     labour: dict[str, int] = {}     # settlementId -> labour force (v4 runs onwards)
     unemployed: dict[str, int] = {}
+    ancestryPopulation: dict[str, dict[str, int]] = {}
     bandits: int = 0                # on every road in scope
 
 
@@ -205,6 +214,7 @@ class CreateScenario(Contract):
     seed: int | None = None
     fromScenarioId: str | None = None
     fromSnapshotId: str | None = None
+    peoples: dict[str, Assignment] = Field(default_factory=dict, max_length=200)
 
 
 class StepRequest(Contract):

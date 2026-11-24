@@ -10,6 +10,8 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
 
+from ...peoples.decisions import Opportunity, preferences, rank
+from ...peoples.physiology import person_rules
 from ..contracts import Business, SettlementState
 from ..economy.contracts import Route, Trade, Trader
 from .contracts import Cast, Person
@@ -110,7 +112,26 @@ def _work(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
     if rng.random() < c["findWorkPerMonth"] * (1 - town.unemployment) * (0.75 + 0.5 * p.personality.caution):
         posts = [b for b in town.businesses.values() if b.filled > town.named[b.id]]
         if posts:
-            return _hire(p, rng.choices(posts, weights=[x.filled - town.named[x.id] for x in posts])[0], town, m)
+            weights = preferences(p.identity, p.upbringing, town.settlement.identity, c.get("cultureProfiles", {}))
+            if not weights:
+                job = rng.choices(posts, weights=[x.filled - town.named[x.id] for x in posts])[0]
+            else:
+                by_kind = {}
+                for business in posts:
+                    by_kind.setdefault(business.kind, business)
+                best_wage = max(1, max(b.wage for b in by_kind.values()))
+                prior = {r.a: r.trust for r in m.ties.of(p.id, "employer", active=False) if r.b == p.id}
+                options = [Opportunity(b.id, b.wage / best_wage, 0.45 if b.sector == "security" else 0.15,
+                                       {"apprenticeship": float(b.sector == "crafts"), "durability": float(b.sector == "crafts"),
+                                        "stewardship": float(b.kind in {"farm", "woodcutter"}),
+                                        "discretion": float(b.kind in {"temple", "garrison"}),
+                                        "autonomy": float(b.kind == "market-stall")},
+                                       relationship=prior.get(b.id, 0.0)) for b in by_kind.values()]
+                scores = rank(options, weights, greed=p.personality.greed, caution=p.personality.caution,
+                              urgency=max(0.0, 1 - town.settlement.economy.food.security),
+                              variation=0.5 + rng.random())
+                job = town.businesses[scores[0]["id"]]
+            return _hire(p, job, town, m)
     o, t = c["outlaw"], p.personality
     if (town.routes and p.idleMonths >= o["idleMonths"] and t.honesty <= o["maxHonesty"] and t.greed >= o["minGreed"]
             and rng.random() < o["chance"]):
@@ -146,7 +167,7 @@ def _outlaw(p: Person, town: Town, m: Month, rng: random.Random) -> Person:
 
 
 def _live(p: Person, town: Town, m: Month) -> Person:
-    c = m.cfg
+    c = person_rules(m.cfg, p.identity.ancestryId)
     rng = random.Random(f"{m.seed}:{m.day}:{p.id}")
     age = age_years(p, m.day, m.cfg)
     if p.role == "imprisoned" and m.day >= (p.releaseDay or 0):
@@ -214,7 +235,7 @@ def people_month(cast: Cast, settlements: list[SettlementState], trade: Trade, f
         alive = sum(1 for p in people.values() if p.alive and p.settlementId == s.settlementId)
         room = int(cast.budget.get(s.settlementId, 0) * (1 + c["maxOverBudget"])) - alive
         born += births(people, s, m, cast, room, households)
-    moves(people, flows, by_id, m, households, dwellings)
+    moves(people, flows, by_id, m, households, dwellings, cast.budget)
     _friendships(m)
     trade = promote_traders(people, trade, settlements, m)
     focused = 0

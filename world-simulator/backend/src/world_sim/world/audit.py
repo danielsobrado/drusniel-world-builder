@@ -74,6 +74,8 @@ def _settlement_record(burg: dict[str, Any], ctx: dict[str, Any]) -> dict[str, A
         "provinceName": province["name"] if province else None,
         "cultureId": culture_id(culture["i"]) if culture else None,
         "cultureName": culture["name"] if culture else None,
+        "faithId": f"faith:azgaar:{religion}" if type(religion := burg.get("religion", cell.get("religion"))) is int
+        and religion > 0 else None,
         "capital": (_num(burg.get("capital")) or 0) > 0,
         "port": civic["port"],
         "population": population,

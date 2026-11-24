@@ -12,6 +12,7 @@ frontend:
 world:
   manifest: ../maps/manifest.json   # the parent repository's map library
   mapsDirectory: ../maps            # maps must resolve inside this directory
+  canonicalCultureMapIds: [eldara-2026]
   mapId: eldara-2026                # override with WS_MAP_ID
   # Counts documented in docs/reference/eldara-local-cultures-populations.md, checked
   # against the source on every audit. Keyed by map id; omit for other maps.

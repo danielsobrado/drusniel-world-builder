@@ -75,6 +75,7 @@ def load_azgaar_world(manifest_path: Path, maps_directory: Path, map_id: str) ->
         "identity": {
             "mapId": entry["id"],
             "name": entry["name"],
+            "sourceMapName": info.get("mapName"),
             "format": entry["format"],
             "fileName": entry["file"].name,
             "sourceFingerprint": f"sha256:{hashlib.sha256(raw).hexdigest()}",

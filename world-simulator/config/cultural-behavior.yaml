@@ -1,0 +1,45 @@
+# Experimental simulation parameters grounded in the repository's culture catalog.
+# Motivation weights influence utility and can be outweighed by individual circumstances.
+profiles:
+  goblin-peoples:
+    preferences: {autonomy: 0.70, continuity: 0.10}
+    institutions:
+      - id: patron-networks
+        label: Trading networks
+        assetId: grukmar/raised-marsh-boardwalk
+        demand: trade
+        environment: wetland
+      - id: wetland-housing
+        label: Wetland housing
+        assetId: grukmar/bog-stilt-dwelling
+        demand: housing
+        environment: wetland
+  vondari:
+    preferences: {apprenticeship: 0.75, durability: 0.60, loyalty: 0.25}
+    institutions:
+      - id: forge-guilds
+        label: Forge guilds
+        assetId: stonehold/forgeheart-workshop
+        demand: industry
+      - id: engineering-works
+        label: Engineering works
+        assetId: stonehold/mine-ventilation-stack
+        demand: mining
+  elenori:
+    preferences: {stewardship: 0.95, continuity: 0.40}
+    institutions:
+      - id: woodland-stewardship
+        label: Woodland stewardship
+        assetId: elenoria/silviculture-tending-bench
+        demand: woodland
+  umbra-kori:
+    preferences: {discretion: 0.90, loyalty: 0.45, continuity: 0.25}
+    institutions:
+      - id: house-compounds
+        label: House compounds
+        assetId: umbrakor/cliff-house-compound
+        demand: civic
+      - id: depth-wardens
+        label: Depth wardens
+        assetId: umbrakor/depth-warden-gate
+        demand: civic

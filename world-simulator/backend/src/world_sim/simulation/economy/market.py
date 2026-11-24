@@ -22,13 +22,15 @@ class Member:
     population: int
     ratios: dict[str, float]
     econ: SettlementEconomy
+    ration_multiplier: float = 1
 
 
 def targets(m: Member, cfg: dict[str, Any]) -> dict[str, float]:
     e = cfg["economy"]
     months = e["settlement"]["targetMonths"]
     out = {g: u * months for g, u in monthly_use(m.econ, m.population, m.ratios).items()}
-    out[e["food"]["good"]] = m.population * cfg["society"]["needs"]["rationsPerPersonDay"] * e["food"]["granary"]["targetDays"]
+    daily = m.population * cfg["society"]["needs"]["rationsPerPersonDay"] * m.ration_multiplier
+    out[e["food"]["good"]] = daily * e["food"]["granary"]["targetDays"]
     return out
 
 

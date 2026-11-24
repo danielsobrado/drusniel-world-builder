@@ -298,7 +298,7 @@ export interface BiographyContext {
   personId: string; tier: 'basic' | 'standard' | 'major'; asOf: string;
   targets: { facts: number[]; milestones: number[]; words: number[] };
   identity: { name: string; sex: string; age: number | null; born: string; birthplace: string; culture: string | null; home: string;
-    alive: boolean; died: string | null };
+    alive: boolean; died: string | null; ancestry?: string | null; culturalSeed?: string | null; localCulture?: string | null };
   household: { family: string; kind: string; housing: string; homeId: string | null; members: string[] } | null;
   relationships: RelationshipView[];
   work: { role: string; profession: string | null; workplace: string | null;

@@ -8,7 +8,9 @@ exact; the named people who move are drawn from these flows, whole households wi
 
 from typing import Any
 
-from .contracts import Cohorts, SettlementState
+from ..peoples.catalog import NEUTRAL
+from ..peoples.population import combined, transfer
+from .contracts import SettlementState
 
 
 def _rate(s: SettlementState) -> float:
@@ -35,6 +37,11 @@ def migrate(settlements: list[SettlementState], cfg: dict[str, Any]) -> tuple[li
     by_id = {s.settlementId: s for s in settlements}
     kids = {pair: min(by_id[pair[0]].cohorts.children, round(n * by_id[pair[0]].cohorts.children / max(1, by_id[pair[0]].cohorts.adults)))
             for pair, n in flows.items()}
+    groups = {s.settlementId: s.ancestries or {NEUTRAL: s.cohorts} for s in settlements}
+    departures = {}
+    for (origin, destination), adults in sorted(flows.items()):
+        groups[origin], groups[destination], departures[origin] = transfer(
+            groups[origin], groups[destination], adults, kids[(origin, destination)])
     out = []
     for s in settlements:
         gone = sum(n for (a, _), n in flows.items() if a == s.settlementId)
@@ -44,9 +51,11 @@ def migrate(settlements: list[SettlementState], cfg: dict[str, Any]) -> tuple[li
             continue
         left = sum(n for (a, _), n in kids.items() if a == s.settlementId)
         arrived = sum(n for (_, b), n in kids.items() if b == s.settlementId)
-        cohorts = Cohorts(children=s.cohorts.children - left + arrived, adults=s.cohorts.adults - gone + came, elders=s.cohorts.elders)
+        ancestry = groups[s.settlementId]
+        cohorts = combined(ancestry)
         came, gone = came + arrived, gone + left
-        vitals = s.vitals.model_copy(update={"immigrants": came, "emigrants": gone})
-        out.append(s.model_copy(update={"cohorts": cohorts, "population": cohorts.total, "immigrants": s.immigrants + came,
-                                        "emigrants": s.emigrants + gone, "vitals": vitals}))
+        vitals = s.vitals.model_copy(update={"immigrants": came, "emigrants": gone,
+                                             "emigrantsByAncestry": departures.get(s.settlementId, {})})
+        out.append(s.model_copy(update={"cohorts": cohorts, "ancestries": ancestry, "population": cohorts.total,
+                                        "immigrants": s.immigrants + came, "emigrants": s.emigrants + gone, "vitals": vitals}))
     return out, flows

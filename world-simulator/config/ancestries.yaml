@@ -1,0 +1,19 @@
+# All species share neutral simulation defaults until Drusniel-specific rules are authored.
+# Optional experimental keys: ages (child/adult/elder ranges), retireFrom, fertilityAges,
+# lifespanYears (expected), birthsPerAdultPerYear, deathRatePerYear, initialShares,
+# foodMultiplier, environmentMortality (by biome with wetland normalized), bodySize,
+# environments, equipmentTags, senses, movement, magic.
+ancestries:
+  unspecified: {label: Unspecified}
+  other: {label: Other ancestry}
+  human: {label: Human}
+  dwarf: {label: Dwarf}
+  gnome: {label: Gnome}
+  elf: {label: Elf}
+  darkElf: {label: Dark elf}
+  goblin: {label: Goblin}
+  orc: {label: Orc}
+  giant: {label: Giant}
+  serpent: {label: Serpent}
+  draconic: {label: Draconic}
+  rakhnid: {label: Rakhnid}

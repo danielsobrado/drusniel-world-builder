@@ -7,6 +7,8 @@ road, bandit bands grow or shrink, and caravan-guard companies resize.
 from collections import defaultdict
 from typing import Any
 
+from ...peoples.catalog import profile_key
+from ...peoples.physiology import food_multiplier
 from ..contracts import Need, SettlementState, Society
 from ..needs import status
 from ..society import update_society
@@ -104,11 +106,13 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
     trade = trade.model_copy(update={"routes": routes, "markets": markets})
     flows: dict[str, float] = defaultdict(float)
     members = []
+    peoples = cfg.get("peoples", {})
     for s in settlements:
-        econ, flow = run_production(econs[s.settlementId], s.society, s.population, cfg)
+        multiplier = food_multiplier(peoples.get("ancestries", {}), s.ancestries)
+        econ, flow = run_production(econs[s.settlementId], s.society, s.population, cfg, multiplier)
         for g, u in flow.items():
             flows[g] += u
-        members.append(Member(s.settlementId, s.name, s.population, staffing(s.society), econ))
+        members.append(Member(s.settlementId, s.name, s.population, staffing(s.society), econ, multiplier))
 
     clearing = Clearing(trade, day, cfg)
     markets = [clearing.clear(market, [m for m in members if m.econ.marketId == market.marketId]) for market in trade.markets]
@@ -127,7 +131,8 @@ def economy_month(settlements: list[SettlementState], trade: Trade, day: int, cf
         restaff = society is not s.society
         home = {"id": s.settlementId, "sourceId": s.sourceId, "name": s.name, "class": econs[s.settlementId].settlementClass}
         society, econs[s.settlementId], traders, changes, opened = turnover(
-            society, econs[s.settlementId], traders, settlement=home, day=day, cfg=cfg["economy"], society_cfg=cfg["society"])
+            society, econs[s.settlementId], traders, settlement=home, day=day, cfg=cfg["economy"], society_cfg=cfg["society"],
+            preferences=peoples.get("profiles", {}).get(profile_key(s.identity), {}).get("preferences", {}))
         incidents.extend(changes)
         if restaff or opened:
             society = update_society(society, s.cohorts, cfg["society"], cfg["simulation"]["calendar"]["daysPerMonth"])

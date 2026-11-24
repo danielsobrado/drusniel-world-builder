@@ -22,10 +22,12 @@ class Config:
     economy: dict[str, Any]
     llm: dict[str, Any] = field(default_factory=dict)
 
+    peoples: dict[str, Any] = field(default_factory=dict)
+
     @property
     def rules(self) -> dict[str, Any]:
         """Everything the pure simulation engine reads."""
-        return {"simulation": self.simulation, "society": self.society, "economy": self.economy}
+        return {"simulation": self.simulation, "society": self.society, "economy": self.economy, "peoples": self.peoples}
 
     @property
     def class_ids(self) -> list[str]:
@@ -96,4 +98,12 @@ def load_config(root: Path = SIMULATOR_ROOT, env: Mapping[str, str] | None = Non
     if storage:
         simulation["storage"] = storage
     simulator["gameExport"]["directory"] = env.get("WS_GAME_EXPORT_DIR", simulator["gameExport"]["directory"])
-    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society, economy=economy, llm=llm)
+    from .peoples.catalog import normalize
+
+    assets = {item["id"] for item in _read_yaml(root.parent / "config/asset-registry.yaml")["assets"]}
+    peoples = normalize(_read_yaml(root.parent / "config/cultures.yaml"),
+                        _read_yaml(root / "config/ancestries.yaml")["ancestries"],
+                        _read_yaml(root / "config/cultural-behavior.yaml")["profiles"], assets)
+    peoples["mappedMapIds"] = simulator["world"].get("canonicalCultureMapIds", [])
+    return Config(root=root, simulator=simulator, npc=npc, pilot=pilot, simulation=simulation, society=society, economy=economy, llm=llm,
+                  peoples=peoples)

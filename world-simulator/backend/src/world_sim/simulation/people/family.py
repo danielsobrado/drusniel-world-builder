@@ -8,6 +8,8 @@ dwelling of the town's housing stock. Every event names the relatives it touches
 import random
 from typing import TYPE_CHECKING
 
+from ...peoples.catalog import person_identity
+from ...peoples.physiology import person_rules
 from ..contracts import SettlementState
 from ..economy.roads import personality
 from .contracts import Cast, NpcHousehold, Person
@@ -25,20 +27,24 @@ BANDS = {"child": "children", "adult": "adults", "elder": "elders"}
 def deaths(people: dict[str, Person], s: SettlementState, m: "Month") -> set[str]:
     """Which named people of `s` die this month: each band takes no more than the town's own deaths in that band."""
     dead: set[str] = set()
-    for band, key in BANDS.items():
-        toll = s.vitals.deaths.get(key, 0)
-        if not toll:
-            continue
-        pool = sorted((p for p in people.values() if p.alive and p.settlementId == s.settlementId
-                       and band_of(age_years(p, m.day, m.cfg), m.cfg) == band), key=lambda p: p.id)
-        rate = toll / max(1, getattr(s.cohorts, key) + toll)
-        taken = 0
-        for p in pool:
-            if taken >= toll:
-                break
-            if random.Random(f"{m.seed}:{m.day}:{p.id}:death").random() < rate * (2 if p.role == "outlaw" else 1):
-                dead.add(p.id)
-                taken += 1
+    for ancestry, deaths_by_band in (s.vitals.deathsByAncestry or {None: s.vitals.deaths}).items():
+        cohorts = s.ancestries.get(ancestry, s.cohorts)
+        for band, key in BANDS.items():
+            toll = deaths_by_band.get(key, 0)
+            if not toll:
+                continue
+            pool = sorted((p for p in people.values() if p.alive and p.settlementId == s.settlementId
+                           and (ancestry is None or p.identity.ancestryId == ancestry)
+                           and band_of(age_years(p, m.day, m.cfg), person_rules(m.cfg, p.identity.ancestryId)) == band),
+                          key=lambda p: p.id)
+            rate = toll / max(1, getattr(cohorts, key) + toll)
+            taken = 0
+            for p in pool:
+                if taken >= toll:
+                    break
+                if random.Random(f"{m.seed}:{m.day}:{p.id}:death").random() < rate * (2 if p.role == "outlaw" else 1):
+                    dead.add(p.id)
+                    taken += 1
     return dead
 
 
@@ -101,6 +107,12 @@ def marriages(people: dict[str, Person], s: SettlementState, m: "Month", househo
                                 householdId=h.id)
 
 
+def _fertile(person: Person, month: "Month") -> bool:
+    cfg = person_rules(month.cfg, person.identity.ancestryId)
+    low, high = cfg.get("fertilityAges", [cfg["parentMinAge"], 45])
+    return low <= age_years(person, month.day, cfg) <= high
+
+
 def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast, room: int, households: list[NpcHousehold]) -> int:
     """Named children of named couples, within the town's births this month and the budget's allowance; returns how many.
     `households` is the month's working list, so a couple married earlier this month is found. A child comes at least
@@ -112,9 +124,13 @@ def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast
         return 0
     rate = s.vitals.births / max(1, s.cohorts.adults / 2)
     born = 0
+    remaining = dict(s.vitals.birthsByAncestry)
     mothers = sorted((p for p in people.values() if p.alive and p.sex == "female" and p.settlementId == s.settlementId
-                      and c["parentMinAge"] <= age_years(p, m.day, m.cfg) <= 45 and ties.spouse(p.id)), key=lambda p: p.id)
+                      and p.role != "child" and _fertile(p, m) and ties.spouse(p.id)), key=lambda p: p.id)
     for mother in mothers:
+        ancestry = mother.identity.ancestryId
+        if s.vitals.birthsByAncestry and not remaining.get(ancestry):
+            continue
         father_id = ties.spouse(mother.id)
         if born >= min(room, s.vitals.births) or not m.alive(father_id) or people[father_id].householdId != mother.householdId:
             continue
@@ -131,6 +147,7 @@ def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast
         child = Person(id=cast_seq, name=rng.choice(cast.names[s.settlementId].given), family=families[mother.householdId],
             sex=rng.choice(("female", "male")), birthDay=m.day,
             settlementId=s.settlementId, birthplaceId=s.settlementId, householdId=mother.householdId, role="child",
+            **person_identity(ancestry, mother.identity, s.identity, s.settlementId, mother.householdId),
             personality=traits, profile=profile_for(traits, rng))
         siblings = [x for x in ties.children(mother.id) if x in ties.children(father.id) and m.alive(x)]
         new_ties = [ties.add("parent", mother.id, child.id, m.day).id, ties.add("parent", father.id, child.id, m.day).id]
@@ -141,4 +158,6 @@ def births(people: dict[str, Person], s: SettlementState, m: "Month", cast: Cast
                                                           {"personId": father.id, "role": "father"}], "householdId": mother.householdId,
                                          "ties": new_ties})
         born += 1
+        if remaining:
+            remaining[ancestry] -= 1
     return born

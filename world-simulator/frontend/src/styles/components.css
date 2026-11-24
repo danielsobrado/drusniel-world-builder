@@ -264,3 +264,18 @@ h5 { margin: 6px 0 4px; font-size: var(--fs-sm); }
 .grid.checks td { white-space: normal; }
 .grid.checks td:last-child { white-space: nowrap; }
 .trace-form { grid-template-columns: 1fr auto; }
+
+.people-group { padding: 6px 8px; }
+.people-group summary, .peoples-workspace summary { cursor: pointer; color: var(--accent-strong); }
+.people-group .tree-leaf[aria-pressed="true"] { background: var(--accent-soft); }
+.peoples-workspace { display: grid; gap: 12px; }
+.peoples-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding-block: 10px; }
+.peoples-controls label { display: grid; gap: 4px; color: var(--muted); }
+.peoples-map { width: 100%; max-height: 420px; background: var(--sea); border: 1px solid var(--border); }
+.peoples-history svg { display: block; width: 100%; max-height: 220px; }
+.peoples-history p { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.culture-comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; }
+.peoples-relations { display: grid; grid-template-columns: minmax(110px, 1fr) 4fr; align-items: center; gap: 12px; margin-block: 8px; }
+.peoples-relations ul { padding-left: 12px; border-left: 1px solid var(--accent); list-style: none; }
+.peoples-relations li { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.peoples-parameters { white-space: pre-wrap; overflow-wrap: anywhere; }

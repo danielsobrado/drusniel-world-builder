@@ -108,7 +108,10 @@ export function OverviewTab({ base }: { base: string }) {
     <ApiView result={result} loadingLabel="Loading…">
       {(c) => (
         <dl className="fields">
-          <div className="field"><dt>Born</dt><dd>{c.identity.born} in {c.identity.birthplace}{c.identity.culture ? ` · ${c.identity.culture}` : ''}</dd></div>
+          <div className="field"><dt>Born</dt><dd>{c.identity.born} in {c.identity.birthplace}</dd></div>
+          {c.identity.ancestry && <div className="field"><dt>Ancestry</dt><dd>{c.identity.ancestry}</dd></div>}
+          {c.identity.culture && <div className="field"><dt>Upbringing</dt><dd>{c.identity.culture}</dd></div>}
+          {c.identity.culturalSeed && <div className="field"><dt>Cultural seed</dt><dd>{c.identity.culturalSeed}</dd></div>}
           <div className="field"><dt>Lives</dt><dd>{c.identity.home}{c.household ? ` · the ${c.household.family} household, ${c.household.housing}` : ''}</dd></div>
           <div className="field"><dt>With</dt><dd>{c.household?.members.join(', ') || 'alone'}</dd></div>
           <div className="field"><dt>Work</dt><dd>{c.work.profession ? `${c.work.profession}${c.work.workplace ? ` at ${c.work.workplace}` : ''}` : c.work.role}</dd></div>

@@ -15,7 +15,8 @@ OUTCOME_KEYS = ("calendar", "stepSizes", "limits", "demography", "migration", "p
 
 def freeze(rules: dict[str, Any]) -> dict[str, Any]:
     sim = rules["simulation"]
-    return {"simulation": {k: sim[k] for k in OUTCOME_KEYS if k in sim}, "society": rules["society"], "economy": rules["economy"]}
+    return {"simulation": {k: sim[k] for k in OUTCOME_KEYS if k in sim}, "society": rules["society"], "economy": rules["economy"],
+            "peoples": rules.get("peoples", {})}
 
 
 def complete(frozen: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
@@ -25,7 +26,8 @@ def complete(frozen: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
     now = freeze(current)
     rules = {section: {**now[section], **frozen.get(section, {})} for section in now}
     calendar = rules["simulation"]["calendar"]
-    people = {**rules["simulation"]["people"], "daysPerMonth": calendar["daysPerMonth"],
+    people = {**rules["simulation"]["people"], "ancestries": rules["peoples"].get("ancestries", {}),
+              "cultureProfiles": rules["peoples"].get("profiles", {}), "daysPerMonth": calendar["daysPerMonth"],
               "daysPerYear": calendar["daysPerMonth"] * calendar["monthsPerYear"]}
     return {**rules, "simulation": {**rules["simulation"], "people": people}}
 

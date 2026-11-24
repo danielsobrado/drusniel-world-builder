@@ -8,6 +8,9 @@ town's housing stock, and a role from the town's own job market.
 import random
 from typing import TYPE_CHECKING
 
+from ...peoples.catalog import choose_ancestry, person_identity
+from ...peoples.physiology import person_rules
+from ...peoples.population import weights_for_band
 from ..contracts import SettlementState
 from ..economy.roads import personality
 from .contracts import Cast, NpcHousehold, Person
@@ -26,6 +29,7 @@ def promote(people: dict[str, Person], s: SettlementState, cast: Cast, m: "Month
     m.counter += 1
     band = "elder" if rng.random() < s.cohorts.elders / max(1, s.cohorts.adults + s.cohorts.elders) else "adult"
     pid = m.next_id(s)
+    ancestry = choose_ancestry(weights_for_band(s.ancestries, band), m.seed, pid)
     pool = cast.names[s.settlementId]
     family = rng.choice(pool.family)
     hid = f"household:{s.sourceId}:f{m.day}-{m.counter}"
@@ -40,7 +44,9 @@ def promote(people: dict[str, Person], s: SettlementState, cast: Cast, m: "Month
     if business:
         named_workers[business.id] = named_workers.get(business.id, 0) + 1
     person = Person(id=pid, name=rng.choice(pool.given), family=family, sex=rng.choice(("female", "male")),
-                    birthDay=birth_day(rng, band, m.cfg), settlementId=s.settlementId, householdId=hid, role=role,
+                    birthDay=m.day + birth_day(rng, band, person_rules(m.cfg, ancestry)), settlementId=s.settlementId,
+                    householdId=hid, role=role,
+                    **person_identity(ancestry, s.identity, s.identity, s.settlementId, None),
                     businessId=business.id if business else None, profession=business.profession if business else None,
                     retired=role == "retired", personality=traits, profile=profile_for(traits, rng))
     if business:

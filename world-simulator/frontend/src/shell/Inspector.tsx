@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent } from 'react';
+import { useRef, type PointerEvent, type ReactNode } from 'react';
 import type { SettlementClass } from '../api/types';
 import type { Simulation } from '../simulation/useSimulation';
 import { BusinessDetails } from '../society/BusinessDetails';
@@ -13,9 +13,9 @@ const MIN = 280;
 const MAX = 640;
 
 /** The one shared inspector: whatever is selected anywhere shows here. Drag the left edge to resize. */
-export function Inspector({ selectedId, classes, width, onResize, onClose, onSelect, sim }: {
+export function Inspector({ selectedId, classes, width, onResize, onClose, onSelect, sim, content }: {
   selectedId: string | null; classes?: SettlementClass[]; width: number; onResize: (width: number) => void;
-  onClose: () => void; onSelect: (id: string) => void; sim?: Simulation;
+  onClose: () => void; onSelect: (id: string) => void; sim?: Simulation; content?: ReactNode;
 }) {
   const drag = useRef<{ x: number; width: number } | null>(null);
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -35,12 +35,12 @@ export function Inspector({ selectedId, classes, width, onResize, onClose, onSel
         <button type="button" className="icon-btn" aria-label="Close inspector" onClick={onClose}><Icon name="close" size={15} /></button>
       </div>
       <div className="inspector-body">
-        {!selectedId ? <Empty>Select a settlement, business, trader or person anywhere in the workbench.</Empty>
+        {content ?? (!selectedId ? <Empty>Select a settlement, business, trader or person anywhere in the workbench.</Empty>
           : selectedId.startsWith('business:') && sim?.active ? <BusinessDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('npc:trader:') && sim?.active ? <TraderDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('npc:') && sim?.active ? <PersonDetails id={selectedId} sim={sim} onSelect={onSelect} />
           : selectedId.startsWith('event:') && sim?.active ? <EventDetails id={selectedId} sim={sim} onSelect={onSelect} />
-          : <SettlementDetails id={selectedId} classes={classes} onSelect={onSelect} sim={sim} />}
+          : <SettlementDetails id={selectedId} classes={classes} onSelect={onSelect} sim={sim} />)}
       </div>
     </aside>
   );

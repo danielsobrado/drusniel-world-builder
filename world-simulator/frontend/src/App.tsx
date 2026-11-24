@@ -26,6 +26,10 @@ import { RoadsWorkspace } from './roads/RoadsWorkspace';
 import { PeopleWorkspace } from './people/PeopleWorkspace';
 import { DialogueLab } from './narration/DialogueLab';
 import { useLlm } from './narration/useLlm';
+import { PeoplesExplorer } from './peoples/PeoplesExplorer';
+import { PeoplesInspector } from './peoples/PeoplesInspector';
+import { PeoplesWorkspace } from './peoples/PeoplesWorkspace';
+import type { PeoplesData, PeoplesSelection } from './peoples/types';
 import { LabWorkspace } from './lab/LabWorkspace';
 
 export default function App() {
@@ -40,6 +44,14 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const select = useCallback((id: string) => { setSelectedId(id); update({ rightOpen: true }); }, [update]);
   const go = useCallback((workspace: string) => update({ workspace }), [update]);
+  const [peoplesSelection, setPeoplesSelection] = useState<PeoplesSelection | null>(null);
+  const peoples = useApi<PeoplesData>(layout.workspace === 'peoples' && sim.active
+    ? `/api/scenarios/${encodeURIComponent(sim.active.id)}/peoples?v=${encodeURIComponent(sim.version)}` : null);
+  const selectPeoples = (choice: PeoplesSelection) => {
+    setPeoplesSelection(choice);
+    setSelectedId(null);
+    update({ rightOpen: true });
+  };
   const classes = summary.data?.classes;
 
   const views: Record<string, () => ReactNode> = {
@@ -54,6 +66,7 @@ export default function App() {
     economy: () => <EconomyWorkspace sim={sim} onSelect={select} />,
     roads: () => <RoadsWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
     people: () => <PeopleWorkspace sim={sim} onSelect={select} selectedId={selectedId} />,
+    peoples: () => <PeoplesWorkspace result={peoples} sim={sim} world={world.data} selection={peoplesSelection} onSelect={select} />,
     dialogue: () => <DialogueLab sim={sim} llm={llm.status} />,
     lab: () => <LabWorkspace sim={sim} onSelect={select} />,
   };
@@ -65,11 +78,15 @@ export default function App() {
       <WorkspaceBar world={world.data} workspaces={WORKSPACES} active={workspace} onSelect={go} layout={layout} update={update} />
       <div className={`body${layout.leftOpen ? ' left-open' : ''}${layout.rightOpen ? ' right-open' : ''}`}>
         <IconRail workspaces={WORKSPACES} active={workspace} onSelect={go} />
-        {layout.leftOpen && (['simulation', 'households', 'businesses', 'economy', 'roads', 'people', 'dialogue', 'lab'].includes(workspace)
+        {layout.leftOpen && (workspace === 'peoples'
+          ? <PeoplesExplorer data={peoples.data} selection={peoplesSelection} onSelect={selectPeoples} />
+          : ['simulation', 'households', 'businesses', 'economy', 'roads', 'people', 'dialogue', 'lab'].includes(workspace)
           ? <ScenarioExplorer sim={sim} />
           : <ExplorerPanel summary={summary.data} filters={filters} setFilters={setFilters} selectedId={selectedId} onSelect={select} />)}
         <main className="workspace" aria-label={WORKSPACES.find((w) => w.id === workspace)?.label}>{views[workspace]()}</main>
         {layout.rightOpen && <Inspector selectedId={selectedId} classes={classes} width={layout.rightWidth} onSelect={select} sim={sim}
+          content={workspace === 'peoples' && !selectedId ?
+            <PeoplesInspector data={peoples.data} selection={peoplesSelection} /> : undefined}
           onResize={(rightWidth) => update({ rightWidth })} onClose={() => update({ rightOpen: false })} />}
       </div>
       <StatusBar health={health} summary={summary} sim={sim} llm={llm.status} />

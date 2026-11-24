@@ -8,13 +8,15 @@ master, each with when, from whom and how sure they are.
 
 from typing import Any
 
+from ...peoples.decisions import Opportunity, preferences, rank
 from ..economy.contracts import Trade
 from ..history.contracts import HistoryEvent
 from .contracts import Cast, Knowledge
 from .relationships import Ties
 
 
-def spread(cast: Cast, events: list[HistoryEvent], trade: Trade, day: int, cfg: dict[str, Any], month: int) -> tuple[Cast, Trade]:
+def spread(cast: Cast, events: list[HistoryEvent], trade: Trade, day: int, cfg: dict[str, Any], month: int,
+           profiles: dict | None = None) -> tuple[Cast, Trade]:
     """Second-hand knowledge from this batch of events; returns the cast and the trade (caravans pick up news as they leave).
     `month` is the calendar's month length: caravans that arrived within the last one deliver what they carry."""
     people = {p.id: p for p in cast.people}
@@ -41,7 +43,13 @@ def spread(cast: Cast, events: list[HistoryEvent], trade: Trade, day: int, cfg: 
                     tell(other.id, e.id, "told", teller.id, cfg["told"], witnesses)
             if e.importance >= 4:
                 for rel in ties.of(teller.id, "friend"):
-                    tell(ties.other(rel, teller.id), e.id, "told", teller.id, cfg["friend"], witnesses)
+                    weights = preferences(teller.identity, teller.upbringing, None, profiles or {})
+                    share = Opportunity("share", 0.3, 0.10, relationship=rel.trust)
+                    keep = Opportunity("keep", 0, 0, {"discretion": 0.85})
+                    if e.visibility == "public" or rank([share, keep], weights, greed=teller.personality.greed,
+                                                        caution=teller.personality.caution,
+                                                        trust=teller.personality.honesty)[0]["id"] == "share":
+                        tell(ties.other(rel, teller.id), e.id, "told", teller.id, cfg["friend"], witnesses)
     # Rumours travel with caravans: a master leaving home takes its public news along, and on reaching the market centre
     # tells its innkeepers and hears the centre's own news. Nothing arrives before the caravan does.
     centres = {m.marketId: m.centerSettlementId for m in trade.markets}

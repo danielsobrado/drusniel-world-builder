@@ -37,18 +37,19 @@ def monthly_use(econ: SettlementEconomy, population: int, ratios: dict[str, floa
     return dict(use)
 
 
-def food_flows(econ: SettlementEconomy, society: Society, population: int, cfg: dict[str, Any]) -> tuple[int, int, int]:
+def food_flows(econ: SettlementEconomy, society: Society, population: int, cfg: dict[str, Any],
+               ration_multiplier: float = 1) -> tuple[int, int, int]:
     """(local, hinterland, wanted) rations for one month."""
     days = cfg["simulation"]["calendar"]["daysPerMonth"]
     needs = cfg["society"]["needs"]
     farm = sum(b.filled for b in society.businesses if b.sector == "agriculture")
     local = round(farm * needs["rationsPerFarmWorkerDay"] * days)
     hinterland = round(econ.food.ruralPopulation * cfg["economy"]["food"]["ruralSurplusPerPersonDay"] * days)
-    return local, hinterland, round(population * needs["rationsPerPersonDay"] * days)
+    return local, hinterland, round(population * needs["rationsPerPersonDay"] * days * ration_multiplier)
 
 
 def run_production(econ: SettlementEconomy, society: Society, population: int,
-                   cfg: dict[str, Any]) -> tuple[SettlementEconomy, dict[str, float]]:
+                   cfg: dict[str, Any], ration_multiplier: float = 1) -> tuple[SettlementEconomy, dict[str, float]]:
     """Returns the updated economy and the month's net flow per good (produced minus used and eaten)."""
     rations = cfg["economy"]["food"]["good"]
     inv: dict[str, float] = defaultdict(float, econ.inventory)
@@ -76,7 +77,7 @@ def run_production(econ: SettlementEconomy, society: Society, population: int,
         flow[line.good] += out
         lines.append(line.model_copy(update={"produced": r4(out), "limitedBy": limited}))
 
-    local, hinterland, ration_need = food_flows(econ, society, population, cfg)
+    local, hinterland, ration_need = food_flows(econ, society, population, cfg, ration_multiplier)
     inv[rations] += local + hinterland
     flow[rations] += local + hinterland
     scale = population / econ.baselinePopulation if econ.baselinePopulation else 0

@@ -8,6 +8,9 @@ import random
 from collections import defaultdict
 from typing import Any
 
+from ...peoples.catalog import choose_ancestry, person_identity
+from ...peoples.physiology import person_rules
+from ...peoples.population import weights_for_band
 from ...world.model import WorldModel
 from ..economy.names import generator_for
 from ..economy.roads import personality
@@ -39,8 +42,9 @@ def band_of(age: int, cfg: dict[str, Any]) -> str:
 class CastBuilder:
     """Adds people and households for one settlement, keeping ids and the budget."""
 
-    def __init__(self, settlement: Any, pool: NamePool, budget: int, rng: random.Random, cfg: dict[str, Any]):
+    def __init__(self, settlement: Any, pool: NamePool, budget: int, rng: random.Random, cfg: dict[str, Any], seed: int):
         self.s, self.pool, self.budget, self.rng, self.cfg = settlement, pool, budget, rng, cfg
+        self.seed = seed
         self.people: list[Person] = []
         self.households: list[NpcHousehold] = []
         self.dwellings: list[Dwelling] = []
@@ -56,11 +60,18 @@ class CastBuilder:
 
     def person(self, h: NpcHousehold, band: str, sex: str, birth: int | None = None, **fields: Any) -> Person:
         fields.setdefault("role", "unemployed")
-        ages = {**self.cfg["ages"], "adult": self.cfg["traderAges"]} if fields["role"] == "trader" else self.cfg["ages"]
-        born = birth if birth is not None else birth_day(self.rng, band, {**self.cfg, "ages": ages})
-        p = Person(id=f"npc:{self.s.sourceId}:{len(self.people) + 1}", name=fields.pop("name", None) or self.rng.choice(self.pool.given),
+        pid = f"npc:{self.s.sourceId}:{len(self.people) + 1}"
+        ancestry = choose_ancestry(weights_for_band(self.s.ancestries, band), self.seed, pid)
+        cfg = person_rules(self.cfg, ancestry)
+        ages = {**cfg["ages"], "adult": cfg["traderAges"]} if fields["role"] == "trader" else cfg["ages"]
+        low, high = ages[band]
+        year = cfg["daysPerYear"]
+        born = (max(-(high + 1) * year + 1, min(-low * year, birth)) if birth is not None
+                else birth_day(self.rng, band, {**cfg, "ages": ages}))
+        p = Person(id=pid, name=fields.pop("name", None) or self.rng.choice(self.pool.given),
                    family=h.family, sex=sex, birthDay=born, settlementId=self.s.settlementId, birthplaceId=self.s.settlementId,
-                   householdId=h.id, personality=(traits := fields.pop("personality", None) or personality(self.rng)),
+                   householdId=h.id, **person_identity(ancestry, self.s.identity, self.s.identity, self.s.settlementId, h.id),
+                   personality=(traits := fields.pop("personality", None) or personality(self.rng)),
                    profile=profile_for(traits, self.rng),
                    events=[LifeEvent(day=0, kind="introduced", text=f"Lives in {self.s.name}")], **fields)
         p = self.occupy(p, band)
@@ -135,7 +146,7 @@ def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], 
         limit = cfg["namePool"]["maxLength"]
         pool = NamePool(given=[gen.name(rng, limit) for _ in range(cfg["namePool"]["given"])],
                         family=[gen.name(rng, limit) for _ in range(cfg["namePool"]["family"])])
-        b = CastBuilder(s, pool, model.npcs_by_id.get(s.settlementId, 0), rng, cfg)
+        b = CastBuilder(s, pool, model.npcs_by_id.get(s.settlementId, 0), rng, cfg, seed)
         for t in (t for t in traders if t.settlementId == s.settlementId and t.active):
             if b.room() <= 0:
                 break

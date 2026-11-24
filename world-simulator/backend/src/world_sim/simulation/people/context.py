@@ -8,6 +8,8 @@ with the context so a model cannot invent spouses, children, businesses or journ
 from collections.abc import Callable
 from typing import Any
 
+from ...peoples.catalog import profile_key
+from ...peoples.decisions import preferences
 from ..history.archive import HistoryArchive
 from ..history.contracts import HistoryEvent
 from .generate import age_years
@@ -19,6 +21,7 @@ RESTRICTIONS = [
     "Facts with source generated-prehistory are a plausible reconstruction: state them without inventing more detail.",
     "Respect date precision: give a year or 'around' a year when the precision is year or approximate, never an exact day.",
     "A death has no known cause unless one is listed; a time of food shortage is not a cause.",
+    "Culture describes learned customs and local institutions. Never infer conduct or abilities from ancestry.",
     "Hooks, fears, ambitions and mood are derived from circumstances; express them, do not turn them into new events.",
 ]
 
@@ -40,6 +43,7 @@ class ContextBuilder:
                  label: Callable[[int], str]):
         self.state, self.archive, self.world, self.label = state, archive, world, label
         self.cfg = rules["simulation"]["people"]["biography"]
+        self.peoples_cfg = rules.get("peoples", {})
         self.people_cfg = rules["simulation"]["people"]
         self.people = {p.id: p for p in state.cast.people}
         self.ties = Ties(state.cast.relationships, state.cast.relSeq)
@@ -79,13 +83,27 @@ class ContextBuilder:
         places |= {e.facts.get("from") for e in mine if e.kind == "moved" and isinstance(e.facts.get("from"), str)}
         roads = [r.centerName for r in state.trade.routes if trader and r.id == trader.routeId]
         employment = town.society.employment
+        definitions = self.peoples_cfg.get("cultures", {})
+        culture = definitions.get(p.identity.cultureId, {})
+        local = definitions.get(town.identity.cultureId, {})
+        seed = definitions.get(p.identity.cultureSeedId, {})
+        profiles = self.peoples_cfg.get("profiles", {})
+        habits = preferences(p.identity, p.upbringing, town.identity, profiles)
+        discretion = habits.get("discretion", 0)
+        local_institutions = profiles.get(profile_key(town.identity), {}).get("institutions", []) if local else []
         return {
             "personId": pid, "tier": level, "targets": target, "asOf": state.date.label,
             "identity": {"name": f"{p.name} {p.family}", "sex": p.sex,
                          "age": age_years(p, state.date.day, self.people_cfg) if p.alive else None,
                          "born": self.label(p.birthDay), "birthplace": self.place(p.birthplaceId or p.settlementId),
-                         "culture": (self.world.get(p.settlementId) or {}).get("cultureName"), "home": town.name, "alive": p.alive,
+                         "culture": culture.get("displayName"), "home": town.name, "alive": p.alive,
+                         "ancestry": self.peoples_cfg.get("ancestries", {}).get(p.identity.ancestryId, {}).get("label")
+                         if p.identity.ancestryId != "unspecified" else None,
+                         "culturalSeed": seed.get("displayName"), "localCulture": local.get("displayName"),
+                         "upbringing": p.upbringing.model_dump(), "polityId": p.identity.polityId, "faithId": p.identity.faithId,
                          "died": self.label(p.deathDay) if p.deathDay is not None else None},
+            "culturalContext": {"values": culture.get("values", []), "seedContext": seed.get("rule"),
+                                "localInstitutions": [item["label"] for item in local_institutions]},
             "household": {"family": household.family, "kind": household.kind, "housing": household.housing, "homeId": household.homeId,
                           "members": [f"{x.name} {x.family}" for x in self.people.values()
                                       if x.householdId == p.householdId and x.id != pid and x.alive]} if household else None,
@@ -102,7 +120,8 @@ class ContextBuilder:
             "places": sorted({*(self.place(x) for x in places), *roads}),
             "knowledge": [{"event": e.summary, "learned": self.label(sources[e.id].learnedDay), "how": sources[e.id].how,
                            "confidence": sources[e.id].confidence,
-                           "wouldTell": p.personality.honesty > 0.4 or e.visibility in ("settlement", "public")} for e in learned],
+                           "wouldTell": p.personality.honesty > 0.4 + discretion * 0.35 or e.visibility == "public"
+                           or (not discretion and e.visibility == "settlement")} for e in learned],
             "personality": {**p.personality.model_dump(), **(p.profile.model_dump() if p.profile else {})},
             "outlook": outlook(p, cast, state.trade, town, state.date.day, hooks_now),
             "hooks": hooks_now,

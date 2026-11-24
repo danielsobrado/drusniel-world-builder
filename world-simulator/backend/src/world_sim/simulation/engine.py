@@ -3,10 +3,14 @@
 from typing import Any
 
 from ..canonical import state_digest
+from ..peoples.catalog import settlement_identity
+from ..peoples.culture import environment, infrastructure
+from ..peoples.physiology import food_multiplier
+from ..peoples.population import ancestry_counts, combined, initial
 from ..world.model import WorldModel
 from .calendar import date_for
 from .contracts import Cohorts, HistoryPoint, ScenarioState, SettlementState, Society, WorldRef
-from .demography import initial_cohorts, run_month
+from .demography import run_month
 from .economy.baseline import initial_economy
 from .economy.step import economy_month, with_food_need
 from .history.chronicle import chronicle
@@ -23,10 +27,17 @@ from .society import check_invariants, initial_society, update_society
 def build_settlements(model: WorldModel, rows: list[tuple[dict[str, Any], dict[str, Any], Cohorts, Society]],
                       rules: dict[str, Any], seed: int) -> tuple[list[SettlementState], Any]:
     """`rows` holds (settlement fields, imported record, cohorts, society); adds the baseline economy and trade."""
-    econs, trade = initial_economy(model, [(record, cohorts.total, society) for _, record, cohorts, society in rows], rules, seed)
+    ancestry_cfg = rules.get("peoples", {}).get("ancestries", {})
+    members = [({**record, "rationMultiplier": food_multiplier(ancestry_cfg, fields.get("ancestries", {}))}, cohorts.total, society)
+               for fields, record, cohorts, society in rows]
+    econs, trade = initial_economy(model, members, rules, seed)
     settlements = [SettlementState(**fields, cohorts=cohorts, society=with_food_need(society, econ, rules), economy=econ)
                    for (fields, _, cohorts, society), econ in zip(rows, econs, strict=True)]
-    return settlements, trade
+    return [_with_infrastructure(s, rules) for s in settlements], trade
+
+
+def _with_infrastructure(s: SettlementState, rules: dict) -> SettlementState:
+    return s.model_copy(update={"infrastructure": infrastructure(s, rules.get("peoples", {}))})
 
 
 def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[str], seed: int, start_year: int,
@@ -34,15 +45,19 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
     """The state at day 0; a replay passes the scenario's frozen rules, a new scenario takes the current config."""
     rules = ready(rules or model.config.rules)
     rows = []
+    identity = model.audit["identity"]
+    ancestries = rules["peoples"].get("ancestries", {})
     for sid in settlement_ids:
         record = model.settlements_by_id[sid]
-        cohorts = initial_cohorts(record["population"], rules["simulation"]["demography"]["initialShares"])
+        civic, weights = settlement_identity(record, identity, rules)
+        counts = initial(record["population"], weights, ancestries, rules["simulation"]["demography"])
+        cohorts = combined(counts)
         fields = {"settlementId": sid, "sourceId": record["sourceId"], "name": record["name"], "population": record["population"]}
+        fields.update(identity=civic, ancestries=counts, environment=environment(record))
         society = initial_society(record, cohorts, rules["society"], rules["simulation"]["calendar"]["daysPerMonth"])
         rows.append((fields, record, cohorts, society))
     settlements, trade = build_settlements(model, rows, rules, seed)
     cast = initial_cast(model, settlements, trade.traders, seed, rules["simulation"]["people"])
-    identity = model.audit["identity"]
     return ScenarioState(
         scenarioId=scenario_id,
         world=WorldRef(mapId=identity["mapId"], sourceFingerprint=identity["sourceFingerprint"]),
@@ -50,7 +65,8 @@ def baseline_state(model: WorldModel, *, scenario_id: str, settlement_ids: list[
         startYear=start_year,
         date=date_for(0, start_year, rules["simulation"]["calendar"]),
         settlements=settlements,
-        history=[HistoryPoint(day=0, population={s.settlementId: s.population for s in settlements})],
+        history=[HistoryPoint(day=0, population={s.settlementId: s.population for s in settlements},
+                              ancestryPopulation=ancestry_counts(settlements))],
         trade=trade,
         cast=cast,
     )
@@ -60,7 +76,8 @@ def _month(settlement: SettlementState, *, seed: int, month_index: int, rules: d
     sim = rules["simulation"]
     shortfall = max(0.0, 1.0 - settlement.economy.food.security)
     after = run_month(settlement, seed=seed, month_index=month_index, params=sim["demography"],
-                      months_per_year=sim["calendar"]["monthsPerYear"], mortality=1 + rules["economy"]["famine"]["mortality"] * shortfall)
+                      months_per_year=sim["calendar"]["monthsPerYear"], ancestries=rules["peoples"].get("ancestries", {}),
+                      mortality=1 + rules["economy"]["famine"]["mortality"] * shortfall)
     return after.model_copy(update={"society": update_society(after.society, after.cohorts, rules["society"],
                                                                     sim["calendar"]["daysPerMonth"])})
 
@@ -77,6 +94,8 @@ def assert_consistent(settlements: list[SettlementState], cast: Any, trade: Any,
         raise AssertionError(f"people, {when}: {'; '.join(broken)}")
     for s in settlements:
         broken = check_invariants(s.population, s.cohorts, s.society)
+        if s.ancestries and combined(s.ancestries) != s.cohorts:
+            broken.append("ancestry cohorts do not match the settlement cohorts")
         if broken:
             raise AssertionError(f"{s.settlementId} {when}: {'; '.join(broken)}")
 
@@ -109,6 +128,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
             settlements = [s.model_copy(update={"society": update_society(s.society, s.cohorts, rules["society"], days)})
                            if s.settlementId in moved else s for s in settlements]
         settlements, trade, economy = economy_month(settlements, trade, day, rules, state.seed)
+        settlements = [_with_infrastructure(s, rules) for s in settlements]
         linked = link(economy["incidents"], cast, settlements)
         cast, trade, lives = people_month(cast, settlements, trade, flows, day=day, seed=state.seed, rules=rules)
         cast, trade, events = chronicle([*linked, *lives], cast, trade, seq, day, rules)
@@ -121,6 +141,7 @@ def advance(state: ScenarioState, days: int, rules: dict[str, Any]) -> tuple[Sce
         history.append(HistoryPoint(day=day, population={s.settlementId: s.population for s in settlements},
                                     labour={s.settlementId: s.society.employment.labourSupply for s in settlements},
                                     unemployed={s.settlementId: s.society.employment.unemployed for s in settlements},
+                                    ancestryPopulation=ancestry_counts(settlements),
                                     bandits=sum(r.bandits for r in trade.routes)))
         employed = sum(s.society.employment.employed for s in settlements)
         supply = sum(s.society.employment.labourSupply for s in settlements)

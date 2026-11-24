@@ -8,6 +8,7 @@ without Azgaar evidence close after months with nobody to work them.
 
 from typing import Any
 
+from ...peoples.decisions import Opportunity, rank
 from ..contracts import Business, Society
 from .contracts import SettlementEconomy, Trader
 from .escorts import KIND as ESCORTS
@@ -45,7 +46,7 @@ def _close(society: Society, cfg: dict[str, Any]) -> tuple[list[Business], list[
 
 
 def _next_kind(businesses: list[Business], supply: int, shares: dict[str, float],
-               templates: dict[str, Any]) -> tuple[str, dict[str, Any]] | None:
+               templates: dict[str, Any], preferences: dict[str, float] | None = None) -> tuple[str, dict[str, Any]] | None:
     """A generic kind in the sector furthest below its share of the labour force."""
     generic = {k: t for k, t in templates.items() if not t.get("requires") and not t.get("evidence")}
     posts = {s: sum(b.staff for b in businesses if b.sector == s) for s in SECTORS}
@@ -53,6 +54,13 @@ def _next_kind(businesses: list[Business], supply: int, shares: dict[str, float]
                      key=lambda s: (-(shares.get(s, 0) * supply - posts[s]), s))
     if not sectors:
         return None
+    if preferences:
+        opportunities = [Opportunity(sector, (shares.get(sector, 0) * supply - posts[sector]) / max(1, supply), 0,
+                                     {"apprenticeship": 0.1 if sector == "crafts" else 0,
+                                      "autonomy": 0.12 if sector == "trade" else 0,
+                                      "stewardship": 0.12 if sector == "agriculture" else 0,
+                                      "loyalty": 0.1 if sector == "security" else 0}) for sector in sectors]
+        sectors = [row["id"] for row in rank(opportunities, preferences)]
     count = {k: sum(b.kind == k for b in businesses) for k in generic}
     kind = min((k for k, t in generic.items() if t["sector"] == sectors[0]), key=lambda k: (count[k], k))
     return kind, generic[kind]
@@ -62,7 +70,7 @@ Outcome = tuple[Society, SettlementEconomy, list[Trader], list[dict[str, Any]], 
 
 
 def turnover(society: Society, econ: SettlementEconomy, traders: list[Trader], *, settlement: dict[str, Any], day: int,
-             cfg: dict[str, Any], society_cfg: dict[str, Any]) -> Outcome:
+             cfg: dict[str, Any], society_cfg: dict[str, Any], preferences: dict[str, float] | None = None) -> Outcome:
     """Closes idle businesses and opens new ones for the idle; the flag says whether jobs must be refilled."""
     tc = cfg["turnover"]
     by_id = {t.id: t for t in traders}
@@ -81,7 +89,7 @@ def turnover(society: Society, econ: SettlementEconomy, traders: list[Trader], *
     shares = society_cfg["labour"]["sectorShareByClass"][settlement["class"] or "town"]
     seq, opened = econ.businessSeq, 0
     while idle >= tc["minIdle"] and opened < tc["maxOpeningsPerMonth"]:
-        pick = _next_kind(businesses, supply, shares, society_cfg["businesses"])
+        pick = _next_kind(businesses, supply, shares, society_cfg["businesses"], preferences)
         if pick is None:
             break
         kind, t = pick

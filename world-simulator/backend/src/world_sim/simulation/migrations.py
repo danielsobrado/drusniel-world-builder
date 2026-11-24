@@ -2,8 +2,13 @@
 
 from typing import Any
 
+from ..ids import settlement_id
+from ..peoples.catalog import NEUTRAL, choose_ancestry, map_matches, person_identity, settlement_identity
+from ..peoples.contracts import CivicIdentity
+from ..peoples.culture import environment, infrastructure
+from ..peoples.population import established
 from ..world.model import WorldModel
-from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, Society
+from .contracts import STATE_SCHEMA_VERSION, Cohorts, ScenarioState, SettlementState, Society
 from .economy.contracts import SettlementEconomy, Trade
 from .economy.roads import initial_roads
 from .engine import build_settlements
@@ -69,14 +74,39 @@ def _v6_to_v7(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
     return {**raw, "schemaVersion": 7}
 
 
+def _v7_to_v8(raw: dict[str, Any], model: WorldModel, rules: dict) -> dict:
+    world = model.audit["identity"]
+    records = model.settlements_by_id if map_matches(raw["world"], world) else {}
+    known = {sid: settlement_identity(record, world, rules) for sid, record in records.items()}
+    neutral = CivicIdentity(), {NEUTRAL: 1.0}
+    settlements = []
+    for row in raw["settlements"]:
+        identity, weights = known.get(row["settlementId"], neutral)
+        cohorts = established(Cohorts(**row["cohorts"]), weights)
+        settlement = SettlementState(**{**row, "identity": identity, "ancestries": cohorts,
+                                         "environment": environment(records.get(row["settlementId"], {}))})
+        settlements.append(settlement.model_copy(update={"infrastructure": infrastructure(settlement, rules.get("peoples", {}))})
+                           .model_dump())
+    people = []
+    for row in raw["cast"]["people"]:
+        source = row["id"].split(":")
+        origin = settlement_id(int(source[1])) if len(source) == 3 and source[1].isdigit() else row.get("birthplaceId")
+        learned, weights = known.get(origin, neutral)
+        home, _ = known.get(row["settlementId"], neutral)
+        identity = person_identity(choose_ancestry(weights, raw["seed"], row["id"]), learned, home, origin, row["householdId"])
+        people.append({**row, **{key: value.model_dump() for key, value in identity.items()}})
+    return {**raw, "schemaVersion": 8, "settlements": settlements, "cast": {**raw["cast"], "people": people}}
+
+
 STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7}
 
 
-def migrate_state(raw: dict[str, Any], model: WorldModel) -> tuple[ScenarioState, int]:
+def migrate_state(raw: dict[str, Any], model: WorldModel, rules: dict | None = None) -> tuple[ScenarioState, int]:
     """Returns the state at the current schema and the version it was stored at."""
     stored = int(raw.get("schemaVersion", 1))
     if stored > STATE_SCHEMA_VERSION:
         raise IncompatibleState(f"state schema {stored} is newer than this simulator ({STATE_SCHEMA_VERSION})")
     while int(raw.get("schemaVersion", 1)) < STATE_SCHEMA_VERSION:
-        raw = STEPS[int(raw.get("schemaVersion", 1))](raw, model)
+        version = int(raw.get("schemaVersion", 1))
+        raw = _v7_to_v8(raw, model, rules or model.config.rules) if version == 7 else STEPS[version](raw, model)
     return ScenarioState(**raw), stored
