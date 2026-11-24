@@ -21,11 +21,14 @@ export const DEFAULT_CONTACT_SHADE = Object.freeze({
   // metres; 1.2 a unit of scale stands for the donor's trunk and stone radii.
   treeRadius: 3,
   rockRadius: 1,
-  bushRadius: 0.75,
+  // A shrub's crown shades its own floor (bushes cast no shadow-map shadow, BUSH_CAST_SHADOW).
+  // At 0.56 the quadratic falloff fell below the terrain's 0.1 darkening ramp by half
+  // the radius, and shrubs floated on unshaded grass (2026-11-24 captures).
+  bushRadius: 1,
   radiusPerScale: 1.2,
   treeStrength: 1,
   rockStrength: 0.8,
-  bushStrength: 0.56,
+  bushStrength: 0.95,
 });
 
 export function resolveContactShade(config) {

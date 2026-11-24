@@ -93,7 +93,9 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   const groundContact = sampleGroundContactAt(blade.canonical, { canonical: true });
   const groundAo = float(1).sub(groundContact.contact.mul(0.32)).sub(groundContact.canopy.mul(0.14)).clamp(0.45, 1);
   root = root.mul(groundAo);
-  tip = tip.mul(mix(float(1), groundAo, float(0.55)));
+  // Tips take most of it: at 0.55 the shade under a shrub's crown never reached the
+  // top of the sward, and shrubs stood on unshaded grass (2026-11-24 captures).
+  tip = tip.mul(mix(float(1), groundAo, float(0.85)));
   const footSoilColor = mix(root.mul(SOIL_SHARE), groundContact.soilColor.mul(0.92), groundContact.inside.mul(0.45))
     .toVarying('meadowFootSoil');
   // Occupancy rides in the root varying's fourth lane: no extra vertex output.

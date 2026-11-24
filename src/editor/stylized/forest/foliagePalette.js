@@ -7,6 +7,8 @@ const PETAL_MIN_PEAK = .56;
 const FALLBACK_PALETTE_TILE = Object.freeze({ 0: 3, 1: 10, 2: 10, 11: 10, 32: 10 });
 const OPEN_DRY_BIOMES = new Set([0, 1, 2, 3, 10, 11, 32]);
 const MEADOW_BIOMES = new Set([4, 14]);
+/** Linear blue kept by the understory ramp, to sit in the rendered grass's hue (2026-11-24). */
+const SWARD_BLUE = 0.68;
 /**
  * Sun-bleached dust and dry earth are each plant's own colour lifted toward pale,
  * as on the town's walls (townWeathering): the rocks' style, not their colour.
@@ -43,6 +45,11 @@ export function resolveFoliagePalette(config = {}, tileId = null) {
     base.lerp(shadowColor, 0.07);
     tip.lerp(lightColor, 0.15);
   }
+  // The grass renders warmer than its configured pigment (ground style, stand tones,
+  // warm transmission): measured at noon, plants read blue/green 0.6 to the sward's
+  // 0.45 with red/green matched. Pull only blue, so the layers share one hue family.
+  base.b *= SWARD_BLUE;
+  tip.b *= SWARD_BLUE;
   return { base, tip, exposure: config.understory?.paletteExposure ?? 1.7 };
 }
 

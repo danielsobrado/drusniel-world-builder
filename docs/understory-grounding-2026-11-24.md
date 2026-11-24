@@ -29,15 +29,25 @@ shared understory material path (`stylized/AuthoredFoliageMaterial.js`,
    existing ground-contact field, applied in `applySkywardNormal`), so the foot
    shades like the ground it stands in. Bush proxies get the same seat.
 
+4. **No shade under a shrub.** Bushes cast no shadow-map shadow
+   (`BUSH_CAST_SHADOW`); their footprint in the contact shade was 0.56 strong,
+   and its quadratic falloff dropped below the terrain's 0.1 darkening ramp by
+   half the radius. Grass tips took only 55% of the contact shade, so in a
+   meadow the shade never reached the top of the sward. Bushes now paint at 0.95
+   over a 1 m base radius (`contactShade.js`), and grass tips take 85%
+   (`meadowPigment.js`). That share also deepens the grass round trunks and
+   stones, which were already painted at 1 and 0.8.
+5. **A cooler hue than the grass.** The understory ramp is the configured meadow
+   palette, but the grass's own pigment pipeline (ground style, stand tones,
+   straw seeds, warm transmission) renders the sward warmer. Measured at noon,
+   red/green matched (0.80 to 0.77) and only blue was high (blue/green 0.6 to
+   0.45). `resolveFoliagePalette` keeps 0.68 of the ramp's linear blue, which
+   covers near plants, bush proxies and floating leaves in one place.
+
 No new texture, sampler, varying family, scene light or `viewport*Texture` node:
 the ground normal and contact shade come from varyings the material already had.
 
 ## Not changed
-
-Understory leaves stay on the configured meadow palette ramp (blue/green ≈ 0.6),
-while the grass's own pigment pipeline (ground style, stand tones, straw seeds,
-warm transmission) renders the sward warmer (≈ 0.43–0.45). Matching that would
-mean sharing the meadow's ground-style uniforms with every plant material.
 
 The pine crowns (`stylized-pine-near-*`) carry a physical material with
 roughness 0; they are trees, outside this change.
@@ -70,3 +80,15 @@ before on `10f1b931`, after with the change; left before, right after:
 
 Neutral, above the 60 FPS floor. Absolute FPS sits below the usual band for this
 route: other sessions shared the GPU, equally in both arms.
+
+Shade and hue (items 4 and 5), same route and warmup, A = `a196e531`:
+
+| Run | Avg FPS | dt p50 / p95 / p99 ms | Hitches |
+| --- | --- | --- | --- |
+| B1 (change) | 70.0 | 13.9 / 28.9 / 33.1 | 6 |
+| A1 (base) | 70.7 | 13.7 / 29.8 / 33.8 | 11 |
+| B2 (change) | 71.1 | 13.8 / 28.1 / 33.0 | 7 |
+| A2 (base) | 72.1 | 13.4 / 28.5 / 32.3 | 5 |
+
+Within run noise: two shader constants and a larger painted footprint, no new
+work per frame.
