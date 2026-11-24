@@ -84,12 +84,15 @@ class ContextBuilder:
         employment = town.society.employment
         definitions = self.peoples_cfg.get("cultures", {})
         culture = definitions.get(p.identity.cultureId, {})
-        local = definitions.get(town.identity.cultureId, {})
+        local_key = profile_key(town.identity)
+        local = definitions.get(local_key, {})
         seed = definitions.get(p.identity.cultureSeedId, {})
         profiles = self.peoples_cfg.get("profiles", {})
         habits = preferences(p.identity, p.upbringing, town.identity, profiles)
         discretion = habits.get("discretion", 0)
-        local_institutions = profiles.get(profile_key(town.identity), {}).get("institutions", []) if local else []
+        infrastructure = {item.institutionId for item in town.infrastructure}
+        local_institutions = [item["label"] for item in profiles.get(local_key, {}).get("institutions", [])
+                              if item["id"] in infrastructure]
         return {
             "personId": pid, "tier": level, "targets": target, "asOf": state.date.label,
             "identity": {"name": f"{p.name} {p.family}", "sex": p.sex,
@@ -102,7 +105,7 @@ class ContextBuilder:
                          "upbringing": p.upbringing.model_dump(), "polityId": p.identity.polityId, "faithId": p.identity.faithId,
                          "died": self.label(p.deathDay) if p.deathDay is not None else None},
             "culturalContext": {"values": culture.get("values", []), "seedContext": seed.get("rule"),
-                                "localInstitutions": [item["label"] for item in local_institutions]},
+                                "localInstitutions": local_institutions},
             "household": {"family": household.family, "kind": household.kind, "housing": household.housing, "homeId": household.homeId,
                           "members": [f"{x.name} {x.family}" for x in self.people.values()
                                       if x.householdId == p.householdId and x.id != pid and x.alive]} if household else None,

@@ -31,6 +31,7 @@ from .replay import event_digest, player_event, replay, with_past
 from .rules import complete, fingerprint, freeze
 from .scope import resolve_scope
 from .store import ScenarioStore, slugify
+from .travel_news import expire, remember, report_ids
 
 
 def _now() -> str:
@@ -115,10 +116,13 @@ class ScenarioManager:
             log.error("scenario cannot be loaded; files left untouched", exc, scenarioId=scenario_id)
             self.unloadable[scenario_id] = str(exc)
             return
+        if not foreign and stored_schema < STATE_SCHEMA_VERSION:
+            state = self._restore_news(state, rules)
         session = Session(ScenarioMeta(**raw_meta), state, [Event(**e) for e in raw_events])
-        if not foreign and stored_schema < STATE_SCHEMA_VERSION and session.meta.rules is not None:
-            self._freeze(session, rules)
+        if not foreign and stored_schema < STATE_SCHEMA_VERSION:
             session.meta = session.meta.model_copy(update={"journal": None})
+            if session.meta.rules is not None:
+                self._freeze(session, rules)
         if session.meta.rules is None and not foreign:
             self._freeze(session)
             self._event(session, "migrated", f"Froze the current rules for this scenario ({session.meta.rulesFingerprint[:19]}…)")
@@ -190,14 +194,36 @@ class ScenarioManager:
         intact = (checksum(raw_state) if len(meta.checksum) == 8 else state_digest(raw_state)) == meta.checksum
         if not intact:
             raise ApiError(500, "corrupt_snapshot", f"Snapshot {snapshot_id} does not match its checksum")
+        rules = self.rules(self.session(scenario_id))
         try:
-            state, _ = migrate_state(raw_state, self.model, self.rules(self.session(scenario_id)))
+            state, stored_schema = migrate_state(raw_state, self.model, rules)
         except IncompatibleState as exc:
             raise ApiError(409, "incompatible_snapshot", str(exc), {"id": snapshot_id}) from exc
         if state.world.sourceFingerprint != self.fingerprint or state.scenarioId != scenario_id:
             raise ApiError(409, "foreign_snapshot", f"Snapshot {snapshot_id} belongs to another scenario or source map",
                            {"id": snapshot_id, "scenarioId": state.scenarioId})
+        if stored_schema < STATE_SCHEMA_VERSION:
+            state = self._restore_news(state, rules)
+            meta = meta.model_copy(update={"journalAt": None})
         return meta, state
+
+    def _restore_news(self, state: ScenarioState, rules: dict[str, Any]) -> ScenarioState:
+        if not state.historySeq:
+            return state
+        archive = self.archive(state.scenarioId)
+        day = state.date.day
+        sim = rules["simulation"]
+        max_age = sim["travel"]["newsMaxAgeDays"]
+        knowledge = sim["people"]["knowledge"]
+        minimum = knowledge.get("rumourMinImportance", knowledge["minImportance"])
+        ids = report_ids(state.travel, state.trade.caravans)
+        indexed = [e for e in archive.many(sorted(ids)) if e.seq < state.historySeq and e.day <= day]
+        published = {e.id: e.day for e in indexed}
+        witnesses = {e.id: [p.personId for p in e.participants] for e in indexed if e.participants}
+        travel = state.travel.model_copy(update={"newsPublishedDays": published, "newsWitnesses": witnesses})
+        recent = archive.query(before=state.historySeq, from_day=day - max_age, to_day=day, min_importance=minimum, limit=None)
+        travel = remember(travel, recent, minimum, sim["travel"]["newsPerSettlement"])
+        return state.model_copy(update={"travel": expire(travel, day, max_age)})
 
     # ---- mutations -----------------------------------------------------
     def _event(self, s: Session, kind: str, message: str, at_day: int | None = None, **data: Any) -> None:

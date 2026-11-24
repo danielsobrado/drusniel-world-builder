@@ -61,11 +61,9 @@ def test_unmapped_map_and_v7_migration_preserve_character_records(eldara):
     upgraded, version = migrate_state(raw, foreign)
     assert version == 7 and upgraded.schemaVersion == STATE_SCHEMA_VERSION
     assert upgraded.cast.households == neutral.cast.households
-    assert [p.model_dump(exclude={"identity", "upbringing"}) for p in upgraded.cast.people] == [
-        p.model_dump(exclude={"identity", "upbringing"}) for p in neutral.cast.people
-    ]
-    assert all(p.upbringing.settlementId == p.birthplaceId for p in upgraded.cast.people)
-
+    for migrated, original in zip(upgraded.cast.people, neutral.cast.people, strict=True):
+        assert migrated.model_dump(exclude={"upbringing"}) == original.model_dump(exclude={"upbringing"})
+        assert migrated.upbringing.settlementId == original.birthplaceId
 
 
 def test_v7_migration_uses_recorded_birthplace_for_upbringing(eldara):

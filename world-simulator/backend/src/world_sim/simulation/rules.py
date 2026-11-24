@@ -31,7 +31,8 @@ def complete(frozen: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
     people = {**rules["simulation"]["people"], "ancestries": rules["peoples"].get("ancestries", {}),
               "cultureProfiles": rules["peoples"].get("profiles", {}), "daysPerMonth": calendar["daysPerMonth"],
               "daysPerYear": calendar["daysPerMonth"] * calendar["monthsPerYear"]}
-    return {**rules, "simulation": {**rules["simulation"], "people": people}}
+    travel = {**now["simulation"].get("travel", {}), **rules["simulation"].get("travel", {})}
+    return {**rules, "simulation": {**rules["simulation"], "people": people, "travel": travel}}
 
 
 def ready(rules: dict[str, Any]) -> dict[str, Any]:

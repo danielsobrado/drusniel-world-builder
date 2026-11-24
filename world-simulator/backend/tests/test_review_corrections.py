@@ -1,6 +1,9 @@
 import asyncio
 from collections import Counter
 
+import pytest
+
+from world_sim.canonical import state_digest
 from world_sim.ids import settlement_id
 from world_sim.peoples.assignments import assigned_rules
 from world_sim.peoples.contracts import Assignment
@@ -8,7 +11,7 @@ from world_sim.simulation.contracts import STATE_SCHEMA_VERSION, Cohorts, Create
 from world_sim.simulation.engine import advance_frames, baseline_state
 from world_sim.simulation.interventions import Intervention
 from world_sim.simulation.manager import ScenarioManager
-from world_sim.simulation.migrations import migrate_state
+from world_sim.simulation.migrations import IncompatibleState, migrate_state
 from world_sim.simulation.people.context import ContextBuilder
 from world_sim.simulation.people.generate import age_years, band_of
 from world_sim.simulation.rules import ready
@@ -93,18 +96,21 @@ def test_biography_includes_seeded_institutions_in_crild(fresh_model):
     assert set(context["culturalContext"]["localInstitutions"]) == {"Trading networks", "Wetland housing"}
 
 
-def test_v9_news_keeps_original_publication_day_when_loading_and_restoring(fresh_model):
+@pytest.mark.parametrize("schema", [8, 9, 12])
+def test_news_keeps_original_publication_day_when_loading_and_restoring(fresh_model, schema):
     manager = ScenarioManager(fresh_model)
     session = manager.session("baseline-pilot")
     scenario_id = session.meta.id
     origin = next(s.settlementId for s in session.state.settlements if s.name == "Falanenerwin")
     event = manager.intervene(scenario_id, Intervention(kind="granary-loss", settlementId=origin))[0]
     manager.step(scenario_id, 30)
-    snapshot = manager.snapshot(scenario_id, "v9 news")
+    snapshot = manager.snapshot(scenario_id, f"v{schema} news")
     raw = session.state.model_dump()
-    raw["schemaVersion"] = 9
-    raw["travel"].pop("newsPublishedDays", None)
-    from world_sim.canonical import state_digest
+    raw["schemaVersion"] = schema
+    if schema == 8:
+        raw.pop("travel")
+    else:
+        raw["travel"].pop("newsPublishedDays")
 
     snap_meta = {**snapshot.model_dump(), "checksum": state_digest(raw)}
     manager.store.save_snapshot(scenario_id, snap_meta, raw)
@@ -119,18 +125,53 @@ def test_v9_news_keeps_original_publication_day_when_loading_and_restoring(fresh
     assert session.state.travel.newsPublishedDays[event.id] == 0
 
 
-def test_older_reports_expire_without_refreshing_when_caravans_relay_them(fresh_model):
+@pytest.mark.parametrize("max_age", [36, 42])
+def test_older_reports_expire_without_refreshing_when_caravans_relay_them(fresh_model, max_age):
     manager = ScenarioManager(fresh_model)
     session = manager.session("baseline-pilot")
     origin = next(s.settlementId for s in session.state.settlements if s.name == "Falanenerwin")
     report = manager.intervene(session.meta.id, Intervention(kind="granary-loss", settlementId=origin))[0]
+    destination_report = manager.intervene(session.meta.id, Intervention(kind="granary-loss", settlementId=VHALTHA))[0]
     rules = manager.rules(session)
-    rules["simulation"]["travel"] = {**rules["simulation"]["travel"], "newsMaxAgeDays": 36}
+    rules["simulation"]["travel"] = {**rules["simulation"]["travel"], "newsMaxAgeDays": max_age}
     traveling, _ = advance_frames(session.state, 36, rules)
     sale = next(c for c in traveling.trade.caravans if c.fromId == origin and c.kind == "sale")
     assert report.id in sale.news and sale.arriveDay > 36
 
-    expired, _ = advance_frames(traveling, sale.arriveDay - 36, rules)
+    arrived, _ = advance_frames(traveling, sale.arriveDay - 36, rules)
+    master = next(p for p in arrived.cast.people if p.id == sale.carrierId)
+    if sale.arriveDay <= max_age:
+        assert report.id in arrived.travel.news[sale.toId]
+        assert arrived.travel.newsPublishedDays[report.id] == report.day
+        assert next(k.learnedDay for k in master.knowledge if k.eventId == destination_report.id) == sale.arriveDay
+        expired, _ = advance_frames(arrived, max_age + 1 - sale.arriveDay, rules)
+    else:
+        assert all(k.eventId not in {report.id, destination_report.id} for p in arrived.cast.people for k in p.knowledge)
+        expired = arrived
     assert report.id not in expired.travel.news.get(sale.toId, [])
     assert report.id not in expired.travel.news.get(origin, [])
-    assert all(k.eventId != report.id for p in expired.cast.people for k in p.knowledge)
+
+
+
+def test_legacy_allocation_can_reassign_a_preference_to_find_an_age_compatible_slot(eldara):
+    from world_sim.peoples.catalog import choose_ancestry
+    from world_sim.simulation.people.legacy import assign_residents
+
+    [town] = _baseline(eldara, [VHALTHA]).settlements
+    town = town.model_copy(update={"ancestries": {"human": Cohorts(children=1, adults=1, elders=0),
+                                                 "dwarf": Cohorts(children=1, adults=0, elders=0)}})
+    cfg = ready(eldara.config.rules)["simulation"]["people"]
+    cfg = {**cfg, "ancestries": {"dwarf": {"ages": {"child": [0, 29], "adult": [30, 59], "elder": [60, 80]}}}}
+    seed = next(seed for seed in range(100) if choose_ancestry({"dwarf": 1, "human": 1}, seed, "a") == "dwarf")
+    people = [{"id": pid, "birthDay": -age * cfg["daysPerYear"]} for pid, age in (("a", 10), ("b", 20), ("c", 20))]
+    assigned = assign_residents(town, people, day=0, seed=seed, cfg=cfg)
+    assert assigned["a"] == "human" and {assigned["b"], assigned["c"]} == {"dwarf", "human"}
+
+
+def test_v7_reports_a_conflicting_census_without_rewriting_the_save(eldara):
+    raw, rules = _v7_legacy_fixture(eldara)
+    raw["settlements"][0]["cohorts"] = Cohorts(children=0, adults=4, elders=0).model_dump()
+    checksum = state_digest(raw)
+    with pytest.raises(IncompatibleState, match="cannot fit within the saved ancestry and age cohorts"):
+        migrate_state(raw, eldara, rules)
+    assert state_digest(raw) == checksum

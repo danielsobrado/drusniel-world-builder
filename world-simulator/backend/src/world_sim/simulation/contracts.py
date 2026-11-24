@@ -10,7 +10,7 @@ from .climate import ClimateState
 from .economy.contracts import SettlementEconomy, Trade
 from .people.contracts import Cast
 
-STATE_SCHEMA_VERSION = 12
+STATE_SCHEMA_VERSION = 13
 
 
 class Contract(BaseModel):
@@ -73,6 +73,7 @@ class TravelState(Contract):
     journeys: list[Journey] = []
     sequence: int = 0
     news: dict[str, list[str]] = {}
+    newsPublishedDays: dict[str, int] = {}
     newsWitnesses: dict[str, list[str]] = {}
     pendingIncidents: list[dict[str, Any]] = []
 

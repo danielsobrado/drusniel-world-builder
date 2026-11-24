@@ -1,5 +1,6 @@
 """Upgrades saved scenario states to the current schema. Each step is deterministic."""
 
+from collections import defaultdict
 from typing import Any
 
 from ..geography.paths import RoutePlanner, build_routes
@@ -16,6 +17,7 @@ from .economy.roads import initial_roads
 from .engine import build_settlements
 from .finance import HouseholdFinances
 from .people.generate import initial_cast
+from .people.legacy import assign_residents
 from .rules import ready
 from .society import initial_society
 
@@ -88,19 +90,37 @@ def _v7_to_v8(raw: dict[str, Any], model: WorldModel, rules: dict) -> dict:
         cohorts = established(Cohorts(**row["cohorts"]), weights)
         settlement = SettlementState(**{**row, "identity": identity, "ancestries": cohorts,
                                          "environment": environment(records.get(row["settlementId"], {}))})
-        settlements.append(settlement.model_copy(update={"infrastructure": infrastructure(settlement, rules.get("peoples", {}))})
-                           .model_dump())
+        settlements.append(settlement.model_copy(update={"infrastructure": infrastructure(settlement, rules.get("peoples", {}))}))
+
+    residents = defaultdict(list)
+    for row in raw["cast"]["people"]:
+        if row.get("alive", True):
+            residents[row["settlementId"]].append(row)
+    cfg = ready(rules)["simulation"]["people"]
+    assigned = {}
+    for town in settlements:
+        try:
+            assigned.update(assign_residents(town, residents[town.settlementId], day=raw["date"]["day"], seed=raw["seed"], cfg=cfg))
+        except ValueError as exc:
+            raise IncompatibleState(str(exc)) from exc
+
     people = []
     for row in raw["cast"]["people"]:
-        source = row["id"].split(":")
         origin = row.get("birthplaceId")
-        if not origin and len(source) == 3 and source[1].isdigit():
-            origin = settlement_id(int(source[1]))
+        if not origin:
+            source = row["id"].split(":")
+            origin = settlement_id(int(source[1])) if len(source) == 3 and source[1].isdigit() else None
         learned, weights = known.get(origin, neutral)
         home, _ = known.get(row["settlementId"], neutral)
-        identity = person_identity(choose_ancestry(weights, raw["seed"], row["id"]), learned, home, origin, row["householdId"])
+        ancestry = assigned.get(row["id"])
+        if ancestry is None:
+            if row.get("alive", True):
+                raise IncompatibleState(f"{row['id']} has no settlement in the saved census")
+            ancestry = choose_ancestry(weights, raw["seed"], row["id"])
+        identity = person_identity(ancestry, learned, home, origin, row["householdId"])
         people.append({**row, **{key: value.model_dump() for key, value in identity.items()}})
-    return {**raw, "schemaVersion": 8, "settlements": settlements, "cast": {**raw["cast"], "people": people}}
+    return {**raw, "schemaVersion": 8, "settlements": [town.model_dump() for town in settlements],
+            "cast": {**raw["cast"], "people": people}}
 
 
 def _v8_to_v9(raw: dict, model: WorldModel, rules: dict) -> dict:
@@ -154,7 +174,12 @@ def _v11_to_v12(raw: dict) -> dict:
     return {**raw, "schemaVersion": 12, "settlements": settlements}
 
 
-STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7}
+def _v12_to_v13(raw: dict[str, Any], model: WorldModel) -> dict[str, Any]:
+    """The manager fills in publication dates from the canonical history archive."""
+    return {**raw, "schemaVersion": 13}
+
+
+STEPS = {1: _v1_to_v2, 2: _v2_to_v3, 3: _v3_to_v4, 4: _v4_to_v5, 5: _v5_to_v6, 6: _v6_to_v7, 12: _v12_to_v13}
 
 
 def migrate_state(raw: dict[str, Any], model: WorldModel, rules: dict | None = None) -> tuple[ScenarioState, int]:

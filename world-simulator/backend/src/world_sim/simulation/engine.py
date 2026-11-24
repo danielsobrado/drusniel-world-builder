@@ -26,7 +26,7 @@ from .people.life import people_month
 from .phase_timings import PhaseTimings
 from .rules import ready
 from .society import check_invariants, initial_society, update_society
-from .travel_news import assign_carriers, propagate, remember
+from .travel_news import assign_carriers, expire, propagate, remember
 
 
 def build_settlements(model: WorldModel, rows: list[tuple[dict[str, Any], dict[str, Any], Cohorts, Society]],
@@ -131,6 +131,7 @@ def advance_frames(state: ScenarioState, days: int, rules: dict[str, Any], *,
     travel_cfg = rules["simulation"]["travel"]
     knowledge = rules["simulation"]["people"]["knowledge"]
     min_news = knowledge.get("rumourMinImportance", knowledge["minImportance"])
+    max_news_age = travel_cfg.get("newsMaxAgeDays", 90)
     next_incident = min((i["day"] for i in travel.pendingIncidents), default=float("inf"))
     caravan_schedule = None
     next_arrival = float("inf")
@@ -199,6 +200,8 @@ def advance_frames(state: ScenarioState, days: int, rules: dict[str, Any], *,
         travel = remember(today.state, events, min_news, travel_cfg["newsPerSettlement"])
         if arrivals or convoys or month_close or day in departures:
             travel, cast, trade = propagate(travel, cast, trade, arrivals, convoys, day=day, cfg=knowledge, travel_cfg=travel_cfg)
+        elif travel.news:
+            travel = expire(travel, day, max_news_age)
         if month_close:
             cast, past = with_backstory(cast, seq, day, settlements, rules, state.seed)
             seq += len(past)

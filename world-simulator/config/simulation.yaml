@@ -55,6 +55,7 @@ travel:
   maxCompleted: 240
   newsPerSettlement: 24
   newsPerTrip: 8
+  newsMaxAgeDays: 90             # publication day stays fixed as a report changes hands
   stormChance: 0.08
   closureChance: 0.04
   banditChancePerBandit: 0.002
