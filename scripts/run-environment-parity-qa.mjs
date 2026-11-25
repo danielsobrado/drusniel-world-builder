@@ -17,6 +17,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const baseUrl = option('--url', 'http://localhost:5173');
 const output = path.resolve(option('--out', 'tmp/environment-parity'));
 const waterlineOnly = process.argv.includes('--waterline');
+const r187 = process.argv.includes('--r187');
+assert.ok(!(r187 && waterlineOnly), 'Choose one environment fixture.');
 await mkdir(output, { recursive: true });
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
 const report = { url: baseUrl, checks: [], backends: {} };
@@ -29,6 +31,7 @@ try {
     const errors = createBrowserErrorMonitor(page);
     const url = new URL('/scripts/fixtures/environment-parity.html', baseUrl); url.searchParams.set('backend', backend);
     if (waterlineOnly) url.searchParams.set('waterline', '1');
+    if (r187) url.searchParams.set('r187', '1');
     await page.goto(url.href, { waitUntil: 'domcontentloaded' });
     let lastId = null;
     for (;;) {
@@ -67,7 +70,21 @@ try {
     }
     await page.close();
   }
-  if (!process.argv.includes('--capture-only')) {
+  if (r187) {
+    for (const backend of ['webgpu', 'webgl']) {
+      const caseIds = report.backends[backend].cases.map(item => item.id);
+      for (const id of ['r187-environment-off', 'r187-cube-pmrem', 'r187-secondary-uv']) assert.ok(caseIds.includes(id));
+      assert.equal(caseIds.includes('r187-ssgi-half'), backend === 'webgpu');
+      const uv = compareRenderedImages(images.get(`${backend}-r187-cube-pmrem`),
+        images.get(`${backend}-r187-secondary-uv`), { maximumMeanColorError: 1 });
+      report.checks.push({ id: `${backend} secondary UV beauty parity`, ...uv });
+      assert.ok(uv.passed, uv.failures.join(' '));
+    }
+    const sharing = compareRenderedImages(images.get('webgpu-r187-independent-shaders'),
+      images.get('webgpu-r187-shared-shaders'), { maximumMeanColorError: 1 });
+    report.checks.push({ id: 'WebGPU shader sharing preserves per-instance colors', ...sharing });
+    assert.ok(sharing.passed, sharing.failures.join(' '));
+  } else if (!process.argv.includes('--capture-only')) {
   const check = (id, left, right, options = {}) => {
     const result = compareRenderedImages(images.get(left), images.get(right), options);
     report.checks.push({ id, ...result });

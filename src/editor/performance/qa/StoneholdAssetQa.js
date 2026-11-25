@@ -8,6 +8,8 @@ import { createTownKitMaterial } from '../../towns/TownKitMaterial.js';
 import { selectTownLod, townEdgeDistance, TOWN_LOD_NEAR } from '../../towns/TownLod.js';
 import { resolveLook } from '../../towns/TownMaterialPalette.js';
 import { createDenseCliff, DENSE_CLIFF } from './StoneholdDenseCliff.js';
+import { batchComparisonId, createBatchComparison } from './StoneholdBatchComparison.js';
+import { inspectRendererCapabilities } from '../../../render/RendererCapabilities.js';
 
 const NAMES = [
   'Stonehold_Ledge_Small', 'Stonehold_Ledge_Large', 'Stonehold_Twin_Outcrop',
@@ -20,6 +22,7 @@ const mode = query.get('meshlets') ?? 'baseline';
 const comparison = query.has('meshlets');
 const staticMaterial = query.get('material') === 'static';
 const dense = comparison && query.get('module') === DENSE_CLIFF;
+const batchComparison = mode === 'separate' || mode === 'batched';
 if (dense) NAMES.splice(0, NAMES.length, DENSE_CLIFF);
 const controls = Object.fromEntries(['module', 'lod', 'light', 'view'].map(id => [id, document.getElementById(id)]));
 for (const name of NAMES) controls.module.add(new Option(name.replaceAll('_', ' '), name));
@@ -28,12 +31,21 @@ if (!NAMES.includes(controls.module.value)) controls.module.value = 'Stonehold_T
 const status = document.getElementById('status');
 
 async function main() {
-  if (!['baseline', 'authored', 'native', 'external'].includes(mode)) throw new Error(`Unknown meshlet mode: ${mode}`);
+  if (!['baseline', 'authored', 'native', 'visibility', 'external', 'separate', 'batched'].includes(mode)) {
+    throw new Error(`Unknown Stonehold comparison mode: ${mode}`);
+  }
   if (dense && mode === 'external') throw new Error('The dense fixture compares authored LODs and native meshlets.');
-  const occlusion = mode === 'native' && query.get('occlusion') === '1';
+  if (dense && batchComparison) throw new Error('The batch comparison needs heterogeneous kit modules.');
+  const gpuDriven = mode === 'native' || mode === 'visibility';
+  const occlusion = gpuDriven && query.get('occlusion') === '1';
+  const lodThreshold = Number(query.get('lodThreshold') ?? 1);
+  const compileMode = query.get('compile') ?? 'async';
+  if (!Number.isFinite(lodThreshold) || lodThreshold <= 0) throw new Error('lodThreshold must be positive.');
+  if (!['async', 'on-demand'].includes(compileMode)) throw new Error(`Unknown compile mode: ${compileMode}`);
+  const forceWebGL = query.get('webgl') === '1';
   const startup = performance.now();
   const renderer = new THREE.WebGPURenderer({
-    antialias: true, forceWebGL: query.get('webgl') === '1', trackTimestamp: comparison,
+    antialias: true, forceWebGL, trackTimestamp: comparison,
   });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
@@ -47,10 +59,15 @@ async function main() {
   if (comparison && renderer.backend.isWebGPUBackend) {
     renderer.backend.device.addEventListener('uncapturederror', event => console.error(event.error.message));
   }
-  if (mode === 'native') {
-    const { MeshletDrawingPipeline } = await import('three/addons/pipelines/MeshletDrawingPipeline.js');
-    renderer.drawingPipeline = new MeshletDrawingPipeline({ occlusionCulling: occlusion });
+  const actualWebGPU = renderer.backend.isWebGPUBackend === true;
+  if (gpuDriven && actualWebGPU) {
+    const Pipeline = mode === 'native'
+      ? (await import('three/addons/pipelines/MeshletDrawingPipeline.js')).MeshletDrawingPipeline
+      : (await import('three/addons/pipelines/VisibilityBufferDrawingPipeline.js')).VisibilityBufferDrawingPipeline;
+    renderer.drawingPipeline = new Pipeline({ occlusionCulling: occlusion, lodThreshold });
   }
+  const capabilities = inspectRendererCapabilities(renderer, { forceWebGL,
+    requestedPipeline: gpuDriven ? mode : 'standard', effectivePipeline: gpuDriven && actualWebGPU ? mode : 'standard' });
   const assets = new TownKitAssets({ baseUrl: import.meta.env.BASE_URL });
   let townMaterial;
   if (!dense) {
@@ -119,7 +136,7 @@ async function main() {
       vg.dispose(); // The viewer owns one active asset; release the retired geometry pool as well.
     }
     mesh?.removeFromParent();
-    mesh?.dispose();
+    mesh?.dispose?.();
     mesh = null;
     activeGeometry = null;
   }
@@ -131,18 +148,31 @@ async function main() {
     const geometry = far ? farGeometry : nearGeometry;
     if (!geometry) throw new Error(`Missing ${controls.module.value} at LOD ${controls.lod.value}`);
     const frameGeometry = cliff?.source ?? (mode === 'authored' ? nearGeometry : geometry);
-    const size = frameGeometry.boundingBox.getSize(new THREE.Vector3());
-    const centre = frameGeometry.boundingBox.getCenter(new THREE.Vector3());
+    const bounds = frameGeometry.boundingBox.clone();
+    let batchGeometries;
+    if (batchComparison) {
+      const otherName = name === 'Stonehold_Twin_Outcrop' ? 'Stonehold_Fang_Shrine' : 'Stonehold_Twin_Outcrop';
+      const other = (far ? assets.farModules : assets.modules).get(otherName)?.opaque;
+      if (!other) throw new Error(`Missing batch partner ${otherName} at LOD ${controls.lod.value}`);
+      batchGeometries = [geometry, other];
+      bounds.union(other.boundingBox);
+    }
+    const size = bounds.getSize(new THREE.Vector3());
+    const centre = bounds.getCenter(new THREE.Vector3());
     if (activeGeometry !== geometry) {
       unload();
       activeGeometry = geometry;
-      mesh = new THREE.InstancedMesh(geometry, material, copies);
-      for (let i = 0; i < copies; i += 1) {
-        mesh.setMatrixAt(i, new THREE.Matrix4().makeTranslation((i % columns) * (size.x + 4), 0, Math.floor(i / columns) * (size.z + 4)));
-        mesh.setColorAt(i, new THREE.Color(0.95, 0.95, 0.95));
+      if (batchComparison) {
+        mesh = createBatchComparison({ geometries: batchGeometries, material, copies, columns,
+          spacingX: size.x + 4, spacingZ: size.z + 4, batched: mode === 'batched' });
+      } else {
+        mesh = new THREE.InstancedMesh(geometry, material, copies);
+        for (let i = 0; i < copies; i += 1) {
+          mesh.setMatrixAt(i, new THREE.Matrix4().makeTranslation((i % columns) * (size.x + 4), 0, Math.floor(i / columns) * (size.z + 4)));
+          mesh.setColorAt(i, new THREE.Color(0.95, 0.95, 0.95));
+        }
+        mesh.castShadow = mesh.receiveShadow = true;
       }
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
       subject.add(mesh);
       const current = { module: controls.module.value, lod: Number(controls.lod.value), copies, triangles: geometry.index.count / 3 };
       if (comparison) Object.assign(current, { mode, occlusion, material: dense ? 'stone-pbr' : staticMaterial ? 'static' : 'town', converted: 0, buildMs: 0 });
@@ -196,6 +226,13 @@ async function main() {
   const state = window.__stoneholdQa = { ready: false, renderer, assets, scene, camera, update, frameTimes: [] };
   if (comparison) Object.assign(state, {
     timestamps, orbit, unload, vg,
+    capabilities, compileMode, lodThreshold,
+    pickAt(x, y) {
+      if (!batchComparison) return null;
+      const ray = new THREE.Raycaster();
+      ray.setFromCamera(new THREE.Vector2(x, y), camera);
+      return batchComparisonId(ray.intersectObject(subject)[0]) ?? null;
+    },
     setSubjectVisible(value) { subject.visible = value; },
     setShadows(value) { renderer.shadowMap.enabled = value; },
     shiftOrigin(offset) {
@@ -228,15 +265,15 @@ async function main() {
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
   });
-  if (mode === 'native' && renderer.backend.isWebGPUBackend) {
+  if (gpuDriven && actualWebGPU) {
     const buildStart = performance.now();
     await renderer.drawingPipeline.prepareAsync(scene, camera);
     state.current.buildMs = performance.now() - buildStart;
   }
   const compileStart = performance.now();
   if (vg) await vg.compileAsync(renderer, scene, camera);
-  else await renderer.compileAsync(scene, camera);
-  state.compileMs = performance.now() - compileStart;
+  else if (compileMode === 'async') await renderer.compileAsync(scene, camera);
+  state.compileMs = vg || compileMode === 'async' ? performance.now() - compileStart : null;
   let previous = performance.now();
   renderer.setAnimationLoop(() => {
     if (state.preparing) return;
@@ -245,11 +282,14 @@ async function main() {
     if (state.measuring) state.frameTimes.push(dt);
     previous = now;
     if (state.beforeRender?.() === false) return;
-    const start = state.afterRender ? performance.now() : 0;
+    const start = state.afterRender || !state.ready ? performance.now() : 0;
     state.applyAuthoredLod?.();
     renderer.render(scene, camera);
     state.afterRender?.(dt, performance.now() - start);
-    if (!state.ready) state.firstFrameMs = performance.now() - startup;
+    if (!state.ready) {
+      state.firstFrameMs = performance.now() - startup;
+      state.firstRenderCpuMs = performance.now() - start;
+    }
     state.ready = true;
   });
 }

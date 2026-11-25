@@ -1,9 +1,27 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import sharp from 'sharp';
+import { BoxGeometry, MeshBasicMaterial, Raycaster, SphereGeometry, Vector3 } from 'three/webgpu';
 
 import { stoneholdVisualGates } from '../scripts/lib/stonehold-visual-gates.mjs';
 import { createDenseCliff } from '../src/editor/performance/qa/StoneholdDenseCliff.js';
+import { createBatchComparison, batchComparisonId } from '../src/editor/performance/qa/StoneholdBatchComparison.js';
+
+test('batch comparison preserves geometry placement and picking identity', () => {
+  const geometries = [new BoxGeometry(), new SphereGeometry(0.5)];
+  const material = new MeshBasicMaterial();
+  for (const batched of [false, true]) {
+    const subject = createBatchComparison({ geometries, material, copies: 2, columns: 2,
+      spacingX: 3, spacingZ: 3, batched });
+    subject.updateMatrixWorld(true);
+    const ray = new Raycaster(new Vector3(3, 0.1, 3), new Vector3(0, 0, -1));
+    const [hit] = ray.intersectObject(subject);
+    assert.equal(batchComparisonId(hit), 1);
+    subject.dispose?.();
+  }
+  material.dispose();
+  geometries.forEach(geometry => geometry.dispose());
+});
 
 test('visual gates flag a localized missing foreground while preserving the other checks', async () => {
   const image = async (topLeft, topRight, bottomLeft) => {

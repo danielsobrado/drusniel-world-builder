@@ -12,9 +12,11 @@ import { runWaterBodyAppearanceFixture } from './WaterBodyAppearanceFixture.js';
 import { runTerrainCoastAppearanceFixture } from './TerrainCoastAppearanceFixture.js';
 import { runShoreDetailsAppearanceFixture } from './ShoreDetailsAppearanceFixture.js';
 import { runUnderwaterWaterlineFixture } from './UnderwaterWaterlineFixture.js';
+import { inspectRendererCapabilities } from '../../../render/RendererCapabilities.js';
 
 // A bounded render fixture. The world movement harness remains the performance authority.
-const backend = new URLSearchParams(location.search).get('backend') ?? 'webgpu';
+const params = new URLSearchParams(location.search);
+const backend = params.get('backend') ?? 'webgpu';
 const requiredLimits = backend === 'webgpu' ? await raiseDeviceLimits({}, { powerPreference: 'high-performance' }) : {};
 const renderer = new THREE.WebGPURenderer({ antialias: false, forceWebGL: backend === 'webgl', powerPreference: 'high-performance', requiredLimits });
 const pruning = installUnusedSamplerPruning(renderer);
@@ -22,7 +24,8 @@ await renderer.init(); renderer.setSize(640, 480); renderer.setPixelRatio(1);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
 document.body.append(renderer.domElement);
 const actualBackend = renderer.backend.isWebGPUBackend ? 'webgpu' : 'webgl';
-const state = { renderer, report: { backend: actualBackend, requestedBackend: backend, cases: [] }, pendingCapture: null };
+const state = { renderer, report: { backend: actualBackend, requestedBackend: backend,
+  capabilities: inspectRendererCapabilities(renderer, { forceWebGL: backend === 'webgl' }), cases: [] }, pendingCapture: null };
 window.__environmentFixture = state;
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0);
 const camera = new THREE.OrthographicCamera(-4, 4, 3, -3, 0.1, 100);
@@ -42,9 +45,12 @@ async function publishCapture(id, extra = {}) {
 }
 try {
   if (actualBackend !== backend) throw new Error(`Requested ${backend}, renderer selected ${actualBackend}.`);
-  if (new URLSearchParams(location.search).has('waterline')) {
+  if (params.has('r187')) {
+    const { runR187RenderExperiments } = await import('./R187RenderExperiments.js');
+    await runR187RenderExperiments(renderer, publishCapture);
+  } else if (params.has('waterline')) {
     await runUnderwaterWaterlineFixture(renderer, publishCapture);
-  } else if (new URLSearchParams(location.search).has('shoreDetails')) {
+  } else if (params.has('shoreDetails')) {
     await runShoreDetailsAppearanceFixture(renderer, publishCapture);
   } else {
   const manifest = await (await fetch('/assets/impostors/trees/manifest.json')).json();

@@ -15,25 +15,38 @@ const value = (key, fallback) => args.includes(`--${key}`) ? args[args.indexOf(`
 const url = value('url', 'http://localhost:5173');
 const out = path.resolve(value('out', 'tmp/stonehold-meshlets'));
 const suite = value('suite', 'kit');
-assert.ok(['kit', 'dense', 'buffers'].includes(suite), 'Unknown Stonehold suite');
-const dense = suite === 'dense';
-const modes = value('modes', dense ? 'authored,native,native-hzb' : 'baseline,authored,native,external').split(',');
-assert.ok(modes[0] === (dense ? 'authored' : 'baseline') && new Set(modes).size === modes.length
-  && modes.every(mode => (dense ? ['authored', 'native', 'native-hzb'] : ['baseline', 'authored', 'native', 'external']).includes(mode)));
+const suites = {
+  kit: ['baseline', 'authored', 'native', 'external'],
+  dense: ['authored', 'native', 'native-hzb'],
+  buffers: ['baseline', 'authored', 'native', 'external'],
+  drawing: ['baseline', 'native', 'visibility'],
+  batch: ['separate', 'batched'],
+};
+assert.ok(Object.hasOwn(suites, suite), 'Unknown Stonehold suite');
+const dense = suite === 'dense' || suite === 'drawing';
+const modes = value('modes', suites[suite].join(',')).split(',');
+const optionalModes = suite === 'drawing' ? ['native-hzb', 'visibility-hzb'] : suite === 'kit' ? ['visibility'] : [];
+assert.ok(modes[0] === suites[suite][0] && new Set(modes).size === modes.length
+  && modes.every(mode => [...suites[suite], ...optionalModes].includes(mode)), 'Invalid modes or missing reference arm');
 const heights = dense ? value('resolutions', '1080,1440,2160').split(',').map(Number) : [720];
-const instanceCounts = dense ? value('copies', '1,16,100').split(',').map(Number) : [16];
+const instanceCounts = dense ? value('copies', suite === 'drawing' ? '1,16' : '1,16,100').split(',').map(Number) : [16];
+const compileMode = value('compile', 'async');
+const lodThreshold = Number(value('lod-threshold', '1'));
+const cycles = Number(value('cycles', '3'));
+assert.ok(['async', 'on-demand'].includes(compileMode) && Number.isFinite(lodThreshold) && lodThreshold > 0);
+assert.ok(Number.isInteger(cycles) && cycles > 0);
 assert.ok(heights.every(height => [720, 1080, 1440, 2160].includes(height)));
 assert.ok(instanceCounts.every(count => [1, 16, 100].includes(count)));
 const fixtures = dense ? ['Dense_Cliff'] : ['Stonehold_Fang_Shrine', 'Stonehold_Twin_Outcrop'];
 const timingCases = suite === 'buffers' ? [] : fixtures.flatMap(fixture => heights.flatMap(height =>
   instanceCounts.map(copies => [fixture, height, copies])));
-const report = { recordedAt: new Date().toISOString(), suite, runs: [], checks: [] };
+const report = { recordedAt: new Date().toISOString(), suite, compileMode, lodThreshold, runs: [], checks: [] };
 
 function stats(values) {
   const sorted = [...values].sort((a, b) => a - b);
   assert.ok(sorted.length && sorted.every(Number.isFinite), 'empty or invalid timings');
   const percentile = p => sorted[Math.ceil(p * sorted.length) - 1];
-  return { samples: sorted.length, p50: percentile(0.50), p95: percentile(0.95), max: sorted.at(-1) };
+  return { samples: sorted.length, p50: percentile(0.50), p95: percentile(0.95), p99: percentile(0.99), max: sorted.at(-1) };
 }
 
 async function pixelDiff(imageA, imageB) {
@@ -156,7 +169,7 @@ async function capturePoses(page, run, comparisonShots) {
   await select(page, 'view', 'hero');
   run.hero = await inspect(page);
   const hero = await take('hero');
-  if (mode === 'native') assert.ok(run.hero.native?.triangles > 0 && run.hero.draws.indirect > 0);
+  if (mode === 'native' || mode === 'visibility') assert.ok(run.hero.native?.triangles > 0 && run.hero.draws.indirect > 0);
   if (mode === 'external') assert.ok(run.hero.external?.drawnTriangles > 0 && !run.hero.external.overflow && run.hero.draws.indirect > 0);
   if (mode === 'baseline') {
     await page.evaluate(() => window.__stoneholdQa.setSubjectVisible(false));
@@ -235,7 +248,7 @@ async function captureBufferLifecycle(browser, page) {
   assert.equal(control.after.staging.createdBytes - (control.before.staging?.createdBytes ?? 0), 16);
   assert.equal(control.after.staging.destroyedBytes - (control.before.staging?.destroyedBytes ?? 0), 16);
   const samples = [await sample('initial-loaded')];
-  for (let cycle = 1; cycle <= 3; cycle++) {
+  for (let cycle = 1; cycle <= cycles; cycle++) {
     await select(page, 'lod', '1');
     await page.evaluate(() => window.__stoneholdQa.unload());
     await waitFrames(page);
@@ -263,16 +276,16 @@ try {
   await (await focusPerfBrowser(browser, page, { headed: true }))();
 
   async function load(mode, module, material, copies, webgl = false) {
-    const occlusion = mode === 'native-hzb';
-    const query = new URLSearchParams({ meshlets: occlusion ? 'native' : mode, module, material, copies,
+    const occlusion = mode.endsWith('-hzb');
+    const query = new URLSearchParams({ meshlets: mode.replace(/-hzb$/, ''), module, material, copies, compile: compileMode, lodThreshold,
       occlusion: occlusion ? '1' : '0', webgl: webgl ? '1' : '0', buffers: suite === 'buffers' ? '1' : '0' });
     await page.goto(`${url}/stonehold-qa.html?${query}`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__stoneholdQa?.ready || window.__stoneholdQaError, null, { timeout: 120000 });
     const context = await page.evaluate(async () => {
       if (window.__stoneholdQaError) throw new Error(window.__stoneholdQaError);
-      const { current, firstFrameMs, compileMs, renderer, timestamps } = window.__stoneholdQa;
+      const { current, firstFrameMs, firstRenderCpuMs, compileMs, renderer, timestamps, capabilities } = window.__stoneholdQa;
       const adapter = renderer.backend.isWebGPUBackend ? (await navigator.gpu.requestAdapter())?.info : null;
-      return { current, firstFrameMs, compileMs, timestamps, webgpu: renderer.backend.isWebGPUBackend === true,
+      return { current, firstFrameMs, firstRenderCpuMs, compileMs, timestamps, capabilities, webgpu: renderer.backend.isWebGPUBackend === true,
         adapter: adapter ? { vendor: adapter.vendor, architecture: adapter.architecture, fallback: adapter.isFallbackAdapter } : null };
     });
     assert.equal(context.webgpu, !webgl);
@@ -294,9 +307,11 @@ try {
     const viewport = { width: Math.round(height * 16 / 9), height };
     await page.setViewportSize(viewport);
     const comparisonShots = new Map();
-    for (const [index, mode] of [...modes, ...modes.toReversed()].entries()) {
+    const repeats = suite === 'drawing' || suite === 'batch' ? [...modes, ...modes.toReversed(), ...modes] : [...modes, ...modes.toReversed()];
+    let batchReference;
+    for (const [index, mode] of repeats.entries()) {
       const context = await load(mode, fixture, 'static', copies);
-      const run = { ...context, viewport, repeat: index < modes.length ? 1 : 2 };
+      const run = { ...context, viewport, repeat: Math.floor(index / modes.length) + 1 };
       report.runs.push(run);
       assert.ok(context.timestamps, 'WebGPU timestamp queries are required for this comparison');
       if (dense && context.current.mode === 'native') assert.ok(context.current.triangles >= 300000);
@@ -321,11 +336,28 @@ try {
         break;
       }
       assert.ok(run.focus.passed, 'benchmark lost foreground focus');
-      if (run.repeat === 1 && !dense && mode !== 'authored') await capturePoses(page, run, comparisonShots);
+      if (run.repeat === 1 && !dense && mode !== 'authored' && suite !== 'batch') await capturePoses(page, run, comparisonShots);
+      if (run.repeat === 1 && suite === 'batch') {
+        await select(page, 'view', 'hero');
+        const picks = await page.evaluate(() => {
+          const { pickAt } = window.__stoneholdQa;
+          const offsets = Array.from({ length: 21 }, (_, index) => (index - 10) * 0.07);
+          return offsets.flatMap(y => offsets.map(x => pickAt(x, y)));
+        });
+        run.hero = await inspect(page);
+        const image = await screenshot(page, `${fixture}-${mode}`);
+        if (mode === 'separate') batchReference = { image, picks };
+        else {
+          assert.ok(batchReference.picks.some(pick => pick !== null), 'Batch comparison missed all subjects');
+          assert.deepEqual(picks, batchReference.picks, 'Batch comparison changed picking IDs');
+          run.batchPixelDiff = await pixelDiff(image, batchReference.image);
+          assert.ok(run.batchPixelDiff < 0.01, `Batch comparison changed over 1% of pixels: ${run.batchPixelDiff}`);
+        }
+      }
       if (run.repeat === 1 && dense) {
         await waitFrames(page, 100);
         run.hero = await inspect(page);
-        if (mode !== 'authored') assert.ok(run.hero.native?.triangles > 0 && run.hero.draws.indirect > 0);
+        if (mode.startsWith('native') || mode.startsWith('visibility')) assert.ok(run.hero.native?.triangles > 0 && run.hero.draws.indirect > 0);
         if (height === 1080) await screenshot(page, `${fixture}-${mode}-${copies}-${height}`);
       }
       assert.equal(browserErrors.snapshot().count, 0, JSON.stringify(browserErrors.snapshot()));
