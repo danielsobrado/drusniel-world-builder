@@ -1,5 +1,5 @@
 /**
- * Renders the world wind field into `worldWindTarget` once per frame, and
+ * Renders the world wind field into `worldWindTarget` at its scheduled cadence, and
  * answers CPU queries for the same field.
  *
  * The texture window follows the camera but is snapped to whole texels in

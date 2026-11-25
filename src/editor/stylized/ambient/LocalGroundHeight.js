@@ -132,7 +132,7 @@ export class LocalGroundHeight {
         if ((row * resolution + column) % 64 === 63) yield;
       }
     }
-    while (budgetProvider() && !budgetProvider().canPublish(data.byteLength)) yield 'wait-publication-budget';
+    while (budgetProvider()?.canPublish?.(data.byteLength) === false) yield 'wait-publication-budget';
     this.data = data;
     this.texture.image.data = data;
     PerfCounters.inc('localGroundUploadBytes', data.byteLength);

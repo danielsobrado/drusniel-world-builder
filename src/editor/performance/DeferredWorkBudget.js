@@ -3,7 +3,7 @@ import { PerfCounters } from './qa/PerfCounters.js';
 import { PreparationPressure, hasPreparationBacklog } from './PreparationPressure.js';
 
 const UPLOAD_COUNTERS = [
-  'textureBytesUploaded', 'attributeBytesUploaded', 'terrainMaterialBakeGpuUploadBytes',
+  'textureBytesUploaded', 'attributeBytesUploaded', 'publicationCustomAttributeBytes', 'terrainMaterialBakeGpuUploadBytes',
   'streamedDrawInitialUploadBytes', 'localGroundUploadBytes',
 ];
 

@@ -41,7 +41,15 @@ export class StreamedDrawPreparation {
     // busy scene must not leave these meshes hidden indefinitely.
     if (++this.waitFrames >= MAX_WAIT_FRAMES) {
       this.reservation = budget.reserve(6);
-      if (this.reservation) this.releaseUpload = budget.reserveUpload?.(INITIAL_UPLOAD_BYTES_PER_FRAME);
+      if (this.reservation) {
+        const mesh = this.pending.values().next().value;
+        const attributes = this.initialUploadAttributes.get(mesh);
+        const sliced = attributes && this.attributeInitialization.supported;
+        const estimate = this.uploadEstimate.estimate(mesh, new Set(), sliced ? attributes : []);
+        const initial = this.initialUploadBytes.get(mesh) ?? 0;
+        const bytes = sliced ? INITIAL_UPLOAD_BYTES_PER_FRAME + estimate.bytes : Math.max(initial, estimate.bytes);
+        this.releaseUpload = budget.reserveUpload?.(bytes);
+      }
     }
   }
   flushBudgeted(camera, budget) {
@@ -50,7 +58,7 @@ export class StreamedDrawPreparation {
     this.releaseUpload?.();
     this.releaseUpload = null;
     const bytes = Math.min(INITIAL_UPLOAD_BYTES_PER_FRAME, budget.remainingUploadBytes?.() ?? Infinity);
-    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget));
+    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget, this.waitFrames >= MAX_WAIT_FRAMES * 2));
     else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes, budget), 6);
   }
   register(root, { uploadBytes = 0, uploadAttributes = null } = {}) {
@@ -85,7 +93,7 @@ export class StreamedDrawPreparation {
   isMaterialReady(mesh, material) {
     return !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material) === true;
   }
-  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null) {
+  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null, aged = false) {
     this.revealPending();
     if (shouldYield?.()) return;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) return;
@@ -120,7 +128,8 @@ export class StreamedDrawPreparation {
         const bytes = budgeted ? estimate.bytes : Math.max(initial, estimate.bytes);
         // An indivisible upload may exceed the local slice only if the shared budget admits it.
         if (uploadBytes + bytes > byteLimit && (targets.length || budgetedBytes > 0
-            || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
+            || (budget ? !budget.canPublish(uploadBytes + bytes) && !aged : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
+        if (budget && !budget.canPublish(uploadBytes + bytes)) PerfCounters.inc('streamedOversizedPublicationBytes', bytes);
         for (const buffer of estimate.buffers) plannedBuffers.add(buffer);
         this.pending.delete(mesh);
         uploadBytes += bytes;

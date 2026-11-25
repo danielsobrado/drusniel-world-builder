@@ -114,6 +114,7 @@ export class TerrainCommitQueue {
     maxCommits = this.maxCommitsPerFrame,
     budgetMs = this.commitBudgetMs,
     maxUploadBytes = Number.POSITIVE_INFINITY,
+    canPublishUpload = null,
   } = {}) {
     assertMaxCommits(maxCommits, { allowInfinity: true });
     assertBudgetMs(budgetMs, { allowInfinity: true });
@@ -136,6 +137,7 @@ export class TerrainCommitQueue {
       const bytes = (job.page?.tilePixels?.byteLength ?? 0)
         + (job.page?.surfaceMaskPixels?.byteLength ?? 0) + (job.page?.heights?.byteLength ?? 0);
       // Allow one indivisible oversized page so the queue cannot deadlock.
+      if (canPublishUpload && !canPublishUpload(bytes)) break;
       if (bytes > 0 && maxUploadBytes === 0) break;
       if (committed > 0 && uploadBytes + bytes > maxUploadBytes) break;
       this.queue.pop();

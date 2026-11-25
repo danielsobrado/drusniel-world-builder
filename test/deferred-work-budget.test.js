@@ -62,12 +62,13 @@ test('publication accounting shares one allowance without double-counting water'
   PerfCounters.inc('textureBytesUploaded', 40);
   PerfCounters.inc('waterUploadBytes', 40);
   PerfCounters.inc('attributeBytesUploaded', 10);
-  assert.equal(budget.remainingUploadBytes(), 50);
-  assert.equal(budget.canPublish(51), false);
+  PerfCounters.inc('publicationCustomAttributeBytes', 5);
+  assert.equal(budget.remainingUploadBytes(), 45);
+  assert.equal(budget.canPublish(46), false);
   const release = budget.reserveUpload(30);
-  assert.equal(budget.remainingUploadBytes(), 20);
+  assert.equal(budget.remainingUploadBytes(), 15);
   release(); release();
-  assert.equal(budget.remainingUploadBytes(), 50);
+  assert.equal(budget.remainingUploadBytes(), 45);
   budget.beginFrame();
   assert.equal(budget.remainingUploadBytes(), 100);
 });

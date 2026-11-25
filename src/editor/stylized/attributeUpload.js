@@ -19,6 +19,7 @@ export function markAttributeRangeUpdated(attribute, usedCount, { counter = 'att
   const bytes = floats * (attribute.array?.BYTES_PER_ELEMENT ?? 4);
   if (bytes > 0) {
     PerfCounters.inc(counter, bytes);
+    if (counter !== 'attributeBytesUploaded') PerfCounters.inc('publicationCustomAttributeBytes', bytes);
   }
   return bytes;
 }
@@ -84,6 +85,7 @@ export function markAttributeSubrangeUpdated(
   const bytes = Math.max(0, queuedFloats - previousFloats) * (attribute.array?.BYTES_PER_ELEMENT ?? 4);
   if (bytes > 0) {
     PerfCounters.inc(counter, bytes);
+    if (counter !== 'attributeBytesUploaded') PerfCounters.inc('publicationCustomAttributeBytes', bytes);
   }
   return bytes;
 }

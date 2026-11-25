@@ -13,7 +13,7 @@ export class WaterObstacleUpdates {
       for (const slot of surface.waterSlots) slot.obstacleDescriptor = null;
     }
     for (const slot of surface.waterSlots) {
-      if (!slot.hasWaterCoverage || !slot.hasRiverWater || !slot.isWithinRefractionRange()) { this.jobs.delete(slot); continue; }
+      if (!slot.mesh.visible || !slot.hasWaterCoverage || !slot.hasRiverWater || !slot.isWithinRefractionRange()) { this.jobs.delete(slot); continue; }
       const descriptor = slot.terrainSlot.descriptor;
       if (slot.obstacleDescriptor === descriptor && slot.obstacleVersion === store.version) continue;
       slot.obstacleVersion = store.version;
@@ -43,8 +43,11 @@ export class WaterObstacleUpdates {
           rockHeight: rock => (view.prototypeHeights[rock.prototypeIndex] ?? 1) * rock.scale }) };
       }
       const job = this.active;
-      if (job.slot.terrainSlot.descriptor !== job.descriptor) { this.active = null; continue; }
-      if (job.iterator.next().done) {
+      if (job.slot.terrainSlot.descriptor !== job.descriptor || !job.slot.mesh.visible) { this.active = null; continue; }
+      if (this.jobs.has(job.slot)) { this.active = null; continue; }
+      job.done ||= job.iterator.next().done;
+      if (job.done) {
+        if (surface.publicationBudget?.canPublish(this.scratch.byteLength) === false) break;
         job.slot.waterObstaclePixels.set(this.scratch); job.slot.waterObstacleTexture.needsUpdate = true;
         PerfCounters.inc('waterObstacleUploadBytes', this.scratch.byteLength);
         PerfCounters.inc('textureBytesUploaded', this.scratch.byteLength);

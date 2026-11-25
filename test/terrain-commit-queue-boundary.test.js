@@ -94,3 +94,14 @@ test('terrain publication limits cumulative upload bytes while allowing one over
   assert.deepEqual(committed, [0, 1]);
   assert.equal(queue.size, 1);
 });
+
+test('terrain does not spend capacity reserved for another publisher', () => {
+  const queue = new TerrainCommitQueue({ now: () => 0 });
+  queue.enqueue({ ...createJob(0), page: { heights: new Float32Array(4) } });
+  let committed = 0;
+  queue.flush(() => committed++, null, { maxCommits: 1, maxUploadBytes: 8, canPublishUpload: bytes => bytes <= 8 });
+  assert.equal(committed, 0);
+  assert.equal(queue.size, 1);
+  queue.flush(() => committed++, null, { maxCommits: 1, maxUploadBytes: 8, canPublishUpload: () => true });
+  assert.equal(committed, 1);
+});
