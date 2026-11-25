@@ -16,3 +16,9 @@ export {
   wscGeoTexture,
   wscUniforms,
 } from './WorldSurfaceContextState.js';
+export {
+  TERRAIN_SURFACE_CONSTANTS,
+  createTerrainSurfaceEvaluator,
+  sampleMaterialBakeChannels,
+  srgbByteToLinear,
+} from './TerrainSurfaceEvaluator.js';

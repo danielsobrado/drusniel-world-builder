@@ -86,10 +86,13 @@ import {
   slotBilinearLoad,
   slotVector2,
 } from './materials/TerrainSlotBindings.js';
+import { TERRAIN_SURFACE_CONSTANTS } from './stylized/worldSurfaceContext/TerrainSurfaceEvaluator.js';
 
-const HEIGHT_SHADE_SCALE = 0.018;
-const MINIMUM_HEIGHT_SHADE = 0.72;
-const MAXIMUM_HEIGHT_SHADE = 1.22;
+const {
+  HEIGHT_SHADE_SCALE,
+  MINIMUM_HEIGHT_SHADE,
+  MAXIMUM_HEIGHT_SHADE,
+} = TERRAIN_SURFACE_CONSTANTS;
 
 /**
  * Where the nearest-sampled biome tile is read from: the pixel's own cell,

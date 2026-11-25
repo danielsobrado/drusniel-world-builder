@@ -33,11 +33,14 @@ import {
   applyTerrainWeatheringColor,
   createTerrainWeatheringState,
 } from './TerrainMaterialWeatheringNodes.js';
+import { TERRAIN_SURFACE_CONSTANTS } from '../stylized/worldSurfaceContext/TerrainSurfaceEvaluator.js';
 
 /** Share of a fully snowed point's pigment the bake leaves out. */
-const SNOW_ALBEDO_PURITY = 0.92;
-const ALPINE_ROCK_HEIGHT = 300;
-const ALPINE_ROCK_PURITY = 0.8;
+const {
+  SNOW_ALBEDO_PURITY,
+  ALPINE_ROCK_HEIGHT,
+  ALPINE_ROCK_PURITY,
+} = TERRAIN_SURFACE_CONSTANTS;
 
 const MIN_WEIGHT_SUM = 0.0001;
 const DEBUG_CURVATURE_SCALE = 8;
