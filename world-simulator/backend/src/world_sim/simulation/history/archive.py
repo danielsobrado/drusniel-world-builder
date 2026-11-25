@@ -31,6 +31,7 @@ CAUSES_VERSION = 1      # PRAGMA user_version once the causes table is filled fo
 class HistoryArchive:
     def __init__(self, path: Path):
         self.path = path
+        self.visible_before: int | None = None
         path.parent.mkdir(parents=True, exist_ok=True)
         with closing(self._db()) as db, db:
             db.executescript(SCHEMA)
@@ -67,34 +68,37 @@ class HistoryArchive:
         """Copies the events numbered below `seq` into another (empty) archive, for a branch."""
         other.append(self.query(before=seq, limit=None))
 
+    def _read_limit(self) -> int:
+        return self.visible_before if self.visible_before is not None else 2**63 - 1
+
     def count(self) -> int:
         with closing(self._db()) as db:
-            return db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+            return db.execute("SELECT COUNT(*) FROM events WHERE seq < ?", (self._read_limit(),)).fetchone()[0]
 
     def get(self, event_id: str) -> HistoryEvent | None:
         with closing(self._db()) as db:
-            row = db.execute("SELECT body FROM events WHERE id = ?", (event_id,)).fetchone()
+            row = db.execute("SELECT body FROM events WHERE id = ? AND seq < ?", (event_id, self._read_limit())).fetchone()
         return HistoryEvent(**json.loads(row[0])) if row else None
 
     def many(self, ids: list[str]) -> list[HistoryEvent]:
         if not ids:
             return []
         with closing(self._db()) as db:
-            rows = db.execute(f"SELECT body FROM events WHERE id IN ({','.join('?' * len(ids))}) ORDER BY seq", ids).fetchall()  # noqa: S608
+            rows = db.execute(f"SELECT body FROM events WHERE id IN ({','.join('?' * len(ids))}) AND seq < ? ORDER BY seq", [*ids, self._read_limit()]).fetchall()  # noqa: S608
         return [HistoryEvent(**json.loads(r[0])) for r in rows]
 
     def consequences(self, event: HistoryEvent, limit: int = 20) -> list[HistoryEvent]:
         """Later events that name this one as a cause."""
         with closing(self._db()) as db:
-            rows = db.execute("SELECT e.body FROM causes c JOIN events e ON e.seq = c.seq WHERE c.cause = ? ORDER BY c.seq LIMIT ?",
-                              (event.id, limit)).fetchall()
+            rows = db.execute("SELECT e.body FROM causes c JOIN events e ON e.seq = c.seq WHERE c.cause = ? AND e.seq < ? ORDER BY c.seq LIMIT ?",
+                              (event.id, self._read_limit(), limit)).fetchall()
         return [HistoryEvent(**json.loads(r[0])) for r in rows]
 
     def query(self, *, person: str | None = None, entity: str | None = None, kinds: list[str] | None = None,
               categories: list[str] | None = None, sources: list[str] | None = None, min_importance: int = 1,
               from_day: int | None = None, to_day: int | None = None, before: int | None = None, newest_first: bool = False,
               limit: int | None = 200, offset: int = 0) -> list[HistoryEvent]:
-        where, args = ["e.importance >= ?"], [min_importance]
+        where, args = ["e.importance >= ?", "e.seq < ?"], [min_importance, self._read_limit()]
         joins = ""
         if person:
             joins += " JOIN participants p ON p.seq = e.seq AND p.person = ?"
@@ -123,7 +127,7 @@ class HistoryArchive:
         with closing(self._db()) as db:
             if person:
                 rows = db.execute("SELECT e.category, COUNT(*) FROM events e JOIN participants p ON p.seq = e.seq AND p.person = ? "
-                                  "GROUP BY e.category", (person,)).fetchall()
+                                  "WHERE e.seq < ? GROUP BY e.category", (person, self._read_limit())).fetchall()
             else:
-                rows = db.execute("SELECT category, COUNT(*) FROM events GROUP BY category").fetchall()
+                rows = db.execute("SELECT category, COUNT(*) FROM events WHERE seq < ? GROUP BY category", (self._read_limit(),)).fetchall()
         return dict(rows)

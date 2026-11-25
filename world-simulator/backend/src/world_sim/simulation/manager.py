@@ -219,7 +219,13 @@ class ScenarioManager:
         # The session remains write-locked until its immutable snapshot is durable.
         s.busy = True
         try:
-            await asyncio.to_thread(self._save, s.meta, s.state, tuple(s.events))
+            task = asyncio.create_task(asyncio.to_thread(self._save, s.meta, s.state, tuple(s.events)))
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                await task
+                s.dirty, s.saved_at = False, time.monotonic()
+                raise
             s.dirty, s.saved_at = False, time.monotonic()
         finally:
             s.busy = False
@@ -371,18 +377,37 @@ class ScenarioManager:
         timings = PhaseTimings()
         try:
             state, months = await asyncio.to_thread(advance_frames, s.state, days, self.rules(s), timings=timings)
-            self._apply(s, state, months, days, time.perf_counter() - started, timings)
+            seconds = time.perf_counter() - started
+            archive = self.archive(s.meta.id)
+            events = [e for month in months for e in month["events"]]
+            archive.visible_before = s.state.historySeq
+            try:
+                archive_started = time.perf_counter()
+                task = asyncio.create_task(asyncio.to_thread(archive.append, events))
+                try:
+                    await asyncio.shield(task)
+                except asyncio.CancelledError:
+                    await task
+                    self._apply(s, state, months, days, seconds, timings,
+                                archive_ms=(time.perf_counter() - archive_started) * 1000)
+                    raise
+                self._apply(s, state, months, days, seconds, timings,
+                            archive_ms=(time.perf_counter() - archive_started) * 1000)
+            finally:
+                archive.visible_before = None
         finally:
             s.busy = False
 
     def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]], days: int, seconds: float,
-               timings: PhaseTimings) -> None:
+               timings: PhaseTimings, *, archive_ms: float | None = None) -> None:
+        events = [e for m in months for e in m["events"]]
+        if archive_ms is None:
+            archive_started = time.perf_counter()
+            self.archive(s.meta.id).append(events)
+            archive_ms = (time.perf_counter() - archive_started) * 1000
         started = time.perf_counter()
         s.state = state
         self._journal(s, {"op": "advance", "days": days})
-        events = [e for m in months for e in m["events"]]
-        self.archive(s.meta.id).append(events)
-        archive_ms = (time.perf_counter() - started) * 1000
         for m in months:
             for incident in m["incidents"]:     # what happened during the month, then its close
                 people = incident.get("participants") or []
@@ -400,7 +425,7 @@ class ScenarioManager:
         s.perf.append({"day": state.date.day, "days": days, "months": sum(m.get("monthClose", True) for m in months),
                        "ms": round(seconds * 1000, 1), "events": len(events), "people": len(state.cast.people),
                        "phases": {**timings.report(), "archive": round(archive_ms, 2),
-                                  "publication": round((time.perf_counter() - started) * 1000 - archive_ms, 2)}})
+                                  "publication": round((time.perf_counter() - started) * 1000, 2)}})
 
     def _steppable(self, scenario_id: str, days: int) -> Session:
         s = self.writable(scenario_id)

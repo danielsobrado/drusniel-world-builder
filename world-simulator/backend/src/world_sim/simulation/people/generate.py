@@ -140,6 +140,10 @@ class CastBuilder:
 def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], seed: int, cfg: dict[str, Any]) -> Cast:
     az = AzgaarEconomy(model)
     people, households, dwellings, names, seq, budget = [], [], [], {}, {}, {}
+    active_traders: dict[str, list[Any]] = {}
+    for trader in traders:
+        if trader.active:
+            active_traders.setdefault(trader.settlementId, []).append(trader)
     for s in settlements:
         rng = random.Random(f"{seed}:people:{s.settlementId}")
         gen = generator_for(model.document, az.culture_of(s.sourceId))
@@ -147,7 +151,7 @@ def initial_cast(model: WorldModel, settlements: list[Any], traders: list[Any], 
         pool = NamePool(given=[gen.name(rng, limit) for _ in range(cfg["namePool"]["given"])],
                         family=[gen.name(rng, limit) for _ in range(cfg["namePool"]["family"])])
         b = CastBuilder(s, pool, model.npcs_by_id.get(s.settlementId, 0), rng, cfg, seed)
-        for t in (t for t in traders if t.settlementId == s.settlementId and t.active):
+        for t in active_traders.get(s.settlementId, []):
             if b.room() <= 0:
                 break
             h = b.household("couple" if t.household.adults == 2 else "single")
@@ -175,14 +179,17 @@ def origins(model: WorldModel, people: list[Person], seed: int, cfg: dict[str, A
     rng = random.Random(f"{seed}:origins")
     places: dict[str, str] = {}
     out = []
+    candidates: dict[str, list[dict[str, Any]]] = {}
     for p in people:
         here = model.settlements_by_id[p.settlementId]
         if p.role != "child" and rng.random() >= cfg["originLocalShare"]:
-            others = [t for t in towns if t["id"] != here["id"]]
-            kin = [t for t in others if t["cultureId"] == here["cultureId"]] or others
-            near = sorted(kin, key=lambda t: ((t["x"] - here["x"]) ** 2 + (t["y"] - here["y"]) ** 2,
-                                              t["sourceId"]))[:cfg["originCandidates"]]
-            birthplace = rng.choice(near)
+            if p.settlementId not in candidates:
+                others = [t for t in towns if t["id"] != here["id"]]
+                kin = [t for t in others if t["cultureId"] == here["cultureId"]] or others
+                candidates[p.settlementId] = sorted(
+                    kin, key=lambda t: ((t["x"] - here["x"]) ** 2 + (t["y"] - here["y"]) ** 2,
+                                        t["sourceId"]))[:cfg["originCandidates"]]
+            birthplace = rng.choice(candidates[p.settlementId])
             places[birthplace["id"]] = birthplace["name"]
             p = p.model_copy(update={"birthplaceId": birthplace["id"]})
         out.append(p)
