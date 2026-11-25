@@ -82,6 +82,10 @@ export class SnowFieldPass {
     this.clock = 0;
     this.cover = 0;
     this.renderKey = '';
+    this.renderedCenter = null;
+    this.renderedGroundRevision = -1;
+    this.nextCenter = null;
+    this.forceRender = false;
     this.focus = { x: 0, z: 0 };
     this.origin = null;
     this.uniforms = {
@@ -140,7 +144,8 @@ export class SnowFieldPass {
    *   value and phase, this frame's snowfall 0..1, whether the storm is snapped (QA: drifts
    *   hold still), and SandCover's value and the sandstorm 0..1 blowing now
    */
-  update(dt, cameraRender, origin, { cover, melting, snowFall, snap = false, sandCover = 0, sandFall = 0 }) {
+  update(dt, cameraRender, origin, { cover, melting, snowFall, snap = false, sandCover = 0, sandFall = 0 },
+    scheduler = null, budget = null) {
     this.focus.x = cameraRender.x;
     this.focus.z = cameraRender.z;
     this.origin = origin;
@@ -149,7 +154,12 @@ export class SnowFieldPass {
     const fall = Math.max(snowFall, this.sand ? sandFall : 0);
     // No cover, nothing to draw: the ground patch waits for the first storm rather
     // than rebuilding on the CPU every 64 m of clear-weather travel.
-    if (this.cover > 0 || this.sandCover > 0) this.ground.update(this.focus, origin, yieldAfter(1));
+    if (this.cover > 0 || this.sandCover > 0) {
+      const prepare = shouldYield => this.ground.update(this.focus, origin, shouldYield, budget);
+      if (scheduler) scheduler.prepare('snow-ground', budget, prepare);
+      else prepare(yieldAfter(1));
+    }
+    if (this.renderedCenter) this.publishWindow(this.renderedCenter);
     const step = Math.min(Math.max(Number.isFinite(dt) ? dt : 0, 0), MAX_STEP_SECONDS);
     this.clock += step;
     const wind = worldWindUniforms.prevailing.value;
@@ -163,19 +173,36 @@ export class SnowFieldPass {
     const center = this.ground.center;
     if (!center) return;
     const snapped = snapWindowCenter(center.x, center.z, this.texel);
-    snowFieldUniforms.windowCenterCanonical.value.set(snapped.x, snapped.z);
-    snowFieldUniforms.windowCenter.value.set(snapped.x - origin.x, snapped.z - origin.z);
+    this.nextCenter = snapped;
     const [u, v] = driftPatternOrigin(snapped.x, snapped.z, steppedDriftOffset(this.offset.x), steppedDriftOffset(this.offset.z),
       wind.x, wind.y, this.config.driftAlongMetres, this.config.driftAcrossMetres);
     this.uniforms.driftOrigin.value.set(u, v);
     // A thaw follows the moving sun, a couple of times a second; otherwise a held cover draws nothing new.
     const thaw = melting > 0 ? Math.floor(this.clock / THAW_REDRAW_SECONDS) : -1;
-    this.nextKey = [snapped.x, snapped.z, u, v, wind.x, wind.y, this.ground.rebuilds, thaw].join();
+    this.nextKey = [snapped.x, snapped.z, u, v, wind.x, wind.y, this.ground.rebuilds, Math.round(melting * 255), thaw].join();
   }
 
   /** Draw the field when there is snow or sand to place and its inputs moved. Call before the scene. */
-  render(renderer) {
-    if (!(this.cover > 0 || this.sandCover > 0) || !this.ground.ready || (this.nextKey !== null && this.nextKey === this.renderKey)) return;
+  publishWindow(center) {
+    snowFieldUniforms.windowCenterCanonical.value.set(center.x, center.z);
+    snowFieldUniforms.windowCenter.value.set(center.x - this.origin.x, center.z - this.origin.z);
+  }
+
+  render(renderer, scheduler = null, budget = null) {
+    if (!(this.cover > 0 || this.sandCover > 0)) {
+      snowFieldUniforms.active.value = 0;
+      return false;
+    }
+    if (!this.ground.ready || !this.nextCenter || (!this.forceRender && this.nextKey === this.renderKey
+        && snowFieldUniforms.active.value > 0)) return false;
+    const urgent = this.forceRender || !this.renderedCenter || this.renderedGroundRevision !== this.ground.rebuilds
+      || snowFieldUniforms.active.value === 0;
+    if (scheduler) return scheduler.run('snow-sand', budget, () => this.draw(renderer), { urgent });
+    this.draw(renderer);
+    return true;
+  }
+
+  draw(renderer) {
     const previousTarget = renderer.getRenderTarget();
     const previousMrt = renderer.getMRT?.() ?? null;
     renderer.setMRT?.(null);
@@ -187,11 +214,16 @@ export class SnowFieldPass {
       renderer.setMRT?.(previousMrt);
     }
     this.renderKey = this.nextKey;
+    this.renderedCenter = { ...this.nextCenter };
+    this.renderedGroundRevision = this.ground.rebuilds;
+    this.publishWindow(this.renderedCenter);
+    this.forceRender = false;
     snowFieldUniforms.active.value = 1;
   }
 
   /** QA: finish the ground patch now, so a settled capture is complete. */
   settle() {
+    this.forceRender = true;
     if (this.origin && (this.ground.job || !this.ground.ready)) this.ground.rebuild(this.focus, this.origin);
   }
 

@@ -18,6 +18,13 @@ frameBudget:
 drawPreparation:
   enabled: true
   meshesPerFrame: 2
+environmentPasses:
+  enabled: true
+  windIntervalMs: 13.8
+  windMaxDeferralMs: 14
+  fieldMaxDeferralMs: 100
+  preparationSliceMs: 1
+  initialPassMs: 0.25
 residents:
   enabled: true
   radiusMeters: 220

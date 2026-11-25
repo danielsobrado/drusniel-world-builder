@@ -1,4 +1,5 @@
 import { frameUniform } from '../../../render/FrameUniforms.js';
+import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import * as THREE from 'three/webgpu';
 import { texture, vec2 } from 'three/tsl';
 
@@ -69,7 +70,9 @@ export class LocalGroundHeight {
    * @param {{ x: number, z: number }} origin floating origin (canonical of render zero)
    * @returns {boolean} whether the patch was rebuilt
    */
-  update(focus, origin, shouldYield = () => false) {
+  update(focus, origin, shouldYield = () => false, publicationBudget = null) {
+    this.currentGate = shouldYield;
+    this.publicationBudget = publicationBudget;
     const canonical = { x: focus.x + origin.x, z: focus.z + origin.z };
     const revision = this.getRevision();
     const drift = this.center ? Math.max(Math.abs(canonical.x - this.center.x), Math.abs(canonical.z - this.center.z)) : Infinity;
@@ -79,13 +82,13 @@ export class LocalGroundHeight {
     }
     if (!this.job && (this.revision !== revision || drift >= this.extent / 8)) {
       this.target = canonical; this.jobRevision = revision;
-      this.job = this.buildPatch(canonical, revision, shouldYield);
+      this.job = this.buildPatch(canonical, revision, () => this.currentGate(), () => this.publicationBudget);
     }
     const previous = this.rebuilds;
     while (this.job && !shouldYield()) {
       const step = this.job.next();
       if (step.done) this.job = null;
-      else if (step.value === 'wait-ground-dependencies') break;
+      else if (step.value === 'wait-ground-dependencies' || step.value === 'wait-publication-budget') break;
     }
     Object.assign(this.origin, origin);
     if (this.center) this.uniforms.corner.value.set(this.center.x - this.extent / 2 - origin.x,
@@ -107,7 +110,7 @@ export class LocalGroundHeight {
     return true;
   }
 
-  *buildPatch(focus, revision, shouldYield) {
+  *buildPatch(focus, revision, shouldYield, budgetProvider = () => null) {
     const { resolution, extent } = this;
     const step = extent / (resolution - 1);
     // Snapped so a patch rebuilt nearby samples the same ground at the same texels.
@@ -129,8 +132,10 @@ export class LocalGroundHeight {
         if ((row * resolution + column) % 64 === 63) yield;
       }
     }
+    while (budgetProvider() && !budgetProvider().canPublish(data.byteLength)) yield 'wait-publication-budget';
     this.data = data;
     this.texture.image.data = data;
+    PerfCounters.inc('localGroundUploadBytes', data.byteLength);
     this.uniforms.base.value = Number.isFinite(base) ? base : 0;
     this.texture.needsUpdate = true;
     this.center = { x: centerX, z: centerZ };

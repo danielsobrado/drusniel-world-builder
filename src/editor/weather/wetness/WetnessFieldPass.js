@@ -105,9 +105,14 @@ export class WetnessFieldPass {
    * @param {{ x: number, z: number }} origin floating origin (canonical = render + origin)
    * @param {object} [budget] DeferredWorkBudget: the height patch builds under it
    */
-  update(focus, origin, budget = null) {
-    const prepare = () => this.ground.update(focus, origin, budget?.shouldYield);
-    (budget?.runner ?? ((run) => run()))(prepare);
+  update(focus, origin, budget = null, scheduler = null) {
+    const dry = groundWetnessClocksUniform.value.toArray().every(value => value === 0);
+    const wasDry = !this.last || this.last.clocks.every(value => value === 0);
+    if (!dry || !wasDry || this.force) {
+      const prepare = shouldYield => this.ground.update(focus, origin, shouldYield, budget);
+      if (scheduler) scheduler.prepare('wetness-ground', budget, prepare);
+      else (budget?.runner ?? ((run) => run()))(() => prepare(budget?.shouldYield));
+    }
     // Every frame, so a floating-origin rebase moves the window with the ground.
     if (this.renderedCenter) {
       wetnessFieldUniforms.corner.value.set(this.renderedCenter.x - WETNESS_FIELD_METRES / 2 - origin.x,
@@ -127,7 +132,7 @@ export class WetnessFieldPass {
    * @param {THREE.Vector3} sunValue the sun direction's CPU value
    * @param {{ x: number, z: number }} origin floating origin
    */
-  render(renderer, nowSeconds, sunValue, origin) {
+  render(renderer, nowSeconds, sunValue, origin, scheduler = null, budget = null) {
     if (!this.ground.ready) return false;
     const now = {
       clocks: groundWetnessClocksUniform.value.toArray(),
@@ -136,7 +141,12 @@ export class WetnessFieldPass {
     };
     const since = nowSeconds - this.lastRenderSeconds;
     if (!this.force && !wetnessFieldNeedsRender(this.last, now, since, this.config.intervalSeconds)) return false;
-    this.force = false;
+    const urgent = this.force || !this.last || this.last.window !== now.window;
+    if (scheduler) return scheduler.run('wetness', budget, () => this.draw(renderer, nowSeconds, now, origin), { urgent });
+    return this.draw(renderer, nowSeconds, now, origin);
+  }
+
+  draw(renderer, nowSeconds, now, origin) {
     const center = this.ground.center;
     this.origins.update(center.x, center.z);
     const previousTarget = renderer.getRenderTarget();
@@ -149,6 +159,7 @@ export class WetnessFieldPass {
       renderer.setRenderTarget(previousTarget);
       renderer.setMRT?.(previousMrt);
     }
+    this.force = false;
     this.last = now;
     this.lastRenderSeconds = nowSeconds;
     this.renderedCenter = { x: center.x, z: center.z };

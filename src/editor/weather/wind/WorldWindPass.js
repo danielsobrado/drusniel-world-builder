@@ -81,6 +81,8 @@ export class WorldWindPass {
     this.gustThreshold = this.params.gust.threshold;
     this.gustPeak = this.params.gust.peak;
     this.centerCanonical = { x: 0, z: 0 };
+    this.renderedCenter = null;
+    this.renderedWind = null;
     this.origin = { x: 0, z: 0 };
     worldWindUniforms.referenceStrength.value = this.params.baseStrength;
 
@@ -142,8 +144,7 @@ export class WorldWindPass {
     this.uniforms.gustThreshold.value = this.gustThreshold;
     this.uniforms.gustPeak.value = this.gustPeak;
     this.uniforms.centerCanonical.value.set(centerX, centerZ);
-    worldWindUniforms.windowCenter.value.set(centerX - origin.x, centerZ - origin.z);
-    worldWindUniforms.windowCenterCanonical.value.set(centerX, centerZ);
+    this.publishWindow(this.renderedCenter ?? this.centerCanonical);
     const radians = this.directionDegrees / RAD_TO_DEG;
     worldWindUniforms.prevailing.value.set(Math.cos(radians), Math.sin(radians));
     worldWindUniforms.prevailingStrength.value = this.params.baseStrength * this.intensity;
@@ -155,8 +156,26 @@ export class WorldWindPass {
     worldWindCamera.storm = Math.max(0, Math.min(1, Number(weather?.storm) || 0));
   }
 
-  /** Draw this frame's field. Call before the scene renders. */
-  render(renderer) {
+  publishWindow(center) {
+    worldWindUniforms.windowCenter.value.set(center.x - this.origin.x, center.z - this.origin.z);
+    worldWindUniforms.windowCenterCanonical.value.set(center.x, center.z);
+  }
+
+  /** Draw the current field, publishing its coordinates only after the draw. */
+  render(renderer, scheduler = null, budget = null) {
+    const changed = !this.renderedCenter || this.centerCanonical.x !== this.renderedCenter.x
+      || this.centerCanonical.z !== this.renderedCenter.z || !this.renderedWind
+      || Math.abs(this.directionDegrees - this.renderedWind.direction) > 2
+      || Math.abs(this.intensity - this.renderedWind.intensity) > 0.05;
+    if (scheduler) return scheduler.run('wind', budget, () => this.draw(renderer), {
+      urgent: changed, intervalMs: scheduler.settings.windIntervalMs,
+      maxDeferralMs: scheduler.settings.windMaxDeferralMs,
+    });
+    this.draw(renderer);
+    return true;
+  }
+
+  draw(renderer) {
     const previousTarget = renderer.getRenderTarget();
     const previousMrt = renderer.getMRT?.() ?? null;
     renderer.setMRT?.(null);
@@ -167,6 +186,12 @@ export class WorldWindPass {
       renderer.setRenderTarget(previousTarget);
       renderer.setMRT?.(previousMrt);
     }
+    this.renderedCenter ??= { x: 0, z: 0 };
+    Object.assign(this.renderedCenter, this.centerCanonical);
+    this.renderedWind ??= { direction: 0, intensity: 0 };
+    this.renderedWind.direction = this.directionDegrees;
+    this.renderedWind.intensity = this.intensity;
+    this.publishWindow(this.renderedCenter);
   }
 
   /**

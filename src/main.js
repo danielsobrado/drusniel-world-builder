@@ -133,6 +133,7 @@ import { RendererRecovery } from './editor/lifecycle/RendererRecovery.js';
 import { captureEditorRecoveryState, restoreEditorRecoveryState } from './editor/lifecycle/EditorRecoveryState.js';
 import { ResourceScope } from './editor/lifecycle/ResourceScope.js';
 import { DeferredWorkBudget } from './editor/performance/DeferredWorkBudget.js';
+import { EnvironmentalPassScheduler } from './editor/performance/EnvironmentalPassScheduler.js';
 import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
 import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
 import { withPreparationFrame } from './render/preparation/DrawPreparation.js';
@@ -1586,6 +1587,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     finishWaterPrewarm?.();
   }
   const deferredWork = new DeferredWorkBudget(config.exploration.frameBudget);
+  const environmentPasses = new EnvironmentalPassScheduler(config.exploration.environmentPasses);
   deferredWork.attachSurface(stylizedSurface);
   const drawPreparation = new StreamedDrawPreparation({ scene: terrainView.scene, renderer: terrainView.renderer,
     settings: config.exploration.drawPreparation, render: camera => terrainView.prewarmPostProcessing(camera),
@@ -1916,7 +1918,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     oceanWeatherScratch.directionDegrees = worldWind.directionDegrees;
     oceanWeatherScratch.intensity = worldWind.intensity;
     stylizedSurface.setOceanWeather(oceanWeatherScratch);
-    worldWind.render(terrainView.renderer);
+    worldWind.render(terrainView.renderer, environmentPasses, deferredWork);
     waterfallMist.update(frameTimestamp / 1000, viewModeController.camera);
     updateGroundDeformation(frameTimestamp / 1000);
     snowWakeRecorder.update(frameTimestamp / 1000, snowWakeBody());
@@ -1946,8 +1948,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     lastWetnessSeconds = frameSeconds;
     const groundStorm = stormFrame();
     surfaceWetness.update(groundSnap ? 1e6 : frameDelta, frameWeatherAudio.rain, stylizedSurface.skyView?.sunDirectionValue?.y);
-    wetnessField?.update(viewModeController.camera.position, frameOrigin, deferredWork);
-    wetnessField?.render(terrainView.renderer, frameSeconds, stylizedSurface.skyView?.sunDirectionValue, frameOrigin);
+    wetnessField?.update(viewModeController.camera.position, frameOrigin, deferredWork, environmentPasses);
+    wetnessField?.render(terrainView.renderer, frameSeconds, stylizedSurface.skyView?.sunDirectionValue, frameOrigin, environmentPasses, deferredWork);
     stormSnowCoverUniform.value = groundSnap
       ? snowCover.snap(groundStorm.snow)
       : snowCover.update(frameDelta, groundStorm.snow, groundStorm.snowShare);
@@ -1956,8 +1958,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     snowField?.update(frameDelta, viewModeController.camera.position, frameOrigin,
       { cover: snowCover.value, melting: snowCover.melting, snowFall: Math.min(1, groundStorm.snow), snap: groundSnap,
         // A held cover (QA) holds its streaks still too.
-        sandCover: sandCover.value, sandFall: sandCover.frozen ? 0 : Math.min(1, sandstorm) });
-    snowField?.render(terrainView.renderer);
+        sandCover: sandCover.value, sandFall: sandCover.frozen ? 0 : Math.min(1, sandstorm) }, environmentPasses, deferredWork);
+    snowField?.render(terrainView.renderer, environmentPasses, deferredWork);
     const deformPlayerRender = viewModeController.camera.position;
     gpuSnowDeform.update(
       frameDelta,

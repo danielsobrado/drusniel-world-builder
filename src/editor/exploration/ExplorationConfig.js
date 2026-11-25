@@ -3,6 +3,8 @@ const DEFAULTS = {
   freeFly: { enabled: true, moveSpeed: 24, fastMultiplier: 4, lookSensitivity: 0.003 },
   frameBudget: { enabled: true, targetFps: 144, reserveMs: 0.5, minimumMs: 0.25, maximumMs: 1.2, maxUploadBytes: 2097152 },
   drawPreparation: { enabled: true, meshesPerFrame: 2 },
+  environmentPasses: { enabled: true, windIntervalMs: 13.8, windMaxDeferralMs: 14,
+    fieldMaxDeferralMs: 100, preparationSliceMs: 1, initialPassMs: 0.25 },
   residents: { enabled: true, radiusMeters: 220, maxResidents: 24, maxPerSettlement: 8,
     wanderRadius: 18, refreshSeconds: 0.5 },
   // The World Simulator's game export: named people as residents (world-simulator/docs/09).
