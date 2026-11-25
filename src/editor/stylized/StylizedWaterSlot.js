@@ -239,6 +239,7 @@ export class StylizedWaterSlot {
       if (publicationBudget && !publicationBudget.canPublish(bytes)) {
         // A reused terrain slot must not show the previous chunk's water.
         if (this.uploadedPage !== page) this.mesh.visible = false;
+        else this.mesh.position.copy(this.terrainSlot.mesh.position);
         PerfCounters.inc('waterPublicationDeferred');
         return;
       }

@@ -876,11 +876,12 @@ export class StylizedSurfaceView {
     // hidden, so nothing pops on surfacing; the field catches up over the next few
     // frames. Water itself keeps updating: it is what you are looking at.
     const landStreaming = !isLandStreamingSuspended();
-    if (!landStreaming) {
-      for (const slot of this.waterSlots) slot.update(timestamp, this.publicationBudget);
-      return;
+    for (const slot of this.waterSlots) {
+      slot.update(timestamp, this.publicationBudget);
+      this.reflections?.residency.update(slot);
     }
-    for (const slot of this.waterSlots) slot.update(timestamp, this.publicationBudget);
+    if (this.reflections) this.reflections.residencyReady = true;
+    if (!landStreaming) return;
     this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
     if (camera) {

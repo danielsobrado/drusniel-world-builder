@@ -4,6 +4,7 @@ import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { withReflectionCapture } from './ReflectionCapture.js';
 import { ReflectionShadowRegistry } from './ReflectionShadowRegistry.js';
 import { ReflectionCaptureSchedule } from './ReflectionCaptureSchedule.js';
+import { WaterReflectionResidency, nearestWaterSlots } from './WaterReflectionResidency.js';
 import { preparePlanarCamera } from './PlanarCamera.js';
 import { PlanarReprojection } from './PlanarReprojection.js';
 import { withAuxiliaryScene } from './ReflectionScene.js';
@@ -42,9 +43,10 @@ export class WaterReflectionController {
     this.disposed = false;
     this.capturing = false;
     this.wetSlots = [];
+    this.residency = new WaterReflectionResidency(terrainView.chunkWorldSize);
+    this.residencyReady = false;
     this.hiddenObjects = [];
     this.overlayObjects = [];
-    this.overlaySceneChildCount = -1;
     this.overlayRefreshCountdown = 0;
     this.planarWetSlots = [];
     this.preparedState = { origin: null, canonical: { x: 0, z: 0 }, wet: this.wetSlots };
@@ -133,19 +135,33 @@ export class WaterReflectionController {
       sceneRevision[2] = objectRevision;
       sceneRevision[3] = constructionRevision;
     }
-    const wet = this.wetSlots;
-    wet.length = 0;
-    let nearby = false;
-    for (const slot of surface.waterSlots) {
-      if (!slot.hasWaterCoverage || !slot.terrainSlot.descriptor) continue;
-      wet.push(slot);
-      const d = slot.terrainSlot.descriptor;
-      if (Math.hypot(d.centerWorldX - canonical.x, d.centerWorldZ - canonical.z)
-        < this.config.reachMeters + this.view.chunkWorldSize) nearby = true;
+    const radius = this.config.reachMeters + this.view.chunkWorldSize;
+    let nearby;
+    if (this.residencyReady) {
+      nearby = this.residency.hasNearby(canonical.x, canonical.z, radius);
+      this.preparedState.wet = this.residency.slots;
+    } else {
+      // Standalone warmup and fixtures can prepare before the first publication pass.
+      const wet = this.wetSlots;
+      wet.length = 0;
+      nearby = false;
+      for (const slot of surface.waterSlots) {
+        if (!slot.hasWaterCoverage || !slot.terrainSlot.descriptor) continue;
+        wet.push(slot);
+        const d = slot.terrainSlot.descriptor;
+        if ((d.centerWorldX - canonical.x) ** 2 + (d.centerWorldZ - canonical.z) ** 2 < radius ** 2) nearby = true;
+      }
+      this.preparedState.wet = wet;
     }
     if (!nearby) { this.invalidate(); return; }
     if (this.hasCanonicalProbe && (Math.hypot(canonical.x - this.canonicalProbe.x, canonical.z - this.canonicalProbe.z) > this.config.reachMeters * 0.5
       || Math.abs(camera.position.y - this.probeY) > this.config.reachMeters * 0.2)) this.invalidate();
+    if (this.face > 0 && (Math.hypot(canonical.x - this.pendingProbe.x, canonical.z - this.pendingProbe.z) > this.config.reachMeters * 0.5
+      || Math.abs(camera.position.y - this.pendingProbeY) > this.config.reachMeters * 0.2)) {
+      this.face = 0;
+      this.nextCapture = 0;
+      PerfCounters.inc('waterProbeRestarts');
+    }
     if (this.hasCanonicalProbe) {
       this.origin.value.set(
         this.canonicalProbe.x - origin.x,
@@ -165,7 +181,7 @@ export class WaterReflectionController {
     if (!budgetReserved && surface.shouldYieldWork?.()) return;
     const hidden = this.hiddenObjects;
     hidden.length = 0;
-    for (const slot of surface.waterSlots) hidden.push(slot.mesh);
+    for (const slot of this.residencyReady ? this.residency.slots : surface.waterSlots) hidden.push(slot.mesh);
     this.refreshOverlayObjects();
     for (const object of this.overlayObjects) hidden.push(object);
     const started = performance.now();
@@ -219,37 +235,32 @@ export class WaterReflectionController {
   }
 
   refreshOverlayObjects() {
-    const scene = this.view.scene;
-    const childCount = scene.children.length;
+    const registry = this.shadowRegistry;
     this.overlayRefreshCountdown -= 1;
-    if (childCount === this.overlaySceneChildCount && this.overlayRefreshCountdown > 0) return;
-    this.overlaySceneChildCount = childCount;
-    this.overlayRefreshCountdown = OVERLAY_REFRESH_CAPTURES;
-    this.overlayObjects.length = 0;
-    scene.traverse((object) => {
-      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) {
-        this.overlayObjects.push(object);
+    if (registry && this.overlayRefreshCountdown <= 0) {
+      // Tags can be assigned after attachment; reconcile them without a scene traversal.
+      registry.overlays.clear();
+      for (const object of registry.objects) {
+        if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) registry.overlays.add(object);
       }
+      this.overlayRefreshCountdown = OVERLAY_REFRESH_CAPTURES;
+    }
+    this.overlayObjects.length = 0;
+    if (registry) {
+      for (const object of registry.overlays) {
+        if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlayObjects.push(object);
+      }
+    } else this.view.scene.traverse(object => {
+      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlayObjects.push(object);
     });
   }
 
   capturePlanar(camera, wet, origin, now, surface) {
     if (!this.planarTarget || now - this.lastPlanar < this.config.intervalMs) return;
-    const ordered = this.planarWetSlots;
-    ordered.length = 0;
-    for (const slot of wet) ordered.push(slot);
     const cameraX = origin.x + camera.position.x;
     const cameraZ = origin.z + camera.position.z;
-    ordered.sort((a, b) => {
-      const left = a.terrainSlot.descriptor;
-      const right = b.terrainSlot.descriptor;
-      const leftX = left.centerWorldX - cameraX;
-      const leftZ = left.centerWorldZ - cameraZ;
-      const rightX = right.centerWorldX - cameraX;
-      const rightZ = right.centerWorldZ - cameraZ;
-      return leftX * leftX + leftZ * leftZ - (rightX * rightX + rightZ * rightZ);
-    });
-    const candidateCount = Math.min(4, ordered.length);
+    const ordered = nearestWaterSlots(wet, cameraX, cameraZ, 4, this.planarWetSlots);
+    const candidateCount = ordered.length;
     for (let index = 0; index < candidateCount; index += 1) {
       const slot = ordered[index];
       const d = slot.terrainSlot.descriptor;
@@ -269,7 +280,7 @@ export class WaterReflectionController {
     this.planarValid.value = 0;
   }
 
-  dispose() { this.disposed = true; this.invalidate(); this.shadowRegistry?.dispose(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
+  dispose() { this.disposed = true; this.invalidate(); this.residency.clear(); this.shadowRegistry?.dispose(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
 
   prewarm(camera, surface) {
     const now = performance.now();

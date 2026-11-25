@@ -74,3 +74,16 @@ test('reflection failure restores current shadows and renderer state even if tar
     assert.deepEqual(scratch.states, []); assert.deepEqual(scratch.shadows, []);
   } finally { registry.dispose(); }
 });
+
+test('overlay membership follows nested scene insertion and removal', () => {
+  const scene = new Scene(), group = new Group(), overlay = new Group();
+  overlay.userData.editorOverlay = true;
+  scene.add(group);
+  const registry = new ReflectionShadowRegistry(scene);
+  try {
+    group.add(overlay);
+    assert.equal(registry.overlays.has(overlay), true);
+    overlay.removeFromParent();
+    assert.equal(registry.overlays.has(overlay), false);
+  } finally { registry.dispose(); }
+});
