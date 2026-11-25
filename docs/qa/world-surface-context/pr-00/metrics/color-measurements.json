@@ -1,0 +1,1886 @@
+{
+  "generatedAt": "2026-11-25T03:16:33.630Z",
+  "thresholds": {
+    "contactInvestigateDeltaE00": 5,
+    "contactMajorDeltaE00": 10,
+    "lodLuminanceDiffPct": 10,
+    "chunkBoundaryLuminanceDiffPct": 5,
+    "floatingOriginDeltaE00": 1
+  },
+  "comparisons": [
+    {
+      "label": "Stillmeadow C02 (overcast D00): Near grass vs adjacent terrain",
+      "colorShotId": "B14-C02-overcast-D00-normal",
+      "d24ShotId": "B14-C02-overcast-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 153,
+        "coverage": 0.00015161244292237442,
+        "meanRgb": [
+          8.33,
+          14.07,
+          15.48
+        ],
+        "medianRgb": [
+          8,
+          14,
+          16
+        ],
+        "meanLinearLuminance": 0.00411,
+        "luminancePercentiles": {
+          "p10": 0.00298,
+          "p50": 0.0041,
+          "p90": 0.00547
+        },
+        "meanHueDeg": 191.9,
+        "meanSaturation": 0.4762,
+        "saturationP90": 0.5833,
+        "lab": {
+          "L": 3.614758512559426,
+          "a": -1.5147967413997598,
+          "b": -1.0766435480412173
+        }
+      },
+      "regionB": {
+        "count": 1005474,
+        "coverage": 0.996355355783866,
+        "meanRgb": [
+          20.31,
+          24.61,
+          20.71
+        ],
+        "medianRgb": [
+          20,
+          24,
+          21
+        ],
+        "meanLinearLuminance": 0.00907,
+        "luminancePercentiles": {
+          "p10": 0.00602,
+          "p50": 0.00871,
+          "p90": 0.01266
+        },
+        "meanHueDeg": 129.8,
+        "meanSaturation": 0.2123,
+        "saturationP90": 0.3214,
+        "lab": {
+          "L": 8.112094179709288,
+          "a": -3.3642066847821006,
+          "b": 1.9423965460339143
+        }
+      },
+      "comparison": {
+        "deltaE00": 4.575,
+        "lumaDiffPct": -54.69,
+        "contrastRatio": 1.092,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "Stillmeadow C02 (unlit D01): Near grass albedo vs terrain albedo",
+      "colorShotId": "B14-C02-overcast-D01-albedo",
+      "d24ShotId": "B14-C02-overcast-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 153,
+        "coverage": 0.00015161244292237442,
+        "meanRgb": [
+          89.03,
+          102.56,
+          59.82
+        ],
+        "medianRgb": [
+          91,
+          106,
+          62
+        ],
+        "meanLinearLuminance": 0.12309,
+        "luminancePercentiles": {
+          "p10": 0.08939,
+          "p50": 0.1283,
+          "p90": 0.15174
+        },
+        "meanHueDeg": 78,
+        "meanSaturation": 0.4242,
+        "saturationP90": 0.4455,
+        "lab": {
+          "L": 41.454407449104096,
+          "a": -13.304436487950655,
+          "b": 22.51531593896218
+        }
+      },
+      "regionB": {
+        "count": 1005474,
+        "coverage": 0.996355355783866,
+        "meanRgb": [
+          92.35,
+          91.31,
+          52.66
+        ],
+        "medianRgb": [
+          92,
+          91,
+          51
+        ],
+        "meanLinearLuminance": 0.10306,
+        "luminancePercentiles": {
+          "p10": 0.06927,
+          "p50": 0.10093,
+          "p90": 0.14035
+        },
+        "meanHueDeg": 58.3,
+        "meanSaturation": 0.4429,
+        "saturationP90": 0.5663,
+        "lab": {
+          "L": 37.86882676039125,
+          "a": -6.019128486809327,
+          "b": 22.043996642527908
+        }
+      },
+      "comparison": {
+        "deltaE00": 6.486,
+        "lumaDiffPct": 19.44,
+        "contrastRatio": 1.131,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Stillmeadow C01 (overcast D00): Near grass vs terrain",
+      "colorShotId": "B14-C01-overcast-D00-normal",
+      "d24ShotId": "B14-C01-overcast-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 34813,
+        "coverage": 0.03449728088533739,
+        "meanRgb": [
+          18.09,
+          26.71,
+          22.03
+        ],
+        "medianRgb": [
+          17,
+          25,
+          21
+        ],
+        "meanLinearLuminance": 0.01021,
+        "luminancePercentiles": {
+          "p10": 0.00554,
+          "p50": 0.00876,
+          "p90": 0.01646
+        },
+        "meanHueDeg": 152.9,
+        "meanSaturation": 0.3431,
+        "saturationP90": 0.4286,
+        "lab": {
+          "L": 8.742073776061957,
+          "a": -5.476852056601617,
+          "b": 2.1310590840826205
+        }
+      },
+      "regionB": {
+        "count": 737126,
+        "coverage": 0.7304410039320142,
+        "meanRgb": [
+          27.18,
+          33.8,
+          27.65
+        ],
+        "medianRgb": [
+          25,
+          31,
+          25
+        ],
+        "meanLinearLuminance": 0.01624,
+        "luminancePercentiles": {
+          "p10": 0.00821,
+          "p50": 0.01274,
+          "p90": 0.02374
+        },
+        "meanHueDeg": 127.3,
+        "meanSaturation": 0.2503,
+        "saturationP90": 0.375,
+        "lab": {
+          "L": 12.357175270633018,
+          "a": -4.727118453723089,
+          "b": 3.000852780007551
+        }
+      },
+      "comparison": {
+        "deltaE00": 2.563,
+        "lumaDiffPct": -37.13,
+        "contrastRatio": 1.1,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "Stillmeadow C01 (unlit D01): Near grass albedo vs terrain albedo",
+      "colorShotId": "B14-C01-overcast-D01-albedo",
+      "d24ShotId": "B14-C01-overcast-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 34813,
+        "coverage": 0.03449728088533739,
+        "meanRgb": [
+          101.61,
+          114.15,
+          72.59
+        ],
+        "medianRgb": [
+          104,
+          119,
+          76
+        ],
+        "meanLinearLuminance": 0.16017,
+        "luminancePercentiles": {
+          "p10": 0.08166,
+          "p50": 0.16645,
+          "p90": 0.23363
+        },
+        "meanHueDeg": 77.7,
+        "meanSaturation": 0.3745,
+        "saturationP90": 0.4891,
+        "lab": {
+          "L": 46.09700324965847,
+          "a": -12.045775708930396,
+          "b": 21.27275036879682
+        }
+      },
+      "regionB": {
+        "count": 737126,
+        "coverage": 0.7304410039320142,
+        "meanRgb": [
+          90.04,
+          93.85,
+          53.92
+        ],
+        "medianRgb": [
+          90,
+          94,
+          52
+        ],
+        "meanLinearLuminance": 0.10679,
+        "luminancePercentiles": {
+          "p10": 0.07329,
+          "p50": 0.10386,
+          "p90": 0.1411
+        },
+        "meanHueDeg": 65.6,
+        "meanSaturation": 0.4396,
+        "saturationP90": 0.5529,
+        "lab": {
+          "L": 38.6304485316226,
+          "a": -8.553475708383468,
+          "b": 22.392287451391034
+        }
+      },
+      "comparison": {
+        "deltaE00": 7.417,
+        "lumaDiffPct": 49.99,
+        "contrastRatio": 1.34,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Stillmeadow C01 (overcast D00): Tree bark vs terrain",
+      "colorShotId": "B14-C01-overcast-D00-normal",
+      "d24ShotId": "B14-C01-overcast-D24-material-family",
+      "familyA": "treeBark",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 70218,
+        "coverage": 0.06958119292237443,
+        "meanRgb": [
+          40.48,
+          41.04,
+          40.86
+        ],
+        "medianRgb": [
+          42,
+          39,
+          40
+        ],
+        "meanLinearLuminance": 0.02673,
+        "luminancePercentiles": {
+          "p10": 0.0064,
+          "p50": 0.02133,
+          "p90": 0.04961
+        },
+        "meanHueDeg": 184.6,
+        "meanSaturation": 0.1795,
+        "saturationP90": 0.3958,
+        "lab": {
+          "L": 16.489274934198924,
+          "a": -0.4503698440624926,
+          "b": -0.15772903840550745
+        }
+      },
+      "regionB": {
+        "count": 737126,
+        "coverage": 0.7304410039320142,
+        "meanRgb": [
+          27.18,
+          33.8,
+          27.65
+        ],
+        "medianRgb": [
+          25,
+          31,
+          25
+        ],
+        "meanLinearLuminance": 0.01624,
+        "luminancePercentiles": {
+          "p10": 0.00821,
+          "p50": 0.01274,
+          "p90": 0.02374
+        },
+        "meanHueDeg": 127.3,
+        "meanSaturation": 0.2503,
+        "saturationP90": 0.375,
+        "lab": {
+          "L": 12.357175270633018,
+          "a": -4.727118453723089,
+          "b": 3.000852780007551
+        }
+      },
+      "comparison": {
+        "deltaE00": 6.62,
+        "lumaDiffPct": 64.59,
+        "contrastRatio": 1.158,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Stillmeadow C06 (clear D00): Building foundation vs paving/terrain",
+      "colorShotId": "B14-C06-clear-D00-normal",
+      "d24ShotId": "B14-C06-clear-D24-material-family",
+      "familyA": "building",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 4377,
+        "coverage": 0.0043373049847793,
+        "meanRgb": [
+          12.07,
+          10.43,
+          7.95
+        ],
+        "medianRgb": [
+          11,
+          9,
+          7
+        ],
+        "meanLinearLuminance": 0.00344,
+        "luminancePercentiles": {
+          "p10": 0.0015,
+          "p50": 0.00298,
+          "p90": 0.00622
+        },
+        "meanHueDeg": 41.8,
+        "meanSaturation": 0.3802,
+        "saturationP90": 0.6875,
+        "lab": {
+          "L": 2.82535712365236,
+          "a": 0.27434373689670666,
+          "b": 0.9515691298436768
+        }
+      },
+      "regionB": {
+        "count": 418017,
+        "coverage": 0.4142260036149163,
+        "meanRgb": [
+          10.46,
+          13.51,
+          8.31
+        ],
+        "medianRgb": [
+          7,
+          10,
+          5
+        ],
+        "meanLinearLuminance": 0.00466,
+        "luminancePercentiles": {
+          "p10": 0.00193,
+          "p50": 0.0028,
+          "p90": 0.01026
+        },
+        "meanHueDeg": 96.8,
+        "meanSaturation": 0.4844,
+        "saturationP90": 0.6667,
+        "lab": {
+          "L": 3.578250700181897,
+          "a": -2.0678234911686575,
+          "b": 2.036185771032889
+        }
+      },
+      "comparison": {
+        "deltaE00": 3.47,
+        "lumaDiffPct": -26.18,
+        "contrastRatio": 1.023,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "Grassland B01 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B01-C02-clear-D00-normal",
+      "d24ShotId": "B01-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 257083,
+        "coverage": 0.25475151414256725,
+        "meanRgb": [
+          117.25,
+          118.21,
+          57.25
+        ],
+        "medianRgb": [
+          116,
+          117,
+          55
+        ],
+        "meanLinearLuminance": 0.18046,
+        "luminancePercentiles": {
+          "p10": 0.09201,
+          "p50": 0.1684,
+          "p90": 0.28697
+        },
+        "meanHueDeg": 61.2,
+        "meanSaturation": 0.5283,
+        "saturationP90": 0.5943,
+        "lab": {
+          "L": 48.30348995328988,
+          "a": -9.677550065586404,
+          "b": 33.14028168609986
+        }
+      },
+      "regionB": {
+        "count": 623676,
+        "coverage": 0.6180198820395738,
+        "meanRgb": [
+          124.11,
+          124.2,
+          68.11
+        ],
+        "medianRgb": [
+          123,
+          123,
+          66
+        ],
+        "meanLinearLuminance": 0.19862,
+        "luminancePercentiles": {
+          "p10": 0.1198,
+          "p50": 0.18899,
+          "p90": 0.29223
+        },
+        "meanHueDeg": 60.3,
+        "meanSaturation": 0.4654,
+        "saturationP90": 0.56,
+        "lab": {
+          "L": 50.82509881810762,
+          "a": -8.758242967602747,
+          "b": 30.46427991402636
+        }
+      },
+      "comparison": {
+        "deltaE00": 2.767,
+        "lumaDiffPct": -9.14,
+        "contrastRatio": 1.079,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "Grassland B01 C02 (unlit D01): Near grass albedo vs terrain albedo",
+      "colorShotId": "B01-C02-clear-D01-albedo",
+      "d24ShotId": "B01-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 257083,
+        "coverage": 0.25475151414256725,
+        "meanRgb": [
+          137.53,
+          136.42,
+          92.78
+        ],
+        "medianRgb": [
+          138,
+          137,
+          94
+        ],
+        "meanLinearLuminance": 0.24318,
+        "luminancePercentiles": {
+          "p10": 0.16766,
+          "p50": 0.24184,
+          "p90": 0.3206
+        },
+        "meanHueDeg": 58.6,
+        "meanSaturation": 0.3353,
+        "saturationP90": 0.4087,
+        "lab": {
+          "L": 55.88931534702826,
+          "a": -6.347687107295719,
+          "b": 23.416706986538216
+        }
+      },
+      "regionB": {
+        "count": 623676,
+        "coverage": 0.6180198820395738,
+        "meanRgb": [
+          123.52,
+          120.58,
+          77.23
+        ],
+        "medianRgb": [
+          122,
+          119,
+          74
+        ],
+        "meanLinearLuminance": 0.18843,
+        "luminancePercentiles": {
+          "p10": 0.12565,
+          "p50": 0.17853,
+          "p90": 0.26662
+        },
+        "meanHueDeg": 56.4,
+        "meanSaturation": 0.3849,
+        "saturationP90": 0.487,
+        "lab": {
+          "L": 50.09228517128929,
+          "a": -6.0171675318356765,
+          "b": 24.56337230630654
+        }
+      },
+      "comparison": {
+        "deltaE00": 5.7,
+        "lumaDiffPct": 29.06,
+        "contrastRatio": 1.23,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Deciduous B02 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B02-C02-clear-D00-normal",
+      "d24ShotId": "B02-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 22874,
+        "coverage": 0.022666555682394722,
+        "meanRgb": [
+          51.4,
+          60.44,
+          33.58
+        ],
+        "medianRgb": [
+          51,
+          60,
+          33
+        ],
+        "meanLinearLuminance": 0.04354,
+        "luminancePercentiles": {
+          "p10": 0.02106,
+          "p50": 0.04093,
+          "p90": 0.06956
+        },
+        "meanHueDeg": 80.7,
+        "meanSaturation": 0.4384,
+        "saturationP90": 0.4925,
+        "lab": {
+          "L": 23.83934476523521,
+          "a": -9.104759779780174,
+          "b": 14.860594494899726
+        }
+      },
+      "regionB": {
+        "count": 973765,
+        "coverage": 0.9649339247209539,
+        "meanRgb": [
+          58.09,
+          80.71,
+          47.19
+        ],
+        "medianRgb": [
+          58,
+          80,
+          46
+        ],
+        "meanLinearLuminance": 0.07301,
+        "luminancePercentiles": {
+          "p10": 0.03846,
+          "p50": 0.06893,
+          "p90": 0.11294
+        },
+        "meanHueDeg": 100.9,
+        "meanSaturation": 0.4126,
+        "saturationP90": 0.5227,
+        "lab": {
+          "L": 31.782948217994353,
+          "a": -16.1446792351857,
+          "b": 17.23323390110416
+        }
+      },
+      "comparison": {
+        "deltaE00": 7.873,
+        "lumaDiffPct": -40.36,
+        "contrastRatio": 1.315,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Deciduous B02 C02 (unlit D01): Near grass albedo vs terrain albedo",
+      "colorShotId": "B02-C02-clear-D01-albedo",
+      "d24ShotId": "B02-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 22874,
+        "coverage": 0.022666555682394722,
+        "meanRgb": [
+          135.88,
+          140.14,
+          100.29
+        ],
+        "medianRgb": [
+          142,
+          144,
+          105
+        ],
+        "meanLinearLuminance": 0.25497,
+        "luminancePercentiles": {
+          "p10": 0.14917,
+          "p50": 0.26717,
+          "p90": 0.32292
+        },
+        "meanHueDeg": 67,
+        "meanSaturation": 0.2895,
+        "saturationP90": 0.3437,
+        "lab": {
+          "L": 56.98833786370109,
+          "a": -8.394931521318982,
+          "b": 20.938535910998702
+        }
+      },
+      "regionB": {
+        "count": 973765,
+        "coverage": 0.9649339247209539,
+        "meanRgb": [
+          97.99,
+          110.35,
+          66.13
+        ],
+        "medianRgb": [
+          98,
+          111,
+          65
+        ],
+        "meanLinearLuminance": 0.1453,
+        "luminancePercentiles": {
+          "p10": 0.09788,
+          "p50": 0.14309,
+          "p90": 0.19404
+        },
+        "meanHueDeg": 76.7,
+        "meanSaturation": 0.4044,
+        "saturationP90": 0.5156,
+        "lab": {
+          "L": 44.435731253871246,
+          "a": -12.511180558388679,
+          "b": 23.054840791892207
+        }
+      },
+      "comparison": {
+        "deltaE00": 12.883,
+        "lumaDiffPct": 75.48,
+        "contrastRatio": 1.562,
+        "flag": "major-mismatch-candidate"
+      }
+    },
+    {
+      "label": "Temperate Rainforest B03 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B03-C02-clear-D00-normal",
+      "d24ShotId": "B03-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 51839,
+        "coverage": 0.051368872082699135,
+        "meanRgb": [
+          78.47,
+          95.02,
+          50.19
+        ],
+        "medianRgb": [
+          75,
+          93,
+          47
+        ],
+        "meanLinearLuminance": 0.10959,
+        "luminancePercentiles": {
+          "p10": 0.04654,
+          "p50": 0.09474,
+          "p90": 0.19379
+        },
+        "meanHueDeg": 83.1,
+        "meanSaturation": 0.4737,
+        "saturationP90": 0.527,
+        "lab": {
+          "L": 37.903986598320444,
+          "a": -14.972889865343147,
+          "b": 23.57338803680632
+        }
+      },
+      "regionB": {
+        "count": 940310,
+        "coverage": 0.9317823281329275,
+        "meanRgb": [
+          65.78,
+          75.25,
+          46.11
+        ],
+        "medianRgb": [
+          65,
+          75,
+          45
+        ],
+        "meanLinearLuminance": 0.06627,
+        "luminancePercentiles": {
+          "p10": 0.04143,
+          "p50": 0.06374,
+          "p90": 0.09223
+        },
+        "meanHueDeg": 79.6,
+        "meanSaturation": 0.3834,
+        "saturationP90": 0.4894,
+        "lab": {
+          "L": 30.370144861582204,
+          "a": -9.380346853971211,
+          "b": 16.11395061646993
+        }
+      },
+      "comparison": {
+        "deltaE00": 7.771,
+        "lumaDiffPct": 65.37,
+        "contrastRatio": 1.373,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Temperate Rainforest B03 C02 (unlit D01): Near grass albedo vs terrain albedo",
+      "colorShotId": "B03-C02-clear-D01-albedo",
+      "d24ShotId": "B03-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 51839,
+        "coverage": 0.051368872082699135,
+        "meanRgb": [
+          110.33,
+          122.7,
+          81.43
+        ],
+        "medianRgb": [
+          112,
+          126,
+          84
+        ],
+        "meanLinearLuminance": 0.18488,
+        "luminancePercentiles": {
+          "p10": 0.11173,
+          "p50": 0.18926,
+          "p90": 0.23936
+        },
+        "meanHueDeg": 77.5,
+        "meanSaturation": 0.3428,
+        "saturationP90": 0.375,
+        "lab": {
+          "L": 49.58692385135862,
+          "a": -12.510084698959256,
+          "b": 21.419484531531975
+        }
+      },
+      "regionB": {
+        "count": 940310,
+        "coverage": 0.9317823281329275,
+        "meanRgb": [
+          80.01,
+          84.16,
+          47.64
+        ],
+        "medianRgb": [
+          80,
+          84,
+          46
+        ],
+        "meanLinearLuminance": 0.08493,
+        "luminancePercentiles": {
+          "p10": 0.05673,
+          "p50": 0.08235,
+          "p90": 0.11328
+        },
+        "meanHueDeg": 66.6,
+        "meanSaturation": 0.441,
+        "saturationP90": 0.5676,
+        "lab": {
+          "L": 34.51780531018238,
+          "a": -8.044775187159264,
+          "b": 20.499773264128983
+        }
+      },
+      "comparison": {
+        "deltaE00": 14.065,
+        "lumaDiffPct": 117.69,
+        "contrastRatio": 1.741,
+        "flag": "major-mismatch-candidate"
+      }
+    },
+    {
+      "label": "Tropical Rainforest B04 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B04-C02-clear-D00-normal",
+      "d24ShotId": "B04-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 605578,
+        "coverage": 0.6000860128107559,
+        "meanRgb": [
+          20.82,
+          42.48,
+          21.33
+        ],
+        "medianRgb": [
+          20,
+          41,
+          20
+        ],
+        "meanLinearLuminance": 0.02064,
+        "luminancePercentiles": {
+          "p10": 0.00932,
+          "p50": 0.01796,
+          "p90": 0.0342
+        },
+        "meanHueDeg": 124.3,
+        "meanSaturation": 0.551,
+        "saturationP90": 0.6207,
+        "lab": {
+          "L": 14.786532859819857,
+          "a": -13.974625968589546,
+          "b": 11.153402462203704
+        }
+      },
+      "regionB": {
+        "count": 335164,
+        "coverage": 0.3321243975139523,
+        "meanRgb": [
+          37.12,
+          59.3,
+          36.73
+        ],
+        "medianRgb": [
+          31,
+          57,
+          34
+        ],
+        "meanLinearLuminance": 0.04063,
+        "luminancePercentiles": {
+          "p10": 0.01994,
+          "p50": 0.03307,
+          "p90": 0.07002
+        },
+        "meanHueDeg": 122.7,
+        "meanSaturation": 0.4489,
+        "saturationP90": 0.5588,
+        "lab": {
+          "L": 22.49535897457404,
+          "a": -14.110026764862338,
+          "b": 10.963759022502572
+        }
+      },
+      "comparison": {
+        "deltaE00": 5.263,
+        "lumaDiffPct": -49.2,
+        "contrastRatio": 1.283,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Taiga B05 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B05-C02-clear-D00-normal",
+      "d24ShotId": "B05-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 115066,
+        "coverage": 0.1140224663876205,
+        "meanRgb": [
+          79.86,
+          95.49,
+          61.25
+        ],
+        "medianRgb": [
+          78,
+          94,
+          59
+        ],
+        "meanLinearLuminance": 0.11175,
+        "luminancePercentiles": {
+          "p10": 0.04652,
+          "p50": 0.10027,
+          "p90": 0.19356
+        },
+        "meanHueDeg": 88.8,
+        "meanSaturation": 0.3591,
+        "saturationP90": 0.4259,
+        "lab": {
+          "L": 38.246324125324556,
+          "a": -12.504211714939789,
+          "b": 17.61708614471408
+        }
+      },
+      "regionB": {
+        "count": 854067,
+        "coverage": 0.8463214659436834,
+        "meanRgb": [
+          68.12,
+          81.18,
+          52.15
+        ],
+        "medianRgb": [
+          68,
+          81,
+          51
+        ],
+        "meanLinearLuminance": 0.07807,
+        "luminancePercentiles": {
+          "p10": 0.03989,
+          "p50": 0.07371,
+          "p90": 0.11856
+        },
+        "meanHueDeg": 87.9,
+        "meanSaturation": 0.3558,
+        "saturationP90": 0.4875,
+        "lab": {
+          "L": 32.61649005563642,
+          "a": -11.065969343517528,
+          "b": 15.419824901162727
+        }
+      },
+      "comparison": {
+        "deltaE00": 4.872,
+        "lumaDiffPct": 43.14,
+        "contrastRatio": 1.263,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "Wetland B06 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B06-C02-clear-D00-normal",
+      "d24ShotId": "B06-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 152060,
+        "coverage": 0.15068096778285134,
+        "meanRgb": [
+          30.83,
+          37.03,
+          25.85
+        ],
+        "medianRgb": [
+          29,
+          35,
+          25
+        ],
+        "meanLinearLuminance": 0.01819,
+        "luminancePercentiles": {
+          "p10": 0.0087,
+          "p50": 0.0155,
+          "p90": 0.0308
+        },
+        "meanHueDeg": 97,
+        "meanSaturation": 0.3016,
+        "saturationP90": 0.4565,
+        "lab": {
+          "L": 13.762447507301644,
+          "a": -5.341346537774849,
+          "b": 6.45528467781486
+        }
+      },
+      "regionB": {
+        "count": 791529,
+        "coverage": 0.7843506230974124,
+        "meanRgb": [
+          31.74,
+          36.77,
+          32.17
+        ],
+        "medianRgb": [
+          31,
+          36,
+          32
+        ],
+        "meanLinearLuminance": 0.01789,
+        "luminancePercentiles": {
+          "p10": 0.01071,
+          "p50": 0.01647,
+          "p90": 0.02664
+        },
+        "meanHueDeg": 129.3,
+        "meanSaturation": 0.1636,
+        "saturationP90": 0.2162,
+        "lab": {
+          "L": 14.027154922641792,
+          "a": -3.514364883998672,
+          "b": 2.569909278238053
+        }
+      },
+      "comparison": {
+        "deltaE00": 3.574,
+        "lumaDiffPct": 1.68,
+        "contrastRatio": 1.004,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "Tundra B10 C01 (clear D00): Rock vs snow terrain",
+      "colorShotId": "B10-C01-clear-D00-normal",
+      "d24ShotId": "B10-C01-clear-D24-material-family",
+      "familyA": "rock",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 1661,
+        "coverage": 0.0016459363901572806,
+        "meanRgb": [
+          124.93,
+          135.53,
+          143.8
+        ],
+        "medianRgb": [
+          104,
+          117,
+          126
+        ],
+        "meanLinearLuminance": 0.28037,
+        "luminancePercentiles": {
+          "p10": 0.08896,
+          "p50": 0.17128,
+          "p90": 0.61263
+        },
+        "meanHueDeg": 206.4,
+        "meanSaturation": 0.158,
+        "saturationP90": 0.2784,
+        "lab": {
+          "L": 56.069297221319516,
+          "a": -2.284776495580232,
+          "b": -5.644643108792202
+        }
+      },
+      "regionB": {
+        "count": 918528,
+        "coverage": 0.9101978691019786,
+        "meanRgb": [
+          150.19,
+          156.26,
+          160.96
+        ],
+        "medianRgb": [
+          150,
+          157,
+          162
+        ],
+        "meanLinearLuminance": 0.3344,
+        "luminancePercentiles": {
+          "p10": 0.258,
+          "p50": 0.33148,
+          "p90": 0.42715
+        },
+        "meanHueDeg": 206.3,
+        "meanSaturation": 0.0717,
+        "saturationP90": 0.1069,
+        "lab": {
+          "L": 64.02620436400859,
+          "a": -1.145168160363752,
+          "b": -3.3533799047539503
+        }
+      },
+      "comparison": {
+        "deltaE00": 7.369,
+        "lumaDiffPct": -16.16,
+        "contrastRatio": 1.164,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Woodland Edge B15 C02 (clear D00): Near grass vs terrain",
+      "colorShotId": "B15-C02-clear-D00-normal",
+      "d24ShotId": "B15-C02-clear-D24-material-family",
+      "familyA": "nearGrass",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 839149,
+        "coverage": 0.8315387572932521,
+        "meanRgb": [
+          91.58,
+          119.01,
+          45.1
+        ],
+        "medianRgb": [
+          85,
+          115,
+          39
+        ],
+        "meanLinearLuminance": 0.17372,
+        "luminancePercentiles": {
+          "p10": 0.06633,
+          "p50": 0.1438,
+          "p90": 0.33438
+        },
+        "meanHueDeg": 83.9,
+        "meanSaturation": 0.634,
+        "saturationP90": 0.7159,
+        "lab": {
+          "L": 46.52290235661898,
+          "a": -22.309765049142506,
+          "b": 36.66173771777238
+        }
+      },
+      "regionB": {
+        "count": 111771,
+        "coverage": 0.11075734874429223,
+        "meanRgb": [
+          89.92,
+          126.21,
+          51.75
+        ],
+        "medianRgb": [
+          86,
+          126,
+          49
+        ],
+        "meanLinearLuminance": 0.18352,
+        "luminancePercentiles": {
+          "p10": 0.09567,
+          "p50": 0.17064,
+          "p90": 0.29199
+        },
+        "meanHueDeg": 90.4,
+        "meanSaturation": 0.593,
+        "saturationP90": 0.6574,
+        "lab": {
+          "L": 48.6892965500376,
+          "a": -25.947868349100624,
+          "b": 35.64726485869816
+        }
+      },
+      "comparison": {
+        "deltaE00": 2.981,
+        "lumaDiffPct": -5.34,
+        "contrastRatio": 1.044,
+        "flag": "ok"
+      }
+    },
+    {
+      "label": "B16 Fixture Grass-Sand (clear D00): Rock vs terrain",
+      "colorShotId": "B16-C01-clear-D00-normal",
+      "d24ShotId": "B16-C01-clear-D24-material-family",
+      "familyA": "rock",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 1871,
+        "coverage": 0.0018540319000507357,
+        "meanRgb": [
+          166.09,
+          171.94,
+          175.59
+        ],
+        "medianRgb": [
+          206,
+          213,
+          215
+        ],
+        "meanLinearLuminance": 0.47369,
+        "luminancePercentiles": {
+          "p10": 0.1224,
+          "p50": 0.65812,
+          "p90": 0.80419
+        },
+        "meanHueDeg": 205.2,
+        "meanSaturation": 0.072,
+        "saturationP90": 0.1402,
+        "lab": {
+          "L": 69.99784360570395,
+          "a": -1.328312749172611,
+          "b": -2.7840907429513395
+        }
+      },
+      "regionB": {
+        "count": 1000339,
+        "coverage": 0.9912669251014713,
+        "meanRgb": [
+          189.06,
+          177.66,
+          136.02
+        ],
+        "medianRgb": [
+          195,
+          186,
+          130
+        ],
+        "meanLinearLuminance": 0.45953,
+        "luminancePercentiles": {
+          "p10": 0.2619,
+          "p50": 0.48536,
+          "p90": 0.64791
+        },
+        "meanHueDeg": 46.5,
+        "meanSaturation": 0.2958,
+        "saturationP90": 0.3878,
+        "lab": {
+          "L": 72.52038618786206,
+          "a": -2.6876026253162544,
+          "b": 22.933784566889635
+        }
+      },
+      "comparison": {
+        "deltaE00": 18.354,
+        "lumaDiffPct": 3.08,
+        "contrastRatio": 1.028,
+        "flag": "major-mismatch-candidate"
+      }
+    },
+    {
+      "label": "B17 Fixture Snow-Rock (clear D00): Rock vs snow terrain",
+      "colorShotId": "B17-C01-clear-D00-normal",
+      "d24ShotId": "B17-C01-clear-D24-material-family",
+      "familyA": "rock",
+      "familyB": "terrain",
+      "kind": "contact",
+      "regionA": {
+        "count": 241367,
+        "coverage": 0.23917804255454084,
+        "meanRgb": [
+          130.71,
+          136.66,
+          141.45
+        ],
+        "medianRgb": [
+          106,
+          113,
+          119
+        ],
+        "meanLinearLuminance": 0.30556,
+        "luminancePercentiles": {
+          "p10": 0.08478,
+          "p50": 0.1617,
+          "p90": 0.79579
+        },
+        "meanHueDeg": 207.5,
+        "meanSaturation": 0.0938,
+        "saturationP90": 0.1628,
+        "lab": {
+          "L": 56.722465180961024,
+          "a": -1.3740798960094613,
+          "b": -2.8988707431055527
+        }
+      },
+      "regionB": {
+        "count": 703768,
+        "coverage": 0.6973855276509386,
+        "meanRgb": [
+          205.78,
+          209.58,
+          211.49
+        ],
+        "medianRgb": [
+          207,
+          211,
+          213
+        ],
+        "meanLinearLuminance": 0.6405,
+        "luminancePercentiles": {
+          "p10": 0.58471,
+          "p50": 0.64617,
+          "p90": 0.70482
+        },
+        "meanHueDeg": 200.2,
+        "meanSaturation": 0.0291,
+        "saturationP90": 0.0408,
+        "lab": {
+          "L": 83.9230250266628,
+          "a": -1.1756905767438819,
+          "b": -0.9703156873993368
+        }
+      },
+      "comparison": {
+        "deltaE00": 21.035,
+        "lumaDiffPct": -52.29,
+        "contrastRatio": 1.942,
+        "flag": "major-mismatch-candidate"
+      }
+    },
+    {
+      "label": "Stillmeadow C02: GroundContactField soil (D12) vs actual terrain albedo (D01)",
+      "shotA": "B14-C02-overcast-D12-substrate",
+      "shotB": "B14-C02-overcast-D01-albedo",
+      "kind": "contact",
+      "regionA": {
+        "count": 698880,
+        "coverage": 1,
+        "meanRgb": [
+          111.52,
+          87.62,
+          56.89
+        ],
+        "medianRgb": [
+          111,
+          88,
+          57
+        ],
+        "meanLinearLuminance": 0.10627,
+        "luminancePercentiles": {
+          "p10": 0.10417,
+          "p50": 0.10654,
+          "p90": 0.10961
+        },
+        "meanHueDeg": 33.8,
+        "meanSaturation": 0.4898,
+        "saturationP90": 0.4955,
+        "lab": {
+          "L": 39.105182352254545,
+          "a": 5.479107512215419,
+          "b": 21.68886401580522
+        }
+      },
+      "regionB": {
+        "count": 698880,
+        "coverage": 1,
+        "meanRgb": [
+          93.71,
+          93.4,
+          53.94
+        ],
+        "medianRgb": [
+          93,
+          94,
+          53
+        ],
+        "meanLinearLuminance": 0.10742,
+        "luminancePercentiles": {
+          "p10": 0.07337,
+          "p50": 0.10586,
+          "p90": 0.14444
+        },
+        "meanHueDeg": 59.5,
+        "meanSaturation": 0.4384,
+        "saturationP90": 0.5618,
+        "lab": {
+          "L": 38.68165648227414,
+          "a": -6.1539576946752215,
+          "b": 22.53151065560064
+        }
+      },
+      "comparison": {
+        "deltaE00": 11.527,
+        "lumaDiffPct": -1.07,
+        "contrastRatio": 1.007,
+        "flag": "major-mismatch-candidate"
+      }
+    },
+    {
+      "label": "Grassland B01 C02: GroundContactField soil (D12) vs actual terrain albedo (D01)",
+      "shotA": "B01-C02-clear-D12-substrate",
+      "shotB": "B01-C02-clear-D01-albedo",
+      "kind": "contact",
+      "regionA": {
+        "count": 457187,
+        "coverage": 0.6541709592490842,
+        "meanRgb": [
+          141,
+          129,
+          90
+        ],
+        "medianRgb": [
+          141,
+          129,
+          90
+        ],
+        "meanLinearLuminance": 0.22101,
+        "luminancePercentiles": {
+          "p10": 0.22101,
+          "p50": 0.22101,
+          "p90": 0.22101
+        },
+        "meanHueDeg": 45.9,
+        "meanSaturation": 0.3617,
+        "saturationP90": 0.3617,
+        "lab": {
+          "L": 54.1351205804763,
+          "a": -1.5756972104268852,
+          "b": 22.826720550941772
+        }
+      },
+      "regionB": {
+        "count": 457187,
+        "coverage": 0.6541709592490842,
+        "meanRgb": [
+          121.3,
+          118.47,
+          75.3
+        ],
+        "medianRgb": [
+          120,
+          117,
+          72
+        ],
+        "meanLinearLuminance": 0.18116,
+        "luminancePercentiles": {
+          "p10": 0.12232,
+          "p50": 0.17159,
+          "p90": 0.25195
+        },
+        "meanHueDeg": 56.4,
+        "meanSaturation": 0.3892,
+        "saturationP90": 0.4909,
+        "lab": {
+          "L": 48.92121944993954,
+          "a": -5.8781893268614045,
+          "b": 24.122478807817473
+        }
+      },
+      "comparison": {
+        "deltaE00": 6.484,
+        "lumaDiffPct": 22,
+        "contrastRatio": 1.172,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Temp. Rainforest B03 C02: GroundContactField soil (D12) vs actual terrain albedo (D01)",
+      "shotA": "B03-C02-clear-D12-substrate",
+      "shotB": "B03-C02-clear-D01-albedo",
+      "kind": "contact",
+      "regionA": {
+        "count": 660883,
+        "coverage": 0.945631581959707,
+        "meanRgb": [
+          110.2,
+          87.04,
+          56.13
+        ],
+        "medianRgb": [
+          110,
+          87,
+          56
+        ],
+        "meanLinearLuminance": 0.10438,
+        "luminancePercentiles": {
+          "p10": 0.10183,
+          "p50": 0.10417,
+          "p90": 0.1072
+        },
+        "meanHueDeg": 34.3,
+        "meanSaturation": 0.4907,
+        "saturationP90": 0.4954,
+        "lab": {
+          "L": 38.58153238967291,
+          "a": 5.049284089672618,
+          "b": 21.56448599397801
+        }
+      },
+      "regionB": {
+        "count": 660883,
+        "coverage": 0.945631581959707,
+        "meanRgb": [
+          79.21,
+          83.95,
+          47.19
+        ],
+        "medianRgb": [
+          79,
+          84,
+          46
+        ],
+        "meanLinearLuminance": 0.08429,
+        "luminancePercentiles": {
+          "p10": 0.0558,
+          "p50": 0.08146,
+          "p90": 0.1127
+        },
+        "meanHueDeg": 67.5,
+        "meanSaturation": 0.4432,
+        "saturationP90": 0.5698,
+        "lab": {
+          "L": 34.412825942734464,
+          "a": -8.636512573831052,
+          "b": 20.93958586197896
+        }
+      },
+      "comparison": {
+        "deltaE00": 14.013,
+        "lumaDiffPct": 23.83,
+        "contrastRatio": 1.15,
+        "flag": "major-mismatch-candidate"
+      }
+    },
+    {
+      "label": "LOD Grass: 0m near blades vs 32m low blades",
+      "shotA": "LOD-G01-d000m-D00-normal",
+      "shotB": "LOD-G01-d032m-D00-normal",
+      "kind": "lod",
+      "regionA": {
+        "count": 398592,
+        "coverage": 1,
+        "meanRgb": [
+          107.32,
+          138.69,
+          60.24
+        ],
+        "medianRgb": [
+          105,
+          140,
+          59
+        ],
+        "meanLinearLuminance": 0.23393,
+        "luminancePercentiles": {
+          "p10": 0.10256,
+          "p50": 0.22181,
+          "p90": 0.38617
+        },
+        "meanHueDeg": 85.2,
+        "meanSaturation": 0.5779,
+        "saturationP90": 0.6847,
+        "lab": {
+          "L": 53.93883618713876,
+          "a": -24.743122902422975,
+          "b": 38.036659942267505
+        }
+      },
+      "regionB": {
+        "count": 398592,
+        "coverage": 1,
+        "meanRgb": [
+          97.9,
+          124.93,
+          52
+        ],
+        "medianRgb": [
+          97,
+          126,
+          51
+        ],
+        "meanLinearLuminance": 0.18463,
+        "luminancePercentiles": {
+          "p10": 0.08988,
+          "p50": 0.17811,
+          "p90": 0.28817
+        },
+        "meanHueDeg": 82.9,
+        "meanSaturation": 0.5908,
+        "saturationP90": 0.6777,
+        "lab": {
+          "L": 48.898364865424696,
+          "a": -22.182221935669656,
+          "b": 36.024493437507765
+        }
+      },
+      "comparison": {
+        "deltaE00": 5.152,
+        "lumaDiffPct": 26.7,
+        "contrastRatio": 1.21,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "LOD Grass: 0m near blades vs 58m far cards",
+      "shotA": "LOD-G01-d000m-D00-normal",
+      "shotB": "LOD-G01-d058m-D00-normal",
+      "kind": "lod",
+      "regionA": {
+        "count": 398592,
+        "coverage": 1,
+        "meanRgb": [
+          107.32,
+          138.69,
+          60.24
+        ],
+        "medianRgb": [
+          105,
+          140,
+          59
+        ],
+        "meanLinearLuminance": 0.23393,
+        "luminancePercentiles": {
+          "p10": 0.10256,
+          "p50": 0.22181,
+          "p90": 0.38617
+        },
+        "meanHueDeg": 85.2,
+        "meanSaturation": 0.5779,
+        "saturationP90": 0.6847,
+        "lab": {
+          "L": 53.93883618713876,
+          "a": -24.743122902422975,
+          "b": 38.036659942267505
+        }
+      },
+      "regionB": {
+        "count": 398592,
+        "coverage": 1,
+        "meanRgb": [
+          131.19,
+          144.05,
+          76.75
+        ],
+        "medianRgb": [
+          135,
+          146,
+          77
+        ],
+        "meanLinearLuminance": 0.2626,
+        "luminancePercentiles": {
+          "p10": 0.149,
+          "p50": 0.2646,
+          "p90": 0.36813
+        },
+        "meanHueDeg": 72,
+        "meanSaturation": 0.4782,
+        "saturationP90": 0.6069,
+        "lab": {
+          "L": 57.3740710709002,
+          "a": -15.573184189013546,
+          "b": 33.882439135084596
+        }
+      },
+      "comparison": {
+        "deltaE00": 5.619,
+        "lumaDiffPct": -10.92,
+        "contrastRatio": 1.101,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "LOD Grass: 58m far cards vs 95m terrain groundCover",
+      "shotA": "LOD-G01-d058m-D00-normal",
+      "shotB": "LOD-G01-d095m-D00-normal",
+      "kind": "lod",
+      "regionA": {
+        "count": 398592,
+        "coverage": 1,
+        "meanRgb": [
+          131.19,
+          144.05,
+          76.75
+        ],
+        "medianRgb": [
+          135,
+          146,
+          77
+        ],
+        "meanLinearLuminance": 0.2626,
+        "luminancePercentiles": {
+          "p10": 0.149,
+          "p50": 0.2646,
+          "p90": 0.36813
+        },
+        "meanHueDeg": 72,
+        "meanSaturation": 0.4782,
+        "saturationP90": 0.6069,
+        "lab": {
+          "L": 57.3740710709002,
+          "a": -15.573184189013546,
+          "b": 33.882439135084596
+        }
+      },
+      "regionB": {
+        "count": 398592,
+        "coverage": 1,
+        "meanRgb": [
+          103.66,
+          129.33,
+          62.8
+        ],
+        "medianRgb": [
+          104,
+          132,
+          63
+        ],
+        "meanLinearLuminance": 0.19802,
+        "luminancePercentiles": {
+          "p10": 0.1155,
+          "p50": 0.20004,
+          "p90": 0.27489
+        },
+        "meanHueDeg": 83.9,
+        "meanSaturation": 0.5191,
+        "saturationP90": 0.6328,
+        "lab": {
+          "L": 50.68988158272988,
+          "a": -20.55970461657103,
+          "b": 32.60718685602011
+        }
+      },
+      "comparison": {
+        "deltaE00": 7.165,
+        "lumaDiffPct": 32.61,
+        "contrastRatio": 1.26,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Chunk boundary x=0: West chunk vs East chunk ground band",
+      "shotA": "STR-CB01-clear-D00-normal (west)",
+      "shotB": "STR-CB01-clear-D00-normal (east)",
+      "kind": "chunk-boundary",
+      "regionA": {
+        "count": 86856,
+        "coverage": 1,
+        "meanRgb": [
+          144.67,
+          124.93,
+          76.13
+        ],
+        "medianRgb": [
+          146,
+          127,
+          76
+        ],
+        "meanLinearLuminance": 0.21875,
+        "luminancePercentiles": {
+          "p10": 0.12686,
+          "p50": 0.21736,
+          "p90": 0.31134
+        },
+        "meanHueDeg": 42.5,
+        "meanSaturation": 0.4773,
+        "saturationP90": 0.58,
+        "lab": {
+          "L": 53.17821587432087,
+          "a": 0.7704517199720873,
+          "b": 29.461030439935975
+        }
+      },
+      "regionB": {
+        "count": 86856,
+        "coverage": 1,
+        "meanRgb": [
+          140.75,
+          115.32,
+          65.53
+        ],
+        "medianRgb": [
+          140,
+          115,
+          66
+        ],
+        "meanLinearLuminance": 0.19123,
+        "luminancePercentiles": {
+          "p10": 0.10842,
+          "p50": 0.18287,
+          "p90": 0.28674
+        },
+        "meanHueDeg": 39.4,
+        "meanSaturation": 0.5374,
+        "saturationP90": 0.6282,
+        "lab": {
+          "L": 49.88018256486474,
+          "a": 3.6928980936078437,
+          "b": 30.752315939552243
+        }
+      },
+      "comparison": {
+        "deltaE00": 4.078,
+        "lumaDiffPct": 14.39,
+        "contrastRatio": 1.114,
+        "flag": "investigate"
+      }
+    },
+    {
+      "label": "Floating-origin roundtrip: Before rebase vs after >12 km rebase",
+      "shotA": "STR-FO01-before-rebase-D00-normal",
+      "shotB": "STR-FO02-after-rebase-D00-normal",
+      "kind": "floating-origin",
+      "regionA": {
+        "count": 537600,
+        "coverage": 1,
+        "meanRgb": [
+          131.35,
+          129.72,
+          72.63
+        ],
+        "medianRgb": [
+          132,
+          130,
+          72
+        ],
+        "meanLinearLuminance": 0.2193,
+        "luminancePercentiles": {
+          "p10": 0.13158,
+          "p50": 0.21291,
+          "p90": 0.31521
+        },
+        "meanHueDeg": 58.4,
+        "meanSaturation": 0.4581,
+        "saturationP90": 0.5478,
+        "lab": {
+          "L": 53.24592507183675,
+          "a": -8.469527840765323,
+          "b": 30.89917398302786
+        }
+      },
+      "regionB": {
+        "count": 537600,
+        "coverage": 1,
+        "meanRgb": [
+          123.5,
+          122.55,
+          68.07
+        ],
+        "medianRgb": [
+          124,
+          123,
+          67
+        ],
+        "meanLinearLuminance": 0.19411,
+        "luminancePercentiles": {
+          "p10": 0.1133,
+          "p50": 0.18767,
+          "p90": 0.28353
+        },
+        "meanHueDeg": 59,
+        "meanSaturation": 0.4611,
+        "saturationP90": 0.5522,
+        "lab": {
+          "L": 50.533279772106326,
+          "a": -8.202945106402792,
+          "b": 30.10309293436906
+        }
+      },
+      "comparison": {
+        "deltaE00": 2.706,
+        "lumaDiffPct": 12.98,
+        "contrastRatio": 1.103,
+        "flag": "investigate"
+      }
+    }
+  ]
+}

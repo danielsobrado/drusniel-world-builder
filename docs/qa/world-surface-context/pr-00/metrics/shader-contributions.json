@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "b7183e59",
+  "auditDate": "2026-11-25",
+  "sceneLightingAuthority": {
+    "source": "src/editor/stylized/sky/StylizedSkyView.js + editor.config.yaml",
+    "directionalIntensity": 3.4,
+    "ambientIntensity": 1.35,
+    "environmentIntensity": 0.3,
+    "toneMapping": "ACESFilmicToneMapping",
+    "toneMappingExposure": 1.12,
+    "cinematicFinish": {
+      "saturation": 1.04,
+      "contrast": 1.12,
+      "highlightDesaturation": 0.35
+    }
+  },
+  "artificialEmissiveFills": [
+    {
+      "family": "terrain (under forest canopy)",
+      "file": "src/editor/terrainMaterial.js",
+      "lines": "121, 688-689",
+      "formula": "foliageSkyFill(material.colorNode, 0.8) * forestFloor",
+      "effectiveGain": 0.8,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": false,
+      "note": "INVERSE of shadow: adds 0.8x unshadowed sky fill specifically where forestFloor > 0, causing shaded forest terrain to glow saturated green while grass blades on top receive only 0.025x fill."
+    },
+    {
+      "family": "nearGrass & farGrassCards",
+      "file": "src/editor/stylized/meadow/meadowBladeMaterial.js",
+      "lines": "80-84",
+      "formula": "pigment * skyColor * appearance.fill (0.025) * mix(0.45, 1, rootShade) + sunBacklight",
+      "effectiveGain": 0.025,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": false,
+      "note": "32x lower ambient emissive fill than the forest floor directly beneath it (0.025 vs 0.80)."
+    },
+    {
+      "family": "treeFoliage",
+      "file": "src/editor/stylized/forest/foliageLight.js",
+      "lines": "34-37, 170-182",
+      "formula": "CROWN_FILL(0.75)*vis + CROWN_BOUNCE(0.95)*underside*vis + CROWN_AIR(0.55) + skyEdge",
+      "effectiveGain": 0.75,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": true
+    },
+    {
+      "family": "treeBark",
+      "file": "src/editor/stylized/forest/foliageLight.js",
+      "lines": "35-38, 192-198",
+      "formula": "BARK_FILL(0.78) + BARK_BOUNCE(1.1)*low*facing + air",
+      "effectiveGain": 0.78,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": false
+    },
+    {
+      "family": "shrub & understory",
+      "file": "src/editor/stylized/forest/foliageLight.js + AuthoredFoliageMaterial.js",
+      "lines": "45-48, 212-222 / 21, 164-166",
+      "formula": "(UNDERSTORY_FILL(0.78) + UNDERSTORY_BOUNCE(1.15)*facing + air) * footFill(0.70..1.0) * interior",
+      "effectiveGain": 0.78,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": true
+    },
+    {
+      "family": "rock",
+      "file": "src/editor/stylized/forest/foliageLight.js",
+      "lines": "43-44, 201-206",
+      "formula": "ROCK_FILL(3.5) + ROCK_BOUNCE(4.0)*facing + air",
+      "effectiveGain": 3.5,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": false,
+      "note": "Not attenuated by GroundContactField.canopy; boulders under closed canopy retain 3.5x sky fill."
+    },
+    {
+      "family": "building",
+      "file": "src/editor/stylized/forest/foliageLight.js + townGrade.js",
+      "lines": "51-52, 229-234 / 134-135",
+      "formula": "BUILDING_FILL(2.2) + BUILDING_BOUNCE(2.6)*facing + air",
+      "effectiveGain": 2.2,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": false
+    },
+    {
+      "family": "paving",
+      "file": "src/editor/world/settlements/paving/SettlementPavingMaterial.js",
+      "lines": "90",
+      "formula": "buildingShadeEmission(colorNode, { fill: 1.35, bounce: 0.8 })",
+      "effectiveGain": 1.35,
+      "gatedByShadowMap": false,
+      "gatedByCanopyOcclusion": false
+    }
+  ],
+  "doubleShadingChains": [
+    {
+      "id": "DS-01",
+      "target": "Near grass blades under trees/shrubs",
+      "stages": [
+        "1. meadowPigment.js:94 groundAo = clamp(1 - contact*0.32 - canopy*0.14, 0.45, 1.0) multiplied into root & 85% tip albedo",
+        "2. meadowPigment.js:116-117 rootShade = mix(rootBrightness(0.55), 1.0, smoothstep(0, canopyDepth, height)) multiplied into albedo",
+        "3. meadowPigment.js:99 footSoilColor = mix(root*0.88, groundContact.soilColor*0.92, 0.45) darkens root further toward approximated brown soil",
+        "4. meadowPigment.js:123 bladeValue jitter (0.75..1.25) + tuftValue spread (0.84..1.16)",
+        "5. DirectionalLight CSM shadow map + cloud shadow attenuate direct light",
+        "6. Cumulative dark-blade factor in canopy shade: 0.45 * 0.55 * 0.88 * 0.75 ≈ 0.163x albedo while adjacent terrain adds 0.8x unshadowed emissive"
+      ]
+    },
+    {
+      "id": "DS-02",
+      "target": "Shrubs & understory bases",
+      "stages": [
+        "1. foliagePalette.js:76-77 applyUnderstoryWeathering foot darkening (0.86..1.0 on local.y 0..0.32m)",
+        "2. AuthoredFoliageMaterial.js:31-34 understoryFootShade = mix(0.86 - contact*0.26, 1, baseRamp) * (1 - canopy*0.14) multiplied into albedo",
+        "3. AuthoredFoliageMaterial.js:146-149 CROWN_SELF_SHADE (0.52) * crownInteriorVisibility multiplied into albedo",
+        "4. AuthoredFoliageMaterial.js:167 material.aoNode *= interior (ambient light attenuated a second time)",
+        "5. AuthoredFoliageMaterial.js:164-166 emissive fill scaled by UNDERSTORY_FOOT_FILL (0.70) * interior",
+        "6. DirectionalLight CSM shadow map + cloud shadow"
+      ]
+    },
+    {
+      "id": "DS-03",
+      "target": "Tree trunk bases",
+      "stages": [
+        "1. barkWeathering.js:191 baseShade (up to 0.40 -> BASE_TINT [0.62,0.58,0.50]) over 1.8m",
+        "2. barkWeathering.js:192-195 rootContactAo = 1 - (contact*0.28 + 0.14) over 0.55m",
+        "3. barkWeathering.js:198-200 SOIL_SHARE (0.70) over only SOIL_REACH (0.15m) toward approximated brown soilColor",
+        "4. terrainMaterial.js:365-368 contactShade darkens floor by 0.60x AND mixes brown duff, while trunk blends only 15cm into un-matched soilTable"
+      ]
+    },
+    {
+      "id": "DS-04",
+      "target": "Terrain forest floor vs near/mid bake",
+      "stages": [
+        "1. createMeadowGroundPalette:44-46 applies groundOcclusion (1 - 0.18 * density) into baked root palette",
+        "2. terrainMaterial.js:286-290 mixes floorMoss at forestFloor * 0.68",
+        "3. terrainMaterial.js:368 multiplies groundColor by (1 - contact*0.40)",
+        "4. TerrainMaterialBakedNodes.js:308-314 midColor AGAIN mixes groundCoreColor at canopy * 0.30, and nearDetailed blends 14% midColor",
+        "5. terrainMaterial.js:688 ADDS foliageSkyFill(0.8) * forestFloor as unshadowed emissive — over-compensating darkness into glowing saturated green under overcast/shadow"
+      ]
+    }
+  ]
+}

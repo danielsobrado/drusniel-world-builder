@@ -1,0 +1,216 @@
+# World Surface Context (WSC) — PR 0 Visual Diagnostic Modes
+# Disabled by default in production (`defaultMode: D00`).
+# Used exclusively by WorldVisualQa / PR 0 capture scripts to inspect material
+# pipelines, shared environmental fields, lighting splits, and LOD continuity
+# without altering normal rendering or compiling extra production shaders.
+schemaVersion: 1
+defaultMode: D00
+modes:
+  D00:
+    slug: normal
+    label: Normal rendering
+    category: production
+    supported: true
+    stage: final
+    units: display sRGB
+    legend: Production renderer baseline (unchanged)
+  D01:
+    slug: albedo
+    label: Resolved unlit albedo
+    category: material
+    supported: true
+    stage: resolved-albedo
+    units: unlit linear -> sRGB
+    legend: Each material's resolved colorNode without direct/indirect lighting, emissive, or fog
+  D02:
+    slug: source-albedo
+    label: Source albedo
+    category: material
+    supported: true
+    stage: raw-input
+    units: texture * color * vertexColor
+    legend: Raw authored texture map / base colour before biome grading, weathering, or ground blends
+  D03:
+    slug: biome-pigment
+    label: Biome pigment
+    category: environment
+    supported: true
+    stage: raw-input
+    units: RGB swatch
+    legend: Terrain biome tileTexture RGB; instanced foliage/rocks show instanceBiomeLook RGB
+  D04:
+    slug: local-tint
+    label: Local environmental tint
+    category: environment
+    supported: true
+    stage: raw-input
+    units: cool/warm patch multiplier
+    legend: Shared worldNoise macro meadowPatchColors cool/warm/dry spatial field across world XZ
+  D05:
+    slug: normals
+    label: Surface normals
+    category: geometry
+    supported: true
+    stage: resolved-surface
+    units: world normal [-1..1] -> [0..1]
+    legend: R=Nx*0.5+0.5, G=Ny*0.5+0.5, B=Nz*0.5+0.5 in world space
+  D06:
+    slug: roughness
+    label: Roughness
+    category: pbr
+    supported: true
+    stage: resolved-surface
+    units: roughness [0..1]
+    legend: Black=0.0 mirror, Mid-grey=0.5, White=1.0 matte (Lambert materials report 1.0)
+  D07:
+    slug: metalness
+    label: Metalness
+    category: pbr
+    supported: true
+    stage: resolved-surface
+    units: metalness [0..1] (alert > 0.05)
+    legend: Dark blue=0.0 dielectric; bright magenta/red highlights any surface with metalness > 0.05
+  D08:
+    slug: contact-ao
+    label: Contact occlusion
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: GroundContactField contact [0..1]
+    legend: Black=0.0 open, Amber/White=1.0 full trunk/rock/bush contact shade; dark violet outside 128 m field
+  D09:
+    slug: canopy
+    label: Canopy coverage
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: GroundContactField canopy [0..1]
+    legend: Black=0.0 open sky, Bright green=1.0 closed forest canopy; dark violet outside 128 m field
+  D10:
+    slug: forest-litter
+    label: Forest litter
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: forestFloorTexture B [0..1]
+    legend: Terrain forestFloorTexture B channel (bare woodland litter between canopy grass islands); non-terrain muted grey
+  D11:
+    slug: vegetation-coverage
+    label: Vegetation coverage
+    category: ecology
+    supported: true
+    stage: raw-input
+    units: surfaceMask G [0..1] vs blade geometry
+    legend: Terrain shows surfaceMask G (green=1.0 grass habitat); rendered grass blades highlight cyan to expose sparse-floor mismatch
+  D12:
+    slug: substrate
+    label: Soil / substrate pigment
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: GroundContactField soilColor (unlit)
+    legend: GroundContactField published soilColor sampled at positionWorld.xz (compare directly with D01 terrain albedo)
+  D13:
+    slug: gc-height
+    label: Ground-contact height delta
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: positionWorld.y - field.height (m)
+    legend: Blue=-0.5 m buried, Green=0.0 m exact contact, Yellow=+0.5 m, Red>=+1.5 m above sampled ground; violet outside field
+  D14:
+    slug: gc-normal
+    label: Ground-contact normal
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: field world normal [-1..1] -> [0..1]
+    legend: Sampled GroundContactField terrain normal projected onto all geometry
+  D15:
+    slug: gc-validity
+    label: Ground-contact validity
+    category: ground-contact
+    supported: true
+    stage: raw-input
+    units: window inside [0..1] + missing-slot flag
+    legend: Green=inside active window, Yellow=12 m border fade, Red=outside/inactive, Magenta=missing-slot fallback texel (128,110,85)
+  D16:
+    slug: direct-lighting
+    label: Direct lighting
+    category: lighting
+    supported: true
+    stage: isolated-lighting
+    units: scene-linear direct radiance
+    legend: Directional sun/moon + shadow map only (hemisphere light, IBL environment, and material emissive disabled)
+  D17:
+    slug: indirect-lighting
+    label: Indirect lighting
+    category: lighting
+    supported: true
+    stage: isolated-lighting
+    units: scene-linear indirect + emissive fill
+    legend: Hemisphere light + HDR environment + material sky/bounce emissive only (directional sun/moon disabled)
+  D18:
+    slug: emissive
+    label: Emissive contribution
+    category: lighting
+    supported: true
+    stage: resolved-surface
+    units: unlit emissiveNode RGB (2x gain)
+    legend: Isolates artificial emissive fills (FOREST_FLOOR_FILL, tree/bark/rock/understory/buildingShadeEmission, grass backlight) at 2x gain
+  D19:
+    slug: shadow
+    label: Shadow contribution
+    category: lighting
+    supported: true
+    stage: isolated-lighting
+    units: direct shadow factor [0..1]
+    legend: White matte Lambert override under directional light + CSM shadow map + cloud shadows (no ambient/emissive)
+  D20:
+    slug: lod
+    label: LOD classification
+    category: lod
+    supported: true
+    stage: classification
+    units: categorical palette
+    legend: Slate=Terrain, BrightGreen=NearGrass, YellowGreen=GrassCards, Emerald=TreeNear, Orange=TreeProxy, Cyan=TreeImpostor, Teal=BushNear, Gold=BushProxy, Blue=RockNear, Purple=RockProxy, Coral=Building
+  D21:
+    slug: wetness
+    label: Wetness
+    category: coatings
+    supported: true
+    stage: raw-input
+    units: surfaceWetnessUniform [0..1] + water mask
+    legend: Global shared rain wetness uniform (blue) + terrain shoreline/water surfaceMask B (cyan)
+  D22:
+    slug: moss
+    label: Moss eligibility (approximate)
+    category: coatings
+    supported: partial
+    stage: raw-input
+    units: upward normal * canopy/biome eligibility [0..1]
+    legend: Approximate shared moss potential (normalWorld.y * canopy/biome moss); private per-material moss closures are not separately exposed in baseline shaders
+  D23:
+    slug: snow
+    label: Snow coverage
+    category: coatings
+    supported: true
+    stage: raw-input
+    units: stormSnowCover + altitude snowline [0..1]
+    legend: Shared stormSnowCoverAt(xz) combined with altitude snow band (700..950 m) in ice-blue/white
+  D24:
+    slug: material-family
+    label: Material family ID
+    category: classification
+    supported: true
+    stage: classification
+    units: exact RGB class ID
+    legend: Deterministic per-family colour ID for the 17 audited material families (used for automated ROI masking)
+  D25:
+    slug: chunk-boundaries
+    label: Chunk and field boundaries
+    category: streaming
+    supported: true
+    stage: overlay
+    units: canonical grid overlay
+    legend: Red=128 m terrain chunk borders, Yellow=8 m meadow tile borders, Cyan=128 m GroundContactField boundary over unlit albedo

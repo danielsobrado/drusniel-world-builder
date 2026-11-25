@@ -1,0 +1,664 @@
+{
+  "schemaVersion": 1,
+  "pr": "PR-00",
+  "generatedAt": "2026-11-25T03:19:26.892Z",
+  "sourceCommit": "b7183e595163c6ddb3c929ed0902c2b8f44ab3c8",
+  "hardware": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "diagnosticModeDefault": "D00",
+  "productionOverheadWhenDisabled": {
+    "extraDrawCalls": 0,
+    "extraShaderCompiles": 0,
+    "extraGpuTextures": 0,
+    "extraFrameTimeMs": 0,
+    "note": "WorldVisualDiagnostics allocates zero materials and does not traverse the scene until explicitly activated via WorldVisualQa.setDiagnosticMode()."
+  },
+  "fixtureFrameTimeComparison": {
+    "scene": "WSC Standardized 4-Substrate Fixture (FX-C02-junction)",
+    "normalD00": {
+      "p50Ms": 7,
+      "p95Ms": 7.9,
+      "avgFps": 143.8
+    },
+    "diagnosticD01": {
+      "p50Ms": 18.2,
+      "p95Ms": 383.5,
+      "avgFps": 4.5
+    },
+    "diagnosticD01SwitchMs": 26.3,
+    "note": "d01 p95 reflects initial WebGPU pipeline compilation for newly cloned diagnostic materials on first activation; D00 steady-state ran at 143.8 FPS (p50 7.0 ms, p95 7.9 ms) on NVIDIA Lovelace hardware WebGPU at 1920x1080."
+  },
+  "groundContactFieldBaselineCost": {
+    "resolution": "128x128 (1.0 m/texel over 128 m window)",
+    "gpuTextures": 2,
+    "gpuMemoryBytes": 131072,
+    "recenterHysteresisMeters": 16,
+    "borderFadeMeters": 12,
+    "cpuUpdateTrigger": "camera movement >= 16 m or terrain/contact revision change"
+  },
+  "sceneRenderStatsSummaryAcrossD00Captures": {
+    "sampleCount": 66,
+    "residentGeometries": {
+      "min": 855,
+      "p50": 874,
+      "max": 1205
+    },
+    "residentTextures": {
+      "min": 1354,
+      "p50": 1424,
+      "max": 1451
+    },
+    "note": "WebGPURenderer with RenderPipeline accumulates renderer.info.render.calls/triangles across frames (autoReset=false); live resident geometry/texture counts are reported here while per-frame timing is reported in fixtureFrameTimeComparison."
+  },
+  "qaPerfHarnessStatus": {
+    "commandAttempted": "npm run qa:perf -- --headed --url http://127.0.0.1:5181 --qa chunk-cross --warmup 6 --duration 10 --settle",
+    "status": "blocked-by-windows-foreground-activation",
+    "error": "Windows could not activate the owned benchmark browser (scripts/lib/perf-browser-foreground-win32.mjs:92)",
+    "note": "Windows refuses SetForegroundWindow from a non-interactive background session. Native focus checks were NOT bypassed. Re-run the exact command from an interactive Windows desktop terminal to collect walking chunk-cross / settlement-approach hitch telemetry."
+  },
+  "perLocationD00RenderStats": [
+    {
+      "locationId": "B14",
+      "cameraId": "C01",
+      "condition": "overcast",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1156,
+      "residentTextures": 1407
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1156,
+      "residentTextures": 1407
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C02",
+      "condition": "overcast",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1156,
+      "residentTextures": 1407
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1156,
+      "residentTextures": 1407
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C03",
+      "condition": "overcast",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1424
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C03",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1424
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C04",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1416
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C05",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1429
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C06",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1429
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C01",
+      "condition": "sunrise",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1429
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C01",
+      "condition": "sunset",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1429
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C01",
+      "condition": "night",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1429
+    },
+    {
+      "locationId": "B14",
+      "cameraId": "C01",
+      "condition": "rain",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1158,
+      "residentTextures": 1429
+    },
+    {
+      "locationId": "B10",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 10,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 872,
+      "residentTextures": 1418
+    },
+    {
+      "locationId": "B10",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 10,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 872,
+      "residentTextures": 1418
+    },
+    {
+      "locationId": "B11",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 11,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1423
+    },
+    {
+      "locationId": "B12",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 10,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1423
+    },
+    {
+      "locationId": "B18",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 13,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 1205,
+      "residentTextures": 1451
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1354
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1354
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C03",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1376
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1424
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1425
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C03",
+      "condition": "clear",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1425
+    },
+    {
+      "locationId": "B03",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1426
+    },
+    {
+      "locationId": "B03",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1426
+    },
+    {
+      "locationId": "B03",
+      "cameraId": "C03",
+      "condition": "clear",
+      "biomeId": 8,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1426
+    },
+    {
+      "locationId": "B04",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 7,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1431
+    },
+    {
+      "locationId": "B04",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 7,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1431
+    },
+    {
+      "locationId": "B05",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 9,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 872,
+      "residentTextures": 1405
+    },
+    {
+      "locationId": "B05",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 9,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 872,
+      "residentTextures": 1405
+    },
+    {
+      "locationId": "B06",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 12,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1428
+    },
+    {
+      "locationId": "B06",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 12,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 873,
+      "residentTextures": 1428
+    },
+    {
+      "locationId": "B07",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 3,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1428
+    },
+    {
+      "locationId": "B07",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 3,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1428
+    },
+    {
+      "locationId": "B08",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 1,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1428
+    },
+    {
+      "locationId": "B08",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 1,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1428
+    },
+    {
+      "locationId": "B09",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 2,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 866,
+      "residentTextures": 1403
+    },
+    {
+      "locationId": "B13",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 867,
+      "residentTextures": 1427
+    },
+    {
+      "locationId": "B15",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1427
+    },
+    {
+      "locationId": "B15",
+      "cameraId": "C02",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 875,
+      "residentTextures": 1427
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C01",
+      "condition": "sunrise",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1354
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C01",
+      "condition": "overcast",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1356
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C01",
+      "condition": "sunset",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1356
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C01",
+      "condition": "night",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1356
+    },
+    {
+      "locationId": "B01",
+      "cameraId": "C01",
+      "condition": "rain",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 855,
+      "residentTextures": 1356
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C01",
+      "condition": "sunrise",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1404
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C01",
+      "condition": "overcast",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1405
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C01",
+      "condition": "sunset",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1405
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C01",
+      "condition": "night",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1405
+    },
+    {
+      "locationId": "B02",
+      "cameraId": "C01",
+      "condition": "rain",
+      "biomeId": 6,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 874,
+      "residentTextures": 1405
+    },
+    {
+      "locationId": "LOD",
+      "cameraId": "d0m",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 867,
+      "residentTextures": 1386
+    },
+    {
+      "locationId": "LOD",
+      "cameraId": "d12m",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 868,
+      "residentTextures": 1409
+    },
+    {
+      "locationId": "LOD",
+      "cameraId": "d32m",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 868,
+      "residentTextures": 1409
+    },
+    {
+      "locationId": "LOD",
+      "cameraId": "d58m",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 868,
+      "residentTextures": 1409
+    },
+    {
+      "locationId": "LOD",
+      "cameraId": "d95m",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 868,
+      "residentTextures": 1409
+    },
+    {
+      "locationId": "LOD",
+      "cameraId": "d145m",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 868,
+      "residentTextures": 1409
+    },
+    {
+      "locationId": "FIXTURE",
+      "cameraId": "FX-C01-overview",
+      "condition": "clear",
+      "biomeId": 1,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 900,
+      "residentTextures": 1426
+    },
+    {
+      "locationId": "FIXTURE",
+      "cameraId": "FX-C02-junction",
+      "condition": "clear",
+      "biomeId": 1,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 900,
+      "residentTextures": 1426
+    },
+    {
+      "locationId": "FIXTURE",
+      "cameraId": "FX-C03-grass-forest",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 903,
+      "residentTextures": 1427
+    },
+    {
+      "locationId": "FIXTURE",
+      "cameraId": "FX-C04-rocks",
+      "condition": "clear",
+      "biomeId": 13,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 903,
+      "residentTextures": 1427
+    },
+    {
+      "locationId": "B16",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 1,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 903,
+      "residentTextures": 1427
+    },
+    {
+      "locationId": "B17",
+      "cameraId": "C01",
+      "condition": "clear",
+      "biomeId": 10,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 903,
+      "residentTextures": 1449
+    },
+    {
+      "locationId": "STREAMING",
+      "cameraId": "CB01",
+      "condition": "clear",
+      "biomeId": 3,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 864,
+      "residentTextures": 1385
+    },
+    {
+      "locationId": "STREAMING",
+      "cameraId": "FO01",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 876,
+      "residentTextures": 1426
+    },
+    {
+      "locationId": "STREAMING",
+      "cameraId": "FO02",
+      "condition": "clear",
+      "biomeId": 4,
+      "renderPath": "cinematic-god-rays",
+      "residentGeometries": 876,
+      "residentTextures": 1428
+    }
+  ]
+}

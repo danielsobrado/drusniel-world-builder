@@ -1,0 +1,196 @@
+# World Surface Context (WSC) — PR 0 Reproducible Camera Manifest
+# Every location uses canonical world coordinates, real Azgaar/procedural biome IDs,
+# and frozen world seed (procedural seed 918273 or Eldara Full 2026-07-23-20-37).
+schemaVersion: 1
+viewport:
+  width: 1920
+  height: 1080
+worlds:
+  procedural:
+    seed: 918273
+    generatorVersion: 1
+    tileSize: 2
+    chunkSize: 64
+  eldara:
+    map: /maps/Eldara Full 2026-07-23-20-37.json
+    stillmeadowBurgId: 18
+
+locations:
+  B01:
+    name: Grassland
+    folder: biomes/grassland
+    world: procedural
+    tileId: 4
+    cameras:
+      C01: { label: Wide landscape, x: -1869, z: -4003, yaw: 2.488, pitch: -0.06, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Ground-level grass contact, x: -1869, z: -4003, yaw: 2.488, pitch: -0.34, mode: fly, heightAboveGround: 0.75, fov: 62 }
+      C03: { label: Distant terrain view, x: -1869, z: -4003, yaw: 2.488, pitch: -0.32, mode: fly, heightAboveGround: 28, fov: 60 }
+
+  B02:
+    name: Temperate deciduous forest
+    folder: biomes/temperate-deciduous
+    world: procedural
+    tileId: 6
+    canopy: true
+    cameras:
+      C01: { label: Wide forest floor, x: 8901, z: 15277, yaw: 0.0, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Trunk and grass close-up, x: 8901, z: 15277, yaw: 0.0, pitch: -0.28, mode: fly, heightAboveGround: 0.9, fov: 62 }
+      C03: { label: Canopy aerial, x: 8901, z: 15277, yaw: 0.0, pitch: -0.42, mode: fly, heightAboveGround: 42, fov: 60 }
+
+  B03:
+    name: Temperate rainforest
+    folder: biomes/temperate-rainforest
+    world: procedural
+    tileId: 8
+    canopy: true
+    cameras:
+      C01: { label: Wide rainforest interior, x: 10119, z: 5719, yaw: 0.785, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Sparse blades & trunk base, x: 10119, z: 5719, yaw: 0.785, pitch: -0.30, mode: fly, heightAboveGround: 0.85, fov: 62 }
+      C03: { label: Mid-distance floor, x: 10119, z: 5719, yaw: 1.45, pitch: -0.14, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B04:
+    name: Tropical rainforest
+    folder: biomes/tropical-rainforest
+    world: procedural
+    tileId: 7
+    canopy: true
+    cameras:
+      C01: { label: Wide jungle floor, x: 12991, z: -1419, yaw: -0.785, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Understory & grass contact, x: 12991, z: -1419, yaw: -0.785, pitch: -0.28, mode: fly, heightAboveGround: 0.85, fov: 62 }
+
+  B05:
+    name: Taiga
+    folder: biomes/taiga
+    world: procedural
+    tileId: 9
+    canopy: true
+    cameras:
+      C01: { label: Wide boreal forest, x: -6951, z: 10379, yaw: 0.785, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Conifer base & moss floor, x: -6951, z: 10379, yaw: 0.785, pitch: -0.28, mode: fly, heightAboveGround: 0.9, fov: 62 }
+
+  B06:
+    name: Wetland
+    folder: biomes/wetland
+    world: procedural
+    tileId: 12
+    cameras:
+      C01: { label: Wide wetland bog, x: 11495, z: 9197, yaw: 1.879, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Sedge & peat contact, x: 11495, z: 9197, yaw: 1.879, pitch: -0.30, mode: fly, heightAboveGround: 0.85, fov: 62 }
+
+  B07:
+    name: Savanna
+    folder: biomes/savanna
+    world: procedural
+    tileId: 3
+    findBiome: true
+    cameras:
+      C01: { label: Wide savanna, yaw: 0.8, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Tussocks & laterite soil, yaw: 0.8, pitch: -0.30, mode: fly, heightAboveGround: 0.85, fov: 62 }
+
+  B08:
+    name: Hot desert
+    folder: biomes/desert
+    world: procedural
+    tileId: 1
+    cameras:
+      C01: { label: Wide desert erg, x: -5791, z: -27, yaw: 5.357, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Rock & scrub on sand, x: -5791, z: -27, yaw: 5.357, pitch: -0.26, mode: fly, heightAboveGround: 0.9, fov: 62 }
+
+  B09:
+    name: Cold steppe
+    folder: biomes/cold-steppe
+    world: procedural
+    tileId: 2
+    findBiome: true
+    cameras:
+      C01: { label: Wide cold steppe, yaw: 1.1, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B10:
+    name: Tundra
+    folder: biomes/tundra
+    world: eldara
+    tileId: 10
+    cameras:
+      C01: { label: Wide tundra snow, x: 151523, z: -49043, yaw: 0.6, pitch: -0.12, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Rock & tussock in snow, x: 151523, z: -49043, yaw: 0.6, pitch: -0.30, mode: fly, heightAboveGround: 0.9, fov: 62 }
+
+  B11:
+    name: Snow-covered alpine terrain
+    folder: biomes/alpine-snow
+    world: eldara
+    cameras:
+      C01: { label: Alpine snow eye level, x: -3291493, z: -210747, yaw: 2.0, pitch: 0.05, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B12:
+    name: Rocky mountain terrain
+    folder: biomes/rocky-mountain
+    world: eldara
+    cameras:
+      C01: { label: Glacier & alpine crags, x: -282505, z: -389567, yaw: 1.2, pitch: -0.25, mode: fly, heightAboveGround: 25, fov: 60 }
+
+  B13:
+    name: Coastline
+    folder: biomes/coastline
+    world: procedural
+    cameras:
+      C01: { label: Wide coastal shore, x: -2077, z: 1731, yaw: -1.571, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B14:
+    name: Stillmeadow settlement (Eldara burg 18)
+    folder: stillmeadow
+    world: eldara
+    stillmeadow: true
+    tileId: 8
+    cameras:
+      C01: { label: Forest approach wide (reproducing Stillmeadow screenshot), subfolder: forest-approach, offsetForward: 0, yawOffset: 0, pitch: -0.06, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Sparse dark grass over green terrain close-up, subfolder: grass-contact, offsetForward: 8, yawOffset: 0.35, pitch: -0.34, mode: fly, heightAboveGround: 0.8, fov: 62 }
+      C03: { label: Tree trunk base contact, subfolder: tree-roots, offsetForward: 14, yawOffset: -0.45, pitch: -0.24, mode: fly, heightAboveGround: 1.0, fov: 60 }
+      C04: { label: Understories beneath trees, subfolder: understories, offsetForward: 26, yawOffset: 0.55, pitch: -0.18, mode: fly, heightAboveGround: 1.2, fov: 64 }
+      C05: { label: Terrain-to-road transition, subfolder: roads, offsetForward: 55, yawOffset: 0.05, pitch: -0.16, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C06: { label: Building foundations & settlement paving, subfolder: foundations, offsetForward: 88, yawOffset: 0.12, pitch: -0.12, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B15:
+    name: Forest-to-grassland transition
+    folder: transitions/forest-grassland
+    world: procedural
+    cameras:
+      C01: { label: Woodland edge meadow, x: 3135, z: 7229, yaw: 1.782, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C02: { label: Woodland edge ground contact, x: 3135, z: 7229, yaw: 1.782, pitch: -0.28, mode: fly, heightAboveGround: 0.85, fov: 62 }
+
+  B16:
+    name: Grass-to-sand transition
+    folder: transitions/grass-sand
+    world: fixture
+    cameras:
+      C01: { label: Fixture grass-road-sand seam, x: -10248, z: 10226, yaw: -0.45, pitch: -0.16, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B17:
+    name: Snow-to-rock transition
+    folder: transitions/snow-rock
+    world: fixture
+    cameras:
+      C01: { label: Fixture snow-mound & boulders, x: -10214, z: 10202, yaw: -0.78, pitch: -0.18, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+  B18:
+    name: Settlement-to-natural-terrain transition
+    folder: transitions/settlement-terrain
+    world: eldara
+    cameras:
+      C01: { label: Town edge & paving transition, x: -6724492, z: -347232, yaw: 1.32, pitch: 0.04, mode: player, heightAboveGround: 1.7, fov: 68 }
+
+lightingConditions:
+  sunrise: { weather: off, hour: 6.5 }
+  clear: { weather: off, hour: 12 }
+  overcast: { weather: rain, hour: 12, weatherIntensity: 0.35 }
+  sunset: { weather: off, hour: 18.6 }
+  night: { weather: off, hour: 21 }
+  rain: { weather: rain, hour: 12, weatherIntensity: 1.0 }
+
+lodSweeps:
+  # Thresholds read directly from editor.config.yaml:
+  # grass blades: high 6m, medium 14m, low 30m, veryLow 50m; far cards: 40-90m; groundCover: 30-120m
+  # trees: meshRadius 1 (128m), impostorRadius 5; bushes: meshRadius 1, proxyRadius 2
+  grassAndWoodland:
+    world: procedural
+    basePose: { x: 3135, z: 7229, yaw: 1.782, pitch: -0.10, mode: player, heightAboveGround: 1.7, fov: 68 }
+    distancesMeters: [0, 12, 32, 58, 95, 145]

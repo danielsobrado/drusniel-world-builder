@@ -10,11 +10,13 @@ import { setWaterTimeOverride } from '../../water/WaterVisualClock.js';
 import { WorldVisualLayerControls, worldVisualVegetation } from './WorldVisualVegetation.js';
 import { findBiomeSurfacePose, holdStagedGrass, liveDryHeading, stageSurfaceDemo } from './WorldVisualSurfaceDemo.js';
 import { findCanopyPose, habitatAt } from './WorldVisualCanopyPose.js';
+import { WorldVisualDiagnostics } from './WorldVisualDiagnostics.js';
+import { groundContactGeoTexture, groundContactSoilTexture, groundContactUniforms } from '../../stylized/groundContact/GroundContactState.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
 export class WorldVisualQa {
-  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0;this.motionSchemaVersion=WORLD_VISUAL_MOTION_SCHEMA_VERSION;this.layers=new WorldVisualLayerControls(editor); }
+  constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0;this.motionSchemaVersion=WORLD_VISUAL_MOTION_SCHEMA_VERSION;this.layers=new WorldVisualLayerControls(editor);this.visualDiagnostics=new WorldVisualDiagnostics(editor); }
   async loadWorld(name) {
     if(name!=='eldara')throw new Error(`Unknown visual fixture world: ${name}`);
     const {importAzgaarFullJson}=await import('../../import/AzgaarJsonImporter.js');
@@ -29,6 +31,43 @@ export class WorldVisualQa {
     const {centerX,centerZ}=VISUAL_SYNTHETIC;
     await this.cut({x:centerX-64,z:centerZ+40,yaw:0,pitch:-.08,mode:'player'});await this.settle();
     return {...VISUAL_SYNTHETIC,...selectVisualSyntheticRoute(this.editor)};
+  }
+  async loadWscFixture() {
+    const {createWscFixtureDocument,WSC_FIXTURE,WSC_FIXTURE_CAMERAS}=await import('./WorldVisualWscFixture.js');
+    await this.editor.controller.loadDocument(createWscFixtureDocument(this.editor.controller.toDocument()));
+    await this.cut(WSC_FIXTURE_CAMERAS.quadJunction);
+    await this.settle({minimumMs:8000});
+    return {fixture:WSC_FIXTURE,cameras:WSC_FIXTURE_CAMERAS};
+  }
+  async loadStillmeadow(burgId=18) {
+    const {prepareSettlementApproach}=await import('./SettlementApproachFixture.js');
+    return prepareSettlementApproach({controller:this.editor.controller,terrainView:this.editor.terrainView,config:this.editor.config,burgId});
+  }
+  setDiagnosticMode(mode='D00') { return this.visualDiagnostics.setMode(mode); }
+  getDiagnosticMode() { return this.visualDiagnostics.getMode(); }
+  sampleGroundContactField(canonicalX,canonicalZ) {
+    const field=this.editor.stylizedSurface?.groundContactField;
+    const active=groundContactUniforms.active.value;
+    const origin=groundContactUniforms.canonicalOrigin.value;
+    const invSpan=groundContactUniforms.inverseSpan.value;
+    const baseHeight=groundContactUniforms.baseHeight.value;
+    const res=field?.resolution??128;
+    const u=(canonicalX-origin.x)*invSpan,v=(canonicalZ-origin.y)*invSpan;
+    const inside=active>0&&u>=0&&u<=1&&v>=0&&v<=1;
+    const ix=Math.max(0,Math.min(res-1,Math.floor(u*res)));
+    const iz=Math.max(0,Math.min(res-1,Math.floor(v*res)));
+    const idx=(iz*res+ix)*4;
+    const soil=groundContactSoilTexture.image.data;
+    const geo=groundContactGeoTexture.image.data;
+    const sr=soil[idx]/255,sg=soil[idx+1]/255,sb=soil[idx+2]/255,canopy=soil[idx+3]/255;
+    const isMissingFallback=soil[idx]===128&&soil[idx+1]===110&&soil[idx+2]===85&&soil[idx+3]===0&&geo[idx]===0;
+    return {active,inside,u,v,resolution:res,span:field?.span??128,origin:[origin.x,origin.y],baseHeight,
+      soilLinear:[sr*sr,sg*sg,sb*sb],soilSrgbByte:[soil[idx],soil[idx+1],soil[idx+2]],canopy,isMissingFallback};
+  }
+  renderStats() {
+    const info=this.editor.terrainView?.renderer?.info;
+    return info?{calls:info.render?.calls??null,triangles:info.render?.triangles??null,
+      geometries:info.memory?.geometries??null,textures:info.memory?.textures??null}:null;
   }
   async syntheticIdentity() {
     const {visualSyntheticIdentity}=await import('./WorldVisualSynthetic.js');return visualSyntheticIdentity(this.editor);
@@ -172,5 +211,5 @@ export class WorldVisualQa {
     throw new Error('Static sky, lights and fog failed to converge.');
   }
 
-  dispose() {this.layers.restore();setWaterTimeOverride(null);this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
+  dispose() {this.visualDiagnostics?.dispose();this.layers.restore();setWaterTimeOverride(null);this.motion?.stop(new Error('Visual motion disposed.'));this.disposed=true;this.editor.playerController.setHarnessKeys([]);this.setCaptureUi(false);}
 }

@@ -1,0 +1,56 @@
+# World Surface Context (WSC) — PR 0 Baseline Environment Configuration
+schemaVersion: 1
+pr: PR-00
+baselineType: production-unchanged
+viewport:
+  width: 1920
+  height: 1080
+  deviceScaleFactor: 1
+renderer:
+  backend: webgpu
+  antialias: false
+  toneMapping: ACESFilmicToneMapping
+  toneMappingExposure: 1.12
+  renderPath: cinematic-god-rays
+postProcessing:
+  cinematicFinish:
+    enabled: true
+    saturation: 1.04
+    contrast: 1.12
+    lift: [0.004, 0.006, 0.012]
+    gain: [1.02, 1.0, 0.97]
+    highlightDesaturation: 0.35
+    vignette: 0.10
+    grain: 0.006
+groundContactField:
+  resolution: 128
+  spanMeters: 128
+  texelMeters: 1.0
+  recenterThresholdMeters: 16
+  borderFadeMeters: 12
+  geoTextureFormat: RGBA16F
+  soilTextureFormat: RGBA8
+grass:
+  system: meadow
+  tileSizeMeters: 8
+  maxBladeDistanceMeters: 50
+  farCardDistanceMeters: 90
+  groundCoverStartMeters: 30
+  groundCoverEndMeters: 120
+trees:
+  meshRadiusChunks: 1
+  proxyRadiusChunks: 1
+  impostorRadiusChunks: 5
+  impostorSignature: tree-impostor-v10-6246a38a
+bushes:
+  meshRadiusChunks: 1
+  proxyRadiusChunks: 2
+rocks:
+  meshRadiusChunks: 3
+  proxyRadiusChunks: 3
+settlements:
+  nearInMeters: 70
+  farRangeMeters: 1500
+diagnostics:
+  defaultMode: D00
+  productionOverheadWhenDisabled: zero
