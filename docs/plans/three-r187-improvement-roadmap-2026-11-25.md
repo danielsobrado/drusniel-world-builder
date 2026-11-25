@@ -1,12 +1,12 @@
 # Three.js r187 adoption — implementation roadmap
 
-Date: 2026-11-25 | Status: proposed; no runtime changes in this document.
+Date: 2026-11-25 | Status: implementation candidate pushed for hardware QA. See [implementation and testing handoff](#19-implementation-and-testing-handoff).
 Baseline inspected: [054d0d4](https://github.com/danielsobrado/drusniel-world-builder/commit/054d0d448ec6ae35578cd5f90bf0a2c13290f4fe).
 Upstream target: [r187 / 7e89746](https://github.com/mrdoob/three.js/releases/tag/r187).
 
 ## 1. Goal and non-goals
 
-The project already declares three ^0.187.0, three-mesh-bvh 0.9.13 and meshoptimizer ^1.2.0 in package.json; three-virtual-geometry 0.1.3 is a dev dependency. This is a capability-adoption program, not a dependency bump. Improve the real world exploration critical path, reduce shader and upload stalls, increase sustainable geometric and lighting quality and reduce reliance on private renderer contracts where upstream supports equivalent behavior.
+The candidate pins the existing Three.js resolution to `0.187.0` in `package.json`. The project also declares three-mesh-bvh 0.9.13 and meshoptimizer ^1.2.0, with three-virtual-geometry 0.1.3 as a dev dependency. The goal is to improve the world exploration critical path, reduce shader and upload stalls, increase sustainable geometric and lighting quality and reduce reliance on private renderer contracts where upstream supports equivalent behavior.
 
 Keep the simulation, save formats, floating origin, authored LODs, vegetation/impostors, terrain deformation, ocean FFT/coastal effects, World Surface Context (WSC), workshop and collision architecture intact. Preserve forced WebGL fallback. Never patch node_modules. No GitHub Actions; use the existing local scripts and actual hardware browser QA. All new tunable settings belong in the existing validated YAML configuration system; no magic tuning numbers scattered in code. Use narrow modules and deterministic disposal, existing logging and counters, explicit errors and actionable TODOs for incomplete work. No new dependency without measured justification.
 
@@ -304,3 +304,88 @@ Write docs/qa/three-r187/pr-NN/README.md (or existing equivalent) containing bas
 - API feasibility of replacing private draw/occlusion adapters, selective meshlet eligibility, worker/offline preparation and loader cancellation is not established by this document. Each is an explicit investigation with a fallback/no-go branch.
 - Exact configuration keys and new numerical budgets are proposed, not approved performance results. The existing YAML schema, frame budget and current main supersede suggestions when they conflict.
 - This document is the master plan; individual phase implementation briefs can expand test matrices and exact symbols after inspecting the latest code.
+
+## 19. Implementation and testing handoff
+
+Implementation started from `1ca402d54179c7d08268316b3cc4286a1a348664` on `main`. Use that commit as the control when comparing this series. Unit tests, lint, builds and browser QA were deferred to the test machine. All performance targets and visual gates await evidence.
+
+| Phase | Candidate code | Remaining work and promotion gate |
+| --- | --- | --- |
+| 00 | Exact Three.js pin, capability snapshot after renderer initialization, forced WebGL URL, source inventory below | Verify the installed package tree and run the defined baseline routes on both backends. |
+| 01 | Streamed preparation counters for enqueue, wait, pass CPU, ready delay and cancellation. Stonehold compares startup `compileAsync` with first-use compilation. A separate fixture compares per-object graphs with `referenceAttribute` and `NodeMaterialInstance`. | Measure shader-related movement stalls and check shadow, reflection and post-processing coverage. Live async streaming requires a safe scheduling and retirement boundary. Existing r187 async work restores render-target and MRT state after yields. |
+| 02 | Cancel detached staged draws immediately. Hold the transcoder lease during in-flight GLB decode. Allocate Hi-Z readback only for diagnostics. Stonehold can record 50 unload/reload cycles with settled GPU buffer accounting. | Verify recovery during pending uploads and decoding, and isolate world-level retention from allocator high-water marks. |
+| 03 | `r187.depthOnlyOcclusion` selects a zero-color-attachment proxy target on actual WebGPU. The pass restores MRT, cube face, mip and target, and keeps the existing displaced-terrain proxies and indirect draw ownership. | Compare equal camera routes with the original depth pass and ordinary draws. Validate camera isolation, fail-visible behavior and actual attachment count. The public drawing pipeline does not expose an equivalent custom indirect-buffer handoff. |
+| 04 | Stonehold compares separate draws and one local `BatchedMesh` for the same heterogeneous modules. The runner checks visual parity and matching pick IDs. | Measure the existing instanced world route and repeat the comparison in an actual dense settlement before production batching. |
+| 05 | Native meshlet QA accepts `--lod-threshold`, mapped to upstream `lodThreshold`. The drawing suite compares raw standard geometry, native and native Hi-Z. Authored LODs remain a separate comparison. | Verify GPU time, visual quality, preparation stalls and memory. Production routing needs a supported eligibility and budgeted preparation path for real asset families. |
+| 06 | `r187.prioritizedRequests` enables a bounded queue for cache-managed stylized GLBs. It coalesces resolved URL aliases, promotes queued shared requests, ages pending work and forwards the priority through dedicated GLTF loaders. Asset startup and movement reports expose queue metrics. | Check cold-cache readiness, malformed or missing assets and recovery during decode. Independent network/decode limits, active fetch cancellation and CDN manifest rollout are follow-up work. |
+| 07 | The r187 visual fixture captures one and two sun cascades and a moved sun. The world movement harness retains per-pass GPU and draw counters. | Measure forest and settlement cascades. Shadow caching and tiled local shadows require their own invalidation and torch-scene results. |
+| 08 | The fixture compares cube PMREM with environment lighting off on both backends and captures upstream stochastic SSR with binary refinement on a fixed WebGPU scene. | Compare the real wet-stone, water and FFT routes against the production reflector and selective SSR. Check off-screen misses, edge fade, camera cuts and temporal shimmer. |
+| 09 | Fixed WebGPU inputs for half-resolution GTAO, quarter/half-resolution SSGI and a bounded light-probe bake. | Check contact shading, light leakage and GPU cost. Temporal integration, regional probe adoption and VXGI remain follow-up experiments. |
+| 10 | Offline secondary UV fixture preserves the source geometry, material groups and primary UVs. Tests check remapping and deterministic output. | Inspect padding, atlas seams and output on real workshop exports. Keep derived UVs separate from workshop state. MaterialX and detailed LOD baking are future comparisons. |
+| 11 | Standalone visibility-buffer and Hi-Z arms with isolated renderer lifecycles in the Stonehold runner. | Confirm the candidate actually draws clusters, then run stock-kit fallback, shadow, reflector and origin checks. Extend to dense city and low-overdraw controls before considering rollout. |
+
+### r187 compatibility source inventory
+
+| Contract | Caller and decision | QA to run |
+| --- | --- | --- |
+| Renderer internals | Retain the viewport framebuffer reuse, empty-draw, sampler and QA adapters. Startup records backend selection once. The shipping renderer relies on the default `StandardDrawingPipeline`. | Run production startup, water and post-processing fixtures on WebGPU and forced WebGL. Check recovery and the WebGPU validation console. |
+| Compilation, target and temporal state | Retain `DrawPreparation`, `SceneWarmup`, the post-processing precompile and the canvas/MRT frame-entry reset. The private node-frame ID and attribute/buffer bridges stay pinned to r187. | Exercise staged materials under nested shadows, water and temporal passes, then restart with preparation pending. |
+| Struct buffers and dispatch | `GpuTreeImpostorBatch` and `GpuVoxelChunk` already index the indirect struct with `element(0)`. The tree culling path updates `dispatchSize`. | Run `test/gpu-indirect-struct-wgsl.test.js`, vegetation LOD and initial/late voxel publication. |
+| Cube PMREM, TSL and color | Source search found no callers of the removed cube-UV mapping constant, node-valued `pixelationPass` settings, the old iridescence range or `library.addLight`. Verify representative numeric coercions, materials and cube PMREM visually before grading. | Compare WSC D00–D25 poses at the same exposure, time, weather and camera. Use the new PMREM and shader-sharing fixture as an API check. |
+| Viewports and XR | Source search found no direct app XR camera or render-target viewport/scissor callers. Inspect effects using generated targets when changing pixel ratio or backend. | Run full-window and resized parity captures at device scale 1 and on a HiDPI display. |
+| Dependency copies | The lockfile resolves `three@0.187.0` at the root and `0.185.1` under `procedural-texture-lab`. Vite already deduplicates `three` and aliases bare `three` to `three/webgpu`. Preserve the dependency's declared version when validating that the browser uses a single renderer copy. | Run `npm ls three --all`; expect the nested package in npm's dependency tree and `revision: "187"` in the world report. |
+
+Tagged references for the changed contracts are [Renderer.js](https://github.com/mrdoob/three.js/blob/r187/src/renderers/common/Renderer.js), [Loader.js](https://github.com/mrdoob/three.js/blob/r187/src/loaders/Loader.js), [GLTFLoader.js](https://github.com/mrdoob/three.js/blob/r187/examples/jsm/loaders/GLTFLoader.js), [MeshletDrawingPipeline.js](https://github.com/mrdoob/three.js/blob/r187/examples/jsm/pipelines/MeshletDrawingPipeline.js), [SSR example](https://github.com/mrdoob/three.js/blob/r187/examples/webgpu_postprocessing_ssr.html), [SSGI example](https://github.com/mrdoob/three.js/blob/r187/examples/webgpu_postprocessing_ssgi.html), and [unwrapUVs.js](https://github.com/mrdoob/three.js/blob/r187/examples/jsm/utils/unwrapUVs.js).
+
+### Run first on the test machine
+
+1. Pull `main`, record `git rev-parse HEAD`, and identify the GPU, driver, OS, browser, resolution and device scale. Use the same runtime asset corpus for control and candidate. Install dependencies and run the targeted tests before building. Record any failures and reproduce them on the control SHA where the test exists.
+
+   ```sh
+   git pull --ff-only origin main
+   git rev-parse HEAD
+   npm ci
+   npm ls three --all
+   node --test test/render-enhancements.test.js test/staged-draw-publication.test.js test/stylized-scene-asset-cache-lifecycle.test.js test/gpu-indirect-struct-wgsl.test.js test/stonehold-meshlet-qa.test.js test/r187-secondary-uv.test.js
+   npm run lint
+   npm test
+   npm run build
+   npx playwright install chromium
+   ```
+
+2. Start `npm run dev -- --port 5174` and keep the headed Chromium window in the foreground. Use [the movement QA protocol](../perf-qa.md) for settings, settled workload and report interpretation. Run the default matrix and recovery before comparing either opt-in. For forced WebGL, open `http://127.0.0.1:5174/?forceWebGL=1` in a fresh browser session. Check streaming, water, editor camera, workshop and walking. The recovery script also exercises a WebGPU-to-WebGL restart.
+
+   ```sh
+   npm run qa:perf:matrix -- --url http://127.0.0.1:5174 --headed --resources
+   npm run qa:recovery -- --url http://127.0.0.1:5174 --out tmp/r187/recovery
+   npm run qa:postprocessing:browser -- --url http://127.0.0.1:5174 --headed --outDir tmp/r187/postprocessing
+   npm run qa:water:acceptance -- --url http://127.0.0.1:5174 --headed
+   ```
+
+3. Run the culling arms with identical cameras and scene settings. Compare ordinary draws, Hi-Z with one color attachment, and Hi-Z with zero. Use `meta.renderer`, `meta.occlusionColorAttachments`, GPU pass timing and visible coverage to confirm each arm. A `null` count means the proxy target did not allocate and no depth-only timing comparison is valid. Repeat with a near-plane crossing, quick 180° turn, reflection and shadow views, teleport and rebase. Review the scene against the ordinary-draw reference for missing objects.
+
+   ```sh
+   npm run qa:perf -- --url http://127.0.0.1:5174 --headed --qa settlement-approach --settle --revisit --turn-on-revisit --gpuTimings 1 --out tmp/r187/no-occlusion.json
+   npm run qa:perf -- --url 'http://127.0.0.1:5174/?gpuOcclusion=1' --headed --qa settlement-approach --settle --revisit --turn-on-revisit --gpuTimings 1 --out tmp/r187/occlusion-color.json
+   npm run qa:perf -- --url 'http://127.0.0.1:5174/?gpuOcclusion=1&r187DepthOnlyOcclusion=1' --headed --qa settlement-approach --settle --revisit --turn-on-revisit --gpuTimings 1 --out tmp/r187/occlusion-depth.json
+   ```
+
+4. Compare asset loading. The startup runner uses a fresh context and disables the cache by default. Repeat the pair with `--repeat-cache` for warm runs. Keep the same throttling profile or local proxy for the shaped-network pass. Check `sceneAssetRequests` and the existing startup resource timeline for duplicate GLBs, queue delay, concurrency, decode time and errors. Manually unload or teleport during a slow request and reload the same asset. Compare readiness against the default 20% improvement gate in §10.
+
+   ```sh
+   npm run qa:assets:startup -- --url http://127.0.0.1:5174 --headed --runs 3 --out tmp/r187/assets-default.json
+   npm run qa:assets:startup -- --url 'http://127.0.0.1:5174/?r187PrioritizedRequests=1' --headed --runs 3 --out tmp/r187/assets-prioritized.json
+   ```
+
+5. Run the isolated comparisons serially. `drawing` uses the same dense source across arms, and `dense` compares against the authored LODs. At first run use 1080p and one or 16 copies, then increase toward representative workloads. Repeat the drawing command with `--lod-threshold 1` and `--lod-threshold 2` in distinct output directories. For compile A/B, run the same raw standard arm once with `--compile async` and once with `--compile on-demand` in fresh browser sessions and compare `compileMs`, `firstFrameMs` and `firstRenderCpuMs`.
+
+   ```sh
+   node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5174 --suite drawing --modes baseline,native,native-hzb,visibility,visibility-hzb --resolutions 1080 --copies 1,16 --lod-threshold 1.5 --out tmp/r187/drawing
+   node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5174 --suite dense --resolutions 1080 --copies 1,16 --out tmp/r187/authored-lods
+   node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5174 --suite kit --modes baseline,native,visibility --out tmp/r187/kit-fallback
+   node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5174 --suite batch --out tmp/r187/batching
+   node scripts/run-stonehold-meshlet-qa.mjs --url http://127.0.0.1:5174 --suite buffers --modes baseline,native --cycles 50 --out tmp/r187/buffers
+   npm run qa:environment:parity -- --url http://127.0.0.1:5174 --r187 --out tmp/r187/environment
+   ```
+
+6. Inspect the screenshots under `tmp/r187/environment`. Compare the PMREM sphere roughness ladder across backends, the two-cascade sun movement, shader-sharing color parity, and visible SSR/GTAO/SSGI differences against their captured control. Save representative frames and rejected runs. Use the WSC camera manifest for world comparisons, and save retained A/B results under `docs/qa/three-r187/` with the evidence fields in §17. Record shader-builder counts as diagnostics and renderer/GPU-buffer estimates separately from driver memory. Restore the default flags by opening the base URL without the QA overrides. Keep rollout decisions pending until the relevant gates pass.
