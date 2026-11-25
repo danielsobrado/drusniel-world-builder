@@ -108,7 +108,7 @@
     "js-yaml": "4.3.2",
     "meshoptimizer": "^1.2.0",
     "polygon-clipping": "0.15.7",
-    "procedural-texture-lab": "github:danielsobrado/drusniel-procedural-textures#0611d31",
+    "procedural-texture-lab": "github:danielsobrado/drusniel-procedural-textures#be248dd",
     "straight-skeleton": "1.1.0",
     "three": "0.187.0",
     "three-mesh-bvh": "0.9.13"
