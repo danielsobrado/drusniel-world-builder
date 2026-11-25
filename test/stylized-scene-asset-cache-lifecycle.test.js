@@ -99,6 +99,33 @@ test('network keeps progressing during decode and aborts an abandoned queued dec
   }
 });
 
+test('releasing the final network lease aborts the fetch and a new lease can retry', async () => {
+  const asset = disposableScene();
+  let starts = 0;
+  let aborted = false;
+  const cache = new StylizedSceneAssetCache({
+    loader: {},
+    requests: { prioritizedRequests: true, maxConcurrentRequests: 1, requestMaxWaitMs: 1000 },
+    loadSplit: async (_url, _priority, signal, decode) => {
+      if (++starts > 1) return decode(() => ({ scene: asset.scene }));
+      return new Promise((_, reject) => signal.addEventListener('abort', () => {
+        aborted = true;
+        reject(signal.reason);
+      }, { once: true }));
+    },
+  });
+  try {
+    const old = cache.acquireLease('trees.glb');
+    old.release();
+    await assert.rejects(old.ready, { name: 'AbortError' });
+    assert.ok(aborted);
+    assert.equal(await cache.acquireLease('trees.glb').ready, asset.scene);
+    assert.equal(starts, 2);
+  } finally {
+    cache.dispose();
+  }
+});
+
 test('pending scene released before load completion is disposed when it arrives', async () => {
   const pending = deferred();
   const cache = createCache(pending);

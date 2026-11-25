@@ -220,18 +220,21 @@ export class StylizedVariantResidency {
         job.lease = job.layer.acquireLease(job.definition.scene, priority);
         this.inFlightLeases.set(job.id, job);
       }
-      (job.lease?.ready ?? job.layer.acquire(job.definition.scene)).then(
-        (scene) => {
-          this.inFlight -= 1;
+      const finish = () => {
+        this.inFlight -= 1;
+        if (!job.lease || this.inFlightLeases.get(job.id) === job) {
           this.inFlightIds.delete(job.id);
           this.inFlightLeases.delete(job.id);
+        }
+      };
+      (job.lease?.ready ?? job.layer.acquire(job.definition.scene)).then(
+        (scene) => {
+          finish();
           if (this.disposed || job.cancelled) return;
           this.pendingApplies.push({ ...job, scene });
         },
         (error) => {
-          this.inFlight -= 1;
-          this.inFlightIds.delete(job.id);
-          this.inFlightLeases.delete(job.id);
+          finish();
           if (this.disposed || job.cancelled) return;
           // Marked failed rather than retried: a missing or malformed variant
           // fails the same way every time, and retrying it each rescan would
@@ -332,6 +335,7 @@ export class StylizedVariantResidency {
     for (const job of this.inFlightLeases.values()) job.lease.release();
     for (const job of this.pendingApplies) job.lease?.release();
     this.inFlightLeases.clear();
+    this.inFlightIds.clear();
     this.activeApply?.iterator?.return();
     this.activeApply = null;
     this.pendingLoads.length = 0;

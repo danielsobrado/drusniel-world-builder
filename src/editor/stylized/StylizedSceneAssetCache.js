@@ -239,6 +239,7 @@ export class StylizedSceneAssetCache {
       const cancel = () => {
         this.decodeQueue.splice(this.decodeQueue.indexOf(job), 1);
         reject(signal.reason);
+        this.pump();
       };
       job.start = () => signal.removeEventListener('abort', cancel);
       signal.addEventListener('abort', cancel, { once: true });
