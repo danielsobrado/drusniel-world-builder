@@ -679,46 +679,46 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "c921e962e8d0c4f074c9b25b85009f3dc61eee9821c31be2df468dea13c1f681",
-      "sourceSha256": "0c62218ecdf1fcea9acc30d13168a1ae1be5214cc62f710a4d99f5dd97ba6601",
-      "outputSha256": "c3ec0ec4d7df5da3ac78e0089f09f81071c3179f886b003ca39eb8adfd903036",
-      "sourceBytes": 869020,
-      "outputBytes": 235844,
-      "gzipBytes": 190774,
-      "brotliBytes": 189048,
+      "cacheKey": "261d7a912aee04ef65e3dc9fc14fa2fe2a2d602e0aea988a387f2bf2bba53c01",
+      "sourceSha256": "adca0beb5aef76e4edb30fad3c3d834eaae0fd36009e87cd123366680de9c537",
+      "outputSha256": "9d23c639bf80c0511d4dd67c8780655f3ad8876bbebbaea59778226a33e51ffb",
+      "sourceBytes": 2428496,
+      "outputBytes": 461304,
+      "gzipBytes": 454162,
+      "brotliBytes": 453209,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 16034,
-        "renderedTriangles": 16034,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "stylized_bush": 16034
+          "stylized_bush": 1280
         },
         "sceneBounds": {
           "min": [
-            -1.1589521169662476,
-            -0.06290022283792496,
-            -1.025079607963562
+            -1.2845594882965088,
+            -0.07401648908853531,
+            -1.458940863609314
           ],
           "max": [
-            1.1106880903244019,
-            1.6956803798675537,
-            1.2219420671463013
+            1.3491929769515991,
+            1.9816149473190308,
+            1.1702945232391357
           ]
         },
-        "bufferBytes": 866824,
-        "logicalAccessorBytes": 667464,
-        "logicalVertexBytes": 571260,
-        "logicalIndexBytes": 96204,
-        "geometryBufferBytes": 667464,
-        "imageBufferBytes": 199356,
+        "bufferBytes": 2426656,
+        "logicalAccessorBytes": 68112,
+        "logicalVertexBytes": 60432,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 68112,
+        "imageBufferBytes": 2358541,
         "nodeNames": [
           "stylized_bush",
           "stylized_bush-mesh"
@@ -735,34 +735,34 @@
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 16034,
-        "renderedTriangles": 16034,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "stylized_bush": 16034
+          "stylized_bush": 1280
         },
         "sceneBounds": {
           "min": [
-            -1.15893555,
-            -0.0629005432,
-            -1.02508545
+            -1.2845459,
+            -0.074016571,
+            -1.45892334
           ],
           "max": [
-            1.11071777,
-            1.69567871,
-            1.22192383
+            1.34918213,
+            1.98162842,
+            1.17028809
           ]
         },
-        "bufferBytes": 594560,
-        "logicalAccessorBytes": 353271,
-        "logicalVertexBytes": 257067,
-        "logicalIndexBytes": 96204,
-        "geometryBufferBytes": 362792,
-        "imageBufferBytes": 99615,
+        "bufferBytes": 495920,
+        "logicalAccessorBytes": 36637,
+        "logicalVertexBytes": 28957,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 37896,
+        "imageBufferBytes": 441003,
         "nodeNames": [
           "stylized_bush",
           "stylized_bush-mesh"
@@ -787,14 +787,14 @@
         "validatorVersion": "2.0.0-dev.3.10",
         "errors": 0,
         "warnings": 0,
-        "knownKtx2Limitations": 6,
+        "knownKtx2Limitations": 4,
         "inheritedWarnings": 0,
         "inheritedWarningCodes": [],
-        "infos": 5,
+        "infos": 4,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 9521,
-        "triangles": 16034
+        "vertices": 1259,
+        "triangles": 1280
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -802,23 +802,23 @@
           "nodeCount": 2,
           "meshCount": 1,
           "materialCount": 1,
-          "textureCount": 3,
+          "textureCount": 2,
           "animationCount": 0
         },
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 16034
+          "triangleCount": 1280
         },
         "data": {
-          "json": 3931,
-          "binary": 231768,
+          "json": 3134,
+          "binary": 458024,
           "buffers": {
-            "vertex": 113920,
-            "index": 18221,
+            "vertex": 15680,
+            "index": 1326,
             "animation": 0,
             "transform": 0,
-            "image": 99615
+            "image": 441003
           }
         }
       }
@@ -849,46 +849,46 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "abea73b1ecfe2d413ba7296dbe847aad2bd16a8441ec29351fdfeaa70e51a669",
-      "sourceSha256": "28cec40cc22e5780ae34c1661f9ccee5c031a7b2fa2ea3b00af405124214b091",
-      "outputSha256": "148bb8da68dcf3b987cfdd0b794c037a66c2d5be10d7d783ca1226b06505fece",
-      "sourceBytes": 848116,
-      "outputBytes": 231360,
-      "gzipBytes": 187617,
-      "brotliBytes": 186259,
+      "cacheKey": "a12860383646397d732e7311bba12943efdaa22e78b8566df8b9d8c43f6ab714",
+      "sourceSha256": "5e3ebb48bfeda94641e1851fdb709a135838a9bc741971dedb5b47797611fe4e",
+      "outputSha256": "4c9cda78becf497cb144930a34c53f85d16f6c36484e81fb401ba32e03cf432d",
+      "sourceBytes": 2127856,
+      "outputBytes": 424724,
+      "gzipBytes": 418154,
+      "brotliBytes": 417206,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 15902,
-        "renderedTriangles": 15902,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "bush_leaf": 15902
+          "bush_leaf": 1104
         },
         "sceneBounds": {
           "min": [
-            -0.6717978715896606,
-            -0.04626743867993355,
-            -0.5348925590515137
+            -1.287135124206543,
+            -0.07552734017372131,
+            -0.8106939792633057
           ],
           "max": [
-            0.6818057894706726,
-            0.8732061386108398,
-            0.5470834970474243
+            0.9504375457763672,
+            1.365586757659912,
+            1.0111753940582275
           ]
         },
-        "bufferBytes": 845944,
-        "logicalAccessorBytes": 652512,
-        "logicalVertexBytes": 557100,
-        "logicalIndexBytes": 95412,
-        "geometryBufferBytes": 652512,
-        "imageBufferBytes": 193426,
+        "bufferBytes": 2126040,
+        "logicalAccessorBytes": 58752,
+        "logicalVertexBytes": 52128,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 58752,
+        "imageBufferBytes": 2067287,
         "nodeNames": [
           "small_bush",
           "small_bush-mesh"
@@ -905,34 +905,34 @@
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 15902,
-        "renderedTriangles": 15902,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "bush_leaf": 15902
+          "bush_leaf": 1104
         },
         "sceneBounds": {
           "min": [
-            -0.671783447,
-            -0.0462665558,
-            -0.534881592
+            -1.28710938,
+            -0.0755271912,
+            -0.810699463
           ],
           "max": [
-            0.681793213,
-            0.873199463,
-            0.547088623
+            0.950439453,
+            1.36560059,
+            1.01116943
           ]
         },
-        "bufferBytes": 582688,
-        "logicalAccessorBytes": 346107,
-        "logicalVertexBytes": 250695,
-        "logicalIndexBytes": 95412,
-        "geometryBufferBytes": 355392,
-        "imageBufferBytes": 98363,
+        "bufferBytes": 454148,
+        "logicalAccessorBytes": 31602,
+        "logicalVertexBytes": 24978,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 32688,
+        "imageBufferBytes": 407011,
         "nodeNames": [
           "small_bush",
           "small_bush-mesh"
@@ -957,14 +957,14 @@
         "validatorVersion": "2.0.0-dev.3.10",
         "errors": 0,
         "warnings": 0,
-        "knownKtx2Limitations": 6,
+        "knownKtx2Limitations": 4,
         "inheritedWarnings": 0,
         "inheritedWarningCodes": [],
-        "infos": 5,
+        "infos": 4,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 9285,
-        "triangles": 15902
+        "vertices": 1086,
+        "triangles": 1104
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -972,23 +972,23 @@
           "nodeCount": 2,
           "meshCount": 1,
           "materialCount": 1,
-          "textureCount": 3,
+          "textureCount": 2,
           "animationCount": 0
         },
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 15902
+          "triangleCount": 1104
         },
         "data": {
-          "json": 3917,
-          "binary": 227296,
+          "json": 3121,
+          "binary": 421460,
           "buffers": {
-            "vertex": 110747,
-            "index": 18177,
+            "vertex": 13294,
+            "index": 1137,
             "animation": 0,
             "transform": 0,
-            "image": 98363
+            "image": 407011
           }
         }
       }
@@ -1019,46 +1019,46 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "f004a6635b9ab13fa1f77ca14a14ce0feeb86047235654eaf9b6d7376aa281b2",
-      "sourceSha256": "d5a832a4c328bfe73d76adfe5a470b2791cd36083391630b0e1d2ce1115b47fe",
-      "outputSha256": "96e1726a33c2bc934fd7a7de0a6e99d3968525f64ff4ae56c51269ce39eb3c48",
-      "sourceBytes": 860236,
-      "outputBytes": 233084,
-      "gzipBytes": 187096,
-      "brotliBytes": 185923,
+      "cacheKey": "40b687c1e81a25f1dfd7f281ab623a35faef250bd48f82eef81cee6c0561041d",
+      "sourceSha256": "8f7d4f9a127b6a3134e3fa0980fca0c436c53cbb4c286e324e89f0d1963a3eba",
+      "outputSha256": "25b6cb2e22107b763ec02c496359b3ce02c42e7e06ae21fd641af5191cfe9c42",
+      "sourceBytes": 2434972,
+      "outputBytes": 466216,
+      "gzipBytes": 458247,
+      "brotliBytes": 457177,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 16030,
-        "renderedTriangles": 16030,
+        "triangles": 1456,
+        "renderedTriangles": 1456,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "Leaves": 16030
+          "Leaves": 1456
         },
         "sceneBounds": {
           "min": [
-            -2.167039632797241,
-            -0.11446274071931839,
-            -2.2211287021636963
+            -1.6847176551818848,
+            -0.05741085857152939,
+            -1.720833420753479
           ],
           "max": [
-            2.1648848056793213,
-            3.6755306720733643,
-            2.2324719429016113
+            1.6155917644500732,
+            3.0586278438568115,
+            1.8727644681930542
           ]
         },
-        "bufferBytes": 858096,
-        "logicalAccessorBytes": 667020,
-        "logicalVertexBytes": 570840,
-        "logicalIndexBytes": 96180,
-        "geometryBufferBytes": 667020,
-        "imageBufferBytes": 191070,
+        "bufferBytes": 2433180,
+        "logicalAccessorBytes": 77472,
+        "logicalVertexBytes": 68736,
+        "logicalIndexBytes": 8736,
+        "geometryBufferBytes": 77472,
+        "imageBufferBytes": 2355706,
         "nodeNames": [
           "bush2",
           "bush2-mesh"
@@ -1075,34 +1075,34 @@
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 16030,
-        "renderedTriangles": 16030,
+        "triangles": 1456,
+        "renderedTriangles": 1456,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "Leaves": 16030
+          "Leaves": 1456
         },
         "sceneBounds": {
           "min": [
-            -2.16699219,
-            -0.114463806,
-            -2.22106934
+            -1.68469238,
+            -0.0574111938,
+            -1.7208252
           ],
           "max": [
-            2.16491699,
-            3.67553711,
-            2.23242188
+            1.61560059,
+            3.05859375,
+            1.8727417
           ]
         },
-        "bufferBytes": 591628,
-        "logicalAccessorBytes": 353058,
-        "logicalVertexBytes": 256878,
-        "logicalIndexBytes": 96180,
-        "geometryBufferBytes": 362572,
-        "imageBufferBytes": 96536,
+        "bufferBytes": 506080,
+        "logicalAccessorBytes": 41672,
+        "logicalVertexBytes": 32936,
+        "logicalIndexBytes": 8736,
+        "geometryBufferBytes": 43104,
+        "imageBufferBytes": 443504,
         "nodeNames": [
           "bush2",
           "bush2-mesh"
@@ -1127,14 +1127,14 @@
         "validatorVersion": "2.0.0-dev.3.10",
         "errors": 0,
         "warnings": 0,
-        "knownKtx2Limitations": 6,
+        "knownKtx2Limitations": 4,
         "inheritedWarnings": 0,
         "inheritedWarningCodes": [],
-        "infos": 5,
+        "infos": 4,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 9514,
-        "triangles": 16030
+        "vertices": 1432,
+        "triangles": 1456
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -1142,23 +1142,23 @@
           "nodeCount": 2,
           "meshCount": 1,
           "materialCount": 1,
-          "textureCount": 3,
+          "textureCount": 2,
           "animationCount": 0
         },
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 16030
+          "triangleCount": 1456
         },
         "data": {
-          "json": 3883,
-          "binary": 229056,
+          "json": 3095,
+          "binary": 462976,
           "buffers": {
-            "vertex": 114200,
-            "index": 18302,
+            "vertex": 17959,
+            "index": 1503,
             "animation": 0,
             "transform": 0,
-            "image": 96536
+            "image": 443504
           }
         }
       }
@@ -1189,46 +1189,46 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "6cbeac86f14fe8f28a9aa66fea94be72baf1f0fa1ebeda5478f82cdd06a16046",
-      "sourceSha256": "99e91b4ec86e643e8a58aca876f23519fdcaaff49a97431f7eeb4a121625b012",
-      "outputSha256": "b17fc8239a9fd3d553680bea58d4e080d09789a6f465898cf0ae437772eddd30",
-      "sourceBytes": 826540,
-      "outputBytes": 223768,
-      "gzipBytes": 175851,
-      "brotliBytes": 174066,
+      "cacheKey": "9617a06f3d89eda1acefa098bb5e16a1a34f986551d56e310436f1e61bfc3c39",
+      "sourceSha256": "acf379e3aa9221600bdbe0b7a69dba502508bc69664acbb4cd14f9f4f41ca415",
+      "outputSha256": "40f8342c4aea61461bb0af657a80a66438d788c40a15bd7f94e70366003316ef",
+      "sourceBytes": 2398776,
+      "outputBytes": 462452,
+      "gzipBytes": 454930,
+      "brotliBytes": 454101,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 15638,
-        "renderedTriangles": 15638,
+        "triangles": 1230,
+        "renderedTriangles": 1230,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "vetka_kusta": 15638
+          "vetka_kusta": 1230
         },
         "sceneBounds": {
           "min": [
-            -0.6573162078857422,
-            -0.032013531774282455,
-            -0.9414339661598206
+            -1.3314802646636963,
+            -0.05046612396836281,
+            -1.2754250764846802
           ],
           "max": [
-            0.8361918330192566,
-            1.661987543106079,
-            0.7913767099380493
+            1.3618963956832886,
+            2.1780011653900146,
+            1.309809684753418
           ]
         },
-        "bufferBytes": 824376,
-        "logicalAccessorBytes": 636048,
-        "logicalVertexBytes": 542220,
-        "logicalIndexBytes": 93828,
-        "geometryBufferBytes": 636048,
-        "imageBufferBytes": 188324,
+        "bufferBytes": 2396984,
+        "logicalAccessorBytes": 66852,
+        "logicalVertexBytes": 59472,
+        "logicalIndexBytes": 7380,
+        "geometryBufferBytes": 66852,
+        "imageBufferBytes": 2330127,
         "nodeNames": [
           "bush",
           "bush-mesh"
@@ -1245,34 +1245,34 @@
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 15638,
-        "renderedTriangles": 15638,
+        "triangles": 1230,
+        "renderedTriangles": 1230,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "vetka_kusta": 15638
+          "vetka_kusta": 1230
         },
         "sceneBounds": {
           "min": [
-            -0.657318115,
-            -0.0320129395,
-            -0.941436768
+            -1.33148193,
+            -0.0504665375,
+            -1.27545166
           ],
           "max": [
-            0.836181641,
-            1.6619873,
-            0.791381836
+            1.36187744,
+            2.17797852,
+            1.30981445
           ]
         },
-        "bufferBytes": 566576,
-        "logicalAccessorBytes": 337827,
-        "logicalVertexBytes": 243999,
-        "logicalIndexBytes": 93828,
-        "geometryBufferBytes": 346864,
-        "imageBufferBytes": 95169,
+        "bufferBytes": 496324,
+        "logicalAccessorBytes": 35877,
+        "logicalVertexBytes": 28497,
+        "logicalIndexBytes": 7380,
+        "geometryBufferBytes": 37116,
+        "imageBufferBytes": 442471,
         "nodeNames": [
           "bush",
           "bush-mesh"
@@ -1297,14 +1297,14 @@
         "validatorVersion": "2.0.0-dev.3.10",
         "errors": 0,
         "warnings": 0,
-        "knownKtx2Limitations": 6,
+        "knownKtx2Limitations": 4,
         "inheritedWarnings": 0,
         "inheritedWarningCodes": [],
-        "infos": 5,
+        "infos": 4,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 9037,
-        "triangles": 15638
+        "vertices": 1239,
+        "triangles": 1230
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -1312,23 +1312,1723 @@
           "nodeCount": 2,
           "meshCount": 1,
           "materialCount": 1,
-          "textureCount": 3,
+          "textureCount": 2,
           "animationCount": 0
         },
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 15638
+          "triangleCount": 1230
         },
         "data": {
-          "json": 3911,
-          "binary": 219712,
+          "json": 3098,
+          "binary": 459208,
           "buffers": {
-            "vertex": 106819,
-            "index": 17705,
+            "vertex": 15474,
+            "index": 1249,
             "animation": 0,
             "transform": 0,
-            "image": 95169
+            "image": 442471
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-meadow-gorse-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-meadow-gorse-01.glb",
+      "output": "public/assets/bushes/bush-meadow-gorse-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "f4483edb0738da6d840c72a34b96ea27e3553ab4d7b4e627771d96a30489d5fb",
+      "sourceSha256": "cbb7ec8b3120bde36d1c5ff8da7674673dea5be29af33b4b9cd246df2b795a88",
+      "outputSha256": "6f86b0d0a3d20e2ee6ab273c19b53f435db29e6ef1f85615b84c2172882089c9",
+      "sourceBytes": 3229860,
+      "outputBytes": 501964,
+      "gzipBytes": 493127,
+      "brotliBytes": 491955,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushMeadowGorse": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.2559192180633545,
+            -0.05425488203763962,
+            -1.476030707359314
+          ],
+          "max": [
+            1.2894484996795654,
+            1.7171274423599243,
+            1.2896100282669067
+          ]
+        },
+        "bufferBytes": 3227984,
+        "logicalAccessorBytes": 68112,
+        "logicalVertexBytes": 60432,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 68112,
+        "imageBufferBytes": 3159869,
+        "nodeNames": [
+          "bush-meadow-gorse-01",
+          "bush-meadow-gorse-01-mesh"
+        ],
+        "materialNames": [
+          "BushMeadowGorse"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushMeadowGorse": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.25592041,
+            -0.0542545319,
+            -1.47601318
+          ],
+          "max": [
+            1.28942871,
+            1.71710205,
+            1.28961182
+          ]
+        },
+        "bufferBytes": 536552,
+        "logicalAccessorBytes": 36637,
+        "logicalVertexBytes": 28957,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 37896,
+        "imageBufferBytes": 481754,
+        "nodeNames": [
+          "bush-meadow-gorse-01",
+          "bush-meadow-gorse-01-mesh"
+        ],
+        "materialNames": [
+          "BushMeadowGorse"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1259,
+        "triangles": 1280
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1280
+        },
+        "data": {
+          "json": 3165,
+          "binary": 498656,
+          "buffers": {
+            "vertex": 15580,
+            "index": 1312,
+            "animation": 0,
+            "transform": 0,
+            "image": 481754
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-woodland-shrub-04.glb",
+      "source": "assets/runtime-sources/bushes/bush-woodland-shrub-04.glb",
+      "output": "public/assets/bushes/bush-woodland-shrub-04.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "6e397e90c2dde451e1b178144f0177024e9d41720d6b77119cc60747868ead62",
+      "sourceSha256": "3f7069b387ef7828165c9e20c39957bd2bbf0206ac7a17be16dcdbcc87607640",
+      "outputSha256": "42f97a710efa8bf2a75eefd34fbaf7e6d2de22535394733d319e8338fcc2dde3",
+      "sourceBytes": 2354656,
+      "outputBytes": 451196,
+      "gzipBytes": 443399,
+      "brotliBytes": 442277,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1456,
+        "renderedTriangles": 1456,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushWoodlandShrub04": 1456
+        },
+        "sceneBounds": {
+          "min": [
+            -1.5942621231079102,
+            -0.07276874035596848,
+            -1.6798362731933594
+          ],
+          "max": [
+            1.4420479536056519,
+            1.6368328332901,
+            1.3274610042572021
+          ]
+        },
+        "bufferBytes": 2352768,
+        "logicalAccessorBytes": 77472,
+        "logicalVertexBytes": 68736,
+        "logicalIndexBytes": 8736,
+        "geometryBufferBytes": 77472,
+        "imageBufferBytes": 2275295,
+        "nodeNames": [
+          "bush-woodland-shrub-04",
+          "bush-woodland-shrub-04-mesh"
+        ],
+        "materialNames": [
+          "BushWoodlandShrub04"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1456,
+        "renderedTriangles": 1456,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushWoodlandShrub04": 1456
+        },
+        "sceneBounds": {
+          "min": [
+            -1.59423828,
+            -0.072769165,
+            -1.67980957
+          ],
+          "max": [
+            1.44207764,
+            1.63684082,
+            1.32745361
+          ]
+        },
+        "bufferBytes": 490980,
+        "logicalAccessorBytes": 41672,
+        "logicalVertexBytes": 32936,
+        "logicalIndexBytes": 8736,
+        "geometryBufferBytes": 43104,
+        "imageBufferBytes": 428461,
+        "nodeNames": [
+          "bush-woodland-shrub-04",
+          "bush-woodland-shrub-04-mesh"
+        ],
+        "materialNames": [
+          "BushWoodlandShrub04"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1432,
+        "triangles": 1456
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1456
+        },
+        "data": {
+          "json": 3177,
+          "binary": 447876,
+          "buffers": {
+            "vertex": 17908,
+            "index": 1496,
+            "animation": 0,
+            "transform": 0,
+            "image": 428461
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-forest-rhododendron-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-forest-rhododendron-01.glb",
+      "output": "public/assets/bushes/bush-forest-rhododendron-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "9707fd35ab2f5cd600a7014265f26f716efc56d28e4caf25330ccbeadca1b4fa",
+      "sourceSha256": "353549f03ea5efcb42262a0ce252a702e81c29d92fb742225115fcc5811da2b3",
+      "outputSha256": "23d88ab3c2f90be2bb4e48af6722421fb4f62ca6f55f338d991ec218ab604dff",
+      "sourceBytes": 2723268,
+      "outputBytes": 499524,
+      "gzipBytes": 493126,
+      "brotliBytes": 492073,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushForestRhododendron": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.6756540536880493,
+            -0.060978248715400696,
+            -1.6086591482162476
+          ],
+          "max": [
+            1.5377331972122192,
+            1.8106249570846558,
+            1.5430988073349
+          ]
+        },
+        "bufferBytes": 2721352,
+        "logicalAccessorBytes": 68112,
+        "logicalVertexBytes": 60432,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 68112,
+        "imageBufferBytes": 2653237,
+        "nodeNames": [
+          "bush-forest-rhododendron-01",
+          "bush-forest-rhododendron-01-mesh"
+        ],
+        "materialNames": [
+          "BushForestRhododendron"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushForestRhododendron": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.67565918,
+            -0.0609779358,
+            -1.60864258
+          ],
+          "max": [
+            1.53771973,
+            1.81060791,
+            1.54309082
+          ]
+        },
+        "bufferBytes": 534076,
+        "logicalAccessorBytes": 36637,
+        "logicalVertexBytes": 28957,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 37896,
+        "imageBufferBytes": 479016,
+        "nodeNames": [
+          "bush-forest-rhododendron-01",
+          "bush-forest-rhododendron-01-mesh"
+        ],
+        "materialNames": [
+          "BushForestRhododendron"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1259,
+        "triangles": 1280
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1280
+        },
+        "data": {
+          "json": 3201,
+          "binary": 496180,
+          "buffers": {
+            "vertex": 15843,
+            "index": 1316,
+            "animation": 0,
+            "transform": 0,
+            "image": 479016
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-boreal-juniper-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-boreal-juniper-01.glb",
+      "output": "public/assets/bushes/bush-boreal-juniper-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "d99c3e7a756d61a96ca8fa77f4d99cf8e0894154b93114bfabfcab72da588b64",
+      "sourceSha256": "91937dab431bb5f958eef7029e320936b44ccfa9612f8c569c061416a18e6edc",
+      "outputSha256": "ac97124463585e3dc1f6ed9a151db95f58f4a16bfb5eed7e3fd012dbfce23002",
+      "sourceBytes": 2774692,
+      "outputBytes": 502108,
+      "gzipBytes": 494724,
+      "brotliBytes": 493619,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 888,
+        "renderedTriangles": 888,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushBorealJuniper": 888
+        },
+        "sceneBounds": {
+          "min": [
+            -1.2257198095321655,
+            -0.12766093015670776,
+            -1.2790546417236328
+          ],
+          "max": [
+            1.1250817775726318,
+            1.5915968418121338,
+            1.1734540462493896
+          ]
+        },
+        "bufferBytes": 2772808,
+        "logicalAccessorBytes": 46512,
+        "logicalVertexBytes": 41184,
+        "logicalIndexBytes": 5328,
+        "geometryBufferBytes": 46512,
+        "imageBufferBytes": 2726295,
+        "nodeNames": [
+          "bush-boreal-juniper-01",
+          "bush-boreal-juniper-01-mesh"
+        ],
+        "materialNames": [
+          "BushBorealJuniper"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 888,
+        "renderedTriangles": 888,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushBorealJuniper": 888
+        },
+        "sceneBounds": {
+          "min": [
+            -1.22570801,
+            -0.127662659,
+            -1.27905273
+          ],
+          "max": [
+            1.12506104,
+            1.59161377,
+            1.17346191
+          ]
+        },
+        "bufferBytes": 524720,
+        "logicalAccessorBytes": 25062,
+        "logicalVertexBytes": 19734,
+        "logicalIndexBytes": 5328,
+        "geometryBufferBytes": 25920,
+        "imageBufferBytes": 487167,
+        "nodeNames": [
+          "bush-boreal-juniper-01",
+          "bush-boreal-juniper-01-mesh"
+        ],
+        "materialNames": [
+          "BushBorealJuniper"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 858,
+        "triangles": 888
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 888
+        },
+        "data": {
+          "json": 3165,
+          "binary": 498800,
+          "buffers": {
+            "vertex": 10695,
+            "index": 925,
+            "animation": 0,
+            "transform": 0,
+            "image": 487167
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-taiga-sapling-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-taiga-sapling-01.glb",
+      "output": "public/assets/bushes/bush-taiga-sapling-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "7116e455e2740b445ae6952e2259b63c45938b0ec2365eebad75deaa6e3f976c",
+      "sourceSha256": "e98e3be11bfda6071a6c66b5bffbec655c5bef002054e86cc91e3e2655a8e251",
+      "outputSha256": "b04e141a84c756c65115af8e3c92f1a803573b1a1286cc9386cf31e6a6f25d22",
+      "sourceBytes": 2695404,
+      "outputBytes": 515132,
+      "gzipBytes": 505635,
+      "brotliBytes": 504577,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1638,
+        "renderedTriangles": 1638,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushTaigaSapling": 1638
+        },
+        "sceneBounds": {
+          "min": [
+            -1.0667686462402344,
+            -0.05109751597046852,
+            -1.2549933195114136
+          ],
+          "max": [
+            1.2275323867797852,
+            2.297394037246704,
+            1.2051472663879395
+          ]
+        },
+        "bufferBytes": 2693520,
+        "logicalAccessorBytes": 89460,
+        "logicalVertexBytes": 79632,
+        "logicalIndexBytes": 9828,
+        "geometryBufferBytes": 89460,
+        "imageBufferBytes": 2604057,
+        "nodeNames": [
+          "bush-taiga-sapling-01",
+          "bush-taiga-sapling-01-mesh"
+        ],
+        "materialNames": [
+          "BushTaigaSapling"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1638,
+        "renderedTriangles": 1638,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushTaigaSapling": 1638
+        },
+        "sceneBounds": {
+          "min": [
+            -1.06677246,
+            -0.0510978699,
+            -1.25500488
+          ],
+          "max": [
+            1.22753906,
+            2.29736328,
+            1.20513916
+          ]
+        },
+        "bufferBytes": 561460,
+        "logicalAccessorBytes": 47985,
+        "logicalVertexBytes": 38157,
+        "logicalIndexBytes": 9828,
+        "geometryBufferBytes": 49644,
+        "imageBufferBytes": 489639,
+        "nodeNames": [
+          "bush-taiga-sapling-01",
+          "bush-taiga-sapling-01-mesh"
+        ],
+        "materialNames": [
+          "BushTaigaSapling"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1659,
+        "triangles": 1638
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1638
+        },
+        "data": {
+          "json": 3170,
+          "binary": 511816,
+          "buffers": {
+            "vertex": 20510,
+            "index": 1663,
+            "animation": 0,
+            "transform": 0,
+            "image": 489639
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-boreal-bilberry-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-boreal-bilberry-01.glb",
+      "output": "public/assets/bushes/bush-boreal-bilberry-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "d4ea57eb429fb5800f31f30a4cd046b50e414f294788aff1900b2ddb8ba2ecae",
+      "sourceSha256": "238fc6c5d68dafb3a9a091c50df7b5b6a478c9f3e5242a050b831782978431be",
+      "outputSha256": "99cc330244ec56d6f60c263aa34e78d0ee3a6ae748fb7e17e8edb6a070d566e9",
+      "sourceBytes": 2149836,
+      "outputBytes": 418928,
+      "gzipBytes": 413136,
+      "brotliBytes": 412218,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushBorealBilberry": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -0.9855309128761292,
+            -0.05133064091205597,
+            -1.0663411617279053
+          ],
+          "max": [
+            0.9330241680145264,
+            0.9513485431671143,
+            1.0669854879379272
+          ]
+        },
+        "bufferBytes": 2147940,
+        "logicalAccessorBytes": 58752,
+        "logicalVertexBytes": 52128,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 58752,
+        "imageBufferBytes": 2089185,
+        "nodeNames": [
+          "bush-boreal-bilberry-01",
+          "bush-boreal-bilberry-01-mesh"
+        ],
+        "materialNames": [
+          "BushBorealBilberry"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushBorealBilberry": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -0.985534668,
+            -0.0513305664,
+            -1.06634521
+          ],
+          "max": [
+            0.933013916,
+            0.95135498,
+            1.06695557
+          ]
+        },
+        "bufferBytes": 448288,
+        "logicalAccessorBytes": 31602,
+        "logicalVertexBytes": 24978,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 32688,
+        "imageBufferBytes": 400559,
+        "nodeNames": [
+          "bush-boreal-bilberry-01",
+          "bush-boreal-bilberry-01-mesh"
+        ],
+        "materialNames": [
+          "BushBorealBilberry"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1086,
+        "triangles": 1104
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1104
+        },
+        "data": {
+          "json": 3183,
+          "binary": 415600,
+          "buffers": {
+            "vertex": 13902,
+            "index": 1131,
+            "animation": 0,
+            "transform": 0,
+            "image": 400559
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-swamp-buttonbush-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-swamp-buttonbush-01.glb",
+      "output": "public/assets/bushes/bush-swamp-buttonbush-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "6d4a79b3f1fd32f08bfd93718803b69baafa7d49bc989aff6d6ddb592d2059c1",
+      "sourceSha256": "aa1a43df9cf7879a324632e136414ad61813d2e2dcc4233e3f9e2f40341e71f1",
+      "outputSha256": "5f969811c058d1fcfd4294e424a37e40825c018517560089e71096af0dd65ec8",
+      "sourceBytes": 2376912,
+      "outputBytes": 458448,
+      "gzipBytes": 450247,
+      "brotliBytes": 449103,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushSwampButtonbush": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.6674238443374634,
+            -0.0580928772687912,
+            -1.4286924600601196
+          ],
+          "max": [
+            1.636040449142456,
+            2.2391741275787354,
+            1.28249990940094
+          ]
+        },
+        "bufferBytes": 2375016,
+        "logicalAccessorBytes": 68112,
+        "logicalVertexBytes": 60432,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 68112,
+        "imageBufferBytes": 2306900,
+        "nodeNames": [
+          "bush-swamp-buttonbush-01",
+          "bush-swamp-buttonbush-01-mesh"
+        ],
+        "materialNames": [
+          "BushSwampButtonbush"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushSwampButtonbush": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.66741943,
+            -0.0580921173,
+            -1.42871094
+          ],
+          "max": [
+            1.63604736,
+            2.23913574,
+            1.2824707
+          ]
+        },
+        "bufferBytes": 493016,
+        "logicalAccessorBytes": 36637,
+        "logicalVertexBytes": 28957,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 37896,
+        "imageBufferBytes": 438253,
+        "nodeNames": [
+          "bush-swamp-buttonbush-01",
+          "bush-swamp-buttonbush-01-mesh"
+        ],
+        "materialNames": [
+          "BushSwampButtonbush"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1259,
+        "triangles": 1280
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1280
+        },
+        "data": {
+          "json": 3185,
+          "binary": 455120,
+          "buffers": {
+            "vertex": 15543,
+            "index": 1317,
+            "animation": 0,
+            "transform": 0,
+            "image": 438253
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-wetland-willow-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-wetland-willow-01.glb",
+      "output": "public/assets/bushes/bush-wetland-willow-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "ea6138b16317296182e55a80e3846cd29efb9ff6557704c1dfec1da14b56c3c4",
+      "sourceSha256": "a2346197effb6678c78fce59ac01932380e8c5265dd8b22dc6ebd70cb97eb322",
+      "outputSha256": "0c8bc910a933bfe8b15a22b310e91d326329dd8f7d1deac95295f0e2a8795d85",
+      "sourceBytes": 2284632,
+      "outputBytes": 446476,
+      "gzipBytes": 438609,
+      "brotliBytes": 437681,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1456,
+        "renderedTriangles": 1456,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushWetlandWillow": 1456
+        },
+        "sceneBounds": {
+          "min": [
+            -1.5199421644210815,
+            -0.0564524307847023,
+            -1.4543834924697876
+          ],
+          "max": [
+            1.5347106456756592,
+            2.789452075958252,
+            1.4197578430175781
+          ]
+        },
+        "bufferBytes": 2282744,
+        "logicalAccessorBytes": 77472,
+        "logicalVertexBytes": 68736,
+        "logicalIndexBytes": 8736,
+        "geometryBufferBytes": 77472,
+        "imageBufferBytes": 2205269,
+        "nodeNames": [
+          "bush-wetland-willow-01",
+          "bush-wetland-willow-01-mesh"
+        ],
+        "materialNames": [
+          "BushWetlandWillow"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1456,
+        "renderedTriangles": 1456,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushWetlandWillow": 1456
+        },
+        "sceneBounds": {
+          "min": [
+            -1.5199585,
+            -0.0564517975,
+            -1.45440674
+          ],
+          "max": [
+            1.534729,
+            2.78942871,
+            1.41973877
+          ]
+        },
+        "bufferBytes": 486264,
+        "logicalAccessorBytes": 41672,
+        "logicalVertexBytes": 32936,
+        "logicalIndexBytes": 8736,
+        "geometryBufferBytes": 43104,
+        "imageBufferBytes": 423894,
+        "nodeNames": [
+          "bush-wetland-willow-01",
+          "bush-wetland-willow-01-mesh"
+        ],
+        "materialNames": [
+          "BushWetlandWillow"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1432,
+        "triangles": 1456
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1456
+        },
+        "data": {
+          "json": 3173,
+          "binary": 443160,
+          "buffers": {
+            "vertex": 17767,
+            "index": 1486,
+            "animation": 0,
+            "transform": 0,
+            "image": 423894
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-tropical-hibiscus-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-tropical-hibiscus-01.glb",
+      "output": "public/assets/bushes/bush-tropical-hibiscus-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "bd0adfe920fbdc99553f8e21c400e298d61a55eb1fe060a09ca8c09316ac5126",
+      "sourceSha256": "16304e85a3640d9c49cfa58eb7abb5174e74bea010973fb529303a652a6d1343",
+      "outputSha256": "8c4a2f87cb2668500e493f30635f3ba529b6459d4d9915ac2c8afac2cc660387",
+      "sourceBytes": 2674544,
+      "outputBytes": 495208,
+      "gzipBytes": 488746,
+      "brotliBytes": 487783,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushTropicalHibiscus": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.4255030155181885,
+            -0.05589006841182709,
+            -1.525425672531128
+          ],
+          "max": [
+            1.5274659395217896,
+            1.975920557975769,
+            1.4683096408843994
+          ]
+        },
+        "bufferBytes": 2672640,
+        "logicalAccessorBytes": 68112,
+        "logicalVertexBytes": 60432,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 68112,
+        "imageBufferBytes": 2604527,
+        "nodeNames": [
+          "bush-tropical-hibiscus-01",
+          "bush-tropical-hibiscus-01-mesh"
+        ],
+        "materialNames": [
+          "BushTropicalHibiscus"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1280,
+        "renderedTriangles": 1280,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushTropicalHibiscus": 1280
+        },
+        "sceneBounds": {
+          "min": [
+            -1.42547607,
+            -0.0558891296,
+            -1.52545166
+          ],
+          "max": [
+            1.52746582,
+            1.97589111,
+            1.46832275
+          ]
+        },
+        "bufferBytes": 529768,
+        "logicalAccessorBytes": 36637,
+        "logicalVertexBytes": 28957,
+        "logicalIndexBytes": 7680,
+        "geometryBufferBytes": 37896,
+        "imageBufferBytes": 474677,
+        "nodeNames": [
+          "bush-tropical-hibiscus-01",
+          "bush-tropical-hibiscus-01-mesh"
+        ],
+        "materialNames": [
+          "BushTropicalHibiscus"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1259,
+        "triangles": 1280
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1280
+        },
+        "data": {
+          "json": 3191,
+          "binary": 491872,
+          "buffers": {
+            "vertex": 15867,
+            "index": 1317,
+            "animation": 0,
+            "transform": 0,
+            "image": 474677
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-tropical-palm-shrub-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-tropical-palm-shrub-01.glb",
+      "output": "public/assets/bushes/bush-tropical-palm-shrub-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "83c7842acf720267a6c70cc958e1fb43a30cffaa81fbc33f57266e743006707f",
+      "sourceSha256": "4a56799f34359793b3d0fcf8a89414b79a177abe358d31f8e59f66e9dafa673d",
+      "outputSha256": "2f7a5a31a6ac35a8b1eaabe92fa2e2c8c27911e8339a7b2ec1ef90f7fdf405b0",
+      "sourceBytes": 1409776,
+      "outputBytes": 321268,
+      "gzipBytes": 315806,
+      "brotliBytes": 314961,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 539,
+        "renderedTriangles": 539,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushTropicalPalmShrub": 539
+        },
+        "sceneBounds": {
+          "min": [
+            -1.623690128326416,
+            -0.06035083159804344,
+            -1.6537846326828003
+          ],
+          "max": [
+            1.7004808187484741,
+            1.161848545074463,
+            1.6949145793914795
+          ]
+        },
+        "bufferBytes": 1407872,
+        "logicalAccessorBytes": 29922,
+        "logicalVertexBytes": 26688,
+        "logicalIndexBytes": 3234,
+        "geometryBufferBytes": 29922,
+        "imageBufferBytes": 1377943,
+        "nodeNames": [
+          "bush-tropical-palm-shrub-01",
+          "bush-tropical-palm-shrub-01-mesh"
+        ],
+        "materialNames": [
+          "BushTropicalPalmShrub"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 539,
+        "renderedTriangles": 539,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushTropicalPalmShrub": 539
+        },
+        "sceneBounds": {
+          "min": [
+            -1.62371826,
+            -0.0603504181,
+            -1.65380859
+          ],
+          "max": [
+            1.70050049,
+            1.16186523,
+            1.69488525
+          ]
+        },
+        "bufferBytes": 334516,
+        "logicalAccessorBytes": 16022,
+        "logicalVertexBytes": 12788,
+        "logicalIndexBytes": 3234,
+        "geometryBufferBytes": 16578,
+        "imageBufferBytes": 309818,
+        "nodeNames": [
+          "bush-tropical-palm-shrub-01",
+          "bush-tropical-palm-shrub-01-mesh"
+        ],
+        "materialNames": [
+          "BushTropicalPalmShrub"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 556,
+        "triangles": 539
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 539
+        },
+        "data": {
+          "json": 3188,
+          "binary": 317936,
+          "buffers": {
+            "vertex": 7544,
+            "index": 562,
+            "animation": 0,
+            "transform": 0,
+            "image": 309818
           }
         }
       }
@@ -1359,50 +3059,49 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "b852451e420fb2025e61aa8aeec5a4c07ddd3d2fd8335ecf3b5104edf6ea2729",
-      "sourceSha256": "9e7291ed77e108b297934daabb44d121a4bba2b1a98242a3ab099803e5a80b2d",
-      "outputSha256": "66053ae414141bd6f67996fd5303550d8816b857063ffc4bedee3b8cd1b3a3c1",
-      "sourceBytes": 1212864,
-      "outputBytes": 194768,
-      "gzipBytes": 189532,
-      "brotliBytes": 189117,
+      "cacheKey": "cef0d55399e99d888ffce176b0762e9f65b8fd139585c956d7dbcb5b6f575230",
+      "sourceSha256": "5a6e4f303301dc4f66469bce2f7ff7f606af5758c41e4f36e1e4f54f6881dab4",
+      "outputSha256": "4667e30386892eae05fe1a3394624c2170607c2d2f944cfa3da7286cd5a35080",
+      "sourceBytes": 2040288,
+      "outputBytes": 415076,
+      "gzipBytes": 408573,
+      "brotliBytes": 407695,
       "sourceStats": {
         "scenes": 1,
-        "nodes": 3,
+        "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 1,
-        "images": 1,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 1098,
-        "renderedTriangles": 1098,
+        "triangles": 1233,
+        "renderedTriangles": 1233,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "phong1SG": 1098
+          "phong1SG": 1233
         },
         "sceneBounds": {
           "min": [
-            -61.45195388793945,
-            -0.11275099962950914,
-            -69.39009094238281
+            -1.1633293628692627,
+            -0.05415364354848862,
+            -1.0117168426513672
           ],
           "max": [
-            59.19578552246094,
-            218.63264465332034,
-            52.316768646240284
+            1.1951433420181274,
+            2.689664363861084,
+            1.087445616722107
           ]
         },
-        "bufferBytes": 1210766,
-        "logicalAccessorBytes": 48216,
-        "logicalVertexBytes": 35040,
-        "logicalIndexBytes": 13176,
-        "geometryBufferBytes": 48216,
-        "imageBufferBytes": 1162550,
+        "bufferBytes": 2038468,
+        "logicalAccessorBytes": 60102,
+        "logicalVertexBytes": 52704,
+        "logicalIndexBytes": 7398,
+        "geometryBufferBytes": 60102,
+        "imageBufferBytes": 1978361,
         "nodeNames": [
-          "Object_2",
-          "Sketchfab_model",
-          "bamboo.obj.cleaner.materialmerger.gles"
+          "bamboo_bush",
+          "bamboo_bush-mesh"
         ],
         "materialNames": [
           "phong1SG"
@@ -1413,554 +3112,43 @@
       },
       "outputStats": {
         "scenes": 1,
-        "nodes": 3,
+        "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 1,
-        "images": 1,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 1098,
-        "renderedTriangles": 1098,
+        "triangles": 1233,
+        "renderedTriangles": 1233,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "phong1SG": 1098
+          "phong1SG": 1233
         },
         "sceneBounds": {
           "min": [
-            -61.4511719,
-            -0.11275280639532351,
-            -69.39062261207751
+            -1.16333008,
+            -0.0541534424,
+            -1.01171875
           ],
           "max": [
-            59.1953125,
-            218.6328068558067,
-            52.31641193272047
+            1.19512939,
+            2.68969727,
+            1.08746338
           ]
         },
-        "bufferBytes": 220420,
-        "logicalAccessorBytes": 27393,
-        "logicalVertexBytes": 20805,
-        "logicalIndexBytes": 6588,
-        "geometryBufferBytes": 28488,
-        "imageBufferBytes": 179806,
+        "bufferBytes": 445560,
+        "logicalAccessorBytes": 32652,
+        "logicalVertexBytes": 25254,
+        "logicalIndexBytes": 7398,
+        "geometryBufferBytes": 33750,
+        "imageBufferBytes": 397052,
         "nodeNames": [
-          "Object_2",
-          "Sketchfab_model",
-          "bamboo.obj.cleaner.materialmerger.gles"
+          "bamboo_bush",
+          "bamboo_bush-mesh"
         ],
         "materialNames": [
           "phong1SG"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu",
-          "KHR_texture_transform"
-        ],
-        "extensionsRequired": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu"
-        ]
-      },
-      "officialValidation": {
-        "validatorVersion": "2.0.0-dev.3.10",
-        "errors": 0,
-        "warnings": 0,
-        "knownKtx2Limitations": 2,
-        "inheritedWarnings": 0,
-        "inheritedWarningCodes": [],
-        "infos": 3,
-        "hints": 0,
-        "drawCalls": 1,
-        "vertices": 1095,
-        "triangles": 1098
-      },
-      "report": {
-        "generator": "gltfpack 1.2",
-        "scene": {
-          "nodeCount": 3,
-          "meshCount": 1,
-          "materialCount": 1,
-          "textureCount": 1,
-          "animationCount": 0
-        },
-        "render": {
-          "drawCount": 1,
-          "instanceCount": 1,
-          "triangleCount": 1098
-        },
-        "data": {
-          "json": 2693,
-          "binary": 191932,
-          "buffers": {
-            "vertex": 10930,
-            "index": 1190,
-            "animation": 0,
-            "transform": 0,
-            "image": 179806
-          }
-        }
-      }
-    },
-    {
-      "scene": "/assets/bushes/bush-boreal-juniper-01.glb",
-      "source": "assets/runtime-sources/bushes/bush-boreal-juniper-01.glb",
-      "output": "public/assets/bushes/bush-boreal-juniper-01.glb",
-      "profile": "standardScatter",
-      "optimizerArgs": [
-        "-cc",
-        "-kn",
-        "-km",
-        "-ke",
-        "-vpf",
-        "-tq",
-        "8",
-        "-tl",
-        "color,normal",
-        "512",
-        "-tl",
-        "attrib",
-        "512",
-        "-tj",
-        "1",
-        "-tc",
-        "color,attrib",
-        "-tu",
-        "normal"
-      ],
-      "cacheKey": "92a33f67347bcb062791572385f621edde5332a84c88276bfd347007c80b4866",
-      "sourceSha256": "2b8c6f9c7dbbde0163acd12ef6a082b3f0c5ec404bd41b207a42141620b13837",
-      "outputSha256": "f5f04300d56b83607bc6a6190d8e9be2fa3354c939bf21ee513c29fa43fa511b",
-      "sourceBytes": 1031732,
-      "outputBytes": 270856,
-      "gzipBytes": 205638,
-      "brotliBytes": 203449,
-      "sourceStats": {
-        "scenes": 1,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 3,
-        "images": 3,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 15354,
-        "renderedTriangles": 15354,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "BushBorealJuniper3D": 15354
-        },
-        "sceneBounds": {
-          "min": [
-            -1.2164306640625,
-            -0.06169439107179642,
-            -1.0597909688949585
-          ],
-          "max": [
-            0.9870237708091736,
-            1.36872398853302,
-            0.909404456615448
-          ]
-        },
-        "bufferBytes": 1029552,
-        "logicalAccessorBytes": 795624,
-        "logicalVertexBytes": 703500,
-        "logicalIndexBytes": 92124,
-        "geometryBufferBytes": 795624,
-        "imageBufferBytes": 233921,
-        "nodeNames": [
-          "bush-boreal-juniper-01",
-          "bush-boreal-juniper-01-mesh"
-        ],
-        "materialNames": [
-          "BushBorealJuniper3D"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [],
-        "extensionsRequired": []
-      },
-      "outputStats": {
-        "scenes": 1,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 3,
-        "images": 3,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 15354,
-        "renderedTriangles": 15354,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "BushBorealJuniper3D": 15354
-        },
-        "sceneBounds": {
-          "min": [
-            -1.21643066,
-            -0.0616950989,
-            -1.05981445
-          ],
-          "max": [
-            0.987030029,
-            1.36871338,
-            0.909393311
-          ]
-        },
-        "bufferBytes": 687212,
-        "logicalAccessorBytes": 408699,
-        "logicalVertexBytes": 316575,
-        "logicalIndexBytes": 92124,
-        "geometryBufferBytes": 420424,
-        "imageBufferBytes": 89586,
-        "nodeNames": [
-          "bush-boreal-juniper-01",
-          "bush-boreal-juniper-01-mesh"
-        ],
-        "materialNames": [
-          "BushBorealJuniper3D"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu",
-          "KHR_texture_transform"
-        ],
-        "extensionsRequired": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu"
-        ]
-      },
-      "officialValidation": {
-        "validatorVersion": "2.0.0-dev.3.10",
-        "errors": 0,
-        "warnings": 0,
-        "knownKtx2Limitations": 6,
-        "inheritedWarnings": 0,
-        "inheritedWarningCodes": [],
-        "infos": 5,
-        "hints": 0,
-        "drawCalls": 1,
-        "vertices": 11725,
-        "triangles": 15354
-      },
-      "report": {
-        "generator": "gltfpack 1.2",
-        "scene": {
-          "nodeCount": 2,
-          "meshCount": 1,
-          "materialCount": 1,
-          "textureCount": 3,
-          "animationCount": 0
-        },
-        "render": {
-          "drawCount": 1,
-          "instanceCount": 1,
-          "triangleCount": 15354
-        },
-        "data": {
-          "json": 3924,
-          "binary": 266788,
-          "buffers": {
-            "vertex": 160726,
-            "index": 16464,
-            "animation": 0,
-            "transform": 0,
-            "image": 89586
-          }
-        }
-      }
-    },
-    {
-      "scene": "/assets/bushes/bush-swamp-buttonbush-01.glb",
-      "source": "assets/runtime-sources/bushes/bush-swamp-buttonbush-01.glb",
-      "output": "public/assets/bushes/bush-swamp-buttonbush-01.glb",
-      "profile": "standardScatter",
-      "optimizerArgs": [
-        "-cc",
-        "-kn",
-        "-km",
-        "-ke",
-        "-vpf",
-        "-tq",
-        "8",
-        "-tl",
-        "color,normal",
-        "512",
-        "-tl",
-        "attrib",
-        "512",
-        "-tj",
-        "1",
-        "-tc",
-        "color,attrib",
-        "-tu",
-        "normal"
-      ],
-      "cacheKey": "b39776b9cb03700ad0b2bffadd041a4ad7b6c0e3527e1db7e1c9aa415c6aef50",
-      "sourceSha256": "1f7ceaf158a5219a9cb0cf80b025c04e0aa4d53640a56c73c2374cba30848814",
-      "outputSha256": "4c3ce7df6c0360559483717a91d41ed296310c2bfd22dd928b0d540fa2b3876d",
-      "sourceBytes": 1136308,
-      "outputBytes": 300716,
-      "gzipBytes": 225475,
-      "brotliBytes": 223569,
-      "sourceStats": {
-        "scenes": 1,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 3,
-        "images": 3,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 15399,
-        "renderedTriangles": 15399,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "BushSwampButtonbush3D": 15399
-        },
-        "sceneBounds": {
-          "min": [
-            -0.9532685875892639,
-            -0.049010392278432846,
-            -1.173176646232605
-          ],
-          "max": [
-            1.1994647979736328,
-            1.4322582483291626,
-            1.0929490327835083
-          ]
-        },
-        "bufferBytes": 1134104,
-        "logicalAccessorBytes": 896874,
-        "logicalVertexBytes": 804480,
-        "logicalIndexBytes": 92394,
-        "geometryBufferBytes": 896874,
-        "imageBufferBytes": 237226,
-        "nodeNames": [
-          "bush-swamp-buttonbush-01",
-          "bush-swamp-buttonbush-01-mesh"
-        ],
-        "materialNames": [
-          "BushSwampButtonbush3D"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [],
-        "extensionsRequired": []
-      },
-      "outputStats": {
-        "scenes": 1,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 3,
-        "images": 3,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 15399,
-        "renderedTriangles": 15399,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "BushSwampButtonbush3D": 15399
-        },
-        "sceneBounds": {
-          "min": [
-            -0.953277588,
-            -0.0490112305,
-            -1.17315674
-          ],
-          "max": [
-            1.19946289,
-            1.43225098,
-            1.09295654
-          ]
-        },
-        "bufferBytes": 764452,
-        "logicalAccessorBytes": 454410,
-        "logicalVertexBytes": 362016,
-        "logicalIndexBytes": 92394,
-        "geometryBufferBytes": 467818,
-        "imageBufferBytes": 90971,
-        "nodeNames": [
-          "bush-swamp-buttonbush-01",
-          "bush-swamp-buttonbush-01-mesh"
-        ],
-        "materialNames": [
-          "BushSwampButtonbush3D"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu",
-          "KHR_texture_transform"
-        ],
-        "extensionsRequired": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu"
-        ]
-      },
-      "officialValidation": {
-        "validatorVersion": "2.0.0-dev.3.10",
-        "errors": 0,
-        "warnings": 0,
-        "knownKtx2Limitations": 6,
-        "inheritedWarnings": 0,
-        "inheritedWarningCodes": [],
-        "infos": 5,
-        "hints": 0,
-        "drawCalls": 1,
-        "vertices": 13408,
-        "triangles": 15399
-      },
-      "report": {
-        "generator": "gltfpack 1.2",
-        "scene": {
-          "nodeCount": 2,
-          "meshCount": 1,
-          "materialCount": 1,
-          "textureCount": 3,
-          "animationCount": 0
-        },
-        "render": {
-          "drawCount": 1,
-          "instanceCount": 1,
-          "triangleCount": 15399
-        },
-        "data": {
-          "json": 3938,
-          "binary": 296632,
-          "buffers": {
-            "vertex": 189188,
-            "index": 16454,
-            "animation": 0,
-            "transform": 0,
-            "image": 90971
-          }
-        }
-      }
-    },
-    {
-      "scene": "/assets/bushes/bush-forest-scan-01.glb",
-      "source": "assets/runtime-sources/bushes/bush-forest-scan-01.glb",
-      "output": "public/assets/bushes/bush-forest-scan-01.glb",
-      "profile": "alphaCriticalScatter",
-      "optimizerArgs": [
-        "-cc",
-        "-kn",
-        "-km",
-        "-ke",
-        "-vpf",
-        "-tq",
-        "8",
-        "-tl",
-        "color,normal",
-        "512",
-        "-tl",
-        "attrib",
-        "512",
-        "-tj",
-        "1",
-        "-tc",
-        "attrib",
-        "-tu",
-        "color,normal"
-      ],
-      "cacheKey": "c8df42713c8413b9dd74a681233b0df4eff5ca94b832fb3b7ee3c577fad3c094",
-      "sourceSha256": "05d05dbf6146687164503a447ec87790def3a88e6679e4ae746860e1bce39178",
-      "outputSha256": "3ce8617634c8bdc8582313ed8bdcab9d1c239c7b83a6bb216240c4aaf7f67954",
-      "sourceBytes": 2720504,
-      "outputBytes": 445712,
-      "gzipBytes": 438385,
-      "brotliBytes": 437470,
-      "sourceStats": {
-        "scenes": 2,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 2,
-        "images": 2,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 2385,
-        "renderedTriangles": 2385,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "Scan bush-forest-scan-01": 2385
-        },
-        "sceneBounds": {
-          "min": [
-            -0.3735698461532593,
-            0,
-            -0.2815462648868561
-          ],
-          "max": [
-            0.3735698461532593,
-            1.5,
-            0.2815462648868561
-          ]
-        },
-        "bufferBytes": 2718636,
-        "logicalAccessorBytes": 98310,
-        "logicalVertexBytes": 84000,
-        "logicalIndexBytes": 14310,
-        "geometryBufferBytes": 98310,
-        "imageBufferBytes": 2620324,
-        "nodeNames": [
-          "bush-forest-scan-01",
-          "bush-forest-scan-01-mesh"
-        ],
-        "materialNames": [
-          "Scan bush-forest-scan-01"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [],
-        "extensionsRequired": []
-      },
-      "outputStats": {
-        "scenes": 2,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 2,
-        "images": 2,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 2385,
-        "renderedTriangles": 2385,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "Scan bush-forest-scan-01": 2385
-        },
-        "sceneBounds": {
-          "min": [
-            -0.373565674,
-            0,
-            -0.281539917
-          ],
-          "max": [
-            0.373565674,
-            1.5,
-            0.281539917
-          ]
-        },
-        "bufferBytes": 498728,
-        "logicalAccessorBytes": 54560,
-        "logicalVertexBytes": 40250,
-        "logicalIndexBytes": 14310,
-        "geometryBufferBytes": 56310,
-        "imageBufferBytes": 420498,
-        "nodeNames": [
-          "bush-forest-scan-01",
-          "bush-forest-scan-01-mesh"
-        ],
-        "materialNames": [
-          "Scan bush-forest-scan-01"
         ],
         "animationNames": [],
         "extensionsUsed": [
@@ -1985,8 +3173,8 @@
         "infos": 4,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 1750,
-        "triangles": 2385
+        "vertices": 1098,
+        "triangles": 1233
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -2000,357 +3188,17 @@
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 2385
+          "triangleCount": 1233
         },
         "data": {
-          "json": 3151,
-          "binary": 442416,
+          "json": 3123,
+          "binary": 411808,
           "buffers": {
-            "vertex": 19346,
-            "index": 2564,
+            "vertex": 13451,
+            "index": 1293,
             "animation": 0,
             "transform": 0,
-            "image": 420498
-          }
-        }
-      }
-    },
-    {
-      "scene": "/assets/bushes/bush-meadow-scan-01.glb",
-      "source": "assets/runtime-sources/bushes/bush-meadow-scan-01.glb",
-      "output": "public/assets/bushes/bush-meadow-scan-01.glb",
-      "profile": "alphaCriticalScatter",
-      "optimizerArgs": [
-        "-cc",
-        "-kn",
-        "-km",
-        "-ke",
-        "-vpf",
-        "-tq",
-        "8",
-        "-tl",
-        "color,normal",
-        "512",
-        "-tl",
-        "attrib",
-        "512",
-        "-tj",
-        "1",
-        "-tc",
-        "attrib",
-        "-tu",
-        "color,normal"
-      ],
-      "cacheKey": "b1bd6b60f12f143e931605c0fdd2a2e9c92c2c8f21b6cc75a131046c614c01ce",
-      "sourceSha256": "e9fd5abfd2f22a3fd25fc19bb1649aed786b862dc99043fe410fa94e567ade98",
-      "outputSha256": "6e1f27fa4b630f8edb70f34b7a861cdd423536032a9f0e41c05f6751ce40dc1b",
-      "sourceBytes": 2780132,
-      "outputBytes": 492420,
-      "gzipBytes": 482605,
-      "brotliBytes": 481418,
-      "sourceStats": {
-        "scenes": 2,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 2,
-        "images": 2,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 2499,
-        "renderedTriangles": 2499,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "Scan bush-meadow-scan-01": 2499
-        },
-        "sceneBounds": {
-          "min": [
-            -0.8066590428352356,
-            0,
-            -1.0427991151809692
-          ],
-          "max": [
-            0.8062381148338318,
-            1.2003321647644043,
-            1.0431779623031616
-          ]
-        },
-        "bufferBytes": 2778248,
-        "logicalAccessorBytes": 147762,
-        "logicalVertexBytes": 132768,
-        "logicalIndexBytes": 14994,
-        "geometryBufferBytes": 147762,
-        "imageBufferBytes": 2630479,
-        "nodeNames": [
-          "bush-meadow-scan-01",
-          "bush-meadow-scan-01-mesh"
-        ],
-        "materialNames": [
-          "Scan bush-meadow-scan-01"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [],
-        "extensionsRequired": []
-      },
-      "outputStats": {
-        "scenes": 2,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 2,
-        "images": 2,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 2499,
-        "renderedTriangles": 2499,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "Scan bush-meadow-scan-01": 2499
-        },
-        "sceneBounds": {
-          "min": [
-            -0.806671143,
-            0,
-            -1.04278564
-          ],
-          "max": [
-            0.806243896,
-            1.20031738,
-            1.04315186
-          ]
-        },
-        "bufferBytes": 570492,
-        "logicalAccessorBytes": 78612,
-        "logicalVertexBytes": 63618,
-        "logicalIndexBytes": 14994,
-        "geometryBufferBytes": 81378,
-        "imageBufferBytes": 454332,
-        "nodeNames": [
-          "bush-meadow-scan-01",
-          "bush-meadow-scan-01-mesh"
-        ],
-        "materialNames": [
-          "Scan bush-meadow-scan-01"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu",
-          "KHR_texture_transform"
-        ],
-        "extensionsRequired": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu"
-        ]
-      },
-      "officialValidation": {
-        "validatorVersion": "2.0.0-dev.3.10",
-        "errors": 0,
-        "warnings": 0,
-        "knownKtx2Limitations": 4,
-        "inheritedWarnings": 0,
-        "inheritedWarningCodes": [],
-        "infos": 4,
-        "hints": 0,
-        "drawCalls": 1,
-        "vertices": 2766,
-        "triangles": 2499
-      },
-      "report": {
-        "generator": "gltfpack 1.2",
-        "scene": {
-          "nodeCount": 2,
-          "meshCount": 1,
-          "materialCount": 1,
-          "textureCount": 2,
-          "animationCount": 0
-        },
-        "render": {
-          "drawCount": 1,
-          "instanceCount": 1,
-          "triangleCount": 2499
-        },
-        "data": {
-          "json": 3162,
-          "binary": 489112,
-          "buffers": {
-            "vertex": 32208,
-            "index": 2563,
-            "animation": 0,
-            "transform": 0,
-            "image": 454332
-          }
-        }
-      }
-    },
-    {
-      "scene": "/assets/bushes/bush-arid-rooibos-01.glb",
-      "source": "assets/runtime-sources/bushes/bush-arid-rooibos-01.glb",
-      "output": "public/assets/bushes/bush-arid-rooibos-01.glb",
-      "profile": "standardScatter",
-      "optimizerArgs": [
-        "-cc",
-        "-kn",
-        "-km",
-        "-ke",
-        "-vpf",
-        "-tq",
-        "8",
-        "-tl",
-        "color,normal",
-        "512",
-        "-tl",
-        "attrib",
-        "512",
-        "-tj",
-        "1",
-        "-tc",
-        "color,attrib",
-        "-tu",
-        "normal"
-      ],
-      "cacheKey": "282b863666b6c565f43447a483e7e8323f9f986f44017755af689e94824e5cfe",
-      "sourceSha256": "78487519dd66ea2c35e5537fa2492efb29ee1dd2fb73837ba4db4a21d798d18b",
-      "outputSha256": "08d7a9a174f647c4fcbef941480371a946199721d9771293e1d84cbb5d3d29e4",
-      "sourceBytes": 499892,
-      "outputBytes": 156952,
-      "gzipBytes": 131642,
-      "brotliBytes": 130534,
-      "sourceStats": {
-        "scenes": 1,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 3,
-        "images": 3,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 3767,
-        "renderedTriangles": 3767,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "BushSavannaThorn3D": 3767
-        },
-        "sceneBounds": {
-          "min": [
-            -1.1186904907226562,
-            -0.06067770719528198,
-            -1.0677340030670166
-          ],
-          "max": [
-            1.1826649904251099,
-            1.5724985599517822,
-            1.1458723545074463
-          ]
-        },
-        "bufferBytes": 497728,
-        "logicalAccessorBytes": 259662,
-        "logicalVertexBytes": 237060,
-        "logicalIndexBytes": 22602,
-        "geometryBufferBytes": 259662,
-        "imageBufferBytes": 238061,
-        "nodeNames": [
-          "bush-arid-rooibos-01",
-          "bush-arid-rooibos-01-mesh"
-        ],
-        "materialNames": [
-          "BushSavannaThorn3D"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [],
-        "extensionsRequired": []
-      },
-      "outputStats": {
-        "scenes": 1,
-        "nodes": 2,
-        "meshes": 1,
-        "materials": 1,
-        "textures": 3,
-        "images": 3,
-        "skins": 0,
-        "animations": 0,
-        "triangles": 3767,
-        "renderedTriangles": 3767,
-        "drawParts": 1,
-        "materialTriangleCounts": {
-          "BushSavannaThorn3D": 3767
-        },
-        "sceneBounds": {
-          "min": [
-            -1.11871338,
-            -0.0606784821,
-            -1.06774902
-          ],
-          "max": [
-            1.18267822,
-            1.57250977,
-            1.14587402
-          ]
-        },
-        "bufferBytes": 286140,
-        "logicalAccessorBytes": 129279,
-        "logicalVertexBytes": 106677,
-        "logicalIndexBytes": 22602,
-        "geometryBufferBytes": 133230,
-        "imageBufferBytes": 90458,
-        "nodeNames": [
-          "bush-arid-rooibos-01",
-          "bush-arid-rooibos-01-mesh"
-        ],
-        "materialNames": [
-          "BushSavannaThorn3D"
-        ],
-        "animationNames": [],
-        "extensionsUsed": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu",
-          "KHR_texture_transform"
-        ],
-        "extensionsRequired": [
-          "EXT_meshopt_compression",
-          "KHR_mesh_quantization",
-          "KHR_texture_basisu"
-        ]
-      },
-      "officialValidation": {
-        "validatorVersion": "2.0.0-dev.3.10",
-        "errors": 0,
-        "warnings": 0,
-        "knownKtx2Limitations": 6,
-        "inheritedWarnings": 0,
-        "inheritedWarningCodes": [],
-        "infos": 5,
-        "hints": 0,
-        "drawCalls": 1,
-        "vertices": 3951,
-        "triangles": 3767
-      },
-      "report": {
-        "generator": "gltfpack 1.2",
-        "scene": {
-          "nodeCount": 2,
-          "meshCount": 1,
-          "materialCount": 1,
-          "textureCount": 3,
-          "animationCount": 0
-        },
-        "render": {
-          "drawCount": 1,
-          "instanceCount": 1,
-          "triangleCount": 3767
-        },
-        "data": {
-          "json": 3899,
-          "binary": 152908,
-          "buffers": {
-            "vertex": 58578,
-            "index": 3864,
-            "animation": 0,
-            "transform": 0,
-            "image": 90458
+            "image": 397052
           }
         }
       }
@@ -2526,9 +3374,9 @@
       }
     },
     {
-      "scene": "/assets/bushes/bush-tropical-hibiscus-01.glb",
-      "source": "assets/runtime-sources/bushes/bush-tropical-hibiscus-01.glb",
-      "output": "public/assets/bushes/bush-tropical-hibiscus-01.glb",
+      "scene": "/assets/bushes/bush-savanna-thorn-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-savanna-thorn-01.glb",
+      "output": "public/assets/bushes/bush-savanna-thorn-01.glb",
       "profile": "alphaCriticalScatter",
       "optimizerArgs": [
         "-cc",
@@ -2551,52 +3399,52 @@
         "-tu",
         "color,normal"
       ],
-      "cacheKey": "685b95a983b4bebbcb13f49381decc987cdbca6b542e45550d66a8331b2188cd",
-      "sourceSha256": "c20bdc2ef8ae3d72ae3d3d657590fb6b79c00fcd875f34681e0c6026bb2df224",
-      "outputSha256": "fb96ace472bf4ab7a0de5d0f7bfa57a0454455f006b09ce52b0321525e7d0085",
-      "sourceBytes": 841716,
-      "outputBytes": 223116,
-      "gzipBytes": 174865,
-      "brotliBytes": 172636,
+      "cacheKey": "d6fb78825d09672542619b8e046813ec137438bd1176540ba117c93a04dbb6a1",
+      "sourceSha256": "49f22976429ea9deca5263db0870099c118b8c46872d186292bbe0792ea6b076",
+      "outputSha256": "42acd178b0379392afaab0609a765c073300dfe1f27b1ed16769ce4fa9c6d546",
+      "sourceBytes": 2768060,
+      "outputBytes": 472032,
+      "gzipBytes": 466931,
+      "brotliBytes": 466083,
       "sourceStats": {
         "scenes": 1,
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 16050,
-        "renderedTriangles": 16050,
+        "triangles": 700,
+        "renderedTriangles": 700,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "BushTropicalHibiscus": 16050
+          "BushSavannaThorn": 700
         },
         "sceneBounds": {
           "min": [
-            -1.216105341911316,
-            -0.05697903782129288,
-            -1.0824366807937622
+            -1.5973140001296997,
+            -0.06467299908399582,
+            -1.447123408317566
           ],
           "max": [
-            1.0941896438598633,
-            1.7928813695907593,
-            0.9942927360534668
+            1.4732375144958496,
+            1.8585147857666016,
+            1.6528176069259644
           ]
         },
-        "bufferBytes": 839480,
-        "logicalAccessorBytes": 647400,
-        "logicalVertexBytes": 551100,
-        "logicalIndexBytes": 96300,
-        "geometryBufferBytes": 647400,
-        "imageBufferBytes": 192075,
+        "bufferBytes": 2766184,
+        "logicalAccessorBytes": 37080,
+        "logicalVertexBytes": 32880,
+        "logicalIndexBytes": 4200,
+        "geometryBufferBytes": 37080,
+        "imageBufferBytes": 2729104,
         "nodeNames": [
-          "bush-tropical-hibiscus-01",
-          "bush-tropical-hibiscus-01-mesh"
+          "bush-savanna-thorn-01",
+          "bush-savanna-thorn-01-mesh"
         ],
         "materialNames": [
-          "BushTropicalHibiscus"
+          "BushSavannaThorn"
         ],
         "animationNames": [],
         "extensionsUsed": [],
@@ -2607,40 +3455,40 @@
         "nodes": 2,
         "meshes": 1,
         "materials": 1,
-        "textures": 3,
-        "images": 3,
+        "textures": 2,
+        "images": 2,
         "skins": 0,
         "animations": 0,
-        "triangles": 16050,
-        "renderedTriangles": 16050,
+        "triangles": 700,
+        "renderedTriangles": 700,
         "drawParts": 1,
         "materialTriangleCounts": {
-          "BushTropicalHibiscus": 16050
+          "BushSavannaThorn": 700
         },
         "sceneBounds": {
           "min": [
-            -1.21612549,
-            -0.0569782257,
-            -1.0824585
+            -1.59729004,
+            -0.0646743774,
+            -1.44714355
           ],
           "max": [
-            1.09417725,
-            1.79290771,
-            0.994293213
+            1.4732666,
+            1.85852051,
+            1.65283203
           ]
         },
-        "bufferBytes": 572488,
-        "logicalAccessorBytes": 344295,
-        "logicalVertexBytes": 247995,
-        "logicalIndexBytes": 96300,
-        "geometryBufferBytes": 353480,
-        "imageBufferBytes": 96871,
+        "bufferBytes": 489368,
+        "logicalAccessorBytes": 19955,
+        "logicalVertexBytes": 15755,
+        "logicalIndexBytes": 4200,
+        "geometryBufferBytes": 20640,
+        "imageBufferBytes": 459109,
         "nodeNames": [
-          "bush-tropical-hibiscus-01",
-          "bush-tropical-hibiscus-01-mesh"
+          "bush-savanna-thorn-01",
+          "bush-savanna-thorn-01-mesh"
         ],
         "materialNames": [
-          "BushTropicalHibiscus"
+          "BushSavannaThorn"
         ],
         "animationNames": [],
         "extensionsUsed": [
@@ -2659,14 +3507,14 @@
         "validatorVersion": "2.0.0-dev.3.10",
         "errors": 0,
         "warnings": 0,
-        "knownKtx2Limitations": 6,
+        "knownKtx2Limitations": 4,
         "inheritedWarnings": 0,
         "inheritedWarningCodes": [],
-        "infos": 5,
+        "infos": 4,
         "hints": 0,
         "drawCalls": 1,
-        "vertices": 9185,
-        "triangles": 16050
+        "vertices": 685,
+        "triangles": 700
       },
       "report": {
         "generator": "gltfpack 1.2",
@@ -2674,23 +3522,873 @@
           "nodeCount": 2,
           "meshCount": 1,
           "materialCount": 1,
-          "textureCount": 3,
+          "textureCount": 2,
           "animationCount": 0
         },
         "render": {
           "drawCount": 1,
           "instanceCount": 1,
-          "triangleCount": 16050
+          "triangleCount": 700
         },
         "data": {
-          "json": 3962,
-          "binary": 219008,
+          "json": 3158,
+          "binary": 468728,
           "buffers": {
-            "vertex": 103574,
-            "index": 18546,
+            "vertex": 8881,
+            "index": 727,
             "animation": 0,
             "transform": 0,
-            "image": 96871
+            "image": 459109
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-arid-rooibos-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-arid-rooibos-01.glb",
+      "output": "public/assets/bushes/bush-arid-rooibos-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "706617d157084fdf2739e846b16129b3a1d8249b7ec1f7b54d5bc44a54807962",
+      "sourceSha256": "ce083dbdbb4d1a51cfc67cd4cc5516bbde67177e03c4a5e6fef205e4ff1cdaaf",
+      "outputSha256": "b304273a7263a43ced5c07cc0f439e2669592d19c27fe6eba4805ecbae56c59b",
+      "sourceBytes": 2395472,
+      "outputBytes": 435844,
+      "gzipBytes": 429317,
+      "brotliBytes": 428335,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushAridRooibos": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -1.3009916543960571,
+            -0.05498892441391945,
+            -1.2720962762832642
+          ],
+          "max": [
+            1.2872496843338013,
+            1.7532597780227661,
+            1.1604714393615723
+          ]
+        },
+        "bufferBytes": 2393596,
+        "logicalAccessorBytes": 58752,
+        "logicalVertexBytes": 52128,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 58752,
+        "imageBufferBytes": 2334842,
+        "nodeNames": [
+          "bush-arid-rooibos-01",
+          "bush-arid-rooibos-01-mesh"
+        ],
+        "materialNames": [
+          "BushAridRooibos"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushAridRooibos": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -1.30096436,
+            -0.0549888611,
+            -1.27209473
+          ],
+          "max": [
+            1.28723145,
+            1.75323486,
+            1.16046143
+          ]
+        },
+        "bufferBytes": 465220,
+        "logicalAccessorBytes": 31602,
+        "logicalVertexBytes": 24978,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 32688,
+        "imageBufferBytes": 418044,
+        "nodeNames": [
+          "bush-arid-rooibos-01",
+          "bush-arid-rooibos-01-mesh"
+        ],
+        "materialNames": [
+          "BushAridRooibos"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1086,
+        "triangles": 1104
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1104
+        },
+        "data": {
+          "json": 3166,
+          "binary": 432532,
+          "buffers": {
+            "vertex": 13329,
+            "index": 1146,
+            "animation": 0,
+            "transform": 0,
+            "image": 418044
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-arid-didelta-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-arid-didelta-01.glb",
+      "output": "public/assets/bushes/bush-arid-didelta-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "c18ad4bd05924d2b251b5e55352159860f51e6a47e8c613da9d6949981fb39e8",
+      "sourceSha256": "847eb5737eda9c7f599d428e554d2f59710f7cc4251a995105589d2ede2724b0",
+      "outputSha256": "4799d344745988adb9b2a5d0500a019999711b62fdf695c57cab6316607cf0db",
+      "sourceBytes": 2992528,
+      "outputBytes": 545260,
+      "gzipBytes": 539511,
+      "brotliBytes": 538437,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushAridDidelta": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -1.340437650680542,
+            -0.07442118227481842,
+            -1.2946168184280396
+          ],
+          "max": [
+            1.374403953552246,
+            1.6591349840164185,
+            1.2395317554473877
+          ]
+        },
+        "bufferBytes": 2990652,
+        "logicalAccessorBytes": 58752,
+        "logicalVertexBytes": 52128,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 58752,
+        "imageBufferBytes": 2931897,
+        "nodeNames": [
+          "bush-arid-didelta-01",
+          "bush-arid-didelta-01-mesh"
+        ],
+        "materialNames": [
+          "BushAridDidelta"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushAridDidelta": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -1.3404541,
+            -0.074420929,
+            -1.2946167
+          ],
+          "max": [
+            1.37438965,
+            1.65911865,
+            1.23950195
+          ]
+        },
+        "bufferBytes": 574640,
+        "logicalAccessorBytes": 31602,
+        "logicalVertexBytes": 24978,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 32688,
+        "imageBufferBytes": 527353,
+        "nodeNames": [
+          "bush-arid-didelta-01",
+          "bush-arid-didelta-01-mesh"
+        ],
+        "materialNames": [
+          "BushAridDidelta"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1086,
+        "triangles": 1104
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1104
+        },
+        "data": {
+          "json": 3162,
+          "binary": 541952,
+          "buffers": {
+            "vertex": 13443,
+            "index": 1141,
+            "animation": 0,
+            "transform": 0,
+            "image": 527353
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-arid-ocotillo-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-arid-ocotillo-01.glb",
+      "output": "public/assets/bushes/bush-arid-ocotillo-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "cf8b75acca0ecb8f88e2cb9d90e604beb9ef719885a02883108d5c14f142d587",
+      "sourceSha256": "fa9c8b5a9451774c789a4c954fc6490fe0d6390c44ad7e5bd31db0837f16250f",
+      "outputSha256": "d1a984ac39ddcfc312c542873326c13a71a199d7fb5d760eff305c9474a8ea46",
+      "sourceBytes": 1871088,
+      "outputBytes": 393708,
+      "gzipBytes": 387488,
+      "brotliBytes": 386731,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1287,
+        "renderedTriangles": 1287,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushAridOcotillo": 1287
+        },
+        "sceneBounds": {
+          "min": [
+            -0.7052804827690125,
+            -0.04595662280917168,
+            -0.8428225517272949
+          ],
+          "max": [
+            0.8909797072410583,
+            2.171772003173828,
+            0.9034178853034973
+          ]
+        },
+        "bufferBytes": 1869208,
+        "logicalAccessorBytes": 64746,
+        "logicalVertexBytes": 57024,
+        "logicalIndexBytes": 7722,
+        "geometryBufferBytes": 64746,
+        "imageBufferBytes": 1804460,
+        "nodeNames": [
+          "bush-arid-ocotillo-01",
+          "bush-arid-ocotillo-01-mesh"
+        ],
+        "materialNames": [
+          "BushAridOcotillo"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1287,
+        "renderedTriangles": 1287,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushAridOcotillo": 1287
+        },
+        "sceneBounds": {
+          "min": [
+            -0.705291748,
+            -0.0459575653,
+            -0.842834473
+          ],
+          "max": [
+            0.890991211,
+            2.17175293,
+            0.903411865
+          ]
+        },
+        "bufferBytes": 426624,
+        "logicalAccessorBytes": 35046,
+        "logicalVertexBytes": 27324,
+        "logicalIndexBytes": 7722,
+        "geometryBufferBytes": 36234,
+        "imageBufferBytes": 374405,
+        "nodeNames": [
+          "bush-arid-ocotillo-01",
+          "bush-arid-ocotillo-01-mesh"
+        ],
+        "materialNames": [
+          "BushAridOcotillo"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1188,
+        "triangles": 1287
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1287
+        },
+        "data": {
+          "json": 3175,
+          "binary": 390388,
+          "buffers": {
+            "vertex": 14640,
+            "index": 1330,
+            "animation": 0,
+            "transform": 0,
+            "image": 374405
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-steppe-sagebrush-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-steppe-sagebrush-01.glb",
+      "output": "public/assets/bushes/bush-steppe-sagebrush-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "fdd81b9b30cf3e4b380fb3d2cee5225286a05590fd7f8f1c891500510b44051b",
+      "sourceSha256": "3879983a4cbfa5df587f87fd882684a8b74796e4edcb46b496e3015ecfcf5413",
+      "outputSha256": "eb8d055bba0158bf725f389fdc60b8f0fb9982f882ee3b843d4fdc1dec720c56",
+      "sourceBytes": 2657104,
+      "outputBytes": 464012,
+      "gzipBytes": 457848,
+      "brotliBytes": 456885,
+      "sourceStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushSteppeSagebrush": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -1.2234808206558228,
+            -0.059353332966566086,
+            -1.126823902130127
+          ],
+          "max": [
+            1.2780680656433105,
+            1.4511224031448364,
+            1.2171657085418701
+          ]
+        },
+        "bufferBytes": 2655204,
+        "logicalAccessorBytes": 58752,
+        "logicalVertexBytes": 52128,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 58752,
+        "imageBufferBytes": 2596447,
+        "nodeNames": [
+          "bush-steppe-sagebrush-01",
+          "bush-steppe-sagebrush-01-mesh"
+        ],
+        "materialNames": [
+          "BushSteppeSagebrush"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 1,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 1104,
+        "renderedTriangles": 1104,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "BushSteppeSagebrush": 1104
+        },
+        "sceneBounds": {
+          "min": [
+            -1.22351074,
+            -0.0593528748,
+            -1.12683105
+          ],
+          "max": [
+            1.27807617,
+            1.45111084,
+            1.21716309
+          ]
+        },
+        "bufferBytes": 493368,
+        "logicalAccessorBytes": 31602,
+        "logicalVertexBytes": 24978,
+        "logicalIndexBytes": 6624,
+        "geometryBufferBytes": 32688,
+        "imageBufferBytes": 446093,
+        "nodeNames": [
+          "bush-steppe-sagebrush-01",
+          "bush-steppe-sagebrush-01-mesh"
+        ],
+        "materialNames": [
+          "BushSteppeSagebrush"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 1086,
+        "triangles": 1104
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 1104
+        },
+        "data": {
+          "json": 3186,
+          "binary": 460680,
+          "buffers": {
+            "vertex": 13435,
+            "index": 1143,
+            "animation": 0,
+            "transform": 0,
+            "image": 446093
+          }
+        }
+      }
+    },
+    {
+      "scene": "/assets/bushes/bush-meadow-scan-01.glb",
+      "source": "assets/runtime-sources/bushes/bush-meadow-scan-01.glb",
+      "output": "public/assets/bushes/bush-meadow-scan-01.glb",
+      "profile": "alphaCriticalScatter",
+      "optimizerArgs": [
+        "-cc",
+        "-kn",
+        "-km",
+        "-ke",
+        "-vpf",
+        "-tq",
+        "8",
+        "-tl",
+        "color,normal",
+        "512",
+        "-tl",
+        "attrib",
+        "512",
+        "-tj",
+        "1",
+        "-tc",
+        "attrib",
+        "-tu",
+        "color,normal"
+      ],
+      "cacheKey": "b1bd6b60f12f143e931605c0fdd2a2e9c92c2c8f21b6cc75a131046c614c01ce",
+      "sourceSha256": "e9fd5abfd2f22a3fd25fc19bb1649aed786b862dc99043fe410fa94e567ade98",
+      "outputSha256": "6e1f27fa4b630f8edb70f34b7a861cdd423536032a9f0e41c05f6751ce40dc1b",
+      "sourceBytes": 2780132,
+      "outputBytes": 492420,
+      "gzipBytes": 482605,
+      "brotliBytes": 481418,
+      "sourceStats": {
+        "scenes": 2,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 2499,
+        "renderedTriangles": 2499,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Scan bush-meadow-scan-01": 2499
+        },
+        "sceneBounds": {
+          "min": [
+            -0.8066590428352356,
+            0,
+            -1.0427991151809692
+          ],
+          "max": [
+            0.8062381148338318,
+            1.2003321647644043,
+            1.0431779623031616
+          ]
+        },
+        "bufferBytes": 2778248,
+        "logicalAccessorBytes": 147762,
+        "logicalVertexBytes": 132768,
+        "logicalIndexBytes": 14994,
+        "geometryBufferBytes": 147762,
+        "imageBufferBytes": 2630479,
+        "nodeNames": [
+          "bush-meadow-scan-01",
+          "bush-meadow-scan-01-mesh"
+        ],
+        "materialNames": [
+          "Scan bush-meadow-scan-01"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [],
+        "extensionsRequired": []
+      },
+      "outputStats": {
+        "scenes": 2,
+        "nodes": 2,
+        "meshes": 1,
+        "materials": 1,
+        "textures": 2,
+        "images": 2,
+        "skins": 0,
+        "animations": 0,
+        "triangles": 2499,
+        "renderedTriangles": 2499,
+        "drawParts": 1,
+        "materialTriangleCounts": {
+          "Scan bush-meadow-scan-01": 2499
+        },
+        "sceneBounds": {
+          "min": [
+            -0.806671143,
+            0,
+            -1.04278564
+          ],
+          "max": [
+            0.806243896,
+            1.20031738,
+            1.04315186
+          ]
+        },
+        "bufferBytes": 570492,
+        "logicalAccessorBytes": 78612,
+        "logicalVertexBytes": 63618,
+        "logicalIndexBytes": 14994,
+        "geometryBufferBytes": 81378,
+        "imageBufferBytes": 454332,
+        "nodeNames": [
+          "bush-meadow-scan-01",
+          "bush-meadow-scan-01-mesh"
+        ],
+        "materialNames": [
+          "Scan bush-meadow-scan-01"
+        ],
+        "animationNames": [],
+        "extensionsUsed": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu",
+          "KHR_texture_transform"
+        ],
+        "extensionsRequired": [
+          "EXT_meshopt_compression",
+          "KHR_mesh_quantization",
+          "KHR_texture_basisu"
+        ]
+      },
+      "officialValidation": {
+        "validatorVersion": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "knownKtx2Limitations": 4,
+        "inheritedWarnings": 0,
+        "inheritedWarningCodes": [],
+        "infos": 4,
+        "hints": 0,
+        "drawCalls": 1,
+        "vertices": 2766,
+        "triangles": 2499
+      },
+      "report": {
+        "generator": "gltfpack 1.2",
+        "scene": {
+          "nodeCount": 2,
+          "meshCount": 1,
+          "materialCount": 1,
+          "textureCount": 2,
+          "animationCount": 0
+        },
+        "render": {
+          "drawCount": 1,
+          "instanceCount": 1,
+          "triangleCount": 2499
+        },
+        "data": {
+          "json": 3162,
+          "binary": 489112,
+          "buffers": {
+            "vertex": 32208,
+            "index": 2563,
+            "animation": 0,
+            "transform": 0,
+            "image": 454332
           }
         }
       }
@@ -21233,15 +22931,15 @@
     }
   ],
   "totals": {
-    "sourceBytes": 159241704,
-    "outputBytes": 42677512,
-    "gzipBytes": 39078211,
-    "brotliBytes": 38934269,
-    "logicalSourceVertexBytes": 52532992,
-    "logicalOutputVertexBytes": 25185498,
-    "logicalSourceIndexBytes": 7751736,
-    "logicalOutputIndexBytes": 7519764,
-    "savedBytes": 116564192,
-    "reductionRatio": 0.731995
+    "sourceBytes": 197182996,
+    "outputBytes": 49312216,
+    "gzipBytes": 45983052,
+    "brotliBytes": 45834304,
+    "logicalSourceVertexBytes": 48994984,
+    "logicalOutputVertexBytes": 23618533,
+    "logicalSourceIndexBytes": 7182024,
+    "logicalOutputIndexBytes": 6956640,
+    "savedBytes": 147870780,
+    "reductionRatio": 0.749916
   }
 }

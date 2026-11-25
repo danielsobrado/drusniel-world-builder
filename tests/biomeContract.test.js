@@ -37,8 +37,8 @@ for (const [key, look] of Object.entries(looks)) {
     need('rock', !!look.rock, 'config/biome-looks.yaml `rock` (tint, tone, moss)');
     need('floor', surface.groundDetails.tileIds.includes(id) && variantsOn(surface.assets.groundDetailVariants, id) > 0,
       'groundDetails.tileIds and at least one assets.groundDetailVariants entry');
-    need('bushes', surface.bushes.tileIds.includes(id) && variantsOn(surface.assets.bushVariants, id) > 0,
-      'bushes.tileIds and at least one assets.bushVariants entry');
+    need('bushes', surface.bushes.tileIds.includes(id) && variantsOn(surface.assets.bushVariants, id) >= 3,
+      'bushes.tileIds and at least three distinct assets.bushVariants entries so no biome is a shrub monoculture');
     need('groundDetail', !!meadow.groundDetail.byTileId?.[id], 'grass.meadow.groundDetail.byTileId (litter, moss, soil, floor scans)');
     if (grows(id)) {
       need('soil', !!look.soil, 'config/biome-looks.yaml `soil`; without it bare ground shows the map colour');

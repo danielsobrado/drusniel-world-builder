@@ -34,18 +34,15 @@ import {
   cloneBushMaterial,
   createBushProxyPrototype,
 } from './BushRenderAssets.js';
+import {
+  composeBushMatrix,
+  fitBushToGround,
+  varyBushBiomeLook,
+} from './bushInstanceTransform.js';
 
 const BUSH_CLUSTER_SEED_OFFSET = 0x5b;
 const BUSH_PRIORITY_CHANNEL = 31;
 const BUSH_RANDOM_CHANNEL_OFFSET = 64;
-
-// Reused across a rebuild; see the matching note in StylizedRockView.
-const BUSH_UP = new THREE.Vector3(0, 1, 0);
-const BUSH_SCRATCH = {
-  position: new THREE.Vector3(),
-  quaternion: new THREE.Quaternion(),
-  scale: new THREE.Vector3(),
-};
 
 function lodSettings(config) {
   const bush = config.lod?.bush ?? {};
@@ -68,19 +65,20 @@ function lodSettings(config) {
 }
 
 function bushMatrix(placement) {
-  return new THREE.Matrix4().compose(
-    BUSH_SCRATCH.position.set(placement.x, placement.height, placement.z),
-    BUSH_SCRATCH.quaternion.setFromAxisAngle(BUSH_UP, placement.rotationY),
-    BUSH_SCRATCH.scale.setScalar(placement.scale),
-  );
+  return composeBushMatrix(placement);
 }
 
 /** Seed, brightness variation and the understory look of the biome the bush stands in. */
 function bushAppearance(placement, terrainView, config, rules, forestField) {
+  const baseLook = understoryLookAt(
+    config,
+    rules[placement.prototypeIndex]?.paletteTileId,
+    placementTileId(terrainView, placement),
+  );
   return {
     seed: placement.priority,
     colorVariation: (0.84 + placement.priority * 0.32) * canopyShade(forestField, placement.x, placement.z),
-    biomeLook: understoryLookAt(config, rules[placement.prototypeIndex]?.paletteTileId, placementTileId(terrainView, placement)),
+    biomeLook: varyBushBiomeLook(baseLook, placement),
   };
 }
 
@@ -331,9 +329,17 @@ export class StylizedBushView {
       const thicket = valueNoise(candidate.x / THICKET_METERS, candidate.z / THICKET_METERS, THICKET_SEED) * 0.5 + 0.5;
       const density = Math.min(1, clusterDensity * canopy * fringe * biome * (0.12 + 2.4 * thicket * thicket) + bankBoost * 0.45);
       if (candidate.priority >= density) return null;
+      const scaled = candidate.scale * (1 + (bushes.edgeScale ?? 0) * edge);
+      const seat = fitBushToGround(
+        { x: candidate.x, z: candidate.z, height: candidate.height, scale: scaled },
+        bushes.radius ?? 0.55,
+        (x, z) => this.terrainView.getCanonicalHeight(x, z),
+      );
       return {
         // Edge shrubs stand taller: the step up from grass to crowns.
-        scale: candidate.scale * (1 + (bushes.edgeScale ?? 0) * edge),
+        scale: scaled,
+        groundFitHeight: seat?.groundFitHeight ?? candidate.height,
+        groundNormal: seat?.groundNormal ?? null,
         clusterId: cluster.clusterId,
         bushCoverage: cluster.coverage,
         bushEdge: cluster.edge,

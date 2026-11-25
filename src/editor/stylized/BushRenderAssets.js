@@ -66,7 +66,7 @@ export const BUSH_PROXY_PROFILES = Object.freeze({
     Object.freeze([0.52, -0.38, -0.38, 0.42, 0.17, 0.32, -0.08, -0.9, 0.12]),
     Object.freeze([-0.18, -0.40, 0.56, 0.38, 0.16, 0.30, 0.06, 0.7, -0.06]),
   ]),
-  // Wetland buttonbush: broken multi-cane crown with visible sky gaps between leaning clusters.
+  // Wetland buttonbush & willow: broken multi-cane crown with visible sky gaps between leaning clusters.
   swampButtonbush: Object.freeze([
     Object.freeze([0.52, 0.36, 0.22, 0.34, 0.36, 0.32, 0.18, 0.5, -0.22]),
     Object.freeze([-0.48, 0.48, -0.18, 0.32, 0.38, 0.30, -0.16, 1.4, 0.20]),
@@ -74,13 +74,53 @@ export const BUSH_PROXY_PROFILES = Object.freeze({
     Object.freeze([-0.22, -0.04, 0.56, 0.34, 0.32, 0.30, -0.20, -0.8, -0.14]),
     Object.freeze([0.36, -0.22, -0.24, 0.28, 0.30, 0.28, 0.12, 0.9, 0.16]),
   ]),
+  // Upright conifer sapling: tiered conical crown tapering to an apical leader.
+  uprightSapling: Object.freeze([
+    Object.freeze([0.04, 0.62, -0.02, 0.26, 0.38, 0.26, 0.05, 0.4, -0.06]),
+    Object.freeze([-0.22, 0.20, 0.18, 0.38, 0.34, 0.36, -0.10, 1.2, 0.08]),
+    Object.freeze([0.24, 0.14, -0.16, 0.36, 0.32, 0.36, 0.08, 2.1, -0.10]),
+    Object.freeze([-0.32, -0.30, -0.24, 0.46, 0.28, 0.44, -0.08, -0.7, 0.12]),
+    Object.freeze([0.30, -0.34, 0.26, 0.48, 0.26, 0.44, 0.10, 0.9, -0.08]),
+  ]),
+  // Low sprawling mound (bilberry, small bramble, sagebrush, gorse): broad hugged-to-ground cushion.
+  lowMound: Object.freeze([
+    Object.freeze([-0.46, -0.16, 0.16, 0.54, 0.30, 0.46, 0.10, 0.3, -0.12]),
+    Object.freeze([0.44, -0.14, -0.18, 0.52, 0.32, 0.44, -0.12, 1.4, 0.10]),
+    Object.freeze([0.06, 0.16, 0.04, 0.50, 0.34, 0.48, 0.06, 2.2, 0.08]),
+    Object.freeze([-0.14, -0.20, -0.44, 0.46, 0.26, 0.42, -0.14, -0.8, 0.10]),
+    Object.freeze([0.16, -0.22, 0.42, 0.48, 0.26, 0.40, 0.08, 0.9, -0.10]),
+  ]),
+  // Tall arching cane clump (bamboo, ocotillo): narrow base widening into high fanning plumes.
+  tallCane: Object.freeze([
+    Object.freeze([0.02, -0.42, 0.00, 0.24, 0.44, 0.24, 0.04, 0.2, -0.05]),
+    Object.freeze([0.36, 0.34, 0.18, 0.36, 0.34, 0.34, 0.14, 1.1, -0.18]),
+    Object.freeze([-0.34, 0.42, -0.16, 0.34, 0.36, 0.32, -0.16, 2.0, 0.14]),
+    Object.freeze([0.10, 0.54, -0.34, 0.32, 0.32, 0.30, 0.12, -0.9, 0.10]),
+    Object.freeze([-0.16, 0.26, 0.38, 0.34, 0.30, 0.32, -0.12, 0.7, -0.14]),
+  ]),
+  // Broadleaf / dwarf palm rosette: wide flaring outer fronds/leaves radiating from a compact heart.
+  broadleafCrown: Object.freeze([
+    Object.freeze([0.54, 0.04, 0.18, 0.50, 0.26, 0.40, 0.12, 0.4, -0.20]),
+    Object.freeze([-0.52, 0.10, -0.20, 0.48, 0.26, 0.42, -0.14, 1.5, 0.18]),
+    Object.freeze([0.12, 0.28, -0.48, 0.46, 0.28, 0.40, 0.16, 2.4, 0.10]),
+    Object.freeze([-0.18, 0.02, 0.52, 0.48, 0.24, 0.42, -0.18, -0.7, -0.12]),
+    Object.freeze([0.04, 0.38, 0.06, 0.40, 0.32, 0.38, 0.08, 0.8, 0.06]),
+  ]),
 });
 
 export function resolveBushProxyProfile(identifier = '') {
   const key = String(identifier ?? '').toLowerCase();
-  if (key.includes('rooibos') || key.includes('savanna-thorn')) return 'savannaThorn';
+  if (key.includes('rooibos') || key.includes('savanna-thorn') || key.includes('didelta')) return 'savannaThorn';
   if (key.includes('juniper')) return 'borealJuniper';
-  if (key.includes('buttonbush')) return 'swampButtonbush';
+  if (key.includes('buttonbush') || key.includes('willow')) return 'swampButtonbush';
+  if (key.includes('taiga-sapling')) return 'uprightSapling';
+  if (key.includes('bamboo') || key.includes('ocotillo')) return 'tallCane';
+  if (key.includes('palm-shrub') || key.includes('hibiscus') || key.includes('rhododendron') || key.includes('pachira')) {
+    return 'broadleafCrown';
+  }
+  if (key.includes('small_bush') || key.includes('bilberry') || key.includes('sagebrush') || key.includes('gorse')) {
+    return 'lowMound';
+  }
   return 'default';
 }
 

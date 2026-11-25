@@ -157,3 +157,45 @@ test('savanna thorn, boreal juniper, and wetland buttonbush get distinct 100-tri
   geometry.dispose();
   material.dispose();
 });
+
+test('upright saplings, low mounds, tall canes, and broadleaf crowns resolve distinct 100-triangle proxies', () => {
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-taiga-sapling-01.glb'), 'uprightSapling');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-boreal-bilberry-01.glb'), 'lowMound');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-steppe-sagebrush-01.glb'), 'lowMound');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-meadow-gorse-01.glb'), 'lowMound');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bamboo_bush.glb'), 'tallCane');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-arid-ocotillo-01.glb'), 'tallCane');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-tropical-palm-shrub-01.glb'), 'broadleafCrown');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-forest-rhododendron-01.glb'), 'broadleafCrown');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-wetland-willow-01.glb'), 'swampButtonbush');
+  assert.equal(resolveBushProxyProfile('/assets/bushes/bush-arid-didelta-01.glb'), 'savannaThorn');
+
+  const geometry = new THREE.BoxGeometry(2.0, 1.5, 2.0);
+  geometry.translate(0, 0.75, 0);
+  geometry.computeBoundingBox();
+  const material = new THREE.MeshStandardMaterial({ color: '#ffffff' });
+  const hashes = new Set();
+  for (const scenePath of [
+    '/assets/bushes/bush-taiga-sapling-01.glb',
+    '/assets/bushes/bush-boreal-bilberry-01.glb',
+    '/assets/bushes/bamboo_bush.glb',
+    '/assets/bushes/bush-tropical-palm-shrub-01.glb',
+  ]) {
+    const proxy = createBushProxyPrototype({
+      geometry,
+      material,
+      kind: 'bush',
+      height: 1.5,
+      prototypeId: 'test',
+      scenePath,
+    }, { color: '#557744' });
+    assert.equal(triangleCount(proxy.geometry), BUSH_PROXY_TRIANGLES);
+    const pos = proxy.geometry.getAttribute('position').array;
+    hashes.add([...pos.slice(0, 24)].map((v) => v.toFixed(3)).join(','));
+    proxy.geometry.dispose();
+    proxy.material.dispose();
+  }
+  assert.equal(hashes.size, 4);
+  geometry.dispose();
+  material.dispose();
+});
