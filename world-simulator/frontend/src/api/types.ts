@@ -133,7 +133,7 @@ export interface ScenarioStatus {
   id: string; name: string; description: string; scope: ScenarioScope; seed: number;
   parent: { scenarioId: string; snapshotId: string } | null; createdAt: string; snapshotSeq: number; eventSeq: number;
   settlementIds: string[]; date: CalendarDate; running: boolean; speed: number; population: number;
-  checksum: string; snapshots: number; error: string | null; readOnly: string | null; schemaVersion: number;
+  checksum: string; revisions?: Record<string, number>; snapshots: number; error: string | null; readOnly: string | null; schemaVersion: number;
   rulesFingerprint?: string | null; rulesCurrent?: boolean;
   /** Has a complete command journal, so it can be replayed from its baseline (PR8). */
   replayable?: boolean;

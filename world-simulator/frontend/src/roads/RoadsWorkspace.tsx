@@ -2,7 +2,7 @@ import type { EconomyView, SimEvent, Trader, TradeRoute } from '../api/types';
 import { useApi } from '../api/worldApi';
 import { fmt, pct } from '../components/format';
 import { ApiView, Empty } from '../components/StateViews';
-import type { Simulation } from '../simulation/useSimulation';
+import { domainVersion, type Simulation } from '../simulation/useSimulation';
 import { Reputation, TraitBars } from './TraderParts';
 
 const INCIDENTS = new Set(['raid', 'smuggling', 'dismissed', 'opened', 'closed']);
@@ -87,7 +87,7 @@ export function RoadsWorkspace({ sim, onSelect, selectedId }: { sim: Simulation;
   const active = sim.active;
   const id = active ? encodeURIComponent(active.id) : '';
   const view = useApi<EconomyView>(active ? `/api/scenarios/${id}/economy?delivered=0&v=${sim.version}` : null);
-  const events = useApi<SimEvent[]>(active ? `/api/scenarios/${id}/events?limit=1000&v=${sim.version}` : null);
+  const events = useApi<SimEvent[]>(active ? `/api/scenarios/${id}/events?limit=1000&v=${domainVersion(sim, 'events')}` : null);
   if (!active) return <Empty>Create a scenario in the Simulation workspace first.</Empty>;
   return (
     <ApiView result={view} loadingLabel="Loading the roads…">

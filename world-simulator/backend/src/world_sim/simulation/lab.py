@@ -144,13 +144,15 @@ class Lab:
     def metrics(self, scenario_id: str) -> dict[str, Any]:
         s = self.manager.session(scenario_id)
         steps = list(s.perf)
-        per_month = [x["ms"] / x["months"] for x in steps]
+        per_month = [x["ms"] / x["months"] for x in steps if x["months"]]
+        phases = sorted({name for step in steps for name in step.get("phases", {})})
         calls = list(self.latency)
         kinds = sorted({c["kind"] for c in calls})
         state = s.state
         return {
             "steps": {"count": len(steps), "months": sum(x["months"] for x in steps), "msPerMonth": _stats(per_month),
-                      "recent": steps[-30:]},
+                      "phases": {name: _stats([step["phases"][name] for step in steps if name in step.get("phases", {})])
+                                 for name in phases}, "recent": steps[-30:]},
             "size": {"people": len(state.cast.people), "alive": sum(p.alive for p in state.cast.people),
                      "relationships": len(state.cast.relationships), "events": state.historySeq,
                      "stateKb": round(len(json.dumps(state.model_dump(), separators=(",", ":"))) / 1024, 1),

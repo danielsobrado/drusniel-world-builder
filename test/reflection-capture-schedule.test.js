@@ -33,3 +33,14 @@ test('reflection reservations estimate cube and planar work independently withou
   const zero = new ReflectionCaptureSchedule({}); zero.record('cube', 0);
   assert.ok(zero.budgetMs('cube') > 0, 'coarse clocks cannot starve future captures with a zero reservation');
 });
+
+test('reflection captures avoid contended frames without indefinite deferral', () => {
+  const schedule = new ReflectionCaptureSchedule({ maxCaptureDeferralMs: 100 });
+  const reservation = {};
+  const settings = { estimate: 4, contended: true, reserve: () => reservation, reserveStrict: () => null };
+  assert.equal(schedule.reserve({ ...settings, now: 10 }), null);
+  assert.equal(schedule.reserve({ ...settings, now: 109 }), null);
+  assert.equal(schedule.reserve({ ...settings, now: 110 }), reservation);
+  assert.equal(schedule.reserve({ ...settings, now: 111, reserveStrict: () => reservation }), reservation);
+  assert.equal(schedule.reserve({ ...settings, now: 112, contended: false }), reservation);
+});

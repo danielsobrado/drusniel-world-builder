@@ -18,6 +18,11 @@ export function MetricsPanel({ sim }: { sim: Simulation }) {
           <dt>Simulated month</dt>
           <dd>{m.steps.months ? stats(m.steps.msPerMonth, ' ms') : 'Step the scenario to measure.'}
             {m.steps.months > 0 && <span className="muted small"> over {fmt(m.steps.months)} months in {fmt(m.steps.count)} steps since the server started</span>}</dd>
+          {m.steps.phases && Object.keys(m.steps.phases).length > 0 && <>
+            <dt>Step phases</dt>
+            <dd>{Object.entries(m.steps.phases).map(([name, values]) => (
+              <div key={name}><strong>{name}</strong>: {stats(values, ' ms')}</div>))}</dd>
+          </>}
           <dt>Scenario size</dt>
           <dd>{fmt(m.size.alive)} of {fmt(m.size.people)} named people alive · {fmt(m.size.relationships)} relationships · {fmt(m.size.events)} events · state {fmt(m.size.stateKb)} KB
             {m.size.journal !== null ? ` · journal ${fmt(m.size.journal)} commands` : ' · no journal'}</dd>

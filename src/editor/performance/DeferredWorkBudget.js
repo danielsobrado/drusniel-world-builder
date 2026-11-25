@@ -99,6 +99,7 @@ export class DeferredWorkBudget {
     surface.reserveDeferredWork = max => this.reserve(max);
     surface.reserveStrictDeferredWork = max => this.reserveStrict(max);
     surface.shouldYieldWork = shouldYield;
+    surface.hasPublicationPressure = () => this.remainingUploadBytes() < this.maxUploadBytes / 2;
     if (surface.meadowGrass) surface.meadowGrass.workRunner = this.runner;
     if (surface.rockView) surface.rockView.shouldYieldWork = shouldYield;
     this.bindQueue(surface.rockView?.manifestStore?.queue, shouldYield);

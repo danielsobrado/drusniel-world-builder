@@ -18,7 +18,7 @@ import { WorldMap } from './components/WorldMap';
 import { PilotSettlements } from './components/PilotSettlements';
 import { ScenarioExplorer } from './simulation/ScenarioExplorer';
 import { SimulationWorkspace } from './simulation/SimulationWorkspace';
-import { useSimulation } from './simulation/useSimulation';
+import { domainVersion, useSimulation } from './simulation/useSimulation';
 import { HouseholdsWorkspace } from './society/HouseholdsWorkspace';
 import { BusinessesWorkspace } from './society/BusinessesWorkspace';
 import { EconomyWorkspace } from './economy/EconomyWorkspace';
@@ -47,7 +47,7 @@ export default function App() {
   const go = useCallback((workspace: string) => update({ workspace }), [update]);
   const [peoplesSelection, setPeoplesSelection] = useState<PeoplesSelection | null>(null);
   const peoples = useApi<PeoplesData>(layout.workspace === 'peoples' && sim.active
-    ? `/api/scenarios/${encodeURIComponent(sim.active.id)}/peoples?v=${encodeURIComponent(sim.version)}` : null);
+    ? `/api/scenarios/${encodeURIComponent(sim.active.id)}/peoples?v=${encodeURIComponent(domainVersion(sim, 'peoples'))}` : null);
   const selectPeoples = (choice: PeoplesSelection) => {
     setPeoplesSelection(choice);
     setSelectedId(null);

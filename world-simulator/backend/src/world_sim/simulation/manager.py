@@ -26,6 +26,7 @@ from .history.archive import HistoryArchive
 from .history.contracts import HistoryEvent
 from .interventions import Intervention, InvalidIntervention, intervene
 from .migrations import IncompatibleState, migrate_state
+from .phase_timings import PhaseTimings
 from .replay import event_digest, player_event, replay, with_past
 from .rules import complete, fingerprint, freeze
 from .scope import resolve_scope
@@ -51,13 +52,32 @@ class Session:
     stopping: bool = False
     busy: bool = False                # a step is being computed off the event loop
     perf: deque = field(default_factory=lambda: deque(maxlen=200))   # recent step timings
-    _digest: tuple[int, str] | None = None
+    _digest: tuple[ScenarioState, str] | None = None
+    _revision_state: ScenarioState | None = None
+    _revision_refs: dict[str, tuple[Any, ...]] = field(default_factory=dict)
+    _revisions: dict[str, int] = field(default_factory=dict)
+
+    def domain_revisions(self) -> dict[str, int]:
+        if self._revision_state is not self.state:
+            state = self.state
+            refs = {
+                "businesses": tuple(s.society.businesses for s in state.settlements),
+                "peoples": (*state.settlements, *state.history),
+            }
+            for domain, values in refs.items():
+                previous = self._revision_refs.get(domain, ())
+                if domain not in self._revisions or len(previous) != len(values) or any(
+                        a is not b for a, b in zip(previous, values, strict=True)):
+                    self._revisions[domain] = self._revisions.get(domain, 0) + 1
+            self._revision_refs = refs
+            self._revision_state = state
+        return dict(self._revisions)
 
     @property
     def checksum(self) -> str:
         """State digest, recomputed only when the state object changes."""
-        if self._digest is None or self._digest[0] != id(self.state):
-            self._digest = (id(self.state), state_checksum(self.state))
+        if self._digest is None or self._digest[0] is not self.state:
+            self._digest = (self.state, state_checksum(self.state))
         return self._digest[1]
 
     @property
@@ -146,6 +166,7 @@ class ScenarioManager:
             "population": sum(x.population for x in s.state.settlements) + s.state.travel.population,
             "populationInTransit": s.state.travel.population,
             "checksum": s.checksum,
+            "revisions": s.domain_revisions(),
             "snapshots": len(self.store.snapshots(s.meta.id)),
             "readOnly": s.read_only,
             "error": s.error,
@@ -339,27 +360,29 @@ class ScenarioManager:
 
     def _advance(self, s: Session, days: int) -> None:
         started = time.perf_counter()
-        state, months = advance_frames(s.state, days, self.rules(s))
-        self._apply(s, state, months, days, time.perf_counter() - started)
+        timings = PhaseTimings()
+        state, months = advance_frames(s.state, days, self.rules(s), timings=timings)
+        self._apply(s, state, months, days, time.perf_counter() - started, timings)
 
     async def _advance_off_loop(self, s: Session, days: int) -> None:
         """Computes the step in a worker thread so the API keeps answering; the result is applied back on the loop."""
         s.busy = True
         started = time.perf_counter()
+        timings = PhaseTimings()
         try:
-            state, months = await asyncio.to_thread(advance_frames, s.state, days, self.rules(s))
+            state, months = await asyncio.to_thread(advance_frames, s.state, days, self.rules(s), timings=timings)
+            self._apply(s, state, months, days, time.perf_counter() - started, timings)
         finally:
             s.busy = False
-        self._apply(s, state, months, days, time.perf_counter() - started)
 
-    def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]], days: int, seconds: float) -> None:
+    def _apply(self, s: Session, state: ScenarioState, months: list[dict[str, Any]], days: int, seconds: float,
+               timings: PhaseTimings) -> None:
+        started = time.perf_counter()
         s.state = state
         self._journal(s, {"op": "advance", "days": days})
-        if months:
-            s.perf.append({"day": state.date.day, "days": days, "months": sum(m.get("monthClose", True) for m in months),
-                           "ms": round(seconds * 1000, 1),
-                           "events": sum(len(m["events"]) for m in months), "people": len(state.cast.people)})
-        self.archive(s.meta.id).append([e for m in months for e in m["events"]])
+        events = [e for m in months for e in m["events"]]
+        self.archive(s.meta.id).append(events)
+        archive_ms = (time.perf_counter() - started) * 1000
         for m in months:
             for incident in m["incidents"]:     # what happened during the month, then its close
                 people = incident.get("participants") or []
@@ -374,6 +397,10 @@ class ScenarioManager:
                         at_day=m["day"], births=m["births"], deaths=m["deaths"], population=m["population"], unemployed=m["unemployed"],
                         caravans=m["caravans"], shortages=m["shortages"], foodSecurity=m["foodSecurity"], bandits=m["bandits"])
         s.dirty = True
+        s.perf.append({"day": state.date.day, "days": days, "months": sum(m.get("monthClose", True) for m in months),
+                       "ms": round(seconds * 1000, 1), "events": len(events), "people": len(state.cast.people),
+                       "phases": {**timings.report(), "archive": round(archive_ms, 2),
+                                  "publication": round((time.perf_counter() - started) * 1000 - archive_ms, 2)}})
 
     def _steppable(self, scenario_id: str, days: int) -> Session:
         s = self.writable(scenario_id)

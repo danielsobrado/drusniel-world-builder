@@ -433,7 +433,12 @@ export class StylizedSurfaceView {
         && now >= this.reflections.nextCapture
         && this.reserveDeferredWork
       ) {
-        this.reflectionReservation = this.reserveDeferredWork(this.reflections.captureBudgetMs);
+        this.reflectionReservation = this.reflections.captureSchedule.reserve({
+          now, estimate: this.reflections.captureBudgetMs,
+          contended: this.hasPublicationPressure?.() ?? false,
+          reserve: this.reserveDeferredWork, reserveStrict: this.reserveStrictDeferredWork,
+        });
+        if (!this.reflectionReservation) PerfCounters.inc('reflectionCaptureDeferredFrames');
       }
       // Standalone views have no shared scheduler; preserve their direct capture path.
       this.reflectionBudgetReserved = Boolean(

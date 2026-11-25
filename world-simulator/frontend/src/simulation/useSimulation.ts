@@ -28,6 +28,15 @@ export interface Simulation {
   clearError: () => void;
 }
 
+export function domainVersion(sim: Simulation, domain: 'businesses' | 'peoples' | 'events' | 'snapshots'): string {
+  const active = sim.active;
+  if (!active) return '';
+  if (domain === 'events') return `${active.id}:${active.eventSeq}`;
+  if (domain === 'snapshots') return `${active.id}:${active.snapshotSeq}:${active.snapshots}`;
+  const revision = active.revisions?.[domain];
+  return revision === undefined ? sim.version : `${active.id}:${revision}`;
+}
+
 /** Scenario list, the active scenario and its controls. Polls once a second while a scenario runs. */
 export function useSimulation(): Simulation {
   const configResult = useApi<SimulationConfig>('/api/simulation');

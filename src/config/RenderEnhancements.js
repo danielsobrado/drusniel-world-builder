@@ -15,6 +15,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
     captureFrameStride: 4,
     captureSafetyFactor: 1.25,
     initialCaptureCpuMs: 2,
+    maxCaptureDeferralMs: 100,
   }),
 });
 
@@ -52,6 +53,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     ['reachMeters', 16, 256],
     ['captureSafetyFactor', 1, 3],
     ['initialCaptureCpuMs', 0.25, 10],
+    ['maxCaptureDeferralMs', 0, 1000],
   ]) {
     if (!Number.isFinite(water[key]) || water[key] < min || water[key] > max) throw new RangeError(`waterReflections.${key} must be in [${min}, ${max}].`);
   }

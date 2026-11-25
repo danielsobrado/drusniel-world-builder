@@ -9,6 +9,7 @@ waterReflections:
   planar: true
   resolution: 256
   intervalMs: 500
+  maxCaptureDeferralMs: 100
   reachMeters: 96
 shadowCascades: 1
 # Coherence-polish plan, stage 6: near tree crowns cast sun shadows, for shade

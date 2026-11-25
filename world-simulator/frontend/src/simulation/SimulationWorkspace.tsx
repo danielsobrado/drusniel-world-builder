@@ -4,7 +4,7 @@ import { useApi } from '../api/worldApi';
 import { fmt, shortHash } from '../components/format';
 import { ApiView, Empty, ErrorState } from '../components/StateViews';
 import { PopulationTrend } from './PopulationTrend';
-import type { Simulation } from './useSimulation';
+import { domainVersion, type Simulation } from './useSimulation';
 
 const BANDS = [['children', 'Children'], ['adults', 'Adults'], ['elders', 'Elders']] as const;
 
@@ -117,7 +117,7 @@ export function SimulationWorkspace({ sim, summary, onSelect }: { sim: Simulatio
   const active = sim.active;
   const path = active ? `/api/scenarios/${encodeURIComponent(active.id)}` : null;
   const state = useApi<ScenarioState>(path && `${path}/summary?v=${sim.version}`);
-  const events = useApi<SimEvent[]>(path && `${path}/events?limit=60&v=${sim.version}`);
+  const events = useApi<SimEvent[]>(path && `${path}/events?limit=60&v=${domainVersion(sim, 'events')}`);
   return (
     <>
       {sim.error && (
@@ -152,7 +152,7 @@ export function SimulationWorkspace({ sim, summary, onSelect }: { sim: Simulatio
       )}
       {active && (
         <div className="split">
-          <section className="section"><div className="section-head"><h2>Snapshots</h2></div><Snapshots sim={sim} version={sim.version} /></section>
+          <section className="section"><div className="section-head"><h2>Snapshots</h2></div><Snapshots sim={sim} version={domainVersion(sim, 'snapshots')} /></section>
           <section className="section"><div className="section-head"><h2>Event log</h2></div>
             <ApiView result={events} loadingLabel="Loading events…">{(list) => <EventLog events={list} />}</ApiView></section>
         </div>

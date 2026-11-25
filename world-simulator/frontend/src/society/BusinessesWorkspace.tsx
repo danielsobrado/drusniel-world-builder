@@ -3,7 +3,7 @@ import type { Business, PageMeta, ScenarioState, SettlementSimState } from '../a
 import { useApi } from '../api/worldApi';
 import { fmt, pct } from '../components/format';
 import { ApiView, Empty, ErrorState, Loading } from '../components/StateViews';
-import type { Simulation } from '../simulation/useSimulation';
+import { domainVersion, type Simulation } from '../simulation/useSimulation';
 import { SettlementPicker, ShareBar, useScenarioState } from './SocietyParts';
 import { DiagnosticsTable } from './DiagnosticsTable';
 import { IdleTable, UnemploymentTrend } from './UnemploymentView';
@@ -79,7 +79,7 @@ function BusinessTable({ sim, settlement, onSelect, selectedId }: {
   const [sector, setSector] = useState('');
   const [page, setPage] = useState(1);
   useEffect(() => setPage(1), [q, sector, settlement]);
-  const params = new URLSearchParams({ page: String(page), pageSize: '50', v: sim.version });
+  const params = new URLSearchParams({ page: String(page), pageSize: '50', v: domainVersion(sim, 'businesses') });
   if (settlement) params.set('settlement', settlement);
   if (sector) params.set('sector', sector);
   if (q.trim()) params.set('q', q.trim());

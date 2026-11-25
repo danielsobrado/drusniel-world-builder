@@ -60,3 +60,14 @@ test('selection changes bypass the object LOD cadence', () => {
 
   assert.notStrictEqual(selected, first);
 });
+
+test('rotating in place does not rebuild distance-based object LOD', () => {
+  const controller = new ObjectLodController({ nearPixels: 1 });
+  const placements = [placement(1)];
+  controller.seed(placements, 'near', 0);
+  const view = camera();
+  const first = controller.plan({ placements, camera: view, viewportHeight: 720, timestamp: 0 });
+  view.quaternion.y = 0.5;
+  view.quaternion.w = Math.sqrt(0.75);
+  assert.strictEqual(controller.plan({ placements, camera: view, viewportHeight: 720, timestamp: 100 }), first);
+});

@@ -36,7 +36,7 @@ export interface Trace { root: string; nodes: (HistoryEventView & { depth: numbe
 
 export interface Stats { mean: number | null; p95: number | null; last: number | null }
 export interface Metrics {
-  steps: { count: number; months: number; msPerMonth: Stats; recent: { day: number; days: number; months: number; ms: number; events: number }[] };
+  steps: { count: number; months: number; msPerMonth: Stats; phases?: Record<string, Stats>; recent: { day: number; days: number; months: number; ms: number; events: number }[] };
   size: { people: number; alive: number; relationships: number; events: number; stateKb: number; journal: number | null };
   llm: { calls: number; byKind: Record<string, { count: number } & Stats>; recent: { kind: string; seconds: number; model: string }[] };
 }
