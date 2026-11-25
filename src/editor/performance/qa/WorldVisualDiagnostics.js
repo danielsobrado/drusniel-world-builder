@@ -5,7 +5,6 @@ import {
   clamp,
   float,
   fract,
-  length,
   max,
   mix,
   normalWorld,
@@ -325,7 +324,7 @@ export class WorldVisualDiagnostics {
           const litter = slotTexture('forestFloorTexture', ffTex, uv()).b;
           return mix(vec3(0.05, 0.05, 0.06), vec3(0.95, 0.58, 0.12), litter);
         }
-        return vec3(0.16, 0.16, 0.18);
+        return mix(vec3(0.16, 0.16, 0.18), vec3(0.95, 0.58, 0.12), gc.litter);
       }
       case 'D11': {
         if (cls.family === 'nearGrass' || cls.family === 'farGrassCards') return vec3(0.05, 0.95, 0.95);
@@ -343,16 +342,13 @@ export class WorldVisualDiagnostics {
       case 'D14':
         return mix(vec3(0.16, 0.04, 0.2), gc.normal.normalize().mul(0.5).add(0.5), gc.inside);
       case 'D15': {
-        // Detect current GroundContactField missing-slot fallback texel RGB=(128,110,85)/255 -> linear sqrt^2.
-        const missingColor = vec3((128 / 255) ** 2, (110 / 255) ** 2, (85 / 255) ** 2);
-        const isMissingTexel = step(length(gc.soilColor.sub(missingColor)), float(0.012))
-          .mul(step(gc.contact, float(0.001)))
-          .mul(step(gc.canopy, float(0.001)))
-          .mul(gc.inside);
-        const borderFade = gc.inside.mul(oneMinus(gc.inside)).mul(4);
-        let status = mix(vec3(0.85, 0.12, 0.12), vec3(0.12, 0.82, 0.24), gc.inside);
+        // Explicit PR 1 per-texel validity (`geo.a`) separated from window border fade.
+        const win = gc.windowInside;
+        const missingSlot = step(gc.texelValidity, float(0.5)).mul(step(float(0.01), win));
+        const borderFade = win.mul(oneMinus(win)).mul(4);
+        let status = mix(vec3(0.85, 0.12, 0.12), vec3(0.12, 0.82, 0.24), win);
         status = mix(status, vec3(0.95, 0.82, 0.12), borderFade);
-        return mix(status, vec3(0.95, 0.05, 0.92), isMissingTexel);
+        return mix(status, vec3(0.95, 0.05, 0.92), missingSlot);
       }
       case 'D18': {
         const em = source.emissiveNode ?? vec3(0);

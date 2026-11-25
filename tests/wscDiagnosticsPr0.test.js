@@ -164,12 +164,11 @@ test('baseline GroundContactField coordinate conversion, floating-origin shift, 
   assert.equal(groundContactUniforms.renderOrigin.value.x, canonBefore[0] - (-4096));
   assert.equal(groundContactUniforms.renderOrigin.value.y, canonBefore[1] - 4096);
 
-  // Confirm documented PR 0 baseline defect: globally active field writes fallback (128, 110, 85, 0) for unloaded slots.
+  // PR 1 fix verified: unloaded slots encode explicit per-texel validity = 0 (no fake (128,110,85) soil leakage).
   const soil = groundContactSoilTexture.image.data;
-  assert.equal(soil[0], 128);
-  assert.equal(soil[1], 110);
-  assert.equal(soil[2], 85);
-  assert.equal(soil[3], 0);
+  assert.equal(soil[0], 0);
+  assert.equal(soil[1], 0);
+  assert.equal(soil[2], 0);
   field.dispose();
   assert.equal(groundContactUniforms.active.value, 0);
 });

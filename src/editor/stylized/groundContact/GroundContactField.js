@@ -3,13 +3,15 @@ import { resolveMeadowGroundDetail } from '../meadow/meadowGroundDetailConfig.js
 import { resolvePathPaint } from '../path/terrainPathPaint.js';
 import { sampleHeight } from '../scatterMath.js';
 import {
-  GROUND_CONTACT_RESOLUTION,
-  GROUND_CONTACT_SPAN_M,
-  clearGroundContactField,
-  groundContactGeoTexture,
-  groundContactSoilTexture,
-  groundContactUniforms,
-} from './GroundContactState.js';
+  WSC_DEFAULT_ROUGHNESS_BYTE,
+  WSC_RESOLUTION,
+  WSC_SPAN_M,
+  clearWorldSurfaceContext,
+  wscBaseTexture,
+  wscEcoTexture,
+  wscGeoTexture,
+  wscUniforms,
+} from '../worldSurfaceContext/WorldSurfaceContextState.js';
 
 const RECENTER_THRESHOLD_M = 16;
 const DEFAULT_SOIL_HEX = '#6e5435';
@@ -69,7 +71,7 @@ export function buildBiomeSoilPalette(config) {
  * already-resident terrain slots (zero generator calls, zero GPU readbacks).
  */
 export class GroundContactField {
-  constructor({ terrainView, config, resolution = GROUND_CONTACT_RESOLUTION, span = GROUND_CONTACT_SPAN_M }) {
+  constructor({ terrainView, config, resolution = WSC_RESOLUTION, span = WSC_SPAN_M }) {
     this.terrainView = terrainView;
     this.resolution = resolution;
     this.span = span;
@@ -123,7 +125,7 @@ export class GroundContactField {
     }
 
     if (residentCount === 0) {
-      if (groundContactUniforms.active.value !== 0) clearGroundContactField();
+      if (wscUniforms.active.value !== 0) clearWorldSurfaceContext();
       return false;
     }
 
@@ -136,10 +138,10 @@ export class GroundContactField {
 
     const minX = this.centerX - half;
     const minZ = this.centerZ - half;
-    groundContactUniforms.canonicalOrigin.value.set(minX, minZ);
-    groundContactUniforms.renderOrigin.value.set(minX - ox, minZ - oz);
-    groundContactUniforms.inverseSpan.value = 1 / this.span;
-    groundContactUniforms.active.value = 1;
+    wscUniforms.canonicalOrigin.value.set(minX, minZ);
+    wscUniforms.renderOrigin.value.set(minX - ox, minZ - oz);
+    wscUniforms.inverseSpan.value = 1 / this.span;
+    wscUniforms.active.value = 1;
     return true;
   }
 
@@ -154,6 +156,20 @@ export class GroundContactField {
     return sampleHeight(slot.page, localX, localZ, chunkSize);
   }
 
+  resolveBaseHeight(centerX, centerZ, chunkSize, tileSize, chunkWorldSize) {
+    const direct = this.sampleSlotHeight(centerX, centerZ, chunkSize, tileSize, chunkWorldSize);
+    if (Number.isFinite(direct)) return direct;
+    // If center slot is still streaming while neighbours are resident, anchor
+    // half-float height precision to the first finite resident slot height.
+    for (const slot of this.slotsByChunk.values()) {
+      const heights = slot?.page?.heights;
+      if (heights && heights.length > 0 && Number.isFinite(heights[0])) {
+        return heights[0];
+      }
+    }
+    return 0;
+  }
+
   rebuild(centerX, centerZ, chunkSize, tileSize, chunkWorldSize) {
     const res = this.resolution;
     const step = this.texelMeters;
@@ -161,16 +177,17 @@ export class GroundContactField {
     const originX = centerX - half;
     const originZ = centerZ - half;
 
-    let baseHeight = this.sampleSlotHeight(centerX, centerZ, chunkSize, tileSize, chunkWorldSize);
-    if (!Number.isFinite(baseHeight)) baseHeight = 0;
+    const baseHeight = this.resolveBaseHeight(centerX, centerZ, chunkSize, tileSize, chunkWorldSize);
 
-    const geoData = groundContactGeoTexture.image.data;
-    const soilData = groundContactSoilTexture.image.data;
+    const geoData = wscGeoTexture.image.data;
+    const baseData = wscBaseTexture.image.data;
+    const ecoData = wscEcoTexture.image.data;
     const soilTable = this.soilTable;
     const forestLitter = this.forestLitter;
     const halfStep = step * 0.5;
     const toHalf = THREE.DataUtils.toHalfFloat;
     const zeroHalf = toHalf(0);
+    const oneHalf = toHalf(1);
 
     for (let iz = 0; iz < res; iz += 1) {
       const worldZ = originZ + (iz + 0.5) * step;
@@ -184,17 +201,36 @@ export class GroundContactField {
           geoData[offset] = zeroHalf;
           geoData[offset + 1] = zeroHalf;
           geoData[offset + 2] = zeroHalf;
-          geoData[offset + 3] = zeroHalf;
-          soilData[offset] = 128;
-          soilData[offset + 1] = 110;
-          soilData[offset + 2] = 85;
-          soilData[offset + 3] = 0;
+          geoData[offset + 3] = zeroHalf; // explicit per-texel validity = 0
+          baseData[offset] = 0;
+          baseData[offset + 1] = 0;
+          baseData[offset + 2] = 0;
+          baseData[offset + 3] = WSC_DEFAULT_ROUGHNESS_BYTE;
+          ecoData[offset] = 0;
+          ecoData[offset + 1] = 0;
+          ecoData[offset + 2] = 0;
+          ecoData[offset + 3] = 0;
           continue;
         }
         const d = slot.descriptor;
         const localX = Math.max(0, Math.min(chunkSize - 1e-4, worldX / tileSize - d.originCellX));
         const localZ = Math.max(0, Math.min(chunkSize - 1e-4, -worldZ / tileSize - d.originCellZ));
         const h = sampleHeight(slot.page, localX, localZ, chunkSize);
+        if (!Number.isFinite(h)) {
+          geoData[offset] = zeroHalf;
+          geoData[offset + 1] = zeroHalf;
+          geoData[offset + 2] = zeroHalf;
+          geoData[offset + 3] = zeroHalf;
+          baseData[offset] = 0;
+          baseData[offset + 1] = 0;
+          baseData[offset + 2] = 0;
+          baseData[offset + 3] = WSC_DEFAULT_ROUGHNESS_BYTE;
+          ecoData[offset] = 0;
+          ecoData[offset + 1] = 0;
+          ecoData[offset + 2] = 0;
+          ecoData[offset + 3] = 0;
+          continue;
+        }
 
         // Central-difference terrain normal (uses neighbour slots seamlessly across chunk edges).
         let hL = this.sampleSlotHeight(worldX - halfStep, worldZ, chunkSize, tileSize, chunkWorldSize);
@@ -222,35 +258,44 @@ export class GroundContactField {
           litter = slot.forestFloorPixels[fIdx + 2] / 255;
         }
 
-        const tileId = slot.page.tiles
-          ? slot.page.tiles[Math.floor(localZ) * chunkSize + Math.floor(localX)]
+        const cellIdx = Math.floor(localZ) * chunkSize + Math.floor(localX);
+        const tileId = slot.page.tiles ? slot.page.tiles[cellIdx] : 0;
+        const vegByte = slot.page.surfaceMaskPixels
+          ? (slot.page.surfaceMaskPixels[cellIdx * 4 + 1] ?? 0)
           : 0;
+
         const tIdx = (tileId & 255) * 3;
         const litterBlend = Math.min(0.75, litter * 0.55 + canopy * 0.25);
         const sr = soilTable[tIdx] * (1 - litterBlend) + forestLitter[0] * litterBlend;
         const sg = soilTable[tIdx + 1] * (1 - litterBlend) + forestLitter[1] * litterBlend;
         const sb = soilTable[tIdx + 2] * (1 - litterBlend) + forestLitter[2] * litterBlend;
 
-        geoData[offset] = toHalf(Number.isFinite(h) ? h - baseHeight : 0);
+        geoData[offset] = toHalf(h - baseHeight);
         geoData[offset + 1] = toHalf(gx * invLen);
         geoData[offset + 2] = toHalf(gz * invLen);
-        geoData[offset + 3] = toHalf(contact);
+        geoData[offset + 3] = oneHalf; // explicit per-texel validity = 1
 
-        soilData[offset] = Math.round(Math.sqrt(clamp01(sr)) * 255);
-        soilData[offset + 1] = Math.round(Math.sqrt(clamp01(sg)) * 255);
-        soilData[offset + 2] = Math.round(Math.sqrt(clamp01(sb)) * 255);
-        soilData[offset + 3] = Math.round(clamp01(canopy) * 255);
+        baseData[offset] = Math.round(Math.sqrt(clamp01(sr)) * 255);
+        baseData[offset + 1] = Math.round(Math.sqrt(clamp01(sg)) * 255);
+        baseData[offset + 2] = Math.round(Math.sqrt(clamp01(sb)) * 255);
+        baseData[offset + 3] = WSC_DEFAULT_ROUGHNESS_BYTE;
+
+        ecoData[offset] = Math.round(clamp01(contact) * 255);
+        ecoData[offset + 1] = Math.round(clamp01(canopy) * 255);
+        ecoData[offset + 2] = Math.round(clamp01(litter) * 255);
+        ecoData[offset + 3] = vegByte;
       }
     }
 
-    groundContactUniforms.baseHeight.value = baseHeight;
-    groundContactGeoTexture.needsUpdate = true;
-    groundContactSoilTexture.needsUpdate = true;
+    wscUniforms.baseHeight.value = baseHeight;
+    wscGeoTexture.needsUpdate = true;
+    wscBaseTexture.needsUpdate = true;
+    wscEcoTexture.needsUpdate = true;
   }
 
   dispose() {
     this.disposed = true;
     this.slotsByChunk.clear();
-    clearGroundContactField();
+    clearWorldSurfaceContext();
   }
 }

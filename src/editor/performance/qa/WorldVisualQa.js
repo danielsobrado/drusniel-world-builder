@@ -11,7 +11,7 @@ import { WorldVisualLayerControls, worldVisualVegetation } from './WorldVisualVe
 import { findBiomeSurfacePose, holdStagedGrass, liveDryHeading, stageSurfaceDemo } from './WorldVisualSurfaceDemo.js';
 import { findCanopyPose, habitatAt } from './WorldVisualCanopyPose.js';
 import { WorldVisualDiagnostics } from './WorldVisualDiagnostics.js';
-import { groundContactGeoTexture, groundContactSoilTexture, groundContactUniforms } from '../../stylized/groundContact/GroundContactState.js';
+import { sampleGroundContactCpu, groundContactUniforms } from '../../stylized/groundContact/GroundContactState.js';
 const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
 /** Dev-only browser adapter. Navigation uses the engine's transaction, never private predictor fields. */
@@ -47,22 +47,15 @@ export class WorldVisualQa {
   getDiagnosticMode() { return this.visualDiagnostics.getMode(); }
   sampleGroundContactField(canonicalX,canonicalZ) {
     const field=this.editor.stylizedSurface?.groundContactField;
-    const active=groundContactUniforms.active.value;
-    const origin=groundContactUniforms.canonicalOrigin.value;
-    const invSpan=groundContactUniforms.inverseSpan.value;
-    const baseHeight=groundContactUniforms.baseHeight.value;
     const res=field?.resolution??128;
-    const u=(canonicalX-origin.x)*invSpan,v=(canonicalZ-origin.y)*invSpan;
-    const inside=active>0&&u>=0&&u<=1&&v>=0&&v<=1;
-    const ix=Math.max(0,Math.min(res-1,Math.floor(u*res)));
-    const iz=Math.max(0,Math.min(res-1,Math.floor(v*res)));
-    const idx=(iz*res+ix)*4;
-    const soil=groundContactSoilTexture.image.data;
-    const geo=groundContactGeoTexture.image.data;
-    const sr=soil[idx]/255,sg=soil[idx+1]/255,sb=soil[idx+2]/255,canopy=soil[idx+3]/255;
-    const isMissingFallback=soil[idx]===128&&soil[idx+1]===110&&soil[idx+2]===85&&soil[idx+3]===0&&geo[idx]===0;
-    return {active,inside,u,v,resolution:res,span:field?.span??128,origin:[origin.x,origin.y],baseHeight,
-      soilLinear:[sr*sr,sg*sg,sb*sb],soilSrgbByte:[soil[idx],soil[idx+1],soil[idx+2]],canopy,isMissingFallback};
+    const origin=groundContactUniforms.canonicalOrigin.value;
+    const baseHeight=groundContactUniforms.baseHeight.value;
+    const s=sampleGroundContactCpu(canonicalX,canonicalZ,{canonical:true,resolution:res});
+    const isMissingFallback=s.windowInside>0&&s.texelValidity<0.5;
+    return {active:s.active,inside:s.valid,validity:s.validity,texelValidity:s.texelValidity,windowInside:s.windowInside,
+      u:s.u,v:s.v,resolution:res,span:field?.span??128,origin:[origin.x,origin.y],baseHeight,height:s.height,normal:s.normal,
+      soilLinear:s.albedo,albedo:s.albedo,roughness:s.roughness,contact:s.contact,canopy:s.canopy,
+      litter:s.litter,vegetationCoverage:s.vegetationCoverage,isMissingFallback};
   }
   renderStats() {
     const info=this.editor.terrainView?.renderer?.info;

@@ -132,8 +132,8 @@ modes:
     category: ground-contact
     supported: true
     stage: raw-input
-    units: window inside [0..1] + missing-slot flag
-    legend: Green=inside active window, Yellow=12 m border fade, Red=outside/inactive, Magenta=missing-slot fallback texel (128,110,85)
+    units: window inside [0..1] + explicit per-texel validity (geo.a)
+    legend: Green=valid resident texel (geo.a=1), Yellow=12 m border fade, Red=outside/inactive, Magenta=unloaded slot (geo.a=0)
   D16:
     slug: direct-lighting
     label: Direct lighting

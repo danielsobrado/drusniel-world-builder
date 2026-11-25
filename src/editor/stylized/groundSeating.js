@@ -28,10 +28,10 @@ export function applyShaderGroundConform(positionNode, {
   const conformHeight = frameUniform(Math.max(0.12, Number(height) * conformShare));
   const weight = smoothstep(0, conformHeight, positionGeometry.y).oneMinus();
   const vertexWorld = modelWorldMatrix.mul(vec4(positionNode, 1));
-  const vertexGround = sampleGroundContactAt(vertexWorld.xz);
+  const vertexGround = sampleGroundContactAt(vertexWorld.xz, { includeBase: false, includeEco: false });
   if (rootNode) {
     const rootWorld = modelWorldMatrix.mul(vec4(rootNode, 1));
-    const rootGround = sampleGroundContactAt(rootWorld.xz);
+    const rootGround = sampleGroundContactAt(rootWorld.xz, { includeBase: false, includeEco: false });
     const active = vertexGround.inside.mul(rootGround.inside);
     const delta = clamp(vertexGround.height.sub(rootGround.height), -maxOffset, maxOffset);
     const dy = delta.sub(float(bury)).mul(weight).mul(active);
