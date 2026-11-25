@@ -47,7 +47,7 @@ test('one edit in 256 objects classifies and writes one row without touching oth
   assert.ok(mesh.boundingSphere.radius >= oldBounds.radius);
 });
 
-test('removal swaps only a tail row, selection remains local, and camera movement still reclassifies all', t => {
+test('removal swaps only a tail row, selection remains local, and camera movement skips stable spatial groups', t => {
   const f = fixture(t), next = new Map(f.records); next.delete(1);
   const previousCount = f.initial.buckets.coarse.length;
   PerfCounters.reset(); f.publish(next);
@@ -59,6 +59,12 @@ test('removal swaps only a tail row, selection remains local, and camera movemen
   plan = f.plan(160, false, 2); f.plan(162, false, 2);
   assert.equal(PerfCounters.get('objectLodPlacementsEvaluated'), 1);
   f.camera.position.x = 20; PerfCounters.reset();
-  f.plan(200);
-  assert.equal(PerfCounters.get('objectLodPlacementsEvaluated'), 255);
+  const moving = f.plan(200);
+  assert.ok(PerfCounters.get('objectLodPlacementsEvaluated') < 255);
+  assert.ok(PerfCounters.get('objectLodHierarchySkipped') > 0);
+  const canonical = plan => Object.fromEntries(Object.entries(plan.buckets).map(([band, rows]) => [
+    band, rows.map(row => [row.objectId, row.quantizedFade, row.ditherDirection]).sort((a, b) => a[0] - b[0]),
+  ]));
+  const actual = canonical(moving);
+  assert.deepEqual(actual, canonical(f.plan(200, true)));
 });

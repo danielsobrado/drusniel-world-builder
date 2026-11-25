@@ -5,6 +5,7 @@ import {
   advanceLodTransition,
 } from './stylized/lod/projectedLod.js';
 import { InstanceLodRows } from './stylized/lod/InstanceLodRows.js';
+import { ObjectLodHierarchy } from './stylized/lod/ObjectLodHierarchy.js';
 import { PerfCounters } from './performance/qa/PerfCounters.js';
 
 const SOURCE_TO_OBJECT_BAND = Object.freeze({
@@ -56,6 +57,7 @@ export class ObjectLodController {
     transitionMs = 240,
     fadeSteps = 16,
     evaluationHz = 30,
+    hierarchyLeafSize = 16,
   } = {}) {
     this.thresholds = {
       nearPixels,
@@ -65,6 +67,7 @@ export class ObjectLodController {
       hysteresisRatio,
     };
     this.transitionMs = transitionMs;
+    this.hierarchyLeafSize = hierarchyLeafSize;
     this.fadeSteps = fadeSteps;
     this.evaluationIntervalMs = 1000 / Math.max(1, evaluationHz);
     this.nextEvaluationAt = 0;
@@ -80,6 +83,8 @@ export class ObjectLodController {
     this.placements = new Map();
     this.dirtyIds = new Set();
     this.transitionIds = new Set();
+    this.hierarchy = null;
+    this.lastPlacementInput = null;
   }
 
   clear() {
@@ -94,6 +99,8 @@ export class ObjectLodController {
     this.placements = new Map();
     this.dirtyIds = new Set();
     this.transitionIds = new Set();
+    this.hierarchy = null;
+    this.lastPlacementInput = null;
   }
 
   seed(placements, band = 'near', timestamp = 0) {
@@ -123,6 +130,7 @@ export class ObjectLodController {
   updatePlacements(next) {
     for (const [id, record] of next) if (this.placements.get(id) !== record) this.dirtyIds.add(id);
     for (const id of this.placements.keys()) if (!next.has(id)) this.dirtyIds.add(id);
+    if (this.dirtyIds.size) this.hierarchy = null;
     this.placements = next;
     this.seed([...this.dirtyIds].flatMap(id => next.has(id) ? [next.get(id)] : []));
   }
@@ -149,6 +157,14 @@ export class ObjectLodController {
   }
 
   plan({ placements, camera, viewportHeight, timestamp, selectedObjectId = null, force = false }) {
+    if (placements !== this.lastPlacementInput) {
+      const next = new Map(placements.map(p => [p.object.id, p]));
+      for (const [id, record] of next) if (this.placements.get(id) !== record) this.dirtyIds.add(id);
+      for (const id of this.placements.keys()) if (!next.has(id)) this.dirtyIds.add(id);
+      if (this.dirtyIds.size) this.hierarchy = null;
+      this.placements = next;
+      this.lastPlacementInput = placements;
+    }
     writeCameraState(camera, viewportHeight, this.cameraState);
     const cameraUnchanged = this.hasLastCameraState && cameraStatesEqual(this.cameraState, this.lastCameraState);
     const selectionUnchanged = selectedObjectId === this.lastSelectedObjectId;
@@ -156,21 +172,29 @@ export class ObjectLodController {
       if (!this.transitioning && cameraUnchanged) return this.lastPlan;
       if (Number.isFinite(timestamp) && timestamp < this.nextEvaluationAt) return this.lastPlan;
     }
-    if (!force && cameraUnchanged && this.lastPlan) {
+    if (!force && this.lastPlan && this.hasLastCameraState) {
       const ids = new Set([...this.dirtyIds, ...this.transitionIds]);
-      if (!selectionUnchanged) {
-        if (selectedObjectId !== null) ids.add(selectedObjectId);
-        if (this.lastSelectedObjectId !== null) ids.add(this.lastSelectedObjectId);
-      }
+      if (selectedObjectId !== null && !selectionUnchanged) ids.add(selectedObjectId);
+      if (this.lastSelectedObjectId !== null && !selectionUnchanged) ids.add(this.lastSelectedObjectId);
       const changes = new Map();
-      for (const id of ids) {
-        const placement = this.placements.get(id);
-        changes.set(id, placement ? this.classify(placement, camera, viewportHeight, timestamp, selectedObjectId) : []);
-        if (!placement) { this.states.delete(id); this.seeds.delete(id); this.transitionIds.delete(id); }
+      const classify = placement => changes.set(placement.object.id,
+        this.classify(placement, camera, viewportHeight, timestamp, selectedObjectId));
+      if (cameraUnchanged) {
+        for (const id of ids) {
+          const placement = this.placements.get(id);
+          if (placement) classify(placement);
+        }
+        this.hierarchy?.refresh(ids);
+      } else {
+        this.hierarchy ??= new ObjectLodHierarchy(placements, this.states, this.hierarchyLeafSize);
+        this.hierarchy.visit(camera, viewportHeight, this.thresholds, ids, classify);
+      }
+      for (const id of ids) if (!this.placements.has(id)) {
+        changes.set(id, []);
+        this.states.delete(id); this.seeds.delete(id); this.transitionIds.delete(id);
       }
       this.lastPlan = this.rows.patch(changes, this.transitionIds.size);
     } else {
-      this.placements = new Map(placements.map(p => [p.object.id, p]));
       const buckets = { near: [], coarse: [], shell: [] };
       for (const placement of placements) for (const row of this.classify(placement, camera, viewportHeight, timestamp, selectedObjectId)) {
         if (buckets[row.band]) buckets[row.band].push(row);
@@ -179,6 +203,7 @@ export class ObjectLodController {
         this.states.delete(id); this.seeds.delete(id); this.transitionIds.delete(id);
       }
       this.lastPlan = this.rows.replace(buckets, this.transitionIds.size);
+      this.hierarchy = new ObjectLodHierarchy(placements, this.states, this.hierarchyLeafSize);
     }
     this.dirtyIds.clear();
     this.transitioning = this.transitionIds.size > 0;
