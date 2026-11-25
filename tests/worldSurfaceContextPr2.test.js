@@ -253,10 +253,18 @@ test('PR 2 negative canonical coordinates, terrainShape weathering, worldNoise, 
     terrainView: { worldStore: { chunkSize, tileSize }, slots: [slot] },
     config: stylized,
   });
-  field.update({ x: 64, z: -64 }, { x: 0, z: 0 }); // warmup
-  const t0 = performance.now();
-  field.rebuild(64, -64, chunkSize, tileSize, chunkSize * tileSize);
-  const rebuildMs = performance.now() - t0;
-  assert.ok(rebuildMs < 60, `expected 128x128 WSC rebuild < 60 ms in Node, got ${rebuildMs.toFixed(2)} ms`);
-  field.dispose();
+  try {
+    field.update({ x: 64, z: -64 }, { x: 0, z: 0 }); // warmup
+    const samples = [];
+    for (let sample = 0; sample < 3; sample += 1) {
+      const t0 = performance.now();
+      field.rebuild(64, -64, chunkSize, tileSize, chunkSize * tileSize);
+      samples.push(performance.now() - t0);
+    }
+    // A single scheduler stall in the parallel suite should not fail the budget.
+    const rebuildMs = samples.sort((a, b) => a - b)[1];
+    assert.ok(rebuildMs < 60, `expected median 128x128 WSC rebuild < 60 ms in Node, got ${rebuildMs.toFixed(2)} ms`);
+  } finally {
+    field.dispose();
+  }
 });
