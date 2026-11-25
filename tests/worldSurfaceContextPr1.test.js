@@ -128,6 +128,30 @@ test('a deferred context upload can publish on the next budgeted update', () => 
   }
 });
 
+test('a saturated budget hides stale coverage and bounds deferral during movement', () => {
+  const slots = [makeSlot({ chunkX: 0, chunkZ: 0 })];
+  const field = new WorldSurfaceContextField({ terrainView: { worldStore: { chunkSize: 16, tileSize: 2 }, slots } });
+  const origin = { x: 0, z: 0 };
+  const saturated = { canPublish: () => false };
+  try {
+    field.update({ x: 16, z: -16 }, origin);
+    assert.equal(sampleWorldSurfaceContextCpu(16, -16).validity, 1);
+    const version = wscGeoTexture.version;
+    slots[0] = makeSlot({ chunkX: 1, chunkZ: 0, heightFn: () => 30 });
+    for (let t = 0; t < 100; t += 20) {
+      assert.equal(field.update({ x: 33 + t / 10, z: -16 }, origin, saturated, t), false);
+      assert.equal(sampleWorldSurfaceContextCpu(16, -16).validity, 0);
+      assert.equal(wscGeoTexture.version, version);
+    }
+    assert.equal(field.update({ x: 48, z: -16 }, origin, saturated, 100), true);
+    assert.equal(sampleWorldSurfaceContextCpu(48, -16).height, 30);
+    assert.equal(sampleWorldSurfaceContextCpu(48, -16).validity, 1);
+    assert.equal(wscGeoTexture.version, version + 1);
+  } finally {
+    field.dispose();
+  }
+});
+
 test('PR 1 GroundContactState backwards-compatible facade aliases canonical WSC state', () => {
   assert.equal(groundContactGeoTexture, wscGeoTexture);
   assert.equal(groundContactSoilTexture, wscBaseTexture);

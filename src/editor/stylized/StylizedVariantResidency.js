@@ -198,16 +198,28 @@ export class StylizedVariantResidency {
       if (job.layer.requiredKeys.has(job.key)) return true;
       this.requested.delete(job.id);
       job.cancelled = true;
-      job.lease?.release();
+      this.retireInstall(job);
       return false;
     };
     this.pendingLoads = this.pendingLoads.filter(retain);
     this.pendingApplies = this.pendingApplies.filter(retain);
+    if (this.activeApply && !retain(this.activeApply)) this.activeApply = null;
     for (const job of this.inFlightLeases.values()) {
       if (!job.cancelled && retain(job) && job.layer.urgentKeys.has(job.key)) job.lease.promote('high');
     }
     const urgent = job => Number(job.layer.urgentKeys.has(job.key));
     this.pendingLoads.sort((a, b) => urgent(b) - urgent(a));
+  }
+
+  retireInstall(job) {
+    try {
+      job.iterator?.return();
+    } catch (error) {
+      console.warn(`Stylized variant ${job.definition.scene} cleanup failed.`, error);
+    } finally {
+      job.lease?.release();
+      job.lease = null;
+    }
   }
 
   pumpLoads() {
@@ -220,14 +232,15 @@ export class StylizedVariantResidency {
         job.lease = job.layer.acquireLease(job.definition.scene, priority);
         this.inFlightLeases.set(job.id, job);
       }
+      const lease = job.lease;
       const finish = () => {
         this.inFlight -= 1;
-        if (!job.lease || this.inFlightLeases.get(job.id) === job) {
+        if (!lease || this.inFlightLeases.get(job.id) === job) {
           this.inFlightIds.delete(job.id);
           this.inFlightLeases.delete(job.id);
         }
       };
-      (job.lease?.ready ?? job.layer.acquire(job.definition.scene)).then(
+      (lease?.ready ?? job.layer.acquire(job.definition.scene)).then(
         (scene) => {
           finish();
           if (this.disposed || job.cancelled) return;
@@ -273,6 +286,12 @@ export class StylizedVariantResidency {
           job.installed = step.value;
         }
         const installed = job.installed;
+        // Published prototypes can still borrow textures from the acquired scene.
+        // The surface now owns this lease until it has disposed those prototypes.
+        if (job.lease) {
+          job.layer.retainLease?.(job.lease);
+          job.lease = null;
+        }
         if (Array.isArray(installed)) {
           for (const root of installed) this.terrainView.drawPreparation?.register(root);
         } else this.terrainView.drawPreparation?.discover();
@@ -280,7 +299,7 @@ export class StylizedVariantResidency {
         applied += 1;
         PerfCounters.inc('stylizedVariantsApplied');
       } catch (error) {
-        job.iterator?.return();
+        this.retireInstall(job);
         this.activeApply = null;
         applied += 1;
         this.requested.delete(job.id);
@@ -332,11 +351,11 @@ export class StylizedVariantResidency {
 
   dispose() {
     this.disposed = true;
-    for (const job of this.inFlightLeases.values()) job.lease.release();
+    for (const job of this.inFlightLeases.values()) job.lease?.release();
     for (const job of this.pendingApplies) job.lease?.release();
     this.inFlightLeases.clear();
     this.inFlightIds.clear();
-    this.activeApply?.iterator?.return();
+    if (this.activeApply) this.retireInstall(this.activeApply);
     this.activeApply = null;
     this.pendingLoads.length = 0;
     this.pendingApplies.length = 0;

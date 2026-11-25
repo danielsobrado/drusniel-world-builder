@@ -38,7 +38,7 @@ export function prepareObjectCapacity(view, renderer, count, foundationCount, ne
   stage.next = next;
   const meshes = [...stage.objectMeshes, ...(stage.newFoundation ? [stage.foundationMesh] : [])];
   const preparation = view.terrainView.drawPreparation;
-  if (preparation?.settings?.enabled && meshes.some(mesh => !preparation.prepared.has(mesh))) return false;
+  if (preparation?.settings?.enabled && meshes.some(mesh => !preparation.isMaterialReady(mesh, mesh.material))) return false;
   if (stage.objectMeshes.length) {
     const old = renderer.lodMeshes ? Object.values(renderer.lodMeshes).flat() : renderer.meshes;
     removeMeshes(view, old, Boolean(renderer.lodSources));

@@ -13,6 +13,7 @@ export class StreamedDrawPreparation {
     Object.assign(this, { scene, renderer, settings, render, invalidateHistory });
     this.prepared = new WeakSet();
     this.preparedVariants = new WeakMap();
+    this.bypassedVariants = new WeakMap();
     this.stagedMaterials = new Map();
     this.pending = new Set();
     this.isolated = new WeakSet();
@@ -88,28 +89,35 @@ export class StreamedDrawPreparation {
     if (!this.settings.enabled || this.disposed) return;
     // Called after a variant/actor is installed, never scans the scene per frame.
     root.traverse(object => {
-      if (!object.isMesh || this.prepared.has(object) || object.userData.skipWarmup) return;
+      if (!object.isMesh || this.prepared.has(object) || this.isMaterialReady(object, object.material) || object.userData.skipWarmup) return;
       this.enqueue(object);
     });
   }
   markInitialScene() {
     this.scene.traverse(object => { if (object.isMesh) this.markPrepared(object, object.material); });
   }
-  markPrepared(mesh, material, uploaded = true) {
+  markPrepared(mesh, material) {
     this.prepared.add(mesh);
     let variants = this.preparedVariants.get(mesh);
     if (!variants) this.preparedVariants.set(mesh, variants = new Set());
     variants.add(material);
-    if (uploaded) this.uploadEstimate.mark(mesh);
+    this.uploadEstimate.mark(mesh);
+  }
+  markBypassed(mesh, material) {
+    let variants = this.bypassedVariants.get(mesh);
+    if (!variants) this.bypassedVariants.set(mesh, variants = new Set());
+    variants.add(material);
+    if (this.enqueuedAt?.delete(mesh)) PerfCounters.inc('streamedDrawJobsBypassed');
   }
   requestMaterial(mesh, material) {
-    if (this.disposed || !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material)) return false;
+    if (this.disposed || this.isMaterialReady(mesh, material)) return false;
     this.stagedMaterials.set(mesh, material);
     this.enqueue(mesh);
     return true;
   }
   isMaterialReady(mesh, material) {
-    return !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material) === true;
+    return !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material) === true
+      || this.bypassedVariants.get(mesh)?.has(material) === true;
   }
   cancel(mesh) {
     if (this.pending.delete(mesh)) {
@@ -199,8 +207,7 @@ export class StreamedDrawPreparation {
             }
           } else {
             const [target] = targets;
-            this.markPrepared(target, target.material, false);
-            this.cancelDiagnostics(target);
+            this.markBypassed(target, target.material);
             this.stagedMaterials.delete(target);
             this.initialUploadBytes.delete(target);
             this.attributeInitialization.release(this.initialUploadAttributes.get(target) ?? []);
@@ -249,7 +256,7 @@ export class StreamedDrawPreparation {
   }
   hidePending() {
     for (const mesh of this.pending) {
-      if (this.stagedMaterials.has(mesh) && this.prepared.has(mesh)) continue;
+      if (this.stagedMaterials.has(mesh) && this.isMaterialReady(mesh, mesh.material)) continue;
       if (!mesh.parent || !mesh.visible) continue;
       this.hidden.set(mesh, mesh.visible); mesh.visible = false;
     }

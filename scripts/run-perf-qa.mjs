@@ -120,12 +120,14 @@ fs.writeFileSync(
 const { chromium } = require('playwright');
 const fs = require('fs');
 const focusModule = import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-focus.mjs')).href)});
+const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-environment.mjs')).href)});
 
 (async () => {
   let browser = null;
   let cdp = null;
   let cpuProfiling = false;
   try {
+    const { PERF_CHROMIUM_GPU_ARGS, readPerfEnvironment } = await environmentModule;
     browser = await chromium.launch({
       headless: ${hasFlag('headed') ? 'false' : 'true'},
       // Without the blocklist bypass Chromium quietly hands WebGPU a software
@@ -133,15 +135,9 @@ const focusModule = import(${JSON.stringify(pathToFileURL(path.join(root, 'scrip
       // than the GPU path players use. Frame rates come out ~100x too low.
       // vsync is also disabled: a 60 Hz cap hides all headroom above the refresh
       // rate, so a regression is invisible until it drops under the cap.
-      args: [
-        '--enable-unsafe-webgpu',
-        '--ignore-gpu-blocklist',
-        '--use-angle=default',
-        '--enable-gpu-rasterization',
-        '--disable-gpu-vsync',
-        '--disable-frame-rate-limit',
-      ],
+      args: PERF_CHROMIUM_GPU_ARGS,
     });
+    const environment = await readPerfEnvironment(browser).catch(() => null);
     const page = await browser.newPage({
       viewport: { width: ${viewportWidth}, height: ${viewportHeight} },
       deviceScaleFactor: ${deviceScaleFactor},
@@ -450,6 +446,7 @@ const focusModule = import(${JSON.stringify(pathToFileURL(path.join(root, 'scrip
     ${screenshotPath === null ? '' : `await page.screenshot({ path: ${JSON.stringify(screenshotPath.replace(/\\/g, '/'))} });`}
     report.capture.browserErrors = browserErrors.snapshot();
     report.capture.focus = await captureFocus();
+    report.capture.environment = environment;
     fs.writeFileSync(${JSON.stringify(outPath.replace(/\\/g, '/'))}, JSON.stringify(report, null, 2) + '\\n');
     const { perfPreparationFailures } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-preparation-gates.mjs')).href)});
     for (const failure of perfPreparationFailures(report, ${hasFlag('settle')})) {

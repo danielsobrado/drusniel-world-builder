@@ -8,6 +8,7 @@ import { WaterAcceptanceTracker } from '../src/editor/performance/qa/WaterAccept
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
 import { focusPerfBrowser, isPerfFocusError, PERF_FOCUS_EXIT_CODE } from './lib/perf-browser-focus.mjs';
+import { PERF_CHROMIUM_GPU_ARGS, readPerfEnvironment } from './lib/perf-environment.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'tmp');
@@ -304,15 +305,9 @@ async function main() {
       headless: !headed,
       // The Windows headless shell can fail to load Dawn's DXIL libraries.
       channel: !headed && process.platform === 'win32' ? 'chromium' : undefined,
-      args: [
-        '--enable-unsafe-webgpu',
-        '--ignore-gpu-blocklist',
-        '--use-angle=default',
-        '--enable-gpu-rasterization',
-        '--disable-gpu-vsync',
-        '--disable-frame-rate-limit',
-      ],
+      args: PERF_CHROMIUM_GPU_ARGS,
     });
+    const environment = await readPerfEnvironment(browser).catch(() => null);
     const page = await browser.newPage();
     page.setDefaultTimeout(120_000);
     // Water is the only material that samples the viewport colour and depth
@@ -467,7 +462,7 @@ async function main() {
       waterAcceptance: acceptance,
       gpuValidationErrorCount,
       gpuValidationErrors,
-      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot(), focus: browserFocus },
+      capture: { ...perfReport.capture, browserErrors: browserErrors.snapshot(), focus: browserFocus, environment },
       phases: {
         enterSeconds: entry.elapsedSeconds,
         entryReachedTarget: entry.reached,

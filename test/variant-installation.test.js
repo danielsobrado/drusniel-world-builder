@@ -116,6 +116,41 @@ test('variant residency retains an unfinished job across deadlines and cancels i
   assert.equal(residency.getPreparationStatus().pending, 0);
 });
 
+test('leaving a biome rolls back the active install before releasing its lease', () => {
+  const events = [];
+  const layer = { requiredKeys: new Set(), urgentKeys: new Set(), *apply() {
+    try { yield; events.push('published'); }
+    finally { events.push('rollback'); }
+  } };
+  const residency = new StylizedVariantResidency({ terrainView: {}, layers: [layer], manageRequests: true });
+  const id = 'rock|near';
+  residency.requested.add(id);
+  residency.pendingApplies.push({ layer, definition: { scene: 'near.glb' }, id, key: 'near',
+    lease: { release: () => events.push('release') } });
+  residency.pumpApplies(() => true);
+  residency.updateRequestPriorities();
+  assert.deepEqual(events, ['rollback', 'release']);
+  assert.equal(residency.requested.has(id), false);
+  assert.equal(residency.getPreparationStatus().pending, 0);
+});
+
+test('failed installs release after cleanup and successful installs transfer the lease', () => {
+  const events = [];
+  const lease = { release: () => events.push('release') };
+  const failure = { *apply() {
+    try { throw new Error('Broken variant'); }
+    finally { events.push('rollback'); }
+  } };
+  const success = { apply: () => [], retainLease: actual => events.push(actual) };
+  const residency = new StylizedVariantResidency({ terrainView: {}, layers: [failure, success] });
+  residency.pendingApplies.push({ layer: failure, definition: { scene: 'broken.glb' }, lease, id: 'broken' });
+  residency.pendingApplies.push({ layer: success, definition: { scene: 'good.glb' }, lease, id: 'good' });
+  residency.pumpApplies();
+  residency.pumpApplies();
+  assert.deepEqual(events, ['rollback', 'release', lease]);
+  assert.deepEqual(residency.getPreparationStatus().errors, ['broken']);
+});
+
 test('failed material extraction leaves the live registry and existing renderers intact', t => {
   const { view, variants } = fixture(t, 'detail');
   view.appendVariants(variants);

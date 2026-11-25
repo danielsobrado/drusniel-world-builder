@@ -1,6 +1,35 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { evaluatePerfMatrix } from '../scripts/perf-matrix-gates.mjs';
+import { perfEnvironmentFingerprint, readPerfEnvironment } from '../scripts/lib/perf-environment.mjs';
+
+test('matrix checkpoints distinguish browser, OS, adapter and driver changes', async () => {
+  let detached = false;
+  const browser = {
+    version: () => '151.0.7922.34',
+    newBrowserCDPSession: async () => ({
+      send: async () => ({ gpu: {
+        devices: [{ vendorId: 4318, deviceId: 9988, deviceString: 'RTX 4080', driverVersion: '617.14' }],
+        auxAttributes: { glRenderer: 'ANGLE RTX 4080' },
+      } }),
+      detach: async () => { detached = true; },
+    }),
+  };
+  const environment = await readPerfEnvironment(browser);
+  assert.ok(detached);
+  const key = perfEnvironmentFingerprint(environment);
+  assert.ok(key);
+  assert.equal(perfEnvironmentFingerprint(structuredClone(environment)), key);
+  for (const changed of [
+    { browser: '152.0' },
+    { os: { ...environment.os, release: 'other' } },
+    { gpu: { ...environment.gpu, deviceId: 9989 } },
+    { gpu: { ...environment.gpu, driver: '618.00' } },
+  ]) {
+    assert.notEqual(perfEnvironmentFingerprint({ ...environment, ...changed }), key);
+  }
+  assert.equal(perfEnvironmentFingerprint({ ...environment, gpu: { ...environment.gpu, driver: '' } }), null);
+});
 
 function report(id, densityProfile, {
   treesPerChunk = 24,

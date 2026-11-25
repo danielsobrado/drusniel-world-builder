@@ -126,6 +126,34 @@ test('releasing the final network lease aborts the fetch and a new lease can ret
   }
 });
 
+test('an aged decode runs before newer high-priority requests', async (t) => {
+  let now = 0;
+  t.mock.method(performance, 'now', () => now);
+  const active = deferred();
+  const order = [];
+  const cache = new StylizedSceneAssetCache({
+    loader: {},
+    requests: { prioritizedRequests: true, maxConcurrentRequests: 3, maxConcurrentDecodes: 1, requestMaxWaitMs: 50 },
+    loadSplit: async (url, _priority, _signal, decode) => decode(async () => {
+      order.push(url);
+      if (url === '/active.glb') await active.promise;
+      return { scene: disposableScene().scene };
+    }),
+  });
+  try {
+    const first = cache.acquire('active.glb');
+    now = 10;
+    const low = cache.acquire('aged.glb', { priority: 'low' });
+    now = 70;
+    const high = cache.acquire('new.glb', { priority: 'high' });
+    active.resolve();
+    await Promise.all([first, low, high]);
+    assert.deepEqual(order, ['/active.glb', '/aged.glb', '/new.glb']);
+  } finally {
+    cache.dispose();
+  }
+});
+
 test('pending scene released before load completion is disposed when it arrives', async () => {
   const pending = deferred();
   const cache = createCache(pending);

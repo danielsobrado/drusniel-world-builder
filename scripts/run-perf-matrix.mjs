@@ -4,13 +4,15 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
 import { evaluatePerfMatrix } from './perf-matrix-gates.mjs';
-import { acquirePerfRunLock } from './perf-run-lock.mjs';
+import { acquirePerfRunLock, waitForPerfRunLock } from './perf-run-lock.mjs';
 import { PERF_FOCUS_EXIT_CODE } from './lib/perf-browser-focus.mjs';
+import { PERF_CHROMIUM_GPU_ARGS, perfEnvironmentFingerprint, readPerfEnvironment } from './lib/perf-environment.mjs';
 
 if (process.argv.includes('--help')) {
   console.log('Usage: npm run qa:perf:matrix -- --headed [--url URL] [--resume] [--focus-retries 0-5]');
-  console.log('--resume reuses completed captures with matching source and capture settings.');
+  console.log('--resume reuses captures with matching source, settings, OS, Chromium, GPU and driver.');
   console.log('--focus-retries retries only rejected focus captures (default: 2).');
   process.exit(0);
 }
@@ -75,6 +77,20 @@ function sourceIdentity() {
     return hash.digest('hex');
   } catch {
     return null;
+  }
+}
+
+async function probeEnvironment(headed) {
+  const unlock = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: !headed, args: PERF_CHROMIUM_GPU_ARGS });
+    return await readPerfEnvironment(browser);
+  } catch (error) {
+    console.warn('Could not read the benchmark hardware identity.', error.message);
+    return null;
+  } finally {
+    try { await browser?.close(); } finally { unlock(); }
   }
 }
 
@@ -161,7 +177,9 @@ const measuredCaseConfig = {
 };
 const checkpointPath = path.join(root, 'tmp', 'perf-matrix-checkpoint.json');
 const source = waterOnly ? null : sourceIdentity();
-const key = source && JSON.stringify({ source, measuredCaseConfig, includeWater });
+const environment = await probeEnvironment(headed);
+const fingerprint = perfEnvironmentFingerprint(environment);
+const key = source && fingerprint && JSON.stringify({ source, measuredCaseConfig, includeWater, fingerprint });
 const previousCheckpoint = hasFlag('resume') && key && fs.existsSync(checkpointPath)
   ? JSON.parse(fs.readFileSync(checkpointPath, 'utf8'))
   : null;
@@ -171,7 +189,17 @@ function saveCheckpoint() {
   fs.writeFileSync(`${checkpointPath}.tmp`, JSON.stringify(checkpoint));
   fs.renameSync(`${checkpointPath}.tmp`, checkpointPath);
 }
-const results = waterOnly ? (previousMatrix?.cases ?? []) : [];
+const previousEnvironmentMatches = fingerprint && fingerprint === perfEnvironmentFingerprint(previousMatrix?.environment);
+const retainedMovement = waterOnly && previousEnvironmentMatches
+  && previousMatrix.config?.baseUrl === baseUrl && previousMatrix.config?.headed === headed;
+const results = retainedMovement ? (previousMatrix.cases ?? []) : [];
+function checkCaptureEnvironment(execution, report) {
+  if (execution.code !== 0 || !report || !fingerprint) return;
+  if (perfEnvironmentFingerprint(report.capture?.environment) === fingerprint) return;
+  execution.code = 1;
+  execution.error = 'Capture hardware or browser changed during the matrix.';
+  console.error(execution.error);
+}
 saveCheckpoint();
 for (const entry of waterOnly ? [] : cases) {
   const completed = checkpoint.cases[entry.id];
@@ -202,14 +230,20 @@ for (const entry of waterOnly ? [] : cases) {
   const report = fs.existsSync(outPath)
     ? reportSummary(JSON.parse(fs.readFileSync(outPath, 'utf8')))
     : null;
+  checkCaptureEnvironment(execution, report);
   const result = { id: entry.id, execution, report };
   results.push(result);
   checkpoint.cases[entry.id] = result;
   saveCheckpoint();
+  if (execution.code === PERF_FOCUS_EXIT_CODE) {
+    console.error('Matrix paused after exhausting the foreground focus retries.');
+    break;
+  }
 }
 
 let water = includeWater ? checkpoint.water : null;
-if (includeWater && (water?.execution.code !== 0 || !water.report)) {
+const focusBlocked = !waterOnly && results.some(entry => entry.execution.code === PERF_FOCUS_EXIT_CODE);
+if (includeWater && !focusBlocked && (water?.execution.code !== 0 || !water.report)) {
   const source = path.join(root, 'tmp', 'water-acceptance-latest.json');
   const args = ['--existing-server', '--url', baseUrl];
   if (headed) args.push('--headed');
@@ -223,6 +257,7 @@ if (includeWater && (water?.execution.code !== 0 || !water.report)) {
       ? JSON.parse(fs.readFileSync(source, 'utf8')).waterAcceptance
       : null,
   };
+  checkCaptureEnvironment(execution, water.report);
   checkpoint.water = water;
   saveCheckpoint();
 }
@@ -230,8 +265,9 @@ if (includeWater && (water?.execution.code !== 0 || !water.report)) {
 const matrix = {
   version: 1,
   generatedAt: new Date().toISOString(),
+  environment,
   config: {
-    ...(waterOnly && previousMatrix?.config
+    ...(retainedMovement
       ? previousMatrix.config
       : measuredCaseConfig),
     includeWater,

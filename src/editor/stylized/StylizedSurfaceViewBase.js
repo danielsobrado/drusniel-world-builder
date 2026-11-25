@@ -92,6 +92,7 @@ export class StylizedSurfaceView {
       : null;
     this.sharedScenePath = null;
     this.treeVariantPaths = [];
+    this.installedVariantLeases = [];
     this.rockVariantPaths = [];
     this.bushVariantPaths = [];
     this.groundDetailVariantPaths = [];
@@ -585,6 +586,7 @@ export class StylizedSurfaceView {
         return loaded;
       },
       acquireLease: (scene, priority) => this.sceneAssets.acquireLease(scene, { priority }),
+      retainLease: (lease) => this.installedVariantLeases.push(lease),
       apply: variants => installVariants(view, variants),
     });
     const streaming = config.streaming ?? {};
@@ -1198,6 +1200,8 @@ export class StylizedSurfaceView {
     this.aquaticVariantPaths.length = 0;
     for (const path of this.tropicalKitVariantPaths) this.sceneAssets?.release(path);
     this.tropicalKitVariantPaths.length = 0;
+    for (const lease of this.installedVariantLeases) lease.release();
+    this.installedVariantLeases.length = 0;
     this.sceneAssets?.dispose();
     this.sceneAssets = null;
     this.grassBuildQueue.clear();

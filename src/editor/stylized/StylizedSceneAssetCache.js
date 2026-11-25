@@ -22,6 +22,14 @@ function instrumentMeshoptDecoder(telemetry) {
 
 const PRIORITY = Object.freeze({ low: 0, auto: 1, high: 2 });
 
+function nextRequestIndex(queue, maxWaitMs) {
+  const cutoff = performance.now() - maxWaitMs;
+  const aged = queue.findIndex(request => request.queuedAt <= cutoff);
+  if (aged !== -1) return aged;
+  return queue.reduce((best, request, index) =>
+    PRIORITY[request.priority] > PRIORITY[queue[best].priority] ? index : best, 0);
+}
+
 /**
  * A GLTF loader on the renderer's shared KTX2 loader. Call `release` (never
  * `ktx2Loader.dispose()`) when done: other owners share the transcoder workers.
@@ -171,14 +179,7 @@ export class StylizedSceneAssetCache {
     if (this.disposed || !this.requestSettings) return;
     const { maxConcurrentRequests, requestMaxWaitMs } = this.requestSettings;
     while (this.activeRequests < maxConcurrentRequests && this.decodeQueue.length < maxConcurrentRequests && this.queue.length) {
-      const cutoff = performance.now() - requestMaxWaitMs;
-      let next = this.queue.findIndex(entry => entry.queuedAt <= cutoff);
-      if (next < 0) {
-        next = 0;
-        for (let i = 1; i < this.queue.length; i += 1) {
-          if (PRIORITY[this.queue[i].priority] > PRIORITY[this.queue[next].priority]) next = i;
-        }
-      }
+      const next = nextRequestIndex(this.queue, requestMaxWaitMs);
       const [entry] = this.queue.splice(next, 1);
       void this.load(entry);
     }
@@ -235,7 +236,8 @@ export class StylizedSceneAssetCache {
     return new Promise((resolve, reject) => {
       const { signal } = entry.controller;
       signal.throwIfAborted();
-      const job = { entry, decode, resolve, reject, start: null };
+      const job = { decode, resolve, reject, start: null, queuedAt: performance.now(),
+        get priority() { return entry.priority; } };
       const cancel = () => {
         this.decodeQueue.splice(this.decodeQueue.indexOf(job), 1);
         reject(signal.reason);
@@ -250,8 +252,7 @@ export class StylizedSceneAssetCache {
 
   pumpDecodes() {
     while (!this.disposed && this.activeDecodes < (this.requestSettings.maxConcurrentDecodes ?? 2) && this.decodeQueue.length) {
-      const next = this.decodeQueue.reduce((best, job, i, queue) =>
-        PRIORITY[job.entry.priority] > PRIORITY[queue[best].entry.priority] ? i : best, 0);
+      const next = nextRequestIndex(this.decodeQueue, this.requestSettings.requestMaxWaitMs);
       const [job] = this.decodeQueue.splice(next, 1);
       job.start();
       this.activeDecodes += 1;
