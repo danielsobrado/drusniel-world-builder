@@ -8,6 +8,7 @@ export class MeadowPublicationBudget {
   reset(limit) { this.limit = limit; this.used = 0; }
   take(bytes) {
     if (!bytes) return true;
+    if (this.shared && !this.shared.canPublish(bytes)) return false;
     if (this.used > 0 && this.used + bytes > this.limit) return false;
     if (bytes > this.limit) PerfCounters.inc('meadowOversizedPageBytes', bytes);
     this.used += bytes;

@@ -215,7 +215,7 @@ export class StylizedWaterSlot {
     }
   }
 
-  update(timestamp) {
+  update(timestamp, publicationBudget = null) {
     if (!this.config.water.enabled) {
       this.mesh.visible = false;
       return;
@@ -235,6 +235,13 @@ export class StylizedWaterSlot {
     }
     if (page !== this.uploadedPage
         || (page.waterFieldRevision ?? 0) !== this.uploadedFieldRevision) {
+      const bytes = this.waterFieldPixels.byteLength + this.waterFlowPixels.byteLength + this.waterAppearancePixels.byteLength;
+      if (publicationBudget && !publicationBudget.canPublish(bytes)) {
+        // A reused terrain slot must not show the previous chunk's water.
+        if (this.uploadedPage !== page) this.mesh.visible = false;
+        PerfCounters.inc('waterPublicationDeferred');
+        return;
+      }
       this.uploadField(page);
     }
     // A chunk with no coverage anywhere must not draw. Its fragments would all

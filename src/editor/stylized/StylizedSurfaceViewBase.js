@@ -877,9 +877,10 @@ export class StylizedSurfaceView {
     // frames. Water itself keeps updating: it is what you are looking at.
     const landStreaming = !isLandStreamingSuspended();
     if (!landStreaming) {
-      for (const slot of this.waterSlots) slot.update(timestamp);
+      for (const slot of this.waterSlots) slot.update(timestamp, this.publicationBudget);
       return;
     }
+    for (const slot of this.waterSlots) slot.update(timestamp, this.publicationBudget);
     this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
     if (camera) {
@@ -917,7 +918,6 @@ export class StylizedSurfaceView {
       );
     }
     this.flowerView?.update(timestamp);
-    for (const slot of this.waterSlots) slot.update(timestamp);
     this.waterObstacleUpdates.schedule();
     const updateObstacles = () => this.waterObstacleUpdates.flush(this.shouldYieldWork);
     if (this.runDeferredWork) this.runDeferredWork(updateObstacles);

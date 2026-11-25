@@ -136,6 +136,7 @@ export class TerrainCommitQueue {
       const bytes = (job.page?.tilePixels?.byteLength ?? 0)
         + (job.page?.surfaceMaskPixels?.byteLength ?? 0) + (job.page?.heights?.byteLength ?? 0);
       // Allow one indivisible oversized page so the queue cannot deadlock.
+      if (bytes > 0 && maxUploadBytes === 0) break;
       if (committed > 0 && uploadBytes + bytes > maxUploadBytes) break;
       this.queue.pop();
       this.entriesBySlot.delete(job.slot.slotIndex);

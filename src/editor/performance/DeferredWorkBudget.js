@@ -2,7 +2,10 @@ import { FrameSlack } from './FrameSlack.js';
 import { PerfCounters } from './qa/PerfCounters.js';
 import { PreparationPressure, hasPreparationBacklog } from './PreparationPressure.js';
 
-const UPLOAD_COUNTERS = ['textureBytesUploaded', 'waterUploadBytes', 'streamedDrawInitialUploadBytes'];
+const UPLOAD_COUNTERS = [
+  'textureBytesUploaded', 'attributeBytesUploaded', 'terrainMaterialBakeGpuUploadBytes',
+  'streamedDrawInitialUploadBytes', 'localGroundUploadBytes',
+];
 
 /** One shared allowance; collision/physics remain mandatory work. */
 export class DeferredWorkBudget {
@@ -13,6 +16,7 @@ export class DeferredWorkBudget {
     this.maximumMs = settings.maximumMs ?? 1.2;
     this.maxUploadBytes = settings.maxUploadBytes ?? 2 * 1024 * 1024;
     this.uploadBaseline = 0;
+    this.uploadReserved = 0;
     this.pressure = new PreparationPressure({ minimumMs: settings.minimumMs, maximumMs: this.maximumMs });
     this.shouldYield = () => this.peek(Number.POSITIVE_INFINITY) <= 0;
     this.boundQueues = new WeakSet();
@@ -23,16 +27,34 @@ export class DeferredWorkBudget {
     this.pressure.update(this.slack.now(), hasPreparationBacklog(this.preparationSurface));
     this.slack.beginFrame();
     this.uploadBaseline = this.uploadBytes();
+    this.uploadReserved = 0;
   }
   uploadBytes() {
     let total = 0;
     for (const counter of UPLOAD_COUNTERS) total += PerfCounters.get(counter);
     return total;
   }
+  publishedBytes() { return Math.max(0, this.uploadBytes() - this.uploadBaseline); }
   remainingUploadBytes() {
     return this.settings.enabled
-      ? Math.max(0, this.maxUploadBytes - Math.max(0, this.uploadBytes() - this.uploadBaseline))
+      ? Math.max(0, this.maxUploadBytes - this.publishedBytes() - this.uploadReserved)
       : Number.POSITIVE_INFINITY;
+  }
+  canPublish(bytes) {
+    if (!this.settings.enabled || bytes <= 0) return true;
+    return bytes <= this.remainingUploadBytes()
+      || (this.publishedBytes() === 0 && this.uploadReserved === 0 && bytes > this.maxUploadBytes);
+  }
+  reserveUpload(bytes) {
+    const frame = this.slack.frameId;
+    const amount = this.settings.enabled ? Math.min(bytes, this.remainingUploadBytes()) : 0;
+    this.uploadReserved += amount;
+    let active = true;
+    return () => {
+      if (!active) return;
+      active = false;
+      if (frame === this.slack.frameId) this.uploadReserved -= amount;
+    };
   }
   available(maxMs) {
     return this.settings.enabled
@@ -57,7 +79,7 @@ export class DeferredWorkBudget {
     return { cancel: () => { active = false; }, run: work => {
       if (!active) return;
       active = false;
-      return this.run(work);
+      return this.run(() => work(() => false));
     } };
   }
   peek(maxMs) {
@@ -100,7 +122,13 @@ export class DeferredWorkBudget {
     surface.reserveStrictDeferredWork = max => this.reserveStrict(max);
     surface.shouldYieldWork = shouldYield;
     surface.hasPublicationPressure = () => this.remainingUploadBytes() < this.maxUploadBytes / 2;
-    if (surface.meadowGrass) surface.meadowGrass.workRunner = this.runner;
+    surface.publicationBudget = this;
+    if (surface.meadowGrass) {
+      surface.meadowGrass.workRunner = this.runner;
+      for (const layer of [surface.meadowGrass.blades, surface.meadowGrass.cards]) {
+        if (layer?.batchBudget) layer.batchBudget.shared = this;
+      }
+    }
     if (surface.rockView) surface.rockView.shouldYieldWork = shouldYield;
     this.bindQueue(surface.rockView?.manifestStore?.queue, shouldYield);
     this.bindQueue(surface.treeView?.manifestStore?.queue, shouldYield);

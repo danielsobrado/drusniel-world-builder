@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { DeferredWorkBudget } from '../src/editor/performance/DeferredWorkBudget.js';
+import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 
 test('end-frame telemetry does not open a deferred-work deadline', () => {
   const budget = new DeferredWorkBudget({
@@ -51,4 +52,22 @@ test('tryRun does not execute after the shared allowance is consumed', () => {
 
   assert.equal(result, undefined);
   assert.equal(ran, false);
+});
+
+test('publication accounting shares one allowance without double-counting water', () => {
+  const budget = new DeferredWorkBudget({ enabled: true, targetFps: 144, reserveMs: 0.5,
+    minimumMs: 0.25, maximumMs: 1.2, maxUploadBytes: 100 });
+  budget.beginFrame();
+  assert.equal(budget.canPublish(120), true, 'one indivisible oversized publication can progress');
+  PerfCounters.inc('textureBytesUploaded', 40);
+  PerfCounters.inc('waterUploadBytes', 40);
+  PerfCounters.inc('attributeBytesUploaded', 10);
+  assert.equal(budget.remainingUploadBytes(), 50);
+  assert.equal(budget.canPublish(51), false);
+  const release = budget.reserveUpload(30);
+  assert.equal(budget.remainingUploadBytes(), 20);
+  release(); release();
+  assert.equal(budget.remainingUploadBytes(), 50);
+  budget.beginFrame();
+  assert.equal(budget.remainingUploadBytes(), 100);
 });

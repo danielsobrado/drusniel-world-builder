@@ -133,7 +133,7 @@ export class TerrainMaterialBakeGpuBridge {
     }
   }
 
-  update({ shouldYield = null, maxUploads = Infinity } = {}) {
+  update({ shouldYield = null, maxUploads = Infinity, publicationBudget = null } = {}) {
     if (this.disposed) return;
     const now = this.now();
     let uploads = 0;
@@ -148,6 +148,11 @@ export class TerrainMaterialBakeGpuBridge {
       const needsUpload = slot.materialBake?.descriptor?.key
         && state.key !== slot.materialBake.descriptor.key;
       if (needsUpload && (uploads >= maxUploads || shouldYield?.())) continue;
+      if (needsUpload && publicationBudget) {
+        const channels = slot.materialBake?.channels ?? {};
+        const bytes = Object.values(channels).reduce((sum, channel) => sum + (channel?.byteLength ?? 0), 0);
+        if (!publicationBudget.canPublish(bytes)) continue;
+      }
       if (needsUpload) uploads++;
       if (this.updateSlot(slot, state, now)) {
         readySlots += 1;

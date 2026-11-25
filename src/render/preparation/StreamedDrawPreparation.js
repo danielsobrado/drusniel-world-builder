@@ -1,6 +1,8 @@
 import { withDrawPreparation, withPreparationFrame } from './DrawPreparation.js';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { BudgetedAttributeInitialization } from './BudgetedAttributeInitialization.js';
+import { ReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
+import { DrawUploadEstimate } from './DrawUploadEstimate.js';
 
 const MAX_WAIT_FRAMES = 4;
 export const INITIAL_UPLOAD_BYTES_PER_FRAME = 768 * 1024;
@@ -20,11 +22,16 @@ export class StreamedDrawPreparation {
     this.disposed = false;
     this.waitFrames = 0;
     this.reservation = null;
+    this.releaseUpload = null;
+    this.uploadEstimate = new DrawUploadEstimate();
+    this.hierarchy = null;
   }
   beginFrame(budget) {
     this.revealPending();
     this.reservation?.cancel();
     this.reservation = null;
+    this.releaseUpload?.();
+    this.releaseUpload = null;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) {
       this.waitFrames = 0;
       return;
@@ -32,14 +39,19 @@ export class StreamedDrawPreparation {
     // Compilation runs late, after simulation and scene updates. Reserve a
     // turn before earlier queues spend the shared allowance; a perpetually
     // busy scene must not leave these meshes hidden indefinitely.
-    if (++this.waitFrames >= MAX_WAIT_FRAMES) this.reservation = budget.reserve(6);
+    if (++this.waitFrames >= MAX_WAIT_FRAMES) {
+      this.reservation = budget.reserve(6);
+      if (this.reservation) this.releaseUpload = budget.reserveUpload?.(INITIAL_UPLOAD_BYTES_PER_FRAME);
+    }
   }
   flushBudgeted(camera, budget) {
     const reservation = this.reservation;
     this.reservation = null;
+    this.releaseUpload?.();
+    this.releaseUpload = null;
     const bytes = Math.min(INITIAL_UPLOAD_BYTES_PER_FRAME, budget.remainingUploadBytes?.() ?? Infinity);
-    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes));
-    else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes), 6);
+    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget));
+    else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes, budget), 6);
   }
   register(root, { uploadBytes = 0, uploadAttributes = null } = {}) {
     this.discover(root);
@@ -62,6 +74,7 @@ export class StreamedDrawPreparation {
     let variants = this.preparedVariants.get(mesh);
     if (!variants) this.preparedVariants.set(mesh, variants = new Set());
     variants.add(material);
+    this.uploadEstimate.mark(mesh);
   }
   requestMaterial(mesh, material) {
     if (this.disposed || !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material)) return false;
@@ -72,12 +85,13 @@ export class StreamedDrawPreparation {
   isMaterialReady(mesh, material) {
     return !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material) === true;
   }
-  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME) {
+  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null) {
     this.revealPending();
     if (shouldYield?.()) return;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) return;
     const targets = [];
     const materials = new Map();
+    const plannedBuffers = new Set();
     const started = performance.now();
     let uploadBytes = 0;
     const uploadStarted = performance.now();
@@ -101,9 +115,13 @@ export class StreamedDrawPreparation {
           budgetedBytes += result.bytes;
           if (!result.ready) break;
         }
-        const bytes = budgeted ? 0 : this.initialUploadBytes.get(mesh) ?? 0;
-        // One oversized allocation may progress alone, never stacked with another draw.
-        if (uploadBytes + bytes > byteLimit && (targets.length || byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME)) break;
+        const initial = this.initialUploadBytes.get(mesh) ?? 0;
+        const estimate = this.uploadEstimate.estimate(mesh, plannedBuffers, budgeted ? attributes : []);
+        const bytes = budgeted ? estimate.bytes : Math.max(initial, estimate.bytes);
+        // An indivisible upload may exceed the local slice only if the shared budget admits it.
+        if (uploadBytes + bytes > byteLimit && (targets.length || budgetedBytes > 0
+            || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
+        for (const buffer of estimate.buffers) plannedBuffers.add(buffer);
         this.pending.delete(mesh);
         uploadBytes += bytes;
         targets.push(mesh);
@@ -117,7 +135,9 @@ export class StreamedDrawPreparation {
       this.waitFrames = 0;
       for (const mesh of targets) materials.set(mesh, mesh.material);
       for (const target of targets) target.material = this.stagedMaterials.get(target) ?? target.material;
-      withPreparationFrame(this.renderer, null, () => withDrawPreparation(this.scene, targets, () => this.render(camera)));
+      this.hierarchy ??= new ReflectionShadowRegistry(this.scene);
+      withPreparationFrame(this.renderer, null, () => withDrawPreparation(this.scene, targets,
+        () => this.render(camera), this.hierarchy.owners));
       for (const target of targets) {
         this.markPrepared(target, target.material);
         this.stagedMaterials.delete(target);
@@ -152,6 +172,8 @@ export class StreamedDrawPreparation {
   }
   dispose() {
     this.reservation?.cancel(); this.reservation = null;
+    this.releaseUpload?.(); this.releaseUpload = null;
+    this.hierarchy?.dispose(); this.hierarchy = null;
     this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
     this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
   }

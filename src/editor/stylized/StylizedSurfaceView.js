@@ -68,7 +68,7 @@ export class StylizedSurfaceView extends StylizedSurfaceViewBase {
     super.update(timestamp, camera, body);
     const updateMaterials = () => {
       this.materialBakeRuntime?.update(this.shouldYieldWork);
-      this.materialBakeGpuBridge?.update({ shouldYield: this.shouldYieldWork, maxUploads: 1 });
+      this.materialBakeGpuBridge?.update({ shouldYield: this.shouldYieldWork, maxUploads: 1, publicationBudget: this.publicationBudget });
     };
     if (this.runDeferredWork) this.runDeferredWork(updateMaterials);
     else updateMaterials();

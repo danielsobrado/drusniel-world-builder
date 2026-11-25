@@ -3,6 +3,7 @@ export class ReflectionShadowRegistry {
   constructor(scene) {
     this.objects = new Set();
     this.owners = new Set();
+    this.overlays = new Set();
     this.added = event => this.track(event.child);
     this.removed = event => this.untrack(event.child);
     this.track(scene);
@@ -14,6 +15,7 @@ export class ReflectionShadowRegistry {
       this.objects.add(object);
       // A light may replace its shadow object without changing its hierarchy.
       if (object.isLight || object.shadow) this.owners.add(object);
+      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlays.add(object);
       object.addEventListener('childadded', this.added);
       object.addEventListener('childremoved', this.removed);
     });
@@ -23,6 +25,7 @@ export class ReflectionShadowRegistry {
     root.traverse(object => {
       this.objects.delete(object);
       this.owners.delete(object);
+      this.overlays.delete(object);
       object.removeEventListener('childadded', this.added);
       object.removeEventListener('childremoved', this.removed);
     });
@@ -33,6 +36,6 @@ export class ReflectionShadowRegistry {
       object.removeEventListener('childadded', this.added);
       object.removeEventListener('childremoved', this.removed);
     }
-    this.objects.clear(); this.owners.clear();
+    this.objects.clear(); this.owners.clear(); this.overlays.clear();
   }
 }

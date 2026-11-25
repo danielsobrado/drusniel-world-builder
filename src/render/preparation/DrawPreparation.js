@@ -60,9 +60,18 @@ export function withPreparationFrame(renderer, temporalResolve, render) {
  * Renders `render()` with only `targets` (and the gameplay lighting) visible.
  * Returns counts for diagnostics. Scene state is restored even if render throws.
  */
-export function withDrawPreparation(scene, targets, render) {
+export function withDrawPreparation(scene, targets, render, lightOwners = null) {
   const activeLights = new Set();
-  scene.traverseVisible(object => { if (object.isLight) activeLights.add(object); });
+  if (lightOwners) {
+    for (const object of lightOwners) {
+      if (!object.isLight) continue;
+      let visible = true;
+      for (let node = object; node; node = node.parent) {
+        if (!node.visible) { visible = false; break; }
+      }
+      if (visible) activeLights.add(object);
+    }
+  } else scene.traverseVisible(object => { if (object.isLight) activeLights.add(object); });
   const attached = [];
   for (const target of targets) {
     if (!target || isInScene(target, scene)) continue;
