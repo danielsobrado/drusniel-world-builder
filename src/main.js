@@ -2042,6 +2042,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     drawPreparation.hidePending();
     roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();
     roadsideDetailsUi.update();
+    if (import.meta.env.DEV) window.__worldVisualQa?.visualDiagnostics.syncMaterials();
     terrainView.render(viewModeController.camera);
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();

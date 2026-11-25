@@ -390,7 +390,7 @@ export function createMeadowBladePosition({
 
       // Sample the GPU ground-contact field once in the vertex stage for
       // slope-matched root normals and micro-sinking on angled terrain.
-      const groundContact = sampleGroundContactAt(blade.canonical, { canonical: true });
+      const groundContact = sampleGroundContactAt(blade.canonical, { canonical: true, includeBase: false, includeEco: false });
 
       // Sample the final deformed centreline before LOD shrink/world translation.
       if (normalOutput) {

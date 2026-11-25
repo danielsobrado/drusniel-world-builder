@@ -44,10 +44,14 @@ export async function treeImpostorSourceInputs(root = process.cwd(), sourceFiles
     ...Object.values(assets.barkScans ?? {}).flatMap(stem => [`${stem}-albedo-height.png`, `${stem}-normal-roughness.png`]),
     ...(assets.treeVariants ?? []).map(value => value.scene)].filter(Boolean);
   const files = [...new Set([...sourceFiles, ...assetPaths.map(value => `public/${value.replace(/^\//, '')}`)])].sort();
+  const sources = new Set(sourceFiles);
   return {
     version: 1,
     configuration: hash(JSON.stringify(treeImpostorBakeConfiguration(config))),
-    files: Object.fromEntries(await Promise.all(files.map(async file => [file, hash(await readFile(path.join(root, file)))]))),
+    files: Object.fromEntries(await Promise.all(files.map(async file => {
+      const bytes = await readFile(path.join(root, file));
+      return [file, hash(sources.has(file) ? bytes.toString('utf8').replaceAll('\r\n', '\n') : bytes)];
+    }))),
   };
 }
 

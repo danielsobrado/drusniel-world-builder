@@ -4,7 +4,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   crownShadows: false,
   // QA override of water.sea.offshoreFft.enabled (PR I): `?oceanFft=1` forces the offshore FFT on.
   oceanFft: false,
-  r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, requestMaxWaitMs: 500 }),
+  r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, maxConcurrentDecodes: 2, requestMaxWaitMs: 500 }),
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({
     enabled: true,
@@ -34,9 +34,12 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     if (params.has(param)) value.r187[key] = params.get(param) === '1';
     if (typeof value.r187[key] !== 'boolean') throw new TypeError(`r187.${key} must be a boolean.`);
   }
-  const { maxConcurrentRequests, requestMaxWaitMs } = value.r187;
+  const { maxConcurrentRequests, maxConcurrentDecodes, requestMaxWaitMs } = value.r187;
   if (!Number.isInteger(maxConcurrentRequests) || maxConcurrentRequests < 1 || maxConcurrentRequests > 16) {
     throw new RangeError('r187.maxConcurrentRequests must be an integer in [1, 16].');
+  }
+  if (!Number.isInteger(maxConcurrentDecodes) || maxConcurrentDecodes < 1 || maxConcurrentDecodes > 16) {
+    throw new RangeError('r187.maxConcurrentDecodes must be an integer in [1, 16].');
   }
   if (!Number.isFinite(requestMaxWaitMs) || requestMaxWaitMs < 0) throw new RangeError('r187.requestMaxWaitMs must be non-negative.');
   if (params.get('enhancements') === 'high') {

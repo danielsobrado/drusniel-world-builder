@@ -111,7 +111,7 @@ export class WorldVisualDiagnostics {
     this.editor = editor;
     this.mode = WSC_DEFAULT_DIAGNOSTIC_MODE;
     this.savedMaterials = new Map();
-    this.createdMaterials = [];
+    this.materialCache = new Map();
     this.savedLightState = null;
     this.savedFog = null;
     this.savedGodRaysEnabled = null;
@@ -123,14 +123,14 @@ export class WorldVisualDiagnostics {
   }
 
   restore() {
-    for (const [mesh, original] of this.savedMaterials) {
-      mesh.material = original;
+    for (const [mesh, { original, replacement }] of this.savedMaterials) {
+      if (mesh.material === replacement) mesh.material = original;
     }
     this.savedMaterials.clear();
-    for (const mat of this.createdMaterials) {
-      mat.dispose?.();
+    for (const { material, owned } of this.materialCache.values()) {
+      if (owned) material.dispose();
     }
-    this.createdMaterials.length = 0;
+    this.materialCache.clear();
 
     if (this.savedLightState) {
       const { directional, hemisphere, scene, directionalIntensity, hemisphereIntensity, envIntensity } = this.savedLightState;
@@ -184,27 +184,52 @@ export class WorldVisualDiagnostics {
       this.applyLightingIsolation(modeInfo.id);
     }
 
-    const materialCache = new Map();
+    this.mode = modeInfo.id;
+    this.syncMaterials();
+    return modeInfo;
+  }
+
+  syncMaterials() {
+    if (this.mode === WSC_DEFAULT_DIAGNOSTIC_MODE) return;
+    const scene = this.editor.terrainView.scene;
+    const seen = new Set();
+    const usedKeys = new Set();
     scene.traverse((node) => {
       if (!node.isMesh || isSkyOrHelper(node) || !node.material) return;
+      seen.add(node);
+      const saved = this.savedMaterials.get(node);
+      if (saved && node.material === saved.replacement) {
+        for (const key of saved.keys) usedKeys.add(key);
+        return;
+      }
       const original = node.material;
       const list = Array.isArray(original) ? original : [original];
-      const replacement = list.map((mat) => {
+      const keys = [];
+      const materials = list.map((mat) => {
         const cls = classifySceneMesh(node, mat);
-        const cacheKey = `${mat.uuid}:${cls.family}:${cls.lod}`;
-        if (!materialCache.has(cacheKey)) {
-          const built = this.buildDiagnosticMaterial(modeInfo.id, mat, node, cls);
-          materialCache.set(cacheKey, built);
-          if (built && built !== mat) this.createdMaterials.push(built);
+        const key = `${mat.uuid}:${cls.family}:${cls.lod}`;
+        keys.push(key);
+        usedKeys.add(key);
+        if (!this.materialCache.has(key)) {
+          const material = this.buildDiagnosticMaterial(this.mode, mat, node, cls);
+          this.materialCache.set(key, { material, owned: Boolean(material && material !== mat) });
         }
-        return materialCache.get(cacheKey);
+        return this.materialCache.get(key).material;
       });
-      this.savedMaterials.set(node, original);
-      node.material = Array.isArray(original) ? replacement : replacement[0];
+      const replacement = Array.isArray(original) ? materials : materials[0];
+      this.savedMaterials.set(node, { original, replacement, keys });
+      node.material = replacement;
     });
-
-    this.mode = modeInfo.id;
-    return modeInfo;
+    for (const [mesh, { original, replacement }] of this.savedMaterials) {
+      if (seen.has(mesh)) continue;
+      if (mesh.material === replacement) mesh.material = original;
+      this.savedMaterials.delete(mesh);
+    }
+    for (const [key, { material, owned }] of this.materialCache) {
+      if (usedKeys.has(key)) continue;
+      if (owned) material.dispose();
+      this.materialCache.delete(key);
+    }
   }
 
   applyLightingIsolation(modeId) {

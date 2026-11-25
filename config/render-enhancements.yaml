@@ -5,6 +5,7 @@ r187:
   depthOnlyOcclusion: false
   prioritizedRequests: false
   maxConcurrentRequests: 6
+  maxConcurrentDecodes: 2
   requestMaxWaitMs: 500
 surfaceAnisotropy:
   enabled: true

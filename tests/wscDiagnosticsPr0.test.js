@@ -16,6 +16,7 @@ import {
   createWscFixtureDocument,
 } from '../src/editor/performance/qa/WorldVisualWscFixture.js';
 import { GroundContactField } from '../src/editor/stylized/groundContact/GroundContactField.js';
+import { WorldVisualDiagnostics } from '../src/editor/performance/qa/WorldVisualDiagnostics.js';
 import {
   clearGroundContactField,
   groundContactSoilTexture,
@@ -36,6 +37,37 @@ test('diagnostic modes default to D00 (disabled) and match config/wsc-diagnostic
   for (const id of Object.keys(WSC_DIAGNOSTIC_MODES)) {
     assert.ok(doc.modes[id], `YAML missing diagnostic mode ${id}`);
     assert.ok(typeof doc.modes[id].legend === 'string' && doc.modes[id].legend.length > 5);
+  }
+});
+
+test('active diagnostics follow streamed meshes and leave newer production material assignments intact', () => {
+  const scene = new THREE.Scene();
+  const geometry = new THREE.PlaneGeometry();
+  const initial = new THREE.MeshBasicMaterial();
+  const later = new THREE.MeshBasicMaterial();
+  const old = new THREE.Mesh(geometry, initial);
+  const added = new THREE.Mesh(geometry, later);
+  const diagnostics = new WorldVisualDiagnostics({ terrainView: { scene } });
+  try {
+    scene.add(old);
+    diagnostics.setMode('D01');
+    const retired = old.material;
+    let disposed = false;
+    retired.addEventListener('dispose', () => { disposed = true; });
+    old.removeFromParent();
+    scene.add(added);
+    diagnostics.syncMaterials();
+    assert.equal(old.material, initial);
+    assert.ok(disposed);
+    assert.notEqual(added.material, later);
+    added.material = initial;
+    diagnostics.restore();
+    assert.equal(added.material, initial);
+  } finally {
+    diagnostics.dispose();
+    geometry.dispose();
+    initial.dispose();
+    later.dispose();
   }
 });
 

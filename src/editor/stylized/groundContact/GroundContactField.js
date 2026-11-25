@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { resolveMeadowGroundDetail } from '../meadow/meadowGroundDetailConfig.js';
 import { resolvePathPaint } from '../path/terrainPathPaint.js';
 import { sampleHeight } from '../scatterMath.js';
@@ -14,6 +15,8 @@ import {
 } from '../worldSurfaceContext/WorldSurfaceContextState.js';
 
 const RECENTER_THRESHOLD_M = 16;
+const WSC_UPLOAD_BYTES = wscGeoTexture.image.data.byteLength + wscBaseTexture.image.data.byteLength
+  + wscEcoTexture.image.data.byteLength;
 const DEFAULT_SOIL_HEX = '#6e5435';
 
 function clamp01(value) {
@@ -90,7 +93,7 @@ export class GroundContactField {
    * Updates the window origin every frame (2 floats) and repacks textures only
    * when the focus drifts past the hysteresis band or an overlapping slot changes.
    */
-  update(focusCanonical, origin) {
+  update(focusCanonical, origin, publicationBudget = null) {
     if (this.disposed || !this.terrainView?.slots) return false;
     const fx = Number(focusCanonical?.x);
     const fz = Number(focusCanonical?.z);
@@ -126,16 +129,22 @@ export class GroundContactField {
     }
 
     if (residentCount === 0) {
-      if (wscUniforms.active.value !== 0) clearWorldSurfaceContext();
+      if (wscUniforms.active.value !== 0) {
+        clearWorldSurfaceContext();
+        PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
+      }
       this.lastSlotSignature = '';
       return false;
     }
 
     if (signature !== this.lastSlotSignature) {
-      this.centerX = targetX;
-      this.centerZ = targetZ;
-      this.rebuild(targetX, targetZ, chunkSize, tileSize, chunkWorldSize);
-      this.lastSlotSignature = signature;
+      if (!publicationBudget || publicationBudget.canPublish(WSC_UPLOAD_BYTES)) {
+        this.centerX = targetX;
+        this.centerZ = targetZ;
+        this.rebuild(targetX, targetZ, chunkSize, tileSize, chunkWorldSize);
+        this.lastSlotSignature = signature;
+        PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
+      } else if (wscUniforms.active.value === 0) return false;
     }
 
     const minX = this.centerX - half;

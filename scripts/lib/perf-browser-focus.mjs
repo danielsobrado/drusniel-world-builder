@@ -1,5 +1,12 @@
 import { monitorWindowsBrowserForeground } from './perf-browser-foreground-win32.mjs';
 
+export const PERF_FOCUS_EXIT_CODE = 3;
+
+export function isPerfFocusError(error) {
+  return error?.nativeFocus?.passed === false
+    || /\bforeground focus\b|document does not have focus|could not activate the owned benchmark browser/i.test(error?.message ?? '');
+}
+
 /** Foreground is part of a headed benchmark's workload. Activate only the
  * browser returned by this Playwright connection; never search other windows. */
 export async function focusPerfBrowser(browser, page, { headed }) {

@@ -7,7 +7,7 @@ import { chromium } from 'playwright';
 import { WaterAcceptanceTracker } from '../src/editor/performance/qa/WaterAcceptance.js';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
 import { waitForPerfRunLock } from './perf-run-lock.mjs';
-import { focusPerfBrowser } from './lib/perf-browser-focus.mjs';
+import { focusPerfBrowser, isPerfFocusError, PERF_FOCUS_EXIT_CODE } from './lib/perf-browser-focus.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'tmp');
@@ -495,7 +495,7 @@ async function main() {
     }, null, 2));
 
     if (!acceptance.pass || gpuValidationErrorCount > 0 || report.capture.browserErrors.count > 0) process.exitCode = 1;
-    if (!report.capture.focus.passed) process.exitCode = 1;
+    if (!report.capture.focus.passed) process.exitCode = PERF_FOCUS_EXIT_CODE;
   } finally {
     await browser?.close();
     releaseBrowserLock();
@@ -514,5 +514,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
-  process.exitCode = 1;
+  process.exitCode = isPerfFocusError(error) ? PERF_FOCUS_EXIT_CODE : 1;
 });

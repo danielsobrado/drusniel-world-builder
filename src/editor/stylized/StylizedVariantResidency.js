@@ -65,6 +65,7 @@ export class StylizedVariantResidency {
     appliesPerFrame = 1,
     maxConcurrentLoads = 2,
     rescanIntervalMs = 500,
+    manageRequests = false,
   }) {
     this.terrainView = terrainView;
     this.revisionTracker = revisionTracker;
@@ -75,6 +76,7 @@ export class StylizedVariantResidency {
     this.appliesPerFrame = Math.max(1, appliesPerFrame);
     this.maxConcurrentLoads = Math.max(1, maxConcurrentLoads);
     this.rescanIntervalMs = rescanIntervalMs;
+    this.manageRequests = manageRequests;
     // Every layer scans the same window — the widest one any layer asks for.
     // A layer with a tighter residency then prefetches slightly earlier than it
     // strictly needs to, which is the harmless direction to be wrong in.
@@ -92,6 +94,7 @@ export class StylizedVariantResidency {
     this.activeApply = null;
     this.inFlight = 0;
     this.inFlightIds = new Set();
+    this.inFlightLeases = new Map();
     this.lastScanAt = -Infinity;
     this.lastScanKey = null;
     this.disposed = false;
@@ -109,12 +112,11 @@ export class StylizedVariantResidency {
    * which biomes are nearby, and a biome large enough to be worth streaming a
    * prop set for is far wider than the sample stride.
    */
-  scanNearbyTileIds() {
+  scanNearbyTileIds(radius = this.scanRadiusChunks) {
     const focus = this.terrainView.focusChunk;
     const worldStore = this.terrainView.worldStore;
     const chunkSize = worldStore.chunkSize;
     const stride = Math.max(1, Math.floor(chunkSize / this.samplesPerChunkAxis));
-    const radius = this.scanRadiusChunks;
     const tileIds = new Set();
     for (let chunkZ = focus.chunkZ - radius; chunkZ <= focus.chunkZ + radius; chunkZ += 1) {
       for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
@@ -166,6 +168,7 @@ export class StylizedVariantResidency {
 
   rescan() {
     const tileIds = this.scanNearbyTileIds();
+    const nearTileIds = this.manageRequests ? this.scanNearbyTileIds(1) : null;
     for (const layer of this.layers) {
       const required = requiredVariantKeys({
         definitions: layer.definitions,
@@ -173,16 +176,38 @@ export class StylizedVariantResidency {
         pinnedKeys: this.pinnedKeysForLayer(layer, tileIds),
       });
       layer.requiredKeys = required;
+      if (nearTileIds) {
+        layer.urgentKeys = requiredVariantKeys({ definitions: layer.definitions, tileIds: nearTileIds,
+          pinnedKeys: this.pinnedKeysForLayer(layer, nearTileIds) });
+      }
       for (const definition of layer.definitions ?? []) {
         const key = variantKey(definition);
         if (!required.has(key)) continue;
         const id = StylizedVariantResidency.requestId(layer.id, key);
         if (this.requested.has(id) || this.failed.has(id)) continue;
         this.requested.add(id);
-        this.pendingLoads.push({ layer, definition, id });
+        this.pendingLoads.push({ layer, definition, id, key });
       }
     }
+    if (this.manageRequests) this.updateRequestPriorities();
     PerfCounters.set('stylizedVariantsPendingLoad', this.pendingLoads.length);
+  }
+
+  updateRequestPriorities() {
+    const retain = (job) => {
+      if (job.layer.requiredKeys.has(job.key)) return true;
+      this.requested.delete(job.id);
+      job.cancelled = true;
+      job.lease?.release();
+      return false;
+    };
+    this.pendingLoads = this.pendingLoads.filter(retain);
+    this.pendingApplies = this.pendingApplies.filter(retain);
+    for (const job of this.inFlightLeases.values()) {
+      if (!job.cancelled && retain(job) && job.layer.urgentKeys.has(job.key)) job.lease.promote('high');
+    }
+    const urgent = job => Number(job.layer.urgentKeys.has(job.key));
+    this.pendingLoads.sort((a, b) => urgent(b) - urgent(a));
   }
 
   pumpLoads() {
@@ -190,16 +215,24 @@ export class StylizedVariantResidency {
       const job = this.pendingLoads.shift();
       this.inFlight += 1;
       this.inFlightIds.add(job.id);
-      job.layer.acquire(job.definition.scene).then(
+      if (this.manageRequests && job.layer.acquireLease) {
+        const priority = job.layer.urgentKeys.has(job.key) ? 'high' : 'low';
+        job.lease = job.layer.acquireLease(job.definition.scene, priority);
+        this.inFlightLeases.set(job.id, job);
+      }
+      (job.lease?.ready ?? job.layer.acquire(job.definition.scene)).then(
         (scene) => {
           this.inFlight -= 1;
           this.inFlightIds.delete(job.id);
-          if (this.disposed) return;
+          this.inFlightLeases.delete(job.id);
+          if (this.disposed || job.cancelled) return;
           this.pendingApplies.push({ ...job, scene });
         },
         (error) => {
           this.inFlight -= 1;
           this.inFlightIds.delete(job.id);
+          this.inFlightLeases.delete(job.id);
+          if (this.disposed || job.cancelled) return;
           // Marked failed rather than retried: a missing or malformed variant
           // fails the same way every time, and retrying it each rescan would
           // turn one bad path into a permanent fetch loop.
@@ -281,7 +314,7 @@ export class StylizedVariantResidency {
     if (this.disposed || !this.terrainView.focusChunkKey) return;
     // Applies come first so a variant that landed during the previous frame is
     // installed before this frame's scan can queue more work behind it.
-    this.pumpApplies(shouldYield);
+    if (!this.manageRequests) this.pumpApplies(shouldYield);
     const focus = this.terrainView.focusChunk;
     const scanKey = `${focus.chunkX}:${focus.chunkZ}:${this.biomeAssetPalette?.revision ?? 0}`;
     if (scanKey !== this.lastScanKey || now - this.lastScanAt >= this.rescanIntervalMs) {
@@ -289,12 +322,16 @@ export class StylizedVariantResidency {
       this.lastScanAt = now;
       this.rescan();
     }
+    if (this.manageRequests) this.pumpApplies(shouldYield);
     this.pumpLoads();
     PerfCounters.set('stylizedVariantsPendingLoad', this.getPreparationStatus().pending);
   }
 
   dispose() {
     this.disposed = true;
+    for (const job of this.inFlightLeases.values()) job.lease.release();
+    for (const job of this.pendingApplies) job.lease?.release();
+    this.inFlightLeases.clear();
     this.activeApply?.iterator?.return();
     this.activeApply = null;
     this.pendingLoads.length = 0;

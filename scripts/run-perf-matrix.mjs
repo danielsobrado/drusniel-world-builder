@@ -1,10 +1,19 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { evaluatePerfMatrix } from './perf-matrix-gates.mjs';
 import { acquirePerfRunLock } from './perf-run-lock.mjs';
+import { PERF_FOCUS_EXIT_CODE } from './lib/perf-browser-focus.mjs';
+
+if (process.argv.includes('--help')) {
+  console.log('Usage: npm run qa:perf:matrix -- --headed [--url URL] [--resume] [--focus-retries 0-5]');
+  console.log('--resume reuses completed captures with matching source and capture settings.');
+  console.log('--focus-retries retries only rejected focus captures (default: 2).');
+  process.exit(0);
+}
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'tmp', 'perf-matrix');
@@ -25,10 +34,48 @@ function runScript(script, args) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [script, ...args], {
       cwd: root,
-      stdio: 'inherit',
+      stdio: 'inherit', windowsHide: true,
     });
+    child.once('error', (error) => resolve({ code: 1, error: error.message }));
     child.once('exit', (code, signal) => resolve({ code: code ?? 1, signal }));
   });
+}
+
+async function runCapture(script, args, outPath, retries) {
+  const attempts = [];
+  for (let retry = 0; retry <= retries; retry += 1) {
+    fs.rmSync(outPath, { force: true });
+    const execution = await runScript(script, args);
+    attempts.push(execution);
+    if (execution.code !== PERF_FOCUS_EXIT_CODE || retry === retries) return { ...execution, attempts };
+    if (fs.existsSync(outPath)) {
+      const rejectedPath = outPath.replace(/\.json$/, `.focus-rejected-${Date.now()}.json`);
+      fs.renameSync(outPath, rejectedPath);
+      execution.rejectedPath = rejectedPath;
+    }
+    console.log(`Retrying ${path.basename(outPath)} after foreground focus loss (${retry + 1}/${retries}).`);
+  }
+}
+
+function sourceIdentity() {
+  try {
+    const git = (cwd, ...args) => execFileSync('git', args, { cwd, windowsHide: true });
+    const repository = git(root, 'rev-parse', '--show-toplevel').toString().trim();
+    const hash = createHash('sha256').update(git(repository, 'rev-parse', 'HEAD'));
+    const files = Buffer.concat([
+      git(repository, 'diff', '--name-only', '-z', 'HEAD'),
+      git(repository, 'ls-files', '--others', '--exclude-standard', '-z'),
+    ]).toString().split('\0').filter(Boolean).sort();
+    for (const file of files) {
+      const filePath = path.join(repository, file);
+      hash.update(file).update('\0');
+      if (fs.existsSync(filePath)) hash.update(createHash('sha256').update(fs.readFileSync(filePath)).digest());
+      else hash.update('deleted');
+    }
+    return hash.digest('hex');
+  } catch {
+    return null;
+  }
 }
 
 function reportSummary(report) {
@@ -86,6 +133,10 @@ const viewportHeight = readArg('viewportHeight', '720');
 const headed = hasFlag('headed');
 const includeWater = !hasFlag('skip-water');
 const waterOnly = hasFlag('water-only');
+const focusRetries = Number(readArg('focus-retries', '2'));
+if (!Number.isInteger(focusRetries) || focusRetries < 0 || focusRetries > 5) {
+  throw new Error('--focus-retries must be an integer from 0 through 5.');
+}
 const cases = [
   { id: 'standard', qa: 'diagonal', density: 'standard' },
   { id: 'dense-forest', qa: 'diagonal', density: 'dense-forest' },
@@ -100,12 +151,36 @@ const matrixPath = path.join(root, 'tmp', 'perf-matrix-latest.json');
 const previousMatrix = waterOnly && fs.existsSync(matrixPath)
   ? JSON.parse(fs.readFileSync(matrixPath, 'utf8'))
   : null;
+const measuredCaseConfig = {
+  baseUrl,
+  durationSeconds: Number(duration),
+  warmupSeconds: Number(warmup),
+  viewport: { width: Number(viewportWidth), height: Number(viewportHeight) },
+  headed,
+  resources: hasFlag('resources'),
+};
+const checkpointPath = path.join(root, 'tmp', 'perf-matrix-checkpoint.json');
+const source = waterOnly ? null : sourceIdentity();
+const key = source && JSON.stringify({ source, measuredCaseConfig, includeWater });
+const previousCheckpoint = hasFlag('resume') && key && fs.existsSync(checkpointPath)
+  ? JSON.parse(fs.readFileSync(checkpointPath, 'utf8'))
+  : null;
+const checkpoint = previousCheckpoint?.key === key ? previousCheckpoint : { key, cases: {}, water: null };
+function saveCheckpoint() {
+  if (!key) return;
+  fs.writeFileSync(`${checkpointPath}.tmp`, JSON.stringify(checkpoint));
+  fs.renameSync(`${checkpointPath}.tmp`, checkpointPath);
+}
 const results = waterOnly ? (previousMatrix?.cases ?? []) : [];
+saveCheckpoint();
 for (const entry of waterOnly ? [] : cases) {
+  const completed = checkpoint.cases[entry.id];
+  if (completed?.execution.code === 0 && completed.report) {
+    console.log(`Resuming with completed case ${entry.id}.`);
+    results.push(completed);
+    continue;
+  }
   const outPath = path.join(outDir, `${entry.id}.json`);
-  // A runner can stop before writing (for example at the focus gate). Never
-  // present a previous execution's measurements as this execution's report.
-  fs.rmSync(outPath, { force: true });
   const args = [
     '--url', baseUrl,
     '--qa', entry.qa,
@@ -123,20 +198,22 @@ for (const entry of waterOnly ? [] : cases) {
   if (entry.id === 'settlement-approach') args.push('--revisit', '--turn-on-revisit');
   if (hasFlag('resources')) args.push('--resources');
   if (headed) args.unshift('--headed');
-  const execution = await runScript('scripts/run-perf-qa.mjs', args);
+  const execution = await runCapture('scripts/run-perf-qa.mjs', args, outPath, focusRetries);
   const report = fs.existsSync(outPath)
     ? reportSummary(JSON.parse(fs.readFileSync(outPath, 'utf8')))
     : null;
-  results.push({ id: entry.id, execution, report });
+  const result = { id: entry.id, execution, report };
+  results.push(result);
+  checkpoint.cases[entry.id] = result;
+  saveCheckpoint();
 }
 
-let water = null;
-if (includeWater) {
+let water = includeWater ? checkpoint.water : null;
+if (includeWater && (water?.execution.code !== 0 || !water.report)) {
   const source = path.join(root, 'tmp', 'water-acceptance-latest.json');
-  fs.rmSync(source, { force: true });
   const args = ['--existing-server', '--url', baseUrl];
   if (headed) args.push('--headed');
-  const execution = await runScript('scripts/run-water-acceptance-qa.mjs', args);
+  const execution = await runCapture('scripts/run-water-acceptance-qa.mjs', args, source, focusRetries);
   water = {
     execution,
     report: fs.existsSync(source)
@@ -146,18 +223,10 @@ if (includeWater) {
       ? JSON.parse(fs.readFileSync(source, 'utf8')).waterAcceptance
       : null,
   };
+  checkpoint.water = water;
+  saveCheckpoint();
 }
 
-const measuredCaseConfig = {
-  baseUrl,
-  durationSeconds: Number(duration),
-  warmupSeconds: Number(warmup),
-  viewport: {
-    width: Number(viewportWidth),
-    height: Number(viewportHeight),
-  },
-  headed,
-};
 const matrix = {
   version: 1,
   generatedAt: new Date().toISOString(),

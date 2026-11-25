@@ -126,6 +126,40 @@ test('approaching a new biome pulls its variant in', async () => {
   assert.ok(applied.includes('tundra-rock'));
 });
 
+test('prioritized residency abandons a biome request and promotes the new nearby demand', async () => {
+  const terrainView = createTerrainView({ tileForChunkX: (x) => x >= 30 ? 11 : x >= 3 ? 2 : 7 });
+  const { layer } = createLayer({ definitions: DEFINITIONS.slice(1) });
+  const events = [];
+  layer.acquireLease = (scene, priority) => {
+    events.push([scene, priority]);
+    let cancel;
+    const ready = new Promise((_, reject) => { cancel = reject; });
+    return {
+      ready,
+      promote: (next) => events.push([scene, next]),
+      release: () => { events.push([scene, 'release']); cancel(new Error('cancelled')); },
+    };
+  };
+  const residency = new StylizedVariantResidency({ terrainView, layers: [layer], manageRequests: true });
+  try {
+    residency.update(0);
+    terrainView.focusChunk = { chunkX: 3, chunkZ: 0 };
+    residency.update(1);
+    terrainView.focusChunk = { chunkX: 40, chunkZ: 0 };
+    residency.update(2);
+    await Promise.resolve();
+    assert.deepEqual(events, [
+      ['/assets/rocks/desert.glb', 'low'],
+      ['/assets/rocks/desert.glb', 'high'],
+      ['/assets/rocks/desert.glb', 'release'],
+      ['/assets/rocks/tundra.glb', 'high'],
+    ]);
+    assert.deepEqual(residency.getPreparationStatus().errors, []);
+  } finally {
+    residency.dispose();
+  }
+});
+
 test('installs are capped per frame so an arriving batch cannot hitch', async () => {
   const terrainView = createTerrainView({ tileForChunkX: () => 2 });
   const { layer, applied } = createLayer();

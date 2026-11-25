@@ -49,6 +49,56 @@ function createCache(pending) {
   });
 }
 
+test('releasing one lease rejects only that consumer of a shared load', async () => {
+  const pending = deferred();
+  const cache = createCache(pending);
+  const asset = disposableScene();
+  const released = cache.acquireLease('trees.glb');
+  const retained = cache.acquireLease('trees.glb');
+  released.release();
+  released.release();
+  await assert.rejects(released.ready, { name: 'AbortError' });
+  pending.resolve({ scene: asset.scene });
+  assert.equal(await retained.ready, asset.scene);
+  assert.equal(asset.geometry.disposeCount, 0);
+  retained.release();
+  assert.equal(asset.geometry.disposeCount, 1);
+});
+
+test('network keeps progressing during decode and aborts an abandoned queued decode', async () => {
+  const asset = disposableScene();
+  const firstDecode = deferred();
+  const secondFetch = deferred();
+  const started = [];
+  const cache = new StylizedSceneAssetCache({
+    loader: {},
+    requests: { prioritizedRequests: true, maxConcurrentRequests: 1, maxConcurrentDecodes: 1, requestMaxWaitMs: 1000 },
+    loadSplit: async (url, _priority, _signal, decode) => {
+      started.push(url);
+      if (url === '/first.glb') return decode(() => firstDecode.promise);
+      secondFetch.resolve();
+      return decode(() => {
+        assert.fail('cancelled queued decode was started');
+      });
+    },
+  });
+  const first = cache.acquireLease('first.glb');
+  const cancelled = cache.acquireLease('second.glb');
+  try {
+    await secondFetch.promise;
+    assert.deepEqual(started, ['/first.glb', '/second.glb']);
+    assert.equal(cache.getRequestStatus().activeDecodes, 1);
+    assert.equal(cache.getRequestStatus().pendingDecodes, 1);
+    cancelled.release();
+    await assert.rejects(cancelled.ready, { name: 'AbortError' });
+    assert.equal(cache.getRequestStatus().pendingDecodes, 0);
+    firstDecode.resolve({ scene: asset.scene });
+    assert.equal(await first.ready, asset.scene);
+  } finally {
+    cache.dispose();
+  }
+});
+
 test('pending scene released before load completion is disposed when it arrives', async () => {
   const pending = deferred();
   const cache = createCache(pending);

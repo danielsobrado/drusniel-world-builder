@@ -119,6 +119,7 @@ fs.writeFileSync(
   `
 const { chromium } = require('playwright');
 const fs = require('fs');
+const focusModule = import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-focus.mjs')).href)});
 
 (async () => {
   let browser = null;
@@ -153,7 +154,7 @@ const fs = require('fs');
       void browser.close();
     });
     page.on('pageerror', error => console.error('Perf QA browser error:', error.stack ?? error.message));
-    const { focusPerfBrowser } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-focus.mjs')).href)});
+    const { focusPerfBrowser, PERF_FOCUS_EXIT_CODE } = await focusModule;
     // Activate the owned blank window before cold renderer work can block it.
     const startupFocus = await focusPerfBrowser(browser, page, { headed: ${hasFlag('headed')} });
     if (!(await startupFocus()).passed) throw new Error('Benchmark startup did not retain foreground focus.');
@@ -465,7 +466,7 @@ const fs = require('fs');
     }
     if (!report.capture.focus.passed) {
       console.error('Perf QA invalid: the headed browser lost foreground focus; inspect capture.focus.');
-      process.exitCode = 1;
+      process.exitCode = PERF_FOCUS_EXIT_CODE;
     }
     console.log(JSON.stringify({
       outPath: ${JSON.stringify(outPath.replace(/\\/g, '/'))},
@@ -493,9 +494,10 @@ const fs = require('fs');
     }
     await browser?.close();
   }
-})().catch((error) => {
+})().catch(async (error) => {
   console.error(error);
-  process.exitCode = 1;
+  const { isPerfFocusError, PERF_FOCUS_EXIT_CODE } = await focusModule;
+  process.exitCode = isPerfFocusError(error) ? PERF_FOCUS_EXIT_CODE : 1;
 });
 `,
 );
@@ -514,8 +516,8 @@ try {
     );
     child.once('error', reject);
     child.once('exit', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`Perf QA runner exited with code ${code}`));
+      if (code === null) reject(new Error('Perf QA runner was interrupted.'));
+      else { process.exitCode = code; resolve(); }
     });
   });
 } finally {

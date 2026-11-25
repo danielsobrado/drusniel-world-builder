@@ -15,6 +15,7 @@ export class StreamedDrawPreparation {
     this.preparedVariants = new WeakMap();
     this.stagedMaterials = new Map();
     this.pending = new Set();
+    this.isolated = new WeakSet();
     this.enqueuedAt = diagnostics ? new Map() : null;
     this.initialUploadBytes = new Map();
     this.initialUploadAttributes = new Map();
@@ -94,12 +95,12 @@ export class StreamedDrawPreparation {
   markInitialScene() {
     this.scene.traverse(object => { if (object.isMesh) this.markPrepared(object, object.material); });
   }
-  markPrepared(mesh, material) {
+  markPrepared(mesh, material, uploaded = true) {
     this.prepared.add(mesh);
     let variants = this.preparedVariants.get(mesh);
     if (!variants) this.preparedVariants.set(mesh, variants = new Set());
     variants.add(material);
-    this.uploadEstimate.mark(mesh);
+    if (uploaded) this.uploadEstimate.mark(mesh);
   }
   requestMaterial(mesh, material) {
     if (this.disposed || !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material)) return false;
@@ -137,6 +138,8 @@ export class StreamedDrawPreparation {
     try {
       for (const mesh of this.pending) {
         if (shouldYield?.()) break;
+        const isolated = this.isolated.has(mesh);
+        if (isolated && targets.length) break;
         let root = mesh;
         while (root.parent) root = root.parent;
         if (root !== this.scene) {
@@ -163,7 +166,7 @@ export class StreamedDrawPreparation {
         this.pending.delete(mesh);
         uploadBytes += bytes;
         targets.push(mesh);
-        if (targets.length >= this.settings.meshesPerFrame || uploadBytes >= byteLimit) break;
+        if (isolated || targets.length >= this.settings.meshesPerFrame || uploadBytes >= byteLimit) break;
       }
       PerfCounters.inc('streamedInitialUploadCpuMs', performance.now() - uploadStarted);
       PerfCounters.set('meadowInitialGpuUploadMaxFrameBytes',
@@ -182,8 +185,36 @@ export class StreamedDrawPreparation {
           if (queuedAt !== undefined) PerfCounters.inc('streamedDrawQueueWaitMs', prepareStarted - queuedAt);
         }
       }
-      withPreparationFrame(this.renderer, null, () => withDrawPreparation(this.scene, targets,
-        () => this.render(camera), this.hierarchy.owners));
+      const prepared = withPreparationFrame(this.renderer, null, () => {
+        try {
+          withDrawPreparation(this.scene, targets, () => this.render(camera), this.hierarchy.owners);
+          return true;
+        } catch (error) {
+          if (this.renderer._isDeviceLost) throw error;
+          PerfCounters.inc('streamedDrawPreparationFailures');
+          if (targets.length > 1) {
+            for (const target of targets) {
+              this.isolated.add(target);
+              this.pending.add(target);
+            }
+          } else {
+            const [target] = targets;
+            this.markPrepared(target, target.material, false);
+            this.cancelDiagnostics(target);
+            this.stagedMaterials.delete(target);
+            this.initialUploadBytes.delete(target);
+            this.attributeInitialization.release(this.initialUploadAttributes.get(target) ?? []);
+            this.initialUploadAttributes.delete(target);
+            console.warn('Skipping preparation for a draw.', {
+              mesh: target.name || target.uuid,
+              material: target.material?.name || target.material?.type,
+              error,
+            });
+          }
+          return false;
+        }
+      });
+      if (!prepared) return;
       const preparedAt = this.enqueuedAt ? performance.now() : 0;
       if (this.enqueuedAt) {
         PerfCounters.inc('streamedDrawPassCpuMs', preparedAt - prepareStarted);

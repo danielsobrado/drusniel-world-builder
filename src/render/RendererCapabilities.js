@@ -16,6 +16,8 @@ export function inspectRendererCapabilities(renderer, { forceWebGL = false, requ
     fallbackReason: !webgpu && (!forceWebGL || requestedPipeline !== 'standard') ? 'webgpu-unavailable' : null,
     compileAsync: typeof renderer.compileAsync === 'function',
     timestampQuery: device?.features?.has('timestamp-query') ?? false,
+    fragmentTextureUnits: backend?.gl?.getParameter(backend.gl.MAX_TEXTURE_IMAGE_UNITS)
+      ?? device?.limits?.maxSampledTexturesPerShaderStage ?? null,
     storageBuffersPerShaderStage: device?.limits?.maxStorageBuffersPerShaderStage ?? null,
     maxStorageBufferBindingSize: device?.limits?.maxStorageBufferBindingSize ?? null,
   });

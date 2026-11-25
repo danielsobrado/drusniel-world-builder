@@ -584,6 +584,7 @@ export class StylizedSurfaceView {
         paths.push(scene);
         return loaded;
       },
+      acquireLease: (scene, priority) => this.sceneAssets.acquireLease(scene, { priority }),
       apply: variants => installVariants(view, variants),
     });
     const streaming = config.streaming ?? {};
@@ -594,6 +595,7 @@ export class StylizedSurfaceView {
       prefetchChunks: streaming.variantPrefetchChunks ?? 4,
       appliesPerFrame: streaming.variantAppliesPerFrame ?? 1,
       rescanIntervalMs: streaming.variantRescanIntervalMs ?? 500,
+      manageRequests: config.enhancements?.r187?.prioritizedRequests === true,
       layers: [
         this.rockView && layer(
           'rocks',
@@ -916,6 +918,7 @@ export class StylizedSurfaceView {
       this.groundContactField.update(
         { x: camera.position.x + origin.x, z: camera.position.z + origin.z },
         origin,
+        this.publicationBudget,
       );
     }
     this.flowerView?.update(timestamp);

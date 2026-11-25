@@ -5,6 +5,37 @@ import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../src/render/
 import { StreamedDrawPreparation } from '../src/render/preparation/StreamedDrawPreparation.js';
 import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 
+test('one incompatible draw leaves subsequent shader preparation active', () => {
+  const scene = new Scene();
+  const geometry = new BoxGeometry();
+  const bad = new Mesh(geometry, new MeshBasicMaterial());
+  const good = new Mesh(geometry, new MeshBasicMaterial());
+  scene.add(bad, good);
+  let goodPrepared = false;
+  const preparation = new StreamedDrawPreparation({ scene, renderer: {},
+    settings: { enabled: true, meshesPerFrame: 2 }, render: () => {
+      if (bad.visible) throw new Error('Unsupported draw');
+      goodPrepared ||= good.visible;
+    } });
+  try {
+    preparation.register(scene);
+    preparation.flush({});
+    assert.equal(preparation.isMaterialReady(good, good.material), false);
+    preparation.flush({});
+    preparation.flush({});
+    assert.ok(goodPrepared);
+    assert.ok(preparation.isMaterialReady(bad, bad.material), 'failed draw can publish on demand');
+    assert.ok(preparation.isMaterialReady(good, good.material));
+    assert.equal(preparation.requestMaterial(bad, bad.material), false);
+    assert.equal(preparation.settings.enabled, true);
+  } finally {
+    preparation.dispose();
+    geometry.dispose();
+    bad.material.dispose();
+    good.material.dispose();
+  }
+});
+
 test('new publication remains hidden until all gameplay draws are prepared', () => {
   const scene = new Scene(), root = new Group();
   const geometry = new BoxGeometry(), material = new MeshBasicMaterial();

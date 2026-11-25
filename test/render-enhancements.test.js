@@ -9,6 +9,7 @@ import { preparePlanarCamera } from '../src/render/reflections/PlanarCamera.js';
 import { WaterReflectionController } from '../src/render/reflections/WaterReflectionController.js';
 import { resolveRenderEnhancements } from '../src/config/RenderEnhancements.js';
 import { inspectRendererCapabilities } from '../src/render/RendererCapabilities.js';
+import { terrainRendererProfile } from '../src/editor/materials/TerrainRendererProfile.js';
 import { createSnowReliefNodes } from '../src/editor/stylized/SnowReliefShading.js';
 
 test('r187 world experiments require explicit opt-in and bounded request settings', () => {
@@ -26,10 +27,25 @@ test('capabilities report the initialized backend and prerequisites, including f
     compileAsync() {} };
   assert.equal(inspectRendererCapabilities(gpu).revision, '187');
   assert.equal(inspectRendererCapabilities(gpu).timestampQuery, true);
-  const fallback = inspectRendererCapabilities({ backend: { isWebGLBackend: true } }, { requestedPipeline: 'native' });
+  const gl = { MAX_TEXTURE_IMAGE_UNITS: 1, getParameter: (key) => key === 1 ? 16 : undefined };
+  const fallback = inspectRendererCapabilities({ backend: { isWebGLBackend: true, gl } }, { requestedPipeline: 'native' });
   assert.equal(fallback.backend, 'webgl');
   assert.equal(fallback.effectivePipeline, 'standard');
   assert.equal(fallback.fallbackReason, 'webgpu-unavailable');
+  assert.equal(fallback.fragmentTextureUnits, 16);
+});
+
+test('WebGL uses low water and skips texture-heavy terrain effects without changing the authored profile', () => {
+  const config = { materialBake: { enabled: true }, water: { qualityTier: 'high', coast: { enabled: true } },
+    ambientEffects: { snowStreaks: { enabled: true }, sandStreaks: { enabled: true } } };
+  assert.equal(terrainRendererProfile(config, { forceWebGL: false }), config);
+  const fallback = terrainRendererProfile(config, { forceWebGL: true });
+  assert.equal(fallback.materialBake.enabled, false);
+  assert.equal(fallback.water.qualityTier, 'low');
+  assert.equal(fallback.water.coast.enabled, false);
+  assert.equal(fallback.ambientEffects.snowStreaks.enabled, false);
+  assert.equal(fallback.ambientEffects.sandStreaks.enabled, false);
+  assert.equal(config.water.qualityTier, 'high');
 });
 
 test('startup spans close failures/cancellation, are bounded, and disabled mode retains nothing', async () => {

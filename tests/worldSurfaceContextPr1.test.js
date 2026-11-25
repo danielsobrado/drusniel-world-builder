@@ -108,6 +108,26 @@ test('the field enforces its texture resolution and returns unit normals on stee
   }
 });
 
+test('a deferred context upload can publish on the next budgeted update', () => {
+  const slot = makeSlot({ chunkX: 0, chunkZ: 0 });
+  const field = new WorldSurfaceContextField({ terrainView: {
+    worldStore: { chunkSize: 16, tileSize: 2 }, slots: [slot],
+  } });
+  const focus = { x: 16, z: -16 };
+  const origin = { x: 0, z: 0 };
+  clearWorldSurfaceContext();
+  try {
+    const version = wscGeoTexture.version;
+    assert.equal(field.update(focus, origin, { canPublish: () => false }), false);
+    assert.equal(wscGeoTexture.version, version);
+    assert.equal(field.update(focus, origin, { canPublish: (bytes) => bytes <= 256 * 1024 }), true);
+    assert.equal(wscGeoTexture.version, version + 1);
+    assert.ok(sampleWorldSurfaceContextCpu(focus.x, focus.z).valid);
+  } finally {
+    field.dispose();
+  }
+});
+
 test('PR 1 GroundContactState backwards-compatible facade aliases canonical WSC state', () => {
   assert.equal(groundContactGeoTexture, wscGeoTexture);
   assert.equal(groundContactSoilTexture, wscBaseTexture);

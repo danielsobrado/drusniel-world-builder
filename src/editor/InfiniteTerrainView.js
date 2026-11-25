@@ -395,24 +395,7 @@ export class InfiniteTerrainView {
       config: skyConfig?.valleyFog,
       quality: skyConfig?.valleyFog?.quality,
     });
-    // The god rays' sun is the one the sky turns for each time of day.
-    const sharedMaterial = createSharedTerrainMaterialSource({
-      worldStore,
-      stylizedConfig,
-      sunDirection: this.godRays.sunDirection,
-      valleyFog: this.valleyFog,
-    });
-    this.slots = Array.from(
-      { length: streamingConfig.maxResidentChunks },
-      (_, slotIndex) => createSlot({
-        slotIndex,
-        scene: this.scene,
-        geometry: this.geometry,
-        worldStore,
-        stylizedConfig,
-        sharedMaterial,
-      }),
-    );
+    this.slots = [];
 
     this.preview = new THREE.Mesh(
       new THREE.PlaneGeometry(worldStore.tileSize, worldStore.tileSize),
@@ -440,6 +423,22 @@ export class InfiniteTerrainView {
     await this.renderer.init();
     this.rendererBackendStatus = inspectRendererBackend(this.renderer);
     this.rendererCapabilities = inspectRendererCapabilities(this.renderer, { forceWebGL: this.rendererConfig.forceWebGL });
+    // Material graphs must follow the actual backend when device creation falls back.
+    this.stylizedConfig = terrainRendererProfile(this.stylizedConfig, { forceWebGL: this.rendererBackendStatus.webgl });
+    const sharedMaterial = createSharedTerrainMaterialSource({
+      worldStore: this.worldStore,
+      stylizedConfig: this.stylizedConfig,
+      sunDirection: this.godRays.sunDirection,
+      valleyFog: this.valleyFog,
+    });
+    this.slots = Array.from({ length: this.streamingConfig.maxResidentChunks }, (_, slotIndex) => createSlot({
+      slotIndex,
+      scene: this.scene,
+      geometry: this.geometry,
+      worldStore: this.worldStore,
+      stylizedConfig: this.stylizedConfig,
+      sharedMaterial,
+    }));
     PerfCounters.set('rendererWebGPUBackend', this.rendererBackendStatus.webgpu ? 1 : 0);
     PerfCounters.set('rendererWebGLBackend', this.rendererBackendStatus.webgl ? 1 : 0);
     this.coastalSwash = new CoastalSwashField({
