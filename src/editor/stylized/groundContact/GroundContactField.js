@@ -76,6 +76,27 @@ export function buildBiomeSoilPalette(config) {
   return table;
 }
 
+export function buildForestGrassCoreDensityTable(config) {
+  const table = new Float32Array(256);
+  const ff = config?.trees?.forestFloor;
+  if (!ff) {
+    table.fill(1);
+    return table;
+  }
+  const fallback = Number.isFinite(ff.grassCoreDensity) ? clamp01(ff.grassCoreDensity) : 0.16;
+  table.fill(fallback);
+  const byTileId = ff.byTileId;
+  if (byTileId && typeof byTileId === 'object') {
+    for (const [key, entry] of Object.entries(byTileId)) {
+      const id = Number(key);
+      if (Number.isInteger(id) && id >= 0 && id < 256 && Number.isFinite(entry?.grassCoreDensity)) {
+        table[id] = clamp01(entry.grassCoreDensity);
+      }
+    }
+  }
+  return table;
+}
+
 /**
  * Maintains the camera-centred GPU ground-contact textures purely from
  * already-resident terrain slots (zero generator calls, zero GPU readbacks).
@@ -89,6 +110,7 @@ export class GroundContactField {
     this.texelMeters = span / resolution;
     this.soilTable = buildBiomeSoilPalette(config);
     this.forestLitter = linearFromHex(config?.trees?.forestFloor?.litterColor ?? DEFAULT_SOIL_HEX);
+    this.forestGrassCoreDensity = buildForestGrassCoreDensityTable(config);
     this.surfaceEvaluator = createTerrainSurfaceEvaluator(config);
     this.worldNoisePixels = null;
     this.worldNoiseVersion = 0;
@@ -402,10 +424,15 @@ export class GroundContactField {
         baseData[offset + 2] = Math.round(Math.sqrt(clamp01(sb)) * 255);
         baseData[offset + 3] = roughnessByte;
 
+        // Ecological vegetation coverage: mirrors forestFloor canopy suppression & path wear
+        // so WSC `eco.a` and diagnostic `D11` reflect actual ecological blade density (PR 3).
+        const coreDensity = this.forestGrassCoreDensity[tileId & 255];
+        const effectiveVeg = clamp01((vegByte / 255) * (1 - canopy * (1 - coreDensity)) * (1 - pathByte / 255));
+
         ecoData[offset] = Math.round(clamp01(contact) * 255);
         ecoData[offset + 1] = Math.round(clamp01(canopy) * 255);
         ecoData[offset + 2] = Math.round(clamp01(litter) * 255);
-        ecoData[offset + 3] = vegByte;
+        ecoData[offset + 3] = Math.round(effectiveVeg * 255);
       }
     }
 

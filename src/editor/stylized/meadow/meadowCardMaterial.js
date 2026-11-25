@@ -28,6 +28,7 @@ import {
 import { assignGrassMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
+import { FOREST_FLOOR_FILL, foliageSkyFill } from '../forest/foliageLight.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { sampleWorldWindCanonical, worldWindUniforms } from '../../weather/wind/worldWindState.js';
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
@@ -59,7 +60,12 @@ const HIDDEN = 1e9;
  * @param {THREE.Texture} options.atlas meadow-grass-cards.webp
  */
 export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirection, atlas }) {
-  const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
+  // Match terrain and near blades' MeshStandardNodeMaterial lighting & IBL response (WSC PR 3).
+  const material = new THREE.MeshStandardNodeMaterial({
+    metalness: 0,
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+  });
   material.name = 'meadow-grass-cards';
   const cardPlant = varyingProperty('float', 'meadowCardPlant');
   const position = Fn(() => {
@@ -116,7 +122,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   material.alphaTest = ALPHA_TEST;
   material.transparent = false;
 
-  const { pigment, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade: card, melted: true });
+  const { pigment, canopy, color: albedo, height } = meadowPigment({ uniforms, tuning, config, blade: card, melted: true });
   material.colorNode = albedo;
   material.normalNode = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
   const view = normalize(cameraPosition.sub(positionWorld));
@@ -130,9 +136,11 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
     .mul(gust).mul(height.mul(height)).mul(grassGustSheenUniforms.weight);
+  const floorFill = foliageSkyFill(albedo, FOREST_FLOOR_FILL).mul(canopy);
   const emissive = pigment.mul(uniforms.sunColor).mul(transmission)
-    .mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength).mul(0.6).mul(height)
-    .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill))
+    .mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength).mul(0.85).mul(height)
+    .add(albedo.mul(uniforms.skyColor).mul(uniforms.appearance.fill))
+    .add(floorFill)
     .add(sheen);
   material.emissiveNode = spellWorldEnabled
     ? emissive.add(albedo.mul(spellLightIrradiance(positionWorld, vec3(0, 1, 0))))

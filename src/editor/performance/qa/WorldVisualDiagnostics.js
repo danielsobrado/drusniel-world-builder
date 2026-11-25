@@ -355,8 +355,14 @@ export class WorldVisualDiagnostics {
         if (cls.family === 'nearGrass' || cls.family === 'farGrassCards') return vec3(0.05, 0.95, 0.95);
         const maskTex = isTerrain ? terrainSlotTemplate(this.editor, 'surfaceMaskTexture') : null;
         if (maskTex) {
-          const grassCov = slotTexture('surfaceMaskTexture', maskTex, uv()).g;
-          return mix(vec3(0.16, 0.11, 0.07), vec3(0.12, 0.85, 0.22), grassCov);
+          const ffTex = terrainSlotTemplate(this.editor, 'forestFloorTexture');
+          const rawCov = slotTexture('surfaceMaskTexture', maskTex, uv()).g;
+          const fallbackCov = ffTex
+            ? rawCov.mul(oneMinus(slotTexture('forestFloorTexture', ffTex, uv()).r.mul(0.84)))
+            : rawCov;
+          // Inside WSC window, display published ecological blade coverage (`eco.a`) directly.
+          const ecoCov = mix(fallbackCov, gc.vegetationCoverage, gc.inside);
+          return mix(vec3(0.16, 0.11, 0.07), vec3(0.12, 0.85, 0.22), ecoCov.clamp(0, 1));
         }
         return vec3(0.22, 0.22, 0.24);
       }

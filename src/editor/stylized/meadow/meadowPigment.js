@@ -1,4 +1,4 @@
-import { cameraPosition, color, dot, float, fract, mix, pow, smoothstep, uv, vec3, vec4 } from 'three/tsl';
+import { cameraPosition, color, dot, float, fract, mix, pow, smoothstep, uv, vec2, vec3, vec4 } from 'three/tsl';
 
 import { stormSnowCoverAtCanonical } from '../../weather/storm/snowField/snowFieldState.js';
 import { canopySnowColor } from '../forest/canopySnow.js';
@@ -13,10 +13,20 @@ import { meadowShortStand } from './meadowGrowthNodes.js';
 import { applyMeadowGroundStyle, meadowGroundStyle } from './meadowGroundStyle.js';
 import { meadowStandNodes } from './meadowStandNodes.js';
 import { meadowTuftNodes } from './meadowTuftNodes.js';
-import { sampleGroundContactAt } from '../groundContact/GroundContactState.js';
+import { sampleWorldSurfaceContextAt } from '../worldSurfaceContext/WorldSurfaceContextState.js';
+import { resolveTerrainWorldNoiseMean } from '../worldSurfaceContext/TerrainSurfaceEvaluator.js';
 
-/** Share of the root pigment the stem's foot keeps where it meets the soil. */
-const SOIL_SHARE = 0.88;
+/** Environmental terrain-color coupling on blade roots (open meadow vs woodland canopy). */
+const ENV_ROOT_SHARE_OPEN = 0.30;
+const ENV_ROOT_SHARE_CANOPY = 0.68;
+/** Relative share of environmental coupling carried into upper tips (keeps tips lively). */
+const ENV_TIP_RATIO = 0.62;
+/** Tip lift relative to local terrain surface when anchoring blades in shade. */
+const ENV_TIP_LIFT = 1.15;
+/** Direct terrain-albedo match at the blade foot (height = 0) without double root darkening. */
+const FOOT_CONTACT_SHARE = 0.82;
+/** Share of terrain world-noise reflectance mean applied across all distances (matches Standard IBL terrain). */
+const WORLD_NOISE_HARMONY_SHARE = 0.85;
 
 const DEFAULT_PATH_FRINGE_COLOR = '#c2ad62';
 const DEFAULT_PATH_FRINGE_STRENGTH = 0.55;
@@ -89,15 +99,33 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   const stormCover = stormSnowCoverAtCanonical(blade.canonical);
   root = mix(root, canopySnowColor.mul(0.8), stormCover.mul(0.6));
   tip = mix(tip, canopySnowColor, stormCover.mul(0.9));
-  // Inherit local ground contact AO, canopy shade, and biome soil colour from the GPU field (vertex stage).
-  const groundContact = sampleGroundContactAt(blade.canonical, { canonical: true });
-  const groundAo = float(1).sub(groundContact.contact.mul(0.32)).sub(groundContact.canopy.mul(0.14)).clamp(0.45, 1);
-  root = root.mul(groundAo);
-  // Tips take most of it: at 0.55 the shade under a shrub's crown never reached the
-  // top of the sward, and shrubs stood on unshaded grass (2026-11-24 captures).
-  tip = tip.mul(mix(float(1), groundAo, float(0.85)));
-  const footSoilColor = mix(root.mul(SOIL_SHARE), groundContact.soilColor.mul(0.92), groundContact.inside.mul(0.45))
-    .toVarying('meadowFootSoil');
+  // Apply palette brightness + shared terrain world-noise reflectance harmony
+  // BEFORE WSC surface anchoring so wsc.albedo is never double-scaled and far
+  // cards outside the 128 m WSC window stay matched with zero border ring.
+  const wnMean = resolveTerrainWorldNoiseMean(config);
+  const wnHarmony = vec3(
+    1 + (wnMean[0] - 1) * WORLD_NOISE_HARMONY_SHARE,
+    1 + (wnMean[1] - 1) * WORLD_NOISE_HARMONY_SHARE,
+    1 + (wnMean[2] - 1) * WORLD_NOISE_HARMONY_SHARE,
+  );
+  root = root.mul(brightness).mul(wnHarmony);
+  tip = tip.mul(brightness).mul(wnHarmony);
+
+  // Sample canonical World Surface Context once in vertex stage (zero extra samplers).
+  const wsc = sampleWorldSurfaceContextAt(blade.canonical, { canonical: true });
+  // Single-counted trunk/rock contact occlusion (removes DS-01 canopy double-darkening).
+  const contactAo = float(1).sub(wsc.contact.mul(0.26)).clamp(0.65, 1);
+  // Environmental surface coupling: anchors woodland & patchy-ground blades into the
+  // resolved terrain reflectance family while preserving lively sunlit tips.
+  const envShare = wsc.validity.mul(mix(float(ENV_ROOT_SHARE_OPEN), float(ENV_ROOT_SHARE_CANOPY), wsc.canopy));
+  const wscTipTarget = wsc.albedo.mul(ENV_TIP_LIFT).clamp(0, 1);
+  root = mix(root, wsc.albedo, envShare).mul(contactAo);
+  tip = mix(tip, wscTipTarget, envShare.mul(ENV_TIP_RATIO)).mul(mix(float(1), contactAo, float(0.5)));
+
+  // Pack resolved WSC terrain albedo + validity into one vec4 varying; eco canopy +
+  // effective vegetation coverage into one compact vec2 varying.
+  const footSurface = vec4(wsc.albedo, wsc.validity).toVarying('meadowFootSoil');
+  const wscEco = vec2(wsc.canopy, wsc.vegetationCoverage).toVarying('meadowWscEco');
   // Occupancy rides in the root varying's fourth lane: no extra vertex output.
   const rootData = vec4(root, occupancy).toVarying('meadowRootPigment');
   root = rootData.xyz;
@@ -105,27 +133,38 @@ export function meadowPigment({ uniforms, tuning, config, blade, marks = false, 
   const tipData = vec4(tip, melt).toVarying('meadowTipPigment');
   tip = tipData.xyz;
   const melting = tipData.w;
-  const canopy = meadowCanopyColor(root, tip, appearance.canopyTipMix);
+  const canopyColor = meadowCanopyColor(root, tip, appearance.canopyTipMix);
   // A short stem has no sward over its root: the whole blade is lit, so painting
   // most of it as root is what turned it into a black spike on sunlit ground.
   const short = meadowShortStand(uniforms.growth.dimensions.element(blade.growth.toInt()).y).toVarying('meadowShortStand');
   const gradient = mix(pow(height, appearance.gradientPower), height.sqrt(), short);
-  const pigment = mix(mix(root, tip, gradient), canopy, melting.mul(appearance.meltFlatten));
-  // Contact darkening belongs to dense interiors; an isolated stem's foot stays
-  // near the ground's own value instead of punching a dark dot into it.
-  const rootFloor = mix(appearance.rootBrightness, float(1), float(1).sub(rootData.w).mul(tufts.rootLift).max(short));
-  const rootShade = mix(mix(rootFloor, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height)), float(1), melting);
-  // The foot meets the ground as the terrain shows it from this view
-  // (MeadowGroundShading's root): soil-side from above, canopy when grazing.
-  const soil = mix(footSoilColor, canopy, meadowCanopyView(appearance.canopyStrength));
-  const based = mix(soil, pigment, smoothstep(0, 0.18, height).max(melting));
+  const pigment = mix(mix(root, tip, gradient), canopyColor, melting.mul(appearance.meltFlatten));
+  // Self-occlusion inside dense tufts only: sparse woodland blades (`1 - vegetationCoverage`)
+  // and isolated tuft stragglers lift toward 1 so they never punch dark dots into litter.
+  const sparseLift = float(1).sub(wscEco.y).mul(footSurface.w).mul(0.75);
+  const rootFloor = mix(
+    appearance.rootBrightness,
+    float(1),
+    float(1).sub(rootData.w).mul(tufts.rootLift).max(short).max(sparseLift),
+  );
+  // Keep vertical mean luminance conserved when `melting` flattens rootShade across LOD bands.
+  const meltedShade = mix(rootFloor, float(1), float(0.65));
+  const rootShade = mix(mix(rootFloor, 1, smoothstep(0, appearance.canopyDepth.max(0.01), height)), meltedShade, melting);
   const variation = mix(mix(vec3(0.93, 1, 0.9), vec3(1.07, 1, 0.86), blade.variation), vec3(1), melting);
   const bladeValue = mix(fract(blade.rank.mul(0.618034)).sub(0.5).mul(appearance.valueJitter).add(1), float(1), melting);
+  const stemColor = pigment.mul(rootShade).mul(variation).mul(bladeValue);
+  // Foot meets exact resolved terrain reflectance (wsc.albedo) AFTER rootShade so
+  // roots never double-darken against the ground, leaning toward canopy at grazing view.
+  const footTarget = mix(footSurface.xyz, canopyColor, meadowCanopyView(appearance.canopyStrength).mul(0.45));
+  const footReach = smoothstep(0, 0.24, height).oneMinus().mul(footSurface.w).mul(float(1).sub(melting.mul(0.5)));
+  const finalColor = mix(stemColor, footTarget, footReach.mul(FOOT_CONTACT_SHARE));
   return {
     pigment,
     bladeValue,
     rootShade,
-    color: based.mul(rootShade).mul(variation).mul(bladeValue).mul(brightness),
+    canopy: wscEco.x.clamp(0, 1),
+    vegetationCoverage: wscEco.y.clamp(0, 1),
+    color: finalColor,
     height,
   };
 }

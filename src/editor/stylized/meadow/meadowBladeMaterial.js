@@ -18,6 +18,7 @@ import { assignGrassMaterialData } from '../../../render/postprocessing/PostProc
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
+import { FOREST_FLOOR_FILL, foliageSkyFill } from '../forest/foliageLight.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { createMeadowBladePosition, meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
@@ -39,7 +40,14 @@ export { meadowBladeWorldNormal } from './meadowBladeNormals.js';
 export function createMeadowBladeMaterial({
   uniforms, tuning, config, sunDirection, bandCount = 4, handoff = false, tileSize,
 }) {
-  const material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide });
+  // Use MeshStandardNodeMaterial (matching terrainMaterial.js) so blades receive the
+  // exact same `scene.environment` IBL sky fill under overcast clouds, rain, and canopy
+  // shade instead of plunging dark relative to Standard terrain (WSC PR 3).
+  const material = new THREE.MeshStandardNodeMaterial({
+    metalness: 0,
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+  });
   material.name = 'meadow-grass-blades';
   // Shadow receivers interpolate positionWorld so these varying assignments stay in the vertex stage.
   const bentNormal = varyingProperty('vec3', 'meadowBentNormal');
@@ -52,7 +60,7 @@ export function createMeadowBladeMaterial({
   material.positionNode = position;
 
   const blade = meadowInstance(uniforms.origin);
-  const { pigment, bladeValue, rootShade, color: albedo, height } = meadowPigment({
+  const { pigment, bladeValue, rootShade, canopy, color: albedo, height } = meadowPigment({
     uniforms, tuning, config, blade, marks: true, height: profileHeight,
   });
 
@@ -77,10 +85,12 @@ export function createMeadowBladeMaterial({
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
     .mul(gust).mul(height.mul(height)).mul(grassGustSheenUniforms.weight);
+  const floorFill = foliageSkyFill(albedo, FOREST_FLOOR_FILL).mul(canopy);
   const emissive = pigment.mul(bladeValue).mul(uniforms.sunColor)
     .mul(transmission).mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength)
     .mul(smoothstep(0.35, 1, height))
-    .add(pigment.mul(uniforms.skyColor).mul(uniforms.appearance.fill).mul(mix(0.45, 1, rootShade)))
+    .add(albedo.mul(uniforms.skyColor).mul(uniforms.appearance.fill).mul(mix(0.75, 1, rootShade)))
+    .add(floorFill)
     .add(sheen);
   // A spell's light warming the meadow round it (one uniform light, no scene light).
   // Evaluated per vertex: blades are thin, and the meadow's overdraw makes a

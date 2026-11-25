@@ -72,7 +72,7 @@ import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading
 import { applyMeadowGroundDetail } from './stylized/meadow/meadowGroundDetail.js';
 import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
-import { foliageSkyFill } from './stylized/forest/foliageLight.js';
+import { FOREST_FLOOR_FILL, foliageSkyFill } from './stylized/forest/foliageLight.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
 import { createPuddleShading } from './stylized/PuddleShading.js';
@@ -120,8 +120,6 @@ function ecotoneTileUv({ terrainUv, transitionPatterns, chunkWorldSize, cellsPer
 
 /** The packed noise swings wider than four-octave value noise (std 0.2 against ~0.12). */
 const NOISE_TO_FBM = 0.6;
-/** Share of the canopy's sky fill the forest floor takes, so it sits ~2 stops under the crowns, not 4. */
-const FOREST_FLOOR_FILL = 0.8;
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -415,8 +413,12 @@ export function createTerrainMaterial({
         view: positionWorld.sub(cameraPosition).normalize(),
       });
       // Most rays stop high in the layer: a linear tip ramp would pale the field past the cards.
+      // Multiply by the bake's world-noise reflectance factor so 55-95 m grassVolume matches the
+      // underlying terrain & far-card luminance without a bright distance pop (WSC PR 3).
       const tipShare = volume.y.mul(volume.y).mul(grassVolume.tipShare);
-      const blades = mix(grassTint, meadowGround?.tip ?? colorNode(farCover.tipColor), tipShare).mul(heightShade);
+      const blades = mix(grassTint, meadowGround?.tip ?? colorNode(farCover.tipColor), tipShare)
+        .mul(heightShade)
+        .mul(bakedSurface.worldNoiseMultiplier ?? vec3(1));
       bakedSurface.color = mix(bakedSurface.color, blades, volumeMask.mul(volume.x));
     }
     // A desert's dried crust lies in patches with rippled sand between them: as a

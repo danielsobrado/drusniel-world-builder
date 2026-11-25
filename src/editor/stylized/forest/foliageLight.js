@@ -50,6 +50,13 @@ const BLOSSOM_FILL = 1.15;
 const BLOSSOM_BOUNCE = 1.4;
 const BUILDING_FILL = 2.2;
 const BUILDING_BOUNCE = 2.6;
+/**
+ * Shared canopy-floor sky fill consumed identically by shaded forest terrain
+ * (`terrainMaterial.js`), near grass blades (`meadowBladeMaterial.js`), and
+ * far grass cards (`meadowCardMaterial.js`) so woodland blades and floor stay
+ * in the exact same indirect light instead of inverting dark under canopy.
+ */
+export const FOREST_FLOOR_FILL = 0.62;
 /** Metres up a trunk over which the bounce off the ground fades. */
 const BOUNCE_REACH = 5;
 

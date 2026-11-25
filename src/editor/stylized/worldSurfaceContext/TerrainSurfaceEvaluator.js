@@ -82,6 +82,26 @@ function hexToLinearRgb(hex, fallbackHex) {
   return [c.r, c.g, c.b];
 }
 
+/**
+ * Resolves the mean linear RGB multiplier of `TerrainMaterialWorldNoiseNodes`
+ * (`patchWarm` / `patchCool` at `patchStrength`) so grass blades and far cards
+ * stay seamlessly calibrated to terrain reflectance both inside and beyond the
+ * 128 m World Surface Context window (WSC PR 3).
+ */
+export function resolveTerrainWorldNoiseMean(stylizedConfig) {
+  const wn = stylizedConfig?.materialBake?.families?.worldNoise;
+  if (!wn?.enabled) return [1, 1, 1];
+  const strength = clamp01(Number.isFinite(wn.patchStrength) ? wn.patchStrength : 0);
+  if (strength <= 0) return [1, 1, 1];
+  const warm = hexToLinearRgb(wn.patchWarm, '#808080');
+  const cool = hexToLinearRgb(wn.patchCool, '#808080');
+  return [
+    lerp(1, (warm[0] + cool[0]), strength),
+    lerp(1, (warm[1] + cool[1]), strength),
+    lerp(1, (warm[2] + cool[2]), strength),
+  ];
+}
+
 function fract(x) {
   return x - Math.floor(x);
 }

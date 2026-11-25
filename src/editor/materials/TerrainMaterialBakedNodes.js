@@ -392,6 +392,8 @@ export function createTerrainMaterialBakedSurface({
     shape: samples.terrainShape,
     /** Baked open water (g) and shoreline, which take no puddles. */
     water: max(samples.canopyWater.g, samples.wetnessShoreline.g),
+    /** Shared low-frequency world-noise reflectance multiplier (keeps post-bake layers like grassVolume aligned). */
+    worldNoiseMultiplier: noiseShaping?.multiplier ?? vec3(1),
   };
 }
 
