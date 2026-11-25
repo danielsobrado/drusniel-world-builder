@@ -34,7 +34,11 @@ test('one object edit preserves unrelated matrices and only marks the changed in
     assert.equal(b.instanceMatrix.version, bVersion);
     objects = Array.from({ length: 64 }, (_, i) => ({ id: i + 1, x: i, z: 0, rotation: 0, definitionKey: 'a' }));
     const staged = [], prepared = new WeakSet();
-    view.terrainView.drawPreparation = { settings: { enabled: true }, prepared, register: mesh => staged.push(mesh) };
+    view.terrainView.drawPreparation = {
+      settings: { enabled: true },
+      isMaterialReady: mesh => prepared.has(mesh),
+      register: mesh => staged.push(mesh),
+    };
     map.revision++; view.refreshAll();
     assert.equal(a.count, 10, 'previous complete publication remains while replacement is staged');
     assert.equal(view.pendingObjectUpdates.size, 1);
