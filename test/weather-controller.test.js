@@ -123,6 +123,7 @@ test('weather controller applies VFX material policy and restores visibility aft
       compileCalls += 1;
       assert.equal(root, scene);
       assert.equal(activeCamera, camera);
+      assert.equal(scene.getObjectByName('weather-shader-warmup-probe'), undefined);
       assert.ok(groups.every((group) => group.visible));
       return Promise.resolve();
     },

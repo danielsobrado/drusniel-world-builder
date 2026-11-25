@@ -1572,7 +1572,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     await startup.wait(spellRuntime?.precompile?.(terrainView.renderer));
     stylizedSurface.prewarmStreamingResources(terrainView.renderer);
     finishWaterPrewarm = stylizedSurface.beginWaterRefractionPrewarm();
-    await startup.wait(assetStartupTelemetry.trace.measure('warmup.initialScene', () => terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera)));
+    await startup.wait(assetStartupTelemetry.trace.measure('warmup.initialScene', async () => {
+      const warmed = await weatherController?.precompile(terrainView.renderer, editorCamera.camera);
+      if (!warmed) await terrainView.renderer.compileAsync(terrainView.scene, editorCamera.camera);
+    }));
     if (finishWaterPrewarm) {
       terrainView.renderer.render(terrainView.scene, editorCamera.camera);
     }

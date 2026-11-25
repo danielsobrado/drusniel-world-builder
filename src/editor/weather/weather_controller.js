@@ -284,6 +284,9 @@ export function createWeatherController(deps) {
     if (disposed || !renderer || !camera) return false;
     const compile = renderer.compileAsync ?? renderer.compile;
     if (typeof compile !== 'function') return false;
+    // An explicit warmup owns this renderer compile. Remove the fallback probe
+    // before traversing the scene so it cannot queue a second compile.
+    disposeWarmupProbe();
 
     const visibility = systems.map((system) => system.group.visible);
     let restored = false;
@@ -306,7 +309,6 @@ export function createWeatherController(deps) {
       return false;
     } finally {
       restoreVisibility();
-      disposeWarmupProbe();
     }
   };
 
