@@ -72,6 +72,7 @@ export function buildBiomeSoilPalette(config) {
  */
 export class GroundContactField {
   constructor({ terrainView, config, resolution = WSC_RESOLUTION, span = WSC_SPAN_M }) {
+    if (resolution !== WSC_RESOLUTION) throw new RangeError(`World Surface Context resolution must be ${WSC_RESOLUTION}.`);
     this.terrainView = terrainView;
     this.resolution = resolution;
     this.span = span;
@@ -126,6 +127,7 @@ export class GroundContactField {
 
     if (residentCount === 0) {
       if (wscUniforms.active.value !== 0) clearWorldSurfaceContext();
+      this.lastSlotSignature = '';
       return false;
     }
 

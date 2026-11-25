@@ -3,6 +3,7 @@ import {
   float,
   max,
   oneMinus,
+  select,
   smoothstep,
   sqrt,
   varying,
@@ -34,6 +35,8 @@ export const WSC_RESOLUTION = 128;
 export const WSC_SPAN_M = 128;
 export const WSC_BORDER_FADE_M = 12;
 export const WSC_DEFAULT_ROUGHNESS_BYTE = 230; // ~0.90 matte natural ground
+const MIN_TEXEL_WEIGHT = 1e-6;
+const EMPTY_ROUGHNESS = 0.9;
 
 function createWscTexture(data, name, type) {
   const tex = new THREE.DataTexture(data, WSC_RESOLUTION, WSC_RESOLUTION, THREE.RGBAFormat, type);
@@ -84,7 +87,7 @@ function reconstructNormal(nx, nz, weight) {
   const bx = nx.mul(weight);
   const bz = nz.mul(weight);
   const ny = sqrt(max(float(0.01), float(1).sub(bx.mul(bx)).sub(bz.mul(bz))));
-  return vec3(bx, ny, bz);
+  return vec3(bx, ny, bz).normalize();
 }
 
 function computeWindowMask(uv) {
@@ -121,7 +124,7 @@ export function sampleWorldSurfaceContextAt(
   const { texels: geoTexels, blend: blendGeo } = bilinearTexels(wscGeoTexture, clampedUv);
   const weights = geoTexels.map((t) => t.w.clamp(0, 1));
   const texelValidity = blendGeo(weights).clamp(0, 1);
-  const safeWeight = max(texelValidity, float(1e-4));
+  const safeWeight = max(texelValidity, float(MIN_TEXEL_WEIGHT));
 
   const relHeight = blendGeo(geoTexels.map((t, i) => t.r.mul(weights[i]))).div(safeWeight);
   const rawNx = blendGeo(geoTexels.map((t, i) => t.g.mul(weights[i]))).div(safeWeight);
@@ -132,11 +135,12 @@ export function sampleWorldSurfaceContextAt(
   const normal = reconstructNormal(rawNx, rawNz, validity);
 
   let albedo = vec3(0);
-  let roughness = float(0.9);
+  let roughness = float(EMPTY_ROUGHNESS);
   if (includeBase) {
     const { texels: baseTexels, blend: blendBase } = bilinearTexels(wscBaseTexture, clampedUv);
     albedo = blendBase(baseTexels.map((t, i) => t.rgb.mul(t.rgb).mul(weights[i]))).div(safeWeight);
-    roughness = blendBase(baseTexels.map((t, i) => t.a.mul(weights[i]))).div(safeWeight).clamp(0, 1);
+    const baseRoughness = blendBase(baseTexels.map((t, i) => t.a.mul(weights[i]))).div(safeWeight).clamp(0, 1);
+    roughness = select(texelValidity.greaterThan(0), baseRoughness, roughness);
   }
 
   let contact = float(0);
@@ -216,6 +220,7 @@ function smoothstepCpu(edge0, edge1, x) {
  * @param {{ canonical?: boolean, resolution?: number }} [options]
  */
 export function sampleWorldSurfaceContextCpu(x, z, { canonical = true, resolution = WSC_RESOLUTION } = {}) {
+  if (resolution !== WSC_RESOLUTION) throw new RangeError(`World Surface Context resolution must be ${WSC_RESOLUTION}.`);
   const active = wscUniforms.active.value;
   const origin = canonical ? wscUniforms.canonicalOrigin.value : wscUniforms.renderOrigin.value;
   const invSpan = wscUniforms.inverseSpan.value;
@@ -293,7 +298,7 @@ export function sampleWorldSurfaceContextCpu(x, z, { canonical = true, resolutio
   }
 
   const validity = clamp01(texelValidity * windowInside);
-  if (texelValidity <= 1e-6) {
+  if (texelValidity <= 0) {
     return {
       active,
       u,
@@ -306,7 +311,7 @@ export function sampleWorldSurfaceContextCpu(x, z, { canonical = true, resolutio
       height: baseHeight,
       normal: [0, 1, 0],
       albedo: [0, 0, 0],
-      roughness: 0.9,
+      roughness: EMPTY_ROUGHNESS,
       contact: 0,
       canopy: 0,
       litter: 0,
@@ -314,10 +319,11 @@ export function sampleWorldSurfaceContextCpu(x, z, { canonical = true, resolutio
     };
   }
 
-  const invW = 1 / texelValidity;
+  const invW = 1 / Math.max(texelValidity, MIN_TEXEL_WEIGHT);
   const nnx = nx * invW * validity;
   const nnz = nz * invW * validity;
   const nny = Math.sqrt(Math.max(0.01, 1 - nnx * nnx - nnz * nnz));
+  const normalLength = Math.hypot(nnx, nny, nnz);
 
   return {
     active,
@@ -329,7 +335,7 @@ export function sampleWorldSurfaceContextCpu(x, z, { canonical = true, resolutio
     inside: validity,
     valid: validity > 0,
     height: relH * invW + baseHeight,
-    normal: [nnx, nny, nnz],
+    normal: [nnx / normalLength, nny / normalLength, nnz / normalLength],
     albedo: [r * invW, g * invW, b * invW],
     roughness: clamp01(roughness * invW),
     contact: clamp01(contact * invW) * validity,

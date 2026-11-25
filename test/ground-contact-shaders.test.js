@@ -9,6 +9,7 @@ import {
   GROUND_CONTACT_RESOLUTION,
   GROUND_CONTACT_SPAN_M,
   clearGroundContactField,
+  groundContactEcoTexture,
   groundContactGeoTexture,
   groundContactSoilTexture,
   groundContactUniforms,
@@ -96,11 +97,13 @@ test('GroundContactField packs exact sloped height, terrain normal, contact AO, 
     const idx = (64 * GROUND_CONTACT_RESOLUTION + 64) * 4;
     const nx = THREE.DataUtils.fromHalfFloat(groundContactGeoTexture.image.data[idx + 1]);
     const nz = THREE.DataUtils.fromHalfFloat(groundContactGeoTexture.image.data[idx + 2]);
-    const contact = THREE.DataUtils.fromHalfFloat(groundContactGeoTexture.image.data[idx + 3]);
+    const validity = THREE.DataUtils.fromHalfFloat(groundContactGeoTexture.image.data[idx + 3]);
+    const contact = groundContactEcoTexture.image.data[idx] / 255;
     const expectedLen = Math.hypot(-0.25, 1, 0.1);
     assert.ok(Math.abs(nx - (-0.25 / expectedLen)) < 0.015, `nx ${nx} vs ${-0.25 / expectedLen}`);
     assert.ok(Math.abs(nz - (0.1 / expectedLen)) < 0.015, `nz ${nz} vs ${0.1 / expectedLen}`);
     assert.ok(Math.abs(contact - 0.8) < 0.02, `contact ${contact} vs 0.8`);
+    assert.equal(validity, 1);
 
     // Floating-origin shift moves only renderOrigin without rebuilding textures.
     const prevVersion = groundContactGeoTexture.version;
@@ -112,7 +115,8 @@ test('GroundContactField packs exact sloped height, terrain normal, contact AO, 
     const palette = buildBiomeSoilPalette(config);
     assert.ok(palette[1 * 3] > 0 && palette[12 * 3] > 0);
     assert.notEqual(Math.round(palette[1 * 3] * 1000), Math.round(palette[12 * 3] * 1000));
-    assert.ok(groundContactSoilTexture.image.data[idx + 3] > 100, 'canopy shade packed in soil alpha');
+    assert.equal(groundContactEcoTexture.image.data[idx + 1], 128, 'canopy shade packed in ecology green');
+    assert.equal(groundContactSoilTexture.image.data[idx + 3], 230, 'roughness packed in surface alpha');
   } finally {
     field.dispose();
     assert.equal(groundContactUniforms.active.value, 0);

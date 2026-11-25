@@ -71,6 +71,43 @@ function makeSlot({
   };
 }
 
+test('a ground context rebuilds when the same page returns after a full unload', () => {
+  const slot = makeSlot({ chunkX: 0, chunkZ: 0, heightFn: () => 22.5 });
+  const slots = [slot];
+  const field = new WorldSurfaceContextField({ terrainView: { worldStore: { chunkSize: 16, tileSize: 2 }, slots } });
+  const focus = { x: 16, z: -16 };
+  const origin = { x: 0, z: 0 };
+  try {
+    field.update(focus, origin);
+    assert.equal(sampleWorldSurfaceContextCpu(focus.x, focus.z).validity, 1);
+    slots.pop();
+    assert.equal(field.update(focus, origin), false);
+    slots.push(slot);
+    assert.equal(field.update(focus, origin), true);
+    const sample = sampleWorldSurfaceContextCpu(focus.x, focus.z);
+    assert.equal(sample.validity, 1);
+    assert.equal(sample.height, 22.5);
+  } finally {
+    field.dispose();
+  }
+});
+
+test('the field enforces its texture resolution and returns unit normals on steep slopes', () => {
+  const slot = makeSlot({ chunkX: 0, chunkZ: 0, heightFn: (x) => -20 * x });
+  const terrainView = { worldStore: { chunkSize: 16, tileSize: 2 }, slots: [slot] };
+  assert.throws(() => new WorldSurfaceContextField({ terrainView, resolution: 32 }), RangeError);
+  assert.throws(() => sampleWorldSurfaceContextCpu(16, -16, { resolution: 32 }), RangeError);
+  const field = new WorldSurfaceContextField({ terrainView });
+  try {
+    field.update({ x: 16, z: -16 }, { x: 0, z: 0 });
+    const sample = sampleWorldSurfaceContextCpu(16, -16);
+    assert.ok(sample.normal[0] > 0.99);
+    assert.ok(Math.abs(Math.hypot(...sample.normal) - 1) < 1e-6);
+  } finally {
+    field.dispose();
+  }
+});
+
 test('PR 1 GroundContactState backwards-compatible facade aliases canonical WSC state', () => {
   assert.equal(groundContactGeoTexture, wscGeoTexture);
   assert.equal(groundContactSoilTexture, wscBaseTexture);

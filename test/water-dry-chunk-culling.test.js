@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createWaterField, waterFieldHasCoverage } from '../src/editor/water/WaterField.js';
+import { StylizedWaterSlot } from '../src/editor/stylized/StylizedWaterSlot.js';
 
 const WATER_FIELD_CHANNELS = 4;
 
@@ -119,11 +120,8 @@ test('the water slot hides dry chunks so the viewport copy is not triggered', as
   );
   // Visibility must be decided after the upload, otherwise a chunk that just
   // gained water would stay hidden for a frame.
-  const update = source.match(/update\(timestamp\)[\s\S]*?\n {2}\}/)?.[0] ?? '';
-  assert.ok(update.includes('this.uploadField(page)'), 'update uploads the field');
-  assert.ok(
-    update.indexOf('this.uploadField(page)')
-      < update.indexOf('this.mesh.visible = this.hasWaterCoverage'),
-    'visibility is resolved after the upload',
-  );
+  const update = StylizedWaterSlot.prototype.update.toString();
+  const upload = update.indexOf('this.uploadField(page)');
+  const visibility = update.indexOf('this.mesh.visible = this.hasWaterCoverage');
+  assert.ok(upload >= 0 && visibility > upload, 'visibility is resolved after the upload');
 });

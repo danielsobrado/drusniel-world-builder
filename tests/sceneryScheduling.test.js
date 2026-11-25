@@ -30,7 +30,7 @@ function fixture() {
 
 test('animation and layout run every frame before budgeted publications',()=>{
   const {surface,calls}=fixture();surface.update(1000,{position:{x:0,z:0}});
-  assert.deepEqual(calls.slice(0,4),['collision','sky','grass frame','rock']);
+  assert.deepEqual(calls.slice(0,5),['collision','sky','water','grass frame','rock']);
   assert.equal(calls.filter(name=>name==='grass frame').length,1);
   assert.ok(calls.indexOf('grass work')>calls.indexOf('bush'));
   for(const name of ['rock work','tree work','bush work'])assert.ok(calls.indexOf(name)>calls.indexOf('grass frame'));
