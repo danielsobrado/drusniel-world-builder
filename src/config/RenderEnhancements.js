@@ -4,6 +4,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   crownShadows: false,
   // QA override of water.sea.offshoreFft.enabled (PR I): `?oceanFft=1` forces the offshore FFT on.
   oceanFft: false,
+  r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, requestMaxWaitMs: 500 }),
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({
     enabled: true,
@@ -22,9 +23,22 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
 export function resolveRenderEnhancements(source = {}, search = '', { mobile = false } = {}) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) throw new TypeError('Render enhancements must be an object.');
   const value = { ...RENDER_ENHANCEMENT_DEFAULTS, ...source,
+    r187: { ...RENDER_ENHANCEMENT_DEFAULTS.r187, ...source.r187 },
     surfaceAnisotropy: { ...RENDER_ENHANCEMENT_DEFAULTS.surfaceAnisotropy, ...source.surfaceAnisotropy },
     waterReflections: { ...RENDER_ENHANCEMENT_DEFAULTS.waterReflections, ...source.waterReflections } };
   const params = new URLSearchParams(search);
+  if (source.r187 !== undefined && (!source.r187 || typeof source.r187 !== 'object' || Array.isArray(source.r187))) {
+    throw new TypeError('r187 must be an object.');
+  }
+  for (const [param, key] of [['r187DepthOnlyOcclusion', 'depthOnlyOcclusion'], ['r187PrioritizedRequests', 'prioritizedRequests']]) {
+    if (params.has(param)) value.r187[key] = params.get(param) === '1';
+    if (typeof value.r187[key] !== 'boolean') throw new TypeError(`r187.${key} must be a boolean.`);
+  }
+  const { maxConcurrentRequests, requestMaxWaitMs } = value.r187;
+  if (!Number.isInteger(maxConcurrentRequests) || maxConcurrentRequests < 1 || maxConcurrentRequests > 16) {
+    throw new RangeError('r187.maxConcurrentRequests must be an integer in [1, 16].');
+  }
+  if (!Number.isFinite(requestMaxWaitMs) || requestMaxWaitMs < 0) throw new RangeError('r187.requestMaxWaitMs must be non-negative.');
   if (params.get('enhancements') === 'high') {
     value.waterReflections.enabled = true;
     value.waterReflections.planar = true;

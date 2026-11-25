@@ -3,6 +3,7 @@ import test from 'node:test';
 import { BoxGeometry, Group, Mesh, MeshBasicMaterial, Scene } from 'three/webgpu';
 import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../src/render/preparation/StagedDrawPublication.js';
 import { StreamedDrawPreparation } from '../src/render/preparation/StreamedDrawPreparation.js';
+import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 
 test('new publication remains hidden until all gameplay draws are prepared', () => {
   const scene = new Scene(), root = new Group();
@@ -32,12 +33,16 @@ test('cancelling a hidden publication detaches roots and discards pending draws'
   const scene = new Scene(), geometry = new BoxGeometry(), material = new MeshBasicMaterial();
   const mesh = new Mesh(geometry, material);
   const preparation = new StreamedDrawPreparation({ scene, renderer: {},
+    diagnostics: true,
     settings: { enabled: true, meshesPerFrame: 1 }, render: () => assert.fail('cancelled draw rendered') });
   const job = stagedDrawPublication(scene, [mesh], preparation);
   try {
-    job.next(); job.return(); preparation.flush({});
+    const cancellations = PerfCounters.get('streamedDrawJobsCancelled');
+    job.next(); job.return();
     assert.equal(scene.children.length, 0);
     assert.equal(mesh.parent, null);
     assert.equal(preparation.pending.size, 0);
+    assert.equal(PerfCounters.get('streamedDrawJobsCancelled'), cancellations + 1);
+    preparation.flush({});
   } finally { preparation.dispose(); geometry.dispose(); material.dispose(); }
 });

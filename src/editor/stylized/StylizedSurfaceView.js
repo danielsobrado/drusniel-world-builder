@@ -44,7 +44,7 @@ export class StylizedSurfaceView extends StylizedSurfaceViewBase {
       let sharedScene = null;
       if (needsScene) {
         this.sharedScenePath = this.config.assets.scene;
-        sharedScene = await this.sceneAssets.acquire(this.sharedScenePath);
+        sharedScene = await this.sceneAssets.acquire(this.sharedScenePath, { priority: 'high' });
       }
       const treeVariants = this.config.trees.enabled
         ? await loadOptionalTreeVariants({

@@ -88,7 +88,7 @@ export class StylizedSurfaceView {
     this.enabled = Boolean(config?.enabled);
     this.impostorBakeMode = isTreeImpostorBakeMode();
     this.sceneAssets = this.enabled
-      ? new StylizedSceneAssetCache({ renderer: terrainView.renderer, baseUrl })
+      ? new StylizedSceneAssetCache({ renderer: terrainView.renderer, baseUrl, requests: config.enhancements?.r187 })
       : null;
     this.sharedScenePath = null;
     this.treeVariantPaths = [];
@@ -543,7 +543,7 @@ export class StylizedSurfaceView {
       let sharedScene = null;
       if (needsScene) {
         this.sharedScenePath = this.config.assets.scene;
-        sharedScene = await this.sceneAssets.acquire(this.sharedScenePath);
+        sharedScene = await this.sceneAssets.acquire(this.sharedScenePath, { priority: 'high' });
       }
       const treeVariants = this.config.trees.enabled
         ? await Promise.all(
@@ -580,7 +580,7 @@ export class StylizedSurfaceView {
       definitions: definitions ?? [],
       residentRadius,
       acquire: async (scene) => {
-        const loaded = await this.sceneAssets.acquire(scene);
+        const loaded = await this.sceneAssets.acquire(scene, { priority: 'low' });
         paths.push(scene);
         return loaded;
       },

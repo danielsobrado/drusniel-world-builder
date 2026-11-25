@@ -114,7 +114,9 @@ export class GpuOcclusion {
     this.reducePipeline = pipeline('Occlusion max depth', depthReduceShader, [sampled, stored]);
     this.visibilityPipeline = pipeline('Occlusion visibility', visibilityShader,
       [sampled, { buffer: { type: 'read-only-storage' } }, { buffer: { type: 'storage' } }]);
-    this.readback = this.device.createBuffer({ size: 20 * 8192, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    if (this.settings.diagnostics) {
+      this.readback = this.device.createBuffer({ size: 20 * 8192, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    }
     this.stats.supported = true;
     return true;
   }
@@ -125,8 +127,10 @@ export class GpuOcclusion {
     this.pyramid?.destroy();
     this.copyGroup = this.copyDepth = this.copyPyramid = null;
     this.visibilityGroup = this.visibilityInput = this.visibilityOutput = this.visibilityPyramid = null;
-    this.target = new RenderTarget(width, height, { depthBuffer: true, stencilBuffer: false });
-    this.target.depthTexture = new DepthTexture(width, height, UnsignedIntType);
+    const depthTexture = new DepthTexture(width, height, UnsignedIntType);
+    this.target = new RenderTarget(width, height, { depthTexture, stencilBuffer: false,
+      count: this.settings.depthOnlyTarget ? 0 : 1 });
+    this.target.name = 'occlusionDepthProxy';
     const w = nextPowerOfTwo(width);
     const h = nextPowerOfTwo(height);
     this.levels = Math.floor(Math.log2(Math.max(w, h))) + 1;
@@ -346,13 +350,18 @@ export class GpuOcclusion {
         return;
       }
       const previousTarget = this.renderer.getRenderTarget();
+      const previousFace = this.renderer.getActiveCubeFace?.();
+      const previousMip = this.renderer.getActiveMipmapLevel?.();
+      const previousMrt = this.renderer.getMRT?.();
       const previousAutoClear = this.renderer.autoClear;
       try {
         this.renderer.autoClear = true;
+        this.renderer.setMRT?.(null);
         this.renderer.setRenderTarget(this.target);
         this.renderer.render(this.scene, this.world.camera);
       } finally {
-        this.renderer.setRenderTarget(previousTarget);
+        this.renderer.setRenderTarget(previousTarget, previousFace, previousMip);
+        this.renderer.setMRT?.(previousMrt);
         this.renderer.autoClear = previousAutoClear;
       }
       this.#dispatch(entries, prepareStarted);
@@ -421,7 +430,7 @@ export class GpuOcclusion {
     run(this.visibilityPipeline, this.visibilityGroup, Math.ceil(count / 64));
     entries.forEach((record, i) => encoder.copyBufferToBuffer(this.output, i * 20,
       this.renderer.backend.get(record.indirect).buffer, 0, 20));
-    const readStats = Boolean(this.settings.diagnostics) && !this.reading && count <= 8192 && this.frame++ % 30 === 0;
+    const readStats = this.readback && !this.reading && count <= 8192 && this.frame++ % 30 === 0;
     if (readStats) encoder.copyBufferToBuffer(this.output, 0, this.readback, 0, count * 20);
     this.device.queue.submit([encoder.finish()]);
     if (readStats) {

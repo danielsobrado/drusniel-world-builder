@@ -52,6 +52,7 @@ import {
 } from './stylized/StylizedGodRaysPostProcess.js';
 import { patchViewportFramebufferSources } from '../render/patchViewportFramebufferSources.js';
 import { raiseDeviceLimits } from '../render/deviceLimits.js';
+import { inspectRendererCapabilities } from '../render/RendererCapabilities.js';
 import { GpuOcclusion } from '../render/occlusion/GpuOcclusion.js';
 import { resolveCinematicFinish } from './stylized/cinematicFinish.js';
 import { FOREST_FLOOR_SIZE } from './stylized/forestFloorTexture.js';
@@ -438,6 +439,7 @@ export class InfiniteTerrainView {
     }
     await this.renderer.init();
     this.rendererBackendStatus = inspectRendererBackend(this.renderer);
+    this.rendererCapabilities = inspectRendererCapabilities(this.renderer, { forceWebGL: this.rendererConfig.forceWebGL });
     PerfCounters.set('rendererWebGPUBackend', this.rendererBackendStatus.webgpu ? 1 : 0);
     PerfCounters.set('rendererWebGLBackend', this.rendererBackendStatus.webgl ? 1 : 0);
     this.coastalSwash = new CoastalSwashField({
@@ -454,7 +456,7 @@ export class InfiniteTerrainView {
     this.occlusion = occlusionSettings?.enabled
       ? new GpuOcclusion(
         { renderer: this.renderer, scene: this.scene, camera: null },
-        occlusionSettings,
+        { ...occlusionSettings, depthOnlyTarget: this.stylizedConfig.enhancements?.r187?.depthOnlyOcclusion },
       )
       : null;
     if (!this.rendererBackendStatus.webgpu && !this.rendererConfig.forceWebGL) {

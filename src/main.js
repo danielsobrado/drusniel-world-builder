@@ -1596,6 +1596,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   deferredWork.attachSurface(stylizedSurface);
   const drawPreparation = new StreamedDrawPreparation({ scene: terrainView.scene, renderer: terrainView.renderer,
     settings: config.exploration.drawPreparation, render: camera => terrainView.prewarmPostProcessing(camera),
+    diagnostics: Boolean(perfQaConfig),
     invalidateHistory: () => postProcessingController.invalidate(POST_PROCESSING_RESET_REASONS.MANUAL_RESET) });
   resources.own(drawPreparation);
   drawPreparation.markInitialScene(); terrainView.drawPreparation = drawPreparation;

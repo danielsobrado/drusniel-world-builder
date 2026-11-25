@@ -56,11 +56,11 @@ test('pending scene released before load completion is disposed when it arrives'
   const asset = disposableScene();
 
   cache.release('trees.glb');
-  assert.equal(cache.entries.has('trees.glb'), true);
+  assert.equal(cache.entries.has('/trees.glb'), true);
   pending.resolve({ scene: asset.scene });
 
   await assert.rejects(acquisition, /released before loading completed/);
-  assert.equal(cache.entries.has('trees.glb'), false);
+  assert.equal(cache.entries.has('/trees.glb'), false);
   assert.equal(asset.geometry.disposeCount, 1);
   assert.equal(asset.material.disposeCount, 1);
   assert.equal(asset.texture.disposeCount, 1);
@@ -103,4 +103,53 @@ test('disposed scene cache rejects new acquisitions', async () => {
   cache.dispose();
 
   await assert.rejects(cache.acquire('trees.glb'), /after cache disposal/);
+});
+
+test('the prioritized GLB queue deduplicates URL aliases and passes priority to the loader', async () => {
+  const pending = new Map();
+  const calls = [];
+  const cache = new StylizedSceneAssetCache({ baseUrl: '/world/',
+    requests: { prioritizedRequests: true, maxConcurrentRequests: 1, requestMaxWaitMs: 1000 },
+    loader: { loadAsync(url, onProgress, priority) {
+      calls.push([url, priority]);
+      const request = deferred(); pending.set(url, request); return request.promise;
+    } } });
+  const first = cache.acquire('first.glb');
+  const low = cache.acquire('low.glb', { priority: 'low' });
+  const high = cache.acquire('high.glb', { priority: 'high' });
+  const alias = cache.acquire('/high.glb');
+  pending.get('/world/first.glb').resolve({ scene: disposableScene().scene });
+  await first;
+  assert.deepEqual(calls, [['/world/first.glb', 'auto'], ['/world/high.glb', 'high']]);
+  const { scene, texture } = disposableScene();
+  pending.get('/world/high.glb').resolve({ scene });
+  assert.equal(await high, await alias);
+  cache.release('high.glb');
+  assert.equal(texture.disposeCount, 0);
+  cache.release('/high.glb');
+  assert.equal(texture.disposeCount, 1);
+  pending.get('/world/low.glb').resolve({ scene: disposableScene().scene });
+  await low;
+  cache.dispose();
+});
+
+test('a cancelled queued asset never starts and a fresh acquire can retry it', async () => {
+  const pending = deferred();
+  const asset = disposableScene();
+  const calls = [];
+  const cache = new StylizedSceneAssetCache({ requests: { prioritizedRequests: true, maxConcurrentRequests: 1, requestMaxWaitMs: 1000 },
+    loader: { loadAsync(url) {
+      calls.push(url);
+      return url === '/busy.glb' ? pending.promise : Promise.resolve({ scene: asset.scene });
+    } } });
+  const busy = cache.acquire('busy.glb');
+  const cancelled = cache.acquire('waiting.glb');
+  cache.release('waiting.glb');
+  await assert.rejects(cancelled, /released before loading completed/);
+  const retry = cache.acquire('waiting.glb');
+  pending.resolve({ scene: disposableScene().scene });
+  await busy;
+  assert.equal(await retry, asset.scene);
+  assert.deepEqual(calls, ['/busy.glb', '/waiting.glb']);
+  cache.dispose();
 });

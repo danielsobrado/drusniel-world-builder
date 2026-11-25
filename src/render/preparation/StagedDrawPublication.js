@@ -24,6 +24,7 @@ export function* stagedDrawPublication(parent, roots, preparation) {
       yield WAIT_FOR_DRAW_PREPARATION;
     }
   } finally {
+    for (const mesh of targets) preparation.cancel?.(mesh);
     for (const root of roots) root.removeFromParent();
     stage.removeFromParent();
   }

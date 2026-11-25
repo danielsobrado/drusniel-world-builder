@@ -8,7 +8,29 @@ import { withReflectionCapture } from '../src/render/reflections/ReflectionCaptu
 import { preparePlanarCamera } from '../src/render/reflections/PlanarCamera.js';
 import { WaterReflectionController } from '../src/render/reflections/WaterReflectionController.js';
 import { resolveRenderEnhancements } from '../src/config/RenderEnhancements.js';
+import { inspectRendererCapabilities } from '../src/render/RendererCapabilities.js';
 import { createSnowReliefNodes } from '../src/editor/stylized/SnowReliefShading.js';
+
+test('r187 world experiments require explicit opt-in and bounded request settings', () => {
+  assert.equal(resolveRenderEnhancements().r187.depthOnlyOcclusion, false);
+  assert.equal(resolveRenderEnhancements().r187.prioritizedRequests, false);
+  const config = resolveRenderEnhancements({}, '?r187DepthOnlyOcclusion=1&r187PrioritizedRequests=1');
+  assert.equal(config.r187.depthOnlyOcclusion, true);
+  assert.equal(config.r187.prioritizedRequests, true);
+  assert.throws(() => resolveRenderEnhancements({ r187: { maxConcurrentRequests: 0 } }), /maxConcurrentRequests/);
+  assert.throws(() => resolveRenderEnhancements({ r187: { depthOnlyOcclusion: 'true' } }), /depthOnlyOcclusion/);
+});
+
+test('capabilities report the initialized backend and prerequisites, including fallback', () => {
+  const gpu = { backend: { isWebGPUBackend: true, device: { features: new Set(['timestamp-query']), limits: {} } },
+    compileAsync() {} };
+  assert.equal(inspectRendererCapabilities(gpu).revision, '187');
+  assert.equal(inspectRendererCapabilities(gpu).timestampQuery, true);
+  const fallback = inspectRendererCapabilities({ backend: { isWebGLBackend: true } }, { requestedPipeline: 'native' });
+  assert.equal(fallback.backend, 'webgl');
+  assert.equal(fallback.effectivePipeline, 'standard');
+  assert.equal(fallback.fallbackReason, 'webgpu-unavailable');
+});
 
 test('startup spans close failures/cancellation, are bounded, and disabled mode retains nothing', async () => {
   let time = 0;

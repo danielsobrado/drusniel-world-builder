@@ -9,12 +9,13 @@ export const INITIAL_UPLOAD_BYTES_PER_FRAME = 768 * 1024;
 
 /** New renderers are staged on the same scene/pass cache before publication. */
 export class StreamedDrawPreparation {
-  constructor({ scene, renderer, settings, render, invalidateHistory }) {
+  constructor({ scene, renderer, settings, render, invalidateHistory, diagnostics = false }) {
     Object.assign(this, { scene, renderer, settings, render, invalidateHistory });
     this.prepared = new WeakSet();
     this.preparedVariants = new WeakMap();
     this.stagedMaterials = new Map();
     this.pending = new Set();
+    this.enqueuedAt = diagnostics ? new Map() : null;
     this.initialUploadBytes = new Map();
     this.initialUploadAttributes = new Map();
     this.attributeInitialization = new BudgetedAttributeInitialization(renderer);
@@ -66,12 +67,28 @@ export class StreamedDrawPreparation {
     if (uploadBytes > 0 && this.pending.has(root)) this.initialUploadBytes.set(root, uploadBytes);
     if (uploadAttributes && this.pending.has(root)) this.initialUploadAttributes.set(root, uploadAttributes);
   }
+  enqueue(mesh) {
+    if (this.pending.has(mesh)) return;
+    this.pending.add(mesh);
+    if (this.enqueuedAt) {
+      this.enqueuedAt.set(mesh, performance.now());
+      PerfCounters.inc('streamedDrawJobsQueued');
+    }
+  }
+  cancelDiagnostics(mesh) {
+    if (this.enqueuedAt?.delete(mesh)) PerfCounters.inc('streamedDrawJobsCancelled');
+  }
+  cancelAllDiagnostics() {
+    if (!this.enqueuedAt?.size) return;
+    PerfCounters.inc('streamedDrawJobsCancelled', this.enqueuedAt.size);
+    this.enqueuedAt.clear();
+  }
   discover(root = this.scene) {
     if (!this.settings.enabled || this.disposed) return;
     // Called after a variant/actor is installed, never scans the scene per frame.
     root.traverse(object => {
       if (!object.isMesh || this.prepared.has(object) || object.userData.skipWarmup) return;
-      this.pending.add(object);
+      this.enqueue(object);
     });
   }
   markInitialScene() {
@@ -87,11 +104,24 @@ export class StreamedDrawPreparation {
   requestMaterial(mesh, material) {
     if (this.disposed || !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material)) return false;
     this.stagedMaterials.set(mesh, material);
-    this.pending.add(mesh);
+    this.enqueue(mesh);
     return true;
   }
   isMaterialReady(mesh, material) {
     return !this.settings.enabled || this.preparedVariants.get(mesh)?.has(material) === true;
+  }
+  cancel(mesh) {
+    if (this.pending.delete(mesh)) {
+      this.cancelDiagnostics(mesh);
+      this.attributeInitialization.cancel(this.initialUploadAttributes.get(mesh) ?? []);
+      this.initialUploadAttributes.delete(mesh);
+      this.initialUploadBytes.delete(mesh);
+      this.stagedMaterials.delete(mesh);
+    }
+    if (this.hidden.has(mesh)) {
+      mesh.visible = this.hidden.get(mesh);
+      this.hidden.delete(mesh);
+    }
   }
   flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null, aged = false) {
     this.revealPending();
@@ -110,9 +140,8 @@ export class StreamedDrawPreparation {
         let root = mesh;
         while (root.parent) root = root.parent;
         if (root !== this.scene) {
-          this.attributeInitialization.cancel(this.initialUploadAttributes.get(mesh) ?? []);
-          this.initialUploadAttributes.delete(mesh);
-          this.pending.delete(mesh); this.stagedMaterials.delete(mesh); this.initialUploadBytes.delete(mesh); continue;
+          this.cancel(mesh);
+          continue;
         }
         const attributes = this.initialUploadAttributes.get(mesh);
         const budgeted = attributes && this.attributeInitialization.supported;
@@ -145,9 +174,27 @@ export class StreamedDrawPreparation {
       for (const mesh of targets) materials.set(mesh, mesh.material);
       for (const target of targets) target.material = this.stagedMaterials.get(target) ?? target.material;
       this.hierarchy ??= new ReflectionShadowRegistry(this.scene);
+      const prepareStarted = this.enqueuedAt ? performance.now() : 0;
+      if (this.enqueuedAt) {
+        PerfCounters.inc('streamedDrawPassRequests');
+        for (const target of targets) {
+          const queuedAt = this.enqueuedAt.get(target);
+          if (queuedAt !== undefined) PerfCounters.inc('streamedDrawQueueWaitMs', prepareStarted - queuedAt);
+        }
+      }
       withPreparationFrame(this.renderer, null, () => withDrawPreparation(this.scene, targets,
         () => this.render(camera), this.hierarchy.owners));
+      const preparedAt = this.enqueuedAt ? performance.now() : 0;
+      if (this.enqueuedAt) {
+        PerfCounters.inc('streamedDrawPassCpuMs', preparedAt - prepareStarted);
+        PerfCounters.inc('streamedDrawJobsCompleted', targets.length);
+      }
       for (const target of targets) {
+        if (this.enqueuedAt) {
+          const queuedAt = this.enqueuedAt.get(target);
+          if (queuedAt !== undefined) PerfCounters.inc('streamedDrawReadyDelayMs', preparedAt - queuedAt);
+          this.enqueuedAt.delete(target);
+        }
         this.markPrepared(target, target.material);
         this.stagedMaterials.delete(target);
         this.initialUploadBytes.delete(target);
@@ -158,6 +205,7 @@ export class StreamedDrawPreparation {
       PerfCounters.inc('streamedDrawsPrepared', targets.length);
       PerfCounters.inc('streamedDrawInitialUploadBytes', uploadBytes - budgetedBytes);
     } catch (error) {
+      this.cancelAllDiagnostics();
       this.settings = { ...this.settings, enabled: false };
       this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
       this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
@@ -180,6 +228,7 @@ export class StreamedDrawPreparation {
     this.hidden.clear();
   }
   dispose() {
+    this.cancelAllDiagnostics();
     this.reservation?.cancel(); this.reservation = null;
     this.releaseUpload?.(); this.releaseUpload = null;
     this.hierarchy?.dispose(); this.hierarchy = null;

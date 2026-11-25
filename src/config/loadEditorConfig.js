@@ -48,8 +48,11 @@ function runtimeSearch() {
 function applyRuntimeOverrides(config) {
   if (typeof window === 'undefined') return;
   const params = new URLSearchParams(window.location.search);
-  if (params.get('bakeImpostors') === '1') {
+  if (params.get('bakeImpostors') === '1' || params.get('forceWebGL') === '1') {
     config.renderer.forceWebGL = true;
+  }
+  if (config.renderer.gpuOcclusion && params.has('gpuOcclusion')) {
+    config.renderer.gpuOcclusion.enabled = params.get('gpuOcclusion') === '1';
   }
   // `?weather=<mode>` opens on that weather (perf A/Bs); the controller turns an unknown mode into off.
   if (params.get('weather')) config.weather = { ...config.weather, mode: params.get('weather') };

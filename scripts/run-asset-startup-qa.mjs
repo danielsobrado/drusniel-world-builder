@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const outputPath = path.join(root, 'tmp', 'asset-startup-qa-latest.json');
+const outputPath = path.resolve(readArg('out', path.join(root, 'tmp', 'asset-startup-qa-latest.json')));
 const screenshotPath = path.join(root, 'tmp', 'asset-startup-qa-latest.png');
 
 function readArg(name, fallback = null) {
@@ -32,6 +32,7 @@ if (!Number.isInteger(runCount) || runCount < 1 || runCount > 10) {
 }
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+fs.mkdirSync(path.dirname(screenshotPath), { recursive: true });
 const browser = await chromium.launch({
   headless: !hasFlag('headed'),
   args: [
@@ -65,7 +66,11 @@ try {
     await cdp.send('Network.enable');
     await cdp.send('Network.setCacheDisabled', { cacheDisabled: !repeatCache });
 
-    await page.goto(`${baseUrl}/?assetQa=1&run=${run}`, {
+    const target = new URL(baseUrl);
+    target.pathname = `${target.pathname.replace(/\/$/, '')}/`;
+    target.searchParams.set('assetQa', '1');
+    target.searchParams.set('run', run);
+    await page.goto(target.href, {
       waitUntil: 'domcontentloaded',
       timeout: timeoutMs,
     });
@@ -102,6 +107,7 @@ try {
       const startup = window.__assetStartupTelemetry.getReport();
       const surface = window.__editor?.stylizedSurface;
       if (!surface) throw new Error('Asset startup QA could not inspect the tree atlas state.');
+      startup.sceneAssetRequests = surface.sceneAssets?.getRequestStatus() ?? null;
       await surface?.impostorReady;
       const settings = surface?.config?.lod?.impostor;
       const trees = surface?.treeView;

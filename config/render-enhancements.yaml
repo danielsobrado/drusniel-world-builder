@@ -1,6 +1,11 @@
 # Optional quality features. These are deliberately independent of world generation.
 detailVisibility: false
 detailTurnMarginDegrees: 12
+r187:
+  depthOnlyOcclusion: false
+  prioritizedRequests: false
+  maxConcurrentRequests: 6
+  requestMaxWaitMs: 500
 surfaceAnisotropy:
   enabled: true
   level: 16

@@ -439,6 +439,9 @@ export class PerfQaHarness {
         userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
         href: typeof location !== 'undefined' ? location.href : null,
         visibilityState: typeof document !== 'undefined' ? document.visibilityState : null,
+        renderer: this.terrainView.rendererCapabilities ?? null,
+        occlusionColorAttachments: this.terrainView.occlusion?.target?.textures.length ?? null,
+        sceneAssetRequests: this.terrainView.stylizedSurface?.sceneAssets?.getRequestStatus?.() ?? null,
       },
       playerConfig: this.playerController.speedMode?.config ?? this.editorConfig?.player ?? null,
       worldConfig: this.editorConfig
