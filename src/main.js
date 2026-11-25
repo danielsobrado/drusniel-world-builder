@@ -1124,6 +1124,11 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     getGroundHeight: (x, z) => terrainView.getCanonicalHeight(x, z),
     getSeaLevel: () => worldStore.generator?.seaLevel ?? 0,
     getSeed: () => worldStore.generator?.toMetadata?.().seed ?? 0,
+    // Full inside a town's radius, gone 120 m beyond it.
+    getTownPresence: (x, z) => {
+      const town = settlementView?.enabled ? settlementView.nearestTown({ x, z }) : null;
+      return town ? Math.max(0, Math.min(1, (town.radius + 120 - town.distance) / 120)) : 0;
+    },
   });
   const worldAmbience = new WorldAmbience({
     settings: config.stylizedSurface.ambientEffects,
