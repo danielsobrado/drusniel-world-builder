@@ -74,3 +74,26 @@ test('external image uploads crop in rows without exposing partial content', () 
   assert.equal(bytes, 512);
   assert.deepEqual(writes.map(write => write.source.origin.y), [0, 2, 4, 6]);
 });
+
+test('flipped external image stripes select reverse source regions', () => {
+  const { stage, texture, writes } = fixture({ width: 1, height: 1, byteLength: 4 });
+  texture.isCompressedTexture = false; texture.mipmaps = []; texture.flipY = true;
+  texture.image = { width: 16, height: 8 };
+  while (!stage.advance(texture, 128, () => false).ready) { /* transfer slices */ }
+  assert.deepEqual(writes.map(write => write.source.origin.y), [6, 4, 2, 0]);
+  assert.deepEqual(writes.map(write => write.dest.origin.y), [0, 2, 4, 6]);
+  assert.ok(writes.every(write => write.source.flipY));
+});
+
+test('flipped data texture reverses source rows and caps queue calls', () => {
+  const { stage, texture, writes } = fixture({ width: 1, height: 1, byteLength: 4 });
+  texture.isCompressedTexture = false; texture.isDataTexture = true; texture.mipmaps = []; texture.flipY = true;
+  texture.image = { width: 4, height: 40, data: new Uint8Array(640) };
+  const first = stage.advance(texture, 640, () => false);
+  assert.equal(first.ready, false);
+  assert.equal(writes.length, 32);
+  assert.equal(first.bytes, 512);
+  assert.equal(writes[0].layout.offset, 624);
+  assert.equal(stage.advance(texture, 640, () => false).ready, true);
+  assert.equal(writes.at(-1).layout.offset, 0);
+});

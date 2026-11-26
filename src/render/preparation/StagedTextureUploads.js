@@ -1,6 +1,7 @@
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 
 const MAX_ROWS_PER_WRITE = 128;
+const MAX_WRITES_PER_STEP = 32;
 
 function levelsFor(texture, block, size) {
   const compressed = texture.isCompressedTexture === true;
@@ -16,7 +17,7 @@ function levelsFor(texture, block, size) {
     const data = image.data;
     if (compressed || texture.isDataTexture) {
       if (!ArrayBuffer.isView(data) || data.byteLength !== rows * bytesPerRow) return null;
-    } else if (data || texture.flipY || !image.width || !image.height || block.width !== 1 || block.height !== 1) return null;
+    } else if (data || !image.width || !image.height || block.width !== 1 || block.height !== 1) return null;
     levels.push({ image, data, columns, rows, bytesPerRow, mip });
   }
   return levels;
@@ -39,7 +40,6 @@ export class StagedTextureUploads {
     if (manager.has(texture) || backend.get(texture).initialized
       || texture.isCompressedCubeTexture || texture.isCompressedArrayTexture
       || texture.isFramebufferTexture || texture.isHTMLTexture
-      || texture.isDataTexture && texture.flipY
       || texture.source?.dataReady !== true) return null;
     const size = manager.getSize(texture);
     if (size.depth !== 1 || !size.width || !size.height) return null;
@@ -102,33 +102,38 @@ export class StagedTextureUploads {
     let bytes = 0;
     const queue = backend.device.queue, gpu = backend.get(job.token).texture;
     const block = job.block;
+    let writes = 0;
     try {
-      while (job.level < job.images.length && !shouldYield?.()) {
-      const image = job.images[job.level];
-      const remaining = byteLimit - bytes;
-      const availableBlocks = Math.floor(remaining / block.byteLength);
-      if (availableBlocks < 1) break;
-      const columns = Math.min(image.columns - job.column, availableBlocks);
-      const rows = job.column === 0 && columns === image.columns
-        ? Math.min(image.rows - job.row, Math.floor(remaining / image.bytesPerRow), MAX_ROWS_PER_WRITE) : 1;
-      const x = job.column * block.width, y = job.row * block.height;
-      const width = columns * block.width, height = rows * block.height;
-      const count = columns * rows * block.byteLength;
-      const dest = { texture: gpu, mipLevel: image.mip, origin: { x, y, z: 0 } };
-      if (image.data) {
-        queue.writeTexture(dest, image.data, { offset: job.row * image.bytesPerRow + job.column * block.byteLength,
-          bytesPerRow: image.bytesPerRow, rowsPerImage: image.rows }, { width, height, depthOrArrayLayers: 1 });
-      } else {
-        queue.copyExternalImageToTexture({ source: image.image, origin: { x, y }, flipY: false },
-          { ...dest, premultipliedAlpha: texture.premultiplyAlpha }, { width, height, depthOrArrayLayers: 1 });
+      while (job.level < job.images.length && writes++ < MAX_WRITES_PER_STEP && !shouldYield?.()) {
+        const image = job.images[job.level];
+        const remaining = byteLimit - bytes;
+        const availableBlocks = Math.floor(remaining / block.byteLength);
+        if (availableBlocks < 1) break;
+        const columns = Math.min(image.columns - job.column, availableBlocks);
+        const flipData = texture.isDataTexture && texture.flipY;
+        const rows = !flipData && job.column === 0 && columns === image.columns
+          ? Math.min(image.rows - job.row, Math.floor(remaining / image.bytesPerRow), MAX_ROWS_PER_WRITE) : 1;
+        const x = job.column * block.width, y = job.row * block.height;
+        const width = columns * block.width, height = rows * block.height;
+        const count = columns * rows * block.byteLength;
+        const dest = { texture: gpu, mipLevel: image.mip, origin: { x, y, z: 0 } };
+        if (image.data) {
+          const sourceRow = flipData ? image.rows - job.row - 1 : job.row;
+          queue.writeTexture(dest, image.data, { offset: sourceRow * image.bytesPerRow + job.column * block.byteLength,
+            bytesPerRow: image.bytesPerRow, rowsPerImage: image.rows }, { width, height, depthOrArrayLayers: 1 });
+        } else {
+          // WebGPU source origin is relative to the unflipped image.
+          const sourceY = texture.flipY ? image.image.height - y - height : y;
+          queue.copyExternalImageToTexture({ source: image.image, origin: { x, y: sourceY }, flipY: Boolean(texture.flipY) },
+            { ...dest, premultipliedAlpha: texture.premultiplyAlpha }, { width, height, depthOrArrayLayers: 1 });
+        }
+        bytes += count;
+        job.column += columns;
+        if (job.column === image.columns) { job.column = 0; job.row += rows; }
+        if (job.row === image.rows) { job.row = 0; job.level++; }
+        PerfCounters.inc('stagedTextureUploadBytes', count);
+        PerfCounters.inc('stagedTextureUploadSlices');
       }
-      bytes += count;
-      job.column += columns;
-      if (job.column === image.columns) { job.column = 0; job.row += rows; }
-      if (job.row === image.rows) { job.row = 0; job.level++; }
-      PerfCounters.inc('stagedTextureUploadBytes', count);
-      PerfCounters.inc('stagedTextureUploadSlices');
-    }
     } catch (error) {
       this.cancel(texture);
       this.unsupported.set(texture, texture.version);
