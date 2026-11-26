@@ -483,6 +483,7 @@ export function buildChunkLodPlan({
   onTransition = null,
   regionalLodFactor = 1,
   regionalSpatialBudget = null,
+  regionalLayer = null,
   protectedChunkRadius = 1,
 }) {
   const entries = [];
@@ -492,6 +493,10 @@ export function buildChunkLodPlan({
   const spatialActive = regionalSpatialBudget !== null;
   const globalThresholds = regionalLodThresholds(thresholds, regionalLodFactor);
   const thresholdCache = spatialActive ? new Map([[1, thresholds], [regionalLodFactor, globalThresholds]]) : null;
+  const admissionFactors = regionalSpatialBudget?.admission ? regionalSpatialBudget.settings.admissionFactors : null;
+  if (admissionFactors) for (const factor of admissionFactors) {
+    if (!thresholdCache.has(factor)) thresholdCache.set(factor, regionalLodThresholds(thresholds, factor));
+  }
 
   for (let chunkZ = focus.chunkZ - radius; chunkZ <= focus.chunkZ + radius; chunkZ += 1) {
     for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
@@ -508,21 +513,23 @@ export function buildChunkLodPlan({
       const key = chunkKey(chunkX, chunkZ);
       const storedState = transitionStates.get(key) ?? null;
       const previous = storedState?.target ?? null;
-      const requestedFactor = Math.min(regionalLodFactor, regionalSpatialBudget?.factorForKey(key) ?? 1);
-      const factor = requestedFactor < 1
-        && !regionalLodProtected(chunkX, chunkZ, focus, camera, origin, chunkWorldSize, protectedChunkRadius)
-        ? requestedFactor : 1;
+      const localFactor = regionalSpatialBudget?.factorForKey(key, regionalLayer) ?? 1;
+      const requestedFactor = admissionFactors ? localFactor : Math.min(regionalLodFactor, localFactor);
+      const protectedCell = (requestedFactor < 1 || admissionFactors)
+        && regionalLodProtected(chunkX, chunkZ, focus, camera, origin, chunkWorldSize, protectedChunkRadius);
+      const factor = requestedFactor < 1 && !protectedCell ? requestedFactor : 1;
       let activeThresholds = factor === 1 ? thresholds : globalThresholds;
       if (thresholdCache && factor !== 1) {
         if (!thresholdCache.has(factor)) thresholdCache.set(factor, regionalLodThresholds(thresholds, factor));
         activeThresholds = thresholdCache.get(factor);
       }
-      const selected = selectLodBand(pixels, previous, activeThresholds, thresholds.hysteresisRatio);
+      const selected = selectLodBand(pixels, admissionFactors && factor < 1 ? null : previous, activeThresholds, thresholds.hysteresisRatio);
       const lodDistance = distanceForChunk?.(chunkX, chunkZ) ?? chunkDistance;
-      const target = clampBandToRadii(selected, lodDistance, radii);
       const baselineBand = regionalSpatialBudget?.geometryCosts
         ? clampBandToRadii(selectLodBand(pixels, null, thresholds, thresholds.hysteresisRatio), lodDistance, radii)
         : undefined;
+      let target = clampBandToRadii(selected, lodDistance, radii);
+      if (admissionFactors && factor < 1 && target === 'culled' && baselineBand !== 'culled') target = baselineBand;
       if (previous !== null && previous !== target) {
         onTransition?.({
           chunkX,
@@ -552,6 +559,12 @@ export function buildChunkLodPlan({
         lodAnchor: Object.freeze({ x: canonicalX, y: anchor?.y ?? 0, z: canonicalZ }),
       });
       if (baselineBand !== undefined) entries[entries.length - 1].baselineBand = baselineBand;
+      if (admissionFactors && ready && !protectedCell && baselineBand !== 'culled') {
+        entries[entries.length - 1].admissionOptions = admissionFactors.map(optionFactor => {
+          const band = clampBandToRadii(selectLodBand(pixels, null, thresholdCache.get(optionFactor), thresholds.hysteresisRatio), lodDistance, radii);
+          return { factor: optionFactor, band: band === 'culled' ? baselineBand : band };
+        });
+      }
       signatures.push(chunkEntrySignature(key, target, ready, state.representations, fadeSteps));
     }
   }
