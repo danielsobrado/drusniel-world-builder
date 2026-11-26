@@ -16,6 +16,20 @@ regionalInstancePublicationBudget: false
 farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false
+environmentalParticleAdmission: false
+environmentalParticleBudget:
+  particleBudget: 18000
+  pressureFactor: 0.65
+  frameCpuPressureMs: 12
+  sampleMs: 200
+  recoveryMs: 800
+  protectWaterfallMeters: 60
+  minimumShares:
+    precipitation: 0.6
+    dust: 0.5
+    splash: 0.25
+    waterfall: 0.25
+    ambient: 0.15
 townDecorationBudget:
   triangleBudget: 60000
   drawBudget: 24
