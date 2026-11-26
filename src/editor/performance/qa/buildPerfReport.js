@@ -277,7 +277,9 @@ export function buildPerfReport({
       'stylizedVariantApplyMs', 'stylizedVariantApplySlices',
       'meadowPageCommitsDeferred', 'settlementPlansRequested', 'settlementPlanInstallationCpuMs',
       'settlementPlacementsEvaluated', 'settlementRetirementRowsChecked',
-      'objectLodPlacementsEvaluated', 'stylizedInstanceRowsCompared']
+      'objectLodPlacementsEvaluated', 'stylizedInstanceRowsCompared',
+      'sceneryPublicationCommits', 'sceneryPublicationEstimatedBytes', 'sceneryPublicationQueuedBytes',
+      'sceneryPublicationStagedAttributeRows', 'sceneryPublicationDeferred', 'sceneryPublicationOversizedBytes']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
