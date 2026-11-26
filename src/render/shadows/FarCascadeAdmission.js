@@ -49,6 +49,8 @@ export class FarCascadeAdmission {
       this.map = null;
       return;
     }
+    // The stock target name is shared by all cascades; label this existing map for QA.
+    if (shadow.map.texture?.name === 'ShadowMap') shadow.map.texture.name = 'ShadowMapFarCascade';
     const state = snapshot(camera, light, origin, revision, now);
     const reason = shadow.needsUpdate ? 'dirty' : this.map !== shadow.map ? 'initial'
       : farCascadeRefreshReason(this.previous, state, this.settings, pressured);
