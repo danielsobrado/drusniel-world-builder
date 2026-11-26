@@ -223,6 +223,11 @@ export class StylizedWaterSlot {
   update(timestamp, publicationBudget = null) {
     if (!this.config.water.enabled) {
       this.mesh.visible = false;
+      this.hasWaterCoverage = false;
+      this.hasOceanWater = false;
+      this.hasRiverWater = false;
+      this.uploadedPage = null;
+      this.terrainView.drawPreparation?.cancel(this.mesh);
       return;
     }
     this.time.value = updateWaterVisualClock(timestamp / 1000);
@@ -235,6 +240,7 @@ export class StylizedWaterSlot {
       && page?.waterFlowPixels,
     );
     if (!ready) {
+      this.terrainView.drawPreparation?.cancel(this.mesh);
       this.mesh.visible = false;
       this.hasWaterCoverage = false;
       this.hasOceanWater = false;

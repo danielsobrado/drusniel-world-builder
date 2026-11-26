@@ -584,7 +584,14 @@ export class StylizedGrassSlot {
       )
       : Number.POSITIVE_INFINITY;
     const withinRadius = distance <= this.config.grass.residentRadius;
-    const active = Boolean(this.terrainSlot.mesh.visible && withinRadius && descriptor && this.terrainSlot.page);
+    const page = this.terrainSlot.page;
+    if (this.eligibilityPage !== page || this.eligibilityRevision !== this.terrainSlot.pageRevision) {
+      this.eligibilityPage = page;
+      this.eligibilityRevision = this.terrainSlot.pageRevision;
+      const eligible = new Set(this.config.grass.tileIds);
+      this.hasEligibleGrass = !page?.tiles || page.tiles.some(id => eligible.has(id));
+    }
+    const active = Boolean(this.terrainSlot.mesh.visible && withinRadius && descriptor && page && this.hasEligibleGrass !== false);
     if (!active) {
       this.mesh.visible = false;
       // A build in flight writes straight into the live instance buffers, a slice

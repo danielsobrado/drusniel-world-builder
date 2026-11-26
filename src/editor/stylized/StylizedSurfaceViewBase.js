@@ -586,6 +586,7 @@ export class StylizedSurfaceView {
       paletteLayerId,
       definitions: definitions ?? [],
       residentRadius,
+      eligibleTileIds: config[paletteLayerId]?.tileIds,
       acquire: async (scene) => {
         const loaded = await this.sceneAssets.acquire(scene, { priority: 'low' });
         paths.push(scene);

@@ -182,15 +182,34 @@ export class StylizedVariantResidency {
 
   *rescanJob(focus, predicted) {
     const nearTileIds = this.manageRequests ? yield* this.scanTileIdsJob(1, focus) : null;
-    const tileIds = yield* this.scanTileIdsJob(this.scanRadiusChunks, focus);
-    if (this.manageRequests && predicted) {
-      for (const tileId of yield* this.scanTileIdsJob(2, predicted)) tileIds.add(tileId);
-    }
+    const windows = new Map();
+    const predictedIds = this.manageRequests && predicted ? yield* this.scanTileIdsJob(2, predicted) : null;
     for (const layer of this.layers) {
-      const required = requiredVariantKeys({
+      const radius = (layer.residentRadius ?? 1) + this.prefetchChunks;
+      if (!windows.has(radius)) windows.set(radius, yield* this.scanTileIdsJob(radius, focus));
+      const tileIds = new Set(windows.get(radius));
+      if (predictedIds) for (const id of predictedIds) tileIds.add(id);
+      // Sparse predictive samples must not exclude a small biome actually resident.
+      for (const slot of this.terrainView.slots ?? []) {
+        const descriptor = slot.descriptor;
+        if (!descriptor || !slot.page?.tiles || slot.loading
+          || Math.hypot(descriptor.chunkX - focus.chunkX, descriptor.chunkZ - focus.chunkZ) > radius) continue;
+        const cached = this.residentTileIds ??= new WeakMap();
+        let entry = cached.get(slot.page);
+        if (!entry || entry.revision !== slot.pageRevision) {
+          entry = { revision: slot.pageRevision, ids: new Set(slot.page.tiles) };
+          cached.set(slot.page, entry);
+        }
+        for (const id of entry.ids) tileIds.add(id);
+        yield;
+      }
+      const allowed = layer.eligibleTileIds?.length ? new Set(layer.eligibleTileIds) : null;
+      const eligible = allowed ? new Set([...tileIds].filter(id => allowed.has(id))) : tileIds;
+      const required = allowed && eligible.size === 0 && tileIds.size > 0
+        ? new Set() : requiredVariantKeys({
         definitions: layer.definitions,
-        tileIds,
-        pinnedKeys: this.pinnedKeysForLayer(layer, tileIds),
+        tileIds: eligible,
+        pinnedKeys: this.pinnedKeysForLayer(layer, eligible),
       });
       layer.requiredKeys = required;
       if (nearTileIds) {

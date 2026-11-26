@@ -223,7 +223,7 @@ function createSlot({ slotIndex, scene, geometry, worldStore, stylizedConfig, sh
     transitionPatterns,
   };
   const bakeGpuState = createTerrainMaterialBakeGpuState(stylizedConfig.materialBake);
-  const material = sharedMaterial(slotData, bakeGpuState);
+  const material = sharedMaterial(slotData, bakeGpuState, false);
   // Own bounds over the shared buffers: the height is applied in the shader.
   const mesh = new THREE.Mesh(createSlotGeometry(geometry), material);
   // What the shared material draws for this slot, and its own bake.
