@@ -12,6 +12,7 @@ regionalSpatialBudget: false
 regionalGeometryCostBudget: false
 regionalAdmissionBudget: false
 rendererAdmissionBudget: false
+regionalInstancePublicationBudget: false
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
