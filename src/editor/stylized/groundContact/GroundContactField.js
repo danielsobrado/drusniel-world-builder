@@ -116,7 +116,7 @@ export class GroundContactField {
     this.surfaceEvaluator = createTerrainSurfaceEvaluator(config);
     this.worldNoisePixels = null;
     this.worldNoiseVersion = 0;
-    acquireWorldNoise(import.meta.env?.BASE_URL?.replace(/\/$/, '') ?? '').whenLoaded((pixels) => {
+    this.cancelNoiseSubscription = acquireWorldNoise(import.meta.env?.BASE_URL?.replace(/\/$/, '') ?? '').whenLoaded((pixels) => {
       if (this.disposed) return;
       this.worldNoisePixels = pixels;
       this.worldNoiseVersion += 1;
@@ -484,6 +484,8 @@ export class GroundContactField {
 
   dispose() {
     this.disposed = true;
+    this.cancelNoiseSubscription?.();
+    this.cancelNoiseSubscription = null;
     this.slotsByChunk.clear();
     this.publishedChunkRevisions.clear();
     clearWorldSurfaceContext();
