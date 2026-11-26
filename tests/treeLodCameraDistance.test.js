@@ -56,3 +56,22 @@ test('other layers keep the existing focus-based radius policy by default', () =
   assert.equal(band(plan, 1, -2), 'impostor');
   assert.equal(band(plan, 0, 0), 'near');
 });
+
+test('regional pressure demotes distant detail but preserves the protected ring', () => {
+  const options = {
+    focus: { chunkX: 0, chunkZ: 0 }, radius: 3, chunkWorldSize: 128,
+    camera: { position: { x: 64, y: 8, z: -64 }, fov: 68 },
+    floatingOrigin: { getState: () => ({ x: 0, z: 0 }) },
+    viewportHeight: 720, objectHeight: 16,
+    thresholds: { nearPixels: 32, proxyPixels: 8, impostorPixels: 2, clusterPixels: 0 },
+    radii: { meshRadius: 3, proxyRadius: 4, impostorRadius: 5, clusterRadius: 5 },
+    timestamp: 0, transitionMs: 320,
+  };
+  const baseline = buildChunkLodPlan({ ...options, transitionStates: new Map() });
+  const pressured = buildChunkLodPlan({ ...options, transitionStates: new Map(),
+    regionalLodFactor: 0.5, protectedChunkRadius: 1 });
+  assert.equal(band(baseline, 1, 1), 'near');
+  assert.equal(band(pressured, 1, 1), 'near');
+  assert.equal(band(baseline, 2, 0), 'near');
+  assert.equal(band(pressured, 2, 0), 'proxy');
+});
