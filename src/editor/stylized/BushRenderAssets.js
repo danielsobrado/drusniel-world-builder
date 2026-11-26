@@ -279,7 +279,7 @@ export function createBushProxyMaterial(sourceMaterial, {
   }
   material.transparent = false;
   material.depthWrite = true;
-  applyPlantMotion(material, { wind: config?.wind, height, profile: motion, groundConform: true });
+  applyPlantMotion(material, { wind: config?.wind, height, profile: motion, groundConform: true, contactProfile: 'bushProxy' });
   if (config) applySkywardNormal(material);
   applyCloudShadow(material, config?.sky);
   applyJungleMist(material, config?.ambientEffects);

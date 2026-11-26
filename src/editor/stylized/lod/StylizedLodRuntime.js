@@ -378,10 +378,12 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
       }
       if (plantRoots) mesh.userData.plantScaleSquared = plantScaleSquared;
       if (matrixRange.max >= 0 || writableCount !== previousCount) {
-        if (selectedRows && !plantRoots) extendInstanceBounds(mesh, selectedRows);
+        // Only a swaying reach is added after the fit, so only it forces a full refit.
+        // shortcut: the WSC conform morph (<= maxOffsetMeters) is not in the bounds; add it if culling ever clips bases.
+        const reach = plantRoots ? (mesh.material.userData.plantMotionReach ?? 0) : 0;
+        if (selectedRows && !(reach > 0)) extendInstanceBounds(mesh, selectedRows);
         else mesh.computeBoundingSphere();
-        if (plantRoots) mesh.boundingSphere.radius += (mesh.material.userData.plantMotionReach ?? 0)
-          * Math.sqrt(plantScaleSquared);
+        if (reach > 0) mesh.boundingSphere.radius += reach * Math.sqrt(plantScaleSquared);
       }
     }
     total += Math.min(

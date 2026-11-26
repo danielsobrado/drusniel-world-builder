@@ -2,7 +2,7 @@ import { attribute, cos, dot, float, modelWorldMatrix, normalLocal, positionLoca
   sin, transformNormalToView, vec3, vec4 } from 'three/tsl';
 import { canonicalFromRender, sampleWorldWind, windWaveCoordinates } from '../weather/wind/worldWindState.js';
 import { groundDetailWindPosition } from './groundDetailWind.js';
-import { applyShaderGroundConform } from './groundSeating.js';
+import { applyGroundContactDeform } from './worldSurfaceContext/GroundContactDeformer.js';
 import { resolvePlantMotion } from './PlantMotionProfiles.js';
 import { plantSwayTime } from './plantSway.js';
 
@@ -18,33 +18,28 @@ function rotate(vector, direction, angle) {
  * instances. The root attribute is uploaded with placement, never per frame.
  *
  * When `groundConform` is enabled, lower vertices also conform in the vertex
- * shader to the exact GPU `GroundContactField` surface while upper stems remain
- * phototropically upright.
+ * shader to the WSC surface by the `contactProfile`'s declarative `conform`
+ * block (`GroundContactDeformer`) while upper stems remain phototropically upright.
  */
-export function applyPlantMotion(material, { wind, height, profile = 'woody-shrub', groundConform = false } = {}) {
+export function applyPlantMotion(material, {
+  wind, height, profile = 'woody-shrub', groundConform = false, contactProfile = 'understory',
+} = {}) {
   const motion = resolvePlantMotion(profile);
   material.userData.plantMotionProfile = motion.id;
   const conform = Boolean(groundConform && height > 0);
   if (conform) material.userData.plantMotionAnchor = true;
+  const seat = position => applyGroundContactDeform(position, {
+    profile: contactProfile, height, rootNode: attribute('instancePlantRoot', 'vec3'),
+  });
   if (!wind || !(height > 0) || motion.give === 0) {
     if (conform) {
-      material.positionNode = applyShaderGroundConform(material.positionNode ?? positionLocal, {
-        height,
-        rootNode: attribute('instancePlantRoot', 'vec3'),
-        conformShare: 0.55,
-      });
+      material.positionNode = seat(material.positionNode ?? positionLocal);
     }
     return material;
   }
   if (!motion.rigid) {
     const swayed = groundDetailWindPosition(wind, height);
-    material.positionNode = conform
-      ? applyShaderGroundConform(swayed, {
-        height,
-        rootNode: attribute('instancePlantRoot', 'vec3'),
-        conformShare: 0.65,
-      })
-      : swayed;
+    material.positionNode = conform ? seat(swayed) : swayed;
     return material;
   }
   material.userData.plantMotionAnchor = true;
@@ -59,9 +54,7 @@ export function applyPlantMotion(material, { wind, height, profile = 'woody-shru
     .mul(field.envelope.clamp(0, 3.5)).mul(2 * motion.give)
     .clamp(-motion.maximumAngle, motion.maximumAngle);
   const rotated = root.add(rotate(positionLocal.sub(root), field.direction, angle));
-  material.positionNode = conform
-    ? applyShaderGroundConform(rotated, { height, rootNode: root, conformShare: 0.45 })
-    : rotated;
+  material.positionNode = conform ? seat(rotated) : rotated;
   material.normalNode = transformNormalToView(rotate(normalLocal, field.direction, angle))
     .toVarying('plantMotionNormal').normalize();
   return material;

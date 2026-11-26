@@ -1,45 +1,7 @@
-import { attribute, clamp, float, modelWorldMatrix, positionGeometry, smoothstep, vec3, vec4 } from 'three/tsl';
-import { frameUniform } from '../../render/FrameUniforms.js';
-import { sampleGroundContactAt } from './groundContact/GroundContactState.js';
+import { attribute } from 'three/tsl';
 
-/**
- * Pure-shader vertex ground conforming for standing bushes, ferns, and ground
- * details: lower vertices hug the exact terrain height from `GroundContactField`
- * (even across slopes, humps, and hollows) while upper foliage stays upright.
- *
- * Uses `frameUniform` for height so prototypes share one compiled WGSL pipeline,
- * zero CPU terrain queries, zero readbacks, and zero extra vertex buffers.
- *
- * @param {object} positionNode post-wind local vertex position node
- * @param {object} options
- * @param {number} options.height prototype height in local metres
- * @param {object | null} [options.rootNode] local root position (`instancePlantRoot`)
- * @param {number} [options.conformShare] fraction of height over which conforming fades out
- * @param {number} [options.bury] subtle downward ground tuck in metres
- * @param {number} [options.maxOffset] clamp on vertical terrain conformance in metres
- */
-export function applyShaderGroundConform(positionNode, {
-  height = 1,
-  rootNode = null,
-  conformShare = 0.55,
-  bury = 0.03,
-  maxOffset = 0.65,
-} = {}) {
-  const conformHeight = frameUniform(Math.max(0.12, Number(height) * conformShare));
-  const weight = smoothstep(0, conformHeight, positionGeometry.y).oneMinus();
-  const vertexWorld = modelWorldMatrix.mul(vec4(positionNode, 1));
-  const vertexGround = sampleGroundContactAt(vertexWorld.xz, { includeBase: false, includeEco: false });
-  if (rootNode) {
-    const rootWorld = modelWorldMatrix.mul(vec4(rootNode, 1));
-    const rootGround = sampleGroundContactAt(rootWorld.xz, { includeBase: false, includeEco: false });
-    const active = vertexGround.inside.mul(rootGround.inside);
-    const delta = clamp(vertexGround.height.sub(rootGround.height), -maxOffset, maxOffset);
-    const dy = delta.sub(float(bury)).mul(weight).mul(active);
-    return positionNode.add(vec3(0, dy, 0));
-  }
-  const dy = float(bury).negate().mul(weight).mul(vertexGround.inside);
-  return positionNode.add(vec3(0, dy, 0));
-}
+// The shader-side vertex conform moved to the declarative WSC deformer
+// (`worldSurfaceContext/GroundContactDeformer.js`, WSC PR 5).
 
 /**
  * Computes a gentle footprint-settled height and partial slope normal from 5

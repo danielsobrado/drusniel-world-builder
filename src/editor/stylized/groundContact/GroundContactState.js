@@ -3,7 +3,7 @@
  *
  * Existing consumers (`meadowPigment`, `meadowBladeShape`, `StylizedFlowerMaterial`,
  * `barkWeathering`, `rockWeathering`, `AlpineRockMaterial`, `AuthoredFoliageMaterial`,
- * `BushRenderAssets`, `biomeUnderstoryPrototypes`, `groundSeating`) continue to
+ * `BushRenderAssets`, `biomeUnderstoryPrototypes`, `GroundContactDeformer`) continue to
  * import from this module with identical semantics — while automatically gaining
  * PR 1's explicit per-texel validity and validity-weighted bilinear sampling.
  */

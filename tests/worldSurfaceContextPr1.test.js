@@ -21,7 +21,7 @@ import {
   sampleGroundContactAt,
   sampleGroundContactVarying,
 } from '../src/editor/stylized/groundContact/GroundContactState.js';
-import { applyShaderGroundConform } from '../src/editor/stylized/groundSeating.js';
+import { applyGroundContactDeform } from '../src/editor/stylized/worldSurfaceContext/GroundContactDeformer.js';
 
 function makeSlot({
   chunkX,
@@ -175,7 +175,7 @@ test('PR 1 GroundContactState backwards-compatible facade aliases canonical WSC 
   for (const key of ['height', 'normal', 'validity', 'inside', 'albedo', 'soilColor', 'roughness', 'contact', 'canopy', 'litter', 'vegetationCoverage']) {
     assert.ok(varied[key], `sampleWorldSurfaceContextVarying missing field ${key}`);
   }
-  const conformed = applyShaderGroundConform(positionWorld, { height: 1.5 });
+  const conformed = applyGroundContactDeform(positionWorld, { profile: 'understory', height: 1.5 });
   assert.ok(conformed);
 });
 

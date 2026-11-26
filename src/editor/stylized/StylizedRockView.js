@@ -44,6 +44,8 @@ import { iterateCoastStones, DEFAULT_COAST_STONES } from './coastStones.js';
 import { iterateSeabedRocks, DEFAULT_SEABED_ROCKS } from './seabedRocks.js';
 import { iterateRockFormations, DEFAULT_ROCK_FORMATIONS } from './rockFormations.js';
 import { applyRockWeathering, resolveRockWeathering } from './rockWeathering.js';
+import { applyGroundContactDeform } from './worldSurfaceContext/GroundContactDeformer.js';
+import { attribute, positionLocal } from 'three/tsl';
 import { biomeLook, placementTileId } from '../biomes/BiomeLooks.js';
 import { fitRockToGround } from './rockGroundFit.js';
 import { rockWaterContact } from './localRockWater.js';
@@ -60,6 +62,18 @@ function rockGroundLine(geometry, burial) {
   const height = Math.max(0.1, max.y - min.y);
   const groundY = min.y + Math.max(0, Number(burial) || 0) * height;
   return { smoothNormal: true, groundY, height: max.y - groundY, centre: [(min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2] };
+}
+
+/**
+ * WSC `settle` conform (PR 5): the boulder's rim over a hollow or a convex ridge is
+ * pulled down onto the ground; the LOD runtime writes `instancePlantRoot` for it.
+ */
+function seatRockOnGround(material, ground) {
+  material.userData.plantMotionAnchor = true;
+  material.positionNode = applyGroundContactDeform(material.positionNode ?? positionLocal, {
+    profile: 'rock', height: ground.height, groundY: ground.groundY,
+    rootNode: attribute('instancePlantRoot', 'vec3'),
+  });
 }
 
 /**
@@ -89,6 +103,7 @@ export function createStylizedRockMaterial(mesh, config, weathering, geometry = 
         ? config.water.coast.rockImpact.wetness : null,
     });
   }
+  if (geometry) seatRockOnGround(material, rockGroundLine(geometry, config?.rocks?.burial));
   material.emissiveNode = rockShadeEmission(material.colorNode ?? authoredFoliageColor(material));
   applyJungleMist(material, config?.ambientEffects);
   material.needsUpdate = true;
