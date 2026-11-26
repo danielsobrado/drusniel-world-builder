@@ -85,3 +85,17 @@ test('a shrub crown is darker at its core and underside than on its sunlit shell
   assert.ok(core < 0.5, `core ${core}`);
   assert.ok(under < top && under > core, `underside ${under}`);
 });
+
+test('a ground-cover mat has no crown interior to shade; a shrub keeps its 0.45 floor', async () => {
+  const { crownInteriorFloor } = await import('../src/editor/stylized/AuthoredFoliageMaterial.js');
+  assert.equal(crownInteriorFloor(0.08), 1);
+  assert.equal(crownInteriorFloor(0.15), 1);
+  assert.ok(Math.abs(crownInteriorFloor(0.5) - 0.45) < 1e-12);
+  assert.ok(Math.abs(crownInteriorFloor(1.4) - 0.45) < 1e-12);
+  let previous = 1;
+  for (let h = 0.15; h <= 0.5; h += 0.01) {
+    const floor = crownInteriorFloor(h);
+    assert.ok(floor <= previous + 1e-12);
+    previous = floor;
+  }
+});

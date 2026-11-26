@@ -34,6 +34,17 @@ export function understoryFootShade(baseRamp, groundContact) {
   return mix(foot, float(1), baseRamp).mul(float(1).sub(groundContact.canopy.mul(0.14)));
 }
 
+/**
+ * How dark a plant's crown interior may get, by the plant's height in metres.
+ * A shrub has an inside its own leaves shade; a ground-cover mat (sorrel,
+ * periwinkle) does not, and reading its leaves as "interior" by their place in
+ * the bounding box turned them near-black in open meadow. 1 means no interior shade.
+ */
+export function crownInteriorFloor(heightMeters) {
+  const t = Math.min(1, Math.max(0, (heightMeters - 0.15) / (0.5 - 0.15)));
+  return 1 - 0.55 * t * t * (3 - 2 * t);
+}
+
 /** The lower part of a plant takes the terrain's normal (applySkywardNormal), fading out by 40% of its height. */
 export function seatPlantNormal(material, baseT, groundContact) {
   material.foliageGroundNormalNode = groundContact.normal;
@@ -140,7 +151,8 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const baseAo = understoryFootShade(baseRamp, groundContact);
   // Shrubs cast no shadow on themselves: inner and underside leaves lose part of
   // the sun here and their sky light below, or the crown reads as one flat sheet.
-  const interior = bounds && !blossom ? crownInteriorVisibilityNode(bounds) : float(1);
+  const interiorFloor = crownInteriorFloor(spanY);
+  const interior = bounds && !blossom && interiorFloor < 1 ? crownInteriorVisibilityNode(bounds, interiorFloor) : float(1);
   const contact = !blossom
     ? applyWorldSurfaceContact({
       surface: { color },
@@ -180,10 +192,12 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
     seatPlantNormal(material, baseT, groundContact);
     material.foliageWrapDiffuseNode = mix(float(0.08), float(0.32), plantGreen);
     material.foliageRimGlowNode = mix(float(0), float(0.14), plantGreen).mul(baseRamp);
-    if (bounds) {
+    // A crown's puff normal points a mat's lower leaves at the ground, so it scales with the crown like the interior shade.
+    const crownShare = (1 - interiorFloor) / 0.55;
+    if (bounds && crownShare > 0) {
       // Vertex-safe puff normals: modest upward bias keeps sunlit shrub sides rich at noon.
       material.foliageShapeNormalNode = crownPuffNormalNode(bounds, 0.34, 0.12);
-      material.foliageNormalBlendNode = mix(float(0.22), float(0.76), smoothstep(0.06, 0.38, localHeightT));
+      material.foliageNormalBlendNode = mix(float(0.22), float(0.76), smoothstep(0.06, 0.38, localHeightT)).mul(crownShare);
     }
   }
   // Retain any authored emission (e.g. flower centres).
