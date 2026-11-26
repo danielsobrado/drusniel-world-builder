@@ -12,10 +12,13 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   regionalDensityBudget: false,
   regionalSpatialBudget: false,
   regionalGeometryCostBudget: false,
+  regionalAdmissionBudget: false,
   regionalBudget: Object.freeze({ idleMs: 30000, maxTrackedTextureMiB: 256, maxRendererMiB: 4096, evictionsPerFrame: 1, farGrassPressure: 0.85,
     sceneryLodPressure: 0.85, protectedChunkRadius: 1, spatialChunkRadius: 8, spatialChunkBudget: 1200,
     spatialLodFactor: 0.75, spatialCardFactor: 0.8, spatialWorkItems: 256,
     spatialTriangleBudget: 200000, spatialDrawBudget: 100, spatialReflectionPassWeight: 0.25,
+    admissionFactors: Object.freeze([1, 0.85, 0.7, 0.5]),
+    admissionPriorities: Object.freeze({ tree: 4, rock: 3, bush: 2, card: 1 }),
     spatialWeights: Object.freeze({ town: 1, tree: 8, rock: 3, bush: 2, blade: 0.01, card: 0.15, detail: 1, water: 50 }), sampleIntervalMs: 1000, triangleBudget: 4000000, drawBudget: 1500, townInstanceBudget: 3000, recoveryRatio: 0.75 }),
   r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, maxConcurrentDecodes: 2, requestMaxWaitMs: 500 }),
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
@@ -38,7 +41,8 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   const value = { ...RENDER_ENHANCEMENT_DEFAULTS, ...source,
     r187: { ...RENDER_ENHANCEMENT_DEFAULTS.r187, ...source.r187 },
     regionalBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget, ...source.regionalBudget,
-      spatialWeights: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, ...source.regionalBudget?.spatialWeights } },
+      spatialWeights: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, ...source.regionalBudget?.spatialWeights },
+      admissionPriorities: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, ...source.regionalBudget?.admissionPriorities } },
     surfaceAnisotropy: { ...RENDER_ENHANCEMENT_DEFAULTS.surfaceAnisotropy, ...source.surfaceAnisotropy },
     waterReflections: { ...RENDER_ENHANCEMENT_DEFAULTS.waterReflections, ...source.waterReflections } };
   const params = new URLSearchParams(search);
@@ -66,11 +70,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -85,6 +89,15 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   for (const [key, weight] of Object.entries(value.regionalBudget.spatialWeights)) {
     if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, key)
         || !Number.isFinite(weight) || weight < 0 || weight > 10000) throw new RangeError(`Invalid regionalBudget.spatialWeights.${key}.`);
+  }
+  const factors = value.regionalBudget.admissionFactors;
+  if (!Array.isArray(factors) || factors.length < 2 || factors.length > 8 || factors[0] !== 1
+      || factors.some((factor, i) => !Number.isFinite(factor) || factor < 0.5 || factor > 1 || (i > 0 && factor >= factors[i - 1]))) {
+    throw new RangeError('regionalBudget.admissionFactors must descend from 1 to at least 0.5, with 2–8 entries.');
+  }
+  for (const [key, priority] of Object.entries(value.regionalBudget.admissionPriorities)) {
+    if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, key)
+        || !Number.isFinite(priority) || priority < 0 || priority > 100) throw new RangeError(`Invalid regionalBudget.admissionPriorities.${key}.`);
   }
   const water = value.waterReflections;
   if (![128, 256, 512].includes(water.resolution)) throw new RangeError('Reflection resolution must be 128, 256 or 512.');
