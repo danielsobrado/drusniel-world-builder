@@ -279,7 +279,10 @@ export function buildPerfReport({
       'settlementPlacementsEvaluated', 'settlementRetirementRowsChecked',
       'objectLodPlacementsEvaluated', 'stylizedInstanceRowsCompared',
       'sceneryPublicationCommits', 'sceneryPublicationEstimatedBytes', 'sceneryPublicationQueuedBytes',
-      'sceneryPublicationStagedAttributeRows', 'sceneryPublicationDeferred', 'sceneryPublicationOversizedBytes']
+      'sceneryPublicationStagedAttributeRows', 'sceneryPublicationDeferred', 'sceneryPublicationOversizedBytes',
+      'farShadowAdmissionRefresh', 'farShadowAdmissionReuse', 'reflectionAdmissionGpuDeferred',
+      'reflectionAdmissionPressureDeferred', 'reflectionAdmissionCostDeferred', 'reflectionAdmissionDeadlineTurns',
+      'reflectionAdmissionEligible.cube', 'reflectionAdmissionEligible.planar']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
