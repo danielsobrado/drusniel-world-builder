@@ -489,7 +489,9 @@ export function buildChunkLodPlan({
   const signatures = [];
   const origin = floatingOrigin.getState();
   const needsReadyAnchor = typeof positionForChunk === 'function';
-  const thresholdCache = new Map([[1, thresholds]]);
+  const spatialActive = regionalSpatialBudget !== null;
+  const globalThresholds = regionalLodThresholds(thresholds, regionalLodFactor);
+  const thresholdCache = spatialActive ? new Map([[1, thresholds], [regionalLodFactor, globalThresholds]]) : null;
 
   for (let chunkZ = focus.chunkZ - radius; chunkZ <= focus.chunkZ + radius; chunkZ += 1) {
     for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
@@ -510,8 +512,11 @@ export function buildChunkLodPlan({
       const factor = requestedFactor < 1
         && !regionalLodProtected(chunkX, chunkZ, focus, camera, origin, chunkWorldSize, protectedChunkRadius)
         ? requestedFactor : 1;
-      if (!thresholdCache.has(factor)) thresholdCache.set(factor, regionalLodThresholds(thresholds, factor));
-      const activeThresholds = thresholdCache.get(factor);
+      let activeThresholds = factor === 1 ? thresholds : globalThresholds;
+      if (thresholdCache && factor !== 1) {
+        if (!thresholdCache.has(factor)) thresholdCache.set(factor, regionalLodThresholds(thresholds, factor));
+        activeThresholds = thresholdCache.get(factor);
+      }
       const selected = selectLodBand(pixels, previous, activeThresholds, thresholds.hysteresisRatio);
       const target = clampBandToRadii(selected, distanceForChunk?.(chunkX, chunkZ) ?? chunkDistance, radii);
       if (previous !== null && previous !== target) {
