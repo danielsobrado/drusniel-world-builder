@@ -1,3 +1,4 @@
+import { particlePrefix } from '../performance/EnvironmentalParticleBudget.js';
 import * as THREE from "three";
 import { createSnowShaderMaterial } from "./rainShaderMaterial.js";
 import { SNOW_FLAKE_COUNT } from "./rain_constants.js";
@@ -82,13 +83,19 @@ class SnowWeatherSystem {
     this.group.visible = intensity > 1e-3;
     this.snowMaterial.setIntensity(intensity);
   }
-  update(deltaSeconds, elapsedSeconds, cameraPosition, origin) {
+  update(deltaSeconds, elapsedSeconds, cameraPosition, origin, particles = null) {
     const dt = Math.max(0, Math.min(0.1, Number(deltaSeconds) || 0));
     const eased = this.regionalTarget + (this.regional - this.regionalTarget)
       * Math.exp(-this.snowfallSettings.regionalFadeRate * dt);
     this.regional = Math.abs(eased - this.regionalTarget) < 0.002 ? this.regionalTarget : eased;
     this.refresh();
     if (!this.group.visible) return;
+    if (particles) {
+      const count = this.snowMaterial.getRequestedCount?.() ?? this.flakeCount;
+      const factor = particles.request('precipitation', count);
+      if (this.snowMaterial.setParticleFactor) this.snowMaterial.setParticleFactor(factor);
+      else this.snowMesh.geometry.instanceCount = particlePrefix(count, factor);
+    }
     this.center.copy(cameraPosition);
     this.snowMaterial.setCenter(this.center);
     this.snowMaterial.setOrigin?.(origin);
@@ -101,7 +108,7 @@ class SnowWeatherSystem {
   getStats() {
     if (!this.group.visible) return { flakes: 0 };
     const density = this.snowMaterial.getDensity?.();
-    return { flakes: density ? density.live.reduce((sum, count) => sum + Math.round(count), 0) : this.flakeCount };
+    return { flakes: density ? density.live.reduce((sum, count) => sum + Math.round(count), 0) : this.snowMesh.geometry.instanceCount };
   }
   dispose() {
     this.group.removeFromParent();
