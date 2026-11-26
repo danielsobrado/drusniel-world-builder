@@ -710,10 +710,7 @@ export class StylizedSurfaceView {
    * in a movement frame.
    */
   prewarmStreamingResources(renderer = this.terrainView.renderer) {
-    // Seven fixed shapes belong to loading-screen geometry and shader warmup.
-    this.alpineRockView?.ensureMeshes();
-    this.glacierSeracView?.ensureMeshes();
-    this.icebergView?.ensureMeshes();
+    // Geology meshes are created by their residency views only after a cell resolves.
     const textures = new Set();
     for (const terrainSlot of this.terrainView.slots) {
       for (const texture of [
@@ -727,18 +724,22 @@ export class StylizedSurfaceView {
       }
     }
     for (const waterSlot of this.waterSlots) {
+      if (!waterSlot.hasWaterCoverage) continue;
       textures.add(waterSlot.waterFieldTexture);
       textures.add(waterSlot.waterFlowTexture);
       textures.add(waterSlot.waterAppearanceTexture);
       textures.add(waterSlot.waterObstacleTexture);
     }
+    let pinnedGrass = 0;
     for (const grassSlot of this.slots) {
+      if (!grassSlot.mesh.visible) continue;
       grassSlot.pinResources();
       textures.add(grassSlot.trampleTexture);
+      pinnedGrass++;
     }
     for (const texture of textures) renderer.initTexture(texture);
     PerfCounters.set('streamingTexturesPrewarmed', textures.size);
-    PerfCounters.set('grassSlotsPinned', this.slots.length);
+    PerfCounters.set('grassSlotsPinned', pinnedGrass);
     return textures.size;
   }
 
@@ -753,8 +754,8 @@ export class StylizedSurfaceView {
     // the unused pool slots that streaming will claim at the first boundary;
     // warming every slot multiplied viewport-node resources with no additional
     // hitch benefit.
-    const slots = this.waterSlots.filter((slot) => !slot.terrainSlot.descriptor);
-    if (slots.length === 0) slots.push(this.waterSlots[0]);
+    const slots = this.waterSlots.filter(slot => slot.hasWaterCoverage && slot.isWithinRefractionRange());
+    if (slots.length === 0) return null;
     const previous = slots.map((slot) => ({
       slot,
       material: slot.mesh.material,

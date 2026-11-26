@@ -1,3 +1,4 @@
+import { ALL_WATER_FEATURES, waterFeatureProfile } from './WaterFeatureProfile.js';
 import { WATER_SLOT_OPTIONS } from './SharedWaterMaterials.js';
 import { TERRAIN_SLOT_KEY } from '../materials/TerrainSlotBindings.js';
 import * as THREE from 'three/webgpu';
@@ -121,7 +122,8 @@ export class StylizedWaterSlot {
       surfacePatterns: this.surfacePatterns,
       sunDirection,
     };
-    this.material = this.createMaterial(false);
+    this.features = ALL_WATER_FEATURES;
+    this.material = sharedMaterials?.placeholder ?? this.createMaterial(false);
     // Built on first approach to water, never up front: a material carrying the
     // viewport-texture nodes costs the whole frame a colour copy, a depth copy
     // and a mip chain, so a session that never nears water must never create it.
@@ -131,16 +133,18 @@ export class StylizedWaterSlot {
     this.mesh.userData[WATER_SLOT_OPTIONS] = this.materialOptions;
     this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.visible = false;
+    this.mesh.userData.skipWarmup = true;
     this.mesh.renderOrder = 2;
     this.mesh.name = `stylized-water-${terrainSlot.slotIndex}`;
     terrainView.scene.add(this.mesh);
   }
 
   createMaterial(enableRefraction) {
-    if (this.sharedMaterials) return this.sharedMaterials.get(this.materialOptions, enableRefraction);
+    if (this.sharedMaterials) return this.sharedMaterials.get(this.materialOptions, enableRefraction, this.features);
     const material = createStylizedWaterMaterial({
       ...this.materialOptions,
       enableRefraction,
+      features: this.features,
     });
     material.side = THREE.DoubleSide;
     material.needsUpdate = true;
@@ -231,10 +235,29 @@ export class StylizedWaterSlot {
     );
     if (!ready) {
       this.mesh.visible = false;
+      this.hasWaterCoverage = false;
+      this.hasOceanWater = false;
+      this.hasRiverWater = false;
+      this.mesh.userData.skipWarmup = true;
       return;
     }
     if (page !== this.uploadedPage
         || (page.waterFieldRevision ?? 0) !== this.uploadedFieldRevision) {
+      const features = waterFeatureProfile(page);
+      if (!features) {
+        this.terrainView.drawPreparation?.cancel(this.mesh);
+        this.hasWaterCoverage = false;
+        this.hasOceanWater = false;
+        this.hasRiverWater = false;
+        this.mesh.visible = false;
+        this.mesh.userData.skipWarmup = true;
+        this.uploadedPage = page;
+        this.uploadedFieldRevision = page.waterFieldRevision ?? 0;
+        this.seaPhaseDescriptor = null;
+        PerfCounters.inc(PERF_COUNTER_WATER_CHUNKS_DRY);
+        PerfCounters.inc('waterDryUploadsSkipped');
+        return;
+      }
       const bytes = this.waterFieldPixels.byteLength + this.waterFlowPixels.byteLength + this.waterAppearancePixels.byteLength;
       if (publicationBudget && !publicationBudget.canPublish(bytes)) {
         // A reused terrain slot must not show the previous chunk's water.
@@ -244,6 +267,13 @@ export class StylizedWaterSlot {
         return;
       }
       this.uploadField(page);
+      if (this.sharedMaterials && (this.features !== features || this.material === this.sharedMaterials.placeholder)) {
+        this.terrainView.drawPreparation?.cancel(this.mesh);
+        this.features = features;
+        this.material = this.createMaterial(false);
+        this.refractiveMaterial = null;
+        this.refractionPrewarmed = false;
+      }
     }
     // A chunk with no coverage anywhere must not draw. Its fragments would all
     // discard on alpha, but the refraction branch samples the viewport colour
@@ -255,7 +285,13 @@ export class StylizedWaterSlot {
       this.hasWaterCoverage ? PERF_COUNTER_WATER_CHUNKS_WET : PERF_COUNTER_WATER_CHUNKS_DRY,
     );
     if (!this.hasWaterCoverage) return;
-    const material = this.resolveMaterial();
+    this.mesh.userData.skipWarmup = false;
+    const preparation = this.terrainView.drawPreparation;
+    if (preparation && !preparation.isMaterialReady(this.mesh, this.material)) {
+      preparation.requestMaterial(this.mesh, this.material);
+      this.mesh.visible = false;
+    }
+    const material = this.mesh.visible ? this.resolveMaterial() : this.material;
     if (this.mesh.material !== material) this.mesh.material = material;
     if (material === this.refractiveMaterial) {
       PerfCounters.inc(PERF_COUNTER_WATER_CHUNKS_REFRACTIVE);

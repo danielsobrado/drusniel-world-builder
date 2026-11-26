@@ -22,11 +22,11 @@ export function createTerrainOceanMask(terrainUv, groundHeight, fieldSize) {
 /** Share the slot's derived water identity with the ground without a sampler. */
 export function createTerrainWaterContext(terrainUv, groundHeight, fieldSize,
   shelteredSurf = false, runupHeight = 0) {
-  const readTexture = object => waterSlot(object)?.waterFieldTexture;
+  const readTexture = object => waterSlot(object)?.hasWaterCoverage ? waterSlot(object).waterFieldTexture : empty;
   const fieldUv = terrainUv.mul((fieldSize - 1) / fieldSize).add(0.5 / fieldSize);
   const origin = uniform(0).onObjectUpdate(({ object }) => waterSlot(object)?.surfaceOrigin.value ?? 0);
   const wet = uniform(0).onObjectUpdate(({ object }) => waterSlot(object)?.hasWaterCoverage ? 1 : 0);
-  const readAppearance = object => waterSlot(object)?.waterAppearanceTexture ?? emptyAppearance;
+  const readAppearance = object => waterSlot(object)?.hasWaterCoverage ? waterSlot(object).waterAppearanceTexture : emptyAppearance;
   const shelterHeightLimit = Math.max(MIN_SHELTER_HEIGHT_METERS,
     runupHeight + SHELTER_HEIGHT_MARGIN_METERS);
   const context = Fn(() => {

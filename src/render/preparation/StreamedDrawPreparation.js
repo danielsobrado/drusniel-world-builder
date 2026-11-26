@@ -102,7 +102,7 @@ export class StreamedDrawPreparation {
     });
   }
   markInitialScene() {
-    this.scene.traverse(object => { if (object.isMesh) this.markPrepared(object, object.material); });
+    this.scene.traverse(object => { if (object.isMesh && !object.userData.skipWarmup) this.markPrepared(object, object.material); });
   }
   markPrepared(mesh, material) {
     this.prepared.add(mesh);

@@ -1,5 +1,6 @@
-import { DoubleSide } from 'three/webgpu';
+import { DoubleSide, MeshBasicMaterial } from 'three/webgpu';
 import { uniform } from 'three/tsl';
+import { ALL_WATER_FEATURES } from './WaterFeatureProfile.js';
 import { createStylizedWaterMaterial } from './StylizedWaterMaterial.js';
 import { bilinearLoad, perObjectTexture } from '../materials/TerrainSlotBindings.js';
 
@@ -12,12 +13,14 @@ export class SharedWaterMaterials {
     this.reflections = reflections;
     this.oceanFft = oceanFft;
     this.materials = new Map();
+    this.placeholder = new MeshBasicMaterial();
     this.bindings = null;
     this.disposed = false;
   }
 
-  get(options, enableRefraction) {
-    if (this.materials.has(enableRefraction)) return this.materials.get(enableRefraction);
+  get(options, enableRefraction, features = ALL_WATER_FEATURES) {
+    const key = `${features}:${Number(enableRefraction)}`;
+    if (this.materials.has(key)) return this.materials.get(key);
     if (!this.bindings) {
       const read = object => object?.userData?.[WATER_SLOT_OPTIONS] ?? options;
       const bindings = { ...options };
@@ -36,9 +39,10 @@ export class SharedWaterMaterials {
       bindings.loadTexture = (name, template, uv) => bilinearLoad(template, uv, object => read(object)[name]);
       this.bindings = bindings;
     }
-    const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction, reflections: this.reflections, oceanFft: this.oceanFft });
+    const material = createStylizedWaterMaterial({ ...this.bindings, enableRefraction, features, reflections: this.reflections, oceanFft: this.oceanFft });
     material.side = DoubleSide;
-    this.materials.set(enableRefraction, material);
+    this.materials.set(key, material);
+    material.userData.waterFeatureProfile = features;
     return material;
   }
 
@@ -47,5 +51,6 @@ export class SharedWaterMaterials {
     this.disposed = true;
     for (const material of this.materials.values()) material.dispose();
     this.materials.clear();
+    this.placeholder.dispose();
   }
 }

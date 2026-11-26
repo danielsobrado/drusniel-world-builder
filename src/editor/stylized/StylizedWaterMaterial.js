@@ -1,3 +1,4 @@
+import { ALL_WATER_FEATURES, WATER_FEATURES } from './WaterFeatureProfile.js';
 import * as THREE from 'three/webgpu';
 import { assignMaterialData, REFLECTION_CLASSES } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import {
@@ -120,6 +121,7 @@ export function createStylizedWaterMaterial({
   // not avoid it. Chunks far from the camera get a variant built without the
   // branch so a player away from water pays nothing.
   enableRefraction = true,
+  features = ALL_WATER_FEATURES,
   // Offshore FFT (PR I.4): the view's shared OceanFftBinding and this chunk's cascade
   // UV origins (vec4). Null when the feature is off: the graph is then the original.
   oceanFft = null,
@@ -130,6 +132,10 @@ export function createStylizedWaterMaterial({
   loadTexture = (_name, value, uvNode) => bilinearLoad(value, uvNode),
 }) {
   const water = config.water;
+  const oceanEnabled = Boolean(features & WATER_FEATURES.OCEAN);
+  const inlandEnabled = Boolean(features & WATER_FEATURES.INLAND);
+  const fallEnabled = Boolean(features & WATER_FEATURES.FALL);
+  const iceEnabled = Boolean(features & WATER_FEATURES.ICE);
   const quality = resolveWaterQualityFeatures(water);
   const terrainUv = uv();
   const fieldUv = terrainUv
@@ -210,7 +216,7 @@ export function createStylizedWaterMaterial({
   // Faded out over the last half metre of depth: on the film over a beach
   // the rings otherwise drew as bright arcs across the wet sand.
   const ripple = rippleSum ? rippleSum.mul(smoothstep(0.1, 0.5, waterDepth)).toVar('waterRippleSlope') : null;
-  const sea = water.sea?.enabled && quality.flow && seaPhaseOrigin && sunDirection
+  const sea = oceanEnabled && water.sea?.enabled && quality.flow && seaPhaseOrigin && sunDirection
     ? createSeaSurfaceNodes({
       terrainUv,
       patternXZ: surfacePatterns.latticePoint('riverDetail', localXZ),
@@ -235,7 +241,7 @@ export function createStylizedWaterMaterial({
     : null;
   // Inland water takes grass-test's surface; the sea keeps its own shading.
   const fall = fallPlunge ? fallPlunge.x : float(0);
-  const river = water.riverSurface?.enabled && quality.flow && quality.depthOptics && sunDirection
+  const river = inlandEnabled && water.riverSurface?.enabled && quality.flow && quality.depthOptics && sunDirection
     ? createRiverSurfaceNodes({
       patternXZ: surfacePatterns.latticePoint('riverDetail', localXZ),
       patterns: surfacePatterns,
@@ -260,7 +266,7 @@ export function createStylizedWaterMaterial({
     currentStrength,
   }));
   const oceanWeight = appearance?.ocean ?? sea?.mask ?? float(0);
-  const seaOptics = water.sea?.enabled && quality.depthOptics ? createSeaOpticsNodes(waterDepth, water.sea.optics, water.qualityTier) : null;
+  const seaOptics = oceanEnabled && water.sea?.enabled && quality.depthOptics ? createSeaOpticsNodes(waterDepth, water.sea.optics, water.qualityTier) : null;
   const distort = surfaceNoise.sub(0.5).mul(water.distortAmount);
   const sampleUv = surfacePatterns.latticePoint('cells', localXZ)
     .add(surfaceOffset)
@@ -451,7 +457,7 @@ export function createStylizedWaterMaterial({
 
   // Foam is composited after refraction, which resets alpha to coverage.
   let whitewater = null;
-  if (quality.foam && water.foam.enabled && fallPlunge && water.waterfall.enabled) {
+  if (fallEnabled && quality.foam && water.foam.enabled && fallPlunge && water.waterfall.enabled) {
     whitewater = createWaterfallFoamNode({
       fallPlunge,
       flow: currentFlow,
@@ -697,7 +703,7 @@ export function createStylizedWaterMaterial({
   // the sheet down onto the bed exactly at the waterline, so the terrain
   // occludes the rest per pixel and the bank follows the contour, not the grid.
   // Lakes in glacier and tundra country lie frozen: ice over the body, no waves.
-  const ice = createFrozenWaterNodes({ appearance, patterns: surfacePatterns, localXZ, waterDepth, currentStrength, shoreDistance, sunDirection });
+  const ice = iceEnabled ? createFrozenWaterNodes({ appearance, patterns: surfacePatterns, localXZ, waterDepth, currentStrength, shoreDistance, sunDirection }) : null;
   if (ice) {
     color = ice.color(color);
     alpha = ice.alpha(alpha, waterlineFade.mul(waterCoverage), fade);
@@ -711,7 +717,7 @@ export function createStylizedWaterMaterial({
   // triangle between them rose over the sand as a pale, straight-edged wedge.
   const swing = smoothstep(0.25, 1.2, waterDepth);
   if (sea) surfaceHeight = surfaceHeight.add(sea.displacement.mul(swing).mul(open));
-  if (water.riverSurface?.enabled && quality.flow) {
+  if (inlandEnabled && water.riverSurface?.enabled && quality.flow) {
     const phases = LAKE_WAVES.map((_, i) => surfacePatterns.wavePhase(`lakeWave${i}`, localXZ));
     surfaceHeight = surfaceHeight.add(lakeWaveRise(phases, time)
       .mul(oneMinus(clamp(currentStrength.mul(4), 0, 1)))
