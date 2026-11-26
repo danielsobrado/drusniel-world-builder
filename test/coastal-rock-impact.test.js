@@ -108,3 +108,27 @@ test('impact moisture outlives foam and decays independently of update frequency
   assert.ok(wet > foam);
   assert.ok(Math.abs(wet - evolve(settings.wetness.decaySeconds, 120)) < 1e-11);
 });
+
+test('compact spray builds a masked material and publishes a bounded live prefix', () => {
+  const origin = { x: 0, z: 0 };
+  const spray = new CoastalImpactSpray({ scene: new Scene(), qualityTier: 'high', settings: settings.spray,
+    compact: true, alphaCutoff: 0.003,
+    floatingOrigin: { getState: () => origin, toRender: (x, z) => ({ x: x - origin.x, z: z - origin.z }) } });
+  try {
+    assert.ok(spray.material.maskNode);
+    assert.equal(spray.material.transparent, true);
+    assert.equal(spray.material.depthWrite, false);
+    const count = spray.emit({ rockId: 'fixture', crestId: 1, directionX: 1, directionZ: 0,
+      intensity: 0.9, contactX: 5, contactY: 0, contactZ: 5, radius: 1 }, 1);
+    spray.update(1);
+    assert.equal(spray.geometry.instanceCount, count);
+    for (const attribute of [spray.spawn, spray.velocity, spray.style]) {
+      assert.deepEqual(attribute.updateRanges, [{ start: 0, count: count * 4 }]);
+    }
+    spray.update(10);
+    assert.equal(spray.geometry.instanceCount, 0);
+    assert.equal(spray.mesh.visible, false);
+  } finally {
+    spray.dispose();
+  }
+});
