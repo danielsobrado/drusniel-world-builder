@@ -39,7 +39,7 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
   const weight = settings.spatialReflectionPassWeight;
   const limit = { triangles: settings.rendererAdmissionTriangleBudget, draws: settings.rendererAdmissionDrawBudget };
   const steadyLimit = scale(limit, 1 - settings.rendererAdmissionTransitionReserve);
-  let steady = zero(), active = zero(), fixed = zero(), unknownChunks = 0;
+  let steady = zero(), active = zero(), fixed = zero(), overlap = zero(), unknownChunks = 0;
   const records = [];
   for (const [key, cell] of cells) {
     const layers = cell.renderCost?.layers;
@@ -53,6 +53,8 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
       const fullCost = effectiveRenderCost(full, weight);
       const activeCost = known(layer.active) ? effectiveRenderCost(layer.active, weight)
         : known(layer.selected) ? effectiveRenderCost(layer.selected, weight) : fullCost;
+      const currentCost = known(layer.current) ? effectiveRenderCost(layer.current, weight) : activeCost;
+      overlap = add(overlap, positive(subtract(activeCost, currentCost)));
       active = add(active, activeCost);
       const options = !protectedCell && !mandatory && ADMISSION_LAYERS.includes(kind) ? optionsFor(layer, weight) : null;
       if (!options?.length) {
@@ -62,11 +64,12 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
       }
       const oldFactor = previous.get(key)?.[kind] ?? 1;
       const localFactor = local.decisions.get(key)?.[kind] ?? 1;
+      const oldOption = layer.options.find(option => option.factor === oldFactor);
       const current = options.find(option => option.factor === oldFactor)
-        ?? { factor: oldFactor, cost: known(layer.current) ? effectiveRenderCost(layer.current, weight) : fullCost };
+        ?? { factor: oldFactor, cost: known(oldOption?.cost) ? effectiveRenderCost(oldOption.cost, weight) : currentCost };
       const desired = options.find(option => option.factor === localFactor) ?? options[0];
       records.push({ key, kind, distance: distance(key, focus, cameraChunk), priority: settings.admissionPriorities[kind],
-        current, desired, options, activeCost });
+        current, desired, options, activeCost, activeKnown: known(layer.active ?? layer.selected) });
       steady = add(steady, desired.cost);
     }
     yield;
@@ -83,7 +86,7 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
     steady = add(base, choice.cost);
     yield;
   }
-  return { local, records, fixed, active, steady, localSteady, limit, steadyLimit, unknownChunks };
+  return { local, records, fixed, active, overlap, steady, localSteady, limit, steadyLimit, unknownChunks };
 }
 
 /** Select bounded changes against transition overlap and the live upload allowance. */
@@ -94,11 +97,12 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
   let transient = active;
   let changes = 0, deferred = 0, uploadDeferred = 0, overlapDeferred = 0, emergencyDemotions = 0;
   const contended = publication.contended === true;
-  const changeLimit = contended ? Math.min(1, settings.rendererAdmissionMaxChanges) : settings.rendererAdmissionMaxChanges;
+  const busy = publication.busy === true;
+  const changeLimit = contended || busy ? Math.min(1, settings.rendererAdmissionMaxChanges) : settings.rendererAdmissionMaxChanges;
   const recovery = scale(steadyLimit, settings.recoveryRatio);
   // Establish the current estimated steady state before granting upgrades.
   for (const record of records) admitted = add(admitted, record.current.cost);
-  const overlap = positive(subtract(active, admitted));
+  const overlap = plan.overlap;
   const changed = records.filter(record => record.current.factor !== record.desired.factor);
   changed.sort((a, b) => {
     const ad = a.desired.factor < a.current.factor, bd = b.desired.factor < b.current.factor;
@@ -110,16 +114,17 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
   for (const record of changed) {
     const promotion = record.desired.factor > record.current.factor;
     const nextSteady = add(subtract(admitted, record.current.cost), record.desired.cost);
-    if (promotion && contended) { uploadDeferred++; deferred++; continue; }
+    if (promotion && (contended || busy)) { uploadDeferred++; deferred++; continue; }
     if (changes >= changeLimit || (promotion && !fits(nextSteady, recovery))) { deferred++; continue; }
     // Candidate union includes the currently selected and target bands. No credit
     // for retiring geometry until a later completed sample observes the retirement.
-    const extra = record.desired.transition ? positive(subtract(record.desired.transition, record.activeCost)) : null;
+    const extra = record.activeKnown && record.desired.transition ? positive(subtract(record.desired.transition, record.activeCost)) : null;
     const nextTransient = extra && add(transient, extra);
-    if (!nextTransient || !fits(nextTransient, limit)) {
+    const noAddedOverlap = extra && extra.triangles === 0 && extra.draws === 0;
+    if (!nextTransient || (!fits(nextTransient, limit) && (promotion || !noAddedOverlap))) {
       // An already over-budget view must be able to demote, but never start a
       // batch of oversized transitions or bypass unknown overlap estimates.
-      if (promotion || !nextTransient || contended || changes > 0 || overlap.triangles > 0 || overlap.draws > 0) {
+      if (promotion || !nextTransient || contended || busy || changes > 0 || overlap.triangles > 0 || overlap.draws > 0) {
         overlapDeferred++; deferred++; continue;
       }
       emergencyDemotions++;
@@ -142,6 +147,7 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
     targetTriangles: plan.steady.triangles, targetDraws: plan.steady.draws,
     admittedTriangles: admitted.triangles, admittedDraws: admitted.draws,
     activeTriangles: active.triangles, activeDraws: active.draws,
+    overlapTriangles: overlap.triangles, overlapDraws: overlap.draws,
     transientTriangles: transient.triangles, transientDraws: transient.draws,
     fixedTriangles: plan.fixed.triangles, fixedDraws: plan.fixed.draws,
     steadyTriangleLimit: steadyLimit.triangles, steadyDrawLimit: steadyLimit.draws,
@@ -149,7 +155,7 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
     targetOverflow: Number(!fits(plan.steady, steadyLimit)),
     admittedOverflow: Number(!fits(admitted, steadyLimit)),
     transientOverflow: Number(!fits(transient, limit)),
-    uploadContended: Number(contended), remainingUploadBytes: publication.remainingBytes ?? -1,
+    uploadContended: Number(contended), publicationBusy: Number(busy), remainingUploadBytes: publication.remainingBytes ?? -1,
   } };
 }
 
@@ -158,6 +164,8 @@ export function rendererPublicationState(surface, settings) {
   const remaining = budget?.remainingUploadBytes?.();
   const maximum = budget?.maxUploadBytes;
   const measured = Number.isFinite(remaining) && Number.isFinite(maximum) && maximum > 0;
-  return { remainingBytes: measured ? remaining : -1,
+  const busy = [surface.treeView, surface.rockView, surface.bushView].some(view =>
+    view?.stagedRebuild || view?.pendingLodRebuild || view?.pendingRebuild);
+  return { remainingBytes: measured ? remaining : -1, busy,
     contended: measured && remaining < maximum * settings.rendererAdmissionUploadHeadroom };
 }
