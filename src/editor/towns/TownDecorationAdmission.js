@@ -32,7 +32,7 @@ export function townDecorationMetadata(module, instances, kit) {
     && (!Object.hasOwn(colliders, module) || (Array.isArray(colliders[module]) && !colliders[module].length))
     && prefabParts && typeof prefabParts === 'object'
     && Object.values(prefabParts).every(prefab => Array.isArray(prefab.parts) && !prefab.parts.some(part => part.m === module));
-  const cheaperFar = far && far.triangles < near.triangles;
+  const cheaperFar = far && far.triangles > 0 && far.triangles < near.triangles;
   if (!cheaperFar && !canOmit) return null;
   return { module, near, far, cheaperFar: Boolean(cheaperFar), canOmit: Boolean(canOmit) };
 }
@@ -73,7 +73,7 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
       const protectedNow = distance <= protectedDistance;
       distances[i] = distance;
       const d = Math.hypot(x - focus.x, z - focus.z);
-      const previousTier = instances.decorationTiers?.[i];
+      const previousTier = instances.decorationBaselineTiers?.[i];
       let tier = NEAR;
       if (!protectedNow && meta.far) {
         if (lod === TOWN_LOD_FAR) tier = FAR;
@@ -92,7 +92,7 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
     }
     const cost = costFor(meta, nearCount, farCount);
     requested = sum(requested, cost);
-    plans.push({ instances, meta, tiers, distances, nearCount, farCount, nearest, cost });
+    plans.push({ instances, meta, tiers, baselineTiers: tiers.slice(), distances, nearCount, farCount, nearest, cost });
     yield;
   }
   const limit = { triangles: settings.triangleBudget, draws: settings.drawBudget };
@@ -113,7 +113,8 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
       if (!count) continue;
       const nextCost = costFor(plan.meta, plan.nearCount - count, plan.farCount + count);
       const next = sum(minus(selected, plan.cost), nextCost);
-      if (next.draws > Math.max(selected.draws, limit.draws)) continue;
+      if (next.draws > Math.max(selected.draws, limit.draws)
+          || (selected.triangles <= recovery.triangles && next.draws >= selected.draws)) continue;
       for (let i = 0; i < plan.tiers.length; i++) {
         if (plan.tiers[i] === NEAR && plan.distances[i] > protectedDistance) plan.tiers[i] = FAR;
         if ((i & 63) === 63) yield;
