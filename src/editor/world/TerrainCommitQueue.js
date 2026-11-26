@@ -1,3 +1,5 @@
+import { WorkPriorityHeap } from '../performance/WorkPriorityHeap.js';
+
 /**
  * Frame-budgeted terrain page commits.
  * Worker results only enqueue; memcpy + needsUpdate runs here (no getTile / mask gen).
@@ -64,9 +66,9 @@ export class TerrainCommitQueue {
     this.maxCommitsPerFrame = maxCommitsPerFrame;
     this.commitBudgetMs = commitBudgetMs;
     this.now = now;
-    this.queue = [];
+    this.heap = new WorkPriorityHeap();
+    this.queue = this.heap.items;
     this.entriesBySlot = new Map();
-    this.sortDirty = false;
     this.nextSequence = 0;
     this.maxQueuedAgeMs = 0;
   }
@@ -76,9 +78,8 @@ export class TerrainCommitQueue {
   }
 
   clear() {
-    this.queue.length = 0;
+    this.heap.clear();
     this.entriesBySlot.clear();
-    this.sortDirty = false;
     this.nextSequence = 0;
     this.maxQueuedAgeMs = 0;
   }
@@ -91,23 +92,12 @@ export class TerrainCommitQueue {
       Object.assign(existing, job);
       existing.queuePriority = priority;
       existing.queueSequence = this.nextSequence++;
-      this.sortDirty = true;
+      this.heap.changed(existing);
       return;
     }
     const queued = { ...job, queuePriority: priority, queueSequence: this.nextSequence++ };
-    this.queue.push(queued);
+    this.heap.push(queued);
     this.entriesBySlot.set(slotIndex, queued);
-    this.sortDirty = true;
-  }
-
-  sortQueue() {
-    if (!this.sortDirty) return;
-    this.queue.sort((left, right) => {
-      if (left.queuePriority < right.queuePriority) return 1;
-      if (left.queuePriority > right.queuePriority) return -1;
-      return right.queueSequence - left.queueSequence;
-    });
-    this.sortDirty = false;
   }
 
   flush(commit, isCurrent = null, {
@@ -122,15 +112,18 @@ export class TerrainCommitQueue {
     assertBudgetMs(maxUploadBytes, { allowInfinity: true });
     let committed = 0;
     let uploadBytes = 0;
-    if (maxCommits > 0 && budgetMs > 0) this.sortQueue();
+    let attempts = 0;
+    const maxAttempts = maxCommits === Infinity ? Infinity : 64;
     while (
       this.queue.length > 0
       && committed < maxCommits
+      && attempts < maxAttempts
       && this.now() - startedAt < budgetMs
     ) {
-      const job = this.queue[this.queue.length - 1];
+      attempts++;
+      const job = this.heap.peek();
       if (isCurrent && !isCurrent(job)) {
-        this.queue.pop();
+        this.heap.pop();
         this.entriesBySlot.delete(job.slot.slotIndex);
         continue;
       }
@@ -140,7 +133,7 @@ export class TerrainCommitQueue {
       if (canPublishUpload && !canPublishUpload(bytes)) break;
       if (bytes > 0 && maxUploadBytes === 0) break;
       if (committed > 0 && uploadBytes + bytes > maxUploadBytes) break;
-      this.queue.pop();
+      this.heap.pop();
       this.entriesBySlot.delete(job.slot.slotIndex);
       uploadBytes += bytes;
       this.maxQueuedAgeMs = Math.max(this.maxQueuedAgeMs, this.now() - job.enqueuedAt);

@@ -154,17 +154,18 @@ export class StreamedDrawPreparation {
     // The pass itself cannot yield. Limit the batch using the last observed
     // cost, while retaining the one-job progress guarantee.
     const slackMs = budget?.slack?.strictAvailable?.() ?? Infinity;
-    const targetLimit = this.preparationCostMs === null ? this.settings.meshesPerFrame
+    const targetLimit = this.preparationCostMs === null ? 1
       : Math.min(this.settings.meshesPerFrame, Math.max(1, Math.floor(slackMs / this.preparationCostMs)));
     const uploadStarted = performance.now();
     let budgetedBytes = 0;
     let meadowBytes = 0;
+    let inspected = 0;
     try {
       const pinned = mesh => this.geometryUploads.jobs.has(mesh) || this.textureWarmup.jobs.has(mesh)
         || this.initialUploadAttributes.get(mesh)?.some(attribute => this.attributeInitialization.jobs.has(attribute));
       const order = fifo ? this.pending : this.priority.ordered(this.pending, pinned);
       for (const mesh of order) {
-        if (shouldYield?.()) break;
+        if (shouldYield?.() || inspected++ >= 64) break;
         const isolated = this.isolated.has(mesh);
         if (isolated && targets.length) break;
         let root = mesh;
@@ -210,6 +211,12 @@ export class StreamedDrawPreparation {
         Math.max(PerfCounters.get('meadowInitialGpuUploadMaxFrameBytes'), meadowBytes));
       if (budgetedBytes) PerfCounters.inc('streamedDrawInitialUploadBytes', budgetedBytes);
       if (targets.length === 0) return;
+      if (!fifo && budget?.settings?.enabled && this.preparationCostMs !== null
+        && budget.slack.strictAvailable() < this.preparationCostMs * targets.length) {
+        for (const target of targets) this.pending.add(target);
+        PerfCounters.inc('streamedDrawCostDeferredFrames');
+        return;
+      }
       this.waitFrames = 0;
       for (const mesh of targets) {
         this.geometryUploads.adopt(mesh);
@@ -255,6 +262,11 @@ export class StreamedDrawPreparation {
         }
       });
       const preparedAt = performance.now();
+      const elapsed = preparedAt - prepareStarted;
+      if (elapsed > slackMs && Number.isFinite(slackMs)) {
+        PerfCounters.inc('streamedDrawAtomicOverruns');
+        PerfCounters.inc('streamedDrawAtomicOverrunMs', elapsed - slackMs);
+      }
       const sample = Math.max(0.01, (preparedAt - prepareStarted) / targets.length);
       this.preparationCostMs = this.preparationCostMs === null ? sample
         : Math.max(sample, this.preparationCostMs * 0.75 + sample * 0.25);

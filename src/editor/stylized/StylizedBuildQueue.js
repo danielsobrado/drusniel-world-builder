@@ -1,3 +1,5 @@
+import { WorkPriorityHeap } from '../performance/WorkPriorityHeap.js';
+
 /**
  * Limits heavy stylized rebuilds per frame.
  */
@@ -18,9 +20,9 @@ export class StylizedBuildQueue {
     this.shouldYield = typeof shouldYield === 'function' ? shouldYield : null;
     this.budgetProvider = budgetProvider;
     this.stats = { completed: 0, advanced: 0, blocked: 0, cancelled: 0 };
-    this.queue = [];
+    this.heap = new WorkPriorityHeap();
+    this.queue = this.heap.items;
     this.entriesByKey = new Map();
-    this.sortDirty = false;
     this.nextSequence = 0;
   }
 
@@ -30,24 +32,18 @@ export class StylizedBuildQueue {
 
   clear() {
     this.stats.cancelled += this.queue.length;
-    this.queue.length = 0;
+    this.heap.clear();
     this.entriesByKey.clear();
-    this.sortDirty = false;
     this.nextSequence = 0;
   }
 
   retain(keep) {
-    let writeIndex = 0;
-    for (let readIndex = 0; readIndex < this.queue.length; readIndex += 1) {
-      const job = this.queue[readIndex];
-      if (keep(job)) {
-        this.queue[writeIndex++] = job;
-      } else {
-        this.entriesByKey.delete(job.key);
-        this.stats.cancelled += 1;
-      }
+    for (const job of this.entriesByKey.values()) {
+      if (keep(job)) continue;
+      this.heap.remove(job);
+      this.entriesByKey.delete(job.key);
+      this.stats.cancelled += 1;
     }
-    this.queue.length = writeIndex;
   }
 
   enqueue(job) {
@@ -60,7 +56,7 @@ export class StylizedBuildQueue {
       Object.assign(existing, job);
       if (existing.queuePriority === priority) return false;
       existing.queuePriority = priority;
-      this.sortDirty = true;
+      this.heap.changed(existing);
       return true;
     }
 
@@ -71,9 +67,8 @@ export class StylizedBuildQueue {
       requestedAt: job.requestedAt ?? this.now(),
     };
     this.nextSequence += 1;
-    this.queue.push(queued);
+    this.heap.push(queued);
     this.entriesByKey.set(key, queued);
-    this.sortDirty = true;
     return true;
   }
 
@@ -85,16 +80,6 @@ export class StylizedBuildQueue {
       ...(includeJobs ? { jobs: this.queue.map(job => ({ key: job.key, focus: job.focus,
         chunkX: job.chunkX, chunkZ: job.chunkZ, requestedAt: job.requestedAt, reason: job.blockedReason })) } : {}) };
 
-  }
-
-  sortQueue() {
-    if (!this.sortDirty) return;
-    this.queue.sort((left, right) => {
-      if (left.queuePriority < right.queuePriority) return 1;
-      if (left.queuePriority > right.queuePriority) return -1;
-      return right.queueSequence - left.queueSequence;
-    });
-    this.sortDirty = false;
   }
 
   flush(run) {
@@ -109,14 +94,15 @@ export class StylizedBuildQueue {
       || Boolean(this.shouldYield?.())
     );
     if (shouldYield()) return { built: 0, remaining: this.queue.length };
-    if (this.sortDirty && this.workRunner) this.workRunner(() => this.sortQueue());
-    else this.sortQueue();
+    let attempts = 0;
     while (
       this.queue.length > 0
       && turns < this.buildsPerFrame
+      && attempts < 64
       && !shouldYield()
     ) {
-      const job = this.queue.pop();
+      attempts++;
+      const job = this.heap.pop();
       this.entriesByKey.delete(job.key);
       // Only count successful work so stale/no-op jobs cannot starve real rebuilds.
       const before = job.progressProbe?.() ?? 0;

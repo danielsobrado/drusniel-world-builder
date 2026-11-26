@@ -1,5 +1,6 @@
 /** A dependency is pending: yield this value to stop polling until the next frame. */
 export const ITERATOR_PENDING = Symbol('iterator-pending');
+export const MAX_BUDGETED_ITERATOR_STEPS = 64;
 
 /** A factory is invoked on the first budgeted step, never on a lookup. */
 export function createIteratorBuilder(factory) {
@@ -9,11 +10,12 @@ export function createIteratorBuilder(factory) {
   return {
     get progress() { return progress; },
     get done() { return result !== null; },
-    step({ shouldYield = null } = {}) {
+    step({ shouldYield = null, maxSteps = shouldYield ? MAX_BUDGETED_ITERATOR_STEPS : Infinity } = {}) {
       if (result !== null) return result;
       if (shouldYield?.()) return null;
       iterator ??= factory();
-      while (!shouldYield?.()) {
+      let steps = 0;
+      while (steps++ < maxSteps && !shouldYield?.()) {
         const next = iterator.next();
         if (next.value === ITERATOR_PENDING) return null;
         progress += 1;
