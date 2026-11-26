@@ -190,7 +190,7 @@ water:
       breakDepthFull: 0.7
       breakDepthFade: 2.4
       breakDepthEnd: 4.5
-      strength: 0.52
+      strength: 0.72
       trail: 7
       laceScale: 0.19
     # Crossing ripple trains ride the broad swell and disperse at their own speeds.
@@ -259,35 +259,34 @@ water:
       causticStrength: 0.25
     # Seconds per wave, and how far above still water it runs up the sand.
     period: 7.5
-    runupHeight: 0.5
+    runupHeight: 0.42
     # And how far it may run in metres from the still waterline. A height alone
     # reached 10-15 m over the flat banks of sea-level pools: foam lines on dry sand.
-    runupMeters: 4
+    runupMeters: 3.6
     # Depth in the shallows where the foam line forms.
     breakDepth: 0.5
-    # Height over which the wash's edge fades. At 8 cm the film filled every
-    # hollow of gently rippled sand and skipped the crests: glinting stripes.
-    frontBand: 0.22
+    # Height over which the wash's edge fades; tightened now that cellular lace
+    # erosion breaks the front organically without glinting stripes.
+    frontBand: 0.12
     foamCore: 0.02
     foamWidth: 0.12
-    # A soft band, not a contour wire.
-    foamCoreMeters: 0.08
-    foamWidthMeters: 0.55
+    # Crisp frothy swash lip that erodes into bubble lace behind the wave nose.
+    foamCoreMeters: 0.05
+    foamWidthMeters: 0.34
     breakupStrength: 0.8
     # How fast the wash memory of earlier waves dries, and the always-damp band.
     washDecay: 4
-    dampHeight: 0.9
+    dampHeight: 0.85
     wetDarkening: 0.5
-    # Near matte, darkened rather than glossy: at 0.42 / 0.3 (and still faintly
-    # at 0.75 / 0.6) the sun glinted off each stepped wash front as a white line.
-    wetRoughness: 0.85
-    filmRoughness: 0.8
+    # Damp sand is subtly sleeker than dry sand without hard mirror glints.
+    wetRoughness: 0.72
+    filmRoughness: 0.56
     filmTint: '#8ccad0'
     filmTintStrength: 0.18
-    foamColor: '#edf8fb'
-    # Wash foam is a hint at the waterline; at 0.55 it whitened small pools
-    # edge to edge.
-    foamStrength: 0.3
+    foamColor: '#f4fafc'
+    # Density-driven lace erosion leaves open wet-sand windows at 0% while actual
+    # frothy wave lips and bubble-web filaments reach natural sunlit brightness.
+    foamStrength: 0.85
     # Rock contact events share sea.surf.diffraction exposure and crest timing.
     rockImpact:
       enabled: true
@@ -354,16 +353,16 @@ water:
       maxUprushSpeed: 1.3
       maxBackwashSpeed: 0.9
       lateralSpeed: 0.08
-      foamInjection: 0.85
-      foamDeposition: 0.35
-      foamWetSeconds: 3.5
-      foamWaterSeconds: 4.5
-      foamDrySeconds: 1.8
-      strandedSeconds: 6.5
+      foamInjection: 1.15
+      foamDeposition: 0.42
+      foamWetSeconds: 4.0
+      foamWaterSeconds: 5.0
+      foamDrySeconds: 2.0
+      strandedSeconds: 7.5
       filmSeconds: 3.2
       wetSeconds: 18
       washOff: 0.65
-      strandedOpacity: 0.45
+      strandedOpacity: 0.52
   # grass-test's lake and river surface (`WaterMaterial`, inland branch): its detail
   # normals advected along the current, its Fresnel against its sky, its sun glint
   # (pow 170 × 1.8 + pow 20 × 0.08), and its foam — noise foam in the 0.02–0.75 m

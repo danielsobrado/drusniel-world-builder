@@ -1,21 +1,21 @@
 import {
+  clamp,
   float,
   max,
   mix,
   oneMinus,
   smoothstep,
-  vec2,
   vec3,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import { seaStateUniforms } from '../water/seaState.js';
 import { SEA_SWELL_COMPONENTS } from '../water/SeaSwell.js';
-import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 import { PatternOrigins } from './PatternOrigins.js';
 import { shoreContactDistance } from './ShoreContactNodes.js';
 import { waterVisualClock } from '../water/WaterVisualClock.js';
 import { coastSwashForcingNodes } from './CoastSwashForcingNodes.js';
 import { sampleCoastalSwashState } from './CoastalSwashStateNodes.js';
+import { erodeFoamLace, sampleCoastalFoamPattern } from './CoastalFoamPatterns.js';
 
 /**
  * Swash on the ground at the sea's edge (after grass-test's coast field).
@@ -66,8 +66,8 @@ export const DEFAULT_COAST_SWASH = Object.freeze({
 });
 
 const TAU = Math.PI * 2;
-/** Lattice cells one repeat of the foam-lace texture spans; divides the 512-cell wrap. */
-const FOAM_LACE_CELLS = 8;
+/** Lattice cells one repeat of the medium foam-lace tile spans; divides the 512-cell wrap. */
+const FOAM_LACE_CELLS = 4;
 const MEMORY_CYCLES = Object.freeze([0.15, 0.3, 0.45, 0.6]);
 const DRIFT_SCALE = 0.021;
 const FRONT_BREAKUP_WAVE = Object.freeze([0.13, 0.09]);
@@ -100,26 +100,24 @@ function colorNode(value) {
   return vec3(color.r, color.g, color.b);
 }
 
-/** Shared by the ground and water front. Real gaps replace the old sine's
- * positive opacity floor, which painted a continuous stripe on flat beaches. */
-export function createCoastFoamBreakup(patterns, localXZ, clock, strength, laceField = null) {
+/** Shared by the ground and water front. Real cellular lace gaps replace flat
+ * grey fade-outs, keeping crisp bubble webbing from eye level to coastal overviews. */
+export function createCoastFoamBreakup(patterns, localXZ, clock, strength, laceField = null, waterNoise = null) {
   if (!(strength > 0)) return float(1);
-  const drift = vec2(clock.mul(.025).mod(512), clock.mul(-.017).mod(512));
-  const point = patterns.latticePoint('foamLace', localXZ).add(drift);
-  // `laceField` reads the world noise's foam lace (a vein net, not blurred fBm):
-  // two taps drifting apart, at scales that both divide the lattice's wrap.
-  const lace = laceField
-    ? laceField(point.div(FOAM_LACE_CELLS)).mul(0.6)
-      .add(laceField(vec2(point.y.negate(), point.x).sub(drift.mul(2)).div(FOAM_LACE_CELLS * 2)).mul(0.4))
-    : periodicFbm2(point);
-  const threshold = strength * .625;
-  const footprint = lace.fwidth();
-  const filter = footprint.min(.15);
-  // A wide band: at ±0.1 the lace's threshold drew a dotted line along the shore up close.
-  const laced = smoothstep(float(threshold - .22).sub(filter), float(threshold + .22).add(filter), lace);
-  // Once the lace is finer than a pixel, thresholding it only draws a dotted
-  // moiré along the shore: hand over to its average coverage instead.
-  return mix(laced, float(0.5), smoothstep(.08, .25, footprint));
+  const pattern = sampleCoastalFoamPattern({
+    waterNoise,
+    laceField,
+    point: patterns.latticePoint('foamLace', localXZ),
+    clock,
+    cells: FOAM_LACE_CELLS,
+  });
+  const density = clamp(float(1).sub(strength * 0.48), 0.15, 0.92);
+  return erodeFoamLace({
+    density,
+    laceHeight: pattern.laceHeight,
+    frothDetail: pattern.frothDetail,
+    uvFootprint: pattern.uvFootprint,
+  }).coverage;
 }
 
 /**
@@ -141,6 +139,8 @@ export function createCoastSwashNodes({
   shelter = float(1),
   diffraction = null,
   laceField = null,
+  waterNoise = null,
+  grassMask = float(0),
   persistentEnabled = true,
 }) {
   if (!config.enabled) return null;
@@ -158,24 +158,39 @@ export function createCoastSwashNodes({
   const phaseLag = diffraction?.enabled
     ? shelter.sub(1).mul(SEA_SWELL_COMPONENTS[0].waveNumber * diffraction.phaseLagMeters)
     : float(0);
-  const { phase, front, coverageAt } = coastSwashForcingNodes({
+  const { phase, front, frontVelocity, coverageAt } = coastSwashForcingNodes({
     localXZ, patternOrigins, height, clock, config, runupScale: shelter, phaseLag,
   });
   const analyticFilm = coverageAt(phase).mul(band);
-  const foamBreakup = createCoastFoamBreakup(patternOrigins, localXZ, clock, config.breakupStrength, laceField);
-  const contact = shoreContactDistance(height.sub(front), localXZ);
-  const analyticFoam = oneMinus(smoothstep(config.foamCoreMeters ?? DEFAULT_COAST_SWASH.foamCoreMeters,
-    max(float(config.foamWidthMeters ?? DEFAULT_COAST_SWASH.foamWidthMeters), contact.footprint), contact.distance))
-    .mul(foamBreakup)
+  const foamPattern = sampleCoastalFoamPattern({
+    waterNoise,
+    laceField,
+    point: patternOrigins.latticePoint('foamLace', localXZ),
+    clock,
+    cells: FOAM_LACE_CELLS,
+  });
+  // Organic micro-scalloping on the advancing wave lip breaks up geometric contours.
+  const frontWarp = foamPattern.organicWarp.mul(0.055 * (config.breakupStrength ?? 0.8));
+  const contact = shoreContactDistance(height.sub(front.add(frontWarp)), localXZ);
+  const uprushWeight = smoothstep(-0.12, 0.14, frontVelocity).mul(0.62).add(0.38);
+  const frontLip = oneMinus(smoothstep(
+    config.foamCoreMeters ?? DEFAULT_COAST_SWASH.foamCoreMeters,
+    max(float(config.foamWidthMeters ?? DEFAULT_COAST_SWASH.foamWidthMeters), contact.footprint),
+    contact.distance,
+  ))
+    .mul(uprushWeight)
     // Only where the wash actually runs: on nearly flat sand the foam contour
     // otherwise crossed dry ground several times, drawing parallel white wires.
-    .mul(analyticFilm)
+    .mul(smoothstep(0.08, 0.45, analyticFilm))
     .mul(band)
     .mul(shelter);
   let memory = analyticFilm;
   for (const cyclesAgo of MEMORY_CYCLES) {
     memory = max(memory, coverageAt(phase.sub(TAU * cyclesAgo)).mul(Math.exp(-cyclesAgo * config.washDecay)));
   }
+  // Analytic trailing lace: receding wash leaves thinning lacy bubble webs on wet sand.
+  const analyticTrail = max(analyticFilm.mul(0.34), memory.mul(0.28)).mul(band).mul(shelter);
+  const analyticDensity = max(frontLip.mul(0.95), analyticTrail);
   const damp = oneMinus(smoothstep(0, config.dampHeight, height));
   // Ground under the water stays wet all the way down. Gated by `band`, the damp
   // stopped half a metre under, and over a carved bed's near-planar ramp that
@@ -190,12 +205,31 @@ export function createCoastSwashNodes({
     ? mix(analyticFilm, persistent.film.mul(band), weight) : analyticFilm;
   const wet = persistent
     ? mix(analyticWet, persistent.wetness.mul(band), weight) : analyticWet;
-  const strandedOpacity = config.persistent?.strandedOpacity ?? 0.45;
-  const persistentFoam = persistent
-    ? max(persistent.mobileFoam, persistent.strandedFoam.mul(strandedOpacity))
-      .mul(foamBreakup).mul(band) : float(0);
-  const foam = persistent
-    ? mix(analyticFoam, persistentFoam, weight) : analyticFoam;
+  const strandedOpacity = config.persistent?.strandedOpacity ?? 0.52;
+  // Combine advected persistent foam/residue with the sub-texel crisp leading bore lip.
+  // Cap pre-erosion density so even peak storm surf retains open bubble pockets.
+  const persistentDensity = persistent
+    ? max(
+      max(persistent.mobileFoam.mul(0.84), persistent.strandedFoam.mul(strandedOpacity)),
+      frontLip.mul(0.82),
+    ).mul(band).clamp(0, 0.84)
+    : float(0);
+  const beachClear = oneMinus(smoothstep(0.18, 0.55, grassMask));
+  const rawFoamDensity = (persistent
+    ? mix(analyticDensity.clamp(0, 0.84), persistentDensity, weight)
+    : analyticDensity.clamp(0, 0.84)).mul(beachClear);
+  const eroded = erodeFoamLace({
+    density: rawFoamDensity,
+    laceHeight: foamPattern.laceHeight,
+    frothDetail: foamPattern.frothDetail,
+    uvFootprint: foamPattern.uvFootprint,
+    edgeMin: 0.095,
+    edgeMax: 0.24,
+    bodyFloor: 0.60,
+    bodyStrength: 0.22,
+  });
+  const foam = eroded.coverage;
+  const foamThickness = eroded.thickness;
   const filmTint = colorNode(config.filmTint);
   const foamColor = colorNode(config.foamColor);
   // The same foam front crosses sand and water. The ground owns the portion
@@ -203,14 +237,21 @@ export function createCoastSwashNodes({
   const groundHandoff = oneMinus(smoothstep(0, shorelineFadeDepth, height.negate()));
 
   return {
-    film, foam, wet,
+    film, foam, foamThickness, wet,
     apply(color, roughness) {
       let result = color.mul(mix(float(1), float(config.wetDarkening), wet));
       result = mix(result, result.mul(filmTint).mul(1.6), film.mul(config.filmTintStrength));
-      result = mix(result, foamColor, foam.mul(config.foamStrength).mul(groundHandoff));
+      // Subtle capillary darkening immediately under frothy foam rims gives physical thickness.
+      const groundFoam = foam.mul(config.foamStrength).mul(groundHandoff);
+      const lipContact = smoothstep(0.08, 0.55, rawFoamDensity).mul(oneMinus(foamThickness.mul(0.65)))
+        .mul(groundHandoff).mul(0.14);
+      result = result.mul(oneMinus(lipContact));
+      const frothyTone = mix(foamColor.mul(0.91), foamColor.mul(1.03),
+        clamp(foamThickness.mul(0.65).add(foamPattern.frothDetail.mul(0.35)), 0, 1));
+      result = mix(result, frothyTone, groundFoam);
       let resultRoughness = mix(roughness, float(config.wetRoughness), wet);
       resultRoughness = mix(resultRoughness, float(config.filmRoughness), film);
-      resultRoughness = mix(resultRoughness, float(0.72), foam);
+      resultRoughness = mix(resultRoughness, float(0.76), groundFoam);
       return { color: result, roughness: resultRoughness };
     },
   };

@@ -543,9 +543,10 @@ export function createTerrainMaterial({
       oceanMask,
       shelter: waterContext?.shelter ?? float(1),
       diffraction,
+      grassMask: grassCoverage,
       persistentEnabled: ['high', 'ultra'].includes(stylizedConfig.water?.qualityTier),
-      // Through the family atlas's noise layers: the terrain has no sampler to spare.
-      laceField: familyAtlas ? (uv) => atlasNoise(WORLD_NOISE_LAYERS.water)(uv).r : null,
+      // Through the family atlas's noise layers (R vein, G voronoi, B perlin): the terrain has no sampler to spare.
+      waterNoise: familyAtlas ? (uv) => atlasNoise(WORLD_NOISE_LAYERS.water)(uv) : null,
     });
     const swashed = swash ? swash.apply(beachSurface.color, beachSurface.roughness) : null;
     const coastSurface = swashed ? {

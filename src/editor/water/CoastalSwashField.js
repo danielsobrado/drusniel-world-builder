@@ -108,9 +108,17 @@ function makeCompute(source, target, inputs, patterns, coast, settings, diffract
     const film = max(carried.g.mul(exp(d.div(-settings.filmSeconds))), coverageNow).clamp(0, 1);
     const foamLifetime = mix(settings.foamDrySeconds, settings.foamWetSeconds, film)
       .add(coverageNow.mul(settings.foamWaterSeconds - settings.foamWetSeconds));
-    const packet = sin(patterns.wavePhase('frontBreakup', localXZ).mul(3)).mul(0.2).add(0.8);
+    // Concentrate aerated foam injection along the advancing bore lip while
+    // modulating naturally along the shore into irregular scalloped pockets.
+    const frontLip = coverageNow.mul(oneMinus(coverageNow)).mul(4).clamp(0, 1);
+    const wavePhase = patterns.wavePhase('frontBreakup', localXZ);
+    const packet = sin(wavePhase.mul(2.4)).mul(0.18)
+      .add(sin(wavePhase.mul(5.1).add(1.3)).mul(0.12))
+      .add(0.74).clamp(0.42, 1);
     const breaker = seaStateUniforms.storm.mul(0.45).add(0.55).clamp(0, 1);
-    const injected = advancing.mul(settings.foamInjection).mul(packet).mul(breaker)
+    const injected = advancing.mul(settings.foamInjection)
+      .mul(frontLip.mul(1.15).add(0.25))
+      .mul(packet).mul(breaker)
       .mul(transmission);
     const mobile = carried.b.mul(exp(d.div(foamLifetime).negate()))
       .add(injected).clamp(0, 1);

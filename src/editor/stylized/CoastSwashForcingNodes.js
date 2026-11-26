@@ -12,7 +12,11 @@ export function coastSwashForcingNodes({ localXZ, patternOrigins, height, clock,
   const frontHeight = runupScale.mul(config.runupHeight).add(config.breakDepth);
   const frontAt = samplePhase => {
     const excursion = oneMinus(cos(samplePhase)).mul(0.5);
-    const breakup = sin(breakupPhase.add(samplePhase.mul(0.17)))
+    // Two incommensurate along-shore harmonics produce organic scalloped swash
+    // tongues rather than a uniform sinusoidal wave line.
+    const primaryScallop = sin(breakupPhase.add(samplePhase.mul(0.17))).mul(0.68);
+    const secondaryScallop = sin(breakupPhase.mul(2.13).sub(samplePhase.mul(0.29)).add(drift.mul(0.45))).mul(0.32);
+    const breakup = primaryScallop.add(secondaryScallop)
       .mul(config.breakupStrength * config.frontBand);
     return excursion.mul(frontHeight).sub(config.breakDepth).add(breakup.mul(runupScale));
   };
@@ -23,8 +27,9 @@ export function coastSwashForcingNodes({ localXZ, patternOrigins, height, clock,
   const frontVelocity = sin(phase).mul(
     frontHeight.mul(TAU / (2 * config.period)),
   ).add(
-    cos(breakupPhase.add(phase.mul(0.17)))
-      .mul(runupScale).mul(0.17 * TAU * config.breakupStrength * config.frontBand / config.period),
+    cos(breakupPhase.add(phase.mul(0.17))).mul(0.68 * 0.17)
+      .sub(cos(breakupPhase.mul(2.13).sub(phase.mul(0.29)).add(drift.mul(0.45))).mul(0.32 * 0.29))
+      .mul(runupScale).mul(TAU * config.breakupStrength * config.frontBand / config.period),
   );
   return { phase, frontAt, coverageAt, frontVelocity, front: frontAt(phase) };
 }

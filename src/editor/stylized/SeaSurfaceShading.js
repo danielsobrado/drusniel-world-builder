@@ -1,7 +1,8 @@
 import { createSeaDetailNodes } from './SeaDetailShading.js';
-import { createSeaSurfNodes, createSeaFoamNoise } from './SeaSurfNodes.js';
+import { createSeaSurfNodes, createSeaFoamPattern } from './SeaSurfNodes.js';
 import { createSeaShelterNode } from './SeaDiffractionNodes.js';
 import { resolveSeaSurf } from '../water/SeaSurf.js';
+import { erodeFoamLace } from './CoastalFoamPatterns.js';
 import {
   abs,
   clamp,
@@ -15,6 +16,7 @@ import {
   positionWorld,
   pow,
   select,
+  sin,
   smoothstep,
   sqrt,
   vec2,
@@ -86,6 +88,8 @@ export function createSeaSurfaceNodes({
   // Long swell (PR I.6): this chunk's four vec4 mode phase origins, or null. Real
   // wave height; only with a real ocean mask, like the FFT normals.
   oceanSwellOrigin = null,
+  // Shared tileable `WORLD_NOISE_LAYERS.water` `(uv) => vec3` (R vein, G voronoi, B perlin).
+  waterNoise = null,
 }) {
   const { storm } = seaStateUniforms;
   // Metres from the chunk centre on canonical axes, matching the chunk's world position.
@@ -115,6 +119,7 @@ export function createSeaSurfaceNodes({
     settings: resolveSeaSurf(config.surf),
     offshoreAmplitude: offshore, legacyAmplitude: amplitude,
     exposure, seaMask, waterCoverage,
+    waterNoise,
   });
   const shelter = config.surf?.diffraction?.enabled
     ? createSeaShelterNode(exposure, shoreDistance) : float(1);
@@ -147,10 +152,12 @@ export function createSeaSurfaceNodes({
   const crest = smoothstep(0.3, 0.95, height).mul(strength);
   // Whitecaps share the surf's bounded world field, independently of the
   // periodic normal texture. Chunk-local coordinates preserve planet precision.
-  const foamNoise=surf?.foamNoise??(patterns?createSeaFoamNoise(patterns,localXZ,time):float(1));
+  const foamPattern = surf?.foamPattern
+    ?? (patterns ? createSeaFoamPattern(patterns, localXZ, time, waterNoise) : null);
+  const foamNoise = foamPattern?.laceHeight ?? float(1);
   // Evaluate breakup per fragment. The old sub-4 m vertex sine pattern aliased
   // against the 2 m water grid and repeated along every carrier crest.
-  const breakup=smoothstep(0.25,0.85,foamNoise);
+  const breakup = smoothstep(0.25, 0.85, foamNoise);
   const threshold = mix(
     float(config.whitecapThreshold),
     float(config.stormWhitecapThreshold),
@@ -166,6 +173,8 @@ export function createSeaSurfaceNodes({
     release: detail?.release,
     normal,
     foamNoise,
+    foamPattern,
+    subsurfaceFoam: surf?.subsurfaceFoam?.mul(seaMask) ?? float(0),
     roughness,
     glint(viewDirection) {
       const specular = dot(sun.negate().reflect(normal), viewDirection).max(0);
@@ -183,10 +192,32 @@ export function createSeaSurfaceNodes({
       return shaded.mul(float(1).add(crest.mul(config.crestLift)));
     },
     whitecap() {
-      const crestCap = smoothstep(threshold, 1, height).mul(strength).mul(breakup);
-      // Past a gale the wind tears foam off every wave: drifting patches and
-      // streaks over all open water, not only on the tallest crests.
+      const crestDensity = smoothstep(threshold, 1, height).mul(strength);
+      // Past a gale the wind tears foam off breaking wave crests and stretches
+      // wispy spume trails along the swell — never tiling a flat grid over troughs.
       const gale = smoothstep(0.35, 1, storm);
+      if (foamPattern) {
+        const crestWave = smoothstep(0.18, 0.88, height);
+        const swellBreakup = patterns
+          ? sin(patterns.wavePhase('surfAlong', localXZ).mul(0.85)).mul(0.25).add(0.75)
+          : float(0.85);
+        const streakDensity = gale.mul(crestWave).mul(swellBreakup)
+          .mul(smoothstep(0.6, 2.5, waterDepth)).mul(seaMask).mul(0.52);
+        const capDensity = max(crestDensity.mul(0.78), streakDensity);
+        // Feathery wind-whipped edges so distant offshore whitecaps never look like cutouts.
+        const capFade = smoothstep(0.05, 0.45, capDensity);
+        return erodeFoamLace({
+          density: capDensity,
+          laceHeight: foamPattern.laceHeight,
+          frothDetail: foamPattern.frothDetail,
+          uvFootprint: foamPattern.uvFootprint,
+          edgeMin: 0.14,
+          edgeMax: 0.32,
+          bodyFloor: 0.68,
+          bodyStrength: 0.18,
+        }).coverage.mul(capFade);
+      }
+      const crestCap = crestDensity.mul(breakup);
       const streaks = smoothstep(mix(float(0.78), float(0.5), gale), 0.95, foamNoise)
         .mul(gale).mul(smoothstep(0.6, 2.5, waterDepth)).mul(seaMask).mul(0.7);
       return max(crestCap, streaks);
@@ -195,16 +226,31 @@ export function createSeaSurfaceNodes({
      * The standing foam line where the sea meets the beach: a laced band over
      * the first metre or two from the shore, wider and denser in a storm. The
      * swash front only draws a thin moving wire; this is what reads from afar.
-     * Measured in metres, not depth: a depth band on a flat shelf ran metres
-     * wide even at 0.34 m and read as a milky smear, worse in a storm.
+     * Measured in metres, not depth, and organically warped so the 2 m water
+     * field grid never prints a sawtooth contour along diagonal beaches.
      */
     shoreLine(shoreDistance) {
+      const warpedShore = foamPattern
+        ? max(shoreDistance.add(foamPattern.organicWarp.mul(0.45)), 0)
+        : shoreDistance;
       // Starts just past the waterline fade (0.2 m), so the sheet does not thin it away.
-      const band = smoothstep(0.06, 0.16, waterDepth)
-        .mul(oneMinus(smoothstep(0.5, storm.mul(2).add(1.4), shoreDistance)));
-      return band.mul(smoothstep(0.45, 0.75, foamNoise))
-        .mul(storm.mul(0.3).add(0.5)).mul(seaMask)
-        .mul(shelter);
+      const band = smoothstep(0.05, 0.16, waterDepth)
+        .mul(oneMinus(smoothstep(0.42, storm.mul(1.9).add(1.75), warpedShore)));
+      // Keep peak storm density below solid saturation so cellular lace breathes through.
+      const density = band.mul(storm.mul(0.22).add(0.54)).mul(seaMask).mul(shelter).clamp(0, 0.76);
+      if (foamPattern) {
+        return erodeFoamLace({
+          density,
+          laceHeight: foamPattern.laceHeight,
+          frothDetail: foamPattern.frothDetail,
+          uvFootprint: foamPattern.uvFootprint,
+          edgeMin: 0.095,
+          edgeMax: 0.25,
+          bodyFloor: 0.62,
+          bodyStrength: 0.20,
+        }).coverage;
+      }
+      return density.mul(smoothstep(0.45, 0.75, foamNoise));
     },
     /**
      * Light coming through a crest, after grass-test's crest transmission.

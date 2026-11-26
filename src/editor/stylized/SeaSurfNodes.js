@@ -4,6 +4,7 @@ import { SEA_SWELL_COMPONENTS } from '../water/SeaSwell.js';
 import { periodicFbm2 } from './PeriodicNoiseNodes.js';
 import { createSeaRefractionPhaseNode } from './SeaRefractionNodes.js';
 import { createSeaDiffractionPhaseNode } from './SeaDiffractionNodes.js';
+import { erodeFoamLace, sampleCoastalFoamPattern } from './CoastalFoamPatterns.js';
 
 /** Depth-following surf on an arbitrary coast; all pattern origins are bounded. */
 /**
@@ -13,8 +14,20 @@ import { createSeaDiffractionPhaseNode } from './SeaDiffractionNodes.js';
  */
 const FOAM_WARP_RATE = [0.093, 0.069];
 const FOAM_FINE_DRIFT = [-0.06, 0.045];
+/** Lattice cells per medium foam-lace tile (`surfLace` scale 0.19 => ~5.26 m medium, ~2.63 m fine). */
+const SURF_FOAM_LACE_CELLS = 1;
 
-export function createSeaFoamNoise(patterns, localXZ, time) {
+export function createSeaFoamPattern(patterns, localXZ, time, waterNoise = null) {
+  return sampleCoastalFoamPattern({
+    waterNoise,
+    point: patterns.latticePoint('surfLace', localXZ),
+    clock: time,
+    cells: SURF_FOAM_LACE_CELLS,
+  });
+}
+
+export function createSeaFoamNoise(patterns, localXZ, time, waterNoise = null) {
+  if (waterNoise) return createSeaFoamPattern(patterns, localXZ, time, waterNoise).laceHeight;
   const point=patterns.latticePoint('surfLace',localXZ)
     .add(vec2(time.mul(0.021).mod(512),time.mul(-0.013).mod(512)));
   // Independent, bounded phases warp the lattice without creating chunk seams.
@@ -33,11 +46,13 @@ export function createSeaFoamNoise(patterns, localXZ, time) {
 export function createSeaSurfNodes({
   swell, waterDepth, shoreDistance, localXZ, patterns, time, settings,
   offshoreAmplitude, legacyAmplitude, exposure, seaMask, waterCoverage,
+  waterNoise = null,
 }) {
   if (settings.enabled && settings.model === 'directionalBreakers' && patterns) {
     return createDirectionalSurfNodes({
       swell, waterDepth, shoreDistance, localXZ, patterns, time, settings,
       offshoreAmplitude, legacyAmplitude, exposure, seaMask, waterCoverage,
+      waterNoise,
     });
   }
   if (!settings.enabled || !patterns) return null;
@@ -52,23 +67,31 @@ export function createSeaSurfNodes({
   const s = sin(phase);
   const near = s.add(s.mul(s).sub(0.5).mul(0.45)).div(1.225).mul(set);
   const offshore = smoothstep(settings.fadeStart, settings.fadeEnd, waterDepth);
-  const lace = createSeaFoamNoise(patterns,localXZ,time);
+  const foamPattern = createSeaFoamPattern(patterns, localXZ, time, waterNoise);
   const age = fract(phase.sub(Math.PI / 2).div(Math.PI * 2));
   const zone = smoothstep(settings.breakDepthStart, settings.breakDepthFull, waterDepth)
     .mul(oneMinus(smoothstep(settings.breakDepthFade, settings.breakDepthEnd, waterDepth)))
     .mul(smoothstep(1 - settings.setDepth * 0.6 - 0.001, 1 - settings.setDepth * 0.1, set))
     .mul(oneMinus(offshore));
-  const roll = smoothstep(0.92, 0.985, age).mul(smoothstep(0.5, 0.8, lace));
-  const trail = exp(age.mul(-settings.trail))
-    .mul(smoothstep(age.mul(0.5).add(0.45), age.mul(0.5).add(0.7), lace));
+  const roll = smoothstep(0.90, 0.985, age);
+  const trail = exp(age.mul(-settings.trail));
+  const eroded = erodeFoamLace({
+    density: max(roll, trail.mul(0.82)).mul(zone).mul(float(settings.strength)),
+    laceHeight: foamPattern.laceHeight,
+    frothDetail: foamPattern.frothDetail,
+    uvFootprint: foamPattern.uvFootprint,
+  });
   // Over a gently shelving bed the depth term crowds crests closer than a
   // pixel; drawn there they aliased into white fingerprint whorls.
   const resolved = oneMinus(smoothstep(0.35, 1.1, phase.fwidth()));
   return {
-    foamNoise: lace,
+    foamNoise: foamPattern.laceHeight,
+    foamPattern,
     height: mix(near, swell.height, offshore),
     offshore,
-    foam: max(roll, trail).mul(zone).mul(resolved).mul(float(settings.strength)),
+    foam: eroded.coverage.mul(resolved),
+    foamThickness: eroded.thickness.mul(resolved),
+    subsurfaceFoam: max(roll, trail).mul(zone).mul(resolved).mul(0.42),
   };
 }
 
@@ -76,6 +99,7 @@ export function createSeaSurfNodes({
 function createDirectionalSurfNodes({
   swell, waterDepth, shoreDistance, localXZ, patterns, time, settings,
   offshoreAmplitude, legacyAmplitude, exposure, seaMask, waterCoverage,
+  waterNoise = null,
 }) {
   const { directional, breaking } = settings;
   const phases = [];
@@ -154,14 +178,31 @@ function createDirectionalSurfNodes({
   const height = mix(nearHeight, swell.height, blend);
   const displacement = mix(nearHeight.mul(visibleAmplitude),
     swell.height.mul(legacyAmplitude), blend);
-  const foamNoise = createSeaFoamNoise(patterns, localXZ, time);
+  const foamPattern = createSeaFoamPattern(patterns, localXZ, time, waterNoise);
   const resolved = oneMinus(smoothstep(0.35, 1.1, phases[0].fwidth()));
-  const foam = foamCrests.mul(breakingIntensity)
-    .mul(smoothstep(0.35, 0.82, foamNoise))
-    .mul(resolved).mul(settings.strength)
-    .mul(oneMinus(blend)).mul(seaMask).mul(waterCoverage);
+  // Slight organic breakup on breaking roller density creates natural ragged
+  // whitewater fronts that erode into stretching bubble-lace trails behind.
+  const rollerOrganic = foamPattern.organicWarp.mul(0.16).add(0.92).clamp(0.72, 1.12);
+  const surfDensity = foamCrests.mul(breakingIntensity).mul(rollerOrganic)
+    .mul(settings.strength).mul(oneMinus(blend)).mul(seaMask).mul(waterCoverage).clamp(0, 0.84);
+  const eroded = erodeFoamLace({
+    density: surfDensity,
+    laceHeight: foamPattern.laceHeight,
+    frothDetail: foamPattern.frothDetail,
+    uvFootprint: foamPattern.uvFootprint,
+    edgeMin: 0.095,
+    edgeMax: 0.25,
+    bodyFloor: 0.58,
+    bodyStrength: 0.24,
+  });
+  const foam = eroded.coverage.mul(resolved);
+  const foamThickness = eroded.thickness.mul(resolved);
+  // Soft suspended micro-bubble cloud beneath breaking rollers adds volumetric depth.
+  const subsurfaceFoam = smoothstep(0.08, 0.72, surfDensity).mul(resolved).mul(0.42);
   return {
-    height, displacement, amplitude, offshore: blend, foam, foamNoise,
+    height, displacement, amplitude, offshore: blend,
+    foam, foamThickness, subsurfaceFoam,
+    foamNoise: foamPattern.laceHeight, foamPattern,
     breaking: breakingIntensity,
   };
 }

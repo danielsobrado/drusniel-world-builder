@@ -45,6 +45,29 @@ function createTexture(size) {
   return texture;
 }
 
+/** Two-pass 3-tap binomial smooth to remove grid chamfer kinks from shore distance. */
+function smoothField(values, size, passes = 2) {
+  const scratch = new Float32Array(values.length);
+  for (let pass = 0; pass < passes; pass++) {
+    for (let z = 0; z < size; z++) {
+      const row = z * size;
+      for (let x = 0; x < size; x++) {
+        const xm = x > 0 ? x - 1 : 0;
+        const xp = x + 1 < size ? x + 1 : size - 1;
+        scratch[row + x] = values[row + xm] * 0.25 + values[row + x] * 0.5 + values[row + xp] * 0.25;
+      }
+    }
+    for (let z = 0; z < size; z++) {
+      const zm = (z > 0 ? z - 1 : 0) * size;
+      const z0 = z * size;
+      const zp = (z + 1 < size ? z + 1 : size - 1) * size;
+      for (let x = 0; x < size; x++) {
+        values[z0 + x] = scratch[zm + x] * 0.25 + scratch[z0 + x] * 0.5 + scratch[zp + x] * 0.25;
+      }
+    }
+  }
+}
+
 /** A sampled view of authoritative ocean classification and editable terrain. */
 export class CoastalSwashInputs {
   constructor(worldStore, size, texelMeters, runupMeters, diffraction = null) {
@@ -65,6 +88,7 @@ export class CoastalSwashInputs {
     const revision = `${this.worldStore.baseTerrainRevision}:${this.worldStore.revision}`;
     if (this.originX === originX && this.originZ === originZ && this.revision === revision) return false;
     const { worldStore, size, texelMeters } = this;
+    const cellOcean = new Uint8Array(size * size);
     const types = new Uint8Array(size * size);
     const valid = new Uint8Array(size * size);
     const heights = new Float32Array(size * size);
@@ -84,13 +108,43 @@ export class CoastalSwashInputs {
         cells.set(key, kind);
       }
       const index = z * size + x;
-      types[index] = kind === WATER_KIND_OCEAN ? 1 : 0;
+      cellOcean[index] = kind === WATER_KIND_OCEAN ? 1 : 0;
       valid[index] = kind === WATER_KIND_OCEAN || kind === WATER_KIND_NONE ? 1 : 0;
-      if (types[index]) oceanCount++;
+      if (cellOcean[index]) oceanCount++;
       heights[index] = worldStore.sampleHeight(worldX / tileSize, -worldZ / tileSize) - seaLevel;
+    }
+    // Refine the shoreline contour at input-texel resolution using continuous
+    // terrain height inside a one-tile halo of authoritative ocean tiles, so
+    // diagonal beaches do not inherit 2 m staircase zig-zags.
+    const halo = Math.max(1, Math.ceil(tileSize / texelMeters));
+    for (let z = 0; z < size; z++) for (let x = 0; x < size; x++) {
+      const index = z * size + x;
+      if (!valid[index]) { types[index] = 0; continue; }
+      if (cellOcean[index]) {
+        types[index] = heights[index] <= 0.02 ? 1 : 0;
+        continue;
+      }
+      let touchesOcean = false;
+      if (heights[index] <= 0) {
+        for (let dz = -halo; dz <= halo && !touchesOcean; dz++) {
+          const nz = z + dz;
+          if (nz < 0 || nz >= size) continue;
+          const row = nz * size;
+          for (let dx = -halo; dx <= halo; dx++) {
+            const nx = x + dx;
+            if (nx >= 0 && nx < size && cellOcean[row + nx]) { touchesOcean = true; break; }
+          }
+        }
+      }
+      types[index] = touchesOcean ? 1 : 0;
     }
     const oceanDistances = distanceTransform(types, size, 1);
     const landDistances = distanceTransform(types, size, 0);
+    const signedDistances = new Float32Array(size * size);
+    for (let i = 0; i < types.length; i++) {
+      signedDistances[i] = (types[i] ? -landDistances[i] : oceanDistances[i]) * texelMeters;
+    }
+    smoothField(signedDistances, size, 2);
     const pixels = this.texture.image.data;
     const shelter = this.diffraction.enabled
       ? createSeaDiffractionSampler({
@@ -102,7 +156,7 @@ export class CoastalSwashInputs {
     const range = this.runupMeters + 3;
     let eligibleCount = 0;
     for (let i = 0; i < types.length; i++) {
-      const distance = (types[i] ? -landDistances[i] : oceanDistances[i]) * texelMeters;
+      const distance = signedDistances[i];
       const eligible = valid[i] && Math.abs(distance) < range && heights[i] < range
         && heights[i] > -3 ? 1 : 0;
       if (eligible) eligibleCount++;

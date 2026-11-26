@@ -52,6 +52,7 @@ import { createSeaSurfaceNodes, seaWaterMask } from './SeaSurfaceShading.js';
 import { createSeaOpticsNodes } from './SeaOpticsShading.js';
 import { resolveOffshoreFft } from '../water/fft/OceanFftConfig.js';
 import { createCoastSwashNodes, DEFAULT_COAST_SWASH } from './CoastSwashShading.js';
+import { erodeFoamLace } from './CoastalFoamPatterns.js';
 import { acquireWorldNoise } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { createRainRippleNode } from './RainRippleShading.js';
@@ -216,6 +217,10 @@ export function createStylizedWaterMaterial({
   // Faded out over the last half metre of depth: on the film over a beach
   // the rings otherwise drew as bright arcs across the wet sand.
   const ripple = rippleSum ? rippleSum.mul(smoothstep(0.1, 0.5, waterDepth)).toVar('waterRippleSlope') : null;
+  // Shared tileable water-noise layer (R foam lace, G voronoi web, B soft perlin)
+  // reused across sea surf, beach swash, whitecaps, and rock wakes at zero extra sampler cost.
+  const waterNoise = (sampleUv) => texture(acquireWorldNoise().texture, sampleUv)
+    .depth(int(WORLD_NOISE_LAYERS.water)).rgb;
   const sea = oceanEnabled && water.sea?.enabled && quality.flow && seaPhaseOrigin && sunDirection
     ? createSeaSurfaceNodes({
       terrainUv,
@@ -237,6 +242,7 @@ export function createStylizedWaterMaterial({
       oceanFft: oceanFft && oceanFftOrigin && appearance
         ? { binding: oceanFft, origin: oceanFftOrigin, settings: resolveOffshoreFft(water.sea.offshoreFft) } : null,
       oceanSwellOrigin: appearance ? oceanSwellOrigin : null,
+      waterNoise,
     })
     : null;
   // Inland water takes grass-test's surface; the sea keeps its own shading.
@@ -644,6 +650,7 @@ export function createStylizedWaterMaterial({
     );
   }
 
+  let subsurfaceAeration = float(0);
   if (sea && quality.foam && water.foam.enabled) {
     const coast = createCoastSwashNodes({ localXZ, patternOrigins: surfacePatterns,
       groundHeight: waterField.g.add(waterSurfaceOrigin).sub(waterField.b),
@@ -652,19 +659,39 @@ export function createStylizedWaterMaterial({
       persistentEnabled: ['high', 'ultra'].includes(water.qualityTier),
       shelter: sea.shelter,
       diffraction: water.sea?.surf?.diffraction,
-      laceField: (uv) => texture(acquireWorldNoise().texture, uv).depth(int(WORLD_NOISE_LAYERS.water)).r });
+      waterNoise });
     const swashFoam = coast ? coast.foam.mul(water.coast?.foamStrength ?? DEFAULT_COAST_SWASH.foamStrength).mul(sea.mask)
-      .mul(seaStateUniforms.storm.add(1)) : float(0);
-    const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, sea.shoreLine(shoreDistance))).mul(waterCoverage);
+      : float(0);
+    const shoreLace = sea.shoreLine(shoreDistance);
+    const whitecap = max(max(sea.whitecap(), sea.surfFoam ?? float(0)), max(swashFoam, shoreLace)).mul(waterCoverage);
     foamAmount = max(foamAmount, whitecap);
     whitewater = whitewater ? max(whitewater, whitecap) : whitecap;
+    // Suspended turquoise micro-bubbles beneath breaking rollers and shoreline surf.
+    const shallowChurn = smoothstep(0.06, 0.25, waterDepth)
+      .mul(oneMinus(smoothstep(0.4, 2.2, shoreDistance)))
+      .mul(sea.shelter).mul(0.24);
+    subsurfaceAeration = max(sea.subsurfaceFoam ?? float(0), shallowChurn)
+      .mul(sea.mask).mul(waterCoverage).mul(waterlineFade);
   }
 
   if (sea && quality.foam && water.foam.enabled && water.coast?.rockImpact?.enabled) {
     const impact = sampleCoastalRockImpactState();
-    const rockFoam = impact.foam.mul(sea.mask).mul(waterCoverage)
+    const rockDensity = impact.foam.mul(sea.mask).mul(waterCoverage)
       .mul(smoothstep(0.04, 0.6, waterDepth));
+    const rockFoam = sea.foamPattern
+      ? erodeFoamLace({
+        density: rockDensity,
+        laceHeight: sea.foamPattern.laceHeight,
+        frothDetail: sea.foamPattern.frothDetail,
+        uvFootprint: sea.foamPattern.uvFootprint,
+        edgeMin: 0.075,
+        edgeMax: 0.22,
+        bodyFloor: 0.46,
+        bodyStrength: 0.34,
+      }).coverage
+      : rockDensity;
     foamAmount = max(foamAmount, rockFoam);
+    subsurfaceAeration = max(subsurfaceAeration, rockDensity.mul(0.35));
   }
 
   if (quality.foam && water.foam.enabled) {
@@ -674,7 +701,24 @@ export function createStylizedWaterMaterial({
     const aeration = whitewater && fallPlunge
       ? max(fallPlunge.x, clamp(fallPlunge.y.mul(1.5), 0, 1)) : float(0);
     const inlandFoamColor = mix(colorNode(water.foam.color), colorNode('#e4f5ff'), aeration);
-    const foamColor = sea ? mix(inlandFoamColor, colorNode(water.coast?.foamColor ?? '#edf8fb'), sea.mask) : inlandFoamColor;
+    // Subtle underwater turquoise bubble-cloud scatter under breaking waves.
+    if (sea) {
+      const bubbleScatter = colorNode('#9be2e4').mul(skyLightUniforms.reflectionTint.mul(0.45).add(0.55));
+      color = mix(color, bubbleScatter, clamp(subsurfaceAeration, 0, 0.45));
+    }
+    // Physically motivated directional + sky shading and frothy micro-relief on sea foam.
+    let seaFoamColor = colorNode(water.coast?.foamColor ?? '#f4fafc');
+    if (sea && sunDirection) {
+      const sunDir = normalize(sunDirection);
+      const sunFacing = dot(sea.normal, sunDir).mul(0.45).add(0.55).clamp(0.25, 1);
+      const frothRelief = sea.foamPattern
+        ? mix(float(0.91), float(1.04), sea.foamPattern.frothDetail) : float(1);
+      const skyAmbient = skyLightUniforms.reflectionTint.mul(0.45).add(0.55);
+      const shadowedFoam = seaFoamColor.mul(vec3(0.76, 0.84, 0.90)).mul(skyAmbient);
+      const litFoam = seaFoamColor.mul(mix(vec3(1.02, 1.01, 0.99), skyAmbient.mul(0.95), seaStateUniforms.storm.mul(0.65)));
+      seaFoamColor = mix(shadowedFoam, litFoam, sunFacing).mul(frothRelief);
+    }
+    const foamColor = sea ? mix(inlandFoamColor, seaFoamColor, sea.mask) : inlandFoamColor;
     const foamed = compositeWaterFoam(color, alpha, foamColor,
       clamp(foamAmount, 0, 1).mul(waterlineFade));
     color = foamed.color;
