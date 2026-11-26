@@ -94,8 +94,7 @@ export class StylizedSurfaceView {
     this.sceneAssets = this.enabled
       ? new StylizedSceneAssetCache({ renderer: terrainView.renderer, baseUrl, requests: config.enhancements?.r187 })
       : null;
-    this.sharedScenePath = null;
-    this.treeVariantPaths = [];
+    this.treeSourceLeases = [];
     this.installedVariantLeases = [];
     this.rockVariantPaths = [];
     this.bushVariantPaths = [];
@@ -547,20 +546,35 @@ export class StylizedSurfaceView {
    * moment it landed. The prop layers below are not load-bearing that way, so
    * they stream in from `variantResidency` as their biomes come into range.
    */
+  acquireTreeSource(path, options) {
+    const lease = this.sceneAssets.acquireLease(path, options);
+    this.treeSourceLeases.push(lease);
+    return lease.ready;
+  }
+
+  releaseTreeSources() {
+    for (const lease of this.treeSourceLeases.splice(0)) lease.release();
+  }
+
+  releaseDetachedTreeSources() {
+    if (!this.treeView?.canReleaseTreeSources) return;
+    const count = this.treeSourceLeases.length;
+    this.releaseTreeSources();
+    PerfCounters.inc('regionalTreeSourceLeasesReleased', count);
+  }
+
   async bootstrapLayers() {
     if (!this.enabled) return null;
     const needsScene = this.config.trees.enabled;
     try {
       let sharedScene = null;
       if (needsScene) {
-        this.sharedScenePath = this.config.assets.scene;
-        sharedScene = await this.sceneAssets.acquire(this.sharedScenePath, { priority: 'high' });
+        sharedScene = await this.acquireTreeSource(this.config.assets.scene, { priority: 'high' });
       }
       const treeVariants = this.config.trees.enabled
         ? await Promise.all(
           (this.config.assets.treeVariants ?? []).map(async (definition) => {
-            this.treeVariantPaths.push(definition.scene);
-            return { definition, scene: await this.sceneAssets.acquire(definition.scene) };
+            return { definition, scene: await this.acquireTreeSource(definition.scene) };
           }),
         )
         : [];
@@ -570,6 +584,7 @@ export class StylizedSurfaceView {
       ].filter(Boolean));
       this.forestDebrisView?.syncScannedBark?.(this.treeView?.barkScans);
       this.groundDetailView?.syncScannedBark?.(this.treeView?.barkScans);
+      this.releaseDetachedTreeSources();
       return null;
     } catch (error) {
       console.warn('Some stylized assets failed to load; remaining layers stay active.', error);
@@ -1216,12 +1231,7 @@ export class StylizedSurfaceView {
     this.alpineRockView?.dispose();
     this.glacierSeracView?.dispose();
     this.pathBridgeView?.dispose();
-    if (this.sharedScenePath) {
-      this.sceneAssets?.release(this.sharedScenePath);
-      this.sharedScenePath = null;
-    }
-    for (const path of this.treeVariantPaths) this.sceneAssets?.release(path);
-    this.treeVariantPaths.length = 0;
+    this.releaseTreeSources();
     for (const path of this.rockVariantPaths) this.sceneAssets?.release(path);
     this.rockVariantPaths.length = 0;
     for (const path of this.bushVariantPaths) this.sceneAssets?.release(path);
