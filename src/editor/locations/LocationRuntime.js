@@ -122,7 +122,7 @@ export class LocationRuntime {
       await nextPaint();
       const next = await LocationScene.prepare({
         site, generator, quality: this.catalog.quality, baseUrl: this.baseUrl, renderer: this.renderer,
-        camera: player.camera,
+        camera: player.camera, decorationBudget: this.decorationBudget,
         progress: async (stepId) => { session.start(stepId); await nextPaint(); },
       });
       const spawn = next.spawns[spawnId] ?? next.spawns.entry;
