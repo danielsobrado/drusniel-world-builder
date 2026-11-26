@@ -1,3 +1,4 @@
+import { reducedSampleCount } from '../AtmosphericPassAdmission.js';
 import * as THREE from 'three/webgpu';
 import {
   Break,
@@ -373,11 +374,11 @@ export class SelectiveSsrNode {
     this.outputNode = this.compositeNode;
   }
 
-  updateUniforms(frameState, settings = this.settings) {
+  updateUniforms(frameState, settings = this.settings, atmosphere = null) {
     this.settings = settings;
     this.projectionMatrix.value.copy(frameState.camera.projectionMatrix);
     this.projectionMatrixInverse.value.copy(frameState.camera.projectionMatrixInverse);
-    this.maxSteps.value = settings.maxSteps;
+    this.maxSteps.value = atmosphere ? reducedSampleCount(settings.maxSteps, atmosphere.ssrStepFactor, atmosphere.ssrMinimumSteps) : settings.maxSteps;
     this.binarySteps.value = settings.binarySteps;
     this.maxDistanceMeters.value = settings.maxDistanceMeters;
     this.thicknessMeters.value = settings.thicknessMeters;
