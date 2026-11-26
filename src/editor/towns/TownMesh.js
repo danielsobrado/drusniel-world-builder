@@ -5,6 +5,8 @@ import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, TOWN_LOD_SPLIT } from './TownLod.js';
 import { townLook } from './TownMaterialPalette.js';
 import { isTownProp } from './TownPrefabCatalog.js';
 import { TownModuleInstances } from './TownModuleInstances.js';
+import { decorationPointsChanged, planTownDecorations, townDecorationMetadata } from './TownDecorationAdmission.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 const DOOR_MODULE = 'Door_Leaf';
 // A far level costs a second set of draws, so only modules the far kit makes
@@ -31,7 +33,7 @@ function simplerFar(near, far) {
  * are their own instances so a door can swing without touching anything else.
  */
 export class TownMesh {
-  constructor({ assets, palette, layout, climate = {}, deferred = false }) {
+  constructor({ assets, palette, layout, climate = {}, deferred = false, decorationSettings = null }) {
     this.layout = layout;
     this.group = new THREE.Group();
     this.group.name = `Town ${layout.name || layout.settlementId}`;
@@ -41,6 +43,8 @@ export class TownMesh {
     this.lod = TOWN_LOD_NEAR;
     this.interiorCentre = null;
     this.modules = [];
+    this.decorationSettings = decorationSettings;
+    this.decorationModules = [];
     this.preparation = this.prepare(assets, palette, layout);
     if (!deferred) { drainJob(this.preparation); this.preparation = null; }
   }
@@ -64,6 +68,10 @@ export class TownMesh {
         createMesh, deferred: true,
       });
       yield* this.adopt(instances);
+      if (this.decorationSettings) {
+        instances.decoration = townDecorationMetadata(module, instances, assets.kit);
+        if (instances.decoration) this.decorationModules.push(instances);
+      }
     }
     yield* this.buildDoorsJob(assets, createMesh);
   }
@@ -80,7 +88,7 @@ export class TownMesh {
 
   setLod(lod) {
     this.lod = lod;
-    for (const instances of this.modules) instances.setLod(lod);
+    for (const instances of this.modules) if (!instances.decoration) instances.setLod(lod);
   }
 
   /** A big town: near kit within `radius` of the town-local point (x, z), far kit beyond. */
@@ -90,7 +98,7 @@ export class TownMesh {
 
   *splitJob(x, z, radius, budget = null) {
     this.lod = TOWN_LOD_SPLIT;
-    for (const instances of this.modules) { yield* instances.splitJob(x, z, radius, budget); yield; }
+    for (const instances of this.modules) { if (!instances.decoration) yield* instances.splitJob(x, z, radius, budget); yield; }
     this.splitCentre = { x, z };
   }
 
@@ -102,6 +110,27 @@ export class TownMesh {
   *cullInteriorsJob(x, z, radius, budget = null) {
     for (const instances of this.modules) { yield* instances.cullJob(x, z, radius, budget); yield; }
     this.interiorCentre = { x, z };
+  }
+
+  *selectDecorationsJob(points, lod, lodSettings, budget = null, isCurrent = () => true) {
+    if (!this.decorationModules.length || !points.length) return;
+    const settings = this.decorationSettings;
+    const local = points.map(point => ({ x: point.x - this.layout.anchor.x, z: point.z - this.layout.anchor.z }));
+    if (this.decorationLod === lod && !decorationPointsChanged(this.decorationPoints, local, settings.refreshMeters)) return;
+    const result = yield* planTownDecorations(this.decorationModules, local, lod, lodSettings, settings, this.decorationPressured);
+    if (!isCurrent()) return;
+    for (const plan of result.plans) {
+      if (!(yield* plan.instances.decorationJob(plan.tiers, budget, isCurrent))) return;
+      yield;
+    }
+    this.decorationLod = lod;
+    this.decorationPoints = local;
+    this.decorationPressured = result.pressured;
+    this.decorationStats = { requestedTriangles: result.requested.triangles, selectedTriangles: result.selected.triangles,
+      requestedDraws: result.requested.draws, selectedDraws: result.selected.draws,
+      requestedInstances: result.requestedInstances, protectedInstances: result.protectedInstances,
+      simplified: result.simplified, omitted: result.omitted, overflow: Number(result.overflow) };
+    PerfCounters.inc('townDecorationSelections');
   }
 
   instanced(geometry, material, count, glass) {
