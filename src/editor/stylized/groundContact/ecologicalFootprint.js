@@ -13,7 +13,7 @@
  */
 
 /** Harmonic orders and their maximum amplitudes; the amplitudes sum to `ROOT_LOBE`. */
-const HARMONICS = Object.freeze([[1, 0.05], [2, 0.09], [3, 0.05], [5, 0.03]]);
+const HARMONICS = Object.freeze([[1, 0.08], [2, 0.13], [3, 0.08], [5, 0.05]]);
 
 /** The furthest any footprint pushes in or out of its circle (sum of the amplitudes). */
 export const ROOT_LOBE = HARMONICS.reduce((sum, [, amplitude]) => sum + amplitude, 0);
