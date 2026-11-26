@@ -5,15 +5,19 @@ export function evaluateSceneryDemand(cells, previous, settings) {
   const pressured = new Set();
   let maxUnits = 0;
   let totalUnits = 0;
+  const totals = {};
   for (const [key, demand] of cells) {
     let units = 0;
-    for (const [kind, count] of Object.entries(demand)) units += count * (settings.spatialWeights[kind] ?? 0);
+    for (const [kind, count] of Object.entries(demand)) {
+      units += count * (settings.spatialWeights[kind] ?? 0);
+      totals[kind] = (totals[kind] ?? 0) + count;
+    }
     maxUnits = Math.max(maxUnits, units);
     totalUnits += units;
     const limit = settings.spatialChunkBudget * (previous.has(key) ? settings.recoveryRatio : 1);
     if (units > limit) pressured.add(key);
   }
-  return { pressured, maxUnits, totalUnits };
+  return { pressured, maxUnits, totalUnits, totals };
 }
 
 function sameKeys(a, b) {
@@ -61,6 +65,9 @@ export class RegionalSceneryBudget {
       PerfCounters.set('regionalSpatialSampledChunks', step.value.size);
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
       PerfCounters.set('regionalSpatialPeakChunkUnits', result.maxUnits);
+      for (const kind of Object.keys(this.settings.spatialWeights)) {
+        PerfCounters.set(`regionalSpatialDemand.${kind}`, result.totals[kind] ?? 0);
+      }
       PerfCounters.inc('regionalSpatialSamples');
       this.sampleWindow = { focus: this.job.focus, size: this.job.size };
       this.job = null;
