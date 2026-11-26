@@ -428,7 +428,7 @@ export class StylizedSurfaceView {
       : null;
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections, this.oceanFft?.binding ?? null);
     this.reflectionPrepared = null;
-    this.farShadowAdmission = config.enhancements?.farShadowAdmission ? new FarCascadeAdmission(config.enhancements.auxiliaryPassBudget) : null;
+    this.farShadowAdmission = config.enhancements?.farShadowAdmission && terrainView.renderer?.backend?.isWebGPUBackend === true ? new FarCascadeAdmission(config.enhancements.auxiliaryPassBudget) : null;
     this.reflectionAdmission = this.reflections && config.enhancements?.reflectionAdmission ? new ReflectionAdmission(config.enhancements.auxiliaryPassBudget) : null;
     terrainView.beforeMainRender = camera => {
       // Only ocean water slots read the offshore FFT: inland it would step and transform for nothing.
