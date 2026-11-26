@@ -1,3 +1,4 @@
+import { buildDecorationBatches } from '../LocationDecorationAdmission.js';
 import * as THREE from 'three/webgpu';
 import { crystalClusterUnit, facetedCrystal } from '../gen/iceKit.js';
 import { SHADE_SIZE } from '../gen/LightBake.js';
@@ -91,6 +92,7 @@ export function buildLocationCrystalField({
   seed = 101,
   maxClusters = 650,
   maxNeedles = 900,
+  decorationBudget = null,
 }) {
   if (!crystalMaterial || (maxClusters <= 0 && maxNeedles <= 0)) return [];
 
@@ -240,7 +242,8 @@ export function buildLocationCrystalField({
   }
   if (needles.length > 0) {
     const unit = buildHoarfrostNeedleUnit(seed + 29);
-    meshes.push(createCrystalInstancedMesh('location-hoarfrost-needles', unit, crystalMaterial, needles));
+    meshes.push(...buildDecorationBatches(needles, decorationBudget, records =>
+      createCrystalInstancedMesh('location-hoarfrost-needles', unit, crystalMaterial, records)));
     unit.dispose();
   }
   return meshes;
