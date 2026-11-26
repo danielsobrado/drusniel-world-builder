@@ -113,3 +113,28 @@ test('geometry cost planning retains the unpressured band independently of selec
   assert.equal(entry.band, 'proxy');
   assert.equal(band(plan, -2, 0), 'near');
 });
+
+test('admission candidates respect protected rings and physical near guarantees', () => {
+  const options = {
+    focus: { chunkX: 0, chunkZ: 0 }, radius: 3, chunkWorldSize: 128,
+    camera: { position: { x: 64, y: 8, z: -64 }, fov: 68 },
+    floatingOrigin: { getState: () => ({ x: 0, z: 0 }) },
+    viewportHeight: 720, objectHeight: 16,
+    thresholds: { nearPixels: 32, proxyPixels: 8, impostorPixels: 2, clusterPixels: 0 },
+    radii: { meshRadius: 3, proxyRadius: 4, impostorRadius: 5, clusterRadius: 5 },
+    timestamp: 0, transitionMs: 320, protectedChunkRadius: 1, regionalLayer: 'rock',
+    regionalSpatialBudget: { geometryCosts: true, admission: true, settings: { admissionFactors: [1, 0.85, 0.7, 0.5] },
+      factorForKey: (key, kind) => kind === 'rock' && (key === '2:0' || key === '1:0') ? 0.5 : 1 },
+  };
+  const plan = buildChunkLodPlan({ ...options, transitionStates: new Map() });
+  const find = (p, x) => p.entries.find(entry => entry.chunkX === x && entry.chunkZ === 0);
+  assert.equal(find(plan, 2).baselineBand, 'near');
+  assert.equal(find(plan, 2).band, 'proxy');
+  assert.equal(find(plan, 2).admissionOptions.at(-1).band, 'proxy');
+  assert.equal(find(plan, 1).band, 'near');
+  assert.equal(find(plan, 1).admissionOptions, undefined);
+  assert.equal(find(plan, -2).band, 'near');
+  const guaranteed = buildChunkLodPlan({ ...options, radii: { ...options.radii, forceNearWithinMeshRadius: true }, transitionStates: new Map() });
+  assert.equal(find(guaranteed, 2).band, 'near');
+  assert.ok(find(guaranteed, 2).admissionOptions.every(option => option.band === 'near'));
+});
