@@ -8,7 +8,7 @@ import {
 import { Rng } from '../_clod_shims/seed.js';
 import { DEFAULT_WEATHER_EFFECTS } from './WeatherEffectsConfig.js';
 import { evaluateLevels, PRECIP_LEVEL_KEYS } from './storm/stormCurves.js';
-import { interleaveLayers, layerAllocation, precipitationDensity } from './storm/precipitationLayers.js';
+import { interleaveLayers, layerAllocation, precipitationDensity, scalePrecipitationDensity } from './storm/precipitationLayers.js';
 import { skyLightUniforms } from '../stylized/sky/skyLight.js';
 
 /** Streak width on screen, in radians: ~1–3 px at 1600 px / 60° (storm plan §3.1). */
@@ -93,7 +93,13 @@ export function createCinematicRainField(settings = DEFAULT_WEATHER_EFFECTS.rain
   let disposed = false;
   let gust = 1;
   let lastTime = null;
-  let density = precipitationDensity(settings.layers, 0, slots);
+  let demand = precipitationDensity(settings.layers, 0, slots);
+  let density = demand, particleFactor = 1;
+  const applyDensity = () => {
+    density = scalePrecipitationDensity(demand, slots, particleFactor);
+    density.density.forEach((share, layer) => { densities.array[layer] = share; });
+    geometry.instanceCount = density.instanceCount;
+  };
   return {
     material, geometry, uniforms: { center, time: clock, intensity, wind, vector, drift, fall, fallSpeed, densities },
     setTime: value => {
@@ -117,15 +123,16 @@ export function createCinematicRainField(settings = DEFAULT_WEATHER_EFFECTS.rain
      */
     setIntensity: value => {
       const channel = Math.max(0, Number(value) || 0);
-      density = precipitationDensity(settings.layers, Math.min(1, channel), slots);
-      density.density.forEach((share, layer) => { densities.array[layer] = share; });
-      geometry.instanceCount = density.instanceCount;
+      demand = precipitationDensity(settings.layers, Math.min(1, channel), slots);
+      applyDensity();
       const level = Math.min(1, channel);
       fallSpeed.value = evaluateLevels(settings.levels.fallSpeed, level, PRECIP_LEVEL_KEYS);
       intensity.value = evaluateLevels(settings.levels.opacity, level, PRECIP_LEVEL_KEYS)
         * density.fade * Math.max(1, channel);
     },
     getDensity: () => density,
+    getRequestedCount: () => demand.instanceCount,
+    setParticleFactor: factor => { if (factor !== particleFactor) { particleFactor = factor; applyDensity(); } },
     setCenter: value => { center.value.copy(value); },
     setWind: (x, z) => { wind.value.set(x, z); },
     dispose() {
