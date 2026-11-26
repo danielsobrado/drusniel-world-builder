@@ -26,7 +26,7 @@ function createAtlas(config) {
   const pixels = new Uint8Array(layerBytes * depth).fill(WORLD_NOISE_NEUTRAL);
   pixels.set(families.pixels);
   const texture = new THREE.DataArrayTexture(pixels, resolution, resolution, depth);
-  acquireWorldNoise(import.meta.env?.BASE_URL?.replace(/\/$/, '') ?? '').whenLoaded((noise) => {
+  const cancelNoiseSubscription = acquireWorldNoise(import.meta.env?.BASE_URL?.replace(/\/$/, '') ?? '').whenLoaded((noise) => {
     for (let layer = 0; layer < WORLD_NOISE_LAYER_NAMES.length; layer += 1) {
       downsampleWorldNoiseLayer(noise, layer, resolution, pixels, (noiseLayer + layer) * layerBytes);
     }
@@ -47,6 +47,7 @@ function createAtlas(config) {
     depth,
     noiseLayer,
     refs: 0,
+    cancelNoiseSubscription,
     estimatedGpuBytes: Math.ceil(pixels.byteLength * FULL_MIP_CHAIN_RATIO),
   };
 }
@@ -73,6 +74,7 @@ export function acquireTerrainMaterialFamilyAtlas(config) {
       entry.refs -= 1;
       if (entry.refs <= 0 && atlasEntries.get(key) === entry) {
         atlasEntries.delete(key);
+        entry.cancelNoiseSubscription();
         entry.texture.dispose();
         publishCounters();
       }
