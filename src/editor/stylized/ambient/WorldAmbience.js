@@ -99,7 +99,7 @@ export class WorldAmbience {
     const prepare = () => this.sampling.prepare({ minX: (x - radius) / tileSize, maxX: (x + radius) / tileSize,
       minZ: -(z + radius) / tileSize, maxZ: -(z - radius) / tileSize }, budget?.shouldYield);
     this.preparing = !(budget?.runner ?? (run => run()))(prepare);
-    if (this.preparing) return;
+    if (this.preparing) { this.system.applyParticleBudget(particles); return; }
     if (walking || !orbitFocus) {
       this.focus.x = camera.position.x;
       this.focus.y = camera.position.y;
@@ -130,6 +130,7 @@ export class WorldAmbience {
       budget,
       particles,
     });
+    this.system.applyParticleBudget(particles);
   }
 
   /**
