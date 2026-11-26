@@ -13,6 +13,19 @@ regionalGeometryCostBudget: false
 regionalAdmissionBudget: false
 rendererAdmissionBudget: false
 regionalInstancePublicationBudget: false
+farShadowAdmission: false
+reflectionAdmission: false
+auxiliaryPassBudget:
+  farShadowIntervalMs: 33
+  farShadowMaxAgeMs: 100
+  farShadowMoveMeters: 0.5
+  farShadowTurnDegrees: 1
+  farShadowSunDegrees: 0.15
+  frameCpuPressureMs: 12
+  cubeCaptureCpuBudgetMs: 1.5
+  planarCaptureCpuBudgetMs: 2
+  reflectionUrgentDeferralMs: 80
+  reflectionMaxDeferralMs: 250
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
