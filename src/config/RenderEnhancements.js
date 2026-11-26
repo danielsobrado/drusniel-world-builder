@@ -23,6 +23,10 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   reflectionAdmission: false,
   townDecorationAdmission: false,
   environmentalParticleAdmission: false,
+  atmosphericPassAdmission: false,
+  atmosphericPassBudget: Object.freeze({ targetFrameMs: 16.7, recoveryFrameMs: 13, pressureMs: 300, recoveryMs: 2000, minimumDwellMs: 3000, maxFrameGapMs: 250,
+    ssrStepFactor: 0.65, ssrMinimumSteps: 12, shaftSampleFactor: 0.5, shaftMinimumSamples: 8,
+    volumetricStepFactor: 0.6, volumetricMinimumSteps: 16, aoResolutionFactor: 0.75, aoMinimumResolution: 0.25 }),
   environmentalFragmentAdmission: false,
   coastalSprayCompaction: false,
   environmentalFragmentBudget: Object.freeze({ fogStepFactor: 0.5, fogMinimumSteps: 3, fogProtectedDistanceMeters: 20,
@@ -69,6 +73,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
       admissionPriorities: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, ...source.regionalBudget?.admissionPriorities } },
     geologyAdmissionBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.geologyAdmissionBudget, ...source.geologyAdmissionBudget },
     locationDecorationBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.locationDecorationBudget, ...source.locationDecorationBudget },
+    atmosphericPassBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.atmosphericPassBudget, ...source.atmosphericPassBudget },
     environmentalFragmentBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalFragmentBudget, ...source.environmentalFragmentBudget },
     environmentalParticleBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalParticleBudget, ...source.environmentalParticleBudget,
       minimumShares: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalParticleBudget.minimumShares, ...source.environmentalParticleBudget?.minimumShares } },
@@ -101,11 +106,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -138,6 +143,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     }
   }
   if (value.locationDecorationBudget.maxDistanceMeters < value.locationDecorationBudget.protectMeters + value.locationDecorationBudget.recoveryMeters + value.locationDecorationBudget.refreshMeters) throw new RangeError('Location decoration reach must cover the protected area.');
+  const atmosphere = value.atmosphericPassBudget;
+  for (const [key, min, max] of [['targetFrameMs', 5, 100], ['recoveryFrameMs', 4, 100], ['pressureMs', 100, 5000], ['recoveryMs', 500, 20000], ['minimumDwellMs', 500, 30000], ['maxFrameGapMs', 100, 2000], ['ssrStepFactor', 0.25, 1], ['ssrMinimumSteps', 1, 64], ['shaftSampleFactor', 0.25, 1], ['shaftMinimumSamples', 1, 48], ['volumetricStepFactor', 0.25, 1], ['volumetricMinimumSteps', 1, 128], ['aoResolutionFactor', 0.5, 1], ['aoMinimumResolution', 0.25, 1]]) {
+    if (!Number.isFinite(atmosphere[key]) || atmosphere[key] < min || atmosphere[key] > max || (['ssrMinimumSteps', 'shaftMinimumSamples', 'volumetricMinimumSteps'].includes(key) && !Number.isInteger(atmosphere[key]))) throw new RangeError(`atmosphericPassBudget.${key} must be in [${min}, ${max}].`);
+  }
+  if (atmosphere.recoveryFrameMs >= atmosphere.targetFrameMs || atmosphere.targetFrameMs >= atmosphere.maxFrameGapMs) throw new RangeError('Atmospheric pass frame thresholds must be ordered.');
   const fragments = value.environmentalFragmentBudget;
   for (const [key, min, max] of [['fogStepFactor', 0.25, 1], ['fogMinimumSteps', 1, 12], ['fogProtectedDistanceMeters', 0, 128],
     ['frameCpuPressureMs', 1, 100], ['recoveryMs', 0, 10000], ['transparentAlphaCutoff', 0, 0.01]]) {
