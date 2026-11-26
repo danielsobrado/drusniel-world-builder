@@ -286,7 +286,8 @@ export function buildPerfReport({
        'environmentParticles.requested', 'environmentParticles.admitted', 'environmentParticles.reserved',
        'environmentParticles.limit', 'environmentParticles.overflow', 'environmentParticles.pressured',
        'environmentFogSteps', 'environmentFogFullSteps', 'coastalSprayExpiredRecords', 'coastalSprayCompactedRows',
-       'coastalSprayAttributeBytes', 'coastalSpraySubmittedInstances', 'coastalSprayAllocatedInstances']
+       'coastalSprayAttributeBytes', 'coastalSpraySubmittedInstances', 'coastalSprayAllocatedInstances',
+       'atmosphericAdmission.world.transitions', 'atmosphericAdmission.location.transitions', 'atmosphericAdmission.godRays.transitions']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
