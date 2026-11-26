@@ -26,6 +26,10 @@ regionalTreeSourceRelease: false
 regionalResourceBudget: false
 regionalDensityBudget: false
 regionalSpatialBudget: false
+spatialPerformanceOverlay: false
+spatialOverlay:
+  refreshMs: 500
+  radius: 8
 regionalGeometryCostBudget: false
 regionalAdmissionBudget: false
 rendererAdmissionBudget: false
