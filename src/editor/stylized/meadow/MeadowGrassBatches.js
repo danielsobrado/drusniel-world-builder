@@ -20,7 +20,6 @@ class MeadowBandPages {
     this.present = new Set();
     this.pages = [];
     this.peers = [];
-    this.addPage();
   }
 
   addPage() {
@@ -90,6 +89,18 @@ class MeadowBandPages {
     let stems = 0;
     for (const page of this.pages) stems += page.update(page.members, budget);
     return stems;
+  }
+
+  retireIdle(now, idleMs, limit) {
+    let retired = 0;
+    for (let index = this.pages.length - 1; index >= 0; index--) {
+      const page = this.pages[index];
+      if (page.memberCount || page.pending || page.geometry.instanceCount) { page.idleSince = now; continue; }
+      page.idleSince ??= now;
+      if (now - page.idleSince < idleMs || retired >= limit) continue;
+      page.dispose(); this.pages.splice(index, 1); retired++;
+    }
+    return retired;
   }
 
   get meshes() {
@@ -175,6 +186,12 @@ export class MeadowGrassBatches {
 
   rebase(x, z, budget) {
     for (const batch of this.batches.values()) for (const page of batch.pages) page.rebase(x, z, budget);
+  }
+
+  retireIdle(now, idleMs, limit) {
+    let retired = 0;
+    for (const batch of this.batches.values()) retired += batch.retireIdle(now, idleMs, Math.max(0, limit - retired));
+    return retired;
   }
 
   get pending() {

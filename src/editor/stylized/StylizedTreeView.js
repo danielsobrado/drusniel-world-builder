@@ -35,6 +35,8 @@ import { stepViewRebuild } from './StagedViewRebuild.js';
 import {
   buildChunkLodPlan,
   createInstancedRenderers,
+  createLazyInstancedRenderers,
+  retireIdleInstancedRenderers,
   disposeInstancedRenderers,
   pruneStateMap,
 } from './lod/StylizedLodRuntime.js';
@@ -655,7 +657,8 @@ export class StylizedTreeView {
     this.proxyPrototypes = proxies.map((prototype) => this.withCloudShadow(tagCrownBand(prototype.proxyParts)));
     this.prototypeHeight = Math.max(...proxies.map((prototype) => prototype.height));
     this.prototypeWidth = Math.max(...proxies.map((prototype) => prototype.width));
-    this.renderers = createInstancedRenderers({
+    const createPool = this.config.enhancements?.regionalLazyTrees ? createLazyInstancedRenderers : createInstancedRenderers;
+    this.renderers = createPool({
       root: this.root,
       renderer: this.terrainView.renderer,
       partsByPrototype: this.prototypes,
@@ -665,7 +668,7 @@ export class StylizedTreeView {
       castLeafShadow: this.config.enhancements?.crownShadows === true,
       tintLeaves: true,
     });
-    this.proxyRenderers = createInstancedRenderers({
+    this.proxyRenderers = createPool({
       root: this.root,
       renderer: this.terrainView.renderer,
       partsByPrototype: this.proxyPrototypes,
@@ -674,7 +677,7 @@ export class StylizedTreeView {
       castShadow: false,
       tintLeaves: true,
     });
-    this.fallbackImpostorRenderers = createInstancedRenderers({
+    this.fallbackImpostorRenderers = createPool({
       root: this.root,
       renderer: this.terrainView.renderer,
       partsByPrototype: this.proxyPrototypes,
@@ -909,6 +912,7 @@ export class StylizedTreeView {
     const job = this.pendingLodRebuild;
     const completed = stepViewRebuild(this, job, shouldYield, job => iterateTreeLod({
       plan: job.plan,
+      getDrawPreparation: () => this.terrainView.drawPreparation,
       anchor: this.instanceAnchor,
       beforePublish: () => {
         const origin = this.terrainView.floatingOrigin.getState();
@@ -933,6 +937,15 @@ export class StylizedTreeView {
     }), 'pendingLodRebuild');
     if (completed) this.lastLodRebuildAt = performance.now();
     return completed;
+  }
+
+  retireRegionalPools(now, idleMs, limit) {
+    if (this.stagedRebuild || this.pendingLodRebuild) return 0;
+    let retired = 0;
+    for (const pool of [this.renderers, this.proxyRenderers, this.fallbackImpostorRenderers]) {
+      retired += retireIdleInstancedRenderers(this.root, pool, now, idleMs, this.terrainView.drawPreparation, Math.max(0, limit - retired));
+    }
+    return retired;
   }
 
   /** Canonical tile under a placement, in the same convention the scatter uses. */

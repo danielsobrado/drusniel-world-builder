@@ -98,6 +98,48 @@ export function createInstancedRenderers(options) {
   return completeIterator(iterateInstancedRenderers(options));
 }
 
+const lazyPools = new WeakMap();
+
+export function createLazyInstancedRenderers(options) {
+  const renderers = options.partsByPrototype.map(() => []);
+  lazyPools.set(renderers, options);
+  return renderers;
+}
+
+export function* prepareLazyInstancedRenderers(renderers, instances) {
+  const options = lazyPools.get(renderers);
+  if (!options) return;
+  for (let index = 0; index < renderers.length; index++) {
+    if (!instances[index]?.length || renderers[index].length) continue;
+    yield;
+    const [parts] = createInstancedRenderers({ ...options, partsByPrototype: [options.partsByPrototype[index]], prototypeOffset: index });
+    renderers[index] = parts;
+    for (const mesh of parts) mesh.userData.lazyPrototype = true;
+    PerfCounters.inc('regionalTreePoolsAllocated');
+  }
+}
+
+export function retireIdleInstancedRenderers(root, renderers, now, idleMs, preparation, limit = 1) {
+  if (!lazyPools.has(renderers)) return 0;
+  let retired = 0;
+  for (let index = 0; index < renderers.length; index++) {
+    const parts = renderers[index];
+    if (!parts.length) continue;
+    if (parts.some(mesh => mesh.count > 0)) {
+      for (const mesh of parts) mesh.userData.regionalIdleSince = now;
+      continue;
+    }
+    const since = parts[0].userData.regionalIdleSince ?? now;
+    for (const mesh of parts) mesh.userData.regionalIdleSince = since;
+    if (now - since < idleMs || retired >= limit) continue;
+    for (const mesh of parts) preparation?.cancel(mesh);
+    disposeInstancedRenderers(root, [parts]);
+    renderers[index] = [];
+    retired++;
+  }
+  return retired;
+}
+
 export function* iterateInstancedRenderers({
   root,
   partsByPrototype,
@@ -110,6 +152,7 @@ export function* iterateInstancedRenderers({
   tintLeaves = false,
   renderer = null,
   reuseVertexArrays = false,
+  prototypeOffset = 0,
 }) {
   const result = [];
   for (const [prototypeIndex, parts] of partsByPrototype.entries()) {
@@ -162,7 +205,7 @@ export function* iterateInstancedRenderers({
       mesh.castShadow = Boolean(castShadow && (castLeafShadow || part.kind !== 'leaf'));
       mesh.receiveShadow = true;
       mesh.frustumCulled = true;
-      mesh.name = `${name}-${prototypeIndex}-${partIndex}`;
+      mesh.name = `${name}-${prototypeIndex + prototypeOffset}-${partIndex}`;
       root.add(mesh);
       meshes.push(mesh);
     }
@@ -388,7 +431,7 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
     }
     total += Math.min(
       instances.length,
-      parts[0]?.instanceMatrix.count ?? instances.length,
+      parts[0]?.instanceMatrix.count ?? (lazyPools.has(renderers) ? 0 : instances.length),
     );
   });
   return total;

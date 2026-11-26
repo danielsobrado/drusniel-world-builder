@@ -10,7 +10,7 @@ import {
   treeRenderSeed,
 } from './forest/TreeAppearance.js';
 import { aggregateCanopyClusters } from './lod/canopyCluster.js';
-import { writeInstances } from './lod/StylizedLodRuntime.js';
+import { prepareLazyInstancedRenderers, writeInstances } from './lod/StylizedLodRuntime.js';
 
 const UNTINTED = Object.freeze([1, 1, 1]);
 
@@ -209,6 +209,7 @@ export function* iterateTreeLod({
   // Canonical point the instance matrices are written relative to (InstanceAnchor).
   anchor = null,
   beforePublish = null,
+  getDrawPreparation = () => null,
 }) {
   PerfCounters.inc('treeRebuilds');
   const leaf = { tint: resolveLeafTint, snow: resolveLeafSnow };
@@ -359,6 +360,9 @@ export function* iterateTreeLod({
     }
   }
 
+  yield* prepareLazyInstancedRenderers(renderers, near);
+  yield* prepareLazyInstancedRenderers(proxyRenderers, proxy);
+  yield* prepareLazyInstancedRenderers(fallbackImpostorRenderers, fallback);
   yield;
   beforePublish?.();
   manifestStore.setActive(active);
@@ -367,6 +371,15 @@ export function* iterateTreeLod({
   const fallbackCount = writeInstances(fallbackImpostorRenderers, fallback, anchor);
   const clusterCount = writeInstances(clusterRenderers, clusters, anchor);
   const understoryCount = writeInstances(understoryRenderers, understory, anchor);
+  const preparation = getDrawPreparation();
+  if (preparation) for (const pool of [renderers, proxyRenderers, fallbackImpostorRenderers]) {
+    for (const parts of pool) for (const mesh of parts) {
+      if (mesh.count > 0 && mesh.userData.lazyPrototype) {
+        preparation.register(mesh);
+        delete mesh.userData.lazyPrototype;
+      }
+    }
+  }
   const requestedGeometryInstances = [near, proxy, fallback, clusters, understory]
     .flat()
     .reduce((total, records) => total + records.length, 0);
