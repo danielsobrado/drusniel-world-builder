@@ -98,3 +98,13 @@ test('a region weight of zero is a runtime skip, not a rebuild', () => {
   assert.ok(nodes?.amount);
   assert.ok(nodes?.color);
 });
+
+test('adaptive march assembles a runtime integer loop bound with near protection', () => {
+  const activeSteps = uniform(3, 'int');
+  const nodes = build({}, { activeSteps, protectedDistance: 20 });
+  assert.ok(nodes?.amount);
+  assert.ok(nodes?.color);
+  activeSteps.value = 6;
+  assert.equal(activeSteps.value, 6);
+  assert.ok(build({ farFade: 1 }, { activeSteps, protectedDistance: 20 })?.amount);
+});
