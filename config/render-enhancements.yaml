@@ -38,6 +38,21 @@ farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false
 environmentalParticleAdmission: false
+measuredGpuAdmission: false
+gpuAdmissionBudget:
+  sampleEvery: 8
+  maxAgeMs: 1500
+  targetRenderMs: 12
+  recoveryRenderMs: 9
+  pressureSamples: 3
+  recoverySamples: 8
+  minimumDwellMs: 2000
+  passMs:
+    ao: 1.2
+    ssr: 1.5
+    bloom: 1
+    shafts: 1.2
+    volumetric: 1.5
 atmosphericPassAdmission: false
 atmosphericPassBudget:
   targetFrameMs: 18
