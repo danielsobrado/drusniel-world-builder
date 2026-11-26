@@ -23,7 +23,9 @@ test('the world noise exists at full size and neutral before its file arrives', 
   assert.ok(texture.image.data.every((byte) => byte === WORLD_NOISE_NEUTRAL));
   assert.deepEqual(WORLD_NOISE_LAYERS, { macro: 0, meso: 1, micro: 2, water: 3, sky: 4 });
   let called = false;
-  whenLoaded(() => { called = true; });
+  const cancel = whenLoaded(() => { called = true; });
+  assert.equal(typeof cancel, 'function');
+  cancel();
   assert.equal(called, false, 'nothing loads without a bitmap decoder');
 });
 
