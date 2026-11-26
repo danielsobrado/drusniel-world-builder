@@ -31,18 +31,21 @@ export class RegionalSceneryBudget {
     this.revision = 0;
     this.nextSample = 0;
     this.job = null;
+    this.sampleWindow = null;
   }
 
   update(surface, now, shouldYield = () => false) {
     const focus = surface.terrainView.focusChunk;
     const size = surface.terrainView.chunkWorldSize;
     if (!focus || !(size > 0)) return;
-    if (this.job && (this.job.size !== size
-      || chunkRingDistance(focus.chunkX, focus.chunkZ, this.job.focus) > this.settings.spatialChunkRadius / 2)) {
+    const window = this.job ?? this.sampleWindow;
+    if (window && (window.size !== size
+      || chunkRingDistance(focus.chunkX, focus.chunkZ, window.focus) > this.settings.spatialChunkRadius / 2)) {
+      if (this.job) PerfCounters.inc('regionalSpatialSamplesCancelled');
       this.job = null;
+      this.sampleWindow = null;
       this.nextSample = now;
       this.publish(new Set());
-      PerfCounters.inc('regionalSpatialSamplesCancelled');
     }
     if (!this.job && now >= this.nextSample) {
       const anchor = { chunkX: focus.chunkX, chunkZ: focus.chunkZ };
@@ -59,6 +62,7 @@ export class RegionalSceneryBudget {
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
       PerfCounters.set('regionalSpatialPeakChunkUnits', result.maxUnits);
       PerfCounters.inc('regionalSpatialSamples');
+      this.sampleWindow = { focus: this.job.focus, size: this.job.size };
       this.job = null;
       this.nextSample = now + this.settings.sampleIntervalMs;
       break;
@@ -97,6 +101,7 @@ export class RegionalSceneryBudget {
 
   dispose() {
     this.job = null;
+    this.sampleWindow = null;
     this.townCache = new WeakMap();
     this.publish(new Set());
   }
