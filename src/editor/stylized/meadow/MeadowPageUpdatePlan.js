@@ -1,6 +1,11 @@
 const NO_WRITES = Object.freeze([]);
 
-const stems = (page, tile) => Math.min(tile.output.count, page.stride);
+export function meadowRequestedStems(tile, stride) {
+  const count = Math.min(tile.output.count, stride);
+  const factor = tile.regionalCountFactor ?? 1;
+  return factor < 1 && count > 0 ? Math.max(1, Math.floor(count * factor)) : count;
+}
+const stems = (page, tile) => meadowRequestedStems(tile, page.stride);
 const sourceOf = tile => tile.prepared ?? tile.buildId;
 const byStartDescending = (left, right) => right.start - left.start;
 const continues = (last, start, offset) => last.start + last.count === start && last.offset + last.count === offset;
