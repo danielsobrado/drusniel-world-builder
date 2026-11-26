@@ -8,6 +8,7 @@ export function evaluateSceneryDemand(cells, previous, settings, geometryCosts =
   let totalUnits = 0;
   const totals = {};
   const requestedCost = emptyRenderCost(), selectedCost = emptyRenderCost();
+  const layerCosts = {};
   let peakTriangles = 0, peakDraws = 0, fallbackChunks = 0;
   for (const [key, demand] of cells) {
     let units = 0;
@@ -24,6 +25,11 @@ export function evaluateSceneryDemand(cells, previous, settings, geometryCosts =
       const { requested, selected } = demand.renderCost;
       addRenderCost(requestedCost, requested);
       addRenderCost(selectedCost, selected);
+      for (const [kind, cost] of Object.entries(demand.renderCost.layers ?? {})) {
+        const layer = layerCosts[kind] ??= { requested: emptyRenderCost(), selected: emptyRenderCost() };
+        addRenderCost(layer.requested, cost.requested);
+        addRenderCost(layer.selected, cost.selected);
+      }
       const effective = effectiveRenderCost(requested, settings.spatialReflectionPassWeight);
       peakTriangles = Math.max(peakTriangles, effective.triangles);
       peakDraws = Math.max(peakDraws, effective.draws);
@@ -34,7 +40,7 @@ export function evaluateSceneryDemand(cells, previous, settings, geometryCosts =
     } else if (geometryCosts) fallbackChunks++;
     if (pressure) pressured.add(key);
   }
-  return { pressured, maxUnits, totalUnits, totals, requestedCost, selectedCost, peakTriangles, peakDraws, fallbackChunks };
+  return { pressured, maxUnits, totalUnits, totals, requestedCost, selectedCost, peakTriangles, peakDraws, fallbackChunks, layerCosts };
 }
 
 function sameKeys(a, b) {
@@ -97,6 +103,13 @@ export class RegionalSceneryBudget {
         PerfCounters.set('regionalCostPeakEffectiveTriangles', result.peakTriangles);
         PerfCounters.set('regionalCostPeakEffectiveDraws', result.peakDraws);
         PerfCounters.set('regionalCostFallbackChunks', result.fallbackChunks);
+        for (const kind of Object.keys(this.settings.spatialWeights)) {
+          for (const phase of ['requested', 'selected']) {
+            const cost = result.layerCosts[kind]?.[phase];
+            PerfCounters.set(`regionalCost.${kind}.${phase}.triangles`, cost?.triangles ?? 0);
+            PerfCounters.set(`regionalCost.${kind}.${phase}.draws`, cost?.draws ?? 0);
+          }
+        }
       }
       PerfCounters.inc('regionalSpatialSamples');
       this.sampleWindow = { focus: this.job.focus, size: this.job.size };
