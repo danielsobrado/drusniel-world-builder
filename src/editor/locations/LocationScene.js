@@ -7,6 +7,7 @@ import { createSky } from './LocationSky.js';
 import { locationLight } from './materials/LocationShading.js';
 import { LocationMaterials } from './materials/LocationMaterials.js';
 import { LocationLightPool } from './LocationLightPool.js';
+import { LocationDecorationAdmission } from './LocationDecorationAdmission.js';
 
 /** Share of the gap to the target that the indoor/outdoor weather fade closes each frame. */
 const WEATHER_EASE = 0.06;
@@ -30,7 +31,7 @@ export class LocationScene {
    * @param {THREE.Camera} options.camera for shader warm-up
    * @param {(stepId: string) => Promise<void>} options.progress marks a loading step and yields a frame
    */
-  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress }) {
+  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null }) {
     const location = new LocationScene(site);
     const isIceSite = site.materials?.terrain?.kind === 'ice';
     const isStoneholdSite = Boolean(site.archetypeKey?.startsWith('stonehold') || site.id?.includes('stonehold'));
@@ -81,7 +82,9 @@ export class LocationScene {
         propShadows: site.lighting.propShadows ?? null,
         crystalField,
         alpineUnderstory,
+        decorationBudget,
       }));
+      if (decorationBudget) location.decorationAdmission = new LocationDecorationAdmission(location.scene, decorationBudget);
       location.lightPool = new LocationLightPool(builder.dynamicLights, {
         gain: site.lighting.dynamicGain ?? (site.lighting.indirectBounce ? 0.28 : 0.14),
       });
@@ -173,6 +176,7 @@ export class LocationScene {
 
   /** The carried lamp sits just below the eye so it lights what is looked at without flattening it. */
   update(camera) {
+    this.decorationAdmission?.update(camera.position);
     locationLight.carriedPosition.value.copy(camera.position);
     locationLight.carriedPosition.value.y -= 0.35;
     const nowMs = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -201,11 +205,13 @@ export class LocationScene {
     this.lightPool?.dispose();
     const owned = new Set();
     this.scene.traverse((object) => {
+      if (object.isInstancedMesh) object.dispose();
       object.geometry?.dispose();
       if (object.material) owned.add(object.material);
     });
     for (const material of owned) material.dispose();
     this.materials?.dispose();
+    this.decorationAdmission = null;
     this.scene.clear();
   }
 }
