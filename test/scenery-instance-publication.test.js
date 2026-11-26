@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { Sphere, Vector3 } from 'three/webgpu';
+import { prepareInstanceBounds } from '../src/editor/stylized/lod/InstanceBoundsUpdate.js';
 import { estimateAttributeSubrangeBytes, markAttributeSubrangeUpdated } from '../src/editor/stylized/attributeUpload.js';
 import { InstancePublicationPlan, admitSceneryPublication } from '../src/editor/stylized/lod/InstancePublicationPlan.js';
 import { iterateInstanceWrites, writeInstances } from '../src/editor/stylized/lod/StylizedLodRuntime.js';
@@ -209,4 +211,30 @@ test('anchor proposal is nonmutating and the publication flag is independent', (
   assert.equal(anchor.x, 0);
   assert.equal(resolveRenderEnhancements().regionalInstancePublicationBudget, false);
   assert.equal(resolveRenderEnhancements({}, '?regionalInstancePublicationBudget=1').regionalInstancePublicationBudget, true);
+});
+
+test('staged bounds match anchor-relative geometry and do not mutate the old sphere', () => {
+  const target = mesh();
+  target.geometry.boundingSphere = new Sphere(new Vector3(), 1);
+  target.boundingSphere = new Sphere(new Vector3(), 2);
+  const old = target.boundingSphere;
+  const values = Array.from({ length: 130 }, (_, x) => ({ matrix: matrix(x) }));
+  const full = prepareInstanceBounds(target, values, values.length, null, { x: 10, z: 0 }, 2);
+  assert.equal(full.next().done, false);
+  const result = completeIterator(full);
+  assert.equal(target.boundingSphere, old);
+  assert.equal(old.radius, 2);
+  assert.equal(result.center.x, 54.5);
+  assert.equal(result.radius, 67.5);
+  const partial = completeIterator(prepareInstanceBounds(target, values, values.length, [20], { x: 0, z: 0 }));
+  assert.equal(old.radius, 2);
+  assert.equal(partial.center.x, 9.5);
+  assert.equal(partial.radius, 11.5);
+  const publication = new InstancePublicationPlan();
+  completeIterator(iterateInstanceWrites([[target]], [values.map((value, i) => ({ ...instance(i), matrix: value.matrix }))], { x: 10, z: 0 }, null, publication));
+  assert.equal(target.boundingSphere, old);
+  publication.commit();
+  assert.equal(target.boundsCalls, 0);
+  assert.equal(target.boundingSphere.center.x, 54.5);
+  assert.equal(target.boundingSphere.radius, 65.5);
 });
