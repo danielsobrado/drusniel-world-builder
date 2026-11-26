@@ -2050,6 +2050,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       };
     }
     drawPreparation.flushBudgeted(viewModeController.camera, deferredWork);
+    terrainView.updateTerrainMaterialProfiles();
     if (profiling) perfQa.mark('ambiencePreparation');
     drawPreparation.hidePending();
     roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();

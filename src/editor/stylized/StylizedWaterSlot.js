@@ -134,6 +134,7 @@ export class StylizedWaterSlot {
     this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.visible = false;
     this.mesh.userData.skipWarmup = true;
+    this.mesh.userData.deferInitialPreparation = true;
     this.mesh.renderOrder = 2;
     this.mesh.name = `stylized-water-${terrainSlot.slotIndex}`;
     terrainView.scene.add(this.mesh);
@@ -238,7 +239,9 @@ export class StylizedWaterSlot {
       this.hasWaterCoverage = false;
       this.hasOceanWater = false;
       this.hasRiverWater = false;
+      this.uploadedPage = null;
       this.mesh.userData.skipWarmup = true;
+      this.mesh.userData.deferInitialPreparation = true;
       return;
     }
     if (page !== this.uploadedPage
@@ -251,6 +254,7 @@ export class StylizedWaterSlot {
         this.hasRiverWater = false;
         this.mesh.visible = false;
         this.mesh.userData.skipWarmup = true;
+        this.mesh.userData.deferInitialPreparation = true;
         this.uploadedPage = page;
         this.uploadedFieldRevision = page.waterFieldRevision ?? 0;
         this.seaPhaseDescriptor = null;
@@ -261,7 +265,12 @@ export class StylizedWaterSlot {
       const bytes = this.waterFieldPixels.byteLength + this.waterFlowPixels.byteLength + this.waterAppearancePixels.byteLength;
       if (publicationBudget && !publicationBudget.canPublish(bytes)) {
         // A reused terrain slot must not show the previous chunk's water.
-        if (this.uploadedPage !== page) this.mesh.visible = false;
+        if (this.uploadedPage !== page) {
+          this.mesh.visible = false;
+          this.hasWaterCoverage = false;
+          this.hasOceanWater = false;
+          this.hasRiverWater = false;
+        }
         else this.mesh.position.copy(this.terrainSlot.mesh.position);
         PerfCounters.inc('waterPublicationDeferred');
         return;
@@ -286,6 +295,7 @@ export class StylizedWaterSlot {
     );
     if (!this.hasWaterCoverage) return;
     this.mesh.userData.skipWarmup = false;
+    this.mesh.userData.deferInitialPreparation = false;
     const preparation = this.terrainView.drawPreparation;
     if (preparation && !preparation.isMaterialReady(this.mesh, this.material)) {
       preparation.requestMaterial(this.mesh, this.material);

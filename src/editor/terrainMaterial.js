@@ -154,6 +154,7 @@ export function createTerrainMaterial({
   // The live sun (a Vector3 the sky turns in place for each time of day), for
   // snow shading. Without it, the configured sun.
   sunDirection = null,
+  waterFeatures = true,
 }) {
   const terrainUv = uv();
   const transitionPatterns = transitionPatternsTemplate
@@ -490,7 +491,7 @@ export function createTerrainMaterial({
     if (pathPaint && bakedSurface.snow) {
       paintedSurface.color = mix(paintedSurface.color, bakedSurface.color, max(bakedSurface.snow, bakedSurface.rock));
     }
-    const coastPatterns = coastPatternsTemplate && slotPatternOrigins('coastPatterns', coastPatternsTemplate);
+    const coastPatterns = waterFeatures && coastPatternsTemplate && slotPatternOrigins('coastPatterns', coastPatternsTemplate);
     // The interpolated mesh height keeps narrow wash fronts smooth between
     // vertices; the nearest-filtered height texture would make texel terraces.
     const coastalHeight = positionWorld.y;
@@ -528,7 +529,7 @@ export function createTerrainMaterial({
       beachSurface.color = mix(beachSurface.color, colorNode('#6f7a7e'), silt.mul(.85));
     }
     // Swash, foam and wet sand where the ground meets the sea.
-    const swash = coastPatternsTemplate && createCoastSwashNodes({
+    const swash = coastPatterns && createCoastSwashNodes({
       localXZ,
       patternOrigins: coastPatterns,
       groundHeight: coastalHeight,

@@ -120,6 +120,22 @@ export class MeadowGroundSampler {
     return this.slotsByChunk.get(`${chunkX}:${chunkZ}`) ?? null;
   }
 
+  /** Conservative exact eligibility check before allocating a blade tile. */
+  canGrowAt(centerX, centerZ, half) {
+    const slot = this.slotFor(...this.chunkOf(centerX, centerZ));
+    if (!slot?.page?.tiles) return true;
+    const { originCellX, originCellZ } = slot.descriptor;
+    const size = this.chunkSize, scale = this.tileSize;
+    const x0 = Math.max(0, Math.floor((centerX - half) / scale - originCellX));
+    const x1 = Math.min(size - 1, Math.floor((centerX + half) / scale - originCellX));
+    const z0 = Math.max(0, Math.floor(-(centerZ + half) / scale - originCellZ));
+    const z1 = Math.min(size - 1, Math.floor(-(centerZ - half) / scale - originCellZ));
+    for (let z = z0; z <= z1; z++) for (let x = x0; x <= x1; x++) {
+      if (this.eligible[slot.page.tiles[z * size + x]]) return true;
+    }
+    return false;
+  }
+
   /**
    * What a tile at this canonical centre would build from — its page revision and
    * the rocks standing in its chunk — or null while the chunk streams. A rock set

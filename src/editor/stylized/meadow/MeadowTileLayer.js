@@ -277,7 +277,7 @@ export class MeadowTileLayer {
     const centerZ = (tz + 0.5) * size;
     const band = this.selectBand(nearest, farthest);
     const preparationBand = this.selectPreparationBand?.(nearest, farthest) ?? band;
-    if (!preparationBand) return null;
+    if (!preparationBand || this.ground.canGrowAt?.(centerX, centerZ, size / 2) === false) return null;
     const key = `${tx}:${tz}`;
     let tile = this.tiles.get(key);
     if (!tile) {

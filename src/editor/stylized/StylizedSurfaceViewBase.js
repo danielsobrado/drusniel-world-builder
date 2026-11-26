@@ -784,6 +784,7 @@ export class StylizedSurfaceView {
       if (
         !descriptor
         || !slot.hasWaterCoverage
+        || !slot.mesh.visible
         || slot.refractionPrewarmed
         || slot.isWithinRefractionRange()
       ) {

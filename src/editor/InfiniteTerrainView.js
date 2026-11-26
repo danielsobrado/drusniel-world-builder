@@ -1,3 +1,4 @@
+import { waterFieldHasCoverage } from './water/WaterField.js';
 import * as THREE from 'three/webgpu';
 import { installUnusedSamplerPruning } from '../render/UnusedSamplerBindings.js';
 import { installSurfaceAnisotropy } from '../render/SurfaceAnisotropyController.js';
@@ -23,6 +24,7 @@ import { SettlementSamplingPreparation } from './world/settlements/SettlementSam
 import {
   attachTerrainMaterialBakeGpuState,
   createTerrainMaterialBakeGpuState,
+  getTerrainMaterialBakeGpuState,
 } from './materials/TerrainMaterialBakeGpu.js';
 import { TERRAIN_SLOT_KEY } from './materials/TerrainSlotBindings.js';
 import { cellCenterToWorld, worldToCell } from './world/WorldCoordinates.js';
@@ -114,7 +116,7 @@ function createSharedTerrainMaterialSource({
   sunDirection = null,
   valleyFog = null,
 }) {
-  let material = null;
+  const materials = new Map();
   // Resolved once, from the ambient layer's block, and handed to the material as
   // resolved settings: a bad shape key is already an error at config load (see
   // validateStylizedLodConfig), so this cannot fail for a caller that got here.
@@ -129,8 +131,9 @@ function createSharedTerrainMaterialSource({
       ? { settings: valleyFog.settings, patch: valleyFog.patch, uniforms: valleyFog.uniforms, quality: valleyFog.quality }
       : null,
   };
-  return (slotData, bakeGpuState) => {
-    material ??= createTerrainMaterial({
+  const get = (slotData, bakeGpuState, waterFeatures = true) => {
+    if (materials.has(waterFeatures)) return materials.get(waterFeatures);
+    const material = createTerrainMaterial({
       ...slotData,
       chunkWorldSize: worldStore.chunkSize * worldStore.tileSize,
       width: worldStore.chunkSize,
@@ -139,9 +142,13 @@ function createSharedTerrainMaterialSource({
       bakeGpuState,
       surfaceEffects,
       sunDirection,
+      waterFeatures,
     });
+    materials.set(waterFeatures, material);
     return material;
   };
+  get.dispose = () => { for (const material of materials.values()) material.dispose(); materials.clear(); };
+  return get;
 }
 
 function createSlot({ slotIndex, scene, geometry, worldStore, stylizedConfig, sharedMaterial }) {
@@ -431,6 +438,7 @@ export class InfiniteTerrainView {
       sunDirection: this.godRays.sunDirection,
       valleyFog: this.valleyFog,
     });
+    this.sharedTerrainMaterial = sharedMaterial;
     this.slots = Array.from({ length: this.streamingConfig.maxResidentChunks }, (_, slotIndex) => createSlot({
       slotIndex,
       scene: this.scene,
@@ -858,6 +866,7 @@ export class InfiniteTerrainView {
     slot.heightTexture.needsUpdate = true;
     slot.page = ready;
     slot.pageRevision = ready.revision;
+    if (this.sharedTerrainMaterial) this.selectTerrainMaterial(slot);
     this.contentRevision = (this.contentRevision ?? 0) + 1;
     slot.mesh.visible = true;
     slot.loading = false;
@@ -959,6 +968,31 @@ export class InfiniteTerrainView {
   }
 
   /** Editor paint/sculpt path — mark dirty then memcpy commit. */
+  selectTerrainMaterial(slot) {
+    const page = slot.page;
+    if (!page || !this.sharedTerrainMaterial) return;
+    const wet = !page.waterFieldPixels || waterFieldHasCoverage(page.waterFieldPixels);
+    const desired = this.sharedTerrainMaterial(slot.mesh.userData[TERRAIN_SLOT_KEY], getTerrainMaterialBakeGpuState(slot.mesh), wet);
+    slot.desiredMaterial = desired;
+    const preparation = this.drawPreparation;
+    if (!preparation || preparation.isMaterialReady(slot.mesh, desired)) {
+      preparation?.cancel(slot.mesh);
+      slot.mesh.material = desired;
+      slot.material = desired;
+    } else preparation.requestMaterial(slot.mesh, desired);
+  }
+
+  updateTerrainMaterialProfiles() {
+    for (const slot of this.slots) {
+      const desired = slot.desiredMaterial;
+      if (!desired || slot.material === desired || !slot.mesh.visible) continue;
+      if (this.drawPreparation?.isMaterialReady(slot.mesh, desired)) {
+        slot.material = desired;
+        slot.mesh.material = desired;
+      }
+    }
+  }
+
   uploadPage(slot, page) {
     page.renderPixelsDirty = true;
     this.commitPage(slot, page);
@@ -1183,8 +1217,8 @@ export class InfiniteTerrainView {
     this.unsubscribeWorld?.();
     this.preview.geometry.dispose();
     this.preview.material.dispose();
-    // Slots share one material; each mesh carries its own bake state.
-    new Set(this.slots.map((slot) => slot.material)).forEach((material) => material.dispose());
+    if (this.sharedTerrainMaterial) this.sharedTerrainMaterial.dispose();
+    else new Set(this.slots.map(slot => slot.material)).forEach(material => material.dispose());
     this.coastalSwash?.dispose();
     this.valleyFog?.dispose();
     this.valleyFogSampling?.dispose();
