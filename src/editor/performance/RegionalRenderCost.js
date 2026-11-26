@@ -111,7 +111,7 @@ export class RegionalRenderCostModel {
     return cost;
   }
 
-  *manifest(view, kind, key, placements) {
+  *manifest(view, kind, key, placements, transitionCosts = false) {
     const requested = emptyRenderCost(), selected = emptyRenderCost();
     if (!placements?.length) return { requested, selected };
     if (!Array.isArray(placements)) {
@@ -125,9 +125,13 @@ export class RegionalRenderCostModel {
       ? [...new Set(entry.representations.filter(rep => rep.fade > 0 && rep.band !== 'culled').map(rep => rep.band))]
       : selectedBand === 'culled' ? [] : [selectedBand];
     if (baseline === 'culled' && selectedBands.length === 0) return { requested, selected };
-    const options = entry?.admissionOptions?.map(option => ({ ...option, cost: emptyRenderCost(), seen: new Set() }));
+    const options = entry?.admissionOptions?.map(option => ({ ...option, cost: emptyRenderCost(), seen: new Set(),
+      ...(transitionCosts ? { transitionCost: emptyRenderCost(), transitionSeen: new Set() } : {}) }));
+    const activeBands = transitionCosts ? [...new Set([...selectedBands, selectedBand].filter(band => band !== 'culled'))] : [];
+    const active = emptyRenderCost(), current = emptyRenderCost();
+    const activeDraws = new Set(), currentDraws = new Set();
     const needsImpostor = baseline === 'impostor' || selectedBands.includes('impostor')
-      || options?.some(option => option.band === 'impostor');
+      || activeBands.includes('impostor') || options?.some(option => option.band === 'impostor');
     const counts = new Map();
     for (let i = 0; i < placements.length; i++) {
       const placement = placements[i];
@@ -151,13 +155,23 @@ export class RegionalRenderCostModel {
     for (const { index, compatible, count } of counts.values()) {
       accumulate(requested, requestedDraws, index, baseline, compatible, count);
       for (const band of selectedBands) accumulate(selected, selectedDraws, index, band, compatible, count);
-      for (const option of options ?? []) accumulate(option.cost, option.seen, index, option.band, compatible, count);
+      if (transitionCosts) {
+        accumulate(current, currentDraws, index, selectedBand, compatible, count);
+        for (const band of activeBands) accumulate(active, activeDraws, index, band, compatible, count);
+      }
+      for (const option of options ?? []) {
+        accumulate(option.cost, option.seen, index, option.band, compatible, count);
+        if (transitionCosts) for (const band of new Set([...activeBands, option.band])) {
+          accumulate(option.transitionCost, option.transitionSeen, index, band, compatible, count);
+        }
+      }
       yield;
     }
-    return { requested, selected, options: options?.map(({ factor, cost }) => ({ factor, cost })) };
+    return { requested, selected, ...(transitionCosts ? { active, current } : {}),
+      options: options?.map(({ factor, cost, transitionCost }) => ({ factor, cost, ...(transitionCosts ? { transitionCost } : {}) })) };
   }
 
-  grass(layer, tile, kind, admissionFactors = null, eligible = false) {
+  grass(layer, tile, kind, admissionFactors = null, eligible = false, transitionCosts = false) {
     const template = layer.templates?.[tile.builtBand ?? tile.band];
     const count = Math.min(tile.output?.count ?? 0, template?.instanceCount ?? Infinity);
     const factor = kind === 'card' ? (tile.regionalCountFactor ?? 1) : 1;
@@ -165,10 +179,13 @@ export class RegionalRenderCostModel {
     const cost = template ? partsRenderCost({ geometry: template }) : null;
     // Each tile gets a conservative share of one draw, even when pages batch tiles.
     const requested = batchRenderCost(cost, count, this.passes);
-    const options = kind === 'card' && admissionFactors ? admissionFactors.map(factor => ({
-      factor, cost: batchRenderCost(cost, eligible && count > 0 ? Math.max(1, Math.floor(count * factor)) : count, this.passes),
-    })) : undefined;
-    return { requested, selected: batchRenderCost(cost, chosen, this.passes), options };
+    const selected = batchRenderCost(cost, chosen, this.passes);
+    const options = kind === 'card' && admissionFactors ? admissionFactors.map(factor => {
+      const target = eligible && count > 0 ? Math.max(1, Math.floor(count * factor)) : count;
+      return { factor, cost: batchRenderCost(cost, target, this.passes),
+        ...(transitionCosts ? { transitionCost: batchRenderCost(cost, Math.max(chosen, target), this.passes) } : {}) };
+    }) : undefined;
+    return { requested, selected, options, ...(transitionCosts ? { active: selected, current: selected } : {}) };
   }
 
   water(slot) {
