@@ -19,8 +19,8 @@ export class InstancePublicationPlan {
     }
   }
 
-  span(attribute, range) {
-    if (attribute && range.max >= range.min) this.spans.push({ attribute, min: range.min, max: range.max });
+  span(attribute, range, counter = 'attributeBytesUploaded') {
+    if (attribute && range.max >= range.min) this.spans.push({ attribute, min: range.min, max: range.max, counter });
   }
 
   bytes() {
@@ -37,7 +37,7 @@ export class InstancePublicationPlan {
       }
     }
     let bytes = 0;
-    for (const span of this.spans) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max);
+    for (const span of this.spans) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max, { counter: span.counter });
     for (const finalize of this.finalizers) finalize();
     this.patches.clear();
     this.spans.length = 0;
