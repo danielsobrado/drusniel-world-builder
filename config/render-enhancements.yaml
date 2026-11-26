@@ -9,6 +9,7 @@ geologyAdmissionBudget:
   protectMeters: 64
   minimumScaleMultiplier: 24
   maxExtraDraws: 8
+  recoveryRatio: 0.85
 locationDecorationBudget:
   cellMeters: 24
   protectMeters: 24
@@ -17,6 +18,7 @@ locationDecorationBudget:
   drawBudget: 24
   recoveryMeters: 4
   boundsPaddingMeters: 1
+  refreshMeters: 1
 # Opt-in until regional visual and GPU acceptance.
 regionalTerrainProfiles: false
 regionalLazyTrees: false
