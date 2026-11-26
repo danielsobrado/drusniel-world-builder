@@ -1,3 +1,4 @@
+import { TreeSourceOwnership } from './forest/TreeSourceOwnership.js';
 import { RegionalImpostorResidency } from './impostor/RegionalImpostorResidency.js';
 import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import * as THREE from 'three/webgpu';
@@ -239,6 +240,8 @@ export class StylizedTreeView {
     this.impostorVersion = 0;
     this.impostorReady = Promise.resolve(null);
     this.textures = [];
+    this.treeSourceOwnership = null;
+    this.canReleaseTreeSources = false;
     this.manifestStore = null;
     this.chunkLodStates = new Map();
     this.lastUpdateKey = null;
@@ -305,6 +308,9 @@ export class StylizedTreeView {
   async buildFromScene(scene, authoredVariants = []) {
     if (!this.config.trees.enabled || !scene || this.disposed) return;
     const textureStart = this.textures.length;
+    this.canReleaseTreeSources = false;
+    this.treeSourceOwnership = this.config.enhancements?.regionalTreeSourceRelease
+      ? new TreeSourceOwnership(texture => this.textures.push(texture)) : null;
     const [barkResult, foliageResult, scanResult] = await Promise.allSettled([
       this.loadBarkTextures(),
       this.loadFoliageCard(),
@@ -448,6 +454,8 @@ export class StylizedTreeView {
       part.kind === 'leaf' && part.material?.userData?.gradedCanopy === true));
     this.prototypeSignature = createTreeImpostorSourceSignature(this.prototypes, this.config);
     this.createRenderResources();
+    this.canReleaseTreeSources = this.treeSourceOwnership?.canRelease === true;
+    this.treeSourceOwnership = null;
   }
 
   appendScenePrototypes(
@@ -496,17 +504,21 @@ export class StylizedTreeView {
         if (this.config.trees.foliageLighting?.enabled) bakeCanopyVisibility(baked, this.config.trees);
         const sway = this.treeSway(baked);
         const parts = baked.map((part) => {
-          const source = firstMaterial(
+          const originalSource = firstMaterial(
             part.source,
             part.kind === 'leaf'
               ? extractionConfig.assets.leafMaterial
               : extractionConfig.assets.trunkMaterial,
           );
+          const source = this.treeSourceOwnership?.detach(originalSource) ?? originalSource;
           let sourceMap = null;
           if (source?.map) {
-            sourceMap = source.map.clone();
-            sourceMap.needsUpdate = true;
-            this.textures.push(sourceMap);
+            if (source !== originalSource) sourceMap = source.map;
+            else {
+              sourceMap = source.map.clone();
+              sourceMap.needsUpdate = true;
+              this.textures.push(sourceMap);
+            }
           }
           const material = part.kind === 'leaf'
             ? createStylizedLeafMaterial({
@@ -1088,7 +1100,9 @@ export class StylizedTreeView {
     disposePrototypeParts(this.clusterPrototypes);
     disposePrototypeParts(this.understoryPrototypes);
     this.prototypeIndicesByAsset.clear();
+    this.treeSourceOwnership = null;
     this.textures.forEach((texture) => texture.dispose());
+    this.textures.length = 0;
     this.manifestStore?.dispose();
     this.chunkLodStates.clear();
   }
