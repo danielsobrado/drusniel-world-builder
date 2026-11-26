@@ -1,0 +1,76 @@
+{
+  "suite": "wsc-contact-gaps-qa",
+  "generatedAt": "2026-11-26T21:57:24.878Z",
+  "commit": "76930d00bb693a80e9906aab710ac7223cbad04e",
+  "modes": [
+    "D00",
+    "D08",
+    "D10",
+    "D11"
+  ],
+  "views": [
+    {
+      "name": "B02-top-notrees",
+      "pose": {
+        "label": "Canopy aerial",
+        "x": 8693,
+        "z": 15741,
+        "yaw": 0,
+        "pitch": -1.5,
+        "mode": "fly",
+        "heightAboveGround": 34,
+        "fov": 60
+      },
+      "settled": true,
+      "hiddenLayers": [
+        "trees"
+      ]
+    },
+    {
+      "name": "B02-slope-rock",
+      "rock": {
+        "x": 8830.088977990905,
+        "z": 15326.772299117642,
+        "radius": 0.3643172776540742,
+        "gx": -0.04430344029696428,
+        "gz": -0.1990795484923574,
+        "convexity": -0.004217504713859288,
+        "score": 0.20394965420433436
+      },
+      "pose": {
+        "x": 8833.212565317694,
+        "z": 15326.077171638739,
+        "yaw": 1.7897694043129493,
+        "pitch": -0.22,
+        "mode": "fly",
+        "heightAboveGround": 0.9,
+        "fov": 55
+      },
+      "settled": true,
+      "hiddenLayers": []
+    },
+    {
+      "name": "B15-slope-rock",
+      "rock": {
+        "x": 3147.888840294417,
+        "z": 7155.255076770031,
+        "radius": 2.531791130851906,
+        "gx": -0.10567987383234524,
+        "gz": 0.007211802328246607,
+        "convexity": -0.0046686809670912766,
+        "score": 0.10592566179185339
+      },
+      "pose": {
+        "x": 3147.164871590086,
+        "z": 7144.646227851277,
+        "yaw": -3.0734563263473893,
+        "pitch": -0.22,
+        "mode": "fly",
+        "heightAboveGround": 3.291328470107478,
+        "fov": 55
+      },
+      "settled": true,
+      "hiddenLayers": []
+    }
+  ]
+}

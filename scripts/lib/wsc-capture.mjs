@@ -39,9 +39,17 @@ export async function startFrozenViteServer(port = 5193) {
 export async function settlePose(page, pose, lighting) {
   await page.evaluate(() => window.__worldVisualQa.setDiagnosticMode('D00'));
   await page.evaluate(l => window.__worldVisualQa.setLighting(l), lighting);
-  await prepareVisualPose(page, pose, SETTLE);
+  try {
+    await prepareVisualPose(page, pose, SETTLE);
+  } catch (error) {
+    // The harness wants 60 consecutive ready frames, which a GPU shared with other
+    // sessions' browsers can keep flickering; still cut to the pose (a timeout in
+    // the ground pre-settle would leave the camera there) and judge readiness below.
+    console.warn(`[wsc-capture] settle fallback: ${String(error.message).slice(0, 100)}`);
+    await page.evaluate(p => window.__worldVisualQa.cut(p), pose);
+  }
   await page.evaluate(l => window.__worldVisualQa.setLighting(l), lighting);
-  const deadline = Date.now() + 20000;
+  const deadline = Date.now() + 60000;
   while (Date.now() < deadline) {
     const ready = await page.evaluate(() => {
       const qa = window.__worldVisualQa;
@@ -55,18 +63,19 @@ export async function settlePose(page, pose, lighting) {
   return false;
 }
 
-/** Captures the current view in one diagnostic mode to a PNG. */
-export async function captureMode(page, mode, file) {
-  await page.evaluate((m) => {
+/** Captures the current view in one diagnostic mode to a PNG, with `layers` (e.g. `{ trees: false }`) hidden. */
+export async function captureMode(page, mode, file, layers = {}) {
+  await page.evaluate(({ m, l }) => {
     const qa = window.__worldVisualQa;
     qa.setCaptureUi(true);
     qa.setAvatarVisible(false);
-    qa.layers.restore();
+    qa.layers.set(l);
     qa.setDiagnosticMode(m);
-  }, mode);
+  }, { m: mode, l: layers });
   await page.waitForTimeout(mode === 'D00' ? 750 : 550);
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r)))));
   await captureWorldCanvas(page, file);
+  await page.evaluate(() => window.__worldVisualQa.layers.restore());
 }
 
 async function contactSheet(files, columns, outPath) {
@@ -83,7 +92,8 @@ async function contactSheet(files, columns, outPath) {
 
 /**
  * Runs one capture suite. `shoot(page, take)` positions the camera and calls
- * `take(name)` per view; each view is captured in every mode, one sheet row.
+ * `take(name, detail, { layers })` per view; each view is captured in every
+ * mode, one sheet row.
  *
  * @param {{ suite: string, out: string, url?: string, modes: string[], shoot: Function }} options
  */
@@ -106,11 +116,11 @@ export async function runWscCapture({ suite, out, url = '', modes, shoot }) {
     await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 120000 });
     const backend = await page.evaluate(() => window.__editor?.terrainView?.rendererBackendStatus?.mode);
     if (backend !== 'webgpu') throw new Error(`Hardware WebGPU required, got ${backend}`);
-    await shoot(page, async (name, detail = {}) => {
-      views.push({ name, ...detail });
+    await shoot(page, async (name, detail = {}, { layers = {} } = {}) => {
+      views.push({ name, ...detail, hiddenLayers: Object.keys(layers).filter(k => layers[k] === false) });
       for (const mode of modes) {
         const file = path.join(outDir, `${name}-${mode}.png`);
-        await captureMode(page, mode, file);
+        await captureMode(page, mode, file, layers);
         files.push(file);
       }
     });
