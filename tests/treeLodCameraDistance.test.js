@@ -93,3 +93,23 @@ test('spatial pressure is applied only to the selected unprotected chunk', () =>
   assert.equal(band(plan, 2, 0), 'proxy');
   assert.equal(band(plan, -2, 0), 'near');
 });
+
+test('geometry cost planning retains the unpressured band independently of selected LOD', () => {
+  const options = {
+    focus: { chunkX: 0, chunkZ: 0 }, radius: 3, chunkWorldSize: 128,
+    camera: { position: { x: 64, y: 8, z: -64 }, fov: 68 },
+    floatingOrigin: { getState: () => ({ x: 0, z: 0 }) },
+    viewportHeight: 720, objectHeight: 16,
+    thresholds: { nearPixels: 32, proxyPixels: 8, impostorPixels: 2, clusterPixels: 0 },
+    radii: { meshRadius: 3, proxyRadius: 4, impostorRadius: 5, clusterRadius: 5 },
+    timestamp: 0, transitionMs: 320, protectedChunkRadius: 1,
+  };
+  const plain = buildChunkLodPlan({ ...options, transitionStates: new Map() });
+  const plan = buildChunkLodPlan({ ...options, transitionStates: new Map(),
+    regionalSpatialBudget: { geometryCosts: true, factorForKey: key => key === '2:0' ? 0.5 : 1 } });
+  const entry = plan.entries.find(item => item.chunkX === 2 && item.chunkZ === 0);
+  assert.equal(plain.entries.find(item => item.chunkX === 2 && item.chunkZ === 0).baselineBand, undefined);
+  assert.equal(entry.baselineBand, 'near');
+  assert.equal(entry.band, 'proxy');
+  assert.equal(band(plan, -2, 0), 'near');
+});
