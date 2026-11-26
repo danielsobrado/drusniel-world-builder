@@ -211,6 +211,7 @@ export class LocationScene {
     });
     for (const material of owned) material.dispose();
     this.materials?.dispose();
+    this.decorationAdmission?.dispose();
     this.decorationAdmission = null;
     this.scene.clear();
   }
