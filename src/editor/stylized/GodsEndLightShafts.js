@@ -36,9 +36,14 @@ export function shaftSourceReference(sky, distance, radius = 0.45) {
 
 /** The donor's stable four-depth-tap source mask and jittered radial march. */
 export class GodsEndLightShafts {
-  constructor({ depth, sunUv, intensity, samples = 32, decay = 0.965, sourceRadius = 0.45 }) {
+  constructor({ depth, sunUv, intensity, samples = 32, decay = 0.965, sourceRadius = 0.45, adaptiveSamples = false }) {
     this.aspect = uniform(1);
     this.radius = frameUniform(sourceRadius);
+    this.authoredSamples = samples;
+    this.activeSamples = adaptiveSamples ? uniform(samples, 'int') : null;
+    this.decay = adaptiveSamples ? uniform(decay) : null;
+    this.normalization = adaptiveSamples ? uniform(shaftNormalization(samples, decay)) : null;
+    this.authoredDecay = decay;
     this.disposed = false;
     const active = () => intensity.value > 0;
     this.mask = new ShaftTarget(Fn(() => {
@@ -54,21 +59,30 @@ export class GodsEndLightShafts {
     this.mask.renderTarget.texture.name = 'Gods End shaft source mask';
     this.march = new ShaftTarget(Fn(() => {
       const coord = screenUV.toVar();
-      const stepUv = sunUv.sub(coord).div(samples);
+      const count = this.activeSamples ?? samples;
+      const stepUv = sunUv.sub(coord).div(count);
       coord.addAssign(stepUv.mul(interleavedGradientNoise(screenCoordinate)));
       const sum = float(0).toVar();
       const weight = float(1).toVar();
-      Loop(samples, () => {
+      Loop(count, () => {
         coord.addAssign(stepUv);
         const coverage = step(0, coord.x).mul(step(coord.x, 1))
           .mul(step(0, coord.y)).mul(step(coord.y, 1));
         sum.addAssign(this.mask.sample(coord.clamp(0, 1)).r.mul(weight).mul(coverage));
-        weight.mulAssign(decay);
+        weight.mulAssign(this.decay ?? decay);
       });
-      return vec4(sum.mul(shaftNormalization(samples, decay)), 0, 0, 1);
+      return vec4(sum.mul(this.normalization ?? shaftNormalization(samples, decay)), 0, 0, 1);
     })(), active);
     this.march.renderTarget.texture.name = 'Gods End quarter-resolution shafts';
     this.outputNode = this.march.sample(screenUV).r.mul(intensity);
+  }
+
+  setActiveSamples(count) {
+    if (!this.activeSamples) return;
+    const decay = this.authoredDecay ** (this.authoredSamples / count);
+    this.activeSamples.value = count;
+    this.decay.value = decay;
+    this.normalization.value = shaftNormalization(count, decay);
   }
 
   dispose() {
