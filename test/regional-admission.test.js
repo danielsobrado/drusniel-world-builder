@@ -131,3 +131,30 @@ test('admission configuration is opt-in and factors and priorities are validated
   assert.throws(() => resolveRenderEnhancements({ regionalBudget: { admissionFactors: [1, 0.5, 0.7] } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ regionalBudget: { admissionPriorities: { tree: -1 } } }), RangeError);
 });
+
+test('sampling and allocation are both resumable; camera teleport clears decisions', () => {
+  const view = { prototypes: [{ geometry: { index: { count: 3000 } } }],
+    proxyPrototypes: [[{ geometry: { index: { count: 300 } } }]],
+    manifestStore: { cache: new Map([['2:0', { placements: [{ prototypeIndex: 0 }] }]]) },
+    previousPlan: { entries: [{ chunkX: 2, chunkZ: 0, band: 'near', baselineBand: 'near',
+      admissionOptions: [{ factor: 1, band: 'near' }, { factor: 0.5, band: 'proxy' }] }] } };
+  const surface = { config: { enhancements: { shadowCascades: 1 } }, waterSlots: [], rockView: view,
+    terrainView: { focusChunk: focus, chunkWorldSize: 128, floatingOrigin: { getState: () => ({ x: 0, z: 0 }) } } };
+  const budget = new RegionalSceneryBudget({ ...settings, spatialWorkItems: 1 }, { admission: true });
+  const camera = { position: { x: 64, z: -64 } };
+  budget.update(surface, 0, () => false, camera);
+  assert.equal(budget.revision, 0);
+  let allocationStarted = false;
+  for (let i = 1; i < 50 && !budget.decisions.size; i++) {
+    budget.update(surface, i, () => false, camera);
+    if (budget.job?.cells) {
+      allocationStarted = true;
+      assert.equal(budget.decisions.size, 0);
+    }
+  }
+  assert.equal(allocationStarted, true);
+  assert.equal(budget.factorForKey('2:0', 'rock'), 0.5);
+  camera.position.x = 12800;
+  budget.update(surface, 100, () => true, camera);
+  assert.equal(budget.decisions.size, 0);
+});
