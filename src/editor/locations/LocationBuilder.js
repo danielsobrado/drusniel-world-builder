@@ -378,6 +378,7 @@ export class LocationBuilder {
     propShadows = null,
     crystalField = null,
     alpineUnderstory = null,
+    decorationBudget = null,
   }) {
     const group = new THREE.Group();
     const preparedProps = [];
@@ -522,6 +523,7 @@ export class LocationBuilder {
         seed: this.seed,
         maxClusters: crystalField.maxClusters ?? 0,
         maxNeedles: crystalField.maxNeedles ?? 0,
+        decorationBudget,
       });
       for (const mesh of crystalMeshes) {
         mesh.renderOrder = 1;
@@ -545,6 +547,7 @@ export class LocationBuilder {
         maxIceShards: alpineUnderstory.iceShards ?? 0,
         maxTundraSedge: alpineUnderstory.tundraSedge ?? 0,
         maxTundraLichen: alpineUnderstory.tundraLichen ?? 0,
+        decorationBudget,
       });
       for (const mesh of understoryMeshes) group.add(mesh);
     }
