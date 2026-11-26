@@ -761,6 +761,7 @@ const kitTowns = kitTownsEnabled();
 const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?.skyView?.hemisphere ?? null);
   resources.own(settlementAmbience);
   if (stylizedSurface.reflections) stylizedSurface.reflections.revisionProvider = () => constructionSpatialIndex.revision;
+  if (stylizedSurface.farShadowAdmission) stylizedSurface.shadowRevisionProvider = () => constructionSpatialIndex.revision;
   const roadsideDetailsUi = new RoadsideDetailsUi(roadsideDetails);
   resources.own(roadsideDetailsUi);
   const postProcessingFocus = new PostProcessingFocusResolver({
