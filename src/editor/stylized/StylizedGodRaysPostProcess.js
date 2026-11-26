@@ -1,3 +1,4 @@
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import * as THREE from 'three/webgpu';
 import { bilateralBlur } from 'three/addons/tsl/display/BilateralBlurNode.js';
 import { godrays } from 'three/addons/tsl/display/GodraysNode.js';
@@ -447,6 +448,9 @@ export class StylizedGodRaysPostProcess {
     const contact = this.config.volumetric.contactOcclusion;
     this.cinematicOcclusion?.applyAtmosphericBudget(contact, atmosphere);
     this.volumetricOcclusion?.applyAtmosphericBudget(contact, atmosphere);
+    PerfCounters.set('atmosphericAdmission.godRays.screenSamples', this.activeScreenSamples.value);
+    PerfCounters.set('atmosphericAdmission.godRays.volumetricSteps', this.volumetricRays?.raymarchSteps.value ?? 0);
+    PerfCounters.set('atmosphericAdmission.godRays.cinematicSamples', this.cinematicShafts?.activeSamples?.value ?? 0);
   }
 
   prewarm(camera) {
