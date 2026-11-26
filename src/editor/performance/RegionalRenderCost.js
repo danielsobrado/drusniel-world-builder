@@ -1,0 +1,179 @@
+export const COST_FIELDS = Object.freeze(['triangles', 'draws', 'shadowTriangles', 'shadowDraws', 'reflectionTriangles', 'reflectionDraws', 'unknown']);
+export function emptyRenderCost() {
+  return Object.fromEntries(COST_FIELDS.map(key => [key, 0]));
+}
+
+export function addRenderCost(target, source) {
+  for (const key of COST_FIELDS) target[key] += source[key] ?? 0;
+  return target;
+}
+
+export function geometryTriangles(geometry) {
+  const count = geometry?.index?.count ?? geometry?.attributes?.position?.count;
+  if (!Number.isFinite(count) || count < 0) return null;
+  const start = Math.max(0, geometry.drawRange?.start ?? 0);
+  const length = Math.max(0, Math.min(count - start, geometry.drawRange?.count ?? Infinity));
+  return Math.floor(length / 3);
+}
+
+/** One part is one draw for the existing single-material scenery batches. */
+export function partsRenderCost(parts, castsShadow = () => false) {
+  if (!parts) return null;
+  const result = { triangles: 0, draws: 0, shadowTriangles: 0, shadowDraws: 0 };
+  for (const part of Array.isArray(parts) ? parts : [parts]) {
+    const triangles = geometryTriangles(part?.geometry);
+    if (triangles === null) return null;
+    if (!triangles) continue;
+    result.triangles += triangles;
+    result.draws++;
+    if (castsShadow(part)) {
+      result.shadowTriangles += triangles;
+      result.shadowDraws++;
+    }
+  }
+  return result;
+}
+
+export function batchRenderCost(cost, instances, passes, drawGroups = 1) {
+  const result = emptyRenderCost();
+  if (!cost) { result.unknown = instances; return result; }
+  if (!(instances > 0)) return result;
+  result.triangles = cost.triangles * instances;
+  result.draws = cost.draws * drawGroups;
+  result.shadowTriangles = cost.shadowTriangles * instances * passes.shadow;
+  result.shadowDraws = cost.shadowDraws * drawGroups * passes.shadow;
+  result.reflectionTriangles = result.triangles * passes.reflection;
+  result.reflectionDraws = result.draws * passes.reflection;
+  return result;
+}
+
+export function effectiveRenderCost(cost, reflectionWeight) {
+  return {
+    triangles: cost.triangles + cost.shadowTriangles + cost.reflectionTriangles * reflectionWeight,
+    draws: cost.draws + cost.shadowDraws + cost.reflectionDraws * reflectionWeight,
+  };
+}
+
+/** Cached metadata only: never allocates a renderer or requests source geometry. */
+export class RegionalRenderCostModel {
+  constructor(surface) {
+    this.surface = surface;
+    this.prototypeCosts = new WeakMap();
+    this.plans = new WeakMap();
+    this.townCosts = new WeakMap();
+    const enhancements = surface.config?.enhancements;
+    this.passes = {
+      shadow: enhancements?.shadowCascades ?? 1,
+      reflection: enhancements?.waterReflections?.enabled && surface.waterSlots?.some(slot => slot.hasWaterCoverage) ? 1 : 0,
+    };
+  }
+
+  planEntry(view, key) {
+    const plan = view.previousPlan;
+    if (!plan) return null;
+    let entries = this.plans.get(plan);
+    if (!entries) {
+      entries = new Map(plan.entries.map(entry => [`${entry.chunkX}:${entry.chunkZ}`, entry]));
+      this.plans.set(plan, entries);
+    }
+    return entries.get(key);
+  }
+
+  prototypeCost(view, kind, index, band) {
+    if (band === 'culled') return { triangles: 0, draws: 0, shadowTriangles: 0, shadowDraws: 0 };
+    const near = band === 'near' || kind === 'detail';
+    let parts = near ? view.prototypes?.[index] : view.proxyPrototypes?.[index];
+    if (kind === 'tree' && band === 'impostor') {
+      const batch = view.impostorBatches?.[index]?.batch;
+      // Not all morphologies can use an atlas; the proxy is the safe estimate.
+      if (!parts && batch?.geometry) parts = { geometry: batch.geometry };
+    }
+    // Cluster aggregation is estimated by per-tree proxy cost, not a fabricated cluster count.
+    if (!parts) return null;
+    if (this.prototypeCosts.has(parts)) return this.prototypeCosts.get(parts);
+    const cost = partsRenderCost(parts, part => near && (
+      kind === 'rock' || (kind === 'tree' && (part.kind !== 'leaf' || view.config?.enhancements?.crownShadows === true))
+      || (kind === 'detail' && view.layerConfig?.castShadow === true)
+    ));
+    this.prototypeCosts.set(parts, cost);
+    return cost;
+  }
+
+  *manifest(view, kind, key, placements) {
+    const requested = emptyRenderCost(), selected = emptyRenderCost();
+    if (!placements?.length) return { requested, selected };
+    if (!Array.isArray(placements)) {
+      requested.unknown = selected.unknown = placements.length;
+      return { requested, selected };
+    }
+    const entry = this.planEntry(view, key);
+    const baseline = entry?.baselineBand ?? (entry?.band === 'culled' ? 'culled' : 'near');
+    const selectedBand = entry?.band ?? baseline;
+    const counts = new Map();
+    for (let i = 0; i < placements.length; i++) {
+      const placement = placements[i];
+      const index = kind === 'tree' && typeof view.resolvePalettePrototypeIndex === 'function'
+        ? view.resolvePalettePrototypeIndex(placement) : placement.prototypeIndex;
+      counts.set(index, (counts.get(index) ?? 0) + 1);
+      if ((i & 63) === 63) yield;
+    }
+    for (const [index, count] of counts) {
+      addRenderCost(requested, batchRenderCost(this.prototypeCost(view, kind, index, baseline), count, this.passes));
+      addRenderCost(selected, batchRenderCost(this.prototypeCost(view, kind, index, selectedBand), count, this.passes));
+      yield;
+    }
+    return { requested, selected };
+  }
+
+  grass(layer, tile, kind) {
+    const template = layer.templates?.[tile.builtBand ?? tile.band];
+    const count = Math.min(tile.output?.count ?? 0, template?.instanceCount ?? Infinity);
+    const factor = kind === 'card' ? (tile.regionalCountFactor ?? 1) : 1;
+    const chosen = count > 0 && factor < 1 ? Math.max(1, Math.floor(count * factor)) : count;
+    const cost = template ? partsRenderCost({ geometry: template }) : null;
+    // Each tile gets a conservative share of one draw, even when pages batch tiles.
+    return { requested: batchRenderCost(cost, count, this.passes), selected: batchRenderCost(cost, chosen, this.passes) };
+  }
+
+  water(slot) {
+    const cost = partsRenderCost(slot.mesh, () => false);
+    const result = batchRenderCost(cost, 1, { ...this.passes, reflection: 0 });
+    return { requested: result, selected: result };
+  }
+
+  /** Full near town-kit cost, spatially attributed by immutable module positions. */
+  *town(town, size, keyForPosition) {
+    const mesh = town.mesh;
+    if (!mesh?.modules) return null;
+    const cached = this.townCosts.get(mesh);
+    if (cached?.size === size) return cached.cells;
+    const cells = new Map();
+    const anchor = town.layout.anchor;
+    for (const module of mesh.modules) {
+      const cost = partsRenderCost(module.nearMeshes, part => part.castShadow === true);
+      const counts = new Map();
+      const values = module.values;
+      for (let i = 0; i < values.length; i += 4) {
+        const key = keyForPosition(anchor.x + values[i], anchor.z + values[i + 2], size);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+        if ((i & 255) === 252) yield;
+      }
+      for (const [key, count] of counts) {
+        let entry = cells.get(key);
+        if (!entry) cells.set(key, entry = emptyRenderCost());
+        // Cache unmultiplied shadow and reflection costs; capture activity varies by sample.
+        addRenderCost(entry, batchRenderCost(cost, count, { shadow: 1, reflection: 1 }));
+        yield;
+      }
+    }
+    this.townCosts.set(mesh, { size, cells });
+    return cells;
+  }
+
+  townPasses(cost) {
+    return { ...cost, shadowTriangles: cost.shadowTriangles * this.passes.shadow,
+      shadowDraws: cost.shadowDraws * this.passes.shadow,
+      reflectionTriangles: cost.reflectionTriangles * this.passes.reflection,
+      reflectionDraws: cost.reflectionDraws * this.passes.reflection };
+  }
+}
