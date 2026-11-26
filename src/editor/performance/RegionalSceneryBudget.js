@@ -1,4 +1,4 @@
-import { allocateRegionalWindow, regionalCardEligible } from './RegionalAdmission.js';
+import { iterateRegionalWindow, regionalCardEligible } from './RegionalAdmission.js';
 import { RegionalRenderCostModel, addRenderCost, effectiveRenderCost, emptyRenderCost } from './RegionalRenderCost.js';
 import { PerfCounters } from './qa/PerfCounters.js';
 import { chunkRingDistance, collectRegionalSceneryDemand, sceneryChunkKey } from './RegionalSceneryDemand.js';
@@ -93,7 +93,10 @@ export class RegionalSceneryBudget {
     const cameraChunk = origin ? { chunkX: Math.floor((camera.position.x + origin.x) / size),
       chunkZ: Math.floor(-(camera.position.z + origin.z) / size) } : null;
     const window = this.job ?? this.sampleWindow;
-    if (window && (window.size !== size
+    const cameraMoved = this.admission && window && (
+      Boolean(cameraChunk) !== Boolean(window.cameraChunk)
+      || (cameraChunk && window.cameraChunk && chunkRingDistance(cameraChunk.chunkX, cameraChunk.chunkZ, window.cameraChunk) > this.settings.spatialChunkRadius / 2));
+    if (window && (window.size !== size || cameraMoved
       || chunkRingDistance(focus.chunkX, focus.chunkZ, window.focus) > this.settings.spatialChunkRadius / 2)) {
       if (this.job) PerfCounters.inc('regionalSpatialSamplesCancelled');
       this.job = null;
@@ -115,13 +118,19 @@ export class RegionalSceneryBudget {
     for (let i = 0; i < this.settings.spatialWorkItems && !shouldYield(); i++) {
       const step = this.job.iterator.next();
       if (!step.done) continue;
-      const result = evaluateSceneryDemand(step.value, this.pressured, this.settings, this.geometryCosts);
+      if (this.admission && !this.job.cells) {
+        this.job.cells = step.value;
+        this.job.iterator = iterateRegionalWindow(step.value, this.settings, this.decisions, this.job.focus, this.job.cameraChunk);
+        continue;
+      }
+      const cells = this.job.cells ?? step.value;
+      const result = evaluateSceneryDemand(cells, this.pressured, this.settings, this.geometryCosts);
       if (this.admission) {
-        const allocation = allocateRegionalWindow(step.value, this.settings, this.decisions, focus, cameraChunk);
+        const allocation = step.value;
         this.publish(new Set(allocation.decisions.keys()), allocation.decisions);
         for (const [key, value] of Object.entries(allocation.stats)) PerfCounters.set(`regionalAdmission.${key}`, value);
       } else this.publish(result.pressured);
-      PerfCounters.set('regionalSpatialSampledChunks', step.value.size);
+      PerfCounters.set('regionalSpatialSampledChunks', cells.size);
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
       PerfCounters.set('regionalSpatialPeakChunkUnits', result.maxUnits);
       for (const kind of Object.keys(this.settings.spatialWeights)) {
@@ -142,7 +151,7 @@ export class RegionalSceneryBudget {
         }
       }
       PerfCounters.inc('regionalSpatialSamples');
-      this.sampleWindow = { focus: this.job.focus, size: this.job.size };
+      this.sampleWindow = { focus: this.job.focus, size: this.job.size, cameraChunk: this.job.cameraChunk };
       this.job = null;
       this.nextSample = now + this.settings.sampleIntervalMs;
       break;
