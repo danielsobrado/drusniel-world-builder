@@ -6,8 +6,12 @@ export function writeTownInstanceRows(meshes, matrices, colours, placementAt, co
   for (const mesh of meshes) {
     for (const slot of dirty) {
       const index = placementAt[slot];
-      mesh.instanceMatrix.array.set(matrices.subarray(index * 16, index * 16 + 16), slot * 16);
-      mesh.instanceColor?.array.set(colours.subarray(index * 3, index * 3 + 3), slot * 3);
+      const target = slot * 16, source = index * 16;
+      for (let i = 0; i < 16; i++) mesh.instanceMatrix.array[target + i] = matrices[source + i];
+      if (mesh.instanceColor) {
+        const targetColor = slot * 3, sourceColor = index * 3;
+        for (let i = 0; i < 3; i++) mesh.instanceColor.array[targetColor + i] = colours[sourceColor + i];
+      }
     }
     mesh.count = count;
     PerfCounters.inc('townInstanceRowsCopied', dirty.length);

@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { CellResidency } from '../lod/CellResidency.js';
+import { InstanceDirtySpan, admitInstancePublication } from '../lod/InstanceDirtySpan.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { ICEBERG_CELL_METERS, ICEBERG_KINDS, icebergCandidate, icebergHasRoom } from './icebergField.js';
 import { createIcebergGeometry } from './icebergGeometry.js';
@@ -33,6 +34,7 @@ export class IcebergView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ICEBERG_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME });
     this.resolve = (cellX, cellZ) => this.resolveCell(cellX, cellZ);
     this.isSea = (x, z) => this.tileAt(x, z) === WATER_TILE;
@@ -82,10 +84,12 @@ export class IcebergView {
     }
   }
 
-  write() {
-    this.anchor.follow(this.floatingOrigin.getState());
+  write(publicationBudget = null) {
     const bergs = this.residency.values();
+    if (!admitInstancePublication(publicationBudget, ICEBERG_KINDS, CAPACITY, 16)) return false;
+    this.anchor.follow(this.floatingOrigin.getState());
     if (bergs.length) this.ensureMeshes();
+    const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix) }));
     for (const mesh of this.meshes) mesh.count = 0;
     for (const berg of bergs) {
       const mesh = this.meshes[berg.kind];
@@ -94,16 +98,19 @@ export class IcebergView {
       scratch.rotation.set(0, berg.yaw, 0);
       scratch.scale.setScalar(berg.scale);
       scratch.updateMatrix();
-      mesh.setMatrixAt(mesh.count, scratch.matrix);
+      const range = dirty[berg.kind];
+      range.matrix.matrix(mesh.count, scratch.matrix);
       mesh.count += 1;
     }
-    for (const mesh of this.meshes) mesh.instanceMatrix.needsUpdate = true;
+    for (const range of dirty) { range.matrix.publish(); }
+    return true;
   }
 
   /** @param {{ x: number, z: number }} cameraWorld canonical metres */
-  update(cameraWorld, shouldYield = () => false) {
+  update(cameraWorld, shouldYield = () => false, publicationBudget = null) {
     this.residency.refocus(cameraWorld.x, cameraWorld.z);
-    if (this.residency.step(this.resolve, shouldYield)) this.write();
+    if (this.residency.step(this.resolve, shouldYield)) this.publicationPending = true;
+    if (this.publicationPending && !shouldYield() && this.write(publicationBudget)) this.publicationPending = false;
     this.anchor.place(this.root, this.floatingOrigin.getState());
   }
 

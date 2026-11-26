@@ -2,7 +2,7 @@ function stats(values) {
   const sorted = values.slice().sort((a, b) => a - b);
   const at = fraction => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * fraction))] ?? null;
   return { samples: sorted.length, avgMs: sorted.length ? sorted.reduce((a, b) => a + b, 0) / sorted.length : null,
-    p50Ms: at(0.5), p95Ms: at(0.95), maxMs: sorted.at(-1) ?? null };
+    p50Ms: at(0.5), p95Ms: at(0.95), p99Ms: at(0.99), p999Ms: at(0.999), maxMs: sorted.at(-1) ?? null };
 }
 
 /** Optional sampled GPU pass queries. Readback never blocks the animation frame. */

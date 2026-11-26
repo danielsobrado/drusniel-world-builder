@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { CellResidency, CELL_PENDING } from '../lod/CellResidency.js';
+import { InstanceDirtySpan, admitInstancePublication } from '../lod/InstanceDirtySpan.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { createGlacierSeracGeometry, GLACIER_SERAC_KINDS } from './glacierSeracGeometry.js';
 import { createGlacierSeracMaterial } from './GlacierSeracMaterial.js';
@@ -40,6 +41,7 @@ export class GlacierSeracView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.publicationPending = false;
     this.residency = new CellResidency({
       cellMeters: SERAC_CELL_METERS,
       reachCells: REACH_CELLS,
@@ -127,10 +129,12 @@ export class GlacierSeracView {
     }
   }
 
-  write() {
-    this.anchor.follow(this.floatingOrigin.getState());
+  write(publicationBudget = null) {
     const seracs = this.residency.values().flat();
+    if (!admitInstancePublication(publicationBudget, GLACIER_SERAC_KINDS, CAPACITY, 17)) return false;
+    this.anchor.follow(this.floatingOrigin.getState());
     if (seracs.length) this.ensureMeshes();
+    const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), seed: new InstanceDirtySpan(mesh.geometry.attributes.instanceSeed) }));
     for (const mesh of this.meshes) mesh.count = 0;
     for (const item of seracs) {
       const mesh = this.meshes[item.kind];
@@ -140,19 +144,19 @@ export class GlacierSeracView {
       scratch.quaternion.setFromUnitVectors(UP, tiltNormal).multiply(spinQuat.setFromAxisAngle(UP, item.yaw));
       scratch.scale.set(item.scale, item.scale * item.stretch, item.scale);
       scratch.updateMatrix();
-      mesh.setMatrixAt(mesh.count, scratch.matrix);
-      mesh.geometry.attributes.instanceSeed.setX(mesh.count, item.seed);
+      const range = dirty[item.kind];
+      range.matrix.matrix(mesh.count, scratch.matrix);
+      range.seed.scalar(mesh.count, item.seed);
       mesh.count += 1;
     }
-    for (const mesh of this.meshes) {
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.geometry.attributes.instanceSeed.needsUpdate = true;
-    }
+    for (const range of dirty) { range.matrix.publish(); range.seed.publish(); }
+    return true;
   }
 
-  update(cameraWorld, shouldYield = () => false) {
+  update(cameraWorld, shouldYield = () => false, publicationBudget = null) {
     this.residency.refocus(cameraWorld.x, cameraWorld.z);
-    if (this.residency.step(this.resolve, shouldYield)) this.write();
+    if (this.residency.step(this.resolve, shouldYield)) this.publicationPending = true;
+    if (this.publicationPending && !shouldYield() && this.write(publicationBudget)) this.publicationPending = false;
     this.anchor.place(this.root, this.floatingOrigin.getState());
   }
 

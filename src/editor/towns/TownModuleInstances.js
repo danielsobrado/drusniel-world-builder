@@ -231,11 +231,33 @@ export class TownModuleInstances {
         if (++units % 64 === 0) yield;
       }
     } else {
-      const drawn = (slots) => [...slots.placementAt.subarray(0, slots.count)];
-      const toNear = [...next].filter(i => this.nearSlots.slotOf[i] < 0).sort((a, b) => a - b);
-      const leftNear = drawn(this.nearSlots).filter(i => !next.has(i)).sort((a, b) => a - b);
-      const leftFar = reached ? drawn(this.farSlots).filter(i => !wantsFar(i)).sort((a, b) => a - b) : toNear;
-      const toFar = reached ? [...reached].filter(i => wantsFar(i) && this.farSlots.slotOf[i] < 0).sort((a, b) => a - b) : leftNear;
+      const toNear = [], leftNear = [];
+      for (const i of next) {
+        if (this.nearSlots.slotOf[i] < 0) toNear.push(i);
+        if (++units % 64 === 0) yield;
+      }
+      for (let slot = 0; slot < this.nearSlots.count; slot++) {
+        const i = this.nearSlots.placementAt[slot];
+        if (!next.has(i)) leftNear.push(i);
+        if (++units % 64 === 0) yield;
+      }
+      const leftFar = reached ? [] : toNear;
+      const toFar = reached ? [] : leftNear;
+      if (reached) {
+        for (let slot = 0; slot < this.farSlots.count; slot++) {
+          const i = this.farSlots.placementAt[slot];
+          if (!wantsFar(i)) leftFar.push(i);
+          if (++units % 64 === 0) yield;
+        }
+        for (const i of reached) {
+          if (wantsFar(i) && this.farSlots.slotOf[i] < 0) toFar.push(i);
+          if (++units % 64 === 0) yield;
+        }
+        leftFar.sort((a, b) => a - b);
+        toFar.sort((a, b) => a - b);
+      }
+      toNear.sort((a, b) => a - b);
+      leftNear.sort((a, b) => a - b);
       for (const [slots, dirty, remove, add] of [[this.nearSlots, nearDirty, leftNear, toNear], [this.farSlots, farDirty, leftFar, toFar]]) {
         for (const i of remove) { slots.set(i, false, dirty); if (++units % 64 === 0) yield; }
         for (const i of add) { slots.set(i, true, dirty); if (++units % 64 === 0) yield; }

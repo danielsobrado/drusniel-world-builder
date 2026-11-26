@@ -21,8 +21,13 @@ export function hasPreparationBacklog(surface) {
       || surface.terrainView?.valleyFog?.patch?.job
       || surface.terrainView?.minimapPreparation?.minimapRequest) return true;
   const towns = surface.terrainView?.townRuntime?.streamer;
-  if (towns?.assets.ready && (towns.pending.size > 0 || towns.buildJob
-      || [...(towns.towns?.values() ?? [])].some(town => town.selectionJob))) return true;
+  if (towns?.assets.ready) {
+    if (towns.pending.size > 0 || towns.buildJob) return true;
+    for (const town of towns.towns?.values() ?? []) if (town.selectionJob) return true;
+  }
+  for (const view of [surface.alpineRockView, surface.glacierSeracView, surface.icebergView]) {
+    if (view?.publicationPending || view?.residency?.pending.length > 0) return true;
+  }
   return (surface.meadowGrass?.blades?.staleTiles?.length ?? 0)
     + (surface.meadowGrass?.cards?.staleTiles?.length ?? 0) > 0;
 }

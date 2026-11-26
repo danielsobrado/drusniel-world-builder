@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { CELL_PENDING, CellResidency } from '../lod/CellResidency.js';
-import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
+import { InstanceDirtySpan, admitInstancePublication } from '../lod/InstanceDirtySpan.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { createPathClearanceField } from '../TreeManifestStore.js';
 import { ALPINE_CELL_METERS, ALPINE_ROCK_KINDS, alpineRocksInCell } from './alpineRockField.js';
@@ -117,13 +117,11 @@ export class AlpineRockView {
   }
 
   write(publicationBudget = null) {
-    this.anchor.follow(this.floatingOrigin.getState());
     const rocks = this.residency.values().flat();
-    // Admit the worst-case changed span before mutating any live instance buffer.
-    const bytes = ALPINE_ROCK_KINDS * CAPACITY * 17 * Float32Array.BYTES_PER_ELEMENT;
-    if (publicationBudget && !publicationBudget.canPublish(bytes)) return false;
+    if (!admitInstancePublication(publicationBudget, ALPINE_ROCK_KINDS, CAPACITY, 17)) return false;
+    this.anchor.follow(this.floatingOrigin.getState());
     if (rocks.length) this.ensureMeshes();
-    const dirty = this.meshes.map(() => ({ matrixMin: Infinity, matrixMax: -1, snowMin: Infinity, snowMax: -1 }));
+    const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), snow: new InstanceDirtySpan(mesh.geometry.attributes.instanceSnow) }));
     for (const mesh of this.meshes) mesh.count = 0;
     for (const rock of rocks) {
       const mesh = this.meshes[rock.kind];
@@ -135,30 +133,11 @@ export class AlpineRockView {
       scratch.scale.set(rock.scale, rock.scale * rock.stretch, rock.scale);
       scratch.updateMatrix();
       const range = dirty[rock.kind];
-      const offset = mesh.count * 16;
-      const matrix = mesh.instanceMatrix.array;
-      let changed = false;
-      for (let i = 0; i < 16; i++) {
-        if (matrix[offset + i] !== Math.fround(scratch.matrix.elements[i])) { changed = true; break; }
-      }
-      if (changed) {
-        mesh.setMatrixAt(mesh.count, scratch.matrix);
-        range.matrixMin = Math.min(range.matrixMin, mesh.count);
-        range.matrixMax = Math.max(range.matrixMax, mesh.count);
-      }
-      const snow = mesh.geometry.attributes.instanceSnow;
-      if (snow.getX(mesh.count) !== Math.fround(rock.snow)) {
-        snow.setX(mesh.count, rock.snow);
-        range.snowMin = Math.min(range.snowMin, mesh.count);
-        range.snowMax = Math.max(range.snowMax, mesh.count);
-      }
+      range.matrix.matrix(mesh.count, scratch.matrix);
+      range.snow.scalar(mesh.count, rock.snow);
       mesh.count += 1;
     }
-    for (let i = 0; i < this.meshes.length; i++) {
-      const mesh = this.meshes[i], range = dirty[i];
-      markAttributeSubrangeUpdated(mesh.instanceMatrix, range.matrixMin, range.matrixMax);
-      markAttributeSubrangeUpdated(mesh.geometry.attributes.instanceSnow, range.snowMin, range.snowMax);
-    }
+    for (const range of dirty) { range.matrix.publish(); range.snow.publish(); }
     return true;
   }
 
