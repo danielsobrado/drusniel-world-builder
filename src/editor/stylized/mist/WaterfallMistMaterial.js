@@ -80,7 +80,6 @@ export function createWaterfallMistMaterial({ puffs, time, intensity, light, alp
     forceSinglePass: true,
   });
   material.name = 'Waterfall mist';
-  material.alphaTest = alphaCutoff;
   material.fog = true;
   material.positionNode = center
     .add(right.mul(screen.x.mul(size)))
@@ -97,6 +96,8 @@ export function createWaterfallMistMaterial({ puffs, time, intensity, light, alp
   const soft = smoothstep(0, SOFT_HEIGHT, positionWorld.y.sub(waterLevel));
   const near = smoothstep(NEAR_COLLAPSE * 1.6, NEAR_FADE, cameraPosition.distance(positionWorld));
   material.opacityNode = density.mul(shape.w).mul(life).mul(soft).mul(near).mul(intensity);
+  // NodeMaterial evaluates its mask before colour and lighting work.
+  if (alphaCutoff > 0) material.maskNode = material.opacityNode.greaterThan(alphaCutoff);
 
   // The quad turns on screen, so its corner turns with it to give the sphere
   // normal in view space.
