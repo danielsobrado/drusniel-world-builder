@@ -1,3 +1,4 @@
+import { particlePrefix } from '../performance/EnvironmentalParticleBudget.js';
 import * as THREE from "three";
 import { createSandstormHazeNodeMaterial, createSandstormNodeMaterial } from "./rainNodeMaterial.js";
 import {
@@ -65,9 +66,10 @@ class SandstormWeatherSystem {
   get intensity() {
     return this.group.visible ? this.settings.intensity : 0;
   }
-  update(deltaSeconds, elapsedSeconds, cameraPosition) {
+  update(deltaSeconds, elapsedSeconds, cameraPosition, particles = null) {
     void elapsedSeconds;
     if (!this.group.visible) return;
+    if (particles) this.sandMesh.geometry.instanceCount = particlePrefix(SANDSTORM_PARTICLE_COUNT, particles.request('dust', SANDSTORM_PARTICLE_COUNT));
     // Along the prevailing world wind, not the local field: every puff's place
     // hangs on the direction, and the field's curl would swing the whole cloud.
     const prevailing = worldWindUniforms.prevailing.value;
@@ -88,7 +90,7 @@ class SandstormWeatherSystem {
     });
   }
   getStats() {
-    return { particles: this.group.visible ? SANDSTORM_PARTICLE_COUNT : 0, haze: this.group.visible };
+    return { particles: this.group.visible ? this.sandMesh.geometry.instanceCount : 0, haze: this.group.visible };
   }
   dispose() {
     this.group.removeFromParent();
