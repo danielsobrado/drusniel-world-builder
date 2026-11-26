@@ -36,8 +36,8 @@ townDecorationAdmission: false
 environmentalParticleAdmission: false
 atmosphericPassAdmission: false
 atmosphericPassBudget:
-  targetFrameMs: 16.7
-  recoveryFrameMs: 13
+  targetFrameMs: 18
+  recoveryFrameMs: 17
   pressureMs: 300
   recoveryMs: 2000
   minimumDwellMs: 3000
@@ -50,6 +50,7 @@ atmosphericPassBudget:
   volumetricMinimumSteps: 16
   aoResolutionFactor: 0.75
   aoMinimumResolution: 0.25
+  reduceBloomFilter: true
 environmentalFragmentAdmission: false
 coastalSprayCompaction: false
 environmentalFragmentBudget:
