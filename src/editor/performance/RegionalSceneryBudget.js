@@ -1,3 +1,4 @@
+import { iterateRendererAdmission, finalizeRendererAdmission, rendererPublicationState } from './RendererAdmission.js';
 import { iterateRegionalWindow, regionalCardEligible } from './RegionalAdmission.js';
 import { RegionalRenderCostModel, addRenderCost, effectiveRenderCost, emptyRenderCost } from './RegionalRenderCost.js';
 import { PerfCounters } from './qa/PerfCounters.js';
@@ -71,10 +72,11 @@ function sameDecisions(a, b) {
 
 /** Sample in bounded slices, publish only a complete demand estimate. */
 export class RegionalSceneryBudget {
-  constructor(settings, { geometryCosts = false, admission = false } = {}) {
+  constructor(settings, { geometryCosts = false, admission = false, rendererAdmission = false } = {}) {
     this.settings = settings;
-    this.geometryCosts = geometryCosts || admission;
-    this.admission = admission;
+    this.geometryCosts = geometryCosts || admission || rendererAdmission;
+    this.admission = admission || rendererAdmission;
+    this.rendererAdmission = rendererAdmission;
     this.decisions = new Map();
     this.costModel = null;
     this.townCache = new WeakMap();
@@ -110,7 +112,8 @@ export class RegionalSceneryBudget {
         this.costModel ??= new RegionalRenderCostModel(surface);
         this.costModel.refreshPasses();
       }
-      const admissionContext = this.admission ? { cameraChunk, handoffEnd: surface.meadowGrass?.uniforms?.cardFadeIn?.value?.y } : null;
+      const admissionContext = this.admission ? { cameraChunk, handoffEnd: surface.meadowGrass?.uniforms?.cardFadeIn?.value?.y,
+        rendererAdmission: this.rendererAdmission } : null;
       this.job = { focus: anchor, size, cameraChunk,
         iterator: collectRegionalSceneryDemand(surface, anchor, size, this.settings, this.townCache, this.costModel, admissionContext) };
     }
@@ -120,15 +123,18 @@ export class RegionalSceneryBudget {
       if (!step.done) continue;
       if (this.admission && !this.job.cells) {
         this.job.cells = step.value;
-        this.job.iterator = iterateRegionalWindow(step.value, this.settings, this.decisions, this.job.focus, this.job.cameraChunk);
+        const allocate = this.rendererAdmission ? iterateRendererAdmission : iterateRegionalWindow;
+        this.job.iterator = allocate(step.value, this.settings, this.decisions, this.job.focus, this.job.cameraChunk);
         continue;
       }
       const cells = this.job.cells ?? step.value;
       const result = evaluateSceneryDemand(cells, this.pressured, this.settings, this.geometryCosts);
       if (this.admission) {
-        const allocation = step.value;
+        const allocation = this.rendererAdmission
+          ? finalizeRendererAdmission(step.value, this.settings, rendererPublicationState(surface, this.settings)) : step.value;
         this.publish(new Set(allocation.decisions.keys()), allocation.decisions);
-        for (const [key, value] of Object.entries(allocation.stats)) PerfCounters.set(`regionalAdmission.${key}`, value);
+        const prefix = this.rendererAdmission ? 'rendererAdmission' : 'regionalAdmission';
+        for (const [key, value] of Object.entries(allocation.stats)) PerfCounters.set(`${prefix}.${key}`, value);
       } else this.publish(result.pressured);
       PerfCounters.set('regionalSpatialSampledChunks', cells.size);
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
