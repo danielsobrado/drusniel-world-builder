@@ -77,6 +77,7 @@ export class RegionalSceneryBudget {
     this.captureDiagnostics = captureDiagnostics || observeOnly;
     this.observeOnly = observeOnly;
     this.diagnosticSample = null;
+    this.diagnosticPaused = false;
     this.geometryCosts = geometryCosts || admission || rendererAdmission;
     this.admission = admission || rendererAdmission;
     this.rendererAdmission = rendererAdmission;
@@ -90,7 +91,17 @@ export class RegionalSceneryBudget {
     this.sampleWindow = null;
   }
 
+  setDiagnosticPaused(paused) {
+    if (!this.observeOnly || this.diagnosticPaused === paused) return;
+    this.diagnosticPaused = paused;
+    this.job = null;
+    this.sampleWindow = null;
+    this.diagnosticSample = null;
+    this.nextSample = 0;
+  }
+
   update(surface, now, shouldYield = () => false, camera = null) {
+    if (this.diagnosticPaused) return;
     const focus = surface.terrainView.focusChunk;
     const size = surface.terrainView.chunkWorldSize;
     if (!focus || !(size > 0)) return;
@@ -118,7 +129,7 @@ export class RegionalSceneryBudget {
       }
       const admissionContext = this.admission ? { cameraChunk, handoffEnd: surface.meadowGrass?.uniforms?.cardFadeIn?.value?.y,
         rendererAdmission: this.rendererAdmission } : null;
-      this.job = { focus: anchor, size, cameraChunk,
+      this.job = { focus: anchor, size, cameraChunk, startedAt: now,
         iterator: collectRegionalSceneryDemand(surface, anchor, size, this.settings, this.townCache, this.costModel, admissionContext) };
     }
     if (!this.job) return;
@@ -143,7 +154,7 @@ export class RegionalSceneryBudget {
         for (const [key, value] of Object.entries(allocation.stats)) PerfCounters.set(`${prefix}.${key}`, value);
       } else if (!this.observeOnly) this.publish(result.pressured);
       if (this.captureDiagnostics) {
-        this.diagnosticSample = { cells, timestamp: now, focus: this.job.focus, cameraChunk: this.job.cameraChunk,
+        this.diagnosticSample = { cells, timestamp: now, startedAt: this.job.startedAt, focus: this.job.focus, cameraChunk: this.job.cameraChunk,
           size, geometryCosts: this.geometryCosts, admission: this.admission, rendererAdmission: this.rendererAdmission,
           observeOnly: this.observeOnly, pressured: this.pressured, localPressure: result.pressured,
           decisions: this.decisions, allocationStats, settings: this.settings };
