@@ -374,7 +374,9 @@ export class StylizedRockView {
     const planKey = `${focus.chunkX}:${focus.chunkZ}:${this.revisionTracker.revision}:${viewportHeight}:${
       camera.fov}:${camera.zoom}:${this.prototypeRevision}`;
     const regionalLodFactor = this.regionalLodFactor ?? 1;
-    const plan = cachedLodPlan(this, `${planKey}:regional:${regionalLodFactor}`, timestamp, settings.transitionMs / 8, () => settings.enabled
+    const regionalSpatialBudget = this.regionalSpatialBudget ?? null;
+    const spatialRevision = regionalSpatialBudget?.revision ?? 0;
+    const plan = cachedLodPlan(this, `${planKey}:regional:${regionalLodFactor}:${spatialRevision}`, timestamp, settings.transitionMs / 8, () => settings.enabled
       ? buildChunkLodPlan({
         focus,
         radius: renderRadius + 1,
@@ -385,6 +387,7 @@ export class StylizedRockView {
         objectHeight: this.prototypeHeight,
         thresholds: settings.thresholds,
         regionalLodFactor,
+        regionalSpatialBudget,
         protectedChunkRadius: this.config.enhancements?.regionalBudget?.protectedChunkRadius,
         radii: {
           meshRadius: settings.meshRadius,
