@@ -14,6 +14,7 @@ import { PostProcessingResources } from './PostProcessingResources.js';
 import { createPostProcessingWarmupVariants } from './PostProcessingWarmup.js';
 import { isPostProcessingEnabled } from './nodes/PostCommon.js';
 import { AtmosphericPassAdmission } from './AtmosphericPassAdmission.js';
+import { readGpuFeedback, hasGpuFeedback } from '../../editor/performance/gpu/GpuPassFeedback.js';
 
 const MAX_TEMPORAL_FRAME_GAP_MS = 250;
 
@@ -233,14 +234,16 @@ export class PostProcessingController {
     try {
       this.ensureGraph(camera);
       frameStarted = true;
-      const before = this.atmosphericAdmission?.reduced;
-      const atmosphere = this.atmosphericAdmission?.update(timestampMs, this.settings.diagnostics?.enabled === true && this.settings.diagnostics.debugView !== 'final') ?? null;
-      if (before !== this.atmosphericAdmission?.reduced) this.invalidation.invalidate(POST_PROCESSING_RESET_REASONS.RENDER_PATH_CHANGED);
+      const before = this.atmosphericAdmission?.qualityKey;
+      const bypass = this.settings.diagnostics?.enabled === true && this.settings.diagnostics.debugView !== 'final';
+      const measured = readGpuFeedback(this.renderer, 'world', timestampMs, bypass);
+      const atmosphere = this.atmosphericAdmission?.update(timestampMs, bypass, measured) ?? null;
+      if (before !== this.atmosphericAdmission?.qualityKey) this.invalidation.invalidate(POST_PROCESSING_RESET_REASONS.RENDER_PATH_CHANGED);
       this.updateFrame(camera, this.graph, this.settings, timestampMs, atmosphere);
       this.graph.render();
       rendered = true;
       this.diagnostics.frameRendered();
-      if (this.settings.diagnostics?.showGpuTimings) {
+      if (this.settings.diagnostics?.showGpuTimings && !hasGpuFeedback(this.renderer)) {
         this.diagnostics.requestGpuTimings(this.renderer, this.graph.gpuPasses);
       }
       return true;
