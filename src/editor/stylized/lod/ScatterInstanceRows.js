@@ -1,5 +1,6 @@
 import { InstanceLodRows } from './InstanceLodRows.js';
-import { writeInstances } from './StylizedLodRuntime.js';
+import { iterateInstanceWrites, writeInstances } from './StylizedLodRuntime.js';
+import { InstancePublicationPlan } from './InstancePublicationPlan.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 
 const RETIRED = Object.freeze([]);
@@ -135,6 +136,43 @@ export class ScatterInstanceRows {
     const proxyCount = writeInstances(proxyRenderers, proxy, anchor, rebased || forceFull ? null : proxyRows);
     this.chunks = job.chunks;
     return { near: nearCount, proxy: proxyCount, manifestsChanged: job.manifestsChanged };
+  }
+
+  /** Assemble replacement storage and attribute rows without changing published data. */
+  *prepareCommit(job, nearRenderers, proxyRenderers, anchor, forceFull = false) {
+    const rebased = anchor.x !== this.anchorX || anchor.z !== this.anchorZ;
+    const nextStorage = this.storage.slice();
+    const near = [], proxy = [], nearRows = [], proxyRows = [];
+    let changedRows = 0;
+    for (let prototype = 0; prototype < nearRenderers.length; prototype++) {
+      const changes = job.changes[prototype];
+      const old = this.storage[prototype];
+      const storage = !old ? new InstanceLodRows(['near', 'proxy']) : changes?.size ? yield* old.fork() : old;
+      nextStorage[prototype] = storage;
+      const plan = changes?.size ? yield* storage.iteratePatch(changes, 0)
+        : storage.plan(0, { ...storage.versions }, { near: [], proxy: [] });
+      near.push(plan.buckets.near);
+      proxy.push(plan.buckets.proxy);
+      nearRows.push(plan.changedRows.near);
+      proxyRows.push(plan.changedRows.proxy);
+      changedRows += plan.changedRows.near.length + plan.changedRows.proxy.length;
+      yield;
+    }
+    const publication = new InstancePublicationPlan();
+    const nearCount = yield* iterateInstanceWrites(nearRenderers, near, anchor, rebased || forceFull ? null : nearRows, publication);
+    const proxyCount = yield* iterateInstanceWrites(proxyRenderers, proxy, anchor, rebased || forceFull ? null : proxyRows, publication);
+    return {
+      bytes: () => publication.bytes(),
+      commit: () => {
+        publication.commit();
+        this.anchorX = anchor.x;
+        this.anchorZ = anchor.z;
+        this.storage = nextStorage;
+        this.chunks = job.chunks;
+        PerfCounters.inc(`${this.name}RowsChanged`, changedRows);
+        return { near: nearCount, proxy: proxyCount, manifestsChanged: job.manifestsChanged };
+      },
+    };
   }
 
   /** Every staged placement, in stage order. */
