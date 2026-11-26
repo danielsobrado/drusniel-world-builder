@@ -317,13 +317,15 @@ export class OrganicMeshBuilder {
       }
     }
     const north = this.vertex(center[0], center[1] + radiusY, center[2], colorTop ?? colorBase, 0.5, 1);
+    // Caps wind outward like the side grid: a FrontSide material (deadwood stumps)
+    // otherwise culls the top and shows the bottom cap's inside as a black disc.
     for (let s = 0; s < sides; s += 1) {
-      this.tri(south, start + 1 + ((s + 1) % sides), start + 1 + s);
+      this.tri(south, start + 1 + s, start + 1 + ((s + 1) % sides));
     }
     this.connectGrid(start + 1, rings - 1, sides, true);
     const lastRow = start + 1 + (rings - 2) * sides;
     for (let s = 0; s < sides; s += 1) {
-      this.tri(north, lastRow + s, lastRow + ((s + 1) % sides));
+      this.tri(north, lastRow + ((s + 1) % sides), lastRow + s);
     }
   }
 
