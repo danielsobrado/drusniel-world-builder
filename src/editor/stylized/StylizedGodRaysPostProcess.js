@@ -19,6 +19,7 @@ import { setPipelineOutput } from './pipelineOutput.js';
 import { createFinishUniforms } from './cinematicFinish.js';
 import { GodsEndLightShafts } from './GodsEndLightShafts.js';
 import { createContactOcclusion } from './GodRaysContactOcclusion.js';
+import { AtmosphericPassAdmission, reducedSampleCount } from '../../render/postprocessing/AtmosphericPassAdmission.js';
 export {
   advectedDustDensityReference,
   dustModulationReference,
@@ -148,10 +149,13 @@ export class StylizedGodRaysPostProcess {
     sunDirection,
     sunColor,
     finish = null,
+    atmosphericBudget = null,
   }) {
     this.renderer = renderer;
     this.scene = scene;
     this.config = config ?? {};
+    this.atmosphericAdmission = atmosphericBudget ? new AtmosphericPassAdmission(atmosphericBudget, 'godRays') : null;
+    this.activeScreenSamples = this.atmosphericAdmission ? uniform(this.config.samples ?? 16, 'int') : null;
     // The donor's grade and bloom on the walking frame (cinematicFinish.js).
     this.finish = finish?.enabled ? finish : null;
     this.finishUniforms = this.finish ? createFinishUniforms(this.finish) : null;
@@ -280,6 +284,7 @@ export class StylizedGodRaysPostProcess {
       weight: this.weight,
       exposure: this.exposure,
       samples: this.config.samples ?? 16,
+      activeSamples: this.activeScreenSamples,
       dustStrength: this.dustStrength,
       dustScale: this.dustScale,
       dustSpeed: this.dustSpeed,
@@ -422,14 +427,29 @@ export class StylizedGodRaysPostProcess {
     if (!this.shouldRender(camera)) return false;
     this.ensurePipeline(camera);
     this.updateUniforms(camera);
+    this.applyAtmosphericBudget(this.atmosphericAdmission?.update(performance.now()) ?? null);
     this.pipeline.render();
     return true;
+  }
+
+  applyAtmosphericBudget(atmosphere) {
+    if (!this.atmosphericAdmission) return;
+    const samples = this.config.samples ?? 16;
+    this.activeScreenSamples.value = atmosphere ? reducedSampleCount(samples, atmosphere.shaftSampleFactor, atmosphere.shaftMinimumSamples) : samples;
+    if (this.volumetricRays) {
+      const steps = this.config.volumetric.raymarchSteps ?? 40;
+      this.volumetricRays.raymarchSteps.value = atmosphere ? reducedSampleCount(steps, atmosphere.volumetricStepFactor, atmosphere.volumetricMinimumSteps) : steps;
+    }
+    const contact = this.config.volumetric.contactOcclusion;
+    this.cinematicOcclusion?.applyAtmosphericBudget(contact, atmosphere);
+    this.volumetricOcclusion?.applyAtmosphericBudget(contact, atmosphere);
   }
 
   prewarm(camera) {
     if (!this.shouldRender(camera)) return false;
     this.ensurePipeline(camera);
     this.updateUniforms(camera);
+    this.applyAtmosphericBudget(null);
     this.pipeline.render();
     return true;
   }
