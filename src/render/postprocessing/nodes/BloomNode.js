@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import {
   Fn,
+  If,
   clamp,
   float,
   max,
@@ -31,6 +32,9 @@ const LOW_PASS_TAPS = Object.freeze([
   Object.freeze([-1, 1, 0.125]),
   Object.freeze([1, 1, 0.125]),
 ]);
+
+// Five taps retain a symmetric normalized filter for constrained frames.
+const REDUCED_LOW_PASS_TAPS = Object.freeze([[0, 0, 4], [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1]]);
 
 const TENT_TAPS = Object.freeze([
   Object.freeze([-1, -1, 1]),
@@ -69,12 +73,12 @@ function karisWeight(colour) {
   return float(1).div(float(1).add(luminance));
 }
 
-function sampleLowPass13(textureNode, resolutionNode, useKaris, exposureNode = null) {
+function sampleLowPass(textureNode, resolutionNode, useKaris, exposureNode = null, taps = LOW_PASS_TAPS) {
   const texel = vec2(1).div(resolutionNode);
   const colourSum = vec3(0).toVar();
   const weightSum = float(0).toVar();
 
-  for (const [x, y, kernelWeight] of LOW_PASS_TAPS) {
+  for (const [x, y, kernelWeight] of taps) {
     const sampledColour = textureNode
       .sample(screenUV.add(texel.mul(vec2(x, y))))
       .rgb
@@ -90,6 +94,17 @@ function sampleLowPass13(textureNode, resolutionNode, useKaris, exposureNode = n
   }
 
   return colourSum.div(max(weightSum, EPSILON));
+}
+
+function sampleAdaptiveLowPass(textureNode, resolutionNode, useKaris, exposureNode, reduced) {
+  if (!reduced) return sampleLowPass(textureNode, resolutionNode, useKaris, exposureNode);
+  const filtered = vec3(0).toVar();
+  If(reduced.greaterThan(0), () => {
+    filtered.assign(sampleLowPass(textureNode, resolutionNode, useKaris, exposureNode, REDUCED_LOW_PASS_TAPS));
+  }).Else(() => {
+    filtered.assign(sampleLowPass(textureNode, resolutionNode, useKaris, exposureNode));
+  });
+  return filtered;
 }
 
 function sampleTent9(textureNode, resolutionNode) {
@@ -126,10 +141,12 @@ export class BloomNode {
     materialNode,
     settings,
     exposure = 1,
+    adaptiveAtmosphere = false,
   }) {
     this.settings = settings;
     this.disposed = false;
     this.levelCount = clampBloomLevels(settings.levels);
+    this.reducedFilter = adaptiveAtmosphere ? uniform(0) : null;
     this.exposure = uniform(exposure);
     this.threshold = uniform(settings.threshold);
     this.knee = uniform(settings.knee);
@@ -142,11 +159,12 @@ export class BloomNode {
     this.targets = [];
 
     const prefiltered = Fn(() => {
-      const exposedLowPass = sampleLowPass13(
+      const exposedLowPass = sampleAdaptiveLowPass(
         sourceNode,
         this.sourceResolution,
         true,
         this.exposure,
+        this.reducedFilter,
       );
       const brightness = max(
         exposedLowPass.r,
@@ -177,7 +195,7 @@ export class BloomNode {
     for (let level = 1; level < this.levelCount; level += 1) {
       const source = this.targets[level - 1];
       const downsampled = Fn(() => vec4(
-        sampleLowPass13(source, this.levelResolutions[level - 1], false),
+        sampleAdaptiveLowPass(source, this.levelResolutions[level - 1], false, null, this.reducedFilter),
         1,
       ))();
       this.targets.push(createHdrTarget(downsampled));
@@ -201,7 +219,8 @@ export class BloomNode {
     this.outputNode = combined;
   }
 
-  updateUniforms(settings, exposure = 1) {
+  updateUniforms(settings, exposure = 1, atmosphere = null) {
+    if (this.reducedFilter) this.reducedFilter.value = Number(Boolean(atmosphere?.reduceBloomFilter));
     this.settings = settings;
     this.exposure.value = exposure;
     this.threshold.value = settings.threshold;
