@@ -64,7 +64,7 @@ export function spatialWindow(sample, radius, layer, metric) {
 }
 
 export function spatialExport(sample) {
-  return { version: 1, timestampMs: sample.timestamp, focus: sample.focus, cameraChunk: sample.cameraChunk,
+  return { version: 1, timestampMs: sample.timestamp, startedAtMs: sample.startedAt ?? sample.timestamp, focus: sample.focus, cameraChunk: sample.cameraChunk,
     chunkWorldSize: sample.size, observeOnly: sample.observeOnly, geometryCosts: sample.geometryCosts,
     admission: sample.admission, rendererAdmission: sample.rendererAdmission, settings: sample.settings,
     allocationStats: sample.allocationStats, cells: [...sample.cells.keys()].map(key => {
