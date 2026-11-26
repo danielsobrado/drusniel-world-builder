@@ -428,9 +428,12 @@ export class StylizedSurfaceView {
       this.reflectionReservation?.cancel();
       this.reflectionReservation = null;
       const captureTurn = this.reflections?.captureSchedule.nextFrame() ?? false;
+      const gpuBusy = this.reflections?.gpuPressure?.busy === true;
+      if (prepared && captureTurn && gpuBusy) PerfCounters.inc('reflectionGpuDeferredFrames');
       if (
         prepared
         && captureTurn
+        && !gpuBusy
         && now >= this.reflections.nextCapture
         && this.reserveDeferredWork
       ) {
@@ -445,6 +448,7 @@ export class StylizedSurfaceView {
       this.reflectionBudgetReserved = Boolean(
         prepared
         && !this.reserveDeferredWork
+        && !gpuBusy
         && !this.shouldYieldWork?.()
       );
     };

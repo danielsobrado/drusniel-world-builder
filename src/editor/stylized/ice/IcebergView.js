@@ -35,7 +35,7 @@ export class IcebergView {
     this.anchor = new InstanceAnchor();
     this.meshes = [];
     this.publicationPending = false;
-    this.residency = new CellResidency({ cellMeters: ICEBERG_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME });
+    this.residency = new CellResidency({ cellMeters: ICEBERG_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
     this.resolve = (cellX, cellZ) => this.resolveCell(cellX, cellZ);
     this.isSea = (x, z) => this.tileAt(x, z) === WATER_TILE;
   }
@@ -77,7 +77,7 @@ export class IcebergView {
     for (let kind = 0; kind < ICEBERG_KINDS; kind += 1) {
       const mesh = new THREE.InstancedMesh(createIcebergGeometry(kind), material, CAPACITY);
       mesh.count = 0;
-      mesh.frustumCulled = false;
+      mesh.frustumCulled = true;
       this.root.add(mesh);
       this.meshes.push(mesh);
       this.getDrawPreparation()?.register(mesh);
@@ -103,6 +103,7 @@ export class IcebergView {
       mesh.count += 1;
     }
     for (const range of dirty) { range.matrix.publish(); }
+    for (const mesh of this.meshes) mesh.computeBoundingSphere();
     return true;
   }
 

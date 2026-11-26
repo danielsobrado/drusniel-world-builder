@@ -21,10 +21,12 @@ export function sceneryPreparationStatus(surface) {
   const ambientGround = Boolean(ambience?.system.ground?.job || ambience?.preparing);
   const valleyGround = Boolean(surface.terrainView.valleyFog?.patch?.job);
   const minimap = Boolean(surface.terrainView.minimapPreparation?.minimapRequest);
-  return { ready: queueDepth+fields+meadow+draws+variants+staged.length+waterObstacles === 0 && errors.length === 0
+  const geology = [surface.alpineRockView, surface.glacierSeracView, surface.icebergView]
+    .reduce((sum, view) => sum + (view?.residency?.pending?.length ?? 0) + Number(Boolean(view?.publicationPending)), 0);
+  return { ready: queueDepth+fields+meadow+draws+variants+staged.length+waterObstacles+geology === 0 && errors.length === 0
       && settlements.ready && towns.ready && objects === 0 && farTerrain.ready && !ambientGround && !valleyGround && !minimap,
     settlements, towns, objects, farTerrain, ambientGround, valleyGround, minimap,
-    queueDepth, fields, meadow, draws, variants, waterObstacles, staged: staged.length, queues, errors,
+    queueDepth, fields, meadow, draws, variants, waterObstacles, geology, staged: staged.length, queues, errors,
     blockedJobs: staged.filter(view => view.blockedDependency).map(view => ({
       key: (view.pendingRebuild ?? view.pendingLodRebuild ?? view.stagedRebuild?.job)?.key,
       focus: view.stagedRebuild?.job.focus, revision: view.stagedRebuild?.revision,

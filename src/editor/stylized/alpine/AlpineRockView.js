@@ -50,7 +50,7 @@ export class AlpineRockView {
     this.anchor = new InstanceAnchor();
     this.meshes = [];
     this.publicationPending = false;
-    this.residency = new CellResidency({ cellMeters: ALPINE_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME });
+    this.residency = new CellResidency({ cellMeters: ALPINE_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
     this.ground = (x, z) => this.groundAt(x, z);
     this.resolve = (cellX, cellZ) => this.resolveCell(cellX, cellZ);
   }
@@ -107,7 +107,7 @@ export class AlpineRockView {
       geometry.setAttribute('instanceSnow', new THREE.InstancedBufferAttribute(new Float32Array(CAPACITY), 1));
       const mesh = new THREE.InstancedMesh(geometry, material, CAPACITY);
       mesh.count = 0;
-      mesh.frustumCulled = false;
+      mesh.frustumCulled = true;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       this.root.add(mesh);
@@ -138,6 +138,7 @@ export class AlpineRockView {
       mesh.count += 1;
     }
     for (const range of dirty) { range.matrix.publish(); range.snow.publish(); }
+    for (const mesh of this.meshes) mesh.computeBoundingSphere();
     return true;
   }
 

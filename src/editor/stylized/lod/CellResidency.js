@@ -6,8 +6,8 @@
 export const CELL_PENDING = Symbol('cell-pending');
 
 export class CellResidency {
-  constructor({ cellMeters, reachCells, cellsPerFrame }) {
-    Object.assign(this, { cellMeters, reachCells, cellsPerFrame });
+  constructor({ cellMeters, reachCells, cellsPerFrame, progressive = false }) {
+    Object.assign(this, { cellMeters, reachCells, cellsPerFrame, progressive });
     this.cells = new Map();
     this.pending = [];
     this.focusKey = null;
@@ -55,7 +55,7 @@ export class CellResidency {
     }
     // Blocked cells go behind untried cells, including when all cells are blocked.
     if (deferred.length) this.pending.unshift(...deferred);
-    if (!this.dirty || this.pending.length) return false;
+    if (!this.dirty || (!this.progressive && this.pending.length)) return false;
     this.dirty = false;
     return true;
   }

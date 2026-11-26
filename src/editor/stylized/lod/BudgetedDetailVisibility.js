@@ -1,4 +1,4 @@
-import { Sphere } from 'three/webgpu';
+import { Frustum, Matrix4, Sphere } from 'three/webgpu';
 import { TurnEnvelopeFrustum } from '../../../render/visibility/TurnEnvelopeFrustum.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { writeInstances } from './StylizedLodRuntime.js';
@@ -52,6 +52,9 @@ export class BudgetedDetailVisibility {
     this.scratchSphere = new Sphere();
     this.turnEnvelope = new TurnEnvelopeFrustum();
     this.frustum = this.turnEnvelope.frustum;
+    this.auxiliaryFrustum = new Frustum();
+    this.auxiliaryProjection = new Matrix4();
+    this.auxiliarySphere = new Sphere();
   }
 
   reset(instances) {
@@ -76,6 +79,10 @@ export class BudgetedDetailVisibility {
         full.instanceMatrix = mesh.instanceMatrix.clone();
         full.geometry = mesh.geometry.clone();
         full.visible = false;
+        // Bounds are calculated once over the full-resident clone, not main-camera rows.
+        full.computeBoundingSphere();
+        full.boundingSphere.radius += 2.75;
+        full.frustumCulled = true;
         full.name = `${mesh.name}-auxiliary`;
         this.view.root.add(full);
         this.fullMeshes.push(full);
@@ -147,6 +154,22 @@ export class BudgetedDetailVisibility {
     const states = [...this.view.meshes.flat(), ...this.fullMeshes].map(mesh => [mesh, mesh.visible]);
     this.showFull(true, false);
     try { return operation(); } finally { for (const [mesh, visible] of states) mesh.visible = visible; }
+  }
+
+  withAuxiliaryCamera(camera, operation) {
+    camera.updateMatrixWorld();
+    this.auxiliaryProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    this.auxiliaryFrustum.setFromProjectionMatrix(this.auxiliaryProjection, camera.coordinateSystem, camera.reversedDepth);
+    return this.withFull(() => {
+      for (const mesh of this.fullMeshes) {
+        mesh.updateWorldMatrix(true, false);
+        if (mesh.boundingSphere) {
+          this.auxiliarySphere.copy(mesh.boundingSphere).applyMatrix4(mesh.matrixWorld);
+          mesh.visible = mesh.count > 0 && this.auxiliaryFrustum.intersectsSphere(this.auxiliarySphere);
+        }
+      }
+      return operation();
+    });
   }
 
   disposeMeshes() { for (const mesh of this.fullMeshes) { mesh.removeFromParent(); mesh.geometry.dispose(); mesh.dispose(); } this.fullMeshes.length = 0; }

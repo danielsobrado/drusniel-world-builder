@@ -4,6 +4,7 @@ import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { withReflectionCapture } from './ReflectionCapture.js';
 import { acquireReflectionShadowRegistry } from './ReflectionShadowRegistry.js';
 import { ReflectionCaptureSchedule } from './ReflectionCaptureSchedule.js';
+import { ReflectionGpuPressure } from './ReflectionGpuPressure.js';
 import { WaterReflectionResidency, nearestWaterSlots } from './WaterReflectionResidency.js';
 import { preparePlanarCamera } from './PlanarCamera.js';
 import { PlanarReprojection } from './PlanarReprojection.js';
@@ -56,6 +57,7 @@ export class WaterReflectionController {
     this.originScratch = { x: 0, z: 0 };
     this.lastCaptureCpuMs = 0;
     this.captureSchedule = new ReflectionCaptureSchedule(config);
+    this.gpuPressure = new ReflectionGpuPressure(terrainView.renderer);
   }
 
   get captureBudgetMs() { return this.captureSchedule.budgetMs(this.planarPending ? 'planar' : 'cube'); }
@@ -228,6 +230,7 @@ export class WaterReflectionController {
       }, this.captureScratch);
     } finally {
       this.capturing = false;
+      if (budgetReserved) this.gpuPressure.submitted();
       this.lastCaptureCpuMs = performance.now() - started;
       this.captureSchedule.record(captureKind, this.lastCaptureCpuMs);
       PerfCounters.inc('waterReflectionCpuMs', this.lastCaptureCpuMs);
@@ -281,7 +284,7 @@ export class WaterReflectionController {
     this.planarValid.value = 0;
   }
 
-  dispose() { this.disposed = true; this.invalidate(); this.residency.clear(); this.shadowRegistryLease?.release(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
+  dispose() { this.disposed = true; this.gpuPressure.dispose(); this.invalidate(); this.residency.clear(); this.shadowRegistryLease?.release(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
 
   prewarm(camera, surface) {
     const now = performance.now();

@@ -46,6 +46,7 @@ export class GlacierSeracView {
       cellMeters: SERAC_CELL_METERS,
       reachCells: REACH_CELLS,
       cellsPerFrame: CELLS_PER_FRAME,
+      progressive: true,
     });
     this.resolve = (cx, cz) => this.resolveCell(cx, cz);
   }
@@ -119,7 +120,7 @@ export class GlacierSeracView {
       geometry.setAttribute('instanceSeed', new THREE.InstancedBufferAttribute(new Float32Array(CAPACITY), 1));
       const mesh = new THREE.InstancedMesh(geometry, material, CAPACITY);
       mesh.count = 0;
-      mesh.frustumCulled = false;
+      mesh.frustumCulled = true;
       mesh.castShadow = true;
       mesh.receiveShadow = false;
       mesh.renderOrder = 4;
@@ -150,6 +151,7 @@ export class GlacierSeracView {
       mesh.count += 1;
     }
     for (const range of dirty) { range.matrix.publish(); range.seed.publish(); }
+    for (const mesh of this.meshes) mesh.computeBoundingSphere();
     return true;
   }
 
