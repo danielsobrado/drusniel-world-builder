@@ -15,6 +15,7 @@ import { BloomNode } from '../../render/postprocessing/nodes/BloomNode.js';
 import { HierarchicalDepthNode } from '../../render/postprocessing/nodes/HierarchicalDepthNode.js';
 import { SelectiveSsrNode } from '../../render/postprocessing/nodes/SelectiveSsrNode.js';
 import { ToneMappingNode } from '../../render/postprocessing/nodes/ToneMappingNode.js';
+import { AtmosphericPassAdmission } from '../../render/postprocessing/AtmosphericPassAdmission.js';
 
 const DEFAULT_AO_SETTINGS = Object.freeze({
   enabled: true,
@@ -66,8 +67,10 @@ export class LocationPostProcessing {
     enableSsr = true,
     enableAo = true,
     enableBloom = true,
+    atmosphericBudget = null,
   }) {
     this.renderer = renderer;
+    this.atmosphericAdmission = atmosphericBudget ? new AtmosphericPassAdmission(atmosphericBudget, 'location') : null;
     this.camera = camera;
     this.disposed = false;
     this.width = 0;
@@ -217,8 +220,11 @@ export class LocationPostProcessing {
 
     this.scenePass.camera = camera;
     const frameState = { camera, width: size.x, height: size.y, pixelRatio: pr };
-    this.ambientOcclusion?.updateUniforms(frameState, this.settings.ao);
-    this.ssr?.updateUniforms(frameState, this.settings.ssr);
+    const previous = this.atmosphericAdmission?.reduced;
+    const atmosphere = this.atmosphericAdmission?.update(performance.now()) ?? null;
+    if (previous !== this.atmosphericAdmission?.reduced) this.history.ssrValid = false;
+    this.ambientOcclusion?.updateUniforms(frameState, this.settings.ao, atmosphere);
+    this.ssr?.updateUniforms(frameState, this.settings.ssr, atmosphere);
     this.bloom?.updateUniforms(this.settings.bloom, this.settings.toneMapping.exposure);
     this.toneMapping.updateUniforms(
       this.settings.toneMapping,
