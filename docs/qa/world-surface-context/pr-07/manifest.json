@@ -1,0 +1,54 @@
+{
+  "suite": "wsc-pr7-qa",
+  "generatedAt": "2026-11-26T20:10:08.022Z",
+  "commit": "a8df6e74c53fd916c634d0e077c77b9ff3d5e9ee",
+  "modes": [
+    "D00",
+    "D01"
+  ],
+  "views": [
+    {
+      "name": "B14-C05-clear",
+      "pose": {
+        "x": 2366305.4239096637,
+        "z": -2373932.644344072,
+        "yaw": 0.3968797486042276,
+        "pitch": -0.16,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "settled": true,
+      "hiddenLayers": []
+    },
+    {
+      "name": "B14-C06-clear",
+      "pose": {
+        "x": 2366294.205062553,
+        "z": -2373963.6788002374,
+        "yaw": 0.4668797486042276,
+        "pitch": -0.12,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "settled": true,
+      "hiddenLayers": []
+    },
+    {
+      "name": "B18-C01-clear",
+      "pose": {
+        "label": "Town edge & paving transition",
+        "x": -6724492,
+        "z": -347232,
+        "yaw": 1.32,
+        "pitch": 0.04,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "settled": true,
+      "hiddenLayers": []
+    }
+  ]
+}

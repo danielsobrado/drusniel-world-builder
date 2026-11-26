@@ -8,22 +8,25 @@ import { applyWorldSurfaceContact } from '../../editor/stylized/worldSurfaceCont
  * instead of one static `TOWN_GROUND` for every biome (`DEF-13`).
  *
  * Next to a house the terrain is usually meadow, and green earth reads wrong,
- * so the terrain albedo is turned into a soil: mostly grey, warmed to an earth
- * hue, and pulled halfway (in log luminance) toward `TOWN_GROUND`'s value. A
+ * so the terrain albedo is turned into a soil: mostly grey, in the town
+ * ground's earth hue, and pulled halfway (in log luminance) toward `TOWN_GROUND`'s value. A
  * meadow town gets dark rich earth, a desert town sand, a road tile the
  * terrain's own path earth. Outside the WSC window it is `TOWN_GROUND` again.
  */
 export const TOWN_GROUND = Object.freeze([0.47, 0.41, 0.33]);
 
 const LUMA = Object.freeze([0.3, 0.55, 0.15]);
-/** Earth hue, normalised to unit luma. */
+/**
+ * Earth hue, normalised to unit luma: TOWN_GROUND's own, so a terrain as bright
+ * as the town ground gives the town ground back. A warmer hue stacked on the
+ * earth photograph's own warmth and turned the B18 apron orange.
+ */
 const EARTH_HUE = (() => {
-  const hue = [1.3, 1.0, 0.68];
-  const luma = hue[0] * LUMA[0] + hue[1] * LUMA[1] + hue[2] * LUMA[2];
-  return Object.freeze(hue.map(channel => channel / luma));
+  const luma = TOWN_GROUND[0] * LUMA[0] + TOWN_GROUND[1] * LUMA[1] + TOWN_GROUND[2] * LUMA[2];
+  return Object.freeze(TOWN_GROUND.map(channel => channel / luma));
 })();
 /** How much of the terrain's own chroma a soil keeps. */
-const SOIL_CHROMA = 0.25;
+const SOIL_CHROMA = 0.12;
 const GROUND_LUMA = TOWN_GROUND[0] * LUMA[0] + TOWN_GROUND[1] * LUMA[1] + TOWN_GROUND[2] * LUMA[2];
 /** Geometry height above a building's ground line below which its vertices read the WSC. */
 const FOUNDATION_REACH_METERS = 2.5;

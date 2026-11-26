@@ -100,11 +100,13 @@ worldSurfaceContext:
         contactAoField: 0.18
         aoHeightMeters: 0.14
         preserveIdentity: 0.15
+      # Town walls (render/materials/townGroundContact.js, WSC PR 7): a splash zone, not
+      # a stripe. At 0.22 m with 0.08 m of noise the B18 capture read as a ruled line.
       foundation:
-        blendHeightMeters: 0.22
+        blendHeightMeters: 0.45
         blendStartMeters: -0.03
-        noiseAmplitudeMeters: 0.08
-        surfaceShare: 0.42
+        noiseAmplitudeMeters: 0.2
+        surfaceShare: 0.36
         roughnessShare: 0.75
         normalShare: 0.18
         contactAoBase: 0.10
