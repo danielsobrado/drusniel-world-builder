@@ -1,6 +1,7 @@
 import { TownLayoutBuilder } from './TownLayout.js';
 import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdgeDistance, townSplits } from './TownLod.js';
 import { TownMesh } from './TownMesh.js';
+import { decorationPointsChanged } from './TownDecorationAdmission.js';
 import { WAIT_FOR_TOWN_PUBLICATION } from './TownInstancePublication.js';
 import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../render/preparation/StagedDrawPublication.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -37,6 +38,7 @@ export class TownStreamer {
     unloadRadius = 900,
     queryIntervalMs = 700,
     lod = TOWN_LOD_DEFAULTS,
+    decorationSettings = null,
   }) {
     this.scene = scene;
     this.getGenerator = getGenerator;
@@ -52,6 +54,8 @@ export class TownStreamer {
     this.unloadRadius = unloadRadius;
     this.queryIntervalMs = queryIntervalMs;
     this.lod = lod;
+    this.decorationSettings = decorationSettings;
+    this.decorationPoints = [];
     this.towns = new Map();
     this.lodCursor = null;
     this.pending = new Map();
@@ -62,8 +66,11 @@ export class TownStreamer {
     this.stats = { resident: 0, instances: 0, colliders: 0, buildMs: 0, buildLatencyMs: 0 };
   }
 
-  update(nowMs, focus, budget = null) {
+  update(nowMs, focus, budget = null, protection = []) {
     this.focus = focus;
+    if (this.decorationSettings) this.decorationPoints = [focus, ...protection]
+      .filter(point => Number.isFinite(point?.x) && Number.isFinite(point?.z))
+      .map(point => ({ x: point.x, z: point.z }));
     const generator = this.getGenerator();
     if (generator !== this.generator) {
       this.clear();
@@ -151,7 +158,7 @@ export class TownStreamer {
 
   updateLods(focus, shouldYield = () => false, budget = null) {
     const count = this.towns.size;
-    if (!count) { this.lodCursor = null; return; }
+    if (!count) { this.lodCursor = null; this.reportDecorations(); return; }
     this.lodCursor ??= this.towns.values();
     for (let visited = 0; visited < count && !shouldYield(); visited++) {
       let next = this.lodCursor.next();
@@ -168,22 +175,40 @@ export class TownStreamer {
         if (step.value === WAIT_FOR_TOWN_PUBLICATION) break;
       }
     }
+    this.reportDecorations();
+  }
+
+  reportDecorations() {
+    if (!this.decorationSettings) return;
+    const totals = { requestedTriangles: 0, selectedTriangles: 0, requestedDraws: 0, selectedDraws: 0,
+      requestedInstances: 0, protectedInstances: 0, simplified: 0, omitted: 0, overflow: 0 };
+    for (const town of this.towns.values()) for (const key of Object.keys(totals)) totals[key] += town.mesh.decorationStats?.[key] ?? 0;
+    for (const [key, value] of Object.entries(totals)) PerfCounters.set(`townDecoration.${key}`, value);
   }
 
   *selection(town, focus, budget = null) {
     if (town.split) {
       yield* this.updateSplit(town, focus, budget);
+      yield* this.updateDecorations(town, budget);
       return;
     }
     const distance = townEdgeDistance(town.layout.anchor, town.reach, focus.x, focus.z);
     const lod = selectTownLod(town.mesh.lod, distance, this.lod);
     if (lod !== town.mesh.lod) town.mesh.setLod(lod);
-    if (lod !== TOWN_LOD_NEAR) return;
+    if (lod !== TOWN_LOD_NEAR) { yield* this.updateDecorations(town, budget); return; }
     const x = focus.x - town.layout.anchor.x;
     const z = focus.z - town.layout.anchor.z;
     if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
       yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius, budget);
     }
+    yield* this.updateDecorations(town, budget);
+  }
+
+  *updateDecorations(town, budget) {
+    if (!this.decorationSettings || !this.decorationPoints.length) return;
+    const points = this.decorationPoints;
+    const current = () => !decorationPointsChanged(points, this.decorationPoints, this.decorationSettings.refreshMeters);
+    yield* town.mesh.selectDecorationsJob(points, town.mesh.lod, this.lod, budget, current);
   }
 
   /** A split town: re-pick the near placements (and the interiors) as the viewer moves. */
@@ -259,13 +284,16 @@ export class TownStreamer {
       sampleHeight: (x, z) => generator.sampleHeight(x / this.tileSize, -z / this.tileSize),
     }).buildJob();
     const climate = this.climateAt(generator, best.settlement);
-    const mesh = new TownMesh({ assets: this.assets, palette: this.palette, layout, climate, deferred: true });
+    const mesh = new TownMesh({ assets: this.assets, palette: this.palette, layout, climate, deferred: true, decorationSettings: this.decorationSettings });
     this.buildJob.mesh = mesh;
     yield* mesh.preparation;
     mesh.preparation = null;
     // A city publishes already split, never whole with the near kit for a frame.
     if (townSplits(best.plan.profile?.radius ?? 0, this.lod) && this.focus) {
       yield* mesh.splitJob(this.focus.x - layout.anchor.x, this.focus.z - layout.anchor.z, this.lod.splitRadius);
+    }
+    if (this.decorationSettings && this.decorationPoints.length) {
+      yield* mesh.selectDecorationsJob(this.decorationPoints, mesh.lod, this.lod);
     }
     mesh.setOrigin(this.floatingOrigin.getState());
     yield* stagedDrawPublication(this.scene, [mesh.group], this.getDrawPreparation());
