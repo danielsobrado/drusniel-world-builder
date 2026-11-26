@@ -707,6 +707,8 @@ const kitTowns = kitTownsEnabled();
   const locations = createLocationRuntime({
     renderer: terrainView.renderer, loading, playerController, viewModeController, cameraCutCoordinator,
     floatingOrigin, walkMode: PLAYER_MODE_WALK, baseUrl: import.meta.env.BASE_URL,
+    decorationBudget: terrainView.stylizedConfig?.enhancements?.locationDecorationAdmission
+      ? terrainView.stylizedConfig.enhancements.locationDecorationBudget : null,
   });
   resources.own(locations);
 
