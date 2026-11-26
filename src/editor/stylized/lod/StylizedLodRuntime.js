@@ -9,6 +9,7 @@ import { chunkEntrySignature, chunkKey } from './chunkLodSignature.js';
 import { createDitheredMaterial } from './StylizedDitheredMaterial.js';
 import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { regionalLodProtected, regionalLodThresholds } from '../../performance/RegionalDensityBudget.js';
 import { extendInstanceBounds } from './InstanceBoundsUpdate.js';
 import { NEUTRAL_BIOME_LOOK } from '../../biomes/BiomeLooks.js';
 import { instanceGeometryArrays } from './instanceGeometryArrays.js';
@@ -480,11 +481,14 @@ export function buildChunkLodPlan({
   positionForChunk = null,
   distanceForChunk = null,
   onTransition = null,
+  regionalLodFactor = 1,
+  protectedChunkRadius = 1,
 }) {
   const entries = [];
   const signatures = [];
   const origin = floatingOrigin.getState();
   const needsReadyAnchor = typeof positionForChunk === 'function';
+  const pressuredThresholds = regionalLodThresholds(thresholds, regionalLodFactor);
 
   for (let chunkZ = focus.chunkZ - radius; chunkZ <= focus.chunkZ + radius; chunkZ += 1) {
     for (let chunkX = focus.chunkX - radius; chunkX <= focus.chunkX + radius; chunkX += 1) {
@@ -501,7 +505,10 @@ export function buildChunkLodPlan({
       const key = chunkKey(chunkX, chunkZ);
       const storedState = transitionStates.get(key) ?? null;
       const previous = storedState?.target ?? null;
-      const selected = selectLodBand(pixels, previous, thresholds, thresholds.hysteresisRatio);
+      const activeThresholds = pressuredThresholds !== thresholds
+        && !regionalLodProtected(chunkX, chunkZ, focus, camera, origin, chunkWorldSize, protectedChunkRadius)
+        ? pressuredThresholds : thresholds;
+      const selected = selectLodBand(pixels, previous, activeThresholds, thresholds.hysteresisRatio);
       const target = clampBandToRadii(selected, distanceForChunk?.(chunkX, chunkZ) ?? chunkDistance, radii);
       if (previous !== null && previous !== target) {
         onTransition?.({
