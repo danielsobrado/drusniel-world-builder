@@ -27,15 +27,15 @@ export class AtmosphericPassAdmission {
   }
 
   update(now, bypass = false, measured = null) {
+    const previousQuality = this.qualityKey;
     if (!bypass && measured) {
       this.measured = true;
       this.last = now;
       this.slowMs = this.fastMs = 0;
       const groups = measured.groups;
-      const previous = this.qualityKey;
       this.qualityKey = groups.length ? groups.join(',') : 'full';
       this.reduced = groups.length > 0;
-      if (previous !== this.qualityKey) PerfCounters.inc(`atmosphericAdmission.${this.name}.transitions`);
+      if (previousQuality !== this.qualityKey) PerfCounters.inc(`atmosphericAdmission.${this.name}.transitions`);
       PerfCounters.set(`atmosphericAdmission.${this.name}.reduced`, Number(this.reduced));
       return this.reduced ? { ...this.settings, groups } : null;
     }
@@ -65,6 +65,7 @@ export class AtmosphericPassAdmission {
     }
     PerfCounters.set(`atmosphericAdmission.${this.name}.reduced`, Number(this.reduced));
     this.qualityKey = this.reduced ? 'all' : 'full';
+    if (previousQuality !== this.qualityKey) PerfCounters.inc(`atmosphericAdmission.${this.name}.transitions`);
     return this.reduced ? this.settings : null;
   }
 
@@ -74,7 +75,6 @@ export class AtmosphericPassAdmission {
     this.changedAt = now;
     this.slowMs = 0;
     this.fastMs = 0;
-    PerfCounters.inc(`atmosphericAdmission.${this.name}.transitions`);
   }
 }
 
