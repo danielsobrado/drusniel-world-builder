@@ -212,6 +212,7 @@ export class MeadowGrassField {
     const origin = this.terrainView.floatingOrigin.getState();
     const size = this.terrainView.chunkWorldSize;
     if (!(size > 0)) return;
+    this.cards.regionalCardBudgetEnabled = true;
     const cameraChunk = {
       chunkX: Math.floor((camera.position.x + origin.x) / size),
       chunkZ: Math.floor(-(camera.position.z + origin.z) / size),
