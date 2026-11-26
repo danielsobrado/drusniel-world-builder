@@ -347,22 +347,30 @@ stylizedSurface:
     # `SM_Rocks_NN` of its stylized pack under one painted-stone material, each a
     # prototype of its own. The donor scales the pack ×7 in its units, 2.8 to the
     # metre: 2.5 here. They replace the former mixed set, kept below to restore.
-    # Split by shape: 08–11 stand nearly twice as tall as they are wide, and on
-    # open flat ground (deserts, savanna, grassland) they read as gravestones,
-    # so they keep to the broken, wooded and wet biomes.
+    # Split by shape & mesh detail:
+    # - 01–05 (206–1,438 tris) are full-detail boulders/outcrops used everywhere,
+    #   including open snowy tundra where scaled formations sit in stark contrast.
+    # - 06–07 (54–56 tris) are ultra-low-poly faceted wedges kept off open snow.
+    # - 08–11 (54–68 tris) stand nearly twice as tall as they are wide, reading
+    #   as gravestones on open flat ground (deserts, savanna, grassland, tundra),
+    #   so they keep to the broken, wooded and wet biomes.
     rockVariants:
       - id: donor-rocks-squat
         scene: /assets/rocks/donor/rocks.glb
         scale: 2.5
         rootNames: [SM_Rocks_01_RocksStylized_M_0, SM_Rocks_02_RocksStylized_M_0, SM_Rocks_03_RocksStylized_M_0,
-          SM_Rocks_04_RocksStylized_M_0, SM_Rocks_05_RocksStylized_M_0, SM_Rocks_06_RocksStylized_M_0,
-          SM_Rocks_07_RocksStylized_M_0]
+          SM_Rocks_04_RocksStylized_M_0, SM_Rocks_05_RocksStylized_M_0]
+      - id: donor-rocks-faceted
+        scene: /assets/rocks/donor/rocks.glb
+        scale: 2.5
+        rootNames: [SM_Rocks_06_RocksStylized_M_0, SM_Rocks_07_RocksStylized_M_0]
+        tileIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 15]
       - id: donor-rocks-upright
         scene: /assets/rocks/donor/rocks.glb
         scale: 2.5
         rootNames: [SM_Rocks_08_RocksStylized_M_0, SM_Rocks_09_RocksStylized_M_0, SM_Rocks_10_RocksStylized_M_0,
           SM_Rocks_11_RocksStylized_M_0]
-        tileIds: [5, 6, 7, 8, 9, 10, 12, 15]
+        tileIds: [5, 6, 7, 8, 9, 12, 15]
     # Former set:
     #   - scene: /assets/rocks/rock.glb
     #     scale: 0.02

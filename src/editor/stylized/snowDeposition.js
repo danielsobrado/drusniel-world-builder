@@ -26,18 +26,18 @@ import { PREVAILING_WIND } from '../materials/SnowAccumulation.js';
 export const SNOW_GROUND_COLOR = '#e8eef2';
 const WIND = vec2(...PREVAILING_WIND).normalize();
 /** Up-facing value where a full fall starts to cap a face, and how much higher a trace of snow starts. */
-const CAP_START = 0.54;
+const CAP_START = 0.52;
 const CAP_LIGHT = 0.42;
-const CAP_WIDTH = 0.18;
-/** Skirt height as a share of the object's height above the ground line, under a full fall. */
-const SKIRT = 0.16;
+const CAP_WIDTH = 0.14;
+/** Skirt height as a share of the drift scale above the ground line, under a full fall. */
+const SKIRT = 0.12;
 /** How much higher the skirt climbs a lee face, and how much lower it sits on the windward one. */
-const SKIRT_LEE = 0.11;
-const SKIRT_SCOUR = 0.04;
-/** Drift up a lee face, as a share of the object's height. */
-const LEE_DRIFT = 0.28;
-/** Softness of the skirt's top edge, in the same share (feathered powder transition, not a hard cutout). */
-const SKIRT_EDGE = 0.065;
+const SKIRT_LEE = 0.18;
+const SKIRT_SCOUR = 0.045;
+/** Drift up a lee face, as a share of the drift scale. */
+const LEE_DRIFT = 0.26;
+/** Crisp feathered edge of settled snow meeting stone. */
+const SKIRT_EDGE = 0.048;
 
 /**
  * Welds a faceted stone's normals into one smooth normal per position, as the
@@ -92,6 +92,7 @@ const UP_VECTOR = new THREE.Vector3(0, 1, 0);
 export function snowDeposition({
   snow,
   breakup = float(0),
+  ledgeBoost = float(0),
   centre = null,
   groundY = null,
   height = 1,
@@ -113,22 +114,32 @@ export function snowDeposition({
     ? varying(float(0.35).sub(dot(surfaceLocal, normalize(positionGeometry.sub(vec3(...centre))))).mul(1.5).clamp(0, 1))
     : float(0);
   const start = float(CAP_START).add(depth.oneMinus().mul(CAP_LIGHT)).sub(cavity.mul(0.25));
-  const cap = up.add(breakup.mul(0.45)).smoothstep(start, start.add(CAP_WIDTH));
-  if (groundY === null && !levelNode) return { cover: cap.mul(present), skirt: float(0) };
+  const cap = up.add(ledgeBoost).add(breakup.mul(0.42)).smoothstep(start, start.add(CAP_WIDTH));
+  if (groundY === null && !levelNode) {
+    const capPresent = cap.mul(present);
+    return { cover: capPresent, skirt: float(0), cap: capPresent, apron: float(0) };
+  }
 
   const level = levelNode ?? varying(positionGeometry.y.sub(groundY).div(Math.max(1e-3, height)));
   // Deeper snow buries more of the foot; the root keeps a light fall from sitting as high as a heavy one.
   const fill = depth.sqrt();
   // Banked against the lee face, tallest straight downwind and tapering round the
-  // sides like a drift tail; not under an overhang. Crisp-topped, like the skirt.
+  // sides like a drift tail; sheltered crevices hold snow higher than wind-scoured ribs.
   // WGSL leaves smoothstep undefined for reversed edges, so falling ramps are oneMinus.
-  // Gentle in lee: these stones are faceted, and a steep lee term stepped the snow
-  // line at every facet edge, drawing it as straight vertical cuts.
-  const driftTop = facing.smoothstep(-0.3, 1).mul(fill).mul(LEE_DRIFT).mul(breakup.mul(0.6).add(1)).max(0.01);
-  const drift = level.smoothstep(driftTop.sub(SKIRT_EDGE), driftTop).oneMinus().mul(up.smoothstep(-0.45, 0.1));
+  const driftTop = facing.smoothstep(-0.25, 1).mul(fill).mul(LEE_DRIFT)
+    .mul(breakup.mul(0.75).add(1).max(0.2)).max(0.01);
+  const drift = level.smoothstep(driftTop.sub(SKIRT_EDGE), driftTop).oneMinus().mul(up.smoothstep(-0.4, 0.15));
   const scour = facing.negate().clamp(0, 1);
+  // Steep overhangs shed the skirt so snow banks naturally into the ground seam rather than climbing shear faces.
+  const baseSupport = up.smoothstep(-0.35, 0.35).mul(0.55).add(0.45);
   const skirtTop = float(SKIRT).add(lee.mul(SKIRT_LEE)).sub(scour.mul(SKIRT_SCOUR))
-    .add(breakup.mul(0.22)).mul(fill).max(0.02);
+    .add(breakup.mul(0.18)).mul(fill).mul(baseSupport).max(0.015);
   const skirt = level.smoothstep(skirtTop.sub(SKIRT_EDGE), skirtTop).oneMinus();
-  return { cover: max(max(cap, drift), skirt).mul(present), skirt: skirt.mul(present) };
+  const apron = max(skirt, drift.mul(level.smoothstep(0.02, 0.34).oneMinus()));
+  return {
+    cover: max(max(cap, drift), skirt).mul(present),
+    skirt: skirt.mul(present),
+    cap: cap.mul(present),
+    apron: apron.mul(present),
+  };
 }

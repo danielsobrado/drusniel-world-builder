@@ -204,11 +204,13 @@ export function treeBarkEmission(bark, { height = positionGeometry.y, up = norma
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }
 
-/** Sky fill and floor bounce for scattered stones, which sit wholly in the bounce. */
-export function rockShadeEmission(stone) {
+/** Sky fill and floor bounce for scattered stones, attenuated on bright snow cover so caps keep crisp shading. */
+export function rockShadeEmission(stone, { snowCover = null } = {}) {
   const facing = normalWorld.y.negate().mul(0.5).add(0.5);
-  return foliageSkyFill(stone, ROCK_FILL)
-    .add(stone.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(ROCK_BOUNCE))
+  const fillGain = snowCover ? mix(float(ROCK_FILL), float(0.42), snowCover.clamp(0, 1)) : float(ROCK_FILL);
+  const bounceGain = snowCover ? mix(float(ROCK_BOUNCE), float(0.55), snowCover.clamp(0, 1)) : float(ROCK_BOUNCE);
+  return foliageSkyFill(stone, fillGain)
+    .add(stone.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounceGain))
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }
 

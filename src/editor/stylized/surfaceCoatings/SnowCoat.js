@@ -52,7 +52,7 @@ export function snowCoat(p, n, cover, settings = surfaceCoatings()) {
   return {
     tint: mix(vec3(1), grain.rgb, ready),
     roughness: grain.a.mul(ready),
-    normal() {
+    normal(baseNormal = normalView) {
       if (!settings.snow.enabled) return null;
       const sample = Fn(() => {
         const result = vec3(0, 0, 1).toVar();
@@ -62,8 +62,8 @@ export function snowCoat(p, n, cover, settings = surfaceCoatings()) {
         return result;
       })();
       const strength = coatDetailFade(settings.detail).mul(settings.snow.normalStrength).mul(ready);
-      // Built on the geometric normal (normalView in the normal stage): snow buries the relief beneath it.
-      return perturbByMap(normalView, sample, dx, dy, strength);
+      // Built on the caller's snow normal (defaulting to geometric `normalView`): snow buries rock relief.
+      return perturbByMap(baseNormal, sample, dx, dy, strength);
     },
   };
 }

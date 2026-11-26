@@ -90,21 +90,25 @@ export function createStylizedRockMaterial(mesh, config, weathering, geometry = 
     material.color = new THREE.Color(config.rocks.color);
   }
   material.flatShading = true;
-  // Preserve painted planes while adding moss, local wetness and contact tone.
+  const ground = geometry ? rockGroundLine(geometry, config?.rocks?.burial) : null;
+  if (ground) seatRockOnGround(material, ground);
+  // Preserve painted planes while adding moss, local wetness, fractured cold stone and contact tone.
   if (weathering) {
     applyRockWeathering(material, {
       settings: weathering.settings,
       seaLevel: weathering.seaLevel,
       localWater: true,
       biomeLook: true,
-      ground: geometry ? rockGroundLine(geometry, config?.rocks?.burial) : null,
+      ground,
+      rootNode: ground ? attribute('instancePlantRoot', 'vec3') : null,
       impactSettings: config?.water?.coast?.rockImpact?.enabled
         && ['medium', 'high', 'ultra'].includes(config?.water?.qualityTier)
         ? config.water.coast.rockImpact.wetness : null,
     });
   }
-  if (geometry) seatRockOnGround(material, rockGroundLine(geometry, config?.rocks?.burial));
-  material.emissiveNode = rockShadeEmission(material.colorNode ?? authoredFoliageColor(material));
+  material.emissiveNode = rockShadeEmission(material.colorNode ?? authoredFoliageColor(material), {
+    snowCover: material.userData.rockSnowCoverNode ?? null,
+  });
   applyJungleMist(material, config?.ambientEffects);
   material.needsUpdate = true;
   return material;

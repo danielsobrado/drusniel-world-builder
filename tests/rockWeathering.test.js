@@ -112,7 +112,7 @@ test('it assembles with a source map and roughness map, and without a sea', () =
   material.dispose();
 });
 
-test('snow country assembles the deposition mask with a ground line', () => {
+test('snow country assembles the deposition mask with a ground line and world-metre root', () => {
   const material = rockMaterial();
   applyRockWeathering(material, {
     settings: resolveRockWeathering(shippedRocks().weathering),
@@ -120,7 +120,19 @@ test('snow country assembles the deposition mask with a ground line', () => {
     ground: { groundY: 0.1, height: 1.2, centre: [0, 0.5, 0] },
   });
   assert.ok(material.colorNode);
+  assert.ok(material.userData.rockSnowCoverNode, 'exposes snow cover for restrained rock emission');
   material.dispose();
+});
+
+test('tundra excludes ultra-low-poly faceted wedges and upright gravestone variants', () => {
+  const variants = yaml.load(readFileSync(new URL('../editor.config.yaml', import.meta.url), 'utf8'))
+    .stylizedSurface.assets.rockVariants;
+  const squat = variants.find((v) => v.id === 'donor-rocks-squat');
+  const faceted = variants.find((v) => v.id === 'donor-rocks-faceted');
+  const upright = variants.find((v) => v.id === 'donor-rocks-upright');
+  assert.ok(squat && !squat.tileIds, 'full-detail boulders remain available in every biome');
+  assert.ok(faceted && !faceted.tileIds.includes(10), '54-tri faceted wedges stay off open tundra');
+  assert.ok(upright && !upright.tileIds.includes(10), 'tall gravestone shapes stay off open tundra');
 });
 
 test('switching it off leaves the clone untouched', () => {
