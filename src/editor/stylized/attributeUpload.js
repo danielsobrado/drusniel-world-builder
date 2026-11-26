@@ -26,6 +26,37 @@ export function markAttributeRangeUpdated(attribute, usedCount, { counter = 'att
 
 const MAX_PENDING_RANGES = 8;
 
+function mergePendingRanges(pending) {
+  pending.sort((left, right) => left.start - right.start);
+  let write = 0;
+  for (const range of pending) {
+    const previous = pending[write - 1];
+    if (previous && range.start <= previous.start + previous.count) {
+      previous.count = Math.max(previous.start + previous.count, range.start + range.count) - previous.start;
+    } else {
+      pending[write++] = range;
+    }
+  }
+  pending.length = write;
+  if (pending.length > MAX_PENDING_RANGES) {
+    pending[0].count = pending.at(-1).start + pending.at(-1).count - pending[0].start;
+    pending.length = 1;
+  }
+
+}
+
+/** Incremental queued bytes using the same coalescing policy as publication. */
+export function estimateAttributeSubrangeBytes(attribute, minIndex, maxIndex) {
+  if (!attribute || maxIndex < minIndex) return 0;
+  const pending = (attribute.updateRanges ?? []).map(range => ({ ...range }));
+  const previous = pending.reduce((sum, range) => sum + range.count, 0);
+  pending.push({ start: minIndex * attribute.itemSize, count: (maxIndex - minIndex + 1) * attribute.itemSize });
+  mergePendingRanges(pending);
+  return Math.max(0, pending.reduce((sum, range) => sum + range.count, 0) - previous)
+    * (attribute.array?.BYTES_PER_ELEMENT ?? 4);
+}
+
+
 /**
  * Mark only the instances between `minIndex` and `maxIndex` (inclusive) dirty.
  *
@@ -65,21 +96,7 @@ export function markAttributeSubrangeUpdated(
   const pending = attribute.updateRanges ?? [];
   const previousFloats = pending.reduce((sum, range) => sum + range.count, 0);
   attribute.addUpdateRange(start, length);
-  pending.sort((left, right) => left.start - right.start);
-  let write = 0;
-  for (const range of pending) {
-    const previous = pending[write - 1];
-    if (previous && range.start <= previous.start + previous.count) {
-      previous.count = Math.max(previous.start + previous.count, range.start + range.count) - previous.start;
-    } else {
-      pending[write++] = range;
-    }
-  }
-  pending.length = write;
-  if (pending.length > MAX_PENDING_RANGES) {
-    pending[0].count = pending.at(-1).start + pending.at(-1).count - pending[0].start;
-    pending.length = 1;
-  }
+  mergePendingRanges(pending);
   attribute.needsUpdate = true;
   const queuedFloats = pending.reduce((sum, range) => sum + range.count, 0);
   const bytes = Math.max(0, queuedFloats - previousFloats) * (attribute.array?.BYTES_PER_ELEMENT ?? 4);
