@@ -10,7 +10,8 @@ import {
   treeRenderSeed,
 } from './forest/TreeAppearance.js';
 import { aggregateCanopyClusters } from './lod/canopyCluster.js';
-import { prepareLazyInstancedRenderers, writeInstances } from './lod/StylizedLodRuntime.js';
+import { iterateInstanceWrites, prepareLazyInstancedRenderers, writeInstances } from './lod/StylizedLodRuntime.js';
+import { InstancePublicationPlan, admitSceneryPublication } from './lod/InstancePublicationPlan.js';
 
 const UNTINTED = Object.freeze([1, 1, 1]);
 
@@ -209,6 +210,8 @@ export function* iterateTreeLod({
   // Canonical point the instance matrices are written relative to (InstanceAnchor).
   anchor = null,
   beforePublish = null,
+  getPublicationBudget = null,
+  getPublicationAnchor = null,
   getDrawPreparation = () => null,
   onImpostorDemand = null,
 }) {
@@ -368,13 +371,35 @@ export function* iterateTreeLod({
   yield* prepareLazyInstancedRenderers(proxyRenderers, proxy);
   yield* prepareLazyInstancedRenderers(fallbackImpostorRenderers, fallback);
   yield;
-  beforePublish?.();
-  manifestStore.setActive(active);
-  const nearCount = writeInstances(renderers, near, anchor);
-  const proxyCount = writeInstances(proxyRenderers, proxy, anchor);
-  const fallbackCount = writeInstances(fallbackImpostorRenderers, fallback, anchor);
-  const clusterCount = writeInstances(clusterRenderers, clusters, anchor);
-  const understoryCount = writeInstances(understoryRenderers, understory, anchor);
+  const staged = getPublicationBudget && getPublicationAnchor;
+  const preparedImpostors = new Map();
+  let nearCount, proxyCount, fallbackCount, clusterCount, understoryCount;
+  if (staged) {
+    const proposed = getPublicationAnchor();
+    const publication = new InstancePublicationPlan();
+    nearCount = yield* iterateInstanceWrites(renderers, near, proposed, null, publication);
+    proxyCount = yield* iterateInstanceWrites(proxyRenderers, proxy, proposed, null, publication);
+    fallbackCount = yield* iterateInstanceWrites(fallbackImpostorRenderers, fallback, proposed, null, publication);
+    clusterCount = yield* iterateInstanceWrites(clusterRenderers, clusters, proposed, null, publication);
+    understoryCount = yield* iterateInstanceWrites(understoryRenderers, understory, proposed, null, publication);
+    for (let index = 0; index < impostorBatches.length; index++) {
+      const batch = impostorBatches[index];
+      if (batch) preparedImpostors.set(index, yield* batch.prepareRecords(impostors[index] ?? [], publication));
+      yield;
+    }
+    yield* admitSceneryPublication(getPublicationBudget, () => publication.bytes());
+    beforePublish?.(proposed);
+    manifestStore.setActive(active);
+    publication.commit();
+  } else {
+    beforePublish?.();
+    manifestStore.setActive(active);
+    nearCount = writeInstances(renderers, near, anchor);
+    proxyCount = writeInstances(proxyRenderers, proxy, anchor);
+    fallbackCount = writeInstances(fallbackImpostorRenderers, fallback, anchor);
+    clusterCount = writeInstances(clusterRenderers, clusters, anchor);
+    understoryCount = writeInstances(understoryRenderers, understory, anchor);
+  }
   const preparation = getDrawPreparation();
   if (preparation) for (const pool of [renderers, proxyRenderers, fallbackImpostorRenderers]) {
     for (const parts of pool) for (const mesh of parts) {
@@ -401,7 +426,8 @@ export function* iterateTreeLod({
   for (let index = 0; index < impostorBatches.length; index += 1) {
     if (!impostorBatches[index]) continue;
     const records = impostors[index] ?? [];
-    const stats = impostorBatches[index].setRecords(records);
+    const stats = staged ? preparedImpostors.get(index) : impostorBatches[index].setRecords(records);
+    if (!stats) continue;
     recordBatchStats(statsByMode, stats);
     impostorCount += stats.accepted;
   }
