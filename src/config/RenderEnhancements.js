@@ -5,6 +5,11 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   // QA override of water.sea.offshoreFft.enabled (PR I): `?oceanFft=1` forces the offshore FFT on.
   oceanFft: false,
   geologyLod: false,
+  regionalTerrainProfiles: false,
+  regionalLazyTrees: false,
+  regionalResourceBudget: false,
+  regionalDensityBudget: false,
+  regionalBudget: Object.freeze({ idleMs: 30000, maxTrackedTextureMiB: 256, evictionsPerFrame: 1, farGrassPressure: 0.85 }),
   r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, maxConcurrentDecodes: 2, requestMaxWaitMs: 500 }),
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({
@@ -25,6 +30,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   if (!source || typeof source !== 'object' || Array.isArray(source)) throw new TypeError('Render enhancements must be an object.');
   const value = { ...RENDER_ENHANCEMENT_DEFAULTS, ...source,
     r187: { ...RENDER_ENHANCEMENT_DEFAULTS.r187, ...source.r187 },
+    regionalBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget, ...source.regionalBudget },
     surfaceAnisotropy: { ...RENDER_ENHANCEMENT_DEFAULTS.surfaceAnisotropy, ...source.surfaceAnisotropy },
     waterReflections: { ...RENDER_ENHANCEMENT_DEFAULTS.waterReflections, ...source.waterReflections } };
   const params = new URLSearchParams(search);
@@ -52,17 +58,21 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalResourceBudget', 'regionalDensityBudget']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalResourceBudget', 'regionalDensityBudget']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
   if (![1, 2].includes(value.shadowCascades)) throw new RangeError('shadowCascades must be 1 or 2.');
   if (!Number.isFinite(value.detailTurnMarginDegrees) || value.detailTurnMarginDegrees < 8 || value.detailTurnMarginDegrees > 45) {
     throw new RangeError('detailTurnMarginDegrees must be within [8, 45] to cover pending camera turns.');
+  }
+  for (const [key, min, max] of [['idleMs', 1000, 300000], ['maxTrackedTextureMiB', 16, 8192], ['evictionsPerFrame', 1, 8], ['farGrassPressure', 0.1, 1]]) {
+    const n = value.regionalBudget[key];
+    if (!Number.isFinite(n) || n < min || n > max || (key === 'evictionsPerFrame' && !Number.isInteger(n))) throw new RangeError(`regionalBudget.${key} must be in [${min}, ${max}].`);
   }
   const water = value.waterReflections;
   if (![128, 256, 512].includes(water.resolution)) throw new RangeError('Reflection resolution must be 128, 256 or 512.');

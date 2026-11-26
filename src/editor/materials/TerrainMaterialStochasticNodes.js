@@ -1,5 +1,6 @@
 import {
   Fn,
+  If,
   abs,
   clamp,
   dot,
@@ -257,15 +258,11 @@ export function createTerrainMaterialFamilyMultiplier({
       families,
       microVisibility,
     });
-    const topSecondary = projectedDetail({
-      atlas,
-      planarMeters: worldXZ,
-      familyIndex: pair.secondaryIndex,
-      families,
-      microVisibility,
-      secondary: true,
+    const topDetail = topPrimary.toVar();
+    If(blend.greaterThan(0), () => {
+      const secondary = projectedDetail({ atlas, planarMeters: worldXZ, familyIndex: pair.secondaryIndex, families, microVisibility, secondary: true });
+      topDetail.assign(mix(topDetail, secondary, blend));
     });
-    const topDetail = mix(topPrimary, topSecondary, blend);
     const topVar = topDetail.toVar();
     const vertical = terrainHeight.mul(families.projection.verticalScale);
     const sidePlanar = select(
@@ -274,23 +271,14 @@ export function createTerrainMaterialFamilyMultiplier({
       vec2(worldXZ.x, vertical),
     );
     const slope = terrainShape.r;
-    const sidePrimary = projectedDetail({
-      atlas,
-      planarMeters: sidePlanar,
-      familyIndex: pair.primaryIndex,
-      families,
-      microVisibility,
+    const sideVar = topVar.toVar();
+    If(slope.greaterThanEqual(families.projection.slopeStart), () => {
+      sideVar.assign(projectedDetail({ atlas, planarMeters: sidePlanar, familyIndex: pair.primaryIndex, families, microVisibility }));
+      If(blend.greaterThan(0), () => {
+        const secondary = projectedDetail({ atlas, planarMeters: sidePlanar, familyIndex: pair.secondaryIndex, families, microVisibility, secondary: true });
+        sideVar.assign(mix(sideVar, secondary, blend));
+      });
     });
-    const sideSecondary = projectedDetail({
-      atlas,
-      planarMeters: sidePlanar,
-      familyIndex: pair.secondaryIndex,
-      families,
-      microVisibility,
-      secondary: true,
-    });
-    const sideDetail = mix(sidePrimary, sideSecondary, blend);
-    const sideVar = sideDetail.toVar();
     const projectionBlend = smoothstep(
       families.projection.slopeStart,
       families.projection.slopeFull,

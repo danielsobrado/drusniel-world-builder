@@ -1,3 +1,4 @@
+import { FULL_TERRAIN_FEATURES, TERRAIN_FEATURES } from './materials/TerrainRegionalFeatures.js';
 import { frameUniform } from '../render/FrameUniforms.js';
 import { applyTerrainRockDetail } from './materials/TerrainRockDetail.js';
 import { createSnowDetailNodes } from './stylized/SnowDetailShading.js';
@@ -155,7 +156,11 @@ export function createTerrainMaterial({
   // snow shading. Without it, the configured sun.
   sunDirection = null,
   waterFeatures = true,
+  regionalFeatures = FULL_TERRAIN_FEATURES,
 }) {
+  const grassFeatures = Boolean(regionalFeatures & TERRAIN_FEATURES.GRASS);
+  const aridFeatures = Boolean(regionalFeatures & TERRAIN_FEATURES.ARID);
+  const glacierFeatures = Boolean(regionalFeatures & TERRAIN_FEATURES.GLACIER);
   const terrainUv = uv();
   const transitionPatterns = transitionPatternsTemplate
     && slotPatternOrigins('transitionPatterns', transitionPatternsTemplate);
@@ -240,7 +245,7 @@ export function createTerrainMaterial({
   ).mul(stylizedConfig.color.brightness);
   let groundColor = mix(tileColor, grassTint, grassCoverage);
   // Litter, moss and soil between the meadow's stems, before paths and duff paint over it.
-  if (meadowGround?.detail && transitionPatterns) {
+  if (grassFeatures && meadowGround?.detail && transitionPatterns) {
     groundColor = applyMeadowGroundDetail({
       color: groundColor,
       root: grassTint,
@@ -321,7 +326,7 @@ export function createTerrainMaterial({
       .mul(dirt),
   );
 
-  const farCover = stylizedConfig.groundCover;
+  const farCover = grassFeatures ? stylizedConfig.groundCover : null;
   if (farCover?.enabled) {
     const retention = float(farCover.forestRetention ?? 0.5);
     const farMask = smoothstep(farCover.startDistance, farCover.endDistance, cameraDistance)
@@ -428,7 +433,7 @@ export function createTerrainMaterial({
       ? float(meadowGround.floor.layers.y.round().equal(GROUND_LAYERS.cracked)) : float(0);
     const floorBlend = meadowGround?.floor
       ? mix(meadowGround.floor.blend, meadowGround.floor.blend.smoothstep(0.45, 0.75), crackedFloor) : float(0);
-    if (transitionPatterns && bakedSurface.normal) {
+    if (aridFeatures && transitionPatterns && bakedSurface.normal) {
       // The ecotone nudge carries the water tile up to 2.8 m onto a dry bank, and
       // the ripples stopped on that lobe in a hard, dotted curve: there the
       // ripples read the pixel's own cell instead. A water cell is never sand, so
@@ -622,7 +627,7 @@ export function createTerrainMaterial({
     const deformedSnow = gpuDeform ? gpuDeform.applyColor(printed) : printed;
     // Glacier biomes show bare ice through the snow (biome-looks `glacier`).
     const glacierTable = stylizedConfig.biomeLooks?.glacier;
-    const glacierShareByTile = glacierTable?.some((value) => value > 0) ? uniformArray(Array.from(glacierTable), 'float') : null;
+    const glacierShareByTile = glacierFeatures && glacierTable?.some((value) => value > 0) ? uniformArray(Array.from(glacierTable), 'float') : null;
     const glacierIce = bakedSurface.snow && glacierShareByTile ? createGlacierIceShading({
       terrainUv, chunkWorldSize, chunkCenter, normal: bakedSurface.normal, material, sun: snowSun,
       // Decoded per cell and then filtered: the ecotone swaps border cells to the

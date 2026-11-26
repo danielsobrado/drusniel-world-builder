@@ -1,3 +1,4 @@
+import { FULL_TERRAIN_FEATURES, terrainRegionalFeatures } from './materials/TerrainRegionalFeatures.js';
 import { waterFieldHasCoverage } from './water/WaterField.js';
 import * as THREE from 'three/webgpu';
 import { installUnusedSamplerPruning } from '../render/UnusedSamplerBindings.js';
@@ -131,8 +132,9 @@ function createSharedTerrainMaterialSource({
       ? { settings: valleyFog.settings, patch: valleyFog.patch, uniforms: valleyFog.uniforms, quality: valleyFog.quality }
       : null,
   };
-  const get = (slotData, bakeGpuState, waterFeatures = true) => {
-    if (materials.has(waterFeatures)) return materials.get(waterFeatures);
+  const get = (slotData, bakeGpuState, waterFeatures = true, features = FULL_TERRAIN_FEATURES) => {
+    const key = `${Number(waterFeatures)}:${features}`;
+    if (materials.has(key)) return materials.get(key);
     const material = createTerrainMaterial({
       ...slotData,
       chunkWorldSize: worldStore.chunkSize * worldStore.tileSize,
@@ -143,8 +145,10 @@ function createSharedTerrainMaterialSource({
       surfaceEffects,
       sunDirection,
       waterFeatures,
+      regionalFeatures: features,
     });
-    materials.set(waterFeatures, material);
+    material.userData.regionalTerrainFeatures = features;
+    materials.set(key, material);
     return material;
   };
   get.dispose = () => { for (const material of materials.values()) material.dispose(); materials.clear(); };
@@ -972,7 +976,9 @@ export class InfiniteTerrainView {
     const page = slot.page;
     if (!page || !this.sharedTerrainMaterial) return;
     const wet = !page.waterFieldPixels || waterFieldHasCoverage(page.waterFieldPixels);
-    const desired = this.sharedTerrainMaterial(slot.mesh.userData[TERRAIN_SLOT_KEY], getTerrainMaterialBakeGpuState(slot.mesh), wet);
+    const features = this.stylizedConfig.enhancements?.regionalTerrainProfiles
+      ? terrainRegionalFeatures(page, this.stylizedConfig, wet) : FULL_TERRAIN_FEATURES;
+    const desired = this.sharedTerrainMaterial(slot.mesh.userData[TERRAIN_SLOT_KEY], getTerrainMaterialBakeGpuState(slot.mesh), wet, features);
     slot.desiredMaterial = desired;
     const preparation = this.drawPreparation;
     if (!preparation || preparation.isMaterialReady(slot.mesh, desired)) {

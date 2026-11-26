@@ -2,6 +2,16 @@
 detailVisibility: false
 # Enable after snow/coast visual and hardware acceptance.
 geologyLod: false
+# Opt-in until regional visual and GPU acceptance.
+regionalTerrainProfiles: false
+regionalLazyTrees: false
+regionalResourceBudget: false
+regionalDensityBudget: false
+regionalBudget:
+  idleMs: 30000
+  maxTrackedTextureMiB: 256
+  evictionsPerFrame: 1
+  farGrassPressure: 0.85
 detailTurnMarginDegrees: 12
 r187:
   depthOnlyOcclusion: false
