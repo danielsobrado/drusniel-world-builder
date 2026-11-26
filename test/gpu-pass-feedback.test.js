@@ -55,6 +55,16 @@ test('stale, mismatched, future and failed timestamps fall back', () => {
   profiler.error = 'lost';
   assert.equal(feedback.read('world', 2102), null);
 });
+test('bypass and path changes require a new completed sample before resuming feedback', () => {
+  const { sample, feedback } = fixture();
+  sample(100, 15, { 'Adaptive SSR Trace': 3 });
+  assert.equal(feedback.read('world', 102, true), null);
+  assert.equal(feedback.read('world', 103), null);
+  assert.deepEqual(sample(200, 15, { 'Adaptive SSR Trace': 3 }).groups, []);
+  assert.equal(feedback.read('location', 202), null);
+  assert.equal(feedback.read('world', 203), null);
+  assert.deepEqual(sample(300, 15, { 'Adaptive SSR Trace': 3 }).groups, []);
+});
 test('measured mask selectively overrides cadence and restores authored quality before fallback', () => {
   const admission = new AtmosphericPassAdmission(config.atmosphericPassBudget, 'test');
   const profile = admission.update(100, false, { groups: ['ssr'] });
