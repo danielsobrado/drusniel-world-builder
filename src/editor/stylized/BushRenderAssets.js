@@ -28,7 +28,8 @@ import { applySkywardNormal, understoryShadeEmission } from './forest/foliageLig
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { crownInteriorVisibilityNode, crownPuffNormalNode } from './forest/TreeFoliageSurface.js';
 import { applyCloudShadow } from './CloudShadow.js';
-import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
+import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 
 export const BUSH_CAST_SHADOW = false;
 export const BUSH_PROXY_TRIANGLES = 100;
@@ -246,15 +247,22 @@ export function createBushProxyMaterial(sourceMaterial, {
   );
   const local = config ? meadowPatchOnPlant(ramp, config) : ramp;
   const shadedColor = biomeLook ? biomeUnderstoryColor(local) : local;
-  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'bushProxy');
+  const groundContact = sampleWorldSurfaceContextVarying(positionWorld.xz, 'bushProxy');
+  const localHeightM = positionGeometry.y.sub(float(minimumHeight));
   const worldHeightT = positionWorld.y.sub(groundContact.height).div(Math.max(0.35, height)).clamp(0, 1);
-  const baseT = mix(heightMix, worldHeightT, groundContact.inside);
+  const baseT = mix(heightMix, worldHeightT, groundContact.validity);
   const baseRamp = smoothstep(0.0, 0.30, baseT);
   const baseAo = understoryFootShade(baseRamp, groundContact);
-  const soilMask = smoothstep(0.0, 0.22, baseT).oneMinus().mul(0.30).mul(groundContact.inside);
+  const contact = applyWorldSurfaceContact({
+    surface: { color: shadedColor },
+    wsc: groundContact,
+    profile: 'bushProxy',
+    fallbackHeight: localHeightM,
+    applyAo: false,
+  });
   // The same crown interior shade as the near bush, so the LOD swap keeps its depth.
   const interior = bounds ? crownInteriorVisibilityNode(bounds) : float(1);
-  const groundedProxy = mix(shadedColor, groundContact.soilColor, soilMask).mul(baseAo)
+  const groundedProxy = contact.color.mul(baseAo)
     .mul(mix(float(1), interior, CROWN_SELF_SHADE));
   material.colorNode = groundedProxy;
   material.emissiveNode = understoryShadeEmission(groundedProxy)

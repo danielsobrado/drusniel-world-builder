@@ -1,6 +1,5 @@
 import {
   attribute,
-  cameraViewMatrix,
   color,
   dot,
   float,
@@ -16,7 +15,6 @@ import {
   smoothstep,
   vec2,
   vec3,
-  vec4,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
@@ -25,7 +23,8 @@ import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
 import { mossCoat } from './surfaceCoatings/MossCoat.js';
-import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
+import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 
 /**
  * Bark weathering — after grass-test's `barkWeathering`.
@@ -57,13 +56,6 @@ const SHADED_SIDE = Object.freeze([0, 0, -1]);
 const MOSS_REACH = 6;
 const WET_DARKENING = 0.45;
 const BASE_TINT = Object.freeze([0.62, 0.58, 0.5]);
-/**
- * Metres of bark, and of root, that turn to the soil they run into. Only the
- * contact: buttress fins mostly stand below half a metre, and painted as soil
- * they vanish into the floor they are meant to grip.
- */
-const SOIL_REACH = 0.15;
-const SOIL_SHARE = 0.7;
 const DEFAULT_SOIL = '#6e5435';
 
 export const DEFAULT_BARK_WEATHERING = Object.freeze({
@@ -180,36 +172,33 @@ export function applyBarkWeathering(material, { settings }) {
   }
   const mossy = mossed.color;
 
-  // True height above the sloped/sunk ground from the GPU ground-contact field
-  // (vertex stage), falling back to prototype `local.y` outside the near window.
-  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'bark');
-  const heightAbove = mix(local.y, positionWorld.y.sub(groundContact.height), groundContact.inside);
-  material.treeGroundHeightNode = heightAbove;
-
-  // Soil splashes and damp wick up from the true ground contour, plus subtle
-  // contact AO where concave root pockets meet the floor.
-  const baseShade = smoothstep(0, settings.baseHeight, heightAbove).oneMinus().mul(settings.base);
-  const rootContactAo = float(1).sub(
-    smoothstep(0, 0.55, heightAbove).oneMinus().mul(groundContact.contact.mul(0.28).add(0.14)),
-  );
-  const shaded = mix(mossy, mossy.mul(vec3(BASE_TINT[0], BASE_TINT[1], BASE_TINT[2])), baseShade).mul(rootContactAo);
-  // The foot of the tree, and every root running out from it, ends in the floor
-  // in broken patches instead of a line where bark meets ground.
-  const soil = smoothstep(0, SOIL_REACH, heightAbove.add(patches.sub(0.5).mul(0.24))).oneMinus().mul(SOIL_SHARE);
-  const soilAlbedo = mix(color(settings.soilColor), groundContact.soilColor, groundContact.inside);
-  const grounded = mix(shaded, soilAlbedo, soil);
-  // Dissolve bark specular sheen and crisp bump normals smoothly into matte duff at the seam.
+  // True height above the sloped/sunk ground and generic WSC contact collar
+  // (PR 4: replaces abrupt 15 cm trunk cutoff with YAML-profiled PBR coat blend).
+  const wsc = sampleWorldSurfaceContextVarying(positionWorld.xz, 'bark');
+  const prelimHeight = mix(local.y, positionWorld.y.sub(wsc.height), wsc.validity);
+  const baseShade = smoothstep(0, settings.baseHeight, prelimHeight).oneMinus().mul(settings.base);
+  const shaded = mix(mossy, mossy.mul(vec3(BASE_TINT[0], BASE_TINT[1], BASE_TINT[2])), baseShade);
   const currentRoughness = material.roughnessNode ?? barkRoughness;
-  material.roughnessNode = mix(currentRoughness, currentRoughness.max(0.95), soil);
   const currentNormal = material.normalNode ?? barkNormal;
-  const groundViewNormal = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
-  material.normalNode = mix(currentNormal, groundViewNormal, soil.mul(0.55).mul(groundContact.inside)).normalize();
+  const contact = applyWorldSurfaceContact({
+    surface: { color: shaded, roughness: currentRoughness, normal: currentNormal },
+    wsc,
+    profile: 'tree',
+    fallbackHeight: local.y,
+    fallbackAlbedo: color(settings.soilColor),
+    noiseOffset: patches.sub(0.5),
+  });
+  const heightAbove = contact.heightAbove;
+  material.treeGroundHeightNode = heightAbove;
+  const grounded = contact.color;
+  material.roughnessNode = contact.roughness;
+  material.normalNode = contact.normal;
 
   // Rain runs down in streaks, so the bark darkens unevenly rather than as one
   // flat soak.
   const runs = stylizedFbm2(vec2(around.mul(2.4), local.y.mul(0.18)).add(seed.mul(7)))
     .smoothstep(-0.4, 0.4).mul(0.6).add(0.4);
-  const wet = surfaceWetnessUniform.mul(settings.wet).mul(runs).mul(soil.mul(0.7).oneMinus());
+  const wet = surfaceWetnessUniform.mul(settings.wet).mul(runs).mul(contact.coverage.mul(0.7).oneMinus());
   const soaked = grounded.mul(wet.mul(WET_DARKENING).oneMinus());
 
   if (!settings.snowBand) {

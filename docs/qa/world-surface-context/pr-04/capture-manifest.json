@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "suite": "wsc-pr4-qa",
+  "generatedAt": "2026-11-26T02:57:18.933Z",
+  "git": {
+    "commit": "531007fca87c874d42e06b3a870e28af6cb5adcd",
+    "branch": "main",
+    "dirty": true
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "rois": {
+    "lowerGround": {
+      "x0": 0.05,
+      "y0": 0.42,
+      "x1": 0.95,
+      "y1": 0.96
+    },
+    "contactBase": {
+      "x0": 0.05,
+      "y0": 0.52,
+      "x1": 0.95,
+      "y1": 0.85
+    },
+    "upperTrunk": {
+      "x0": 0.05,
+      "y0": 0.14,
+      "x1": 0.95,
+      "y1": 0.45
+    }
+  },
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "captures": [
+    {
+      "id": "B14-C01-overcast",
+      "world": "eldara",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 0.35
+      },
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 2366324.1219881824,
+          "z": -2373880.9202504624
+        },
+        "origin": {
+          "x": 2366208,
+          "z": -2373760
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B14-C04-clear",
+      "world": "eldara",
+      "pose": {
+        "x": 2366315.282896519,
+        "z": -2373905.3716401686,
+        "yaw": 0.8968797486042277,
+        "pitch": -0.18,
+        "mode": "fly",
+        "heightAboveGround": 1.2,
+        "fov": 64
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 30,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 2366315.282896519,
+          "z": -2373905.3716401686
+        },
+        "origin": {
+          "x": 2366208,
+          "z": -2373760
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B03-C02-clear",
+      "world": "procedural",
+      "pose": {
+        "label": "Sparse blades & trunk base",
+        "x": 10119,
+        "z": 5719,
+        "yaw": 0.785,
+        "pitch": -0.3,
+        "mode": "fly",
+        "heightAboveGround": 0.85,
+        "fov": 62
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 10119,
+          "z": 5719
+        },
+        "origin": {
+          "x": 10112,
+          "z": 5632
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B16-C01-clear",
+      "world": "fixture",
+      "pose": {
+        "label": "Fixture grass-road-sand seam",
+        "x": -10248,
+        "z": 10226,
+        "yaw": -0.45,
+        "pitch": -0.16,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": -10248,
+          "z": 10226
+        },
+        "origin": {
+          "x": -10240,
+          "z": 10112
+        },
+        "biomeId": 1
+      }
+    },
+    {
+      "id": "B17-C01-clear",
+      "world": "fixture",
+      "pose": {
+        "label": "Fixture snow-mound & boulders",
+        "x": -10214,
+        "z": 10202,
+        "yaw": -0.78,
+        "pitch": -0.18,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 30,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": -10214,
+          "z": 10202
+        },
+        "origin": {
+          "x": -10240,
+          "z": 10112
+        },
+        "biomeId": 10
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "file": "pr4-contact-sheet.jpg",
+      "sha256": "5f4b44cc7116bb39a851537f2e9aa3ac3b7b6c112f5a155babd9d69491bd5043",
+      "bytes": 366028
+    },
+    {
+      "file": "metrics.json",
+      "sha256": "3dbf1b51c356678d9c04893d1b778426fa64d382a4c60d1d3e1d5ae97d315cc5",
+      "bytes": 20419
+    }
+  ]
+}

@@ -13,7 +13,12 @@ import terrainMaterialBakeConfigSource from '../../config/terrain-material-bake.
 import waterConfigSource from '../../config/water-domain.yaml?compiled';
 import waterVisualConfigSource from '../../config/water-visual.yaml?compiled';
 import weatherEffectsConfigSource from '../../config/weather-effects.yaml?compiled';
+import wscContactConfigSource from '../../config/wsc-contact.yaml?compiled';
 import { resolveWeatherEffects } from '../editor/weather/WeatherEffectsConfig.js';
+import {
+  registerWorldSurfaceContactConfig,
+  resolveWorldSurfaceContactConfig,
+} from '../editor/stylized/worldSurfaceContext/WorldSurfaceContactConfig.js';
 import { createCollisionConfig } from '../editor/collision/CollisionConfig.js';
 import { registerCollisionConfig } from '../editor/collision/CollisionPlayerBridge.js';
 import { createTerrainMaterialBakeConfig } from '../editor/materials/TerrainMaterialBakeConfig.js';
@@ -84,6 +89,10 @@ export function loadEditorConfig() {
   config.stylizedSurface.snowCover = resolveSnowCoverConfig(config.stylizedSurface.snowCover);
   config.stylizedSurface.surfaceCoatings = resolveSurfaceCoatings(config.stylizedSurface.surfaceCoatings);
   registerSurfaceCoatings(config.stylizedSurface.surfaceCoatings);
+  config.stylizedSurface.worldSurfaceContact = Object.freeze({
+    contact: resolveWorldSurfaceContactConfig(structuredClone(wscContactConfigSource)),
+  });
+  registerWorldSurfaceContactConfig(config.stylizedSurface.worldSurfaceContact.contact);
   config.stylizedSurface.ambientEffects = resolveAmbientEffectsConfig(
     structuredClone(ambientEffectsConfigSource)?.ambientEffects,
   );

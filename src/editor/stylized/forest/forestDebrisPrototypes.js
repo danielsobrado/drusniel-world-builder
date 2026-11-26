@@ -1,7 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
   attribute,
-  cameraViewMatrix,
   clamp,
   color,
   dot,
@@ -11,16 +10,18 @@ import {
   normalViewGeometry,
   normalWorld,
   positionGeometry,
+  positionWorld,
   smoothstep,
   texture,
   vec2,
   vec3,
-  vec4,
 } from 'three/tsl';
 import { LOOK_SNOW_STEPS } from '../../biomes/BiomeLooks.js';
 import { stylizedFbm2 } from '../StylizedNoiseNodes.js';
 import { meadowPatchOnPlant } from '../understoryPatch.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
+import { sampleWorldSurfaceContextVarying } from '../worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { gradeBark, resolveBarkGrade } from './barkGrade.js';
 import { acquireDeadwoodNoise } from './deadwoodNoise.js';
 import { treeBarkEmission, understoryShadeEmission } from './foliageLight.js';
@@ -71,9 +72,19 @@ function mossSurfaceNodes({ baseUrl = '', soilColor = '#5c4a30', floorColor = '#
   const dryTips = mix(mossBase, mossBase.mul(color('#b7a362')), patches.smoothstep(0.48, 0.86).mul(0.5));
   const texturedMoss = dryTips.mul(cushionShade).mul(mix(0.8, 1.2, spore));
 
-  // Peat & humus fringe where the outer cushion pillows tuck into surrounding litter/soil.
-  const rim = smoothstep(0.055, -0.025, positionGeometry.y.add(pillows.sub(0.5).mul(0.05)));
-  const grounded = mix(texturedMoss, color(soilColor).mul(mix(0.82, 1.12, spore)), rim.mul(0.82));
+  // WSC generic contact collar (PR 4): blends cushion rim into actual sloped terrain
+  // albedo, roughness, and slope normal instead of static hardcoded soilColor.
+  const mossWsc = sampleWorldSurfaceContextVarying(positionWorld.xz, 'mossMound');
+  const mossBump = barkBumpNormal(relief.mul(0.085).add(crevices.mul(0.032)));
+  const mossContact = applyWorldSurfaceContact({
+    surface: { color: texturedMoss, roughness: float(0.96), normal: mossBump },
+    wsc: mossWsc,
+    profile: 'mossMound',
+    fallbackHeight: positionGeometry.y,
+    fallbackAlbedo: color(soilColor).mul(mix(0.82, 1.12, spore)),
+    noiseOffset: pillows.sub(0.5),
+  });
+  const grounded = mossContact.color;
   const patched = config ? meadowPatchOnPlant(grounded, config) : grounded;
 
   const snowSteps = look.w.div(4).floor();
@@ -86,7 +97,8 @@ function mossSurfaceNodes({ baseUrl = '', soilColor = '#5c4a30', floorColor = '#
   const colorNode = mix(toned, vec3(0.88, 0.91, 0.95), snowCap.mul(0.85));
   return {
     colorNode,
-    normalNode: barkBumpNormal(relief.mul(0.085).add(crevices.mul(0.032))),
+    normalNode: mossContact.normal,
+    roughnessNode: mossContact.roughness,
     emissiveNode: understoryShadeEmission(colorNode),
   };
 }
@@ -239,29 +251,10 @@ export function deadwoodMaterial(
   const biomeMoss = mix(vec3(dot(litMoss, vec3(0.2126, 0.7152, 0.0722))), litMoss, saturation).mul(look.xyz);
   surface = mix(surface, biomeMoss.mul(mix(0.84, 1.14, detailNoise.r)), mossCoverage);
 
-  // Wavy humus/duff/moss splash climbing smoothly up the root collar & partially embedded log flanks.
-  const soilWave = deadwoodNoise.b.sub(0.5).mul(0.11).add(detailNoise.g.sub(0.5).mul(0.05));
-  const skirtReach = horizontal ? float(0.14) : float(0.18);
-  const groundTouch = smoothstep(skirtReach, float(-0.045), positionGeometry.y.add(soilWave))
-    .mul(exposedMask.oneMinus());
-  const humusTint = mix(color(soilColor), biomeMoss, deadwoodNoise.b.mul(0.55));
-  const patchedHumus = config ? meadowPatchOnPlant(humusTint, config) : humusTint;
-  surface = mix(surface, patchedHumus.mul(mix(0.75, 1.08, detailNoise.r)), groundTouch.mul(0.86));
-
-  // Grade bark reflectance identically to standing trees, then blend deeper ground-contact AO & normal continuity.
+  // Grade bark reflectance identically to standing trees, then compose normals & roughness
+  // with the generic WSC contact collar (PR 4) so logs & stumps seamlessly hug sloped terrain.
   const graded = gradeBark(surface, resolveBarkGrade(barkGrade));
-  const contactAO = mix(float(1), float(0.38), smoothstep(0.09, -0.055, positionGeometry.y.add(soilWave.mul(0.45))).mul(exposedMask.oneMinus()));
-  const barkTinted = mix(graded, graded.mul(look.xyz), 0.22).mul(contactAO);
-
-  const snowDepth = snowSteps.div(LOOK_SNOW_STEPS);
-  const snowCap = smoothstep(0.16, 0.56, normalWorld.y.add(deadwoodNoise.b.sub(0.5).mul(0.48)))
-    .mul(snowDepth.mul(1.2).clamp(0, 1))
-    .mul(snowDepth.smoothstep(0.14, 0.38));
-  const snowy = mix(barkTinted, vec3(0.88, 0.91, 0.95), snowCap.mul(0.88));
-
-  const creviceWet = albedoHeight.a.oneMinus().mul(0.45).add(0.55);
-  const wet = surfaceWetnessUniform.mul(creviceWet).clamp(0, 1);
-  const finalAlbedo = mix(snowy, snowy.mul(vec3(0.52, 0.53, 0.56)), wet.mul(0.55));
+  const barkTinted = mix(graded, graded.mul(look.xyz), 0.22);
 
   const packedSamples = proj.coords.map((coord) => {
     const packedNode = texture(barkTextures.normalRoughness, coord);
@@ -279,18 +272,40 @@ export function deadwoodMaterial(
   const heightRelief = mix(fiberNoise.r, albedoHeight.a, heightWeight);
   const bumpNormal = barkBumpNormal(heightRelief.mul(bumpScale).add(crackBump));
   const combinedNormal = softenedBarkNormal.add(bumpNormal.sub(normalViewGeometry)).normalize();
+  const creviceWet = albedoHeight.a.oneMinus().mul(0.45).add(0.55);
+  const wet = surfaceWetnessUniform.mul(creviceWet).clamp(0, 1);
   const wetNormal = mix(combinedNormal, normalViewGeometry, wet.mul(0.22)).normalize();
   const baseWoodNormal = mix(wetNormal, normalViewGeometry, exposedMask.mul(0.42)).normalize();
-  // Smoothly align surface normals toward ground-up at the soil skirt so light transitions seamlessly off terrain.
-  const groundUpView = cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz.normalize();
-  const normalNode = mix(baseWoodNormal, groundUpView, groundTouch.mul(0.84)).normalize();
 
-  const dryRoughness = mix(normalRoughness.b.max(0.72), float(0.92), exposedMask.mul(0.5))
+  const baseWoodRoughness = mix(normalRoughness.b.max(0.72), float(0.92), exposedMask.mul(0.5))
     .max(rotAmount.mul(0.98))
     .add(mossCoverage.mul(0.06))
-    .max(groundTouch.mul(0.96))
     .clamp(0.45, 1);
-  const roughnessNode = mix(dryRoughness, dryRoughness.min(0.32), wet.mul(0.65));
+
+  const debrisWsc = sampleWorldSurfaceContextVarying(positionWorld.xz, 'debris');
+  const humusFallback = config
+    ? meadowPatchOnPlant(mix(color(soilColor), biomeMoss, deadwoodNoise.b.mul(0.55)), config)
+    : mix(color(soilColor), biomeMoss, deadwoodNoise.b.mul(0.55));
+  const soilWaveNoise = deadwoodNoise.b.sub(0.5).mul(0.7).add(detailNoise.g.sub(0.5).mul(0.3));
+  const debrisContact = applyWorldSurfaceContact({
+    surface: { color: barkTinted, roughness: baseWoodRoughness, normal: baseWoodNormal },
+    wsc: debrisWsc,
+    profile: 'debris',
+    fallbackHeight: positionGeometry.y,
+    fallbackAlbedo: humusFallback.mul(mix(0.78, 1.08, detailNoise.r)),
+    noiseOffset: soilWaveNoise,
+    mask: exposedMask.oneMinus(),
+    heightScale: horizontal ? float(0.8) : float(1.0),
+  });
+
+  const snowDepth = snowSteps.div(LOOK_SNOW_STEPS);
+  const snowCap = smoothstep(0.16, 0.56, normalWorld.y.add(deadwoodNoise.b.sub(0.5).mul(0.48)))
+    .mul(snowDepth.mul(1.2).clamp(0, 1))
+    .mul(snowDepth.smoothstep(0.14, 0.38));
+  const snowy = mix(debrisContact.color, vec3(0.88, 0.91, 0.95), snowCap.mul(0.88));
+  const finalAlbedo = mix(snowy, snowy.mul(vec3(0.52, 0.53, 0.56)), wet.mul(0.55));
+  const normalNode = debrisContact.normal;
+  const roughnessNode = mix(debrisContact.roughness, debrisContact.roughness.min(0.32), wet.mul(0.65));
 
   // Deadwood and moss already fold `attribute('color')` into their custom colorNodes; keeping
   // `vertexColors: false` avoids Three.js NodeMaterial multiplying diffuseColor by `vColor` twice.

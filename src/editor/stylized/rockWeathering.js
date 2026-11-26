@@ -1,7 +1,6 @@
 import { frameUniform } from '../../render/FrameUniforms.js';
 import {
   attribute,
-  cameraViewMatrix,
   color,
   dot,
   float,
@@ -18,7 +17,6 @@ import {
   varying,
   vec2,
   vec3,
-  vec4,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
 import { worldNoiseField } from './worldNoise.js';
@@ -34,7 +32,8 @@ import { surfaceCoatings } from './surfaceCoatings/SurfaceCoatingConfig.js';
 import { SNOW_GROUND_COLOR, snowDeposition } from './snowDeposition.js';
 import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
-import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
+import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
@@ -242,9 +241,9 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     .mul(settings.dust);
   weathered = mix(weathered, color(DUST).mul(shade), dust);
 
-  // The floor's duff carried up the foot, tracking the actual sloped terrain
-  // elevation and biome soil colour from the GPU ground-contact field (vertex stage).
-  const groundContact = (ground || look) ? sampleGroundContactVarying(world.xz, 'rock') : null;
+  // Generic WSC contact material blending (PR 4): tracks sloped terrain height,
+  // resolved linear terrain albedo, roughness, slope normal, and orthogonal contact AO.
+  const groundContact = (ground || look) ? sampleWorldSurfaceContextVarying(world.xz, 'rock') : null;
   const objectLevel = ground
     ? varying(positionGeometry.y.sub(ground.groundY).div(Math.max(1e-3, ground.height)))
     : null;
@@ -252,26 +251,25 @@ export function applyRockWeathering(material, { settings, seaLevel = null, local
     ? mix(
       objectLevel,
       world.y.sub(groundContact.height).div(Math.max(1.0, ground.height)),
-      groundContact.inside,
+      groundContact.validity,
     )
     : objectLevel;
-  if (ground && settings.soil > 0) {
-    const top = stylizedFbm2(pattern.xz.mul(SOIL_EDGE_PER_METRE)).mul(0.7).add(0.3).max(0.15).mul(settings.soilHeight);
-    const soil = groundLevel.smoothstep(top.mul(0.35), top).oneMinus().mul(settings.soil);
-    // The terrain's own duff recipe: half the surface dulled and darkened, half biome soil.
-    const dull = mix(vec3(dot(weathered, vec3(0.3, 0.59, 0.11))), weathered, 0.5).mul(vec3(1, 0.94, 0.76));
+  if (ground && groundContact && settings.soil > 0) {
+    const soilNoise = stylizedFbm2(pattern.xz.mul(SOIL_EDGE_PER_METRE)).sub(0.5);
     const fallbackEarth = color(settings.soilColor).mul(look ? look.rgb : vec3(1));
-    const earth = groundContact ? mix(fallbackEarth, groundContact.soilColor, groundContact.inside) : fallbackEarth;
-    const contactAo = groundContact
-      ? float(1).sub(soil.mul(groundContact.contact.mul(0.24).add(0.12)))
-      : float(1);
-    weathered = mix(weathered, mix(dull.mul(0.45), earth, 0.5), soil).mul(contactAo);
-    roughness = roughness.max(soil.mul(0.95));
-    // Soften flat-shaded polygon facet seams into the terrain normal inside the soil collar.
-    if (groundContact) {
-      const groundViewNormal = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
-      normal = mix(normal, groundViewNormal, soil.mul(0.6).mul(groundContact.inside)).normalize();
-    }
+    const contact = applyWorldSurfaceContact({
+      surface: { color: weathered, roughness, normal },
+      wsc: groundContact,
+      profile: 'rock',
+      worldY: world.y,
+      fallbackHeight: positionGeometry.y.sub(ground.groundY),
+      fallbackAlbedo: fallbackEarth,
+      noiseOffset: soilNoise,
+      mask: float(settings.soil),
+    });
+    weathered = contact.color;
+    roughness = contact.roughness;
+    normal = contact.normal;
   }
 
   // Wet, dark and glossy up to a ragged local splash line, with the green

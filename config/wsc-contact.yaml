@@ -1,0 +1,97 @@
+# World Surface Context (WSC) — PR 4 Contact Material Blending Profiles
+# Controls height-based ground-to-object material continuity (albedo, roughness,
+# slope normal, and orthogonal contact AO) consumed by `applyWorldSurfaceContact`.
+# Outside each profile's contact collar, every object retains its authored material identity.
+
+worldSurfaceContext:
+  contact:
+    enabled: true
+    profiles:
+      tree:
+        blendHeightMeters: 0.34
+        blendStartMeters: -0.04
+        noiseAmplitudeMeters: 0.18
+        surfaceShare: 0.68
+        roughnessShare: 0.85
+        normalShare: 0.50
+        contactAoBase: 0.10
+        contactAoField: 0.24
+        aoHeightMeters: 0.55
+        preserveIdentity: 0.18
+      rock:
+        blendHeightMeters: 0.36
+        blendStartMeters: -0.04
+        noiseAmplitudeMeters: 0.16
+        surfaceShare: 0.72
+        roughnessShare: 0.85
+        normalShare: 0.58
+        contactAoBase: 0.10
+        contactAoField: 0.22
+        aoHeightMeters: 0.45
+        preserveIdentity: 0.22
+      alpineRock:
+        blendHeightMeters: 0.40
+        blendStartMeters: -0.05
+        noiseAmplitudeMeters: 0.18
+        surfaceShare: 0.70
+        roughnessShare: 0.85
+        normalShare: 0.55
+        contactAoBase: 0.10
+        contactAoField: 0.20
+        aoHeightMeters: 0.50
+        preserveIdentity: 0.20
+      understory:
+        blendHeightMeters: 0.20
+        blendStartMeters: -0.02
+        noiseAmplitudeMeters: 0.06
+        surfaceShare: 0.48
+        roughnessShare: 0.70
+        normalShare: 0.45
+        contactAoBase: 0.08
+        contactAoField: 0.22
+        aoHeightMeters: 0.30
+        preserveIdentity: 0.15
+      bushProxy:
+        blendHeightMeters: 0.20
+        blendStartMeters: -0.02
+        noiseAmplitudeMeters: 0.06
+        surfaceShare: 0.42
+        roughnessShare: 0.65
+        normalShare: 0.45
+        contactAoBase: 0.08
+        contactAoField: 0.22
+        aoHeightMeters: 0.30
+        preserveIdentity: 0.15
+      debris:
+        blendHeightMeters: 0.22
+        blendStartMeters: -0.045
+        noiseAmplitudeMeters: 0.12
+        surfaceShare: 0.78
+        roughnessShare: 0.90
+        normalShare: 0.72
+        contactAoBase: 0.12
+        contactAoField: 0.24
+        aoHeightMeters: 0.28
+        preserveIdentity: 0.16
+      mossMound:
+        blendHeightMeters: 0.10
+        blendStartMeters: -0.03
+        noiseAmplitudeMeters: 0.05
+        surfaceShare: 0.76
+        roughnessShare: 0.85
+        normalShare: 0.65
+        contactAoBase: 0.06
+        contactAoField: 0.18
+        aoHeightMeters: 0.14
+        preserveIdentity: 0.15
+      foundation:
+        blendHeightMeters: 0.22
+        blendStartMeters: -0.03
+        noiseAmplitudeMeters: 0.08
+        surfaceShare: 0.42
+        roughnessShare: 0.75
+        normalShare: 0.18
+        contactAoBase: 0.10
+        contactAoField: 0.22
+        aoHeightMeters: 0.32
+        preserveIdentity: 0.24

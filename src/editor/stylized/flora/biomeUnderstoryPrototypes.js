@@ -33,7 +33,8 @@ import { acquireIceTextures } from '../ice/iceTextures.js';
 import { meadowPatchOnPlant } from '../understoryPatch.js';
 import { worldNoiseField } from '../worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
-import { sampleGroundContactVarying } from '../groundContact/GroundContactState.js';
+import { sampleWorldSurfaceContextVarying } from '../worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { COLD_ALPINE_BIOME_FLORA } from './biomeFloraColdAlpine.js';
 import { COASTAL_ARID_BIOME_FLORA } from './biomeFloraCoastalArid.js';
 import { SAVANNA_BADLANDS_BIOME_FLORA } from './biomeFloraSavannaBadlands.js';
@@ -75,35 +76,39 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
   const microField = worldNoiseField(WORLD_NOISE_LAYERS.micro)(positionGeometry.xz.mul(3.8).add(positionGeometry.y.mul(1.6)));
   const veinRib = dot(uvCoord.sub(0.5).abs(), vec3(2, 0, 0).xy).oneMinus().clamp(0, 1);
 
-  // Smooth ground-contact soil/humus collar + AO from the GPU ground-contact field
-  // (vertex stage) so roots & cushions track sloped terrain and biome soil seamlessly.
-  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'biomeFlora');
-  const heightAbove = mix(positionGeometry.y, positionWorld.y.sub(groundContact.height), groundContact.inside);
-  const soilWave = microField.g.sub(0.5).mul(0.06);
-  const groundTouch = smoothstep(-0.03, 0.11, heightAbove.add(soilWave)).oneMinus();
-  const baseRamp = smoothstep(0.0, 0.24, heightAbove);
-  const contactAO = understoryFootShade(baseRamp, groundContact);
-  const fallbackSoil = color(environment.soilColor ?? '#5c4a30');
-  const soilTone = mix(fallbackSoil, groundContact.soilColor, groundContact.inside)
-    .mul(mix(0.84, 1.12, grainSample.r));
-  const groundedColor = mix(local, soilTone, groundTouch.mul(0.54)).mul(contactAO);
-
-  const finalColor = biomeUnderstoryColor(groundedColor);
-  const blossom = entry.kind === 'blossom';
-  const fill = understoryShadeEmission(finalColor, { blossom }).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
-
-  // Normal relief from vein height + organic noise texture, blending smoothly into the terrain normal at the foot.
+  // Normal relief from vein height + organic noise texture before WSC contact blending.
   const reliefHeight = mix(grainSample.r, veinRib, plantGreen.mul(0.45)).mul(0.01);
   const bumpNormal = barkBumpNormal(reliefHeight);
-  const groundUpView = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
-  const skySoft = groundTouch.mul(0.78).max(plantGreen.mul(0.52));
-  const blendedNormal = mix(bumpNormal, groundUpView, skySoft).normalize();
 
   // Spatially varying PBR roughness: soft matte-waxy leaves, matte soil/woody base.
+  const blossom = entry.kind === 'blossom';
   const baseRoughness = blossom
     ? mix(float(0.66), float(0.78), grainSample.g)
     : mix(float(0.86), mix(float(0.56), float(0.74), microField.r), plantGreen);
-  const dryRoughness = baseRoughness.max(groundTouch.mul(0.94)).clamp(0.38, 1);
+
+  // Generic WSC contact collar + orthogonal foot AO (PR 4) so roots & cushions
+  // track sloped terrain, resolved albedo, roughness, and slope normals seamlessly.
+  const groundContact = sampleWorldSurfaceContextVarying(positionWorld.xz, 'biomeFlora');
+  const contact = applyWorldSurfaceContact({
+    surface: { color: local, roughness: baseRoughness, normal: bumpNormal },
+    wsc: groundContact,
+    profile: 'understory',
+    fallbackHeight: positionGeometry.y,
+    fallbackAlbedo: color(environment.soilColor ?? '#5c4a30').mul(mix(0.84, 1.12, grainSample.r)),
+    noiseOffset: microField.g.sub(0.5),
+    applyAo: false,
+  });
+  const baseRamp = smoothstep(0.0, 0.24, contact.heightAbove);
+  const contactAO = understoryFootShade(baseRamp, groundContact);
+  const groundedColor = contact.color.mul(contactAO);
+
+  const finalColor = biomeUnderstoryColor(groundedColor);
+  const fill = understoryShadeEmission(finalColor, { blossom }).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
+
+  // Keep subtle skyward softness on green foliage tips on top of WSC contact-blended base normal.
+  const groundUpView = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();
+  const blendedNormal = mix(contact.normal, groundUpView, plantGreen.mul(0.45)).normalize();
+  const dryRoughness = contact.roughness.clamp(0.38, 1);
   const roughnessNode = mix(dryRoughness, dryRoughness.min(0.28), surfaceWetnessUniform.mul(0.6));
 
   const material = new (foliageMaterialClass(THREE.MeshStandardNodeMaterial))({

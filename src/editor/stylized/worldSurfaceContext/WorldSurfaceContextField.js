@@ -25,3 +25,12 @@ export {
   sampleRgba8Bilinear,
   srgbByteToLinear,
 } from './TerrainSurfaceEvaluator.js';
+export {
+  WSC_CONTACT_DEFAULTS,
+  WSC_CONTACT_PROFILE_NAMES,
+  registerWorldSurfaceContactConfig,
+  resolveContactProfile,
+  resolveWorldSurfaceContactConfig,
+  worldSurfaceContactConfig,
+} from './WorldSurfaceContactConfig.js';
+export { applyWorldSurfaceContact } from './WorldSurfaceContactNodes.js';

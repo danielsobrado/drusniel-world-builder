@@ -12,7 +12,8 @@ import { applyCloudShadow } from './CloudShadow.js';
 import { meadowPatchOnPlant } from './understoryPatch.js';
 import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
-import { sampleGroundContactVarying } from './groundContact/GroundContactState.js';
+import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 
 /** Roughness of a fully rain-wet leaf. */
 const WET_LEAF_ROUGHNESS = 0.34;
@@ -127,26 +128,32 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const local = (role === 'leaf' || role === 'foliage') ? patched : mix(graded, patched, plantGreen);
   const color = biomeLook ? biomeUnderstoryColor(local) : local;
   const blossom = role === 'petal' || role === 'center';
-  // Pure-shader root/base AO, ground-contact darkening, and subtle biome-soil
-  // foot blend so bushes and ferns sit planted in the floor rather than hovering.
-  const groundContact = sampleGroundContactVarying(positionWorld.xz, 'understory');
+  // Pure-shader root/base AO and generic WSC contact collar (PR 4) so bushes
+  // and ferns sit planted in the floor without double-counting AO.
+  const groundContact = sampleWorldSurfaceContextVarying(positionWorld.xz, 'understory');
   const spanY = bounds ? Math.max(0.05, bounds.max[1] - bounds.min[1]) : 0.85;
-  const localHeightT = bounds
-    ? positionGeometry.y.sub(bounds.min[1]).div(spanY).clamp(0, 1)
-    : float(1);
+  const localHeightM = bounds ? positionGeometry.y.sub(bounds.min[1]) : float(spanY);
+  const localHeightT = localHeightM.div(spanY).clamp(0, 1);
   const worldHeightT = positionWorld.y.sub(groundContact.height).div(Math.max(0.35, spanY)).clamp(0, 1);
-  const baseT = mix(localHeightT, worldHeightT, groundContact.inside);
+  const baseT = mix(localHeightT, worldHeightT, groundContact.validity);
   const baseRamp = smoothstep(0.0, 0.30, baseT);
   const baseAo = understoryFootShade(baseRamp, groundContact);
-  const soilMask = smoothstep(0.0, 0.22, baseT).oneMinus()
-    .mul(mix(float(0.55), float(0.30), plantGreen))
-    .mul(groundContact.inside);
   // Shrubs cast no shadow on themselves: inner and underside leaves lose part of
   // the sun here and their sky light below, or the crown reads as one flat sheet.
   const interior = bounds && !blossom ? crownInteriorVisibilityNode(bounds) : float(1);
+  const contact = !blossom
+    ? applyWorldSurfaceContact({
+      surface: { color },
+      wsc: groundContact,
+      profile: 'understory',
+      fallbackHeight: localHeightM,
+      mask: mix(float(1), float(0.62), plantGreen),
+      applyAo: false,
+    })
+    : null;
   const groundedColor = blossom
     ? color.mul(mix(float(0.82), float(1.0), baseRamp))
-    : mix(color, groundContact.soilColor, soilMask).mul(baseAo).mul(mix(float(1), interior, CROWN_SELF_SHADE));
+    : contact.color.mul(baseAo).mul(mix(float(1), interior, CROWN_SELF_SHADE));
   // Cutout shrub/understory cards get GPU edge-on grazing fade + soft horizon-air fringe.
   const edge = softEdges && material.map && !blossom
     ? understoryEdgeNodes(authoredTexture(material.map).a, {
