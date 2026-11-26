@@ -3,6 +3,7 @@ import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { BudgetedAttributeInitialization } from './BudgetedAttributeInitialization.js';
 import { acquireReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
 import { DrawUploadEstimate } from './DrawUploadEstimate.js';
+import { StagedGeometryUploads } from './StagedGeometryUploads.js';
 
 const MAX_WAIT_FRAMES = 4;
 export const INITIAL_UPLOAD_BYTES_PER_FRAME = 768 * 1024;
@@ -21,6 +22,7 @@ export class StreamedDrawPreparation {
     this.initialUploadBytes = new Map();
     this.initialUploadAttributes = new Map();
     this.attributeInitialization = new BudgetedAttributeInitialization(renderer);
+    this.geometryUploads = new StagedGeometryUploads(renderer);
     this.hidden = new Map();
     this.disposed = false;
     this.waitFrames = 0;
@@ -125,6 +127,7 @@ export class StreamedDrawPreparation {
     if (this.pending.delete(mesh)) {
       this.cancelDiagnostics(mesh);
       this.attributeInitialization.cancel(this.initialUploadAttributes.get(mesh) ?? []);
+      this.geometryUploads.cancel(mesh);
       this.initialUploadAttributes.delete(mesh);
       this.initialUploadBytes.delete(mesh);
       this.stagedMaterials.delete(mesh);
@@ -170,9 +173,13 @@ export class StreamedDrawPreparation {
           budgetedBytes += result.bytes;
           if (!result.ready) break;
         }
+        const staged = this.geometryUploads.advance(mesh, byteLimit - uploadBytes, shouldYield, budgeted ? attributes : []);
+        uploadBytes += staged.bytes;
+        budgetedBytes += staged.bytes;
+        if (!staged.ready) break;
         const initial = this.initialUploadBytes.get(mesh) ?? 0;
-        const estimate = this.uploadEstimate.estimate(mesh, plannedBuffers, budgeted ? attributes : []);
-        const bytes = budgeted ? estimate.bytes : Math.max(initial, estimate.bytes);
+        const estimate = this.uploadEstimate.estimate(mesh, plannedBuffers, [...(budgeted ? attributes : []), ...staged.attributes]);
+        const bytes = budgeted || staged.attributes.length ? estimate.bytes : Math.max(initial, estimate.bytes);
         // An indivisible upload may exceed the local slice only if the shared budget admits it.
         if (uploadBytes + bytes > byteLimit && (targets.length || budgetedBytes > 0
             || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
@@ -189,7 +196,10 @@ export class StreamedDrawPreparation {
       if (budgetedBytes) PerfCounters.inc('streamedDrawInitialUploadBytes', budgetedBytes);
       if (targets.length === 0) return;
       this.waitFrames = 0;
-      for (const mesh of targets) materials.set(mesh, mesh.material);
+      for (const mesh of targets) {
+        this.geometryUploads.adopt(mesh);
+        materials.set(mesh, mesh.material);
+      }
       for (const target of targets) target.material = this.stagedMaterials.get(target) ?? target.material;
       this.hierarchyLease ??= acquireReflectionShadowRegistry(this.scene);
       this.hierarchy = this.hierarchyLease.registry;
@@ -260,6 +270,7 @@ export class StreamedDrawPreparation {
       this.settings = { ...this.settings, enabled: false };
       this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
       this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
+      this.geometryUploads.dispose();
       PerfCounters.inc('streamedDrawPreparationFailures');
       console.warn('Streamed draw preparation unavailable.', error);
     } finally {
@@ -285,5 +296,6 @@ export class StreamedDrawPreparation {
     this.hierarchyLease?.release(); this.hierarchyLease = null; this.hierarchy = null;
     this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
     this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
+    this.geometryUploads.dispose();
   }
 }
