@@ -557,36 +557,41 @@ export class InfiniteTerrainView {
     this.finishApplications = 0;
     this.activeRenderPath = 'direct';
     this.coastalSwash?.update(camera, waterVisualClock.value);
-    this.beforeMainRender?.(camera);
-    const draw = () => {
-      if (
-        this.godRays.enabled
-        && ['volumetric', 'cinematic'].includes(this.godRays.technique)
-        && this.godRays.render(camera)
-      ) {
-        this.activeRenderPath = `${this.godRays.technique}-god-rays`;
-        this.finishApplications = this.godRays.technique === 'cinematic' ? 1 : 0;
+    try {
+      this.beforeMainRender?.(camera);
+      const draw = () => {
+        if (
+          this.godRays.enabled
+          && ['volumetric', 'cinematic'].includes(this.godRays.technique)
+          && this.godRays.render(camera)
+        ) {
+          this.activeRenderPath = `${this.godRays.technique}-god-rays`;
+          this.finishApplications = this.godRays.technique === 'cinematic' ? 1 : 0;
+          return;
+        }
+        if (this.postProcessing?.render(camera)) { this.activeRenderPath = 'post-processing'; return; }
+        if (!this.godRays.render(camera)) {
+          this.renderer.render(this.scene, camera);
+        }
+      };
+      if (!this.occlusion) {
+        draw();
+        this.afterMainRender?.(camera);
         return;
       }
-      if (this.postProcessing?.render(camera)) { this.activeRenderPath = 'post-processing'; return; }
-      if (!this.godRays.render(camera)) {
-        this.renderer.render(this.scene, camera);
-      }
-    };
-    if (!this.occlusion) {
-      draw();
+      // Hi-Z prepare runs immediately before the frame's draw, and its indirect-record
+      // bridge stays installed across it. The bridge is geometry-keyed — only a draw
+      // whose geometry has no indirect record of its own is redirected — so the post
+      // passes inside the same pipeline call are untouched, and this project's
+      // compute-compacted impostor and voxel draws are never candidates.
+      this.occlusion.world.camera = camera;
+      this.occlusion.prepare();
+      this.occlusion.render(draw);
       this.afterMainRender?.(camera);
-      return;
+    } catch (error) {
+      this.mainRenderFailed?.();
+      throw error;
     }
-    // Hi-Z prepare runs immediately before the frame's draw, and its indirect-record
-    // bridge stays installed across it. The bridge is geometry-keyed — only a draw
-    // whose geometry has no indirect record of its own is redirected — so the post
-    // passes inside the same pipeline call are untouched, and this project's
-    // compute-compacted impostor and voxel draws are never candidates.
-    this.occlusion.world.camera = camera;
-    this.occlusion.prepare();
-    this.occlusion.render(draw);
-    this.afterMainRender?.(camera);
     const stats = this.occlusion.stats;
     PerfCounters.set(PERF_COUNTER_OCCLUSION_CANDIDATES, stats.candidates);
     PerfCounters.set(PERF_COUNTER_OCCLUSION_OCCLUDERS, stats.occluders);
