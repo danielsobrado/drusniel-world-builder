@@ -50,7 +50,7 @@ export class AlpineRockView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
-    this.lodBatches = new GeologyLodBatches({ enabled: config?.enhancements?.geologyLod, kinds: ALPINE_ROCK_KINDS, cellMeters: ALPINE_CELL_METERS });
+    this.lodBatches = new GeologyLodBatches({ enabled: config?.enhancements?.geologyLod, kinds: ALPINE_ROCK_KINDS, cellMeters: ALPINE_CELL_METERS, admission: config?.enhancements?.regionalGeologyAdmission ? config.enhancements.geologyAdmissionBudget : null });
     this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ALPINE_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
     this.ground = (x, z) => this.groundAt(x, z);
@@ -131,6 +131,7 @@ export class AlpineRockView {
     if (!admitInstancePublication(publicationBudget, this.lodBatches.count, CAPACITY, 17)) return false;
     this.anchor.follow(this.floatingOrigin.getState());
     if (rocks.length) this.ensureMeshes();
+    this.lodBatches.plan(rocks, this.meshes, CAPACITY);
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), snow: new InstanceDirtySpan(mesh.geometry.attributes.instanceSnow) }));
     for (const mesh of this.meshes) mesh.count = 0;
     const kindCounts = new Uint32Array(ALPINE_ROCK_KINDS);
