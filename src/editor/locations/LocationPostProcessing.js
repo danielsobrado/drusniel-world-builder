@@ -174,6 +174,7 @@ export class LocationPostProcessing {
         materialNode: this.inputs.material,
         settings: this.settings.bloom,
         exposure: this.settings.toneMapping.exposure,
+        adaptiveAtmosphere: Boolean(this.atmosphericAdmission),
       })
       : null;
 
@@ -225,7 +226,7 @@ export class LocationPostProcessing {
     if (previous !== this.atmosphericAdmission?.reduced) this.history.ssrValid = false;
     this.ambientOcclusion?.updateUniforms(frameState, this.settings.ao, atmosphere);
     this.ssr?.updateUniforms(frameState, this.settings.ssr, atmosphere);
-    this.bloom?.updateUniforms(this.settings.bloom, this.settings.toneMapping.exposure);
+    this.bloom?.updateUniforms(this.settings.bloom, this.settings.toneMapping.exposure, atmosphere);
     this.toneMapping.updateUniforms(
       this.settings.toneMapping,
       this.settings.bloom.enabled ? this.settings.bloom.intensity : 0,
