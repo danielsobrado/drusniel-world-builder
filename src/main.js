@@ -135,6 +135,7 @@ import { ResourceScope } from './editor/lifecycle/ResourceScope.js';
 import { DeferredWorkBudget } from './editor/performance/DeferredWorkBudget.js';
 import { EnvironmentalPassScheduler } from './editor/performance/EnvironmentalPassScheduler.js';
 import { EnvironmentalParticleBudget } from './editor/performance/EnvironmentalParticleBudget.js';
+import { SpatialPerformanceOverlay } from './editor/performance/qa/SpatialPerformanceOverlay.js';
 import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
 import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
 import { withPreparationFrame } from './render/preparation/DrawPreparation.js';
@@ -1661,6 +1662,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     editorConfig: config,
   });
   resources.own(perfQa);
+  const spatialOverlay = terrainView.stylizedConfig?.enhancements?.spatialPerformanceOverlay
+    ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay }) : null;
+  if (spatialOverlay) resources.own(spatialOverlay);
   if (perfQa) {
     perfQa.mount(root);
     perfQa.publishApi();
@@ -1722,6 +1726,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     terrainView.renderer.setMRT?.(null);
     // Inside an instanced location the world is not drawn or advanced; it resumes where it stopped.
     if (locations.runtime.active) {
+      spatialOverlay?.update(frameTimestamp, true);
       locations.runtime.frame(frameTimestamp);
       viewModeUi.update(frameTimestamp);
       return;
@@ -2084,6 +2089,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     terrainView.render(viewModeController.camera);
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();
+    spatialOverlay?.update(frameTimestamp);
     if (import.meta.env.DEV) window.__worldVisualQa?.afterFrame(frameTimestamp,frameDelta);
     assetStartupTelemetry.markFirstFrame();
     if (profiling) {
