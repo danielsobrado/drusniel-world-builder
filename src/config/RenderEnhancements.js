@@ -13,10 +13,13 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   regionalSpatialBudget: false,
   regionalGeometryCostBudget: false,
   regionalAdmissionBudget: false,
+  rendererAdmissionBudget: false,
   regionalBudget: Object.freeze({ idleMs: 30000, maxTrackedTextureMiB: 256, maxRendererMiB: 4096, evictionsPerFrame: 1, farGrassPressure: 0.85,
     sceneryLodPressure: 0.85, protectedChunkRadius: 1, spatialChunkRadius: 8, spatialChunkBudget: 1200,
     spatialLodFactor: 0.75, spatialCardFactor: 0.8, spatialWorkItems: 256,
     spatialTriangleBudget: 200000, spatialDrawBudget: 100, spatialReflectionPassWeight: 0.25,
+    rendererAdmissionTriangleBudget: 4000000, rendererAdmissionDrawBudget: 1500,
+    rendererAdmissionTransitionReserve: 0.15, rendererAdmissionUploadHeadroom: 0.5, rendererAdmissionMaxChanges: 8,
     admissionFactors: Object.freeze([1, 0.85, 0.7, 0.5]),
     admissionPriorities: Object.freeze({ tree: 4, rock: 3, bush: 2, card: 1 }),
     spatialWeights: Object.freeze({ town: 1, tree: 8, rock: 3, bush: 2, blade: 0.01, card: 0.15, detail: 1, water: 50 }), sampleIntervalMs: 1000, triangleBudget: 4000000, drawBudget: 1500, townInstanceBudget: 3000, recoveryRatio: 0.75 }),
@@ -70,11 +73,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -82,9 +85,9 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   if (!Number.isFinite(value.detailTurnMarginDegrees) || value.detailTurnMarginDegrees < 8 || value.detailTurnMarginDegrees > 45) {
     throw new RangeError('detailTurnMarginDegrees must be within [8, 45] to cover pending camera turns.');
   }
-  for (const [key, min, max] of [['idleMs', 1000, 300000], ['maxTrackedTextureMiB', 16, 8192], ['maxRendererMiB', 128, 32768], ['evictionsPerFrame', 1, 8], ['farGrassPressure', 0.1, 1], ['sceneryLodPressure', 0.5, 1], ['protectedChunkRadius', 1, 8], ['spatialChunkRadius', 2, 16], ['spatialChunkBudget', 1, 1000000], ['spatialLodFactor', 0.5, 1], ['spatialCardFactor', 0.5, 1], ['spatialWorkItems', 16, 2048], ['spatialTriangleBudget', 1000, 100000000], ['spatialDrawBudget', 1, 10000], ['spatialReflectionPassWeight', 0, 1], ['sampleIntervalMs', 250, 10000], ['triangleBudget', 100000, 100000000], ['drawBudget', 50, 20000], ['townInstanceBudget', 100, 100000], ['recoveryRatio', 0.1, 0.99]]) {
+  for (const [key, min, max] of [['idleMs', 1000, 300000], ['maxTrackedTextureMiB', 16, 8192], ['maxRendererMiB', 128, 32768], ['evictionsPerFrame', 1, 8], ['farGrassPressure', 0.1, 1], ['sceneryLodPressure', 0.5, 1], ['protectedChunkRadius', 1, 8], ['spatialChunkRadius', 2, 16], ['spatialChunkBudget', 1, 1000000], ['spatialLodFactor', 0.5, 1], ['spatialCardFactor', 0.5, 1], ['spatialWorkItems', 16, 2048], ['spatialTriangleBudget', 1000, 100000000], ['spatialDrawBudget', 1, 10000], ['spatialReflectionPassWeight', 0, 1], ['rendererAdmissionTriangleBudget', 1000, 100000000], ['rendererAdmissionDrawBudget', 1, 100000], ['rendererAdmissionTransitionReserve', 0, 0.5], ['rendererAdmissionUploadHeadroom', 0, 1], ['rendererAdmissionMaxChanges', 1, 64], ['sampleIntervalMs', 250, 10000], ['triangleBudget', 100000, 100000000], ['drawBudget', 50, 20000], ['townInstanceBudget', 100, 100000], ['recoveryRatio', 0.1, 0.99]]) {
     const n = value.regionalBudget[key];
-    if (!Number.isFinite(n) || n < min || n > max || (['evictionsPerFrame', 'protectedChunkRadius', 'spatialChunkRadius', 'spatialWorkItems'].includes(key) && !Number.isInteger(n))) throw new RangeError(`regionalBudget.${key} must be in [${min}, ${max}].`);
+    if (!Number.isFinite(n) || n < min || n > max || (['evictionsPerFrame', 'protectedChunkRadius', 'spatialChunkRadius', 'spatialWorkItems', 'rendererAdmissionMaxChanges'].includes(key) && !Number.isInteger(n))) throw new RangeError(`regionalBudget.${key} must be in [${min}, ${max}].`);
   }
   for (const [key, weight] of Object.entries(value.regionalBudget.spatialWeights)) {
     if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, key)
