@@ -312,7 +312,7 @@ export class StylizedGodRaysPostProcess {
     const lit = this.cinematicOcclusion ? beauty.rgb.mul(this.cinematicOcclusion.factor) : beauty.rgb;
     this.cinematicShafts = new GodsEndLightShafts({
       depth: this.scenePass.getTextureNode('depth'),
-      sunUv: this.sunUv, intensity: this.cinematicIntensity,
+      sunUv: this.sunUv, intensity: this.cinematicIntensity, adaptiveSamples: Boolean(this.atmosphericAdmission),
     });
     this.cinematicPipeline = setPipelineOutput(new THREE.RenderPipeline(this.renderer), vec4(
       lit.add(this.cinematicShafts.outputNode.mul(this.tint).mul(this.lightScale)),
@@ -439,6 +439,10 @@ export class StylizedGodRaysPostProcess {
     if (this.volumetricRays) {
       const steps = this.config.volumetric.raymarchSteps ?? 40;
       this.volumetricRays.raymarchSteps.value = atmosphere ? reducedSampleCount(steps, atmosphere.volumetricStepFactor, atmosphere.volumetricMinimumSteps) : steps;
+    }
+    if (this.cinematicShafts) {
+      const full = this.cinematicShafts.authoredSamples;
+      this.cinematicShafts.setActiveSamples(atmosphere ? reducedSampleCount(full, atmosphere.shaftSampleFactor, atmosphere.shaftMinimumSamples) : full);
     }
     const contact = this.config.volumetric.contactOcclusion;
     this.cinematicOcclusion?.applyAtmosphericBudget(contact, atmosphere);
