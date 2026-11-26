@@ -125,7 +125,9 @@ export class RegionalRenderCostModel {
       ? [...new Set(entry.representations.filter(rep => rep.fade > 0 && rep.band !== 'culled').map(rep => rep.band))]
       : selectedBand === 'culled' ? [] : [selectedBand];
     if (baseline === 'culled' && selectedBands.length === 0) return { requested, selected };
-    const needsImpostor = baseline === 'impostor' || selectedBands.includes('impostor');
+    const options = entry?.admissionOptions?.map(option => ({ ...option, cost: emptyRenderCost(), seen: new Set() }));
+    const needsImpostor = baseline === 'impostor' || selectedBands.includes('impostor')
+      || options?.some(option => option.band === 'impostor');
     const counts = new Map();
     for (let i = 0; i < placements.length; i++) {
       const placement = placements[i];
@@ -149,19 +151,24 @@ export class RegionalRenderCostModel {
     for (const { index, compatible, count } of counts.values()) {
       accumulate(requested, requestedDraws, index, baseline, compatible, count);
       for (const band of selectedBands) accumulate(selected, selectedDraws, index, band, compatible, count);
+      for (const option of options ?? []) accumulate(option.cost, option.seen, index, option.band, compatible, count);
       yield;
     }
-    return { requested, selected };
+    return { requested, selected, options: options?.map(({ factor, cost }) => ({ factor, cost })) };
   }
 
-  grass(layer, tile, kind) {
+  grass(layer, tile, kind, admissionFactors = null, eligible = false) {
     const template = layer.templates?.[tile.builtBand ?? tile.band];
     const count = Math.min(tile.output?.count ?? 0, template?.instanceCount ?? Infinity);
     const factor = kind === 'card' ? (tile.regionalCountFactor ?? 1) : 1;
     const chosen = count > 0 && factor < 1 ? Math.max(1, Math.floor(count * factor)) : count;
     const cost = template ? partsRenderCost({ geometry: template }) : null;
     // Each tile gets a conservative share of one draw, even when pages batch tiles.
-    return { requested: batchRenderCost(cost, count, this.passes), selected: batchRenderCost(cost, chosen, this.passes) };
+    const requested = batchRenderCost(cost, count, this.passes);
+    const options = kind === 'card' && admissionFactors ? admissionFactors.map(factor => ({
+      factor, cost: batchRenderCost(cost, eligible && count > 0 ? Math.max(1, Math.floor(count * factor)) : count, this.passes),
+    })) : undefined;
+    return { requested, selected: batchRenderCost(cost, chosen, this.passes), options };
   }
 
   water(slot) {
