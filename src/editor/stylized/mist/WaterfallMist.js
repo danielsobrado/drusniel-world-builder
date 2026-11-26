@@ -1,3 +1,4 @@
+import { particlePrefix } from '../../performance/EnvironmentalParticleBudget.js';
 import { frameUniform } from '../../../render/FrameUniforms.js';
 import * as THREE from 'three/webgpu';
 import { createMistParticles } from './mistParticles.js';
@@ -33,6 +34,7 @@ function createSlotMesh(site, material) {
   return {
     site,
     mesh,
+    particleCount: particles.count,
     bounds: new THREE.Sphere(
       new THREE.Vector3(),
       Math.hypot(faceLength, drop) + site.widthMeters * 0.5 + SITE_MARGIN,
@@ -127,7 +129,7 @@ export class WaterfallMist {
     this.slots = kept;
   }
 
-  update(timestampSeconds, camera) {
+  update(timestampSeconds, camera, particles = null) {
     const index = this.enabled ? this.getSites() : null;
     if (!index || !camera) {
       this.assign([]);
@@ -151,6 +153,12 @@ export class WaterfallMist {
       slot.mesh.position.set(render.x, slot.site.foot, render.z);
       slot.bounds.center.set(render.x, slot.site.foot + slot.lift, render.z);
       slot.mesh.visible = this.frustum.intersectsSphere(slot.bounds);
+      if (particles && slot.mesh.visible) {
+        const near = Math.hypot(slot.site.x - canonical.x, slot.site.z - canonical.z) <= particles.settings.protectWaterfallMeters;
+        const factor = particles.request('waterfall', slot.particleCount, near ? slot.particleCount : 0);
+        slot.mesh.geometry.instanceCount = near ? slot.particleCount : particlePrefix(slot.particleCount, factor);
+        slot.mesh.visible = slot.mesh.geometry.instanceCount > 0;
+      }
     }
   }
 
