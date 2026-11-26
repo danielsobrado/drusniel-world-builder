@@ -134,6 +134,7 @@ import { captureEditorRecoveryState, restoreEditorRecoveryState } from './editor
 import { ResourceScope } from './editor/lifecycle/ResourceScope.js';
 import { DeferredWorkBudget } from './editor/performance/DeferredWorkBudget.js';
 import { EnvironmentalPassScheduler } from './editor/performance/EnvironmentalPassScheduler.js';
+import { EnvironmentalParticleBudget } from './editor/performance/EnvironmentalParticleBudget.js';
 import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
 import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
 import { withPreparationFrame } from './render/preparation/DrawPreparation.js';
@@ -1601,6 +1602,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   }
   const deferredWork = new DeferredWorkBudget(config.exploration.frameBudget);
   const environmentPasses = new EnvironmentalPassScheduler(config.exploration.environmentPasses);
+  const particleSettings = terrainView.stylizedConfig?.enhancements;
+  const environmentalParticles = particleSettings?.environmentalParticleAdmission
+    ? new EnvironmentalParticleBudget(particleSettings.environmentalParticleBudget) : null;
   deferredWork.attachSurface(stylizedSurface);
   const drawPreparation = new StreamedDrawPreparation({ scene: terrainView.scene, renderer: terrainView.renderer,
     settings: config.exploration.drawPreparation, render: camera => terrainView.prewarmPostProcessing(camera),
@@ -1715,6 +1719,11 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       locations.runtime.frame(frameTimestamp);
       viewModeUi.update(frameTimestamp);
       return;
+    }
+    if (environmentalParticles) {
+      const pressure = PerfCounters.get('frameFixedCpuMs') + PerfCounters.get('frameDeferredCpuMs') > environmentalParticles.settings.frameCpuPressureMs
+        || PerfCounters.get('framePublicationUploadBytes') > deferredWork.maxUploadBytes / 2;
+      environmentalParticles.beginFrame(frameTimestamp, pressure);
     }
     deferredWork.beginFrame();
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
@@ -1896,6 +1905,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         frameTimestamp * 0.001,
         camera.position,
         effectCenter,
+        environmentalParticles,
       );
     }
     spellRuntime?.update(frameTimestamp);
@@ -1934,7 +1944,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     oceanWeatherScratch.intensity = worldWind.intensity;
     stylizedSurface.setOceanWeather(oceanWeatherScratch);
     worldWind.render(terrainView.renderer, environmentPasses, deferredWork);
-    waterfallMist.update(frameTimestamp / 1000, viewModeController.camera);
+    waterfallMist.update(frameTimestamp / 1000, viewModeController.camera, environmentalParticles);
     updateGroundDeformation(frameTimestamp / 1000);
     snowWakeRecorder.update(frameTimestamp / 1000, snowWakeBody());
     const frameWeatherAudio = weatherAudioLevels();
@@ -2019,6 +2029,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     });
     snowPowder.update(frameSeconds);
     worldAmbience.update(frameDelta, {
+      particles: environmentalParticles,
       budget: deferredWork,
       camera: viewModeController.camera,
       walking: viewModeController.mode === PLAYER_MODE_WALK,
