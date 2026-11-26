@@ -317,11 +317,12 @@ test('PR 2 CPU material-bake and RGBA8 bilinear sampling match GPU bilinearTexel
   };
 
   // Independent reference of GPU `bilinearTexels` (`TerrainSlotBindings.js:65-73`).
-  const gpuBilinearRef = (u, v, readTexel) => {
+  // `edge`: the bake's edge-aligned texels, read through TerrainMaterialBakedNodes' uv remap.
+  const gpuBilinearRef = (u, v, readTexel, edge = false) => {
     const cu = Math.max(0, Math.min(1, u));
     const cv = Math.max(0, Math.min(1, v));
-    const tx = cu * res - 0.5;
-    const tz = cv * res - 0.5;
+    const tx = edge ? cu * (res - 1) : cu * res - 0.5;
+    const tz = edge ? cv * (res - 1) : cv * res - 0.5;
     const bx = Math.floor(tx);
     const bz = Math.floor(tz);
     const wx = tx - bx;
@@ -349,10 +350,10 @@ test('PR 2 CPU material-bake and RGBA8 bilinear sampling match GPU bilinearTexel
     assert.ok(Math.abs((coordOut.w00 + coordOut.w10 + coordOut.w01 + coordOut.w11) - 1) < 1e-12);
 
     assert.equal(sampleMaterialBakeChannels(bake, u, v, out), true);
-    const rawG = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4] / 255);
-    const rawD = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 1] / 255);
-    const rawR = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 2] / 255);
-    const rawS = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 3] / 255);
+    const rawG = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4] / 255, true);
+    const rawD = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 1] / 255, true);
+    const rawR = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 2] / 255, true);
+    const rawS = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 3] / 255, true);
     const rawSum = rawG + rawD + rawR + rawS;
     assert.ok(Math.abs(out.grassWeight - rawG / rawSum) < 1e-6);
     assert.ok(Math.abs(out.dirtWeight - rawD / rawSum) < 1e-6);
@@ -360,16 +361,16 @@ test('PR 2 CPU material-bake and RGBA8 bilinear sampling match GPU bilinearTexel
     assert.ok(Math.abs(out.snowWeight - rawS / rawSum) < 1e-6);
     assert.ok(Math.abs((out.grassWeight + out.dirtWeight + out.rockWeight + out.snowWeight) - 1) < 1e-6);
 
-    const refWet = gpuBilinearRef(u, v, (x, z) => wetnessShoreline[(z * res + x) * 2] / 255);
-    const refShore = gpuBilinearRef(u, v, (x, z) => wetnessShoreline[(z * res + x) * 2 + 1] / 255);
+    const refWet = gpuBilinearRef(u, v, (x, z) => wetnessShoreline[(z * res + x) * 2] / 255, true);
+    const refShore = gpuBilinearRef(u, v, (x, z) => wetnessShoreline[(z * res + x) * 2 + 1] / 255, true);
     assert.ok(Math.abs(out.wetness - refWet) < 1e-6);
     assert.ok(Math.abs(out.shoreline - refShore) < 1e-6);
 
-    const refMacroR = Math.max(0.65, Math.min(1.35, gpuBilinearRef(u, v, (x, z) => macroTint[(z * res + x) * 4] / 255) * 2));
+    const refMacroR = Math.max(0.65, Math.min(1.35, gpuBilinearRef(u, v, (x, z) => macroTint[(z * res + x) * 4] / 255, true) * 2));
     assert.ok(Math.abs(out.macroR - refMacroR) < 1e-6);
 
-    const refSlope = gpuBilinearRef(u, v, (x, z) => fromHalf(terrainShape[(z * res + x) * 2]));
-    const refCurv = gpuBilinearRef(u, v, (x, z) => fromHalf(terrainShape[(z * res + x) * 2 + 1]));
+    const refSlope = gpuBilinearRef(u, v, (x, z) => fromHalf(terrainShape[(z * res + x) * 2]), true);
+    const refCurv = gpuBilinearRef(u, v, (x, z) => fromHalf(terrainShape[(z * res + x) * 2 + 1]), true);
     assert.ok(Math.abs(out.slope - refSlope) < 1e-6);
     assert.ok(Math.abs(out.curvature - refCurv) < 1e-6);
 

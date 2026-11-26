@@ -59,7 +59,11 @@ function normalizedWeights(textureNode) {
   return textureNode.div(total);
 }
 
-function sampleBakeTextures(gpuState, terrainUv) {
+function sampleBakeTextures(gpuState, chunkUv) {
+  // Bake texels are edge-aligned (TerrainMaterialBakeCpu): texel 0 and resolution - 1
+  // lie on the chunk edges, so neighbouring chunks meet at a shared value.
+  const resolution = gpuState.resolution;
+  const terrainUv = resolution > 1 ? chunkUv.mul((resolution - 1) / resolution).add(0.5 / resolution) : chunkUv;
   // A shared material samples each drawn slot's own bake (TerrainSlotBindings).
   const sample = (name) => (gpuState.sampleTexture
     ? gpuState.sampleTexture(name, terrainUv)

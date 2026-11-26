@@ -213,3 +213,51 @@ test('curvature reaches the chunk border ring, so a bowl reads the same at every
   const expected = floatToHalf(0.25);
   for (let index = 0; index < 36; index += 1) assert.equal(shape[index * 2 + 1], expected, `texel ${index}`);
 });
+
+test('neighbouring chunks bake the same texels along their shared edge', async () => {
+  const chunkSize = 4;
+  // One continuous world: a slope and a grass/path gradient that both run across the edge.
+  const worldPage = (chunkX) => {
+    const originX = chunkX * chunkSize;
+    const tilePixels = new Uint8Array(chunkSize * chunkSize * 4);
+    const surfaceMaskPixels = new Uint8Array(chunkSize * chunkSize * 4);
+    for (let z = 0; z < chunkSize; z += 1) {
+      for (let x = 0; x < chunkSize; x += 1) {
+        const worldX = originX + x;
+        const index = z * chunkSize + x;
+        tilePixels.set([60 + worldX * 9, 120 + z * 7, 70, 4], index * 4);
+        surfaceMaskPixels.set([worldX * 25, 255 - worldX * 28, 0, 255], index * 4);
+      }
+    }
+    const heights = new Float32Array((chunkSize + 1) ** 2);
+    for (let z = 0; z <= chunkSize; z += 1) {
+      for (let x = 0; x <= chunkSize; x += 1) heights[z * (chunkSize + 1) + x] = (originX + x) ** 2 * 0.08 + z * 0.1;
+    }
+    return { originX, originZ: 0, tilePixels, surfaceMaskPixels, heights };
+  };
+  const pages = new Map([[0, worldPage(0)], [1, worldPage(1)]]);
+  const bake = async (chunkX) => {
+    const source = captureTerrainMaterialBakeSource({
+      page: pages.get(chunkX),
+      chunkSize,
+      pageAt: (cx, cz) => (cz === 0 ? pages.get(cx) ?? null : null),
+    });
+    const desc = createTerrainMaterialBakeDescriptor({
+      chunkX, chunkZ: 0, quality: 'balanced', revisions: { world: 0, tile: 0, height: 0, water: 0, canopy: 0 },
+    });
+    return (await bakeTerrainMaterialPage({ ...options(source), descriptor: desc, config: bakeConfig(8) })).value;
+  };
+  const west = await bake(0);
+  const east = await bake(1);
+  const res = west.resolution;
+  for (const [name, pixels] of Object.entries(west.channels)) {
+    const components = pixels.length / (res * res);
+    for (let z = 0; z < res; z += 1) {
+      for (let c = 0; c < components; c += 1) {
+        const a = pixels[(z * res + res - 1) * components + c];
+        const b = east.channels[name][(z * res) * components + c];
+        assert.equal(a, b, `${name}[${c}] row ${z}: west edge ${a} vs east edge ${b}`);
+      }
+    }
+  }
+});

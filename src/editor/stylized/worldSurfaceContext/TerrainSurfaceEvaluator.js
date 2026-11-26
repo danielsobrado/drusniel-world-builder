@@ -236,9 +236,11 @@ function sampleWorldNoiseLayer(pixels, layer, u, v, out) {
  * indices and weights for normalized `(u, v)` in `[0, 1]` on a `res x res` map.
  * Zero allocations: writes into caller-supplied scratch object.
  */
-export function bilinearTexelCoords(u, v, res, out) {
-  const tx = clamp01(u) * res - 0.5;
-  const tz = clamp01(v) * res - 0.5;
+export function bilinearTexelCoords(u, v, res, out, edgeAligned = false) {
+  // Edge-aligned textures (the material bake, the forest floor) put texel 0 and
+  // res - 1 on the chunk edges; others centre their texels.
+  const tx = edgeAligned ? clamp01(u) * (res - 1) : clamp01(u) * res - 0.5;
+  const tz = edgeAligned ? clamp01(v) * (res - 1) : clamp01(v) * res - 0.5;
   const bx = Math.floor(tx);
   const bz = Math.floor(tz);
   const fx = tx - bx;
@@ -265,8 +267,8 @@ const BILINEAR_SCRATCH = { i00: 0, i10: 0, i01: 0, i11: 0, w00: 1, w10: 0, w01: 
  * Samples an RGBA8 texture (`size x size`, `LinearFilter`) at normalized `(u, v)`
  * using exact texel-centre bilinear interpolation into `out` (`[r, g, b, a]` in `0..1`).
  */
-export function sampleRgba8Bilinear(pixels, size, u, v, out) {
-  const c = bilinearTexelCoords(u, v, size, BILINEAR_SCRATCH);
+export function sampleRgba8Bilinear(pixels, size, u, v, out, edgeAligned = false) {
+  const c = bilinearTexelCoords(u, v, size, BILINEAR_SCRATCH, edgeAligned);
   const o00 = c.i00 * 4;
   const o10 = c.i10 * 4;
   const o01 = c.i01 * 4;
@@ -290,7 +292,7 @@ export function sampleMaterialBakeChannels(materialBake, u, v, out) {
   const res = materialBake?.resolution ?? 0;
   if (!channels || res <= 0) return false;
 
-  const c = bilinearTexelCoords(u, v, res, BILINEAR_SCRATCH);
+  const c = bilinearTexelCoords(u, v, res, BILINEAR_SCRATCH, true);
   const { i00, i10, i01, i11, w00, w10, w01, w11 } = c;
   const inv255 = 1 / 255;
 

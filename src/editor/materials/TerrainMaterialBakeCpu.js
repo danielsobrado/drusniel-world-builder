@@ -8,6 +8,7 @@ import {
 import { encodeTerrainMaterialWeights } from './TerrainMaterialBakePacking.js';
 import { snowAtPoint } from './SnowAccumulation.js';
 import { terrainBakeMacroSeed, terrainBakeValueNoise as valueNoise } from './TerrainBakeNoise.js';
+import { padTerrainMaterialBakeSource } from './TerrainMaterialBakeSourcePad.js';
 
 const DISTANCE_INFINITY = 1e9;
 const SQRT_TWO = Math.SQRT2;
@@ -26,14 +27,23 @@ function smoothstep(edge0, edge1, value) {
   return t * t * (3 - 2 * t);
 }
 
-function outputToSource(index, resolution, chunkSize) {
-  return clamp(Math.floor((index + 0.5) * chunkSize / resolution), 0, chunkSize - 1);
+/**
+ * An edge-aligned texel's position in cells from the chunk's min edge: texel 0
+ * and `resolution - 1` lie on the chunk edges, so neighbours bake the same border.
+ */
+function texelCellPosition(index, resolution, chunkSize) {
+  return resolution > 1 ? index / (resolution - 1) * chunkSize : chunkSize / 2;
 }
 
-function cellHeight(heights, chunkSize, x, z) {
-  const vertexSize = chunkSize + 1;
-  const x0 = clamp(x, 0, chunkSize - 1);
-  const z0 = clamp(z, 0, chunkSize - 1);
+/** The padded-grid cell holding an edge-aligned texel (the far edge reads the neighbour's first cell). */
+function texelSourceCell(position, chunkSize, pad) {
+  return clamp(Math.floor(position), 0, chunkSize) + pad;
+}
+
+function cellHeight(heights, size, x, z) {
+  const vertexSize = size + 1;
+  const x0 = clamp(x, 0, size - 1);
+  const z0 = clamp(z, 0, size - 1);
   const topLeft = heights[z0 * vertexSize + x0];
   const topRight = heights[z0 * vertexSize + x0 + 1];
   const bottomLeft = heights[(z0 + 1) * vertexSize + x0];
@@ -41,8 +51,9 @@ function cellHeight(heights, chunkSize, x, z) {
   return (topLeft + topRight + bottomLeft + bottomRight) * 0.25;
 }
 
-function terrainShape(heights, chunkSize, tileSize, x, z) {
-  const vertexSize = chunkSize + 1;
+/** Shape of cell (x, z) of a `size × size` cell grid whose heights are `(size + 1)²` vertices. */
+function terrainShape(heights, size, tileSize, x, z) {
+  const vertexSize = size + 1;
   const topLeft = heights[z * vertexSize + x];
   const topRight = heights[z * vertexSize + x + 1];
   const bottomLeft = heights[(z + 1) * vertexSize + x];
@@ -51,20 +62,20 @@ function terrainShape(heights, chunkSize, tileSize, x, z) {
   const dx = (topRight + bottomRight - topLeft - bottomLeft) / (2 * tileSize);
   const dz = (bottomLeft + bottomRight - topLeft - topRight) / (2 * tileSize);
   const slope = Math.hypot(dx, dz);
-  return { center, dx, dz, slope, curvature: cellCurvature(heights, chunkSize, tileSize, x, z) };
+  return { center, dx, dz, slope, curvature: cellCurvature(heights, size, tileSize, x, z) };
 }
 
-// The border ring has no neighbour cell in this chunk: it takes the nearest interior
-// cell's curvature. Zero there drew every chunk edge as a line in the snow and ridge terms.
-function cellCurvature(heights, chunkSize, tileSize, x, z) {
-  if (chunkSize < 3) return 0;
-  const cx = clamp(x, 1, chunkSize - 2);
-  const cz = clamp(z, 1, chunkSize - 2);
-  const left = cellHeight(heights, chunkSize, cx - 1, cz);
-  const right = cellHeight(heights, chunkSize, cx + 1, cz);
-  const near = cellHeight(heights, chunkSize, cx, cz - 1);
-  const far = cellHeight(heights, chunkSize, cx, cz + 1);
-  return (left + right + near + far - cellHeight(heights, chunkSize, cx, cz) * 4) / (tileSize * tileSize);
+// Reads the neighbouring cells, which the padded grid carries across the chunk
+// edge; only its own outer ring takes the nearest interior cell's curvature.
+function cellCurvature(heights, size, tileSize, x, z) {
+  if (size < 3) return 0;
+  const cx = clamp(x, 1, size - 2);
+  const cz = clamp(z, 1, size - 2);
+  const left = cellHeight(heights, size, cx - 1, cz);
+  const right = cellHeight(heights, size, cx + 1, cz);
+  const near = cellHeight(heights, size, cx, cz - 1);
+  const far = cellHeight(heights, size, cx, cz + 1);
+  return (left + right + near + far - cellHeight(heights, size, cx, cz) * 4) / (tileSize * tileSize);
 }
 
 function octNormal(dx, dz) {
@@ -148,9 +159,10 @@ function sampleCanopy(source, x, z, resolution) {
   const pixels = source.canopyPixels;
   const size = source.canopySize;
   if (!pixels || !Number.isInteger(size) || size < 1) return 0;
-  // Edge-aligned canopy texels (forestFloorTexture.js): nearest to this bake texel's centre.
-  const sampleX = clamp(Math.round((x + 0.5) / resolution * (size - 1)), 0, size - 1);
-  const sampleZ = clamp(Math.round((z + 0.5) / resolution * (size - 1)), 0, size - 1);
+  // Both grids are edge-aligned (forestFloorTexture.js), so their edges coincide.
+  const along = resolution > 1 ? (size - 1) / (resolution - 1) : 0;
+  const sampleX = clamp(Math.round(x * along), 0, size - 1);
+  const sampleZ = clamp(Math.round(z * along), 0, size - 1);
   // Four bytes a texel: R is the canopy, G the contact shade the streamed ground
   // also reads (see `StylizedSurfaceViewBase.paintContactShade`). The stride is the
   // whole contract between the two — a one-byte stride here would read the canopy
@@ -160,6 +172,8 @@ function sampleCanopy(source, x, z, resolution) {
 
 export function captureTerrainMaterialBakeSource({
   page,
+  chunkSize = Math.round(Math.sqrt(page?.surfaceMaskPixels?.length / 4)),
+  pageAt = null,
   canopyPixels = null,
   canopySize = 0,
   waterHaloPixels = null,
@@ -174,6 +188,8 @@ export function captureTerrainMaterialBakeSource({
   return Object.freeze({
     originX: page.originX,
     originZ: page.originZ,
+    // The neighbours' border cells, for an edge-aligned bake (TerrainMaterialBakeSourcePad.js).
+    padded: padTerrainMaterialBakeSource({ page, chunkSize, pageAt }),
     tilePixels: page.tilePixels.slice(),
     // Tile ids are the Azgaar biome ids: snow cover follows glacier and tundra.
     tiles: page.tiles ? Uint8Array.from(page.tiles) : null,
@@ -227,17 +243,20 @@ export async function bakeTerrainMaterialPage({
   const curvatures = new Float32Array(texelCount);
   const sourceIndices = new Uint32Array(texelCount);
   const waterSource = waterDistanceSource(source, chunkSize);
+  // Cell arrays with the neighbours' border; a source captured without one pads by clamping.
+  const padded = source.padded ?? padTerrainMaterialBakeSource({ page: source, chunkSize });
+  const { pad, size: paddedSize } = padded;
   const rowsPerYield = config.build.rowsPerYield;
   const farStyle = createTerrainMaterialFarStyle(materialStyle, config.render, config.families?.substrates,
     config.classification?.glacierCover);
 
   for (let z = 0; z < resolution; z += 1) {
-    const sourceZ = outputToSource(z, resolution, chunkSize);
+    const sourceZ = texelSourceCell(texelCellPosition(z, resolution, chunkSize), chunkSize, pad);
     for (let x = 0; x < resolution; x += 1) {
-      const sourceX = outputToSource(x, resolution, chunkSize);
+      const sourceX = texelSourceCell(texelCellPosition(x, resolution, chunkSize), chunkSize, pad);
       const index = z * resolution + x;
-      const sourceIndex = sourceZ * chunkSize + sourceX;
-      const shape = terrainShape(source.heights, chunkSize, tileSize, sourceX, sourceZ);
+      const sourceIndex = sourceZ * paddedSize + sourceX;
+      const shape = terrainShape(padded.heights, paddedSize, tileSize, sourceX, sourceZ);
       sourceIndices[index] = sourceIndex;
       heights[index] = shape.center;
       slopes[index] = shape.slope;
@@ -261,33 +280,36 @@ export async function bakeTerrainMaterialPage({
     for (let x = 0; x < resolution; x += 1) {
       const index = z * resolution + x;
       const sourceIndex = sourceIndices[index];
-      const sourceX = sourceIndex % chunkSize;
-      const sourceZ = Math.floor(sourceIndex / chunkSize);
+      // Chunk-local cell (0..chunkSize: the far edge is the neighbour's first cell).
+      const sourceX = sourceIndex % paddedSize - pad;
+      const sourceZ = Math.floor(sourceIndex / paddedSize) - pad;
       const sourceOffset = sourceIndex * 4;
-      const path = source.surfaceMaskPixels[sourceOffset] / 255;
-      const grassCoverage = sampleSurfaceMaskChannel(source.surfaceMaskPixels,chunkSize,chunkSize,
-        (x+.5)*chunkSize/resolution,(z+.5)*chunkSize/resolution,1);
-      const waterByte = source.surfaceMaskPixels[sourceOffset + 2];
+      const cellX = texelCellPosition(x, resolution, chunkSize);
+      const cellZ = texelCellPosition(z, resolution, chunkSize);
+      const path = padded.surfaceMaskPixels[sourceOffset] / 255;
+      const grassCoverage = sampleSurfaceMaskChannel(padded.surfaceMaskPixels, paddedSize, paddedSize,
+        cellX + pad, cellZ + pad, 1);
+      const waterByte = padded.surfaceMaskPixels[sourceOffset + 2];
       const waterCoverage = waterByte / 255;
       const slope = slopes[index];
       const height = heights[index];
       const land = 1 - waterCoverage;
       const rock = smoothstep(classification.rockSlopeStart, classification.rockSlopeFull, slope) * land;
-      const worldX = (source.originX + (x + 0.5) * chunkSize / resolution) * tileSize;
-      const worldZ = -(source.originZ + (z + 0.5) * chunkSize / resolution) * tileSize;
+      const worldX = (source.originX + cellX) * tileSize;
+      const worldZ = -(source.originZ + cellZ) * tileSize;
       const snow = snowAtPoint({
         height,
         slope,
         dx: gradientsX[index],
         dz: gradientsZ[index],
         curvature: curvatures[index],
-        tileId: source.tiles ? source.tiles[sourceIndex] : -1,
-        biomeCover: source.snowBiomeCover ? source.snowBiomeCover[sourceIndex] / 255 : undefined,
+        tileId: padded.tiles ? padded.tiles[sourceIndex] : -1,
+        biomeCover: padded.snowBiomeCover ? padded.snowBiomeCover[sourceIndex] / 255 : undefined,
         worldX,
         worldZ,
         // The mask's continuous dry share, not the binary water class: cut by
         // that, snow ended at every shore along the cell staircase.
-      }, classification, macroSeed) * smoothstep(0.25, 0.85, source.surfaceMaskPixels[sourceOffset + 3] / 255);
+      }, classification, macroSeed) * smoothstep(0.25, 0.85, padded.surfaceMaskPixels[sourceOffset + 3] / 255);
       const grass = grassCoverage * (1 - path) * (1 - rock) * (1 - snow) * land;
       // Bare bed under water as well as bare land: with snow no longer cut by the
       // water class, a wet cell must still weigh dirt against it.
@@ -307,14 +329,15 @@ export async function bakeTerrainMaterialPage({
         snowWeight,
       );
 
-      const waterIndex = (sourceZ + waterSource.radius) * waterSource.size
-        + sourceX + waterSource.radius;
+      const waterLimit = waterSource.size - waterSource.radius - 1;
+      const waterIndex = (Math.min(sourceZ, waterLimit) + waterSource.radius) * waterSource.size
+        + Math.min(sourceX, waterLimit) + waterSource.radius;
       const waterDistanceCells = waterSource.distance[waterIndex];
       const shoreline = clamp01(1 - waterDistanceCells / classification.shorelineRadiusCells);
       const wetness = terrainWetlandWetness(Math.max(
         waterCoverage,
         clamp01(1 - waterDistanceCells / classification.wetnessRadiusCells),
-      ), source.tilePixels[sourceOffset + 3], slope);
+      ), padded.tilePixels[sourceOffset + 3], slope);
       const canopy = sampleCanopy(source, x, z, resolution);
       wetnessShoreline[index * 2] = Math.round(wetness * 255);
       wetnessShoreline[index * 2 + 1] = Math.round(shoreline * 255);
@@ -343,7 +366,7 @@ export async function bakeTerrainMaterialPage({
         encodeTerrainMaterialFarColor(
           farColor,
           index * 4,
-          source.tilePixels,
+          padded.tilePixels,
           sourceOffset,
           farStyle,
           grassWeight,
@@ -362,17 +385,17 @@ export async function bakeTerrainMaterialPage({
       } else {
         const wetShade = 1 - wetness * macro.wetDarkening;
         farColor[index * 4] = Math.round(clamp(
-          source.tilePixels[sourceOffset] * macroRed * heightShade * wetShade,
+          padded.tilePixels[sourceOffset] * macroRed * heightShade * wetShade,
           0,
           255,
         ));
         farColor[index * 4 + 1] = Math.round(clamp(
-          source.tilePixels[sourceOffset + 1] * macroGreen * heightShade * wetShade,
+          padded.tilePixels[sourceOffset + 1] * macroGreen * heightShade * wetShade,
           0,
           255,
         ));
         farColor[index * 4 + 2] = Math.round(clamp(
-          source.tilePixels[sourceOffset + 2] * macroBlue * heightShade * wetShade,
+          padded.tilePixels[sourceOffset + 2] * macroBlue * heightShade * wetShade,
           0,
           255,
         ));

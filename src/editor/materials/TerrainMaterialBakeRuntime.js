@@ -237,6 +237,9 @@ export class TerrainMaterialBakeRuntime {
     const hasCanopy = Boolean(validForestFloorKey(slot));
     return captureTerrainMaterialBakeSource({
       page: slot.page,
+      chunkSize: this.terrainView.chunkSize,
+      // The neighbours' border cells, so both sides bake the same values on a shared edge.
+      pageAt: (chunkX, chunkZ) => this.residentPages.get(`${chunkX}:${chunkZ}`) ?? null,
       canopyPixels: hasCanopy ? slot.forestFloorPixels : null,
       canopySize: hasCanopy ? slot.forestFloorSize : 0,
       waterHaloPixels: halo?.pixels ?? null,
