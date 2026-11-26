@@ -7,7 +7,7 @@ function triangles(mesh) {
 }
 
 /** Select only cheaper existing representations. Preserve placements and baseline capacity. */
-export function planGeologyAdmission(items, meshes, capacity, lod, settings) {
+export function planGeologyAdmission(items, meshes, capacity, lod, settings, wasPressured = false) {
   const indices = new Map(), candidates = [], counts = new Uint32Array(lod.count);
   const kinds = new Uint32Array(lod.kinds);
   const costs = meshes.map(triangles);
@@ -25,16 +25,18 @@ export function planGeologyAdmission(items, meshes, capacity, lod, settings) {
     const far = lod.farIndex(item), farCost = costs[far];
     const distance = Math.hypot(item.x - lod.focus.x, item.z - lod.focus.z);
     const extent = item.scale * Math.max(1, item.stretch ?? 1);
-    const protect = Math.max(settings.protectMeters, extent * settings.minimumScaleMultiplier);
+    const protect = Math.max(settings.protectMeters, extent * settings.minimumScaleMultiplier) + lod.sectorMeters / 32;
     if (distance <= protect || farCost == null || farCost <= 0 || farCost >= cost) continue;
     candidates.push({ item, index, far, saving: cost - farCost, priority: distance / protect });
   }
   const requestedDraws = counts.reduce((n, count) => n + Number(count > 0), 0);
   let selected = requested, draws = requestedDraws, simplified = 0;
-  if (selected > settings.triangleBudget) {
+  const recovery = settings.triangleBudget * settings.recoveryRatio;
+  const pressured = selected > settings.triangleBudget || (wasPressured && selected > recovery);
+  if (pressured) {
     candidates.sort((a, b) => b.priority - a.priority || b.saving - a.saving);
     for (const entry of candidates) {
-      if (selected <= settings.triangleBudget) break;
+      if (selected <= recovery) break;
       const { item, index, far, saving } = entry;
       const nextDraws = draws + Number(counts[far] === 0) - Number(counts[index] === 1);
       if (nextDraws > requestedDraws + settings.maxExtraDraws || counts[far] >= capacity) continue;
@@ -45,6 +47,6 @@ export function planGeologyAdmission(items, meshes, capacity, lod, settings) {
       simplified++;
     }
   }
-  return { indices, stats: { requested, selected, requestedDraws, selectedDraws: draws, simplified, unknown,
+  return { indices, stats: { requested, selected, requestedDraws, selectedDraws: draws, simplified, unknown, pressured,
     overflow: Math.max(0, selected - settings.triangleBudget) } };
 }
