@@ -187,6 +187,39 @@ export class TownModuleInstances {
     this.shown.set(meshes, previous);
   }
 
+  /** Publish both decorative tiers together; cancellation cannot expose a partial replacement. */
+  *decorationJob(tiers, budget = null, isCurrent = () => true) {
+    const near = [], far = [];
+    for (let i = 0; i < tiers.length; i++) {
+      if (tiers[i] === 1) near.push(i);
+      else if (tiers[i] === 2) far.push(i);
+      if ((i & 63) === 63) yield;
+    }
+    const selections = [];
+    for (const [meshes, indices] of [[this.nearMeshes, near], [this.farMeshes, far]]) {
+      if (!meshes.length) continue;
+      const previous = this.shown.get(meshes);
+      const dirty = [];
+      for (let i = 0; i < indices.length; i++) {
+        // Fresh kit buffers contain the complete identity-ordered placement list.
+        if (previous ? i >= previous.count || previous.indices[i] !== indices[i] : indices[i] !== i) dirty.push(i);
+        if ((i & 63) === 63) yield;
+      }
+      selections.push({ meshes, indices, dirty });
+    }
+    if (budget?.canPublish) {
+      while (isCurrent() && !budget.canPublish(selections.reduce((bytes, item) => bytes + estimateTownPublicationBytes(item.meshes, item.dirty), 0))) yield WAIT_FOR_TOWN_PUBLICATION;
+    }
+    if (!isCurrent()) return false;
+    for (const { meshes, indices, dirty } of selections) {
+      writeTownInstanceRows(meshes, this.matrices, this.colours, indices, indices.length, dirty);
+      this.shown.set(meshes, { indices, count: indices.length });
+    }
+    this.decorationTiers = tiers;
+    this.setLod(TOWN_LOD_SPLIT);
+    return true;
+  }
+
   /**
    * Big towns: near meshes draw the placements within `radius` of town-local (x, z),
    * far meshes the rest. A module without a far level, or an interior one, keeps its
