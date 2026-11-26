@@ -286,6 +286,9 @@ export class MeadowTileLayer {
       this.batchDirty = true;
     }
     const previousBand = tile.band;
+    const factor = this.countFactorForTile?.(centerX, centerZ, size / 2) ?? 1;
+    if ((tile.regionalCountFactor ?? 1) !== factor) this.batchDirty = true;
+    tile.regionalCountFactor = factor;
     const previousRenderX = tile.renderX;
     const previousRenderZ = tile.renderZ;
     tile.band = band;
