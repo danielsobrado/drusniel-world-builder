@@ -338,6 +338,7 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
   const offsetZ = anchor?.z ?? 0;
   let total = 0;
   for (const [prototypeIndex, parts] of renderers.entries()) {
+    if (!parts) continue;
     const instances = instancesByPrototype[prototypeIndex] ?? [];
     for (const mesh of parts) {
       const capacity = mesh.instanceMatrix.count;
