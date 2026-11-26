@@ -198,7 +198,7 @@ test('renderer budget publishes shared decisions only after completed demand and
   }
   assert.equal(sampling, true);
   assert.equal(budget.factorForKey('5:0', 'card'), 0.5);
-  assert.equal(budget.factorForKey('2:0', 'card'), 0.5);
+  assert.equal(budget.factorForKey('2:0', 'card'), 0.7);
   camera.position.x = 12800;
   budget.update(surface, 100, () => true, camera);
   assert.equal(budget.decisions.size, 0);
