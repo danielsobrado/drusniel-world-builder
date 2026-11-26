@@ -2,6 +2,21 @@
 detailVisibility: false
 # Enable after snow/coast visual and hardware acceptance.
 geologyLod: false
+regionalGeologyAdmission: false
+locationDecorationAdmission: false
+geologyAdmissionBudget:
+  triangleBudget: 100000
+  protectMeters: 64
+  minimumScaleMultiplier: 24
+  maxExtraDraws: 8
+locationDecorationBudget:
+  cellMeters: 24
+  protectMeters: 24
+  maxDistanceMeters: 100
+  triangleBudget: 60000
+  drawBudget: 24
+  recoveryMeters: 4
+  boundsPaddingMeters: 1
 # Opt-in until regional visual and GPU acceptance.
 regionalTerrainProfiles: false
 regionalLazyTrees: false
