@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { CellResidency } from '../lod/CellResidency.js';
 import { InstanceDirtySpan, admitInstancePublication } from '../lod/InstanceDirtySpan.js';
+import { GeologyLodBatches } from '../lod/GeologyLodBatches.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { ICEBERG_CELL_METERS, ICEBERG_KINDS, icebergCandidate, icebergHasRoom } from './icebergField.js';
 import { createIcebergGeometry } from './icebergGeometry.js';
@@ -21,7 +22,7 @@ const scratch = new THREE.Object3D();
 
 /** Icebergs off cold coasts: one instanced draw per shape, and nothing built until one is near. */
 export class IcebergView {
-  constructor({ scene, worldStore, floatingOrigin, seaLevel, sunDirection, snowGroundByTile, seed = 0, getDrawPreparation = () => null }) {
+  constructor({ scene, worldStore, floatingOrigin, seaLevel, sunDirection, snowGroundByTile, seed = 0, getDrawPreparation = () => null, geologyLod = false }) {
     this.worldStore = worldStore;
     this.floatingOrigin = floatingOrigin;
     this.seaLevel = seaLevel;
@@ -34,6 +35,7 @@ export class IcebergView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.lodBatches = new GeologyLodBatches({ enabled: geologyLod, kinds: ICEBERG_KINDS, cellMeters: ICEBERG_CELL_METERS });
     this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ICEBERG_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
     this.resolve = (cellX, cellZ) => this.resolveCell(cellX, cellZ);
@@ -74,8 +76,17 @@ export class IcebergView {
   ensureMeshes() {
     if (this.meshes.length) return;
     const material = createIceMaterial({ sunDirection: this.sunDirection, seaLevel: this.seaLevel });
-    for (let kind = 0; kind < ICEBERG_KINDS; kind += 1) {
-      const mesh = new THREE.InstancedMesh(createIcebergGeometry(kind), material, CAPACITY);
+    const farGeometries = new Map();
+    for (let batch = 0; batch < this.lodBatches.count; batch++) {
+      const kind = this.lodBatches.kind(batch);
+      const far = this.lodBatches.isFarBatch(batch);
+      let geometry;
+      if (far && farGeometries.has(kind)) geometry = farGeometries.get(kind);
+      else {
+        geometry = createIcebergGeometry(kind, far);
+        if (far) farGeometries.set(kind, geometry);
+      }
+      const mesh = new THREE.InstancedMesh(geometry, material, CAPACITY);
       mesh.count = 0;
       mesh.frustumCulled = true;
       this.root.add(mesh);
@@ -86,21 +97,25 @@ export class IcebergView {
 
   write(publicationBudget = null) {
     const bergs = this.residency.values();
-    if (!admitInstancePublication(publicationBudget, ICEBERG_KINDS, CAPACITY, 16)) return false;
+    if (!admitInstancePublication(publicationBudget, this.lodBatches.count, CAPACITY, 16)) return false;
     this.anchor.follow(this.floatingOrigin.getState());
     if (bergs.length) this.ensureMeshes();
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix) }));
     for (const mesh of this.meshes) mesh.count = 0;
+    const kindCounts = new Uint32Array(ICEBERG_KINDS);
     for (const berg of bergs) {
-      const mesh = this.meshes[berg.kind];
+      if (kindCounts[berg.kind] >= CAPACITY) continue;
+      const batch = this.lodBatches.index(berg);
+      const mesh = this.meshes[batch];
       if (mesh.count >= CAPACITY) continue;
       scratch.position.set(berg.x - this.anchor.x, this.seaLevel, berg.z - this.anchor.z);
       scratch.rotation.set(0, berg.yaw, 0);
       scratch.scale.setScalar(berg.scale);
       scratch.updateMatrix();
-      const range = dirty[berg.kind];
+      const range = dirty[batch];
       range.matrix.matrix(mesh.count, scratch.matrix);
       mesh.count += 1;
+      kindCounts[berg.kind]++;
     }
     for (const range of dirty) { range.matrix.publish(); }
     for (const mesh of this.meshes) mesh.computeBoundingSphere();
@@ -109,6 +124,7 @@ export class IcebergView {
 
   /** @param {{ x: number, z: number }} cameraWorld canonical metres */
   update(cameraWorld, shouldYield = () => false, publicationBudget = null) {
+    if (this.lodBatches.updateFocus(cameraWorld) && this.meshes.length) this.publicationPending = true;
     this.residency.refocus(cameraWorld.x, cameraWorld.z);
     if (this.residency.step(this.resolve, shouldYield)) this.publicationPending = true;
     if (this.publicationPending && !shouldYield() && this.write(publicationBudget)) this.publicationPending = false;
@@ -117,10 +133,8 @@ export class IcebergView {
 
   dispose() {
     this.root.removeFromParent();
-    for (const mesh of this.meshes) {
-      mesh.geometry.dispose();
-      mesh.dispose();
-    }
+    for (const geometry of new Set(this.meshes.map(mesh => mesh.geometry))) geometry.dispose();
+    for (const mesh of this.meshes) mesh.dispose();
     this.meshes[0]?.material.dispose();
   }
 }

@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { CELL_PENDING, CellResidency } from '../lod/CellResidency.js';
 import { InstanceDirtySpan, admitInstancePublication } from '../lod/InstanceDirtySpan.js';
+import { GeologyLodBatches } from '../lod/GeologyLodBatches.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { createPathClearanceField } from '../TreeManifestStore.js';
 import { ALPINE_CELL_METERS, ALPINE_ROCK_KINDS, alpineRocksInCell } from './alpineRockField.js';
@@ -49,6 +50,7 @@ export class AlpineRockView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.lodBatches = new GeologyLodBatches({ enabled: config?.enhancements?.geologyLod, kinds: ALPINE_ROCK_KINDS, cellMeters: ALPINE_CELL_METERS });
     this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ALPINE_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
     this.ground = (x, z) => this.groundAt(x, z);
@@ -102,8 +104,16 @@ export class AlpineRockView {
   ensureMeshes() {
     if (this.meshes.length) return;
     const material = createAlpineRockMaterial();
-    for (let kind = 0; kind < ALPINE_ROCK_KINDS; kind += 1) {
-      const geometry = createAlpineRockGeometry(kind);
+    const farGeometries = new Map();
+    for (let batch = 0; batch < this.lodBatches.count; batch++) {
+      const kind = this.lodBatches.kind(batch);
+      const far = this.lodBatches.isFarBatch(batch);
+      let geometry;
+      if (far && farGeometries.has(kind)) geometry = farGeometries.get(kind).clone();
+      else {
+        geometry = createAlpineRockGeometry(kind, far);
+        if (far) farGeometries.set(kind, geometry);
+      }
       geometry.setAttribute('instanceSnow', new THREE.InstancedBufferAttribute(new Float32Array(CAPACITY), 1));
       const mesh = new THREE.InstancedMesh(geometry, material, CAPACITY);
       mesh.count = 0;
@@ -118,13 +128,16 @@ export class AlpineRockView {
 
   write(publicationBudget = null) {
     const rocks = this.residency.values().flat();
-    if (!admitInstancePublication(publicationBudget, ALPINE_ROCK_KINDS, CAPACITY, 17)) return false;
+    if (!admitInstancePublication(publicationBudget, this.lodBatches.count, CAPACITY, 17)) return false;
     this.anchor.follow(this.floatingOrigin.getState());
     if (rocks.length) this.ensureMeshes();
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), snow: new InstanceDirtySpan(mesh.geometry.attributes.instanceSnow) }));
     for (const mesh of this.meshes) mesh.count = 0;
+    const kindCounts = new Uint32Array(ALPINE_ROCK_KINDS);
     for (const rock of rocks) {
-      const mesh = this.meshes[rock.kind];
+      if (kindCounts[rock.kind] >= CAPACITY) continue;
+      const batch = this.lodBatches.index(rock);
+      const mesh = this.meshes[batch];
       if (mesh.count >= CAPACITY) continue;
       scratch.position.set(rock.x - this.anchor.x, rock.y + rock.scale * rock.stretch * (0.5 - BURIAL), rock.z - this.anchor.z);
       // Half way to the slope: crags lean with the mountain without lying flat on it.
@@ -132,10 +145,11 @@ export class AlpineRockView {
       scratch.quaternion.setFromUnitVectors(UP, normal).multiply(spin.setFromAxisAngle(UP, rock.yaw));
       scratch.scale.set(rock.scale, rock.scale * rock.stretch, rock.scale);
       scratch.updateMatrix();
-      const range = dirty[rock.kind];
+      const range = dirty[batch];
       range.matrix.matrix(mesh.count, scratch.matrix);
       range.snow.scalar(mesh.count, rock.snow);
       mesh.count += 1;
+      kindCounts[rock.kind]++;
     }
     for (const range of dirty) { range.matrix.publish(); range.snow.publish(); }
     for (const mesh of this.meshes) mesh.computeBoundingSphere();
@@ -144,6 +158,7 @@ export class AlpineRockView {
 
   /** @param {{ x: number, z: number }} cameraWorld canonical metres */
   update(cameraWorld, shouldYield = () => false, publicationBudget = null) {
+    if (this.lodBatches.updateFocus(cameraWorld) && this.meshes.length) this.publicationPending = true;
     this.residency.refocus(cameraWorld.x, cameraWorld.z);
     if (this.residency.step(this.resolve, shouldYield)) this.publicationPending = true;
     if (this.publicationPending && !shouldYield() && this.write(publicationBudget)) this.publicationPending = false;

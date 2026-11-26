@@ -1,5 +1,7 @@
 # Optional quality features. These are deliberately independent of world generation.
 detailVisibility: false
+# Enable after snow/coast visual and hardware acceptance.
+geologyLod: false
 detailTurnMarginDegrees: 12
 r187:
   depthOnlyOcclusion: false

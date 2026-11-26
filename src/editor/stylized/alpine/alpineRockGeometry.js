@@ -93,10 +93,10 @@ function smoothstep(edge0, edge1, x) {
  * A closed unit-scale alpine rock with fractured cleavage planes, stepped
  * bedding ledges, and a flared basal footing (grounded by AlpineRockView).
  */
-export function createAlpineRockGeometry(kind) {
+export function createAlpineRockGeometry(kind, lowDetail = false) {
   const spec = KINDS[kind] ?? KINDS[0];
   const { size, shatter, strataFreq, strataDepth, strataTilt, baseFlare, seed, planes } = spec;
-  const sphere = new THREE.IcosahedronGeometry(1, DETAIL);
+  const sphere = new THREE.IcosahedronGeometry(1, lowDetail ? 4 : DETAIL);
   sphere.deleteAttribute('uv');
   sphere.deleteAttribute('normal');
   const geometry = mergeVertices(sphere, 1e-4);

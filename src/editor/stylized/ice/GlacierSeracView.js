@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { CellResidency, CELL_PENDING } from '../lod/CellResidency.js';
 import { InstanceDirtySpan, admitInstancePublication } from '../lod/InstanceDirtySpan.js';
+import { GeologyLodBatches } from '../lod/GeologyLodBatches.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { createGlacierSeracGeometry, GLACIER_SERAC_KINDS } from './glacierSeracGeometry.js';
 import { createGlacierSeracMaterial } from './GlacierSeracMaterial.js';
@@ -29,7 +30,7 @@ function cellHash(cx, cz, salt) {
  * meshes are not even instantiated until a glacier/ice cell enters residency.
  */
 export class GlacierSeracView {
-  constructor({ scene, terrainView, glacierByTile = [], seaLevel = 0, sunDirection = null, pathClearance = null }) {
+  constructor({ scene, terrainView, glacierByTile = [], seaLevel = 0, sunDirection = null, pathClearance = null, geologyLod = false }) {
     this.terrainView = terrainView;
     this.floatingOrigin = terrainView.floatingOrigin;
     this.glacierByTile = glacierByTile;
@@ -41,6 +42,7 @@ export class GlacierSeracView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.lodBatches = new GeologyLodBatches({ enabled: geologyLod, kinds: GLACIER_SERAC_KINDS, cellMeters: SERAC_CELL_METERS });
     this.publicationPending = false;
     this.residency = new CellResidency({
       cellMeters: SERAC_CELL_METERS,
@@ -115,8 +117,16 @@ export class GlacierSeracView {
   ensureMeshes() {
     if (this.meshes.length) return;
     const material = createGlacierSeracMaterial({ sunDirection: this.sunDirection });
-    for (let kind = 0; kind < GLACIER_SERAC_KINDS; kind += 1) {
-      const geometry = createGlacierSeracGeometry(kind);
+    const farGeometries = new Map();
+    for (let batch = 0; batch < this.lodBatches.count; batch++) {
+      const kind = this.lodBatches.kind(batch);
+      const far = this.lodBatches.isFarBatch(batch);
+      let geometry;
+      if (far && farGeometries.has(kind)) geometry = farGeometries.get(kind).clone();
+      else {
+        geometry = createGlacierSeracGeometry(kind, far);
+        if (far) farGeometries.set(kind, geometry);
+      }
       geometry.setAttribute('instanceSeed', new THREE.InstancedBufferAttribute(new Float32Array(CAPACITY), 1));
       const mesh = new THREE.InstancedMesh(geometry, material, CAPACITY);
       mesh.count = 0;
@@ -132,23 +142,27 @@ export class GlacierSeracView {
 
   write(publicationBudget = null) {
     const seracs = this.residency.values().flat();
-    if (!admitInstancePublication(publicationBudget, GLACIER_SERAC_KINDS, CAPACITY, 17)) return false;
+    if (!admitInstancePublication(publicationBudget, this.lodBatches.count, CAPACITY, 17)) return false;
     this.anchor.follow(this.floatingOrigin.getState());
     if (seracs.length) this.ensureMeshes();
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), seed: new InstanceDirtySpan(mesh.geometry.attributes.instanceSeed) }));
     for (const mesh of this.meshes) mesh.count = 0;
+    const kindCounts = new Uint32Array(GLACIER_SERAC_KINDS);
     for (const item of seracs) {
-      const mesh = this.meshes[item.kind];
+      if (kindCounts[item.kind] >= CAPACITY) continue;
+      const batch = this.lodBatches.index(item);
+      const mesh = this.meshes[batch];
       if (!mesh || mesh.count >= CAPACITY) continue;
       scratch.position.set(item.x - this.anchor.x, item.y, item.z - this.anchor.z);
       tiltNormal.set(-item.dx * 0.35, 1, -item.dz * 0.35).normalize();
       scratch.quaternion.setFromUnitVectors(UP, tiltNormal).multiply(spinQuat.setFromAxisAngle(UP, item.yaw));
       scratch.scale.set(item.scale, item.scale * item.stretch, item.scale);
       scratch.updateMatrix();
-      const range = dirty[item.kind];
+      const range = dirty[batch];
       range.matrix.matrix(mesh.count, scratch.matrix);
       range.seed.scalar(mesh.count, item.seed);
       mesh.count += 1;
+      kindCounts[item.kind]++;
     }
     for (const range of dirty) { range.matrix.publish(); range.seed.publish(); }
     for (const mesh of this.meshes) mesh.computeBoundingSphere();
@@ -156,6 +170,7 @@ export class GlacierSeracView {
   }
 
   update(cameraWorld, shouldYield = () => false, publicationBudget = null) {
+    if (this.lodBatches.updateFocus(cameraWorld) && this.meshes.length) this.publicationPending = true;
     this.residency.refocus(cameraWorld.x, cameraWorld.z);
     if (this.residency.step(this.resolve, shouldYield)) this.publicationPending = true;
     if (this.publicationPending && !shouldYield() && this.write(publicationBudget)) this.publicationPending = false;

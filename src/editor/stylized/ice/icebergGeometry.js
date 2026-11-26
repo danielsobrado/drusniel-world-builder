@@ -58,8 +58,8 @@ function prepareWeldedSphere(radius, detail) {
   return merged;
 }
 
-function createKeel(radius = 0.92, depth = BELOW_WATER, seed = 13) {
-  const geom = prepareWeldedSphere(1, SUB_DETAIL);
+function buildKeel(radius = 0.92, depth = BELOW_WATER, seed = 13, detail = SUB_DETAIL) {
+  const geom = prepareWeldedSphere(1, detail);
   const pos = geom.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const x = pos.getX(i);
@@ -76,7 +76,8 @@ function createKeel(radius = 0.92, depth = BELOW_WATER, seed = 13) {
 }
 
 /** Ring of fractured brash-ice floes resting along the waterline so cliffs blend naturally into sea ice. */
-function createWaterlineBrashCollar(count = 8, radius = 0.88, seed = 401) {
+function createWaterlineBrashCollar(count = 8, radius = 0.88, seed = 401, detail = SUB_DETAIL) {
+  const createIceShard = spec => buildIceShard(spec, detail);
   const parts = [];
   for (let i = 0; i < count; i += 1) {
     const angle = (i / count) * Math.PI * 2 + (seed % 7) * 0.15;
@@ -99,7 +100,7 @@ function createWaterlineBrashCollar(count = 8, radius = 0.88, seed = 401) {
   return parts;
 }
 
-function createIceShard({
+function buildIceShard({
   radiusX = 0.28,
   radiusZ = 0.24,
   height = 0.7,
@@ -112,8 +113,8 @@ function createIceShard({
   taper = 0.65,
   flutes = 5,
   seed = 31,
-}) {
-  const geom = prepareWeldedSphere(1, SUB_DETAIL);
+}, detail = SUB_DETAIL) {
+  const geom = prepareWeldedSphere(1, detail);
   const pos = geom.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const x = pos.getX(i);
@@ -144,9 +145,10 @@ function createIcicleTooth({ x, y, z, radius = 0.045, length = 0.18, tiltX = 0, 
   return cone;
 }
 
-function sculptTabularMesa() {
+function sculptTabularMesa(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
   const parts = [];
-  const main = prepareWeldedSphere(1, DETAIL);
+  const main = prepareWeldedSphere(1, quality.main);
   const pos = main.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const x = pos.getX(i);
@@ -175,7 +177,9 @@ function sculptTabularMesa() {
   return parts;
 }
 
-function sculptCathedralPinnacle() {
+function sculptCathedralPinnacle(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
+  const createKeel = (radius, depth, seed) => buildKeel(radius, depth, seed, quality.sub);
   const parts = [
     createIceShard({
       radiusX: 0.68,
@@ -214,9 +218,10 @@ function sculptCathedralPinnacle() {
   return parts;
 }
 
-function sculptDomedPressureBerg() {
+function sculptDomedPressureBerg(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
   const parts = [];
-  const dome = prepareWeldedSphere(1, DETAIL);
+  const dome = prepareWeldedSphere(1, quality.main);
   const pos = dome.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const x = pos.getX(i);
@@ -243,7 +248,9 @@ function sculptDomedPressureBerg() {
   return parts;
 }
 
-function sculptSeaArch() {
+function sculptSeaArch(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
+  const createKeel = (radius, depth, seed) => buildKeel(radius, depth, seed, quality.sub);
   const parts = [createKeel(0.95, BELOW_WATER, 131)];
   // Left and right piers flanking a true open tunnel along Z.
   parts.push(createIceShard({
@@ -285,7 +292,9 @@ function sculptSeaArch() {
   return parts;
 }
 
-function sculptCrevassedSeracCluster() {
+function sculptCrevassedSeracCluster(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
+  const createKeel = (radius, depth, seed) => buildKeel(radius, depth, seed, quality.sub);
   const parts = [createKeel(0.92, BELOW_WATER, 163)];
   const monoliths = [
     { offsetX: 0.0, offsetZ: 0.04, radiusX: 0.3, radiusZ: 0.26, height: 0.94, tiltX: 0.12, tiltZ: -0.09, yaw: 0.3, taper: 0.68, seed: 167 },
@@ -300,9 +309,11 @@ function sculptCrevassedSeracCluster() {
   return parts;
 }
 
-function sculptOverturnedBlueSlab() {
+function sculptOverturnedBlueSlab(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
+  const createKeel = (radius, depth, seed) => buildKeel(radius, depth, seed, quality.sub);
   const parts = [createKeel(0.88, BELOW_WATER, 199)];
-  const slab = prepareWeldedSphere(1, DETAIL);
+  const slab = prepareWeldedSphere(1, quality.main);
   const pos = slab.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const x = pos.getX(i);
@@ -328,9 +339,10 @@ function sculptOverturnedBlueSlab() {
   return parts;
 }
 
-function sculptMeltCanyonMassif() {
+function sculptMeltCanyonMassif(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
   const parts = [];
-  const massif = prepareWeldedSphere(1, DETAIL);
+  const massif = prepareWeldedSphere(1, quality.main);
   const pos = massif.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const x = pos.getX(i);
@@ -358,7 +370,9 @@ function sculptMeltCanyonMassif() {
   return parts;
 }
 
-function sculptTwinHornedSaddle() {
+function sculptTwinHornedSaddle(quality) {
+  const createIceShard = spec => buildIceShard(spec, quality.sub);
+  const createKeel = (radius, depth, seed) => buildKeel(radius, depth, seed, quality.sub);
   const parts = [createKeel(0.94, BELOW_WATER, 241)];
   // Central saddle base
   parts.push(createIceShard({
@@ -401,15 +415,16 @@ const SCULPTORS = Object.freeze([
  *
  * @param {number} kind index into SCULPTORS (0..7)
  */
-export function createIcebergGeometry(kind) {
+export function createIcebergGeometry(kind, lowDetail = false) {
+  const quality = lowDetail ? { main: 9, sub: 4 } : { main: DETAIL, sub: SUB_DETAIL };
   const sculptor = SCULPTORS[kind] ?? SCULPTORS[0];
-  const parts = sculptor();
-  parts.push(...createWaterlineBrashCollar(7 + (kind % 3), 0.9, 300 + kind * 37));
+  const parts = sculptor(quality);
+  parts.push(...createWaterlineBrashCollar(7 + (kind % 3), 0.9, 300 + kind * 37, quality.sub));
   let merged = parts.length === 1 ? parts[0] : mergeGeometries(parts, false);
   if (parts.length > 1) {
     for (const part of parts) part.dispose();
   }
-  merged = subdivideGeometryRedGreen(merged, 15400, { maxTris: 30000 });
+  if (!lowDetail) merged = subdivideGeometryRedGreen(merged, 15400, { maxTris: 30000 });
   sculptPositionKeyedRelief(merged, {
     amplitude: 0.0085,
     freq: 10.5,

@@ -4,6 +4,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   crownShadows: false,
   // QA override of water.sea.offshoreFft.enabled (PR I): `?oceanFft=1` forces the offshore FFT on.
   oceanFft: false,
+  geologyLod: false,
   r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, maxConcurrentDecodes: 2, requestMaxWaitMs: 500 }),
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({
@@ -51,11 +52,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);

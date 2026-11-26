@@ -128,6 +128,7 @@ export class StylizedSurfaceView {
         sunDirection: this.skyView.sunDirectionValue,
         snowGroundByTile: config.biomeLooks?.snow.ground ?? [],
         getDrawPreparation: () => terrainView.drawPreparation,
+        geologyLod: config.enhancements?.geologyLod,
       })
       : null;
     this.alpineRockView = this.enabled && !this.impostorBakeMode && this.skyView
@@ -149,6 +150,7 @@ export class StylizedSurfaceView {
         seaLevel: terrainView.worldStore.generator?.seaLevel ?? 0,
         sunDirection: this.skyView.sunDirectionValue,
         pathClearance: this.alpineRockView?.pathClearance ?? null,
+        geologyLod: config.enhancements?.geologyLod,
       })
       : null;
     this.pathBridgeView = this.enabled && !this.impostorBakeMode

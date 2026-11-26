@@ -12,8 +12,9 @@ const ARCHETYPES = Object.freeze([
 ]);
 
 /** Builds a chiseled multi-ring glacial ice serac with `seracHeight01` attribute (0 base .. 1 tip). */
-function buildSinglePrism({ radius, height, sides, leanX, leanZ, shatter, seed, offsetX = 0, offsetZ = 0, scale = 1 }) {
-  const rings = 7;
+function buildSinglePrism({ radius, height, sides, leanX, leanZ, shatter, seed, offsetX = 0, offsetZ = 0, scale = 1, lowDetail = false }) {
+  const rings = lowDetail ? 3 : 7;
+  if (lowDetail) sides = Math.max(5, Math.floor(sides * 0.6));
   const positions = [];
   const height01s = [];
   const indices = [];
@@ -60,8 +61,8 @@ function buildSinglePrism({ radius, height, sides, leanX, leanZ, shatter, seed, 
   return { positions, height01s, indices };
 }
 
-export function createGlacierSeracGeometry(kind) {
-  const spec = ARCHETYPES[kind % ARCHETYPES.length];
+export function createGlacierSeracGeometry(kind, lowDetail = false) {
+  const spec = { ...ARCHETYPES[kind % ARCHETYPES.length], lowDetail };
   const parts = [buildSinglePrism(spec)];
   // Secondary companion shards make clusters and fins read as natural fractured glacier formations.
   if (spec.kind === 'cluster' || spec.kind === 'fin') {
