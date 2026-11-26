@@ -30,6 +30,7 @@ export class GpuPassFeedback {
     this.settings = settings;
     this.scope = null;
     this.lastSample = null;
+    this.blockedSample = null;
     this.states = new Map();
     this.selection = [];
   }
@@ -42,17 +43,28 @@ export class GpuPassFeedback {
   }
 
   read(scope, now, bypass = false) {
-    if (this.scope !== scope) this.reset(scope);
-    this.profiler.markScope(scope);
     const sample = this.profiler.latestSample;
+    if (this.scope !== scope) {
+      if (this.scope !== null) this.blockedSample = sample;
+      this.reset(scope);
+    }
+    this.profiler.markScope(bypass ? 'debug' : scope);
     const age = sample ? now - sample.timestamp : Infinity;
-    const valid = !bypass && this.profiler.enabled && !this.profiler.error && sample?.scope === scope
+    const valid = !bypass && sample !== this.blockedSample && this.profiler.enabled && !this.profiler.error && sample?.scope === scope
       && Number.isFinite(age) && age >= 0 && age <= this.settings.maxAgeMs && Number.isFinite(sample.totalMs) && sample.totalMs > 0;
     PerfCounters.set('gpuAdmission.fresh', Number(valid));
     if (!valid) {
+      this.blockedSample = sample;
+      if (this.states.size) {
+        for (const group of GROUPS) {
+          PerfCounters.set(`gpuAdmission.${group}.ms`, -1);
+          PerfCounters.set(`gpuAdmission.${group}.reduced`, 0);
+        }
+      }
       this.reset(scope);
       return null;
     }
+    this.blockedSample = null;
     PerfCounters.set('gpuAdmission.sampleAgeMs', age);
     PerfCounters.set('gpuAdmission.renderMs', sample.totalMs);
     if (sample === this.lastSample) return { groups: this.selection };
