@@ -1,3 +1,5 @@
+import { addRenderCost, emptyRenderCost } from './RegionalRenderCost.js';
+
 export function sceneryChunkKey(x, z, size) {
   return `${Math.floor(x / size)}:${Math.floor(-z / size)}`;
 }
@@ -27,7 +29,7 @@ export function* townSceneryCells(layout, size) {
 }
 
 /** Read resident data without scheduling new manifests or touching their LRU clocks. */
-export function* collectRegionalSceneryDemand(surface, focus, size, settings, townCache) {
+export function* collectRegionalSceneryDemand(surface, focus, size, settings, townCache, costModel = null) {
   const cells = new Map();
   const add = (key, kind, count) => {
     if (!(count > 0) || !Number.isFinite(count) || !inWindow(key, focus, settings.spatialChunkRadius)) return;
@@ -35,18 +37,29 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     if (!cell) cells.set(key, cell = {});
     cell[kind] = (cell[kind] ?? 0) + count;
   };
+  const addCost = (key, estimate) => {
+    if (!estimate || !inWindow(key, focus, settings.spatialChunkRadius)) return;
+    let cell = cells.get(key);
+    if (!cell) cells.set(key, cell = {});
+    cell.renderCost ??= { requested: emptyRenderCost(), selected: emptyRenderCost() };
+    addRenderCost(cell.renderCost.requested, estimate.requested);
+    addRenderCost(cell.renderCost.selected, estimate.selected);
+  };
   const caches = [
-    ['tree', surface.treeView?.manifestStore?.cache],
-    ['rock', surface.rockView?.manifestStore?.cache],
-    ['bush', surface.bushView?.manifestCache],
-    ...(surface.detailViews ?? []).map(view => ['detail', view.manifestCache]),
+    ['tree', surface.treeView?.manifestStore?.cache, surface.treeView],
+    ['rock', surface.rockView?.manifestStore?.cache, surface.rockView],
+    ['bush', surface.bushView?.manifestCache, surface.bushView],
+    ...(surface.detailViews ?? []).map(view => ['detail', view.manifestCache, view]),
   ];
-  for (const [kind, cache] of caches) {
+  for (const [kind, cache, view] of caches) {
     if (!cache) continue;
     let remaining = cache.size;
     for (const [key, entry] of cache) {
       if (remaining-- <= 0) break;
       add(key, kind, entry.placements?.length ?? 0);
+      if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) {
+        addCost(key, yield* costModel.manifest(view, kind, key, entry.placements));
+      }
       yield;
     }
   }
@@ -55,7 +68,11 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     let remaining = layer.tiles.size;
     for (const tile of layer.tiles.values()) {
       if (remaining-- <= 0) break;
-      if (tile.band != null) add(sceneryChunkKey(tile.centerX, tile.centerZ, size), kind, tile.output?.count ?? 0);
+      if (tile.band != null) {
+        const key = sceneryChunkKey(tile.centerX, tile.centerZ, size);
+        add(key, kind, tile.output?.count ?? 0);
+        if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) addCost(key, costModel.grass(layer, tile, kind));
+      }
       yield;
     }
   }
@@ -74,11 +91,25 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
       add(key, 'town', count);
       yield;
     }
+    if (costModel) {
+      const costs = yield* costModel.town(town, size, sceneryChunkKey);
+      for (const [key, cost] of costs ?? []) {
+        const estimate = costModel.townPasses(cost);
+        addCost(key, { requested: estimate, selected: estimate });
+        yield;
+      }
+      if (!costs) for (const [key, count] of cached.cells) {
+        addCost(key, { requested: { unknown: count }, selected: { unknown: count } });
+        yield;
+      }
+    }
   }
   for (const slot of surface.waterSlots ?? []) {
     const d = slot.terrainSlot?.descriptor;
     if (slot.hasWaterCoverage && Number.isInteger(d?.chunkX) && Number.isInteger(d?.chunkZ)) {
-      add(`${d.chunkX}:${d.chunkZ}`, 'water', 1);
+      const key = `${d.chunkX}:${d.chunkZ}`;
+      add(key, 'water', 1);
+      if (costModel) addCost(key, costModel.water(slot));
     }
     yield;
   }
