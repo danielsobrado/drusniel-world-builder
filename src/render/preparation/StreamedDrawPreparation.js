@@ -164,6 +164,10 @@ export class StreamedDrawPreparation {
       const pinned = mesh => this.geometryUploads.jobs.has(mesh) || this.textureWarmup.jobs.has(mesh)
         || this.initialUploadAttributes.get(mesh)?.some(attribute => this.attributeInitialization.jobs.has(attribute));
       const order = fifo ? this.pending : this.priority.ordered(this.pending, pinned);
+      // Gate expensive render work before removing jobs from the FIFO. Upload
+      // preparation may still progress, but an aged reservation owns the next draw.
+      const canDraw = () => fifo || !budget?.settings?.enabled || this.preparationCostMs === null
+        || budget.slack.strictAvailable() >= this.preparationCostMs * (targets.length + 1);
       for (const mesh of order) {
         if (shouldYield?.() || inspected++ >= 64) break;
         const isolated = this.isolated.has(mesh);
@@ -200,6 +204,7 @@ export class StreamedDrawPreparation {
         if (uploadBytes + bytes > byteLimit && (targets.length || budgetedBytes > 0
             || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
         if (budget && bytes > budget.maxUploadBytes) PerfCounters.inc('streamedOversizedPublicationBytes', bytes);
+        if (!canDraw()) { PerfCounters.inc('streamedDrawCostDeferredFrames'); break; }
         for (const buffer of estimate.buffers) plannedBuffers.add(buffer);
         this.pending.delete(mesh);
         uploadBytes += bytes;
@@ -211,12 +216,6 @@ export class StreamedDrawPreparation {
         Math.max(PerfCounters.get('meadowInitialGpuUploadMaxFrameBytes'), meadowBytes));
       if (budgetedBytes) PerfCounters.inc('streamedDrawInitialUploadBytes', budgetedBytes);
       if (targets.length === 0) return;
-      if (!fifo && budget?.settings?.enabled && this.preparationCostMs !== null
-        && budget.slack.strictAvailable() < this.preparationCostMs * targets.length) {
-        for (const target of targets) this.pending.add(target);
-        PerfCounters.inc('streamedDrawCostDeferredFrames');
-        return;
-      }
       this.waitFrames = 0;
       for (const mesh of targets) {
         this.geometryUploads.adopt(mesh);

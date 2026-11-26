@@ -17,10 +17,10 @@ Do not enable the production default until the visual and hardware acceptance ga
 Limitations to verify, not mark complete:
 
 - Staged geometry deliberately excludes interleaved/padded/unsupported attributes and ordinary instance matrices or colors that Three may wrap in another buffer. Large compatible index buffers support 4-byte alignment, including odd Uint16 tails.
-- Texture prewarming admits an entire texture at a time and estimates its size. It does not slice compressed mip chains or image rows; nested TSL textures may only appear at real draw preparation. A single indivisible oversized upload still has the existing progress exception.
+- First-use compatible 2D compressed mipmaps, non-flipped data textures and external images now stage pixel/block rows (or partial rows) within the shared slice. Existing live textures, unsupported formats, flipped data/external images, and non-2D textures use Three's normal path. Generated mipmaps still run in the renderer at adoption. Nested TSL textures may only appear at real draw preparation. A single indivisible oversized upload retains the progress exception.
 - Shader preparation still requires the real synchronous render context. Prediction and observed batch cost do not preempt an individual compile.
 - Queue-completion latency measures outstanding GPU work, not the isolated reflection pass. Auxiliary detail culling is coarse batch-level, not independent per-instance compaction.
-- CPU scheduling is cooperative. Terrain commits, initial allocations, individual generators, large interior commits, disposal and renderer calls can still exceed a frame allowance. Overlay late retags are discovered by a bounded reconciliation scan, not immediate mutation events. Blocked cells use fair retry, not dependency notifications.
+- CPU scheduling now uses indexed heaps for terrain/scenery jobs, fixed attempt/iterator limits and measured-cost admission for draw preparation. Atomic terrain page publication, initial allocation, individual generator steps, large interior commits, disposal and renderer calls are still non-preemptible. Their overruns are reported rather than hidden. Overlay late retags are discovered by bounded reconciliation; blocked cells use fair retry.
 - Geology remains capped and compacted per kind; spatial LOD partitions into conservative far sectors rather than an unbounded per-cell mesh hierarchy. Full npm, browser and hardware tests have not been run in the editing environment.
 
 ## 1. Create immutable control and candidate worktrees
@@ -60,7 +60,7 @@ A failure introduced only by the candidate blocks acceptance.
 ## 2. Focused tests first
 
 ```powershell
-node --test test/staged-geometry-uploads.test.js test/performance-hitch-followup.test.js test/geology-lod-batches.test.js test/performance-hitch-scheduling.test.js test/instance-dirty-span.test.js test/towns/town-budgeted-tier-publication.test.js
+node --test test/staged-texture-uploads.test.js test/bounded-work-queues.test.js test/staged-geometry-uploads.test.js test/performance-hitch-followup.test.js test/geology-lod-batches.test.js test/performance-hitch-scheduling.test.js test/instance-dirty-span.test.js test/towns/town-budgeted-tier-publication.test.js
 node --test test/budgeted-attribute-initialization.test.js test/streamed-draw-budget.test.js tests/streamedMaterialPreparation.test.js test/staged-draw-publication.test.js test/deferred-work-budget.test.js test/reflection-capture-schedule.test.js test/reflection-shadow-registry.test.js test/detail-visibility.test.js test/stylized-variant-residency-cache.test.js test/towns/town-split-lod.test.js test/towns/town-sparse-publication.test.js test/towns/town-streaming-locality.test.js tests/alpineRockSnow.test.js tests/TerrainCommitQueue.test.js tests/sceneryScheduling.test.js
 ```
 
@@ -167,11 +167,12 @@ counter deltas, settle/recovery, configuration, adapter/focus proof, GPU timing
 samples and resource snapshots. Compare at least:
 
 - `stagedGeometryUploadBytes`, `stagedGeometryAllocationBytes`, `stagedGeometryAllocationMs`
-- `streamedTextureWarmupBytesEstimated`, `streamedTextureWarmupMs`
+- `stagedTextureUploadBytes`, `stagedTextureUploadSlices`, `stagedTextureUploadFailures`, `streamedTextureWarmupBytesEstimated`, `streamedTextureWarmupMs`
 - `streamedDrawInitialUploadBytes`, `streamedOversizedPublicationBytes`,
   `streamedDrawPreparationEstimatedMeshMs`, draw failures and queue age
 - `framePublicationUploadBytes`, `frameDeferredCpuMs`, `frameMaxDeferredUnitMs`,
-  `framePeakFixedCpuMs`, `framePreparationBacklogAgeMs`
+  `framePeakFixedCpuMs`, `framePreparationBacklogAgeMs`, `frameDeferredUnitOverruns`, `frameDeferredUnitOverrunMs`
+- `streamedDrawCostDeferredFrames`, `streamedDrawAtomicOverruns`, `streamedDrawAtomicOverrunMs`
 - `townInstanceRowsCopied`, `townLodPlacementsEvaluated`, `townPreparationCpuMs`
 - `reflectionGpuDeferredFrames`, `reflectionGpuQueueLatencyMs`,
   `reflectionGpuQueueErrors`, `waterReflectionCpuMs`, `waterProbeFaces`
@@ -193,3 +194,9 @@ Do not promote `geologyLod` to the default or claim hardware acceptance until
 these checks pass. If a regression is found, fix it on top of the newest main
 without overwriting unrelated commits, rerun the affected focused tests and
 the complete A/B route. No GitHub Actions.
+
+## 8. Texture and bounded-work follow-up
+
+Use cold GLB/KTX2 loads with multiple distinct mip levels, RGBA data textures, and ordinary unflipped images. Check that the sum of staged writes per frame is within the 768 KiB local allowance and shared publication limit. Force a source version change during staging, cancel on region eviction and dispose during upload. Inspect mip transitions, alpha edges, texture orientation, normal maps and colors against control; no partially initialized texture may become visible. Run a device-loss/reload case and verify no duplicate disposal or leaked staging allocation. Compare the render path for flipped, cube/array, live and unsupported textures and record their fallback cost.
+
+Stress the queues with thousands of stale and reprioritized jobs. Verify nearest priority, stable FIFO ties, bounded stale scans and progress after sustained pressure. Verify full initialization drains still finish. Record each atomic overrun and whether it belongs to the renderer, terrain publication or another generator. A JavaScript deadline cannot interrupt a synchronous driver call; acceptance depends on measured frame tails, not the scheduler claiming a hard wall-clock guarantee.

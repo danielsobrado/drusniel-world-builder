@@ -24,7 +24,7 @@ function levelsFor(texture, block, size) {
 
 /** The detached resource is invisible to Three until every source row is queued. */
 export class StagedTextureUploads {
-  constructor(renderer) { this.renderer = renderer; this.jobs = new Map(); }
+  constructor(renderer) { this.renderer = renderer; this.jobs = new Map(); this.unsupported = new WeakMap(); }
 
   get supported() {
     const { backend, _textures: manager } = this.renderer ?? {};
@@ -76,7 +76,10 @@ export class StagedTextureUploads {
 
   cancel(texture) {
     const job = this.jobs.get(texture);
-    if (job) this.releaseToken(job.token);
+    if (job) {
+      texture.removeEventListener?.('dispose', job.onDispose);
+      this.releaseToken(job.token);
+    }
     this.jobs.delete(texture);
   }
 
@@ -87,17 +90,20 @@ export class StagedTextureUploads {
     if (job && (job.version !== texture.version || job.sourceVersion !== texture.source.version || manager.has(texture))) {
       this.cancel(texture); job = null;
     }
-    if (manager.has(texture)) return null;
+    if (manager.has(texture) || this.unsupported.get(texture) === texture.version) return null;
     if (!job) {
       if (shouldYield?.() || byteLimit <= 0) return { ready: false, bytes: 0 };
       job = this.create(texture);
-      if (!job) return null;
+      if (!job) { this.unsupported.set(texture, texture.version); return null; }
+      job.onDispose = () => this.cancel(texture);
+      texture.addEventListener?.('dispose', job.onDispose);
       this.jobs.set(texture, job);
     }
     let bytes = 0;
     const queue = backend.device.queue, gpu = backend.get(job.token).texture;
     const block = job.block;
-    while (job.level < job.images.length && !shouldYield?.()) {
+    try {
+      while (job.level < job.images.length && !shouldYield?.()) {
       const image = job.images[job.level];
       const remaining = byteLimit - bytes;
       const availableBlocks = Math.floor(remaining / block.byteLength);
@@ -122,6 +128,13 @@ export class StagedTextureUploads {
       if (job.row === image.rows) { job.row = 0; job.level++; }
       PerfCounters.inc('stagedTextureUploadBytes', count);
       PerfCounters.inc('stagedTextureUploadSlices');
+    }
+    } catch (error) {
+      this.cancel(texture);
+      this.unsupported.set(texture, texture.version);
+      PerfCounters.inc('stagedTextureUploadFailures');
+      console.warn('Texture staging transfer failed; using renderer upload.', error);
+      return { ready: false, bytes };
     }
     if (job.level !== job.images.length || shouldYield?.()) return { ready: false, bytes };
     this.adopt(texture, job);
@@ -150,6 +163,7 @@ export class StagedTextureUploads {
       backend.updateTexture = update;
       if (transferred) backend.delete(job.token);
       else this.releaseToken(job.token);
+      texture.removeEventListener?.('dispose', job.onDispose);
       this.jobs.delete(texture);
     }
   }
