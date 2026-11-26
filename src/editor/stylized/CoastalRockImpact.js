@@ -46,6 +46,8 @@ export class CoastalRockImpact {
       this.spray = new CoastalImpactSpray({
         scene: terrainView.scene, floatingOrigin: terrainView.floatingOrigin,
         settings: this.settings.spray, qualityTier: this.qualityTier,
+        compact: config.enhancements?.coastalSprayCompaction === true,
+        alphaCutoff: config.enhancements?.environmentalFragmentAdmission ? config.enhancements.environmentalFragmentBudget.transparentAlphaCutoff : 0,
       });
     }
   }
@@ -137,6 +139,7 @@ export class CoastalRockImpact {
       this.spray?.reset();
     }
     this.refresh(camera, time);
+    this.spray?.beginFrame(time);
     if (this.sites.length === 0) {
       if (this.field.enabled) this.field.reset();
       this.field.disable();
