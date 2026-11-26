@@ -41,6 +41,7 @@ export class PostProcessingGraph {
     topologySignature,
     sunDirection,
     sunColor,
+    adaptiveAtmosphere = false,
   }) {
     this.renderer = renderer;
     this.topologySignature = topologySignature;
@@ -104,6 +105,7 @@ export class PostProcessingGraph {
         settings: settings.screenSpaceShafts,
         sunDirection,
         sunColor,
+        adaptiveSamples: adaptiveAtmosphere,
       })
       : null;
     const postShaftOutput = this.screenSpaceShafts?.outputNode ?? occludedOutput;
@@ -214,7 +216,7 @@ export class PostProcessingGraph {
     ]);
   }
 
-  updateUniforms(frameState, settings = null) {
+  updateUniforms(frameState, settings = null, atmosphere = null) {
     // Camera identity can change when switching editor/player views without
     // changing graph topology.
     this.scenePass.camera = frameState.camera;
@@ -245,10 +247,12 @@ export class PostProcessingGraph {
     this.ambientOcclusion?.updateUniforms(
       frameState,
       settings?.ambientOcclusion ?? this.ambientOcclusion.settings,
+      atmosphere,
     );
     this.screenSpaceShafts?.updateUniforms(
       frameState,
       settings?.screenSpaceShafts ?? this.screenSpaceShafts.settings,
+      atmosphere,
     );
     if (
       this.ssr
@@ -267,7 +271,7 @@ export class PostProcessingGraph {
       this.hierarchicalDepth.resize(outputWidth, outputHeight);
       this.ssr.resize(outputWidth, outputHeight);
     }
-    this.ssr?.updateUniforms(frameState, settings?.ssr ?? this.ssr.settings);
+    this.ssr?.updateUniforms(frameState, settings?.ssr ?? this.ssr.settings, atmosphere);
     if (this.taaResolve) {
       this.taaResolve.settings = settings?.antiAliasing ?? this.taaResolve.settings;
       this.taaResolve.updateUniforms(frameState);
