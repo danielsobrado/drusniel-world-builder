@@ -75,3 +75,21 @@ test('regional pressure demotes distant detail but preserves the protected ring'
   assert.equal(band(baseline, 2, 0), 'near');
   assert.equal(band(pressured, 2, 0), 'proxy');
 });
+
+test('spatial pressure is applied only to the selected unprotected chunk', () => {
+  const options = {
+    focus: { chunkX: 0, chunkZ: 0 }, radius: 3, chunkWorldSize: 128,
+    camera: { position: { x: 64, y: 8, z: -64 }, fov: 68 },
+    floatingOrigin: { getState: () => ({ x: 0, z: 0 }) },
+    viewportHeight: 720, objectHeight: 16,
+    thresholds: { nearPixels: 32, proxyPixels: 8, impostorPixels: 2, clusterPixels: 0 },
+    radii: { meshRadius: 3, proxyRadius: 4, impostorRadius: 5, clusterRadius: 5 },
+    timestamp: 0, transitionMs: 320, transitionStates: new Map(),
+    protectedChunkRadius: 1,
+    regionalSpatialBudget: { factorForKey: key => key === '2:0' || key === '1:0' ? 0.5 : 1 },
+  };
+  const plan = buildChunkLodPlan(options);
+  assert.equal(band(plan, 1, 0), 'near');
+  assert.equal(band(plan, 2, 0), 'proxy');
+  assert.equal(band(plan, -2, 0), 'near');
+});
