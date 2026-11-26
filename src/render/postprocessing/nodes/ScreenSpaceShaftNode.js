@@ -1,6 +1,9 @@
 import * as THREE from 'three/webgpu';
 import {
   Fn,
+  If,
+  Loop,
+  int,
   dot,
   float,
   floor,
@@ -15,6 +18,8 @@ import {
   vec3,
   vec4,
 } from 'three/tsl';
+
+import { reducedSampleCount } from '../AtmosphericPassAdmission.js';
 
 const SKY_DEPTH_THRESHOLD = 0.9999;
 const SUN_INFLUENCE_MARGIN_UV = 0.35;
@@ -80,24 +85,31 @@ function buildShaftRadiance({
   decay,
   resolution,
   samples,
+  activeSamples = null,
 }) {
   return Fn(() => {
     const uv = screenUV;
     const pixel = floor(uv.mul(resolution));
     const dither = spatialDither(pixel);
-    const stepVector = sunUv.sub(uv).mul(reach.div(samples));
+    const count = activeSamples ?? samples;
+    const stepVector = sunUv.sub(uv).mul(reach.div(count));
     const coord = uv.add(stepVector.mul(dither)).toVar();
     const illumination = float(1).toVar();
     const visibility = float(0).toVar();
     const totalWeight = float(0).toVar();
 
-    for (let index = 0; index < samples; index += 1) {
+    const accumulate = () => {
       coord.addAssign(stepVector);
       const sampleVisible = step(SKY_DEPTH_THRESHOLD, depthNode.sample(coord).r)
         .mul(screenCoverage(coord));
       visibility.addAssign(sampleVisible.mul(illumination));
       totalWeight.addAssign(illumination);
-      illumination.mulAssign(decay);
+      illumination.mulAssign(activeSamples ? decay.pow(float(samples).div(float(count))) : decay);
+    };
+    if (activeSamples) {
+      If(intensity.greaterThan(0), () => Loop(int(count), accumulate));
+    } else {
+      for (let index = 0; index < samples; index += 1) accumulate();
     }
 
     const visibleShare = visibility.div(max(totalWeight, 1e-5));
@@ -125,6 +137,7 @@ export class ScreenSpaceShaftNode {
     settings,
     sunDirection,
     sunColor = '#ffffff',
+    adaptiveSamples = false,
   }) {
     this.settings = settings;
     this.sunDirection = (sunDirection ?? new THREE.Vector3(0, 0.25, -1))
@@ -142,6 +155,8 @@ export class ScreenSpaceShaftNode {
     this.sunPoint = new THREE.Vector3();
 
     const samples = Math.max(1, Math.round(settings.samples));
+    this.authoredSamples = samples;
+    this.activeSamples = adaptiveSamples ? uniform(samples, 'int') : null;
     this.radianceNode = rtt(buildShaftRadiance({
       depthNode,
       sunUv: this.sunUv,
@@ -150,6 +165,7 @@ export class ScreenSpaceShaftNode {
       decay: this.decay,
       resolution: this.resolution,
       samples,
+      activeSamples: this.activeSamples,
     }), 1, 1, {
       format: THREE.RGBAFormat,
       type: THREE.HalfFloatType,
@@ -185,8 +201,9 @@ export class ScreenSpaceShaftNode {
     };
   }
 
-  updateUniforms(frameState, settings = this.settings) {
+  updateUniforms(frameState, settings = this.settings, atmosphere = null) {
     this.settings = settings;
+    if (this.activeSamples) this.activeSamples.value = atmosphere ? reducedSampleCount(this.authoredSamples, atmosphere.shaftSampleFactor, atmosphere.shaftMinimumSamples) : this.authoredSamples;
     const projected = this.projectSun(frameState.camera);
     this.sunUv.value.set(projected.u, projected.v);
 
