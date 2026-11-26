@@ -61,12 +61,13 @@ export class WaterfallMist {
    * @param {object} options.config `stylizedSurface.water.waterfall`
    * @param {boolean} [options.enabled] false at water qualities that draw no whitewater
    */
-  constructor({ scene, floatingOrigin, getSites, getSkyView, config, enabled = true }) {
+  constructor({ scene, floatingOrigin, getSites, getSkyView, config, enabled = true, alphaCutoff = 0 }) {
     this.enabled = enabled && config.enabled && config.mistEnabled;
     this.floatingOrigin = floatingOrigin;
     this.getSites = getSites;
     this.getSkyView = getSkyView;
     this.config = config;
+    this.alphaCutoff = alphaCutoff;
     this.slots = [];
     this.time = frameUniform(0);
     this.intensity = frameUniform(config.mistIntensity);
@@ -93,6 +94,7 @@ export class WaterfallMist {
       time: this.time,
       intensity: this.intensity,
       light: this.light,
+      alphaCutoff: this.alphaCutoff,
     });
     return this.material;
   }
