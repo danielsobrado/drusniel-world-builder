@@ -29,13 +29,19 @@ export class InstanceAnchor {
    *
    * @param {{ x: number, z: number }} origin canonical position of render (0, 0)
    */
-  follow(origin) {
+  proposed(origin) {
     if (this.x === null
         || Math.abs(origin.x - this.x) > this.reach
         || Math.abs(origin.z - this.z) > this.reach) {
-      this.x = origin.x;
-      this.z = origin.z;
+      return { x: origin.x, z: origin.z };
     }
+    return { x: this.x, z: this.z };
+  }
+
+  follow(origin) {
+    const next = this.proposed(origin);
+    this.x = next.x;
+    this.z = next.z;
     return this;
   }
 
