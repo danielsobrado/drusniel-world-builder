@@ -105,9 +105,12 @@ export function snowDeposition({
   const facing = dot(normalWorld.xz, WIND);
   const lee = facing.clamp(0, 1);
   const depth = snow.clamp(0, 1);
-  // A trace switches it off, and taiga's 0.1 is a trace: at smoothstep(0.02, 0.12) its
-  // boulders stood capped white on green ground. Any real fall is drawn at full white.
-  const present = depth.smoothstep(0.08, 0.3);
+  // A trace switches it off, and taiga's 0.1 / cold desert's 0.2 are bare ground
+  // with snow only in hollows: caps start softly above 0.18, while a white basal
+  // snowdrift skirt requires real ground snow cover (> 0.32) so dry steppe/taiga
+  // boulders never wear a chalky white paint stripe on bare brown dirt.
+  const capPresent = depth.smoothstep(0.16, 0.38);
+  const skirtPresent = depth.smoothstep(0.32, 0.62);
   const cavity = centre
     // A convex stone's faces sit well out along their radius; only faces turned in from it are recesses.
     // Per vertex: it varies smoothly over a stone, and the fragment pass is the expensive one.
@@ -116,8 +119,8 @@ export function snowDeposition({
   const start = float(CAP_START).add(depth.oneMinus().mul(CAP_LIGHT)).sub(cavity.mul(0.25));
   const cap = up.add(ledgeBoost).add(breakup.mul(0.42)).smoothstep(start, start.add(CAP_WIDTH));
   if (groundY === null && !levelNode) {
-    const capPresent = cap.mul(present);
-    return { cover: capPresent, skirt: float(0), cap: capPresent, apron: float(0) };
+    const capOut = cap.mul(capPresent);
+    return { cover: capOut, skirt: float(0), cap: capOut, apron: float(0) };
   }
 
   const level = levelNode ?? varying(positionGeometry.y.sub(groundY).div(Math.max(1e-3, height)));
@@ -136,10 +139,13 @@ export function snowDeposition({
     .add(breakup.mul(0.18)).mul(fill).mul(baseSupport).max(0.015);
   const skirt = level.smoothstep(skirtTop.sub(SKIRT_EDGE), skirtTop).oneMinus();
   const apron = max(skirt, drift.mul(level.smoothstep(0.02, 0.34).oneMinus()));
+  const capOut = cap.mul(capPresent);
+  const driftOut = drift.mul(skirtPresent);
+  const skirtOut = skirt.mul(skirtPresent);
   return {
-    cover: max(max(cap, drift), skirt).mul(present),
-    skirt: skirt.mul(present),
-    cap: cap.mul(present),
-    apron: apron.mul(present),
+    cover: max(max(capOut, driftOut), skirtOut),
+    skirt: skirtOut,
+    cap: capOut,
+    apron: apron.mul(skirtPresent),
   };
 }

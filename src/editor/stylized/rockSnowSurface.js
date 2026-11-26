@@ -7,6 +7,7 @@ import {
   color,
   dFdx,
   dFdy,
+  dot,
   float,
   mix,
   normalize,
@@ -49,6 +50,8 @@ const FALLBACK_STONE = '#5c646e';
 const RIME_COLOR = '#dfe9f4';
 const NORMAL_STRENGTH = 1.25;
 const TRIPLANAR_THRESHOLD = 0.03;
+const BASALT_MEAN = 0.025;
+const LUMA_WEIGHTS = vec3(0.3, 0.55, 0.15);
 
 let shared = null;
 
@@ -257,23 +260,23 @@ export function coldStone(p, n) {
 }
 
 /**
- * Lightweight, close-range fractured stone normal & roughness relief for dry
- * painted boulders and scaled formations in non-snow biomes.
+ * Lightweight fractured stone relief (albedo crevice contrast, normal & roughness)
+ * for non-snow painted boulders and 4.5–8.5x rock formations across all biomes.
  *
- * Uses dominant-axis sampler-free `repeatMipTextureLoad` (2 taps total, zero
- * extra WebGPU samplers) and skips every fetch outside `gate`, keeping desert
- * tors, savanna kopjes, forest boulders and badlands outcrops crisp up close
- * without altering their biome albedo or spending GPU time in the distance.
+ * Uses dominant-axis sampler-free `repeatMipTextureLoad` (3 taps total, zero
+ * extra WebGPU samplers) and skips every fetch outside `gate`. Normalizes
+ * basalt fracture luminance to mean ~1.0 so every biome keeps its exact palette
+ * while gaining crisp fractured rock crevices and strata relief even in shadow.
  */
 export function rockFractureDetail({
   point,
   normal,
   baseNormal,
-  strength = float(0.68),
+  strength = float(0.82),
   gate = null,
 }) {
   const maps = acquireColdStoneTextures();
-  if (!maps) return { normal: baseNormal, roughnessDelta: float(0) };
+  if (!maps) return { normal: baseNormal, roughnessDelta: float(0), albedoFactor: float(1) };
 
   const n = normalize(normal).toVar();
   const q = point.div(STONE_METERS);
@@ -285,11 +288,14 @@ export function rockFractureDetail({
   const dy = select(top, q.xz.dFdy(), select(xSide, q.zy.dFdy(), q.xy.dFdy())).toVar();
 
   const sampled = Fn(() => {
+    // xy = tangent normal xy, z = normalized crevice luma, w = roughness
     const out = vec4(0, 0, 1, 0.75).toVar();
     const run = () => {
+      const c = repeatMipTextureLoad(maps.color, uv, dx, dy).rgb;
       const t = repeatMipTextureLoad(maps.normal, uv, dx, dy).xyz.mul(2).sub(1);
       const r = repeatMipTextureLoad(maps.rough, uv, dx, dy).g;
-      out.assign(vec4(t, r));
+      const luma = dot(c, LUMA_WEIGHTS).max(0.001).div(BASALT_MEAN).pow(0.55).clamp(0.45, 1.42);
+      out.assign(vec4(t.x, t.y, luma, r));
     };
     if (gate) If(gate, run);
     else run();
@@ -308,8 +314,10 @@ export function rockFractureDetail({
   );
   const deltaWorld = normalize(worldN.add(n.mul(1e-4))).sub(n).mul(strength).mul(ready);
   const deltaView = cameraViewMatrix.mul(vec4(deltaWorld, 0)).xyz;
+  const albedoFactor = mix(float(1), sampled.z, strength.clamp(0, 1).mul(0.72).mul(ready));
   return {
     normal: normalize(baseNormal.add(deltaView)),
-    roughnessDelta: sampled.w.sub(0.75).mul(0.28).mul(strength).mul(ready),
+    roughnessDelta: sampled.w.sub(0.75).mul(0.32).mul(strength).mul(ready),
+    albedoFactor,
   };
 }

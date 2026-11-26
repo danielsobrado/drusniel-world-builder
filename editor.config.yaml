@@ -349,8 +349,8 @@ stylizedSurface:
     # metre: 2.5 here. They replace the former mixed set, kept below to restore.
     # Split by shape & mesh detail:
     # - 01–05 (206–1,438 tris) are full-detail boulders/outcrops used everywhere,
-    #   including open snowy tundra where scaled formations sit in stark contrast.
-    # - 06–07 (54–56 tris) are ultra-low-poly faceted wedges kept off open snow.
+    #   including open flat biomes (deserts, savanna, grassland, tundra).
+    # - 06–07 (54–56 tris) are ultra-low-poly faceted wedges kept to wooded/wet cover.
     # - 08–11 (54–68 tris) stand nearly twice as tall as they are wide, reading
     #   as gravestones on open flat ground (deserts, savanna, grassland, tundra),
     #   so they keep to the broken, wooded and wet biomes.
@@ -364,7 +364,7 @@ stylizedSurface:
         scene: /assets/rocks/donor/rocks.glb
         scale: 2.5
         rootNames: [SM_Rocks_06_RocksStylized_M_0, SM_Rocks_07_RocksStylized_M_0]
-        tileIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 15]
+        tileIds: [5, 6, 7, 8, 9, 12, 15]
       - id: donor-rocks-upright
         scene: /assets/rocks/donor/rocks.glb
         scale: 2.5

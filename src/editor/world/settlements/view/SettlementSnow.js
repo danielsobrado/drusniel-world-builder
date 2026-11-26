@@ -5,6 +5,7 @@ import {
 import { blendCoat } from '../../../../render/materials/surfaceLayers/PbrCoatBlend.js';
 import { snowCoat } from '../../../stylized/surfaceCoatings/SnowCoat.js';
 import { surfaceCoatings } from '../../../stylized/surfaceCoatings/SurfaceCoatingConfig.js';
+import { snowLightUniforms } from '../../../stylized/sky/skyLight.js';
 
 /** Families that hold snow: everything solid. Glass and the dark recesses behind openings do not. */
 const SNOWY_SLOTS = Object.freeze(new Set(['roof', 'stone', 'wood', 'mortar', 'metal']));
@@ -51,7 +52,10 @@ export function snowSettlementMaterial(material, slot, settings = surfaceCoating
   const lift = amount.oneMinus().mul(THIN_LIFT);
   const cover = smoothstep(lift.add(from), lift.add(to), up).mul(smoothstep(0, 0.12, amount)).toVar('settlementSnow');
   const coat = snowCoat(positionGeometry, normalGeometry, cover, settings);
+  const shadeFill = mix(snowLightUniforms.shadeTint, vec3(1, 1, 1), smoothstep(from, to + 0.3, facing));
   const snow = mix(SNOW_SHADE, SNOW, smoothstep(from, to + 0.3, facing).mul(fine.mul(0.25).add(0.75)))
+    .mul(shadeFill)
+    .mul(snowLightUniforms.brightness.max(0.84))
     .mul(coat?.tint ?? vec3(1));
   const snowRoughness = settings.snow.enabled ? float(settings.snow.roughness).add(coat?.roughness ?? 0) : PLAIN_ROUGHNESS;
   const metal = Boolean(material.metalnessNode || material.metalness > 0);
@@ -66,4 +70,6 @@ export function snowSettlementMaterial(material, slot, settings = surfaceCoating
   material.roughnessNode = surface.roughness;
   if (metal) material.metalnessNode = surface.metalness;
   if (surface.normal !== baseNormal) material.normalNode = surface.normal;
+  // Restrain heavy stone/timber sky-fill bounce where bright snow covers roofs and ledges.
+  if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(mix(float(1), float(0.28), cover));
 }

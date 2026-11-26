@@ -188,7 +188,15 @@ export function applyRockWeathering(material, {
     .mul(sin(donor.z.mul(0.97).add(sin(donor.x.mul(0.61)).mul(1.2))))
     .mul(sin(donor.y.mul(0.71).add(donor.z.mul(0.37))))
     .mul(0.5).add(0.5);
-  const albedo = (sourceMap ? authoredTexture(sourceMap).rgb : vec3(1))
+  const rawSource = sourceMap ? authoredTexture(sourceMap).rgb : vec3(1);
+  // In arid/mossless biomes (`moss === 0`, e.g. hot desert, cold steppe, savanna, badlands),
+  // neutralize the green forest-moss blotches baked into the donor rock atlas so sandstone
+  // and steppe boulders never show painted green moss patches.
+  const sourceLuma = dot(rawSource, vec3(0.3, 0.59, 0.11));
+  const cleanSource = look
+    ? mix(vec3(sourceLuma), rawSource, moss.smoothstep(0.0, 0.25).mul(0.75).add(0.25))
+    : rawSource;
+  const albedo = cleanSource
     .mul(color(material.color.getHex()))
     .mul(settings.toning)
     .mul(mix(0.74, 1.06, tone));
@@ -247,22 +255,23 @@ export function applyRockWeathering(material, {
     ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1)
     : float(material.roughness ?? 0.85);
   const stoneNormal = material.normalNode ?? materialNormal;
-  // Close-range fractured stone normal & roughness detail for non-snow painted boulders
-  // and 8.5x rock formations (2 sampler-free taps, skipped beyond 38 m and on snow-country stone).
-  const nearFractureFade = smoothstep(12, 38, positionView.z.negate()).oneMinus().toVar();
+  // Close-range fractured stone crevice, normal & roughness relief for non-snow painted
+  // boulders and 8.5x rock formations (3 sampler-free taps, skipped beyond 55 m and on snow stone).
+  const nearFractureFade = smoothstep(18, 55, positionView.z.negate()).oneMinus().toVar();
   const dryRockWeight = look ? snowGround.smoothstep(0.28, 0.85).oneMinus() : float(1);
   const dryFracture = rockFractureDetail({
     point: metricPattern,
     normal: normalWorld,
     baseNormal: stoneNormal,
-    strength: nearFractureFade.mul(dryRockWeight).mul(mossCoatMask.oneMinus()).mul(0.62),
+    strength: nearFractureFade.mul(dryRockWeight).mul(mossCoatMask.oneMinus()).mul(0.88),
     gate: nearFractureFade.mul(dryRockWeight).greaterThan(0.02),
   });
+  const detailedStoneColor = stainedStone.mul(dryFracture.albedoFactor);
   const detailedStoneNormal = dryFracture.normal;
   const detailedStoneRoughness = stoneRoughness.add(dryFracture.roughnessDelta).clamp(0.42, 0.98);
   // The micro layer's pits are the cushions, its grit the tufts inside them.
   const mossLayer = mossCoat({ color: mossColor, pillow: edgeBreakup, tuft: tuftGrain, settings: coatSettings });
-  const mossed = blendCoat({ color: stainedStone, roughness: detailedStoneRoughness, normal: detailedStoneNormal }, {
+  const mossed = blendCoat({ color: detailedStoneColor, roughness: detailedStoneRoughness, normal: detailedStoneNormal }, {
     color: mossLayer.color,
     roughness: mossLayer.roughness ?? detailedStoneRoughness.max(0.96),
     normal: mossLayer.normal(detailedStoneNormal),
