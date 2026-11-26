@@ -366,7 +366,7 @@ export function createWeatherController(deps) {
         effectCenter,
         resolveMeadowEnvironment(settings, visual, cameraPosition, sunDirection),
       );
-      windWeather.update(deltaSeconds, elapsedSeconds, cameraPosition);
+      windWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, particles);
       rainWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, effectCenter, particles);
       snowWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, deps.getOrigin?.(), particles);
       sandstormWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, particles);
