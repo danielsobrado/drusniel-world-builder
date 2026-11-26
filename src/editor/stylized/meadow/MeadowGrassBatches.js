@@ -1,3 +1,4 @@
+import { meadowRequestedStems } from './MeadowPageUpdatePlan.js';
 import { meadowPageTileCapacity, MeadowBandBatch } from './MeadowBandBatch.js';
 
 const NO_TILES = Object.freeze([]);
@@ -204,7 +205,7 @@ export class MeadowGrassBatches {
   isPublished(tile) {
     const batch = this.batches.get(tile.builtBand), slot = batch?.slots.get(tile)?.slots.get(tile);
     return Boolean(slot && slot.source === (tile.prepared ?? tile.buildId)
-      && slot.count === Math.min(tile.output.count, batch.stride));
+      && slot.count === meadowRequestedStems(tile, batch.stride));
   }
 
   publicationBytes(tile, band, output) {
