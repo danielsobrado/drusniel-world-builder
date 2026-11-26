@@ -17,6 +17,15 @@ farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false
 environmentalParticleAdmission: false
+environmentalFragmentAdmission: false
+coastalSprayCompaction: false
+environmentalFragmentBudget:
+  fogStepFactor: 0.5
+  fogMinimumSteps: 3
+  fogProtectedDistanceMeters: 20
+  frameCpuPressureMs: 12
+  recoveryMs: 800
+  transparentAlphaCutoff: 0.003
 environmentalParticleBudget:
   particleBudget: 18000
   pressureFactor: 0.65
