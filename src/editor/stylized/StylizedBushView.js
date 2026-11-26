@@ -19,6 +19,7 @@ import {
   pruneStateMap,
 } from './lod/StylizedLodRuntime.js';
 import { drawnRepresentations, ScatterInstanceRows } from './lod/ScatterInstanceRows.js';
+import { admitSceneryPublication } from './lod/InstancePublicationPlan.js';
 import { InstanceAnchor } from './lod/InstanceAnchor.js';
 import { ScatterClusterField } from './forest/ScatterClusterField.js';
 import { canopyShade, forestFloorDensity, understoryClusterDensity } from './forest/ForestFloor.js';
@@ -562,10 +563,19 @@ export class StylizedBushView {
     }
     yield* this.instanceRows.stageRetired(job);
 
-    const anchorOrigin = this.terrainView.floatingOrigin.getState();
-    this.instanceAnchor.follow(anchorOrigin);
-    const counts = this.instanceRows.commit(job, this.meshes, this.proxyMeshes, this.instanceAnchor);
-    this.instanceAnchor.place(this.root, anchorOrigin);
+    let counts;
+    if (this.sceneryPublicationBudget) {
+      const proposed = this.instanceAnchor.proposed(this.terrainView.floatingOrigin.getState());
+      const publication = yield* this.instanceRows.prepareCommit(job, this.meshes, this.proxyMeshes, proposed);
+      yield* admitSceneryPublication(() => this.sceneryPublicationBudget, publication.bytes);
+      counts = publication.commit();
+      this.instanceAnchor.x = proposed.x;
+      this.instanceAnchor.z = proposed.z;
+    } else {
+      this.instanceAnchor.follow(this.terrainView.floatingOrigin.getState());
+      counts = this.instanceRows.commit(job, this.meshes, this.proxyMeshes, this.instanceAnchor);
+    }
+    this.instanceAnchor.place(this.root, this.terrainView.floatingOrigin.getState());
     if (counts.manifestsChanged) this.placements = this.instanceRows.placements();
     PerfCounters.set('bushNearInstances', counts.near);
     PerfCounters.set('bushProxyInstances', counts.proxy);
