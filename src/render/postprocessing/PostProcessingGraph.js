@@ -1,3 +1,4 @@
+import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import * as THREE from 'three/webgpu';
 import {
   mrt,
@@ -44,6 +45,7 @@ export class PostProcessingGraph {
     adaptiveAtmosphere = false,
   }) {
     this.renderer = renderer;
+    this.adaptiveAtmosphere = adaptiveAtmosphere;
     this.topologySignature = topologySignature;
     this.disposed = false;
 
@@ -294,6 +296,12 @@ export class PostProcessingGraph {
     this.vignette?.updateUniforms(settings?.vignette);
     this.sharpen?.updateUniforms(settings?.sharpen);
     this.grain?.updateUniforms(frameState, settings?.grain);
+    if (this.adaptiveAtmosphere) {
+      PerfCounters.set('atmosphericAdmission.world.aoScale', this.ambientOcclusion?.resolutionScale ?? 0);
+      PerfCounters.set('atmosphericAdmission.world.ssrSteps', this.ssr?.maxSteps.value ?? 0);
+      PerfCounters.set('atmosphericAdmission.world.shaftSamples', this.screenSpaceShafts?.activeSamples?.value ?? 0);
+      PerfCounters.set('atmosphericAdmission.world.bloomDownsampleTaps', this.bloom ? (this.bloom.reducedFilter?.value ? 5 : 13) : 0);
+    }
   }
 
   resize(width, height, pixelRatio = 1) {
