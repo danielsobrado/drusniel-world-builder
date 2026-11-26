@@ -39,3 +39,27 @@ export class ReflectionShadowRegistry {
     this.objects.clear(); this.owners.clear(); this.overlays.clear();
   }
 }
+
+// A scene has one registry even when several rendering passes consume it.
+const sceneRegistries = new WeakMap();
+
+export function acquireReflectionShadowRegistry(scene) {
+  let entry = sceneRegistries.get(scene);
+  if (!entry) {
+    entry = { registry: new ReflectionShadowRegistry(scene), users: 0 };
+    sceneRegistries.set(scene, entry);
+  }
+  entry.users++;
+  let active = true;
+  return {
+    registry: entry.registry,
+    release() {
+      if (!active) return;
+      active = false;
+      if (--entry.users === 0) {
+        entry.registry.dispose();
+        sceneRegistries.delete(scene);
+      }
+    },
+  };
+}

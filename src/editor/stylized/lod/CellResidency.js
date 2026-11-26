@@ -29,6 +29,9 @@ export class CellResidency {
         if (!this.cells.has(cell)) this.pending.push([x, z, cell]);
       }
     }
+    this.pending.sort((left, right) =>
+      (right[0] - focusX) ** 2 + (right[1] - focusZ) ** 2
+      - (left[0] - focusX) ** 2 - (left[1] - focusZ) ** 2);
     for (const [cell, value] of this.cells) {
       if (wanted.has(cell)) continue;
       if (value) this.dirty = true;
@@ -50,7 +53,8 @@ export class CellResidency {
       this.cells.set(cell, value);
       if (value) this.dirty = true;
     }
-    this.pending.push(...deferred);
+    // Blocked cells go behind untried cells, including when all cells are blocked.
+    if (deferred.length) this.pending.unshift(...deferred);
     if (!this.dirty || this.pending.length) return false;
     this.dirty = false;
     return true;

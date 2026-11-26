@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { CELL_PENDING, CellResidency } from '../lod/CellResidency.js';
+import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { InstanceAnchor } from '../lod/InstanceAnchor.js';
 import { createPathClearanceField } from '../TreeManifestStore.js';
 import { ALPINE_CELL_METERS, ALPINE_ROCK_KINDS, alpineRocksInCell } from './alpineRockField.js';
@@ -48,6 +49,7 @@ export class AlpineRockView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ALPINE_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME });
     this.ground = (x, z) => this.groundAt(x, z);
     this.resolve = (cellX, cellZ) => this.resolveCell(cellX, cellZ);
@@ -114,10 +116,14 @@ export class AlpineRockView {
     }
   }
 
-  write() {
+  write(publicationBudget = null) {
     this.anchor.follow(this.floatingOrigin.getState());
     const rocks = this.residency.values().flat();
+    // Admit the worst-case changed span before mutating any live instance buffer.
+    const bytes = ALPINE_ROCK_KINDS * CAPACITY * 17 * Float32Array.BYTES_PER_ELEMENT;
+    if (publicationBudget && !publicationBudget.canPublish(bytes)) return false;
     if (rocks.length) this.ensureMeshes();
+    const dirty = this.meshes.map(() => ({ matrixMin: Infinity, matrixMax: -1, snowMin: Infinity, snowMax: -1 }));
     for (const mesh of this.meshes) mesh.count = 0;
     for (const rock of rocks) {
       const mesh = this.meshes[rock.kind];
@@ -128,20 +134,39 @@ export class AlpineRockView {
       scratch.quaternion.setFromUnitVectors(UP, normal).multiply(spin.setFromAxisAngle(UP, rock.yaw));
       scratch.scale.set(rock.scale, rock.scale * rock.stretch, rock.scale);
       scratch.updateMatrix();
-      mesh.setMatrixAt(mesh.count, scratch.matrix);
-      mesh.geometry.attributes.instanceSnow.setX(mesh.count, rock.snow);
+      const range = dirty[rock.kind];
+      const offset = mesh.count * 16;
+      const matrix = mesh.instanceMatrix.array;
+      let changed = false;
+      for (let i = 0; i < 16; i++) {
+        if (matrix[offset + i] !== Math.fround(scratch.matrix.elements[i])) { changed = true; break; }
+      }
+      if (changed) {
+        mesh.setMatrixAt(mesh.count, scratch.matrix);
+        range.matrixMin = Math.min(range.matrixMin, mesh.count);
+        range.matrixMax = Math.max(range.matrixMax, mesh.count);
+      }
+      const snow = mesh.geometry.attributes.instanceSnow;
+      if (snow.getX(mesh.count) !== Math.fround(rock.snow)) {
+        snow.setX(mesh.count, rock.snow);
+        range.snowMin = Math.min(range.snowMin, mesh.count);
+        range.snowMax = Math.max(range.snowMax, mesh.count);
+      }
       mesh.count += 1;
     }
-    for (const mesh of this.meshes) {
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.geometry.attributes.instanceSnow.needsUpdate = true;
+    for (let i = 0; i < this.meshes.length; i++) {
+      const mesh = this.meshes[i], range = dirty[i];
+      markAttributeSubrangeUpdated(mesh.instanceMatrix, range.matrixMin, range.matrixMax);
+      markAttributeSubrangeUpdated(mesh.geometry.attributes.instanceSnow, range.snowMin, range.snowMax);
     }
+    return true;
   }
 
   /** @param {{ x: number, z: number }} cameraWorld canonical metres */
-  update(cameraWorld, shouldYield = () => false) {
+  update(cameraWorld, shouldYield = () => false, publicationBudget = null) {
     this.residency.refocus(cameraWorld.x, cameraWorld.z);
-    if (this.residency.step(this.resolve, shouldYield)) this.write();
+    if (this.residency.step(this.resolve, shouldYield)) this.publicationPending = true;
+    if (this.publicationPending && !shouldYield() && this.write(publicationBudget)) this.publicationPending = false;
     this.anchor.place(this.root, this.floatingOrigin.getState());
   }
 

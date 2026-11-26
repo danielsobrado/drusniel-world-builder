@@ -15,7 +15,7 @@ export class ReflectionCaptureSchedule {
   budgetMs(kind) { return Math.max(0.25, this.estimates[kind] ?? this.initialCpuMs) * this.safetyFactor; }
 
   reserve({ now, estimate, contended, reserve, reserveStrict }) {
-    if (!contended || !reserveStrict) {
+    if (!reserveStrict) {
       this.deferredSince = null;
       return reserve(estimate);
     }
@@ -23,6 +23,10 @@ export class ReflectionCaptureSchedule {
     if (strict) {
       this.deferredSince = null;
       return strict;
+    }
+    if (!contended) {
+      this.deferredSince = null;
+      return reserve(estimate);
     }
     this.deferredSince ??= now;
     if (now - this.deferredSince < this.maxDeferralMs) return null;

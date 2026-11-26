@@ -122,7 +122,7 @@ export class TerrainCommitQueue {
     assertBudgetMs(maxUploadBytes, { allowInfinity: true });
     let committed = 0;
     let uploadBytes = 0;
-    this.sortQueue();
+    if (maxCommits > 0 && budgetMs > 0) this.sortQueue();
     while (
       this.queue.length > 0
       && committed < maxCommits

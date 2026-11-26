@@ -109,7 +109,8 @@ export class StylizedBuildQueue {
       || Boolean(this.shouldYield?.())
     );
     if (shouldYield()) return { built: 0, remaining: this.queue.length };
-    this.sortQueue();
+    if (this.sortDirty && this.workRunner) this.workRunner(() => this.sortQueue());
+    else this.sortQueue();
     while (
       this.queue.length > 0
       && turns < this.buildsPerFrame

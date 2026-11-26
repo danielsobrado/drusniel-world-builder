@@ -52,6 +52,7 @@ export class TownStreamer {
     this.queryIntervalMs = queryIntervalMs;
     this.lod = lod;
     this.towns = new Map();
+    this.lodCursor = null;
     this.pending = new Map();
     this.generator = null;
     this.nextQueryAt = 0;
@@ -148,12 +149,21 @@ export class TownStreamer {
   }
 
   updateLods(focus, shouldYield = () => false) {
-    for (const town of this.towns.values()) {
+    const count = this.towns.size;
+    if (!count) { this.lodCursor = null; return; }
+    this.lodCursor ??= this.towns.values();
+    for (let visited = 0; visited < count && !shouldYield(); visited++) {
+      let next = this.lodCursor.next();
+      if (next.done) {
+        this.lodCursor = this.towns.values();
+        next = this.lodCursor.next();
+      }
+      if (next.done) return;
+      const town = next.value;
       town.selectionJob ??= this.selection(town, { ...focus });
       while (!shouldYield()) {
         if (town.selectionJob.next().done) { town.selectionJob = null; break; }
       }
-      if (shouldYield()) return;
     }
   }
 
@@ -326,6 +336,7 @@ export class TownStreamer {
     this.buildErrors.clear();
     for (const id of [...this.towns.keys()]) this.unload(id);
     this.pending.clear();
+    this.lodCursor = null;
   }
 
   dispose() {

@@ -1,7 +1,7 @@
 import { withDrawPreparation, withPreparationFrame } from './DrawPreparation.js';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { BudgetedAttributeInitialization } from './BudgetedAttributeInitialization.js';
-import { ReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
+import { acquireReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
 import { DrawUploadEstimate } from './DrawUploadEstimate.js';
 
 const MAX_WAIT_FRAMES = 4;
@@ -28,6 +28,7 @@ export class StreamedDrawPreparation {
     this.releaseUpload = null;
     this.uploadEstimate = new DrawUploadEstimate();
     this.hierarchy = null;
+    this.hierarchyLease = null;
   }
   beginFrame(budget) {
     this.revealPending();
@@ -61,7 +62,7 @@ export class StreamedDrawPreparation {
     this.releaseUpload?.();
     this.releaseUpload = null;
     const bytes = Math.min(INITIAL_UPLOAD_BYTES_PER_FRAME, budget.remainingUploadBytes?.() ?? Infinity);
-    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget, this.waitFrames >= MAX_WAIT_FRAMES * 2));
+    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget));
     else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes, budget), 6);
   }
   register(root, { uploadBytes = 0, uploadAttributes = null } = {}) {
@@ -132,7 +133,7 @@ export class StreamedDrawPreparation {
       this.hidden.delete(mesh);
     }
   }
-  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null, aged = false) {
+  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null) {
     this.revealPending();
     if (shouldYield?.()) return;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) return;
@@ -168,8 +169,8 @@ export class StreamedDrawPreparation {
         const bytes = budgeted ? estimate.bytes : Math.max(initial, estimate.bytes);
         // An indivisible upload may exceed the local slice only if the shared budget admits it.
         if (uploadBytes + bytes > byteLimit && (targets.length || budgetedBytes > 0
-            || (budget ? !budget.canPublish(uploadBytes + bytes) && !aged : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
-        if (budget && !budget.canPublish(uploadBytes + bytes)) PerfCounters.inc('streamedOversizedPublicationBytes', bytes);
+            || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
+        if (budget && bytes > budget.maxUploadBytes) PerfCounters.inc('streamedOversizedPublicationBytes', bytes);
         for (const buffer of estimate.buffers) plannedBuffers.add(buffer);
         this.pending.delete(mesh);
         uploadBytes += bytes;
@@ -184,7 +185,8 @@ export class StreamedDrawPreparation {
       this.waitFrames = 0;
       for (const mesh of targets) materials.set(mesh, mesh.material);
       for (const target of targets) target.material = this.stagedMaterials.get(target) ?? target.material;
-      this.hierarchy ??= new ReflectionShadowRegistry(this.scene);
+      this.hierarchyLease ??= acquireReflectionShadowRegistry(this.scene);
+      this.hierarchy = this.hierarchyLease.registry;
       const prepareStarted = this.enqueuedAt ? performance.now() : 0;
       if (this.enqueuedAt) {
         PerfCounters.inc('streamedDrawPassRequests');
@@ -269,7 +271,7 @@ export class StreamedDrawPreparation {
     this.cancelAllDiagnostics();
     this.reservation?.cancel(); this.reservation = null;
     this.releaseUpload?.(); this.releaseUpload = null;
-    this.hierarchy?.dispose(); this.hierarchy = null;
+    this.hierarchyLease?.release(); this.hierarchyLease = null; this.hierarchy = null;
     this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
     this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
   }

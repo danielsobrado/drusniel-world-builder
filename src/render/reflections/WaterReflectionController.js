@@ -2,7 +2,7 @@ import { CubeCamera, CubeRenderTarget, HalfFloatType, LinearFilter, RenderTarget
 import { abs, cubeTexture, distance, float, mix, positionWorld, smoothstep, texture, uniform, vec2 } from 'three/tsl';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { withReflectionCapture } from './ReflectionCapture.js';
-import { ReflectionShadowRegistry } from './ReflectionShadowRegistry.js';
+import { acquireReflectionShadowRegistry } from './ReflectionShadowRegistry.js';
 import { ReflectionCaptureSchedule } from './ReflectionCaptureSchedule.js';
 import { WaterReflectionResidency, nearestWaterSlots } from './WaterReflectionResidency.js';
 import { preparePlanarCamera } from './PlanarCamera.js';
@@ -50,7 +50,8 @@ export class WaterReflectionController {
     this.overlayRefreshCountdown = 0;
     this.planarWetSlots = [];
     this.preparedState = { origin: null, canonical: { x: 0, z: 0 }, wet: this.wetSlots };
-    this.shadowRegistry = terrainView.scene ? new ReflectionShadowRegistry(terrainView.scene) : null;
+    this.shadowRegistryLease = terrainView.scene ? acquireReflectionShadowRegistry(terrainView.scene) : null;
+    this.shadowRegistry = this.shadowRegistryLease?.registry ?? null;
     this.captureScratch = { states: [], shadows: [], shadowOwners: this.shadowRegistry?.owners };
     this.originScratch = { x: 0, z: 0 };
     this.lastCaptureCpuMs = 0;
@@ -280,7 +281,7 @@ export class WaterReflectionController {
     this.planarValid.value = 0;
   }
 
-  dispose() { this.disposed = true; this.invalidate(); this.residency.clear(); this.shadowRegistry?.dispose(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
+  dispose() { this.disposed = true; this.invalidate(); this.residency.clear(); this.shadowRegistryLease?.release(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
 
   prewarm(camera, surface) {
     const now = performance.now();

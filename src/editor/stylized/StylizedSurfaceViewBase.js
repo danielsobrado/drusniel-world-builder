@@ -893,7 +893,7 @@ export class StylizedSurfaceView {
       const cameraWorld = { x: camera.position.x + origin.x, z: camera.position.z + origin.z };
       const updateGeology = () => {
         this.icebergView?.update(cameraWorld, this.shouldYieldWork);
-        this.alpineRockView?.update(cameraWorld, this.shouldYieldWork);
+        this.alpineRockView?.update(cameraWorld, this.shouldYieldWork, this.publicationBudget);
         this.glacierSeracView?.update(cameraWorld, this.shouldYieldWork);
         this.pathBridgeView?.update(cameraWorld, this.shouldYieldWork);
       };
