@@ -293,7 +293,9 @@ export class TownStreamer {
       yield* mesh.splitJob(this.focus.x - layout.anchor.x, this.focus.z - layout.anchor.z, this.lod.splitRadius);
     }
     if (this.decorationSettings && this.decorationPoints.length) {
-      yield* mesh.selectDecorationsJob(this.decorationPoints, mesh.lod, this.lod);
+      const points = this.decorationPoints;
+      const current = () => !decorationPointsChanged(points, this.decorationPoints, this.decorationSettings.refreshMeters);
+      yield* mesh.selectDecorationsJob(points, mesh.lod, this.lod, null, current);
     }
     mesh.setOrigin(this.floatingOrigin.getState());
     yield* stagedDrawPublication(this.scene, [mesh.group], this.getDrawPreparation());
