@@ -61,15 +61,16 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
   const plans = [];
   let requested = { triangles: 0, draws: 0 }, requestedInstances = 0, protectedInstances = 0;
   const focus = points[0];
+  const protectedDistance = settings.protectMeters + settings.refreshMeters;
   for (const instances of modules) {
     const meta = instances.decoration;
     if (!meta) continue;
-    const tiers = new Uint8Array(instances.count), distances = new Float32Array(instances.count);
+    const tiers = new Uint8Array(instances.count), distances = new Float64Array(instances.count);
     let nearCount = 0, farCount = 0, nearest = Infinity;
     for (let i = 0; i < instances.count; i++) {
       const x = instances.values[i * 4], z = instances.values[i * 4 + 2];
       const distance = distanceToPoints(x, z, points);
-      const protectedNow = distance <= settings.protectMeters;
+      const protectedNow = distance <= protectedDistance;
       distances[i] = distance;
       const d = Math.hypot(x - focus.x, z - focus.z);
       const previousTier = instances.decorationTiers?.[i];
@@ -106,7 +107,7 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
       if (!plan.meta.cheaperFar) continue;
       let count = 0;
       for (let i = 0; i < plan.tiers.length; i++) {
-        if (plan.tiers[i] === NEAR && plan.distances[i] > settings.protectMeters) count++;
+        if (plan.tiers[i] === NEAR && plan.distances[i] > protectedDistance) count++;
         if ((i & 63) === 63) yield;
       }
       if (!count) continue;
@@ -114,7 +115,7 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
       const next = sum(minus(selected, plan.cost), nextCost);
       if (next.draws > Math.max(selected.draws, limit.draws)) continue;
       for (let i = 0; i < plan.tiers.length; i++) {
-        if (plan.tiers[i] === NEAR && plan.distances[i] > settings.protectMeters) plan.tiers[i] = FAR;
+        if (plan.tiers[i] === NEAR && plan.distances[i] > protectedDistance) plan.tiers[i] = FAR;
         if ((i & 63) === 63) yield;
       }
       plan.nearCount -= count; plan.farCount += count; plan.cost = nextCost;
@@ -126,7 +127,7 @@ export function* planTownDecorations(modules, points, lod, lodSettings, settings
       if (!plan.meta.canOmit) continue;
       let near = 0, far = 0;
       for (let i = 0; i < plan.tiers.length; i++) {
-        if (plan.distances[i] >= settings.omitDistanceMeters && plan.distances[i] > settings.protectMeters) {
+        if (plan.distances[i] >= settings.omitDistanceMeters && plan.distances[i] > protectedDistance) {
           if (plan.tiers[i] === NEAR) near++;
           else if (plan.tiers[i] === FAR) far++;
           plan.tiers[i] = NONE;
