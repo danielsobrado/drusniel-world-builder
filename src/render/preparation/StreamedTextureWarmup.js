@@ -45,7 +45,7 @@ export class StreamedTextureWarmup {
       const estimate = Math.ceil(textureBytes(texture));
       const ready = texture.version > 0 && texture.source?.dataReady !== false && texture.image?.complete !== false;
       const current = this.renderer._textures?.has?.(texture) && this.renderer._textures.get(texture).version === texture.version;
-      if (!ready || current || this.completed.get(texture) === texture.version || estimate < MIN_TEXTURE_BYTES
+      if (!ready || current || (!this.renderer._textures && this.completed.get(texture) === texture.version) || estimate < MIN_TEXTURE_BYTES
           || texture.isRenderTargetTexture || texture.isDepthTexture || texture.isVideoTexture || texture.isExternalTexture
           || texture.isStorageTexture || texture.isCubeTexture || texture.isArrayTexture || texture.isDataArrayTexture || texture.isData3DTexture) {
         job.index++; continue;

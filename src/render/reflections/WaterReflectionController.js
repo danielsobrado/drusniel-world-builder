@@ -13,7 +13,7 @@ import { isLandStreamingSuspended } from '../../editor/water/underwaterState.js'
 import { filteredWaterCube, filteredWaterPlanar } from './WaterReflectionFilter.js';
 import { staticWaterAt } from '../../editor/water/StaticWaterSample.js';
 
-const OVERLAY_REFRESH_CAPTURES = 32;
+const OVERLAY_REFRESH_OBJECTS = 64;
 
 /** Fixed-size local capture pool, owned by the scene rather than by water chunks. */
 export class WaterReflectionController {
@@ -48,7 +48,6 @@ export class WaterReflectionController {
     this.residencyReady = false;
     this.hiddenObjects = [];
     this.overlayObjects = [];
-    this.overlayRefreshCountdown = 0;
     this.planarWetSlots = [];
     this.preparedState = { origin: null, canonical: { x: 0, z: 0 }, wet: this.wetSlots };
     this.shadowRegistryLease = terrainView.scene ? acquireReflectionShadowRegistry(terrainView.scene) : null;
@@ -240,15 +239,7 @@ export class WaterReflectionController {
 
   refreshOverlayObjects() {
     const registry = this.shadowRegistry;
-    this.overlayRefreshCountdown -= 1;
-    if (registry && this.overlayRefreshCountdown <= 0) {
-      // Tags can be assigned after attachment; reconcile them without a scene traversal.
-      registry.overlays.clear();
-      for (const object of registry.objects) {
-        if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) registry.overlays.add(object);
-      }
-      this.overlayRefreshCountdown = OVERLAY_REFRESH_CAPTURES;
-    }
+    registry?.refreshOverlayTags(OVERLAY_REFRESH_OBJECTS);
     this.overlayObjects.length = 0;
     if (registry) {
       for (const object of registry.overlays) {

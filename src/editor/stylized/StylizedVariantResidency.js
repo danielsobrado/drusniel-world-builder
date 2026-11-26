@@ -97,6 +97,8 @@ export class StylizedVariantResidency {
     this.inFlightLeases = new Map();
     this.lastScanAt = -Infinity;
     this.lastScanKey = null;
+    this.scanJob = null;
+    this.scanAge = 0;
     this.disposed = false;
   }
 
@@ -113,6 +115,13 @@ export class StylizedVariantResidency {
    * prop set for is far wider than the sample stride.
    */
   scanNearbyTileIds(radius = this.scanRadiusChunks, focus = this.terrainView.focusChunk) {
+    const iterator = this.scanTileIdsJob(radius, focus);
+    let step;
+    do { step = iterator.next(); } while (!step.done);
+    return step.value;
+  }
+
+  *scanTileIdsJob(radius, focus) {
     const worldStore = this.terrainView.worldStore;
     const chunkSize = worldStore.chunkSize;
     const stride = Math.max(1, Math.floor(chunkSize / this.samplesPerChunkAxis));
@@ -127,6 +136,7 @@ export class StylizedVariantResidency {
         for (const tileId of this.chunkTileIds(chunkX, chunkZ, chunkSize, stride)) {
           tileIds.add(tileId);
         }
+        yield;
       }
     }
     return tileIds;
@@ -166,10 +176,15 @@ export class StylizedVariantResidency {
   }
 
   rescan() {
-    const tileIds = this.scanNearbyTileIds();
-    const nearTileIds = this.manageRequests ? this.scanNearbyTileIds(1) : null;
-    if (this.manageRequests && this.predictedFocus) {
-      for (const tileId of this.scanNearbyTileIds(2, this.predictedFocus)) tileIds.add(tileId);
+    const job = this.rescanJob({ ...this.terrainView.focusChunk }, this.predictedFocus);
+    while (!job.next().done) { /* explicit synchronous callers */ }
+  }
+
+  *rescanJob(focus, predicted) {
+    const nearTileIds = this.manageRequests ? yield* this.scanTileIdsJob(1, focus) : null;
+    const tileIds = yield* this.scanTileIdsJob(this.scanRadiusChunks, focus);
+    if (this.manageRequests && predicted) {
+      for (const tileId of yield* this.scanTileIdsJob(2, predicted)) tileIds.add(tileId);
     }
     for (const layer of this.layers) {
       const required = requiredVariantKeys({
@@ -330,7 +345,7 @@ export class StylizedVariantResidency {
   }
 
   getPreparationStatus() {
-    return { pending: this.pendingLoads.length + this.pendingApplies.length + this.inFlight + Number(Boolean(this.activeApply)),
+    return { pending: this.pendingLoads.length + this.pendingApplies.length + this.inFlight + Number(Boolean(this.activeApply)) + Number(Boolean(this.scanJob)),
       errors: [...this.failed] };
   }
 
@@ -342,10 +357,31 @@ export class StylizedVariantResidency {
     const focus = this.terrainView.focusChunk;
     const predicted = this.predictedFocus;
     const scanKey = `${focus.chunkX}:${focus.chunkZ}:${predicted?.chunkX ?? ''}:${predicted?.chunkZ ?? ''}:${this.biomeAssetPalette?.revision ?? 0}`;
-    if (scanKey !== this.lastScanKey || now - this.lastScanAt >= this.rescanIntervalMs) {
-      this.lastScanKey = scanKey;
-      this.lastScanAt = now;
-      this.rescan();
+    if (!shouldYield) {
+      if (scanKey !== this.lastScanKey || now - this.lastScanAt >= this.rescanIntervalMs) {
+        this.lastScanKey = scanKey; this.lastScanAt = now; this.rescan();
+      }
+    } else {
+      if (!this.scanJob && (scanKey !== this.lastScanKey || now - this.lastScanAt >= this.rescanIntervalMs)) {
+        this.scanJob = { key: scanKey, iterator: this.rescanJob({ ...focus }, predicted ? { ...predicted } : null) };
+        this.scanAge = 0;
+      }
+      if (this.scanJob) {
+        // Do not restart a scan on each movement update. Complete it then
+        // immediately request the newest window. One bounded step under load.
+        const force = ++this.scanAge >= 4;
+        let units = 0;
+        while (units < 24 && (!shouldYield() || (force && units === 0))) {
+          units++;
+          if (this.scanJob.iterator.next().done) {
+            this.lastScanKey = this.scanJob.key;
+            this.lastScanAt = now;
+            this.scanJob = null;
+            break;
+          }
+        }
+        if (units) this.scanAge = 0;
+      }
     }
     if (this.manageRequests) this.pumpApplies(shouldYield);
     this.pumpLoads();
@@ -354,6 +390,8 @@ export class StylizedVariantResidency {
 
   dispose() {
     this.disposed = true;
+    this.scanJob?.iterator.return();
+    this.scanJob = null;
     for (const job of this.inFlightLeases.values()) job.lease?.release();
     for (const job of this.pendingApplies) job.lease?.release();
     this.inFlightLeases.clear();

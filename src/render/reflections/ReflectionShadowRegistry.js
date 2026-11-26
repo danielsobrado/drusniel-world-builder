@@ -4,6 +4,7 @@ export class ReflectionShadowRegistry {
     this.objects = new Set();
     this.owners = new Set();
     this.overlays = new Set();
+    this.overlayCursor = null;
     this.added = event => this.track(event.child);
     this.removed = event => this.untrack(event.child);
     this.track(scene);
@@ -31,7 +32,19 @@ export class ReflectionShadowRegistry {
     });
   }
 
+  refreshOverlayTags(limit = 64) {
+    this.overlayCursor ??= this.objects.values();
+    for (let index = 0; index < limit; index++) {
+      const step = this.overlayCursor.next();
+      if (step.done) { this.overlayCursor = null; return; }
+      const object = step.value;
+      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlays.add(object);
+      else this.overlays.delete(object);
+    }
+  }
+
   dispose() {
+    this.overlayCursor = null;
     for (const object of this.objects) {
       object.removeEventListener('childadded', this.added);
       object.removeEventListener('childremoved', this.removed);

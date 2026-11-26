@@ -69,7 +69,7 @@ export class StreamedDrawPreparation {
     this.releaseUpload?.();
     this.releaseUpload = null;
     const bytes = Math.min(INITIAL_UPLOAD_BYTES_PER_FRAME, budget.remainingUploadBytes?.() ?? Infinity);
-    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget));
+    if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget, true));
     else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes, budget), 6);
   }
   register(root, { uploadBytes = 0, uploadAttributes = null } = {}) {
@@ -142,7 +142,7 @@ export class StreamedDrawPreparation {
       this.hidden.delete(mesh);
     }
   }
-  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null) {
+  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null, fifo = false) {
     this.revealPending();
     if (shouldYield?.()) return;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) return;
@@ -158,8 +158,12 @@ export class StreamedDrawPreparation {
       : Math.min(this.settings.meshesPerFrame, Math.max(1, Math.floor(slackMs / this.preparationCostMs)));
     const uploadStarted = performance.now();
     let budgetedBytes = 0;
+    let meadowBytes = 0;
     try {
-      for (const mesh of this.priority.ordered(this.pending, mesh => this.geometryUploads.jobs.has(mesh) || this.textureWarmup.jobs.has(mesh))) {
+      const pinned = mesh => this.geometryUploads.jobs.has(mesh) || this.textureWarmup.jobs.has(mesh)
+        || this.initialUploadAttributes.get(mesh)?.some(attribute => this.attributeInitialization.jobs.has(attribute));
+      const order = fifo ? this.pending : this.priority.ordered(this.pending, pinned);
+      for (const mesh of order) {
         if (shouldYield?.()) break;
         const isolated = this.isolated.has(mesh);
         if (isolated && targets.length) break;
@@ -181,6 +185,7 @@ export class StreamedDrawPreparation {
             byteLimit - uploadBytes, shouldYield);
           uploadBytes += result.bytes;
           budgetedBytes += result.bytes;
+          meadowBytes += result.bytes;
           if (!result.ready) break;
         }
         const staged = this.geometryUploads.advance(mesh, byteLimit - uploadBytes, shouldYield, budgeted ? attributes : []);
@@ -202,7 +207,7 @@ export class StreamedDrawPreparation {
       }
       PerfCounters.inc('streamedInitialUploadCpuMs', performance.now() - uploadStarted);
       PerfCounters.set('meadowInitialGpuUploadMaxFrameBytes',
-        Math.max(PerfCounters.get('meadowInitialGpuUploadMaxFrameBytes'), budgetedBytes));
+        Math.max(PerfCounters.get('meadowInitialGpuUploadMaxFrameBytes'), meadowBytes));
       if (budgetedBytes) PerfCounters.inc('streamedDrawInitialUploadBytes', budgetedBytes);
       if (targets.length === 0) return;
       this.waitFrames = 0;

@@ -5,6 +5,7 @@ const QUIET_GRACE_MS = 150;
 
 export function hasPreparationBacklog(surface) {
   if (!surface) return false;
+  if (surface.variantResidency?.scanJob || surface.variantResidency?.activeApply || surface.variantResidency?.pendingApplies?.length) return true;
   for (const name of QUEUES) {
     if (surface[`${name}BuildQueue`]?.size > 0) return true;
     const view = surface[`${name}View`];
