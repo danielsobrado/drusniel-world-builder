@@ -1,3 +1,4 @@
+import { particlePrefix } from '../performance/EnvironmentalParticleBudget.js';
 import * as THREE from "three";
 import { Rng, hashCombine, hashString } from '../_clod_shims/seed.js';
 import { createWindNodeMaterial } from "./windNodeMaterial.js";
@@ -37,9 +38,13 @@ class WindWeatherSystem {
     this.group.visible = this.settings.enabled && this.settings.intensity > 1e-3;
     this.material.setIntensity(this.settings.intensity);
   }
-  update(deltaSeconds, elapsedSeconds, cameraPosition) {
+  update(deltaSeconds, elapsedSeconds, cameraPosition, particles = null) {
     void deltaSeconds;
     if (!this.group.visible) return;
+    if (particles) {
+      const factor = particles.request('ambient', WIND_RIBBON_COUNT, WIND_NEAR_COUNT);
+      this.mesh.geometry.instanceCount = WIND_NEAR_COUNT + particlePrefix(WIND_RIBBON_COUNT - WIND_NEAR_COUNT, factor);
+    }
     // Ribbons show the prevailing world wind (only its direction shapes them).
     const prevailing = worldWindUniforms.prevailing.value;
     this.material.setWind(prevailing.x, prevailing.y);
@@ -47,7 +52,7 @@ class WindWeatherSystem {
     this.material.setCenter(cameraPosition);
   }
   getStats() {
-    return { ribbons: WIND_RIBBON_COUNT };
+    return { ribbons: this.mesh.geometry.instanceCount };
   }
   dispose() {
     this.group.removeFromParent();
