@@ -354,7 +354,7 @@ export function createWeatherController(deps) {
     get storm() {
       return storm.frame;
     },
-    update(deltaSeconds, elapsedSeconds, cameraPosition, effectCenter) {
+    update(deltaSeconds, elapsedSeconds, cameraPosition, effectCenter, particles = null) {
       if (disposed) return;
       if (deps.getCamera) sandstormWeather.camera = deps.getCamera();
       applyStormChannels(storm.step(deltaSeconds));
@@ -367,9 +367,9 @@ export function createWeatherController(deps) {
         resolveMeadowEnvironment(settings, visual, cameraPosition, sunDirection),
       );
       windWeather.update(deltaSeconds, elapsedSeconds, cameraPosition);
-      rainWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, effectCenter);
-      snowWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, deps.getOrigin?.());
-      sandstormWeather.update(deltaSeconds, elapsedSeconds, cameraPosition);
+      rainWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, effectCenter, particles);
+      snowWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, deps.getOrigin?.(), particles);
+      sandstormWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, particles);
       lightning.step(deltaSeconds, storm.frame.lightning);
       stormWeather.update(deltaSeconds, elapsedSeconds, cameraPosition, lightning.bolt, lightning.boltFlash);
     },
