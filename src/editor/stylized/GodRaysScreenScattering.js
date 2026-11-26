@@ -1,5 +1,8 @@
 import {
   Fn,
+  If,
+  Loop,
+  int,
   clamp,
   dot,
   float,
@@ -187,12 +190,14 @@ export function buildDustGodRays({
   dustScale,
   dustSpeed,
   timeNode,
+  activeSamples = null,
 }) {
   return Fn(() => {
+    const count = activeSamples ?? samples;
     const skyThreshold = float(SKY_DEPTH_THRESHOLD);
-    const delta = uvNode.sub(sunUv).mul(density.mul(1 / samples)).toConst();
+    const delta = uvNode.sub(sunUv).mul(density.div(count)).toConst();
     const coord = uvNode.toVar();
-    const sampleScale = float(REFERENCE_SAMPLE_COUNT / samples);
+    const sampleScale = float(REFERENCE_SAMPLE_COUNT).div(count);
     const perSampleDecay = pow(decay, sampleScale);
     const illuminationDecay = float(1).toVar();
     const accumulated = vec3(0).toVar();
@@ -200,7 +205,7 @@ export function buildDustGodRays({
     const visibilitySquaredAccumulated = float(0).toVar();
     const visibilitySampleCount = float(0).toVar();
 
-    for (let index = 0; index < samples; index += 1) {
+    const accumulate = () => {
       coord.subAssign(delta);
       const coverage = screenUvCoverage(coord);
       const skyVisibility = step(skyThreshold, depthTex.sample(coord).r)
@@ -229,6 +234,11 @@ export function buildDustGodRays({
           .mul(sampleWeight),
       );
       illuminationDecay.mulAssign(perSampleDecay);
+    };
+    if (activeSamples) {
+      If(intensity.greaterThan(0), () => Loop(int(count), accumulate));
+    } else {
+      for (let index = 0; index < samples; index += 1) accumulate();
     }
 
     const visibleShare = clamp(
