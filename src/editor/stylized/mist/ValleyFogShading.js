@@ -139,7 +139,7 @@ export function createValleyFogNodes({
       // the mist fades before the clamp so the boundary never shows.
       const length = distance.min(config.maxDistance).toVar();
       const march = () => {
-        const count = activeSteps ? distance.lessThanEqual(protectedDistance).select(int(steps), activeSteps.clamp(1, steps)).toVar() : null;
+        const count = activeSteps ? distance.lessThanEqual(protectedDistance).select(int(steps), int(activeSteps.clamp(1, steps))).toVar() : null;
         const step = (count ? length.div(float(count)) : length.mul(stepFraction)).toVar();
         const fade = activeSteps ? smoothstep(config.maxDistance * config.farFade, config.maxDistance, distance).oneMinus().toVar() : null;
         Loop(count ?? steps, ({ i }) => {
@@ -187,7 +187,8 @@ export function createValleyFogNodes({
   let tint = base;
   if (sunColor) {
     // Henyey-Greenstein forward lobe toward the sun, normalised to 1 at 90°.
-    const view = worldPosition.sub(cameraPosition).normalize();
+    const viewRay = worldPosition.sub(cameraPosition);
+    const view = activeSteps ? viewRay.div(viewRay.length().max(1e-4)) : viewRay.normalize();
     const g = config.scatter;
     const cosine = dot(view, sunDirection ?? vec3(0.35, 0.85, 0.25).normalize());
     const phase = float((1 + g * g) ** 1.5)
