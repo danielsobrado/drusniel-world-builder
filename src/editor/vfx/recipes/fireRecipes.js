@@ -42,6 +42,7 @@ export function fireballExplosion(fx, ctx) {
   });
   fx.at(0.02, () => {
     fx.burst('explosion.fireball', Math.round(36 * Math.sqrt(s)), { kind: 'sphere', center, radius: 0.9 * s, speed: [6, 15], up: 0.25 }, fire);
+    fx.burst('explosion.groundroll', Math.round(14 * Math.sqrt(s)), { kind: 'ring', center: addScaled(ground, UP, 0.55), radius: 1.1 * s, speed: [9, 15], lift: [0.4, 1.4] }, fire);
     fx.burst('explosion.spark', Math.round(170 * s), { kind: 'sphere', center, radius: 0.5, speed: [10, 28], up: 0.35, hemisphere: true });
   });
   fx.at(0.04, () => {
@@ -80,6 +81,9 @@ export function fireballExplosion(fx, ctx) {
     }, { sizeScale: s });
   });
   fx.stream('explosion.ember', 0.1, 4.5, 32 * s, { kind: 'sphere', center: addScaled(center, UP, 1), radius: 2.5 * s, speed: [1, 4], lift: 1.5 });
+  fx.stream('explosion.updraft.spark', 0.18, 3.2, (t) => 16 * Math.sqrt(s) * (1 - t * 0.7), {
+    kind: 'disk', center: ground, radius: 2.8 * s, ground: fx.groundHeight, height: [0.3, 1.2], lift: [2, 5.5], spread: 1.2,
+  });
   // After-burn licking over the scorch, dying down; coals and wisps outlast it.
   fx.stream('explosion.groundfire', 0.35, 8, (t) => 34 * s * (1 - t) ** 1.2, (t) => ({
     kind: 'disk', center: ground, radius: 4 * s * (1 - t * 0.45), ground: fx.groundHeight, height: 0.35,
@@ -110,18 +114,25 @@ export function fireball(fx, ctx) {
   fx.at(0, () => {
     fx.sound('cast-fire', from);
     fx.burst('explosion.core', 4, { kind: 'sphere', center: from, radius: 0.1, speed: [0.5, 1.5] }, { sizeScale: 0.3 });
+    fx.burst('fire.spark', 10, { kind: 'sphere', center: from, radius: 0.15, speed: [2, 6] });
   });
   const flight = launchProjectile(fx, {
     from, to, speed: 30, path: 'arc', arc: 0.05,
     onFrame: (position, heading) => {
-      if (!light) light = fx.light({ position, ramp: RAMP.BLACKBODY, intensity: 90, range: 14, attack: 0.35, hold: 60, decay: 8, flicker: 0.3, follow: () => flight.position });
+      if (!light) light = fx.light({ position, ramp: RAMP.BLACKBODY, intensity: 95, range: 15, attack: 0.35, hold: 60, decay: 8, flicker: 0.3, follow: () => flight.position });
       fx.burst('fire.head', 1, { kind: 'point', center: position });
-      fx.burst('fire.head.puff', 3, { kind: 'sphere', center: position, radius: 0.15, speed: [0.5, 2] }, { addVelocity: { x: -heading.x * 4, y: -heading.y * 4, z: -heading.z * 4 } });
+      // Sweeping flame wake streaming directly behind the incandescent core.
+      const wakeAxis = { x: -heading.x, y: -heading.y, z: -heading.z };
+      fx.burst('fire.wake', 1, { kind: 'point', center: addScaled(position, heading, -1.2) }, {
+        axis: wakeAxis, axisLength: 3.2, rotation: 0,
+      });
+      fx.burst('fire.head.puff', 3, { kind: 'sphere', center: position, radius: 0.18, speed: [0.5, 2.2] }, { addVelocity: { x: -heading.x * 4.5, y: -heading.y * 4.5, z: -heading.z * 4.5 } });
+      fx.burst('fire.spark', 1, { kind: 'sphere', center: position, radius: 0.22, speed: [1.5, 4] }, { addVelocity: { x: -heading.x * 8, y: -heading.y * 8, z: -heading.z * 8 } });
       // No smoke in the caster's face: the trail starts a few metres out.
       if (Math.hypot(position.x - from.x, position.y - from.y, position.z - from.z) > 3) {
         fx.burst('fire.trail.smoke', 1, { kind: 'sphere', center: position, radius: 0.2, speed: [0.2, 0.6] });
       }
-      if (fx.random() < 0.6) fx.burst('explosion.ember', 1, { kind: 'sphere', center: position, radius: 0.2, speed: [1, 3] });
+      if (fx.random() < 0.7) fx.burst('explosion.ember', 1, { kind: 'sphere', center: position, radius: 0.22, speed: [1, 3.2] });
     },
     onArrive: (position) => {
       light?.release();

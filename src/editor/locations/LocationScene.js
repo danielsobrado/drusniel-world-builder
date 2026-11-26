@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { generateLocation } from './LocationBuilder.js';
-import { createFlames, createHalos, createLightShaft, createParticles } from './LocationEffects.js';
+import { createFlameEmbers, createFlames, createHalos, createLightShaft, createParticles } from './LocationEffects.js';
 import { createBreath, createEmitters } from './LocationEmitters.js';
 import { LocationPostProcessing } from './LocationPostProcessing.js';
 import { createSky } from './LocationSky.js';
@@ -86,7 +86,10 @@ export class LocationScene {
         gain: site.lighting.dynamicGain ?? (site.lighting.indirectBounce ? 0.28 : 0.14),
       });
       if (builder.halos.length > 0) location.scene.add(createHalos(builder.halos));
-      if (builder.flames.length > 0) location.scene.add(createFlames(builder.flames));
+      if (builder.flames.length > 0) {
+        location.scene.add(createFlames(builder.flames));
+        location.scene.add(createFlameEmbers(builder.flames, quality.particleScale));
+      }
       for (const shaft of builder.shafts) {
         location.scene.add(createLightShaft({ ...shaft, softDepth: softShaftDepth }));
       }

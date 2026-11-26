@@ -151,12 +151,21 @@ export function createTownKitMaterial(atlas, look) {
   const base = mix(uv(), place.xz, isCobble);
   const reliefHeight = dot(texture(atlas.albedo, base).depth(row.x).rgb, vec3(0.3, 0.55, 0.15));
   const flow = isRole(ROLE.water).add(isRole(ROLE.foam));
+  const flame = isRole(ROLE.flame);
+  const flamePhase = place.x.mul(3.1).add(place.z.mul(2.3));
+  const flameSway = vec2(
+    sin(time.mul(9.6).add(base.y.mul(11.0)).add(flamePhase)).mul(0.032).mul(base.y),
+    sin(time.mul(14.2).add(base.x.mul(7.0)).add(flamePhase)).mul(0.014).mul(base.y),
+  ).mul(flame);
   const st = base.sub(parallaxDirection.xy.mul(reliefHeight.sub(0.45).mul(surface.z).mul(townKitShared.reliefScale)))
-    .add(vec2(0, time.mul(-0.6)).mul(flow));
+    .add(vec2(0, time.mul(-0.6)).mul(flow))
+    .add(flameSway);
   const albedoSample = texture(atlas.albedo, st).depth(row.x);
   const laid = albedoSample.rgb;
-  const flame = isRole(ROLE.flame);
-  const flicker = sin(time.mul(7).add(place.x.mul(3)).add(place.y.mul(2))).mul(0.12).add(0.88);
+  const flicker = sin(time.mul(6.8).add(flamePhase)).mul(0.11)
+    .add(sin(time.mul(13.7).add(flamePhase.mul(1.9)).add(place.y.mul(3.0))).mul(0.075))
+    .add(sin(time.mul(21.4).add(base.y.mul(9.0))).mul(0.04))
+    .add(1.06);
   // Only spray pixels pay for dithering. Opaque town walls avoid a global alpha-hash pass.
   material.opacityNode = Fn(() => {
     If(role.equal(ROLE.mist), () => {
@@ -262,7 +271,8 @@ export function createTownKitMaterial(atlas, look) {
   const roughness = snowed.roughness.add(wear.mul(0.05)).add(crevice.mul(0.08));
   material.roughnessNode = filterSpecularRoughness(roughness, normalSample.mul(2).sub(1).mul(vec3(strength, strength, 1)));
   material.metalnessNode = snowed.metalness;
-  const selfEmissive = sample.mul(tint.rgb).mul(tint.w).mul(mix(float(1), flicker, flame));
+  const flameHeartBoost = vec3(1.0, 0.88, 0.56).mul(smoothstep(0.42, 0.92, luma).mul(0.42).mul(flame));
+  const selfEmissive = sample.mul(tint.rgb).add(flameHeartBoost).mul(tint.w).mul(mix(float(1), flicker, flame));
   const shadeEmissive = buildingShadeEmission(colour, { snowCover }).mul(float(1).sub(flame));
   material.emissiveNode = selfEmissive.add(shadeEmissive);
   return material;

@@ -54,7 +54,9 @@ export function wallOfFire(fx, ctx) {
     rate -= whole;
     if (whole > 0) fx.burst('wall.flame', whole, span(), { sizeScale: (index, params) => height(params) });
   });
+  fx.stream('wall.base', 0, duration * 0.96, (t) => 34 * fade(t), () => ({ ...span(0.18), lift: 0, jitter: 0.35 }));
   fx.stream('wall.body', 0.1, duration * 0.92, 60, () => span(), { sizeScale: (index, params) => 0.8 + 0.5 * height(params) });
+  fx.stream('wall.wisp', 0.25, duration * 0.92, (t) => 46 * fade(t), () => ({ ...span(1.6), lift: [2.2, 4.8], jitter: 0.45 }));
   fx.stream('explosion.ember', 0.2, duration, 75, () => ({ ...span(), lift: [1, 3.5] }));
   // Roaring surges: a tall gout of flame at a random point, throwing up dark smoke.
   fx.every(0.4, duration - 1, 0.32, () => {

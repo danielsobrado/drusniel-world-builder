@@ -20,8 +20,10 @@ export function bogGasFlame(fx, ctx) {
       attack: 0.4, hold: Math.max(0.5, duration - 1.6), decay: 1.1, flicker: 0.45,
     });
   });
+  fx.stream('wall.base', 0, duration, (t) => 5 * strength(t), { ...vent, height: 0.08 }, { sizeScale: 0.45 });
   fx.stream('wall.flame', 0, duration, (t) => 16 * strength(t), { ...vent, lift: [0.7, 1.6] }, { sizeScale: 0.6 });
   fx.stream('wall.body', 0.1, duration, (t) => 5 * strength(t), { ...vent, radius: 0.3, lift: [0.4, 1] }, { sizeScale: 0.5 });
+  fx.stream('wall.wisp', 0.15, duration, (t) => 7 * strength(t), { ...vent, height: [0.45, 0.9], lift: [1.4, 2.8], spread: 0.2 }, { sizeScale: 0.55 });
   fx.stream('explosion.ember', 0.3, duration, (t) => 4 * strength(t), {
     ...vent, height: [0.4, 1], lift: [1, 2.4], spread: 0.3,
   });

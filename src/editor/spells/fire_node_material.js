@@ -1,10 +1,9 @@
-import * as THREE from "three";
-import { MeshBasicNodeMaterial } from "three/webgpu";
+import * as THREE from 'three';
+import { MeshBasicNodeMaterial } from 'three/webgpu';
 import {
   abs,
   clamp,
   float,
-  floor,
   Fn,
   length,
   max,
@@ -12,92 +11,135 @@ import {
   pow,
   sin,
   smoothstep,
-  step,
   uniform,
   uv,
   vec2,
   vec3,
-  vec4
-} from "three/tsl";
-import { createSpellEffectNoiseNodes } from "./spell_effect_noise.js";
-import { spellCardEdgeFade } from "./spell_card_edge.js";
+  vec4,
+} from 'three/tsl';
+import {
+  blackbodyFireColor,
+  sampleFireNoise,
+  sampleFireTurbulence,
+} from '../vfx/render/fireShaderNodes.js';
+import { spellCardEdgeFade } from './spell_card_edge.js';
+
+const JET_TURB_OPTS = Object.freeze({
+  broadScale: vec2(0.55, 0.42),
+  fineScale: vec2(1.25, 0.92),
+  broadSpeed: 0.72,
+  fineSpeed: 1.28,
+  warpStrength: 0.22,
+  gain: 1.45,
+});
+
 function createFireNodeMaterial() {
   const uTime = uniform(0);
   const uProgress = uniform(0);
-  const { noise, fbm, ridge, gabor2, wavelet2, ringCells2, ign2 } = createSpellEffectNoiseNodes({
-    hashSeed: 753.5453123,
-    fbmFreqMul: 2.03,
-    fbmOffset: [13.7, 7.1, 4.8]
-  });
   const ring = (d, radius, thickness) => float(1).sub(smoothstep(thickness, thickness.mul(1.85), abs(d.sub(radius))));
+
   const fragment = Fn(() => {
     const uvN = uv();
     const side = uvN.x.sub(0.5);
     const t = uvN.y;
-    const p = vec2(side, uvN.y.sub(0.5));
-    const castIn = smoothstep(0, 0.07, uProgress);
-    const castOut = float(1).sub(smoothstep(0.78, 1, uProgress));
+    const castIn = smoothstep(0, 0.06, uProgress);
+    const castOut = float(1).sub(smoothstep(0.76, 1, uProgress));
     const life = castIn.mul(castOut);
-    const grow = smoothstep(0, 0.24, uProgress);
-    const centerNoise = fbm(vec3(t.mul(2.2), uTime.mul(1.7), 3));
-    const filamentNoise = gabor2(
-      vec2(side.mul(5.8), t.mul(3.4)).add(vec2(0, uTime.mul(-2.1))),
-      uTime
-    );
-    const lickNoise = wavelet2(
-      vec2(side.mul(2.2), t.mul(4)).add(vec2(uTime.mul(0.2), uTime.mul(-1.4))),
-      uTime.mul(8)
-    );
-    const sideWarp = centerNoise.sub(0.5).mul(0.105).mul(smoothstep(0.08, 0.86, t)).add(filamentNoise.sub(0.5).mul(0.035).mul(smoothstep(0.12, 0.92, t))).add(lickNoise.sub(0.5).mul(0.028).mul(smoothstep(0.1, 0.8, t)));
-    const warpedSide = side.add(sideWarp);
-    const baseMask = smoothstep(-0.02, 0.08, t).mul(
-      float(1).sub(smoothstep(grow.mul(0.92), grow.mul(1.13).add(0.01), t))
-    );
-    let coneWidth = mix(float(0.035), float(0.255), pow(max(t, 0), 0.74));
-    coneWidth = coneWidth.mul(float(1).sub(smoothstep(0.68, 1.05, t).mul(0.58)));
+    const grow = smoothstep(0, 0.22, uProgress);
+
+    // Expanding turbulent cone that widens from the caster's palm and frays into licking tips.
+    let coneWidth = mix(float(0.036), float(0.28), pow(max(t, 0), 0.72));
+    coneWidth = coneWidth.mul(float(1).sub(smoothstep(0.68, 1.04, t).mul(0.55)));
     coneWidth = max(coneWidth, 0.022);
-    const q = vec3(warpedSide.div(coneWidth), t.mul(3.15), uTime.mul(2.3));
-    const rolling = fbm(q.mul(vec3(0.86, 1.42, 1)).add(vec3(0, uTime.mul(-3.2), uTime.mul(0.25))));
-    const fine = fbm(q.mul(vec3(2.3, 3, 1)).add(vec3(5, uTime.mul(-6.5), 1)));
-    const body = float(1).sub(abs(warpedSide).div(coneWidth)).sub(t.mul(0.46)).add(rolling.mul(0.6)).add(fine.mul(0.18)).add(filamentNoise.sub(0.5).mul(0.24)).add(lickNoise.mul(0.13));
-    const density = smoothstep(0.1, 0.86, body).mul(baseMask).mul(life);
-    const core = smoothstep(0.82, 1.28, body.add(float(1).sub(t).mul(0.26))).mul(baseMask).mul(life);
-    const tongue = smoothstep(0.72, 1.08, filamentNoise.add(lickNoise.mul(0.35))).mul(density).mul(smoothstep(0.12, 0.86, t));
-    const palmDist = length(vec2(side.mul(0.72), t.mul(1.24)));
-    const palmGlow = float(1).sub(smoothstep(0.04, 0.28, palmDist)).mul(life);
-    const magicRing = ring(palmDist, float(0.145).add(sin(uTime.mul(7)).mul(0.016)), float(0.01)).mul(life);
-    const runePulse = ring(palmDist, float(0.215).add(sin(uTime.mul(4.2)).mul(0.02)), float(8e-3)).mul(life).mul(0.55);
-    const cell = floor(vec2(warpedSide.add(0.52).mul(92), t.mul(74)));
-    const sparkNoise = noise(vec3(cell.x, cell.y, floor(uTime.mul(32)))).mul(0.72).add(ign2(cell).mul(0.28));
-    const sparkLine = smoothstep(0.18, 0.96, t).mul(float(1).sub(smoothstep(1, 1.14, t)));
-    const sparks = step(0.986, sparkNoise).mul(sparkLine).mul(life);
-    const emberBurst = ringCells2(vec2(warpedSide.add(0.52).mul(18), t.mul(15).sub(uTime.mul(5.5)))).mul(smoothstep(0.1, 0.72, t)).mul(life);
-    const emberTrail = step(0.993, noise(vec3(cell.x.add(17), cell.y.add(17), floor(uTime.mul(18))))).mul(smoothstep(0.08, 0.58, t)).mul(life);
-    const heat = fbm(vec3(p.x.mul(2), p.y.mul(3), uTime.mul(2)));
-    const heatVeil = smoothstep(0.16, 0.88, body.add(heat.mul(0.25))).mul(baseMask).mul(life).mul(0.11);
-    const smokeVein = ridge(vec3(p.x.mul(1.2), p.y.mul(2.1).sub(uTime.mul(0.35)), uTime.mul(0.6))).mul(smoothstep(0.46, 1, t)).mul(float(1).sub(core)).mul(life).mul(0.09);
-    const ember = vec3(0.85, 0.12, 0.025);
-    const flame = vec3(1, 0.42, 0.07);
-    const hot = vec3(1, 0.88, 0.36);
-    const arcane = vec3(1, 0.37, 0.12);
-    let color = mix(ember, flame, density);
-    color = mix(color, hot, core);
-    color = color.add(hot.mul(tongue).mul(0.44));
-    color = color.add(hot.mul(palmGlow).mul(0.78));
-    color = color.add(arcane.mul(magicRing.add(runePulse)).mul(0.95));
-    color = color.add(vec3(1, 0.55, 0.12).mul(sparks.add(emberBurst.mul(0.42))).mul(0.75));
-    color = color.add(vec3(1, 0.22, 0.06).mul(emberTrail).mul(0.36));
-    color = color.add(vec3(0.7, 0.23, 0.08).mul(heatVeil));
-    color = color.add(vec3(0.34, 0.12, 0.06).mul(smokeVein));
-    const alpha = clamp(
-      density.mul(0.72).add(core.mul(0.34)).add(tongue.mul(0.22)).add(palmGlow.mul(0.48)).add(magicRing.mul(0.55)).add(runePulse.mul(0.34)).add(sparks.mul(0.38)).add(emberBurst.mul(0.2)).add(emberTrail.mul(0.18)).add(heatVeil).add(smokeVein),
+
+    const scrollT = uTime.mul(1.75);
+    const jetUv = vec2(side.div(coneWidth).mul(0.52), t);
+    const turb = sampleFireTurbulence(jetUv, scrollT, vec2(0.17, 0.31), JET_TURB_OPTS);
+
+    const sideWarp = turb.combined.mul(0.135).mul(smoothstep(0.05, 0.88, t));
+    const warpedSide = side.add(sideWarp);
+    const radial = abs(warpedSide).div(coneWidth);
+
+    const baseMask = smoothstep(-0.02, 0.075, t).mul(
+      float(1).sub(smoothstep(grow.mul(0.9), grow.mul(1.12).add(0.01), t)),
+    );
+
+    // Multi-layered roaring combustion body: core plume + curling cellular tongues + tattered outer licks.
+    const cellCarve = turb.cells.sub(0.5).mul(0.56);
+    const bodyField = float(1).sub(radial)
+      .sub(t.mul(0.42))
+      .add(turb.sway.mul(0.45))
+      .add(turb.licks.mul(0.32))
+      .add(cellCarve);
+    const tipErosion = smoothstep(float(1.02), float(0.54), t.add(turb.erosion.sub(0.5).mul(0.42)));
+    const density = smoothstep(0.06, 0.82, bodyField).mul(tipErosion).mul(baseMask).mul(life);
+
+    // Hot incandescent core & flickering flame filaments running down the jet axis.
+    const coreField = float(1).sub(radial.mul(1.35)).add(float(1).sub(t).mul(0.35)).add(cellCarve.mul(0.7));
+    const core = smoothstep(0.55, 1.15, coreField).mul(baseMask).mul(life);
+    const tongues = smoothstep(0.58, 0.92, turb.cells.add(turb.licks.mul(0.4)))
+      .mul(density)
+      .mul(smoothstep(0.1, 0.88, t));
+
+    // Palm ignition heart + pulsing arcane containment rings.
+    const palmDist = length(vec2(side.mul(0.74), t.mul(1.26)));
+    const palmGlow = pow(float(1).sub(smoothstep(0.02, 0.27, palmDist)), 1.6).mul(life);
+    const blueHeart = pow(float(1).sub(smoothstep(0.01, 0.14, palmDist)), 2.0).mul(life);
+    const magicRing = ring(palmDist, float(0.14).add(sin(uTime.mul(7.5)).mul(0.015)), float(0.009)).mul(life);
+    const runePulse = ring(palmDist, float(0.21).add(sin(uTime.mul(4.6)).mul(0.018)), float(0.007)).mul(life).mul(0.52);
+
+    // Smooth elongated rushing sparks & embers (no blocky pixel-grid artifacts).
+    const streakUvA = vec2(warpedSide.mul(5.8).add(0.5), t.mul(1.45).sub(uTime.mul(2.85)));
+    const streakUvB = vec2(warpedSide.mul(9.2).sub(0.25), t.mul(2.1).sub(uTime.mul(3.9)));
+    const streakA = sampleFireNoise(streakUvA, 'meso').b;
+    const streakB = sampleFireNoise(streakUvB, 'sky').r;
+    const sparkMask = smoothstep(0.14, 0.94, t).mul(float(1).sub(smoothstep(0.92, 1.08, t)))
+      .mul(smoothstep(float(1.45), float(0.2), radial));
+    const sparks = smoothstep(0.78, 0.95, streakA.mul(streakB).mul(1.45)).mul(sparkMask).mul(life);
+    const emberFlakes = smoothstep(0.84, 0.97, streakB).mul(sparkMask).mul(life);
+
+    // Heat-haze outer veil and faint dark-crimson smoke edge contrast.
+    const heatVeil = smoothstep(0.02, 0.72, bodyField.add(0.22)).mul(baseMask).mul(life).mul(0.14);
+    const flicker = sin(uTime.mul(23).add(t.mul(8))).mul(0.05).add(1.0);
+
+    // Map internal thermal gradient through the physical blackbody ramp.
+    const heat = clamp(
+      density.mul(0.55)
+        .add(core.mul(0.52))
+        .add(tongues.mul(0.22))
+        .add(float(1).sub(t).mul(0.16).mul(density))
+        .sub(radial.mul(0.18)),
       0,
-      0.98
+      1,
+    );
+    let color = blackbodyFireColor(heat).mul(density.mul(1.35).add(core.mul(0.55)));
+    color = color.add(vec3(1.0, 0.86, 0.42).mul(tongues).mul(0.48));
+    color = color.add(vec3(1.0, 0.92, 0.62).mul(palmGlow).mul(0.95));
+    color = color.add(vec3(0.52, 0.78, 1.0).mul(blueHeart).mul(0.45));
+    color = color.add(vec3(1.0, 0.42, 0.1).mul(magicRing.add(runePulse)).mul(0.85));
+    color = color.add(vec3(1.0, 0.72, 0.24).mul(sparks).mul(1.35));
+    color = color.add(vec3(1.0, 0.34, 0.06).mul(emberFlakes).mul(0.65));
+    color = color.add(vec3(0.68, 0.16, 0.03).mul(heatVeil));
+    color = color.mul(flicker);
+
+    const alpha = clamp(
+      density.mul(0.84)
+        .add(core.mul(0.32))
+        .add(tongues.mul(0.18))
+        .add(palmGlow.mul(0.5))
+        .add(magicRing.mul(0.48))
+        .add(runePulse.mul(0.28))
+        .add(sparks.mul(0.42))
+        .add(emberFlakes.mul(0.24))
+        .add(heatVeil),
+      0,
+      0.98,
     );
     return vec4(color, alpha.mul(spellCardEdgeFade()));
   })();
+
   const material = new MeshBasicNodeMaterial();
-  material.name = "fire-spell-node";
+  material.name = 'fire-spell-node';
   material.colorNode = fragment.xyz;
   material.opacityNode = fragment.w;
   material.transparent = true;
@@ -108,6 +150,5 @@ function createFireNodeMaterial() {
   material.toneMapped = false;
   return { material, uTime, uProgress };
 }
-export {
-  createFireNodeMaterial
-};
+
+export { createFireNodeMaterial };

@@ -31,6 +31,7 @@ export function meteorSwarm(fx, ctx) {
           });
           const behind = { x: -heading.x * 6, y: -heading.y * 6, z: -heading.z * 6 };
           fx.burst('meteor.trail', 4, { kind: 'sphere', center: position, radius: 0.6, speed: [0.5, 2.5] }, { addVelocity: behind });
+          fx.burst('meteor.spark', 2, { kind: 'sphere', center: position, radius: 0.7, speed: [2, 6] }, { addVelocity: { x: -heading.x * 16, y: -heading.y * 16, z: -heading.z * 16 } });
           fx.burst('meteor.smoke', 2, { kind: 'sphere', center: addScaled(position, heading, -3), radius: 0.8, speed: [0.3, 1.2] });
           fx.burst('explosion.ember', 3, { kind: 'sphere', center: position, radius: 0.8, speed: [2, 6] });
         },

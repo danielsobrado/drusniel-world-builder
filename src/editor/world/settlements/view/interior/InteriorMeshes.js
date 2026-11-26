@@ -35,7 +35,11 @@ function litMaterial(set) {
 
 function glowMaterial() {
   const material = new THREE.MeshBasicNodeMaterial();
-  material.colorNode = attribute('color', 'vec3').mul(flicker());
+  const baseColor = attribute('color', 'vec3');
+  const wave = sin(positionWorld.y.mul(16.0).sub(time.mul(11.5)).add(positionWorld.x.mul(4.7)).add(positionWorld.z.mul(3.9)))
+    .mul(0.085)
+    .add(1.04);
+  material.colorNode = baseColor.mul(flicker()).mul(wave);
   return material;
 }
 

@@ -24,8 +24,10 @@ export function paintScorch(surface, noise, variant) {
     const edge = (noise.fbm2(u * 6 + offset, v * 6, 4) - 0.5) * 0.35;
     const char = smooth(1, 0.35, r / reach + edge);
     const soot = 0.55 + 0.45 * noise.fbm2(u * 11 + offset, v * 11 - offset, 4);
-    const cracks = smooth(0.8, 0.94, noise.ridged2(u * 5 + offset, v * 5 + offset, 5));
-    detail[y * size + x] = saturate(cracks * smooth(0.8, 0.1, r) * 1.2);
+    const cracks = smooth(0.74, 0.93, noise.ridged2(u * 5.4 + offset, v * 5.4 + offset, 5));
+    const fineEmbers = smooth(0.76, 0.95, noise.ridged2(u * 10.5 - offset, v * 10.5 + offset * 0.5, 4)) * 0.55;
+    const heart = smooth(0.32, 0.02, r) * 0.45;
+    detail[y * size + x] = saturate((cracks * 1.25 + fineEmbers + heart) * smooth(0.84, 0.08, r));
     return saturate(char * soot * 1.25);
   });
   writeShadedTile(surface, coverage, detail, { bulge: 0, bump: 0 });

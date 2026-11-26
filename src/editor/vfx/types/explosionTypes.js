@@ -45,26 +45,40 @@ export const EXPLOSION_TYPES = Object.freeze({
     ramp: RAMP.MOON, heat: 0.75, heatEnd: 0.4, emissive: 1.6, opacity: 0.3, fadeIn: 0, fadeOut: 0.1,
   },
 
-  // 3. Fireball — eroding flipbook puffs that cool from additive fire into lit smoke.
+  // 3. Fireball — eroding pyroclastic flipbook puffs that cool from additive fire into lit smoke.
   'explosion.fireball': {
-    tiles: TILE_SPANS.fire, tileMode: 'life', lit: 1, life: [1.3, 2.1], size: [3, 4.3],
-    sizeEnd: [1.7, 2.2], sizeEase: 'outExpo', heat: [0.95, 1.08], heatEnd: 0, heatEase: 'outQuad',
-    emissive: 8, additive: 1, additiveEnd: 0, tint: SMOKE_DARK, tintEnd: SMOKE_GREY,
-    fadeIn: 0.02, fadeOut: 0.5, drag: 3.2, gravity: -2.6, turbulence: 1.6, spin: [0.2, 0.9],
+    tiles: TILE_SPANS.fire, tileMode: 'life', lit: 1, life: [1.35, 2.15], size: [3, 4.3],
+    sizeEnd: [1.75, 2.25], sizeEase: 'outExpo', heat: [0.95, 1.08], heatEnd: 0, heatEase: 'outQuad',
+    emissive: 8.5, additive: 1, additiveEnd: 0, tint: SMOKE_DARK, tintEnd: SMOKE_GREY,
+    fadeIn: 0.02, fadeOut: 0.5, drag: 3.2, gravity: -2.7, turbulence: 1.85, spin: [0.25, 0.95],
     spinDrag: 0.6, groundFade: true,
   },
   'explosion.core': {
-    tiles: TILE_SPANS.fire, tileMode: 'life', life: [0.4, 0.7], size: [2.2, 3], sizeEnd: 1.9,
-    sizeEase: 'outExpo', heat: [1.05, 1.2], heatEnd: 0.45, emissive: 12, fadeIn: 0, fadeOut: 0.4,
-    drag: 4, gravity: -2, spin: [0.4, 1.2],
+    tiles: TILE_SPANS.fire, tileMode: 'life', life: [0.42, 0.72], size: [2.2, 3], sizeEnd: 1.9,
+    sizeEase: 'outExpo', heat: [1.05, 1.2], heatEnd: 0.42, emissive: 12.5, fadeIn: 0, fadeOut: 0.4,
+    drag: 4, gravity: -2.1, turbulence: 1.1, spin: [0.4, 1.2],
+  },
+  // Ground-hugging pyroclastic fire collar rolling outward along the blast wave.
+  'explosion.groundroll': {
+    tiles: TILE_SPANS.fire, tileMode: 'life', lit: 1, life: [0.75, 1.25], size: [1.4, 2.2],
+    sizeEnd: 2.3, sizeEase: 'outQuart', heat: [0.88, 1.02], heatEnd: 0.04, heatEase: 'outQuad',
+    emissive: 8.5, additive: 0.95, additiveEnd: 0, tint: SMOKE_DARK, tintEnd: SMOKE_GREY,
+    opacity: 0.85, fadeIn: 0.03, fadeOut: 0.48, drag: 3.4, gravity: -1.1, turbulence: 1.4,
+    spin: [0.5, 1.4], groundFade: true,
   },
 
-  // 4. Sparks — stretched along velocity, bounce once and die.
+  // 4. Sparks — stretched along velocity, bounce once and die; buoyant updraft sparks spiral into the plume.
   'explosion.spark': {
     tiles: [TILE.STREAK, TILE.STREAK], orient: 'velocity', stretch: 0.045, aspect: 2,
     life: [0.6, 1.5], size: [0.05, 0.1], sizeEnd: 0.6, heat: [0.9, 1.05], heatEnd: 0.35,
     emissive: 28, fadeIn: 0, fadeOut: 0.7, gravity: 9.8, drag: 0.9, collide: 'bounce',
     restitution: 0.35, friction: 0.5, cameraFade: false,
+  },
+  'explosion.updraft.spark': {
+    tiles: [TILE.STREAK, TILE.STREAK], orient: 'velocity', stretch: 0.035, aspect: 2.2,
+    life: [0.9, 1.9], size: [0.035, 0.07], sizeEnd: 0.35, heat: [0.85, 1.02], heatEnd: 0.2,
+    emissive: 22, fadeIn: 0.06, fadeOut: 0.65, gravity: -2.6, drag: 1.5,
+    turbulence: 4.5, turbulenceScale: 0.5, windDrift: 0.4, cameraFade: false,
   },
   'explosion.ember': {
     tiles: [TILE.MOTE, TILE.MOTE], life: [2, 4.5], size: [0.07, 0.15], sizeEnd: 0.4, heat: [0.7, 0.95],

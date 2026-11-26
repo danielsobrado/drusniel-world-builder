@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  abs, attribute, cameraFar, cameraNear, cameraPosition, clamp, color, densityFogFactor, dot, float, Fn, fract,
+  abs, attribute, cameraFar, cameraNear, cameraPosition, clamp, color, cos, densityFogFactor, dot, float, Fn, fract,
   hash, instancedBufferAttribute, instanceIndex, int, length, linearDepth, max, min, mix, normalWorldGeometry,
   normalize, positionWorld, pow, reference, renderGroup, screenUV, sin, smoothstep, texture, time, uniform, uv,
   vec2, vec3, viewportDepthTexture, viewportSafeUV,
@@ -8,6 +8,11 @@ import {
 import { REFLECTION_CLASSES, assignMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { acquireWorldNoise } from '../stylized/worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../stylized/worldNoiseLayout.js';
+import {
+  blackbodyFireColor,
+  sampleFireTurbulence,
+  tintedBlackbodyFireColor,
+} from '../vfx/render/fireShaderNodes.js';
 import { locationLight } from './materials/LocationShading.js';
 
 /**
@@ -24,13 +29,19 @@ const TEAR_CONTRAST = 1.4;
 /** Most of a puff's coverage a tear may take before the rest is rescaled; keeps the rescale off zero. */
 const TEAR_CEILING = 0.95;
 
-/** Flame turbulence in texture tiles across (u, -1..1) and up the sprite, tiles a second of scroll at speed 1. */
-const FLAME_SWAY = { across: 0.19, up: 0.25, scroll: 0.28 };
-const FLAME_TONGUES = { across: 0.345, up: 0.42, scroll: 0.41, warp: 0.06 };
+/** Flame turbulence scales across (u, -1..1) and up the sprite, and upward scroll speed at speed 1. */
+const FLAME_TURB_OPTS = Object.freeze({
+  broadScale: vec2(0.22, 0.28),
+  fineScale: vec2(0.46, 0.54),
+  broadSpeed: 0.34,
+  fineSpeed: 0.58,
+  warpStrength: 0.14,
+  gain: 1.4,
+});
 /** Tiles a second a flame's noise slides sideways, so the scroll never brings the same flame back round. */
-const FLAME_WANDER = 0.013;
-/** The texture's fields spread 0.2 about their mean, the Perlin they replace about 0.27: keeps the old sway. */
-const FLAME_GAIN = 1.35;
+const FLAME_WANDER = 0.015;
+/** Rising embers shed per location flame at quality scale 1. */
+const FLAME_EMBERS_PER_SOURCE = 5;
 
 /** The haze a shaft crosses: tiles across and along the beam (stretched along it, so it streaks), drift a second. */
 const SHAFT_HAZE = { across: 1.5, along: 0.35, drift: [0.012, -0.02], swing: 0.6 };
@@ -157,11 +168,9 @@ export function createHalos(halos) {
 }
 
 /**
- * Animated flame tongues rendered in one instanced draw call: upward-scrolling
- * turbulence, teardrop envelope, amber-gold core to orange tips. The turbulence
- * is two taps of the sky layer at the scales of the two Perlin octaves it
- * replaced (one Perlin cell is about a twelfth of a tile there): a broad sway
- * from the wisp (G) and finer tongues from the erosion (B), warped by the sway.
+ * Animated flame tongues rendered in one instanced draw call: dual-stage
+ * domain-warped turbulence, cellular licking tips, anchored hot ignition base,
+ * multi-stop blackbody thermal ramp, and HDR bloom boost.
  *
  * @param {Array<{ x: number, y: number, z: number, width: number, height: number, speed: number, core: number[], outer: number[] }>} flames
  */
@@ -188,38 +197,127 @@ export function createFlames(flames) {
   const coreAttr = instancedBufferAttribute(new THREE.InstancedBufferAttribute(coreArr, 3));
   const outerAttr = instancedBufferAttribute(new THREE.InstancedBufferAttribute(outerArr, 3));
   material.positionNode = instancedBufferAttribute(new THREE.InstancedBufferAttribute(position, 3));
-  material.scaleNode = vec2(sAttr.x, sAttr.y);
 
-  const seed = hash(instanceIndex.toFloat().add(1.37));
+  const idx = instanceIndex.toFloat();
+  const seed = hash(idx.add(1.37));
+  const shimmer = flicker(idx.add(5.1), 0.14);
+  material.scaleNode = vec2(
+    sAttr.x.mul(shimmer.sub(1).mul(0.22).add(1)),
+    sAttr.y.mul(shimmer.sub(1).mul(0.42).add(1)),
+  );
+
   const u = uv().x.sub(0.5).mul(2);
   const v = uv().y;
   const scrollT = time.mul(sAttr.z);
 
-  // Each flame burns in its own patch of the texture.
+  // Each flame burns in its own drifting patch of the shared world-noise array.
   const patch = vec2(seed.mul(7.31).add(time.mul(FLAME_WANDER)), seed.mul(3.73));
-  const n1 = noiseTap(vec2(u.mul(FLAME_SWAY.across), v.mul(FLAME_SWAY.up).sub(scrollT.mul(FLAME_SWAY.scroll))).add(patch), 'sky')
-    .g.sub(0.5).mul(FLAME_GAIN);
-  const n2 = noiseTap(vec2(u.mul(FLAME_TONGUES.across).add(n1.mul(FLAME_TONGUES.warp)),
-    v.mul(FLAME_TONGUES.up).sub(scrollT.mul(FLAME_TONGUES.scroll))).sub(patch), 'sky').b.sub(0.5).mul(FLAME_GAIN);
-  const turb = n1.mul(0.65).add(n2.mul(0.35));
+  const turb = sampleFireTurbulence(vec2(u, v), scrollT, patch, FLAME_TURB_OPTS);
 
-  const envelope = pow(clamp(v.mul(3.6), 0, 1), 0.45).mul(pow(clamp(v.oneMinus(), 0, 1), 0.78));
-  const shiftedU = u.add(turb.mul(0.36).mul(v.mul(0.85).add(0.15)));
+  // Teardrop buoyancy envelope that widens quickly above the coals and tapers into licking tips.
+  const envelope = pow(clamp(v.mul(3.8), 0, 1), 0.44).mul(pow(clamp(v.oneMinus(), 0, 1), 0.74));
+  const swayWeight = v.mul(0.88).add(0.12);
+  const shiftedU = u.add(turb.combined.mul(0.42).mul(swayWeight));
   const dx = abs(shiftedU);
 
-  const tongues = clamp(envelope.mul(1.0).add(n2.mul(0.2).mul(v)), 0.01, 1);
-  const bodyMask = smoothstep(tongues.mul(0.95), tongues.mul(0.18), dx)
-    .mul(smoothstep(float(0.02), float(0.15), v))
-    .mul(smoothstep(float(0.98), float(0.56), v.add(n2.mul(0.26))))
-    .mul(smoothstep(float(0.99), float(0.84), v));
-  const coreMask = pow(smoothstep(tongues.mul(0.54), float(0), dx).mul(smoothstep(float(0.66), float(0.08), v)), 1.75);
-  const shimmer = flicker(instanceIndex.toFloat().add(5.1), 0.1);
-  material.colorNode = mix(outerAttr, coreAttr, coreMask).mul(bodyMask).mul(shimmer).mul(0.84);
+  // Cellular ridge breakups create distinct curling tongues and pinched tips near the crest.
+  const cellularCarve = turb.cells.sub(0.5).mul(0.38).mul(smoothstep(float(0.12), float(0.88), v));
+  const tongues = clamp(envelope.mul(1.04).add(turb.licks.mul(0.26).mul(v)).add(cellularCarve), 0.01, 1.05);
+  const tipBreakup = smoothstep(float(0.98), float(0.48), v.add(turb.licks.mul(0.32)).add(turb.erosion.sub(0.5).mul(0.36)));
+  const bodyMask = smoothstep(tongues.mul(0.96), tongues.mul(0.16), dx)
+    .mul(smoothstep(float(0.015), float(0.14), v))
+    .mul(tipBreakup)
+    .mul(smoothstep(float(0.995), float(0.84), v));
+
+  // Internal heat field: hottest in the lower heart and turbulent filaments, cooling toward tips and rims.
+  const radialHeat = smoothstep(tongues.mul(0.85), float(0), dx);
+  const verticalHeat = smoothstep(float(0.9), float(0.06), v);
+  const filamentBoost = turb.cells.sub(0.5).mul(0.32).add(turb.licks.mul(0.24));
+  const heat = clamp(radialHeat.mul(verticalHeat.mul(0.82).add(0.22)).add(filamentBoost.mul(radialHeat)), 0, 1);
+
+  // Subtle hot base pocket sitting right over the fuel bed.
+  const fuelHeart = pow(smoothstep(float(0.42), float(0), dx).mul(smoothstep(float(0.32), float(0.06), v)), 1.6);
+  const flameColor = tintedBlackbodyFireColor(heat, outerAttr, coreAttr)
+    .add(mix(coreAttr, vec3(0.76, 0.88, 1.0), 0.25).mul(fuelHeart).mul(0.35));
+
+  material.colorNode = flameColor.mul(bodyMask).mul(shimmer).mul(1.18);
+  assignMaterialData(material, {
+    roughness: 1,
+    reactive: 0.9,
+    reflectionClass: REFLECTION_CLASSES.NONE,
+    bloomBoost: 0.68,
+  });
 
   const sprite = new THREE.Sprite(material);
   sprite.count = count;
   sprite.frustumCulled = false;
   sprite.renderOrder = 2;
+  return sprite;
+}
+
+/**
+ * Rising ember sparks automatically shed by a location's flames: one GPU
+ * instanced Sprite draw call, zero CPU simulation, spiraling lazily upward
+ * and cooling along the blackbody ramp before fading out.
+ *
+ * @param {Array<{ x: number, y: number, z: number, width: number, height: number, speed?: number }>} flames
+ * @param {number} [scale] quality multiplier on ember count
+ */
+export function createFlameEmbers(flames, scale = 1) {
+  const perFlame = Math.max(1, Math.round(FLAME_EMBERS_PER_SOURCE * scale));
+  const count = flames.length * perFlame;
+  const origin = new Float32Array(count * 3);
+  const bounds = new Float32Array(count * 3);
+  for (let index = 0; index < count; index += 1) {
+    const flame = flames[index % flames.length];
+    origin.set([flame.x, flame.y - flame.height * 0.22, flame.z], index * 3);
+    bounds.set([flame.width, flame.height, flame.speed ?? 1], index * 3);
+  }
+
+  const material = new THREE.SpriteNodeMaterial({
+    name: 'location-flame-embers',
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    fog: true,
+  });
+  const oAttr = instancedBufferAttribute(new THREE.InstancedBufferAttribute(origin, 3));
+  const bAttr = instancedBufferAttribute(new THREE.InstancedBufferAttribute(bounds, 3));
+
+  const idx = instanceIndex.toFloat();
+  const s1 = hash(idx.mul(3.17).add(11.3));
+  const s2 = hash(idx.mul(5.41).add(23.7));
+  const s3 = hash(idx.mul(7.83).add(41.9));
+  const life = mix(float(1.2), float(2.7), s1);
+  const age = fract(time.mul(bAttr.z).div(life).add(s2));
+
+  // Helical buoyancy rise with gentle outward drift proportional to the flame's size.
+  const angle = s3.mul(6.28318).add(age.mul(mix(float(2.4), float(5.2), s2)));
+  const radialDrift = bAttr.x.mul(mix(float(0.18), float(0.65), age)).mul(mix(float(0.45), float(1.1), s1));
+  const rise = bAttr.y.mul(mix(float(0.9), float(2.1), s2)).mul(pow(age, 0.85));
+  material.positionNode = oAttr.add(vec3(cos(angle).mul(radialDrift), rise, sin(angle).mul(radialDrift)));
+
+  const emberSize = clamp(bAttr.x.mul(0.065), float(0.025), float(0.095))
+    .mul(mix(float(1.0), float(0.35), age));
+  material.scaleNode = vec2(emberSize);
+
+  const radial = length(uv().sub(0.5)).mul(2.0);
+  const mote = pow(smoothstep(float(1.0), float(0.0), radial), 2.4);
+  const twinkle = sin(time.mul(mix(float(11), float(22), s3)).add(s1.mul(60))).mul(0.28).add(0.86);
+  const envelope = smoothstep(float(0.0), float(0.12), age).mul(smoothstep(float(1.0), float(0.45), age));
+  const heat = mix(float(0.95), float(0.18), pow(age, 0.8));
+
+  material.colorNode = blackbodyFireColor(heat).mul(mote).mul(envelope).mul(twinkle).mul(2.4);
+  assignMaterialData(material, {
+    roughness: 1,
+    reactive: 0.9,
+    reflectionClass: REFLECTION_CLASSES.NONE,
+    bloomBoost: 0.55,
+  });
+
+  const sprite = new THREE.Sprite(material);
+  sprite.count = count;
+  sprite.frustumCulled = false;
+  sprite.renderOrder = 3;
   return sprite;
 }
 

@@ -116,15 +116,18 @@ export function createParticleMaterial({ atlas, lighting }) {
 
   // Boiling: puffs warp their own texture with slowly evolving noise, more as
   // they age, so the silhouette curls and changes instead of only scaling.
-  // The field also drifts down the sprite, so lobes appear to roll upward.
-  // Two fields of the shared world noise panning apart (worldNoise.js), one
-  // fetch for both axes: three 3D Perlins a pixel was the costliest thing a
-  // puff did under its own overdraw. Each puff reads its own patch (vSeed).
+  // Hot blackbody flames advect briskly upward, carving flickering tongues and
+  // incandescent combustion veins from the same two shared world-noise fetches.
   const noise = acquireWorldNoise().texture;
   const patch = vec2(vSeed.mul(7.3), vSeed.mul(3.1));
-  const warp = texture(noise, vLocalUv.mul(0.55).add(patch).add(vec2(lighting.time.mul(0.03), lighting.time.mul(-0.12))))
+  const isFireRamp = float(1).sub(step(float(0.5), vRamp));
+  const fireActivity = vBillow.mul(isFireRamp).mul(smoothstep(float(0.22), float(0.68), vHeat));
+  const scrollY = mix(float(-0.12), float(-0.56), fireActivity);
+  const warpScale = mix(float(0.55), float(0.78), fireActivity);
+  const warp = texture(noise, vLocalUv.mul(warpScale).add(patch).add(vec2(lighting.time.mul(0.03), lighting.time.mul(scrollY))))
     .depth(int(WORLD_NOISE_LAYERS.macro)).rg.sub(0.5).mul(2.4);
-  const warpAmount = vBillow.mul(vLife.mul(0.12).add(0.05));
+  const heightGain = mix(float(1), vLocalUv.y.mul(0.95).add(0.22), fireActivity);
+  const warpAmount = vBillow.mul(vLife.mul(0.12).add(0.05).add(fireActivity.mul(0.055))).mul(heightGain);
   const boiled = vLocalUv.add(warp.mul(warpAmount));
   // Keep the warp inside the tile so it never samples a neighbour.
   const localUv = clamp(boiled, 0.02, 0.98);
@@ -133,12 +136,18 @@ export function createParticleMaterial({ atlas, lighting }) {
     texture(atlas, atlasTileUv(min(vTileA.add(1), float(63)), localUv)),
     vFrac,
   );
-  // Erosion: late in life a puff tears into wisps instead of fading evenly.
-  const tear = texture(noise, vLocalUv.mul(0.9).sub(patch).add(vec2(lighting.time.mul(0.05), 0)))
-    .depth(int(WORLD_NOISE_LAYERS.sky)).b;
-  const erode = vBillow.mul(smoothstep(0.35, 1, vLife)).mul(0.7);
+  // Erosion & fire filaments: one sky-layer tap yields Voronoi cells (R), wisps
+  // (G) and turbulent erosion (B). Smoke tears late in life; hot fire licks up
+  // through its body and carves incandescent veins into the blackbody heat.
+  const skyScroll = vec2(lighting.time.mul(0.05), lighting.time.mul(fireActivity.mul(-0.78)));
+  const skySample = texture(noise, vLocalUv.mul(mix(float(0.9), float(1.32), fireActivity)).sub(patch).add(skyScroll))
+    .depth(int(WORLD_NOISE_LAYERS.sky));
+  const tear = skySample.b;
+  const flameLick = mix(skySample.g, skySample.b, 0.55);
+  const erode = vBillow.mul(smoothstep(0.35, 1, vLife).mul(0.7).add(fireActivity.mul(vLocalUv.y).mul(0.32)));
   // Only ever removes coverage: boosting soft edges back up outlines every puff.
-  const coverage = texel.a.mul(float(1).sub(erode.mul(smoothstep(0.25, 0.75, float(1).sub(tear)))));
+  const tearField = mix(tear, flameLick, fireActivity);
+  const coverage = texel.a.mul(float(1).sub(clamp(erode, 0, 0.92).mul(smoothstep(0.24, 0.76, float(1).sub(tearField)))));
   const detail = texel.b;
   const nxy = texel.rg.mul(2).sub(1);
   const nz = sqrt(max(float(0), float(1).sub(dot(nxy, nxy))));
@@ -151,8 +160,11 @@ export function createParticleMaterial({ atlas, lighting }) {
   const facing = mix(smoothstep(0.35, 0.9, texel.a), 0.6, vBillow);
   const normal = normalize(mix(vBasisZ, bumped, facing));
 
-  // Per-texel heat: hot cores, cooler fringes.
-  const heat = clamp(vHeat.mul(detail.mul(0.8).add(0.3)), 0, 1);
+  // Per-texel heat: hot cores, cooler fringes, plus live turbulent combustion
+  // filaments and gentle organic flicker on active fire particles.
+  const fireVeins = mix(skySample.r, skySample.b, 0.45).sub(0.5).mul(0.46).mul(fireActivity);
+  const fireFlicker = sin(lighting.time.mul(17.3).add(vSeed.mul(43.7))).mul(0.055).mul(fireActivity).add(1);
+  const heat = clamp(vHeat.mul(detail.mul(0.82).add(0.28).add(fireVeins)).mul(fireFlicker), 0, 1);
   const ramp = sampleRamp(atlas, vRamp, heat);
   const emission = ramp.rgb.mul(ramp.a).mul(vEmissive).mul(lighting.emissionScale).mul(mix(vTint, vec3(1), vLit));
   // Density: thick cores self-shadow and occlude their crevices, thin fringes
