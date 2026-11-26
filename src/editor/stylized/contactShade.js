@@ -12,7 +12,7 @@
  * distance a tree can still look like it is hovering. This is ambient occlusion
  * rather than shadow — it does not move.
  */
-import { ROOT_LOBE, footprintLobeAt } from './groundContact/ecologicalFootprint.js';
+import { ROOT_LOBE, footprintLobeAt, footprintShape } from './groundContact/ecologicalFootprint.js';
 
 export const DEFAULT_CONTACT_SHADE = Object.freeze({
   enabled: true,
@@ -151,8 +151,7 @@ export function paintContactShade({
     const rotY = isEllipse && Number.isFinite(source.rotationY) ? source.rotationY : 0;
     const cosR = isEllipse ? Math.cos(rotY) : 1;
     const sinR = isEllipse ? Math.sin(rotY) : 0;
-    const cosP = phase === null ? 1 : Math.cos(phase);
-    const sinP = phase === null ? 0 : Math.sin(phase);
+    const shape = phase === null ? null : footprintShape(phase);
     const maxLobedSq = (1 + ROOT_LOBE) * (1 + ROOT_LOBE);
     for (let z = minimumZ; z <= maximumZ; z += 1) {
       for (let x = minimumX; x <= maximumX; x += 1) {
@@ -164,14 +163,14 @@ export function paintContactShade({
           const lx = (ex * cosR - ez * sinR) * invRx;
           const lz = (ex * sinR + ez * cosR) * invRz;
           distance = Math.hypot(lx, lz);
-          if (phase !== null && distance < 1 + ROOT_LOBE) distance /= footprintLobeAt(lx, lz, cosP, sinP);
+          if (phase !== null && distance < 1 + ROOT_LOBE) distance /= footprintLobeAt(lx, lz, shape);
         } else if (phase !== null) {
           // Texel Z runs opposite world Z: the lobe is read in world axes, as the meadow reads it.
           const dx = (x - tx0) * invRx;
           const dz = (tz0 - z) * invRz;
           const distSq = dx * dx + dz * dz;
           if (distSq >= maxLobedSq) continue;
-          distance = Math.sqrt(distSq) / footprintLobeAt(dx, dz, cosP, sinP);
+          distance = Math.sqrt(distSq) / footprintLobeAt(dx, dz, shape);
         } else {
           const t = segLenSq > 1e-6
             ? Math.max(0, Math.min(1, ((x - tx0) * vx + (z - tz0) * vz) / segLenSq))

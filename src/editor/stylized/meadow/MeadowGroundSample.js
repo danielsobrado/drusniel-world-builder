@@ -12,7 +12,7 @@ import {
   grassPatchCover,
   grassStandDensity,
 } from '../../world/GrassPatchiness.js';
-import { ROOT_LOBE, footprintLobe } from '../groundContact/ecologicalFootprint.js';
+import { ROOT_LOBE, footprintLobe, footprintLobeAt } from '../groundContact/ecologicalFootprint.js';
 
 /** Cells a stem may reach across to mix neighboring biome silhouettes. */
 const ECOTONE_REACH_CELLS = 0.9;
@@ -175,7 +175,7 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
         }
         continue;
       }
-      const lobe = footprintLobe(dx, dz, root.phase);
+      const lobe = root.shape ? footprintLobeAt(dx, dz, root.shape) : footprintLobe(dx, dz, root.phase);
       const keep = smoothstep(root.radius, root.reach, dist / lobe);
       if (hash2d(rank, 93) >= keep) return false;
       strength *= 0.55 + 0.45 * keep;

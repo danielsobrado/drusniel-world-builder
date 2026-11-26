@@ -3,7 +3,7 @@ import { createMeadowPathSampler } from './MeadowPathSampler.js';
 import { rockSignatureForChunk, rocksInfluencingChunk } from '../chunkRockSignature.js';
 import { createForestDensitySampler } from '../forest/ForestFloor.js';
 import { collectDebrisGrassZones } from '../UnderstoryClearance.js';
-import { footprintPhase } from '../groundContact/ecologicalFootprint.js';
+import { footprintPhase, footprintShape } from '../groundContact/ecologicalFootprint.js';
 
 import { createMeadowGroundSample } from './MeadowGroundSample.js';
 import { identityOf } from './MeadowSharedGroundInputs.js';
@@ -211,7 +211,8 @@ export class MeadowGroundSampler {
           const reach = (radius + falloff) * scale;
           if (Math.abs(tree.x - centerX) > tileHalf + reach || Math.abs(tree.z - centerZ) > tileHalf + reach) continue;
           // Deterministic per trunk, and the same phase the contact shade paints its duff at.
-          near.push({ x: tree.x, z: tree.z, radius: radius * scale, reach, phase: footprintPhase(tree.x, tree.z) });
+          const phase = footprintPhase(tree.x, tree.z);
+          near.push({ x: tree.x, z: tree.z, radius: radius * scale, reach, phase, shape: footprintShape(phase) });
         }
       }
     }

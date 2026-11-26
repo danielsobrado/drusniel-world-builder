@@ -23,22 +23,67 @@ const read = (pixels, worldX, worldZ, channel = 1) => {
   return pixels[(z * SIZE + x) * 4 + channel];
 };
 
+// The directions in which a phase's outline reaches furthest and least far.
+function extremes(phase) {
+  let wide = 0;
+  let narrow = 0;
+  for (let i = 0; i < 360; i += 1) {
+    const angle = (i / 360) * Math.PI * 2;
+    const lobe = footprintLobe(Math.cos(angle), Math.sin(angle), phase);
+    if (lobe > footprintLobe(Math.cos(wide), Math.sin(wide), phase)) wide = angle;
+    if (lobe < footprintLobe(Math.cos(narrow), Math.sin(narrow), phase)) narrow = angle;
+  }
+  return { wide, narrow };
+}
+
 test('PR 6 a phased trunk patch is lobed, not a ruled disc (DEF-09)', () => {
   const tree = { x: 0.5, z: -0.5, radius: 6, strength: 1, phase: 0.9 };
   const pixels = paint([tree]);
-  // The extent toward the widest and narrowest lobe differs by ±ROOT_LOBE.
-  const wide = -tree.phase / 3;
-  const narrow = wide + Math.PI / 3;
+  const { wide, narrow } = extremes(tree.phase);
   const at = angle => read(pixels, tree.x + 4 * Math.cos(angle), tree.z + 4 * Math.sin(angle));
-  assert.ok(at(wide) > at(narrow) + 20, `wide ${at(wide)} narrow ${at(narrow)}`);
-  // A source without a phase keeps the old radial patch.
+  // A source without a phase keeps the old radial patch: only 1 m texel snapping differs.
   const disc = paint([{ ...tree, phase: undefined }]);
   const discAt = angle => read(disc, tree.x + 4 * Math.cos(angle), tree.z + 4 * Math.sin(angle));
-  assert.ok(Math.abs(discAt(wide) - discAt(narrow)) <= 12); // 1 m texel snapping only
+  assert.ok(Math.abs(discAt(wide) - discAt(narrow)) <= 16, 'disc differs by more than texel snapping');
+  // Against the disc in the same texel, the wide lobe paints more and the narrow one less.
+  const gain = angle => at(angle) - discAt(angle);
+  assert.ok(gain(wide) > 0 && gain(narrow) < 0 && gain(wide) - gain(narrow) > 20,
+    `wide ${at(wide)}/${discAt(wide)} narrow ${at(narrow)}/${discAt(narrow)}`);
   // The wide lobe reaches past the plain radius, so the paint bound must include it.
-  const past = tree.radius * 1.1;
+  const past = tree.radius * 1.08;
   assert.ok(read(pixels, tree.x + past * Math.cos(wide), tree.z + past * Math.sin(wide)) > 0);
   assert.equal(read(pixels, tree.x + past * Math.cos(narrow), tree.z + past * Math.sin(narrow)), 0);
+});
+
+test('PR 6 footprints are individual blobs, not one stamped polygon', () => {
+  const samples = 72;
+  const outline = phase => Array.from({ length: samples }, (_, i) => {
+    const angle = (i / samples) * Math.PI * 2;
+    return footprintLobe(Math.cos(angle), Math.sin(angle), phase) - 1;
+  });
+  // Best correlation of b against a over every rotation: a stamp rotated by its phase scores 1.
+  const bestMatch = (a, b) => {
+    let best = -1;
+    for (let shift = 0; shift < samples; shift += 1) {
+      let dot = 0; let na = 0; let nb = 0;
+      for (let i = 0; i < samples; i += 1) {
+        const bi = b[(i + shift) % samples];
+        dot += a[i] * bi; na += a[i] * a[i]; nb += bi * bi;
+      }
+      best = Math.max(best, dot / Math.sqrt(na * nb));
+    }
+    return best;
+  };
+  const phases = Array.from({ length: 12 }, (_, i) => footprintPhase(i * 7.3 + 1.1, -i * 3.9 + 0.4));
+  const outlines = phases.map(outline);
+  let total = 0;
+  let pairs = 0;
+  for (let i = 0; i < outlines.length; i += 1) {
+    for (let j = i + 1; j < outlines.length; j += 1) { total += bestMatch(outlines[i], outlines[j]); pairs += 1; }
+    // Bounded by ROOT_LOBE, and never folded back on itself.
+    for (const v of outlines[i]) assert.ok(Math.abs(v) <= ROOT_LOBE + 1e-9 && v > -0.5);
+  }
+  assert.ok(total / pairs < 0.8, `mean best rotated match ${total / pairs}`);
 });
 
 test('PR 6 the shade outline is the meadow root-zone outline (same phase, same lobe)', () => {
