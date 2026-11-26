@@ -17,7 +17,7 @@ function distance(key, focus, cameraChunk) {
 }
 
 function compareStable(a, b) {
-  return a.key.localeCompare(b.key) || ADMISSION_LAYERS.indexOf(a.kind) - ADMISSION_LAYERS.indexOf(b.kind);
+  return (a.key < b.key ? -1 : a.key > b.key ? 1 : 0) || ADMISSION_LAYERS.indexOf(a.kind) - ADMISSION_LAYERS.indexOf(b.kind);
 }
 
 function optionsFor(layer, weight) {
@@ -39,15 +39,16 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
   const weight = settings.spatialReflectionPassWeight;
   const limit = { triangles: settings.rendererAdmissionTriangleBudget, draws: settings.rendererAdmissionDrawBudget };
   const steadyLimit = scale(limit, 1 - settings.rendererAdmissionTransitionReserve);
-  let steady = zero(), active = zero(), fixed = zero(), overlap = zero(), unknownChunks = 0;
+  let steady = zero(), active = zero(), fixed = zero(), overlap = zero(), unknownChunks = 0, unknownActiveChunks = 0;
   const records = [];
   for (const [key, cell] of cells) {
     const layers = cell.renderCost?.layers;
     const protectedCell = !cameraChunk || distance(key, focus, cameraChunk) <= settings.protectedChunkRadius;
-    if (!layers) { unknownChunks++; yield; continue; }
+    if (!layers) { unknownChunks++; unknownActiveChunks++; yield; continue; }
     const mandatory = Object.entries(layers).some(([kind, layer]) =>
       !known(kind === 'town' && known(layer.selected) ? layer.selected : layer.requested));
     if (mandatory) unknownChunks++;
+    if (Object.values(layers).some(layer => !known(layer.active ?? layer.selected))) unknownActiveChunks++;
     for (const [kind, layer] of Object.entries(layers)) {
       const full = kind === 'town' && known(layer.selected) ? layer.selected : layer.requested;
       const fullCost = effectiveRenderCost(full, weight);
@@ -58,8 +59,9 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
       active = add(active, activeCost);
       const options = !protectedCell && !mandatory && ADMISSION_LAYERS.includes(kind) ? optionsFor(layer, weight) : null;
       if (!options?.length) {
-        steady = add(steady, fullCost);
-        fixed = add(fixed, fullCost);
+        const reserve = { triangles: Math.max(fullCost.triangles, currentCost.triangles), draws: Math.max(fullCost.draws, currentCost.draws) };
+        steady = add(steady, reserve);
+        fixed = add(fixed, reserve);
         continue;
       }
       const oldFactor = previous.get(key)?.[kind] ?? 1;
@@ -86,7 +88,7 @@ export function* iterateRendererAdmission(cells, settings, previous, focus, came
     steady = add(base, choice.cost);
     yield;
   }
-  return { local, records, fixed, active, overlap, steady, localSteady, limit, steadyLimit, unknownChunks };
+  return { local, records, fixed, active, overlap, steady, localSteady, limit, steadyLimit, unknownChunks, unknownActiveChunks };
 }
 
 /** Select bounded changes against transition overlap and the live upload allowance. */
@@ -95,7 +97,7 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
   const decisions = new Map();
   let admitted = plan.fixed;
   let transient = active;
-  let changes = 0, deferred = 0, uploadDeferred = 0, overlapDeferred = 0, emergencyDemotions = 0;
+  let changes = 0, deferred = 0, uploadDeferred = 0, overlapDeferred = 0, unknownDeferred = 0, emergencyDemotions = 0;
   const contended = publication.contended === true;
   const busy = publication.busy === true;
   const changeLimit = contended || busy ? Math.min(1, settings.rendererAdmissionMaxChanges) : settings.rendererAdmissionMaxChanges;
@@ -115,7 +117,8 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
     const promotion = record.desired.factor > record.current.factor;
     const nextSteady = add(subtract(admitted, record.current.cost), record.desired.cost);
     if (promotion && (contended || busy)) { uploadDeferred++; deferred++; continue; }
-    if (changes >= changeLimit || (promotion && !fits(nextSteady, recovery))) { deferred++; continue; }
+    if (promotion && (plan.unknownChunks || plan.unknownActiveChunks)) { unknownDeferred++; deferred++; continue; }
+    if (changes >= changeLimit || emergencyDemotions > 0 || (promotion && !fits(nextSteady, recovery))) { deferred++; continue; }
     // Candidate union includes the currently selected and target bands. No credit
     // for retiring geometry until a later completed sample observes the retirement.
     const extra = record.activeKnown && record.desired.transition ? positive(subtract(record.desired.transition, record.activeCost)) : null;
@@ -124,7 +127,7 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
     if (!nextTransient || (!fits(nextTransient, limit) && (promotion || !noAddedOverlap))) {
       // An already over-budget view must be able to demote, but never start a
       // batch of oversized transitions or bypass unknown overlap estimates.
-      if (promotion || !nextTransient || contended || busy || changes > 0 || overlap.triangles > 0 || overlap.draws > 0) {
+      if (promotion || !nextTransient || contended || changes > 0 || overlap.triangles > 0 || overlap.draws > 0) {
         overlapDeferred++; deferred++; continue;
       }
       emergencyDemotions++;
@@ -142,7 +145,7 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
     cell[record.kind] = factor;
   }
   return { decisions, stats: {
-    chunks: plan.local.stats.chunks, unknownChunks: plan.unknownChunks,
+    chunks: plan.local.stats.chunks, unknownChunks: plan.unknownChunks, unknownActiveChunks: plan.unknownActiveChunks,
     localTriangles: plan.localSteady.triangles, localDraws: plan.localSteady.draws,
     targetTriangles: plan.steady.triangles, targetDraws: plan.steady.draws,
     admittedTriangles: admitted.triangles, admittedDraws: admitted.draws,
@@ -151,7 +154,7 @@ export function finalizeRendererAdmission(plan, settings, publication = {}) {
     transientTriangles: transient.triangles, transientDraws: transient.draws,
     fixedTriangles: plan.fixed.triangles, fixedDraws: plan.fixed.draws,
     steadyTriangleLimit: steadyLimit.triangles, steadyDrawLimit: steadyLimit.draws,
-    reducedChunks: decisions.size, changes, deferred, uploadDeferred, overlapDeferred, emergencyDemotions,
+    reducedChunks: decisions.size, changes, deferred, uploadDeferred, overlapDeferred, unknownDeferred, emergencyDemotions,
     targetOverflow: Number(!fits(plan.steady, steadyLimit)),
     admittedOverflow: Number(!fits(admitted, steadyLimit)),
     transientOverflow: Number(!fits(transient, limit)),
