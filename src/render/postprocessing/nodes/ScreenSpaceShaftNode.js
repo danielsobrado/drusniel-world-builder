@@ -107,7 +107,7 @@ function buildShaftRadiance({
       illumination.mulAssign(activeSamples ? decay.pow(float(samples).div(float(count))) : decay);
     };
     if (activeSamples) {
-      If(intensity.greaterThan(0), () => Loop(int(count), accumulate));
+      If(intensity.greaterThan(0), () => { Loop(int(count), accumulate); });
     } else {
       for (let index = 0; index < samples; index += 1) accumulate();
     }
