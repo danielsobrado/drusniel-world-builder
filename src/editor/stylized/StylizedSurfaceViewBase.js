@@ -8,6 +8,8 @@ import { GlacierSeracView } from './ice/GlacierSeracView.js';
 import { SharedWaterMaterials } from './SharedWaterMaterials.js';
 import { WaterObstacleUpdates } from './WaterObstacleUpdates.js';
 import { WaterReflectionController } from '../../render/reflections/WaterReflectionController.js';
+import { ReflectionAdmission } from '../../render/reflections/ReflectionAdmission.js';
+import { FarCascadeAdmission } from '../../render/shadows/FarCascadeAdmission.js';
 import { SceneryWorkScheduler, createSceneryConsumers } from './SceneryWorkScheduler.js';
 import { sceneryPreparationStatus } from './SceneryPreparationStatus.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
@@ -426,6 +428,8 @@ export class StylizedSurfaceView {
       : null;
     this.sharedWaterMaterials = new SharedWaterMaterials(this.reflections, this.oceanFft?.binding ?? null);
     this.reflectionPrepared = null;
+    this.farShadowAdmission = config.enhancements?.farShadowAdmission ? new FarCascadeAdmission(config.enhancements.auxiliaryPassBudget) : null;
+    this.reflectionAdmission = this.reflections && config.enhancements?.reflectionAdmission ? new ReflectionAdmission(config.enhancements.auxiliaryPassBudget) : null;
     terrainView.beforeMainRender = camera => {
       // Only ocean water slots read the offshore FFT: inland it would step and transform for nothing.
       if (this.oceanFft && this.waterSlots.some((slot) => slot.hasOceanWater && slot.mesh.visible)) {
@@ -433,6 +437,17 @@ export class StylizedSurfaceView {
       }
       this.skyView?.cascades?.prepare(camera);
       const now = performance.now();
+      const contended = this.hasPublicationPressure?.() ?? false;
+      const cpuPressure = (this.farShadowAdmission || this.reflectionAdmission) &&
+        PerfCounters.get('frameFixedCpuMs') + PerfCounters.get('frameDeferredCpuMs') > config.enhancements.auxiliaryPassBudget.frameCpuPressureMs;
+      const pressured = contended || cpuPressure;
+      if (this.farShadowAdmission) {
+        const origin = terrainView.floatingOrigin.getState();
+        const focus = terrainView.focusChunk;
+        const revision = [terrainView.worldStore.revision ?? 0, this.revisionTracker?.revision ?? 0,
+          this.objectMap?.revision ?? 0, this.shadowRevisionProvider?.() ?? 0, focus?.chunkX, focus?.chunkZ].join(':');
+        this.farShadowAdmission.begin(this.skyView?.cascades, camera, this.skyView?.directional, origin, revision, now, pressured);
+      }
       const prepared = this.reflections?.prepare(camera, this) ?? null;
       this.reflectionPrepared = prepared;
       this.reflectionReservation?.cancel();
@@ -440,9 +455,16 @@ export class StylizedSurfaceView {
       const captureTurn = this.reflections?.captureSchedule.nextFrame() ?? false;
       const gpuBusy = this.reflections?.gpuPressure?.busy === true;
       if (prepared && captureTurn && gpuBusy) PerfCounters.inc('reflectionGpuDeferredFrames');
+      const due = Boolean(prepared && now >= this.reflections.nextCapture);
+      const allowed = this.reflectionAdmission ? this.reflectionAdmission.allow({ now, due,
+        kind: this.reflections.planarPending ? 'planar' : 'cube',
+        invalid: this.reflections.planarPending ? !this.reflections.planarValid.value : !this.reflections.valid.value,
+        partial: this.reflections.face > 0, estimate: this.reflections.captureBudgetMs,
+        contended: pressured, gpuBusy }) : true;
       if (
         prepared
         && captureTurn
+        && allowed
         && !gpuBusy
         && now >= this.reflections.nextCapture
         && this.reserveDeferredWork
@@ -458,19 +480,28 @@ export class StylizedSurfaceView {
       this.reflectionBudgetReserved = Boolean(
         prepared
         && !this.reserveDeferredWork
+        && allowed
         && !gpuBusy
         && !this.shouldYieldWork?.()
       );
     };
+    terrainView.mainRenderFailed = () => {
+      this.farShadowAdmission?.end(false);
+      this.reflectionReservation?.cancel();
+      this.reflectionReservation = null;
+      this.reflectionBudgetReserved = false;
+      this.reflectionPrepared = null;
+    };
     terrainView.afterMainRender = camera => {
+      this.farShadowAdmission?.end();
       const prepared = this.reflectionPrepared;
       this.reflectionPrepared = null;
-      const capture = () => this.reflections.update(
-        camera,
-        this,
-        performance.now(),
-        { budgetReserved: true, prepared },
-      );
+      const capture = () => {
+        const previousFace = this.reflections.face;
+        const previousPlanar = this.reflections.planarPending;
+        this.reflections.update(camera, this, performance.now(), { budgetReserved: true, prepared });
+        if (previousFace !== this.reflections.face || previousPlanar !== this.reflections.planarPending) this.reflectionAdmission?.captured();
+      };
       this.reflectionReservation?.run(capture);
       this.reflectionReservation = null;
       if (this.reflectionBudgetReserved) this.runDeferredWork ? this.runDeferredWork(capture) : capture();
@@ -1293,6 +1324,9 @@ export class StylizedSurfaceView {
     this.oceanFft = null;
     this.reflectionReservation?.cancel();
     this.reflections?.dispose();
+    this.farShadowAdmission?.dispose();
+    this.reflectionAdmission?.reset();
+    this.terrainView.mainRenderFailed = null;
     this.terrainView.beforeMainRender = null;
     this.terrainView.afterMainRender = null;
     this.waterSlots.length = 0;
