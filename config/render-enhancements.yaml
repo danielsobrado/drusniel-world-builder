@@ -10,6 +10,7 @@ regionalResourceBudget: false
 regionalDensityBudget: false
 regionalSpatialBudget: false
 regionalGeometryCostBudget: false
+regionalAdmissionBudget: false
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
@@ -28,6 +29,12 @@ regionalBudget:
   spatialTriangleBudget: 200000
   spatialDrawBudget: 100
   spatialReflectionPassWeight: 0.25
+  admissionFactors: [1, 0.85, 0.7, 0.5]
+  admissionPriorities:
+    tree: 4
+    rock: 3
+    bush: 2
+    card: 1
   spatialWeights:
     town: 1
     tree: 8
