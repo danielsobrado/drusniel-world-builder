@@ -13,7 +13,7 @@ Goal: only prepare/draw effects that the current area's content needs, without l
 
 ## Acceptance
 
-Run [performance hitch testing](performance-hitch-testing-2026-11-26.md) on baseline and candidate. First run `node --test test/water-feature-profile.test.js`, followed by full npm tests/lint/build. Capture WebGPU at matched settings:
+Run [performance hitch testing](performance-hitch-testing-2026-11-26.md) on baseline and candidate. First run `node --test test/water-feature-profile.test.js test/regional-variant-residency.test.js`, followed by full npm tests/lint/build. Capture WebGPU at matched settings:
 
 | Area | Required behavior |
 | --- | --- |

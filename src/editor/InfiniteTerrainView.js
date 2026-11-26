@@ -976,7 +976,7 @@ export class InfiniteTerrainView {
     slot.desiredMaterial = desired;
     const preparation = this.drawPreparation;
     if (!preparation || preparation.isMaterialReady(slot.mesh, desired)) {
-      preparation?.cancel(slot.mesh);
+      preparation?.cancel?.(slot.mesh);
       slot.mesh.material = desired;
       slot.material = desired;
     } else preparation.requestMaterial(slot.mesh, desired);

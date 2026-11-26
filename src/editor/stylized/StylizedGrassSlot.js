@@ -618,7 +618,6 @@ export class StylizedGrassSlot {
     // existing allocate-on-demand path do it without a second code path. Two things
     // can change the shape: the pool re-resolving (a new manifest, or the Settings
     // selector) and the chunk's own biome, which is what makes wetland a reed bed.
-    const page = this.terrainSlot.page;
     const pool = this.bladeProfileProvider?.();
     const profileRevision = pool?.revision ?? -1;
     const profileSetId = this.profileSetFor(page);

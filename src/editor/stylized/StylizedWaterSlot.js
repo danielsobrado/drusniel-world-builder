@@ -227,7 +227,7 @@ export class StylizedWaterSlot {
       this.hasOceanWater = false;
       this.hasRiverWater = false;
       this.uploadedPage = null;
-      this.terrainView.drawPreparation?.cancel(this.mesh);
+      this.terrainView.drawPreparation?.cancel?.(this.mesh);
       return;
     }
     this.time.value = updateWaterVisualClock(timestamp / 1000);
@@ -240,7 +240,7 @@ export class StylizedWaterSlot {
       && page?.waterFlowPixels,
     );
     if (!ready) {
-      this.terrainView.drawPreparation?.cancel(this.mesh);
+      this.terrainView.drawPreparation?.cancel?.(this.mesh);
       this.mesh.visible = false;
       this.hasWaterCoverage = false;
       this.hasOceanWater = false;
@@ -254,7 +254,7 @@ export class StylizedWaterSlot {
         || (page.waterFieldRevision ?? 0) !== this.uploadedFieldRevision) {
       const features = waterFeatureProfile(page);
       if (!features) {
-        this.terrainView.drawPreparation?.cancel(this.mesh);
+        this.terrainView.drawPreparation?.cancel?.(this.mesh);
         this.hasWaterCoverage = false;
         this.hasOceanWater = false;
         this.hasRiverWater = false;
@@ -283,7 +283,7 @@ export class StylizedWaterSlot {
       }
       this.uploadField(page);
       if (this.sharedMaterials && (this.features !== features || this.material === this.sharedMaterials.placeholder)) {
-        this.terrainView.drawPreparation?.cancel(this.mesh);
+        this.terrainView.drawPreparation?.cancel?.(this.mesh);
         this.features = features;
         this.material = this.createMaterial(false);
         this.refractiveMaterial = null;
