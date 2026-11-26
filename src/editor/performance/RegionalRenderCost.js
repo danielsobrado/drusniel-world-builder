@@ -115,6 +115,7 @@ export class RegionalRenderCostModel {
     const entry = this.planEntry(view, key);
     const baseline = entry?.baselineBand ?? (entry?.band === 'culled' || (!entry && view.previousPlan) ? 'culled' : 'near');
     const selectedBand = entry?.band ?? baseline;
+    if (baseline === 'culled' && selectedBand === 'culled') return { requested, selected };
     const counts = new Map();
     for (let i = 0; i < placements.length; i++) {
       const placement = placements[i];
@@ -178,6 +179,40 @@ export class RegionalRenderCostModel {
       }
     }
     this.townCosts.set(mesh, { size, cells });
+    return cells;
+  }
+
+  /** Estimate the currently published town tiers from their visible instance rows. */
+  *selectedTown(town, size, keyForPosition) {
+    if (!town.mesh?.modules) return null;
+    const cells = new Map();
+    const anchor = town.layout.anchor;
+    for (const module of town.mesh.modules) {
+      for (const tier of [module.nearMeshes, module.farMeshes]) {
+        // Kit parts within a tier share a placement order and count.
+        const visible = (tier ?? []).filter(mesh => mesh.visible && mesh.count > 0);
+        if (!visible.length) { yield; continue; }
+        const first = visible[0];
+        const matrices = first.instanceMatrix?.array;
+        const count = first.count;
+        if (!matrices || matrices.length < count * 16
+            || visible.some(mesh => mesh.count !== count)) return null;
+        const cost = partsRenderCost(visible, part => part.castShadow === true);
+        const counts = new Map();
+        for (let i = 0; i < count; i++) {
+          const offset = i * 16;
+          const key = keyForPosition(anchor.x + matrices[offset + 12], anchor.z + matrices[offset + 14], size);
+          counts.set(key, (counts.get(key) ?? 0) + 1);
+          if ((i & 63) === 63) yield;
+        }
+        for (const [key, instances] of counts) {
+          let entry = cells.get(key);
+          if (!entry) cells.set(key, entry = emptyRenderCost());
+          addRenderCost(entry, batchRenderCost(cost, instances, this.passes));
+          yield;
+        }
+      }
+    }
     return cells;
   }
 
