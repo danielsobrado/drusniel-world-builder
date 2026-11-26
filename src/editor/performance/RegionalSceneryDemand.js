@@ -48,11 +48,20 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     addRenderCost(cell.renderCost.selected, estimate.selected);
     addRenderCost(layer.requested, estimate.requested);
     addRenderCost(layer.selected, estimate.selected);
+    if (admissionContext?.rendererAdmission) {
+      layer.active ??= emptyRenderCost();
+      layer.current ??= emptyRenderCost();
+      addRenderCost(layer.active, estimate.active ?? estimate.selected);
+      addRenderCost(layer.current, estimate.current ?? estimate.selected);
+    }
     if (admissionContext && ['tree', 'rock', 'bush', 'card'].includes(kind)) {
-      layer.options ??= settings.admissionFactors.map(factor => ({ factor, cost: emptyRenderCost() }));
+      layer.options ??= settings.admissionFactors.map(factor => ({ factor, cost: emptyRenderCost(),
+        ...(admissionContext.rendererAdmission ? { transitionCost: emptyRenderCost() } : {}) }));
       for (const option of layer.options) {
-        const cost = estimate.options?.find(candidate => candidate.factor === option.factor)?.cost ?? estimate.requested;
-        addRenderCost(option.cost, cost);
+        const candidate = estimate.options?.find(item => item.factor === option.factor);
+        addRenderCost(option.cost, candidate?.cost ?? estimate.requested);
+        if (admissionContext.rendererAdmission) addRenderCost(option.transitionCost,
+          candidate?.transitionCost ?? estimate.active ?? estimate.selected);
       }
     }
   };
@@ -69,7 +78,7 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
       if (remaining-- <= 0) break;
       add(key, kind, entry.placements?.length ?? 0);
       if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) {
-        addCost(key, kind, yield* costModel.manifest(view, kind, key, entry.placements));
+        addCost(key, kind, yield* costModel.manifest(view, kind, key, entry.placements, admissionContext?.rendererAdmission));
       }
       yield;
     }
@@ -85,7 +94,7 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
         if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) {
           const eligible = kind === 'card' && admissionContext && regionalCardEligible(tile.centerX, tile.centerZ,
             layer.tileSize / 2, focus, admissionContext.cameraChunk, size, admissionContext.handoffEnd, settings.protectedChunkRadius);
-          addCost(key, kind, costModel.grass(layer, tile, kind, admissionContext ? settings.admissionFactors : null, eligible));
+          addCost(key, kind, costModel.grass(layer, tile, kind, admissionContext ? settings.admissionFactors : null, eligible, admissionContext?.rendererAdmission));
         }
       }
       yield;
