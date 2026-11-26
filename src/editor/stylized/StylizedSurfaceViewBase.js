@@ -993,6 +993,14 @@ export class StylizedSurfaceView {
       };
       if (this.runDeferredWork) this.runDeferredWork(updateGeology);
       else updateGeology();
+      if (this.config.enhancements?.regionalGeologyAdmission) {
+        for (const [name, view] of [['crags', this.alpineRockView], ['icebergs', this.icebergView], ['seracs', this.glacierSeracView]]) {
+          const stats = view?.lodBatches.stats;
+          for (const key of ['requested', 'selected', 'requestedDraws', 'selectedDraws', 'simplified', 'unknown', 'overflow']) {
+            PerfCounters.set(`geologyAdmission.${name}.${key}`, stats?.[key] ?? 0);
+          }
+        }
+      }
     }
     syncViewRebuildQueue(this.rockBuildQueue, [this.rockView]);
     this.coastalRockImpact?.update(camera);
