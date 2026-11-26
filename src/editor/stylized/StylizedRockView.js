@@ -388,6 +388,7 @@ export class StylizedRockView {
         thresholds: settings.thresholds,
         regionalLodFactor,
         regionalSpatialBudget,
+        regionalLayer: 'rock',
         protectedChunkRadius: this.config.enhancements?.regionalBudget?.protectedChunkRadius,
         radii: {
           meshRadius: settings.meshRadius,
