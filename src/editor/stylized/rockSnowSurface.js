@@ -10,6 +10,7 @@ import {
   float,
   mix,
   normalize,
+  select,
   smoothstep,
   uniform,
   vec2,
@@ -112,6 +113,7 @@ export function coldStoneSurface({
   baseNormal,
   detailFade = float(1),
   rimeAmount = float(0.45),
+  tint = null,
   gate = null,
 }) {
   const n = normalize(normal).toVar();
@@ -214,10 +216,11 @@ export function coldStoneSurface({
   })();
 
   const ready = maps.ready;
+  const stoneTint = tint ?? color(STONE_TINT);
   const fallbackAlbedo = color(FALLBACK_STONE).mul(macroTone);
   // Lift dark basalt scan into legible cool alpine granite/slate while preserving deep crack contrast.
   const scannedAlbedo = sampledColorRough.rgb.max(vec3(0.002)).pow(vec3(0.78))
-    .mul(color(STONE_TINT))
+    .mul(stoneTint)
     .mul(STONE_GAIN)
     .mul(macroTone);
   const stoneAlbedo = mix(fallbackAlbedo, scannedAlbedo, ready).toVar();
@@ -251,4 +254,62 @@ export function coldStoneSurface({
 /** Triplanar cold alpine stone albedo at world point `p` (metres) with world normal `n`. */
 export function coldStone(p, n) {
   return coldStoneSurface({ point: p, normal: n, baseNormal: vec3(0, 0, 1), detailFade: float(0) }).color;
+}
+
+/**
+ * Lightweight, close-range fractured stone normal & roughness relief for dry
+ * painted boulders and scaled formations in non-snow biomes.
+ *
+ * Uses dominant-axis sampler-free `repeatMipTextureLoad` (2 taps total, zero
+ * extra WebGPU samplers) and skips every fetch outside `gate`, keeping desert
+ * tors, savanna kopjes, forest boulders and badlands outcrops crisp up close
+ * without altering their biome albedo or spending GPU time in the distance.
+ */
+export function rockFractureDetail({
+  point,
+  normal,
+  baseNormal,
+  strength = float(0.68),
+  gate = null,
+}) {
+  const maps = acquireColdStoneTextures();
+  if (!maps) return { normal: baseNormal, roughnessDelta: float(0) };
+
+  const n = normalize(normal).toVar();
+  const q = point.div(STONE_METERS);
+  const top = abs(n.y).greaterThan(0.58);
+  const xSide = abs(n.x).greaterThan(abs(n.z));
+  const uv = select(top, q.xz, select(xSide, q.zy, q.xy)).toVar();
+  // Continuous derivatives per axis before the branch prevent mip seams on bevels.
+  const dx = select(top, q.xz.dFdx(), select(xSide, q.zy.dFdx(), q.xy.dFdx())).toVar();
+  const dy = select(top, q.xz.dFdy(), select(xSide, q.zy.dFdy(), q.xy.dFdy())).toVar();
+
+  const sampled = Fn(() => {
+    const out = vec4(0, 0, 1, 0.75).toVar();
+    const run = () => {
+      const t = repeatMipTextureLoad(maps.normal, uv, dx, dy).xyz.mul(2).sub(1);
+      const r = repeatMipTextureLoad(maps.rough, uv, dx, dy).g;
+      out.assign(vec4(t, r));
+    };
+    if (gate) If(gate, run);
+    else run();
+    return out;
+  })();
+
+  const ready = maps.ready;
+  const worldN = select(
+    top,
+    vec3(n.x.add(sampled.x), n.y, n.z.add(sampled.y)),
+    select(
+      xSide,
+      vec3(n.x, n.y.add(sampled.y), n.z.add(sampled.x)),
+      vec3(n.x.add(sampled.x), n.y.add(sampled.y), n.z),
+    ),
+  );
+  const deltaWorld = normalize(worldN.add(n.mul(1e-4))).sub(n).mul(strength).mul(ready);
+  const deltaView = cameraViewMatrix.mul(vec4(deltaWorld, 0)).xyz;
+  return {
+    normal: normalize(baseNormal.add(deltaView)),
+    roughnessDelta: sampled.w.sub(0.75).mul(0.28).mul(strength).mul(ready),
+  };
 }

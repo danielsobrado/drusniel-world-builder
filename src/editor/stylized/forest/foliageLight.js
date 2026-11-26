@@ -235,9 +235,11 @@ export function understoryShadeEmission(plant, { blossom = false, airRim = null 
  * workshop buildings and placed structures so masonry, plaster, timber and roofs
  * share the soft-shaded atmospheric integration of the terrain's boulders.
  */
-export function buildingShadeEmission(surface, { fill = BUILDING_FILL, bounce = BUILDING_BOUNCE } = {}) {
+export function buildingShadeEmission(surface, { fill = BUILDING_FILL, bounce = BUILDING_BOUNCE, snowCover = null } = {}) {
   const facing = normalWorld.y.negate().mul(0.5).add(0.5);
-  return foliageSkyFill(surface, fill)
-    .add(surface.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounce))
+  const fillGain = snowCover ? mix(float(fill), float(0.45), snowCover.clamp(0, 1)) : float(fill);
+  const bounceGain = snowCover ? mix(float(bounce), float(0.55), snowCover.clamp(0, 1)) : float(bounce);
+  return foliageSkyFill(surface, fillGain)
+    .add(surface.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounceGain))
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }

@@ -5,7 +5,8 @@ import { GROUND_LAYERS } from '../stylized/path/groundLayerIds.js';
 const REPEAT_METERS = 16;
 const CANONICAL_PERIOD = 1024;
 const LUMINANCE = vec3(0.3, 0.55, 0.15);
-const STONE_MEAN = 0.24;
+/** Linear mean luminance of `basalt-color.webp` (GROUND_LAYERS.rock). */
+const STONE_MEAN = 0.025;
 const STRATA_METERS = 5.5;
 const STRATA_DEPTH = 0.16;
 /** Angular frequency of `cycles` waves per canonical wrap, so a warp closes across it. */
@@ -36,7 +37,7 @@ export function applyTerrainRockDetail({ color, rock, normal, local, chunkCenter
       const layer = int(GROUND_LAYERS.rock);
       const tap = ({ uv, grad }) => texture(textures.colorRoughness, uv).grad(...grad).depth(layer).rgb;
       const sampled = tap(projections[0]).mul(weights.x).add(tap(projections[1]).mul(weights.y)).add(tap(projections[2]).mul(weights.z));
-      const stone = sampled.dot(LUMINANCE).div(STONE_MEAN).clamp(0.35, 1.9);
+      const stone = sampled.dot(LUMINANCE).max(0.001).div(STONE_MEAN).pow(0.65).clamp(0.45, 1.55);
       // Beds that wander up and down along the face, in two thicknesses, some
       // pronounced and some faint: one even sine read as ruled stripes across a wall.
       const warp = sin(point.x.mul(wave(18)).add(sin(point.y.mul(wave(11))).mul(2)))

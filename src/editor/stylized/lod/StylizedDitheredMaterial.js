@@ -5,6 +5,8 @@ import {
   floor,
   fract,
   mix,
+  normalViewGeometry,
+  normalize,
   positionGeometry,
   sin,
   step,
@@ -156,9 +158,13 @@ export function createDitheredMaterial(sourceMaterial, {
       // The tree's canopy snow, carried in the trunk's morphology x.
       const trunkSnowAmount = withStormSnow(attribute('instanceMorphology', 'vec3').x);
       const groundHeight = sourceMaterial.treeGroundHeightNode ?? positionGeometry.y;
+      const snowCap = trunkSnowCap(trunkSnowAmount, groundHeight).toVar();
       material.colorNode = trunkSnow(material.colorNode, trunkSnowAmount, groundHeight);
-      if (material.roughnessNode) material.roughnessNode = mix(material.roughnessNode, float(0.95),
-        trunkSnowCap(trunkSnowAmount, groundHeight));
+      if (material.roughnessNode) material.roughnessNode = mix(material.roughnessNode, float(0.95), snowCap);
+      // Soften deep bark grooves under packed root/limb snow so vertical fissures do not stripe white drifts.
+      if (material.normalNode) {
+        material.normalNode = normalize(mix(material.normalNode, normalViewGeometry, snowCap.mul(0.72)));
+      }
     }
   }
   applyMorphology(

@@ -54,6 +54,14 @@ import { staticWaterContactAt } from '../water/StaticWaterSample.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
 
 const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
+/** Minimum triangles for a prototype to be scaled up 4.5–8.5x as a rock formation keystone/stone. */
+const FORMATION_MIN_TRIANGLES = 150;
+
+function geometryTriangles(geometry) {
+  if (!geometry) return 0;
+  if (geometry.index) return Math.floor(geometry.index.count / 3);
+  return Math.floor((geometry.attributes?.position?.count ?? 0) / 3);
+}
 
 /** Where a prototype meets the ground once placementMatrix sinks it, in its own space. */
 function rockGroundLine(geometry, burial) {
@@ -172,6 +180,7 @@ export class StylizedRockView {
     // variant that streamed in while the camera stood still.
     this.prototypeRevision = 0;
     this.prototypes = [];
+    this.formationPrototypeIndices = [];
     this.proxyPrototypes = [];
     this.prototypeHeights = [];
     this.prototypeFootprints = [];
@@ -285,6 +294,9 @@ export class StylizedRockView {
       yield material;
     }
     this.prototypes.push(...newPrototypes);
+    this.formationPrototypeIndices = this.prototypes
+      .map((prototype, index) => (geometryTriangles(prototype.geometry) >= FORMATION_MIN_TRIANGLES ? index : -1))
+      .filter((index) => index >= 0);
     // Both fields describe the terrain, not the prop set, so they are built once
     // on the first variant and reused by every one that streams in later.
     this.clusterField ??= new ScatterClusterField({
@@ -667,7 +679,16 @@ export class StylizedRockView {
       seaLevel: this.terrainView.worldStore?.generator?.seaLevel,
       shareAt: (x, z) => share[tileAt(x, z)] ?? 0,
       blocked: this.pathClearance?.enabled ? (x, z, r = 0) => this.pathClearance.blocks(x, z, r) : null,
-      prototypeIndexForRoll: (roll, x, z) => options.prototypeIndexForRoll(roll, tileAt(x, z), x, z),
+      prototypeIndexForRoll: (roll, x, z) => {
+        const index = options.prototypeIndexForRoll(roll, tileAt(x, z), x, z);
+        if (this.formationPrototypeIndices.length === 0 || this.formationPrototypeIndices.includes(index)) {
+          return index;
+        }
+        return this.formationPrototypeIndices[Math.min(
+          this.formationPrototypeIndices.length - 1,
+          Math.floor(Math.max(0, roll) * this.formationPrototypeIndices.length),
+        )];
+      },
       radiusForScale: options.radiusForScale,
       config: this.formationConfig,
     });

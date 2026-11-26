@@ -7,8 +7,10 @@ import { resolveAssetUrl } from '../assets/assetUrl.js';
 import { snowLightUniforms } from '../stylized/sky/skyLight.js';
 import { FAR_GLACIER_ICE } from '../materials/TerrainMaterialBakeFarColor.js';
 
-const COLOR_FILE = 'assets/textures/settlement/stone-rock-color.webp';
-const NORMAL_FILE = 'assets/textures/settlement/stone-rock-normal.webp';
+const COLOR_FILE = 'assets/textures/locations/basalt-color.webp';
+const NORMAL_FILE = 'assets/textures/locations/basalt-normal.webp';
+/** Linear mean luminance of `basalt-color.webp`, used to normalize fractured cliff contrast. */
+const BASALT_MEAN = 0.025;
 /** Texture repeat, metres. */
 const CRAG_METERS = 42;
 const PERIOD_METERS = 4096;
@@ -61,7 +63,9 @@ export function createFarAlpineSurface({ vertexColor, snowCover, snowColor, iceC
       .add(texture(map, p.xy.mul(scale)).rgb.mul(weights.z));
   };
   const crag = triplanar(maps.color, CRAG_METERS).toVar();
-  const stone = crag.mul(2).toVar();
+  // Lift fractured basalt from its dark scan mean (~0.025) into crisp mountain cliff contrast
+  // so crevices stay dark enough for `HOLD_CRACKS` to catch alpine snow first.
+  const stone = crag.max(vec3(0.002)).div(BASALT_MEAN).pow(vec3(0.55)).mul(0.58).toVar();
   const cracks = stone.dot(vec3(0.3, 0.55, 0.15)).clamp(0, 1).toVar();
   const broad = mx_noise_float(p.mul(0.011)).add(mx_noise_float(p.mul(0.043)).mul(0.5)).toVar();
   const strata = p.y.add(broad.mul(26)).div(STRATA_METERS).mul(Math.PI * 2).sin().mul(STRATA_DEPTH).add(1);

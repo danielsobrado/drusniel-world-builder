@@ -135,6 +135,25 @@ test('tundra excludes ultra-low-poly faceted wedges and upright gravestone varia
   assert.ok(upright && !upright.tileIds.includes(10), 'tall gravestone shapes stay off open tundra');
 });
 
+test('coldStoneSurface accepts warm dry tints and rockFractureDetail falls back cleanly without decoder', async () => {
+  const { color, float, vec3 } = await import('three/tsl');
+  const { coldStoneSurface, rockFractureDetail } = await import('../src/editor/stylized/rockSnowSurface.js');
+  const surface = coldStoneSurface({
+    point: vec3(1, 2, 3),
+    normal: vec3(0, 1, 0),
+    baseNormal: vec3(0, 0, 1),
+    tint: color('#c6bfb2'),
+  });
+  assert.ok(surface.color && surface.roughness && surface.normal && surface.perturbedUp);
+  const detail = rockFractureDetail({
+    point: vec3(1, 2, 3),
+    normal: vec3(0, 1, 0),
+    baseNormal: vec3(0, 0, 1),
+    strength: float(0.6),
+  });
+  assert.ok(detail.normal && detail.roughnessDelta);
+});
+
 test('switching it off leaves the clone untouched', () => {
   const material = rockMaterial();
   const before = { color: material.colorNode, roughness: material.roughnessNode };

@@ -15,6 +15,7 @@ import {
   normalize,
   positionGeometry,
   positionLocal,
+  positionView,
   positionWorld,
   sin,
   smoothstep,
@@ -28,7 +29,7 @@ import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { LOOK_SNOW_STEPS } from '../biomes/BiomeLooks.js';
 import { authoredTexture } from './AuthoredTextureNode.js';
-import { coldStoneSurface } from './rockSnowSurface.js';
+import { coldStoneSurface, rockFractureDetail } from './rockSnowSurface.js';
 import { blendCoat, coatDetailFade } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
 import { PREVAILING_WIND } from '../materials/SnowAccumulation.js';
 import { snowLightUniforms } from './sky/skyLight.js';
@@ -193,16 +194,16 @@ export function applyRockWeathering(material, {
     .mul(mix(0.74, 1.06, tone));
   const biomeAlbedo = look ? albedo.mul(look.rgb) : albedo;
 
-  // Organic 3D FBM moss mats with fine bryophyte fringe breakup (replacing periodic sine stripes).
-  const macroPatch = stylizedFbm2(pattern.xz.mul(1.75).add(pattern.y.mul(0.65))).mul(0.5).add(0.5);
+  // Organic 3D FBM moss mats in world metres so 8.5x rock formations keep crisp moss scale.
+  const macroPatch = stylizedFbm2(metricPattern.xz.mul(1.75).add(metricPattern.y.mul(0.65))).mul(0.5).add(0.5);
   // Fringe, tuft grain and clump tone from the world noise, mapped from above and
   // from the side and blended by the facet's slope: four taps in place of three
   // 3D Perlins a pixel. The micro layer's pits break the moss edge, its grit is
   // the tufts; the meso mottle groups them into clumps.
   const noiseAt = (layer, metres) => {
     const field = worldNoiseField(layer);
-    const flat = field(pattern.xz.div(metres));
-    const side = field(vec2(pattern.x.add(pattern.z), pattern.y).div(metres).add(0.37));
+    const flat = field(metricPattern.xz.div(metres));
+    const side = field(vec2(metricPattern.x.add(metricPattern.z), metricPattern.y).div(metres).add(0.37));
     return mix(side, flat, normalWorld.y.abs().smoothstep(0.35, 0.75));
   };
   const micro = noiseAt(WORLD_NOISE_LAYERS.micro, 2.5);
@@ -246,12 +247,25 @@ export function applyRockWeathering(material, {
     ? authoredTexture(material.roughnessMap).g.mul(material.roughness ?? 1)
     : float(material.roughness ?? 0.85);
   const stoneNormal = material.normalNode ?? materialNormal;
+  // Close-range fractured stone normal & roughness detail for non-snow painted boulders
+  // and 8.5x rock formations (2 sampler-free taps, skipped beyond 38 m and on snow-country stone).
+  const nearFractureFade = smoothstep(12, 38, positionView.z.negate()).oneMinus().toVar();
+  const dryRockWeight = look ? snowGround.smoothstep(0.28, 0.85).oneMinus() : float(1);
+  const dryFracture = rockFractureDetail({
+    point: metricPattern,
+    normal: normalWorld,
+    baseNormal: stoneNormal,
+    strength: nearFractureFade.mul(dryRockWeight).mul(mossCoatMask.oneMinus()).mul(0.62),
+    gate: nearFractureFade.mul(dryRockWeight).greaterThan(0.02),
+  });
+  const detailedStoneNormal = dryFracture.normal;
+  const detailedStoneRoughness = stoneRoughness.add(dryFracture.roughnessDelta).clamp(0.42, 0.98);
   // The micro layer's pits are the cushions, its grit the tufts inside them.
   const mossLayer = mossCoat({ color: mossColor, pillow: edgeBreakup, tuft: tuftGrain, settings: coatSettings });
-  const mossed = blendCoat({ color: stainedStone, roughness: stoneRoughness, normal: stoneNormal }, {
+  const mossed = blendCoat({ color: stainedStone, roughness: detailedStoneRoughness, normal: detailedStoneNormal }, {
     color: mossLayer.color,
-    roughness: mossLayer.roughness ?? stoneRoughness.max(0.96),
-    normal: mossLayer.normal(stoneNormal),
+    roughness: mossLayer.roughness ?? detailedStoneRoughness.max(0.96),
+    normal: mossLayer.normal(detailedStoneNormal),
   }, mossCoatMask);
   let weathered = mossed.color.mul(underside);
   let roughness = mossed.roughness;
@@ -281,7 +295,7 @@ export function applyRockWeathering(material, {
     )
     : objectLevel;
   if (ground && groundContact && settings.soil > 0) {
-    const soilNoise = stylizedFbm2(pattern.xz.mul(SOIL_EDGE_PER_METRE)).sub(0.5);
+    const soilNoise = stylizedFbm2(metricPattern.xz.mul(SOIL_EDGE_PER_METRE)).sub(0.5);
     const fallbackEarth = color(settings.soilColor).mul(look ? look.rgb : vec3(1));
     // Heavy snow country grounds boulders through the snow-drift apron below instead of soil mud.
     const soilMask = look
@@ -310,7 +324,7 @@ export function applyRockWeathering(material, {
     const contact = localWater ? attribute('instanceSurface', 'vec3') : null;
     const level = contact ? contact.x : frameUniform(seaLevel);
     const eligible = contact ? contact.y : float(1);
-    const splash = stylizedFbm2(pattern.xz.mul(0.7)).mul(0.5).add(0.5)
+    const splash = stylizedFbm2(metricPattern.xz.mul(0.7)).mul(0.5).add(0.5)
       .mul(settings.waterlineHeight).mul(contact ? contact.z.mul(0.5).add(1) : float(1));
     const above = world.y.sub(level);
     const wet = above.smoothstep(splash.mul(0.6), splash.add(0.15)).oneMinus()

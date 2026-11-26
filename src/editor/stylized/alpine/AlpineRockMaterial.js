@@ -32,12 +32,16 @@ export function createAlpineRockMaterial() {
   const p = positionWorld.toVar();
   const n = normalize(normalWorld).toVar();
   const settings = surfaceCoatings();
+  // Warm weathered canyon/mountain stone on dry crags (e.g. Stonehold Badlands),
+  // transitioning cleanly to cold blue-slate alpine granite where snow lies.
+  const cragTint = mix(color('#c6bfb2'), color('#a4b0be'), instanceSnow.smoothstep(0.1, 0.65));
   const cold = coldStoneSurface({
     point: p,
     normal: n,
     baseNormal: normalView,
     detailFade: coatDetailFade(settings.detail),
     rimeAmount: instanceSnow.smoothstep(0.2, 0.85).mul(0.55),
+    tint: cragTint,
   });
 
   // Anisotropically wind-streaked breakup replaces round cow-spot noise blotches.

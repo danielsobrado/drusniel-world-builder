@@ -263,7 +263,7 @@ export function createTownKitMaterial(atlas, look) {
   material.roughnessNode = filterSpecularRoughness(roughness, normalSample.mul(2).sub(1).mul(vec3(strength, strength, 1)));
   material.metalnessNode = snowed.metalness;
   const selfEmissive = sample.mul(tint.rgb).mul(tint.w).mul(mix(float(1), flicker, flame));
-  const shadeEmissive = buildingShadeEmission(colour).mul(float(1).sub(flame));
+  const shadeEmissive = buildingShadeEmission(colour, { snowCover }).mul(float(1).sub(flame));
   material.emissiveNode = selfEmissive.add(shadeEmissive);
   return material;
 }
