@@ -1040,6 +1040,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     getSites: fallSites,
     getSkyView: () => stylizedSurface.skyView ?? null,
     config: waterVisual.waterfall,
+    alphaCutoff: terrainView.stylizedConfig?.enhancements?.environmentalFragmentAdmission
+      ? terrainView.stylizedConfig.enhancements.environmentalFragmentBudget.transparentAlphaCutoff : 0,
     enabled: waterVisual.enabled !== false && waterVisual.foam.enabled
       && resolveWaterQualityFeatures(waterVisual).foam,
   });
