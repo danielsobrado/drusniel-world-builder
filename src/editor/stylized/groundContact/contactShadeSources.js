@@ -1,5 +1,6 @@
 import { contactShadeRadius } from '../contactShade.js';
 import { collectDebrisGrassZones } from '../UnderstoryClearance.js';
+import { footprintPhase } from './ecologicalFootprint.js';
 
 const NEIGHBOR_OFFSETS = Object.freeze([
   [-1, -1], [0, -1], [1, -1],
@@ -15,6 +16,11 @@ function overlapsChunk(x, z, centerX, centerZ, half, radius) {
  * Collects contact-shade footprints affecting one terrain chunk, including
  * overlapping neighbours from adjacent chunks so patches never clip on chunk
  * seams, plus bushes and resident alpine rocks.
+ *
+ * Every trunk, bush and stone carries its `footprintPhase`, so its patch takes
+ * the lobed outline the meadow clears its grass by. A trunk also yields a wider
+ * root-disturbance litter footprint (`rootLitterSources`), multi-radius: tight
+ * contact shade at the foot, turned litter out over the roots.
  */
 export function collectChunkContactShadeSources({
   descriptor,
@@ -28,6 +34,7 @@ export function collectChunkContactShadeSources({
 }) {
   const sources = [];
   const debrisSources = [];
+  const rootLitterSources = [];
   const half = chunkWorldSize * 0.5;
   const cx = descriptor.centerWorldX;
   const cz = descriptor.centerWorldZ;
@@ -43,7 +50,14 @@ export function collectChunkContactShadeSources({
       const scale = placement.heightScale ?? placement.scale ?? 1;
       const radius = contactShadeRadius(settings, 'tree', scale);
       if (!isOwn && !overlapsChunk(placement.x, placement.z, cx, cz, half, radius)) continue;
-      sources.push({ x: placement.x, z: placement.z, radius, strength: settings.treeStrength });
+      const phase = footprintPhase(placement.x, placement.z);
+      sources.push({ x: placement.x, z: placement.z, radius, strength: settings.treeStrength, phase });
+      if (settings.rootLitterStrength > 0 && settings.rootLitterRadiusShare > 0) {
+        rootLitterSources.push({
+          x: placement.x, z: placement.z, radius: radius * settings.rootLitterRadiusShare,
+          strength: settings.rootLitterStrength, phase,
+        });
+      }
     }
 
     const chunkKey = `${nx}:${nz}`;
@@ -52,7 +66,9 @@ export function collectChunkContactShadeSources({
       const scale = placement.scale ?? 1;
       const radius = contactShadeRadius(settings, 'bush', scale);
       if (!isOwn && !overlapsChunk(placement.x, placement.z, cx, cz, half, radius)) continue;
-      sources.push({ x: placement.x, z: placement.z, radius, strength: settings.bushStrength });
+      sources.push({
+        x: placement.x, z: placement.z, radius, strength: settings.bushStrength, phase: footprintPhase(placement.x, placement.z),
+      });
     }
 
     const debrisPlacements = forestDebrisView?.manifestCache?.get(chunkKey)?.placements ?? [];
@@ -98,9 +114,12 @@ export function collectChunkContactShadeSources({
         radiusZ: radius * ellipse.scaleZ,
         rotationY: placement.rotationY ?? 0,
         strength: settings.rockStrength,
+        phase: footprintPhase(placement.x, placement.z),
       });
     } else {
-      sources.push({ x: placement.x, z: placement.z, radius, strength: settings.rockStrength });
+      sources.push({
+        x: placement.x, z: placement.z, radius, strength: settings.rockStrength, phase: footprintPhase(placement.x, placement.z),
+      });
     }
   }
 
@@ -109,12 +128,14 @@ export function collectChunkContactShadeSources({
       for (const rock of cellRocks ?? []) {
         const radius = Math.max(1.2, (rock.scale ?? 1) * 0.95);
         if (!overlapsChunk(rock.x, rock.z, cx, cz, half, radius)) continue;
-        sources.push({ x: rock.x, z: rock.z, radius, strength: settings.rockStrength * 0.9 });
+        sources.push({
+          x: rock.x, z: rock.z, radius, strength: settings.rockStrength * 0.9, phase: footprintPhase(rock.x, rock.z),
+        });
       }
     }
   }
 
-  return { sources, debrisSources };
+  return { sources, debrisSources, rootLitterSources };
 }
 
 /** Stable key for `updateForestGroundTextures`, tracking neighbours and bushes. */

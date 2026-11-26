@@ -12,6 +12,7 @@
  * distance a tree can still look like it is hovering. This is ambient occlusion
  * rather than shadow — it does not move.
  */
+import { ROOT_LOBE, footprintLobeAt } from './groundContact/ecologicalFootprint.js';
 
 export const DEFAULT_CONTACT_SHADE = Object.freeze({
   enabled: true,
@@ -29,6 +30,13 @@ export const DEFAULT_CONTACT_SHADE = Object.freeze({
   treeStrength: 1,
   rockStrength: 0.8,
   bushStrength: 0.95,
+  // Root disturbance (WSC PR 6): the litter roots turn up round a trunk, out to
+  // this share of its shade patch, in the litter channel. Scaled by the canopy
+  // over it down to `rootLitterOpenShare`, so a lone meadow tree keeps its grass
+  // floor instead of standing on a brown disc.
+  rootLitterRadiusShare: 0.85,
+  rootLitterStrength: 0.7,
+  rootLitterOpenShare: 0.3,
 });
 
 export function resolveContactShade(config) {
@@ -41,7 +49,8 @@ export function resolveContactShade(config) {
       throw new Error(`Invalid editor configuration: contactShade.${key} must not be negative.`);
     }
   }
-  for (const key of ['treeStrength', 'rockStrength', 'bushStrength']) {
+  for (const key of ['treeStrength', 'rockStrength', 'bushStrength', 'rootLitterRadiusShare',
+    'rootLitterStrength', 'rootLitterOpenShare']) {
     const value = Number(settings[key]);
     if (!Number.isFinite(value) || value < 0 || value > 1) {
       throw new Error(`Invalid editor configuration: contactShade.${key} must be within [0, 1].`);
@@ -76,9 +85,12 @@ export function contactShadeRadius(settings, kind, scale = 1) {
  * @param {number} options.centerWorldX canonical centre of the texture
  * @param {number} options.centerWorldZ canonical centre of the texture
  * @param {number} options.chunkWorldSize metres the texture covers
- * @param {Array<{x: number, z: number, radius: number, strength?: number}>} options.sources
+ * @param {Array<{x: number, z: number, radius: number, strength?: number, phase?: number}>} options.sources
+ *   a finite `phase` gives a point or ellipse source the shared lobed outline (ecologicalFootprint.js)
  * @param {number} [options.channel] byte offset within a texel, 0..3
  * @param {number} [options.strengthScale] multiplies every source's strength
+ * @param {number} [options.weightChannel] scales each texel's paint by this channel's value…
+ * @param {number} [options.weightFloor] …from this share at 0 to the full paint at 1
  * @returns {number} how many sources landed inside the texture
  */
 export function paintContactShade({
@@ -90,6 +102,8 @@ export function paintContactShade({
   sources,
   channel = 1,
   strengthScale = 1,
+  weightChannel = -1,
+  weightFloor = 1,
 }) {
   if (!(pixels instanceof Uint8Array)) {
     throw new Error('Contact shade needs a byte texture to paint into.');
@@ -119,7 +133,9 @@ export function paintContactShade({
     const tz0 = toTexelZ(isCapsule ? source.z0 : source.z);
     const tx1 = isCapsule ? toTexelX(source.x1) : tx0;
     const tz1 = isCapsule ? toTexelZ(source.z1) : tz0;
-    const boundRadius = isEllipse ? Math.max(source.radiusX, source.radiusZ) : radius;
+    const phase = !isCapsule && Number.isFinite(source.phase) ? source.phase : null;
+    const boundRadius = (isEllipse ? Math.max(source.radiusX, source.radiusZ) : radius)
+      * (phase === null ? 1 : 1 + ROOT_LOBE);
     const texelRadius = boundRadius / metersPerTexel;
     const minimumZ = Math.max(0, Math.floor(Math.min(tz0, tz1) - texelRadius));
     const maximumZ = Math.min(size - 1, Math.ceil(Math.max(tz0, tz1) + texelRadius));
@@ -130,11 +146,14 @@ export function paintContactShade({
     const vx = tx1 - tx0;
     const vz = tz1 - tz0;
     const segLenSq = vx * vx + vz * vz;
-    const invRx = isEllipse ? metersPerTexel / source.radiusX : 1 / texelRadius;
-    const invRz = isEllipse ? metersPerTexel / source.radiusZ : 1 / texelRadius;
+    const invRx = isEllipse ? metersPerTexel / source.radiusX : metersPerTexel / radius;
+    const invRz = isEllipse ? metersPerTexel / source.radiusZ : metersPerTexel / radius;
     const rotY = isEllipse && Number.isFinite(source.rotationY) ? source.rotationY : 0;
     const cosR = isEllipse ? Math.cos(rotY) : 1;
     const sinR = isEllipse ? Math.sin(rotY) : 0;
+    const cosP = phase === null ? 1 : Math.cos(phase);
+    const sinP = phase === null ? 0 : Math.sin(phase);
+    const maxLobedSq = (1 + ROOT_LOBE) * (1 + ROOT_LOBE);
     for (let z = minimumZ; z <= maximumZ; z += 1) {
       for (let x = minimumX; x <= maximumX; x += 1) {
         let distance;
@@ -145,6 +164,14 @@ export function paintContactShade({
           const lx = (ex * cosR - ez * sinR) * invRx;
           const lz = (ex * sinR + ez * cosR) * invRz;
           distance = Math.hypot(lx, lz);
+          if (phase !== null && distance < 1 + ROOT_LOBE) distance /= footprintLobeAt(lx, lz, cosP, sinP);
+        } else if (phase !== null) {
+          // Texel Z runs opposite world Z: the lobe is read in world axes, as the meadow reads it.
+          const dx = (x - tx0) * invRx;
+          const dz = (tz0 - z) * invRz;
+          const distSq = dx * dx + dz * dz;
+          if (distSq >= maxLobedSq) continue;
+          distance = Math.sqrt(distSq) / footprintLobeAt(dx, dz, cosP, sinP);
         } else {
           const t = segLenSq > 1e-6
             ? Math.max(0, Math.min(1, ((x - tx0) * vx + (z - tz0) * vz) / segLenSq))
@@ -156,8 +183,10 @@ export function paintContactShade({
         if (distance >= 1) continue;
         // Quadratic, as the donor has it: a soft patch rather than a disc, with no
         // visible rim where it stops.
-        const value = Math.round((1 - distance) * (1 - distance) * strength * 255);
-        const index = (z * size + x) * 4 + channel;
+        const texel = (z * size + x) * 4;
+        const weight = weightChannel < 0 ? 1 : weightFloor + (1 - weightFloor) * pixels[texel + weightChannel] / 255;
+        const value = Math.round((1 - distance) * (1 - distance) * strength * weight * 255);
+        const index = texel + channel;
         if (value > pixels[index]) pixels[index] = Math.min(255, value);
       }
     }

@@ -21,6 +21,7 @@ import {
   sampleGroundContactAt,
   sampleGroundContactVarying,
 } from '../src/editor/stylized/groundContact/GroundContactState.js';
+import { contactGrassSuppression } from '../src/editor/stylized/groundContact/GroundContactField.js';
 import { applyGroundContactDeform } from '../src/editor/stylized/worldSurfaceContext/GroundContactDeformer.js';
 
 function makeSlot({
@@ -213,7 +214,8 @@ test('PR 1 missing/unloaded slots carry explicit validity=0 and never pull bound
   assert.ok(Math.abs(insideLoaded.contact - 0.48) < 0.02);
   assert.ok(Math.abs(insideLoaded.canopy - 0.72) < 0.02);
   assert.ok(Math.abs(insideLoaded.litter - 0.64) < 0.02);
-  assert.ok(Math.abs(insideLoaded.vegetationCoverage - 0.85) < 0.02);
+  // PR 6: the contact patch clears its share of grass from the published coverage.
+  assert.ok(Math.abs(insideLoaded.vegetationCoverage - 0.85 * (1 - contactGrassSuppression(0.48))) < 0.02);
   assert.ok(Math.abs(insideLoaded.roughness - (230 / 255)) < 0.02);
 
   // Deep inside unloaded neighbor (-16, -16): explicit validity = 0, zero soil/eco leakage.

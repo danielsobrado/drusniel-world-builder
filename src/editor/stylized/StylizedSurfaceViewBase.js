@@ -1177,7 +1177,7 @@ export class StylizedSurfaceView {
    */
   paintContactShade(terrainSlot, descriptor) {
     if (!this.contactShadeSettings) return;
-    const { sources, debrisSources } = collectChunkContactShadeSources({
+    const { sources, debrisSources, rootLitterSources } = collectChunkContactShadeSources({
       descriptor,
       chunkWorldSize: this.chunkWorldSize,
       settings: this.contactShadeSettings,
@@ -1206,6 +1206,20 @@ export class StylizedSurfaceView {
         chunkWorldSize: this.chunkWorldSize,
         sources: debrisSources,
         channel: 2,
+      });
+    }
+    if (rootLitterSources.length > 0) {
+      // Root disturbance into the litter channel, weighted by the canopy already in R.
+      paintContactShade({
+        pixels: terrainSlot.forestFloorPixels,
+        size: terrainSlot.forestFloorSize,
+        centerWorldX: descriptor.centerWorldX,
+        centerWorldZ: descriptor.centerWorldZ,
+        chunkWorldSize: this.chunkWorldSize,
+        sources: rootLitterSources,
+        channel: 2,
+        weightChannel: 0,
+        weightFloor: this.contactShadeSettings.rootLitterOpenShare,
       });
     }
     PerfCounters.inc('contactShadeSlotsPainted', sources.length);

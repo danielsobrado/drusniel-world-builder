@@ -29,6 +29,17 @@ const WSC_UPLOAD_BYTES = wscGeoTexture.image.data.byteLength + wscBaseTexture.im
   + wscEcoTexture.image.data.byteLength;
 const DEFAULT_SOIL_HEX = '#6e5435';
 
+/**
+ * Share of grass a contact-shade value clears. The shade and the meadow's root
+ * zone share one lobed outline (ecologicalFootprint.js), so the patch value
+ * stands in for distance: a default tree's grass is gone where its shade is
+ * above ~0.62 (`rootZone.radius`) and back to full below ~0.12 (`+ falloff`).
+ */
+export function contactGrassSuppression(contact) {
+  const t = clamp01((contact - 0.12) / 0.5);
+  return t * t * (3 - 2 * t);
+}
+
 function clamp01(value) {
   return value < 0 ? 0 : (value > 1 ? 1 : value);
 }
@@ -496,9 +507,11 @@ export class GroundContactField {
         baseData[offset + 3] = roughnessByte;
 
         // Ecological vegetation coverage: mirrors forestFloor canopy suppression & path wear
-        // so WSC `eco.a` and diagnostic `D11` reflect actual ecological blade density (PR 3).
+        // so WSC `eco.a` and diagnostic `D11` reflect actual ecological blade density (PR 3),
+        // and the grass a trunk or stone clears at its foot (PR 6).
         const coreDensity = this.forestGrassCoreDensity[tileId & 255];
-        const effectiveVeg = clamp01(vegMaskVal * (1 - canopy * (1 - coreDensity)) * (1 - pathMaskVal));
+        const effectiveVeg = clamp01(vegMaskVal * (1 - canopy * (1 - coreDensity)) * (1 - pathMaskVal)
+          * (1 - contactGrassSuppression(contact)));
 
         ecoData[offset] = Math.round(clamp01(contact) * 255);
         ecoData[offset + 1] = Math.round(clamp01(canopy) * 255);

@@ -12,6 +12,7 @@ import {
   grassPatchCover,
   grassStandDensity,
 } from '../../world/GrassPatchiness.js';
+import { ROOT_LOBE, footprintLobe } from '../groundContact/ecologicalFootprint.js';
 
 /** Cells a stem may reach across to mix neighboring biome silhouettes. */
 const ECOTONE_REACH_CELLS = 0.9;
@@ -19,8 +20,6 @@ const ECOTONE_REACH_CELLS = 0.9;
 const DENSITY_TAP_SHIFT = 311.7;
 
 export const MIN_GRASS_STRENGTH = 0.02;
-/** How far a root zone's three lobes push in and out of its circle. */
-const ROOT_LOBE = 0.22;
 const sampleMask = (pixels, size, x, z, channel) => sampleSurfaceMaskChannel(pixels, size, size, x, z, channel);
 function smoothstep(edge0, edge1, value) {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -176,7 +175,7 @@ export function createMeadowGroundSample(snapshot, { forest = null, paths = null
         }
         continue;
       }
-      const lobe = 1 + ROOT_LOBE * Math.cos(3 * Math.atan2(dz, dx) + root.phase);
+      const lobe = footprintLobe(dx, dz, root.phase);
       const keep = smoothstep(root.radius, root.reach, dist / lobe);
       if (hash2d(rank, 93) >= keep) return false;
       strength *= 0.55 + 0.45 * keep;
