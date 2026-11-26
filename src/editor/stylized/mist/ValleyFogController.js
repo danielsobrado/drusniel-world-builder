@@ -3,6 +3,8 @@ import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
 
 import { LocalGroundHeight } from '../ambient/LocalGroundHeight.js';
 import { resolveValleyFogConfig } from './valleyFogConfig.js';
+import { FogStepAdmission } from './FogStepAdmission.js';
+import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 
 /**
  * The valley mist's live state: one camera-local height patch — the same
@@ -28,7 +30,7 @@ export class ValleyFogController {
    * @param {number} [options.resolution] patch texels per side
    * @param {number} [options.extent] patch metres per side
    */
-  constructor({ getHeight, config, quality = 1, resolution = 64, extent = 128, prepareBounds, getRevision } = {}) {
+  constructor({ getHeight, config, quality = 1, resolution = 64, extent = 128, prepareBounds, getRevision, fragmentBudget = null } = {}) {
     // The project's rule is stricter than the module's: a material built with no
     // valleyFog block at all keeps its plain shading, rather than compiling the
     // default mist in. A world that wants it says so in `sky.valleyFog`.
@@ -40,9 +42,12 @@ export class ValleyFogController {
     // patch does not hold) is a config error rather than a visual one.
     this.patch = new LocalGroundHeight({ getHeight, resolution, extent, prepareBounds, getRevision });
     this.quality = quality;
+    this.fragmentBudget = fragmentBudget;
+    this.stepAdmission = fragmentBudget ? new FogStepAdmission(this.settings.steps, fragmentBudget) : null;
     this.uniforms = {
       /** Seconds, for the drifting pockets. */
       time: uniform(0),
+      ...(fragmentBudget ? { activeSteps: uniform(this.settings.steps, 'int') } : {}),
       /** Runtime region weight 0..1: fades the mist out where there are no gorges. */
       weight: uniform(0),
       sunDirection: uniform(new THREE.Vector3(0.35, 0.85, 0.25)),
@@ -65,6 +70,13 @@ export class ValleyFogController {
     if (!this.enabled) return;
     const prepare = () => this.patch.update(focus, origin, state.budget?.shouldYield);
     (state.budget?.runner ?? (run => run()))(prepare);
+    if (this.stepAdmission) {
+      const now = (Number(state.timeSeconds) || 0) * 1000;
+      const active = this.stepAdmission.update(now, Boolean(state.pressured));
+      this.uniforms.activeSteps.value = active;
+      PerfCounters.set('environmentFogSteps', active);
+      PerfCounters.set('environmentFogFullSteps', this.settings.steps);
+    }
     if (!this.patch.ready) return;
     this.uniforms.time.value = Number(state.timeSeconds) || 0;
     this.uniforms.weight.value = Math.max(0, Math.min(1, Number(state.weight) || 0));
