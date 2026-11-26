@@ -10,7 +10,7 @@ import { createDitheredMaterial } from './StylizedDitheredMaterial.js';
 import { markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { regionalLodProtected, regionalLodThresholds } from '../../performance/RegionalDensityBudget.js';
-import { extendInstanceBounds } from './InstanceBoundsUpdate.js';
+import { extendInstanceBounds, prepareInstanceBounds } from './InstanceBoundsUpdate.js';
 import { NEUTRAL_BIOME_LOOK } from '../../biomes/BiomeLooks.js';
 import { instanceGeometryArrays } from './instanceGeometryArrays.js';
 import { completeIterator } from '../ResumableIterator.js';
@@ -440,16 +440,23 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
       if (biomeLooks) publishRange(biomeLooks, biomeLookRange);
       if (plantRoots) publishRange(plantRoots, plantRange);
       if (morphologies) publishRange(morphologies, morphologyRange);
+      const boundsChanged = matrixRange.max >= 0 || writableCount !== previousCount;
+      const reach = plantRoots ? (mesh.material.userData.plantMotionReach ?? 0) : 0;
+      const padding = reach * Math.sqrt(plantScaleSquared);
+      const stagedBounds = stage && boundsChanged
+        ? yield* prepareInstanceBounds(mesh, instances, writableCount, selectedRows, anchor, padding) : null;
       const finalize = () => {
         if (stage) publishCount();
         if (plantRoots) mesh.userData.plantScaleSquared = plantScaleSquared;
-        if (matrixRange.max >= 0 || writableCount !== previousCount) {
+        if (boundsChanged) {
           // Only a swaying reach is added after the fit, so only it forces a full refit.
-          // shortcut: the WSC conform morph (<= maxOffsetMeters) is not in the bounds; add it if culling ever clips bases.
-          const reach = plantRoots ? (mesh.material.userData.plantMotionReach ?? 0) : 0;
-          if (selectedRows && !(reach > 0)) extendInstanceBounds(mesh, selectedRows);
-          else mesh.computeBoundingSphere();
-          if (reach > 0) mesh.boundingSphere.radius += reach * Math.sqrt(plantScaleSquared);
+          // WSC conform morph is not included in these bounds.
+          if (stagedBounds) mesh.boundingSphere = stagedBounds;
+          else {
+            if (selectedRows && !(reach > 0)) extendInstanceBounds(mesh, selectedRows);
+            else mesh.computeBoundingSphere();
+            if (reach > 0) mesh.boundingSphere.radius += padding;
+          }
         }
       };
       if (stage) {
