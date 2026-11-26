@@ -43,29 +43,42 @@ export async function decodeImagePixels(url) {
  * place. `whenLoaded` hands the decoded pixels to consumers that keep their
  * own copy (the terrain's family atlas).
  *
- * @returns {{ texture: THREE.DataArrayTexture, whenLoaded: (use: (pixels: Uint8Array) => void) => void }}
+ * @returns {{ texture: THREE.DataArrayTexture, whenLoaded: (use: (pixels: Uint8Array) => void) => (() => void) }}
  */
 export function acquireWorldNoise(baseUrl = '') {
   if (shared) return shared;
   const pixels = new Uint8Array(WORLD_NOISE_SIZE * WORLD_NOISE_SIZE * WORLD_NOISE_LAYER_NAMES.length * 4).fill(WORLD_NOISE_NEUTRAL);
   const texture = createTexture(pixels);
-  const waiting = [];
+  const waiting = new Set();
+  const canDecode = typeof createImageBitmap === 'function' && typeof OffscreenCanvas === 'function';
   let loaded = false;
+  let failed = false;
   shared = {
     texture,
     whenLoaded(use) {
-      if (loaded) use(pixels);
-      else waiting.push(use);
+      if (loaded) { use(pixels); return () => {}; }
+      if (!canDecode || failed) return () => {};
+      const subscription = { use };
+      waiting.add(subscription);
+      return () => { waiting.delete(subscription); };
     },
   };
   // Node (tests, bakes) has no bitmap decoder: the neutral texture is the result.
-  if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') return shared;
+  if (!canDecode) return shared;
   const load = () => decodeImagePixels(`${baseUrl}${URL_PATH}`).then((data) => {
     pixels.set(data.subarray(0, pixels.length));
     texture.needsUpdate = true;
     loaded = true;
-    for (const use of waiting.splice(0)) use(pixels);
-  }).catch((error) => console.warn('World noise failed to load; shaders keep its neutral fields.', error));
+    for (const subscription of waiting) {
+      waiting.delete(subscription);
+      try { subscription.use(pixels); }
+      catch (error) { console.warn('World noise consumer failed.', error); }
+    }
+  }).catch((error) => {
+    failed = true;
+    waiting.clear();
+    console.warn('World noise failed to load; shaders keep its neutral fields.', error);
+  });
   if (typeof requestIdleCallback === 'function') requestIdleCallback(load, { timeout: 4000 });
   else setTimeout(load, 1500);
   return shared;
