@@ -2,46 +2,72 @@ import { estimateAttributeSubrangeBytes, markAttributeSubrangeUpdated } from '..
 import { ITERATOR_PENDING } from '../ResumableIterator.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 
+const PATCH_PAGE_ROWS = 64;
+
 /** CPU-only dirty rows. Live attributes and draw counts remain untouched until commit. */
 export class InstancePublicationPlan {
   constructor() {
     this.patches = new Map();
-    this.spans = [];
+    this.spans = new Map();
     this.finalizers = [];
+    this.stagedRows = 0;
   }
 
   record(attribute, index, values, offsetX = 0, offsetZ = 0) {
     let patch = this.patches.get(attribute);
-    if (!patch) this.patches.set(attribute, patch = { rows: [], values: [] });
-    patch.rows.push(index);
-    for (let i = 0; i < attribute.itemSize; i++) {
-      patch.values.push(Math.fround(values[i] - (i === 12 ? offsetX : i === 14 ? offsetZ : 0)));
+    if (!patch) this.patches.set(attribute, patch = []);
+    const { itemSize } = attribute;
+    let page = patch.at(-1);
+    if (!page || page.count === PATCH_PAGE_ROWS) {
+      page = { count: 0, rows: new Uint32Array(PATCH_PAGE_ROWS), values: new Float32Array(PATCH_PAGE_ROWS * itemSize) };
+      patch.push(page);
     }
+    const offset = page.count * itemSize;
+    page.rows[page.count++] = index;
+    for (let i = 0; i < itemSize; i++) {
+      page.values[offset + i] = values[i] - (i === 12 ? offsetX : i === 14 ? offsetZ : 0);
+    }
+    this.stagedRows++;
   }
 
   span(attribute, range, counter = 'attributeBytesUploaded') {
-    if (attribute && range.max >= range.min) this.spans.push({ attribute, min: range.min, max: range.max, counter });
+    if (!attribute || range.max < range.min) return;
+    const previous = this.spans.get(attribute);
+    if (previous) {
+      previous.min = Math.min(previous.min, range.min);
+      previous.max = Math.max(previous.max, range.max);
+    } else this.spans.set(attribute, { attribute, min: range.min, max: range.max, counter });
   }
 
   bytes() {
-    return this.spans.reduce((total, span) => total + estimateAttributeSubrangeBytes(span.attribute, span.min, span.max), 0);
+    let bytes = 0;
+    for (const span of this.spans.values()) bytes += estimateAttributeSubrangeBytes(span.attribute, span.min, span.max);
+    return bytes;
   }
 
   commit() {
-    for (const [attribute, patch] of this.patches) {
+    for (const [attribute, pages] of this.patches) {
       const { array, itemSize } = attribute;
-      for (let row = 0; row < patch.rows.length; row++) {
-        const offset = patch.rows[row] * itemSize;
-        const source = row * itemSize;
-        for (let i = 0; i < itemSize; i++) array[offset + i] = patch.values[source + i];
+      for (const page of pages) {
+        let start = 0;
+        while (start < page.count) {
+          let end = start + 1;
+          while (end < page.count && page.rows[end] === page.rows[end - 1] + 1) end++;
+          array.set(page.values.subarray(start * itemSize, end * itemSize), page.rows[start] * itemSize);
+          start = end;
+        }
       }
     }
     let bytes = 0;
-    for (const span of this.spans) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max, { counter: span.counter });
+    for (const span of this.spans.values()) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max, { counter: span.counter });
     for (const finalize of this.finalizers) finalize();
     this.patches.clear();
-    this.spans.length = 0;
+    this.spans.clear();
     this.finalizers.length = 0;
+    PerfCounters.inc('sceneryPublicationCommits');
+    PerfCounters.inc('sceneryPublicationQueuedBytes', bytes);
+    PerfCounters.inc('sceneryPublicationStagedAttributeRows', this.stagedRows);
+    this.stagedRows = 0;
     return bytes;
   }
 }
