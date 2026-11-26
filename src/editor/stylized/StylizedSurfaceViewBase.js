@@ -437,7 +437,7 @@ export class StylizedSurfaceView {
       }
       this.skyView?.cascades?.prepare(camera);
       const now = performance.now();
-      const contended = this.hasPublicationPressure?.() ?? false;
+      const contended = (this.farShadowAdmission || this.reflectionAdmission) ? (this.hasPublicationPressure?.() ?? false) : false;
       const cpuPressure = (this.farShadowAdmission || this.reflectionAdmission) &&
         PerfCounters.get('frameFixedCpuMs') + PerfCounters.get('frameDeferredCpuMs') > config.enhancements.auxiliaryPassBudget.frameCpuPressureMs;
       const pressured = contended || cpuPressure;
@@ -457,7 +457,7 @@ export class StylizedSurfaceView {
       if (prepared && captureTurn && gpuBusy) PerfCounters.inc('reflectionGpuDeferredFrames');
       const due = Boolean(prepared && now >= this.reflections.nextCapture);
       const allowed = this.reflectionAdmission ? this.reflectionAdmission.allow({ now, due,
-        kind: this.reflections.planarPending ? 'planar' : 'cube',
+        kind: this.reflections.planarPending ? 'planar' : 'cube', turn: captureTurn || !this.reserveDeferredWork,
         invalid: this.reflections.planarPending ? !this.reflections.planarValid.value : !this.reflections.valid.value,
         partial: this.reflections.face > 0, estimate: this.reflections.captureBudgetMs,
         contended: pressured, gpuBusy }) : true;
