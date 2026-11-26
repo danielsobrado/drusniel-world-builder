@@ -105,6 +105,7 @@ export class StreamedDrawPreparation {
     this.scene.traverse(object => { if (object.isMesh && !object.userData.deferInitialPreparation) this.markPrepared(object, object.material); });
   }
   markPrepared(mesh, material) {
+    if (!material) return;
     this.prepared.add(mesh);
     let variants = this.preparedVariants.get(mesh);
     if (!variants) this.preparedVariants.set(mesh, variants = new WeakSet());
@@ -112,6 +113,7 @@ export class StreamedDrawPreparation {
     this.uploadEstimate.mark(mesh);
   }
   markBypassed(mesh, material) {
+    if (!material) return;
     let variants = this.bypassedVariants.get(mesh);
     if (!variants) this.bypassedVariants.set(mesh, variants = new WeakSet());
     variants.add(material);

@@ -77,9 +77,9 @@ export class RegionalResourceBudget {
       PerfCounters.set('regionalRendererAccountingAvailable', Number.isFinite(total) ? 1 : 0);
       PerfCounters.set('regionalTextureBudgetExceededBytes', Math.max(0, bytes - settings.maxTrackedTextureMiB * MIB));
     }
-    if (remaining > 0 && !shouldYield()) remaining -= surface.treeView?.retireRegionalPools(now, settings.idleMs, remaining) ?? 0;
-    if (remaining > 0 && !shouldYield()) remaining -= surface.meadowGrass?.blades?.batches.retireIdle(now, settings.idleMs, remaining) ?? 0;
-    if (remaining > 0 && !shouldYield()) remaining -= surface.meadowGrass?.cards?.batches.retireIdle(now, settings.idleMs, remaining) ?? 0;
+    if (remaining > 0 && !shouldYield()) remaining -= surface.treeView?.retireRegionalPools?.(now, settings.idleMs, remaining) ?? 0;
+    if (remaining > 0 && !shouldYield()) remaining -= surface.meadowGrass?.blades?.batches?.retireIdle?.(now, settings.idleMs, remaining) ?? 0;
+    if (remaining > 0 && !shouldYield()) remaining -= surface.meadowGrass?.cards?.batches?.retireIdle?.(now, settings.idleMs, remaining) ?? 0;
     if (remaining > 0 && !shouldYield()) remaining -= surface.sharedWaterMaterials?.retireIdle?.(surface.waterSlots, now, settings.idleMs, remaining) ?? 0;
     if (remaining > 0 && !shouldYield()) remaining -= surface.terrainView.retireRegionalMaterials?.(now, settings.idleMs, remaining) ?? 0;
     PerfCounters.inc('regionalIdleResourceRetirements', settings.evictionsPerFrame - remaining);

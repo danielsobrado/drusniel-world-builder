@@ -152,7 +152,7 @@ export class MeadowBandBatch {
   }
 
   dispose() {
-    this.getDrawPreparation()?.cancel(this.mesh);
+    this.getDrawPreparation()?.cancel?.(this.mesh);
     this.mesh.removeFromParent();
     this.geometry.dispose();
   }

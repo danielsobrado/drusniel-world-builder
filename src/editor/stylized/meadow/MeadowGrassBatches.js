@@ -20,6 +20,7 @@ class MeadowBandPages {
     this.present = new Set();
     this.pages = [];
     this.peers = [];
+    if (!options.lazyPages) this.addPage();
   }
 
   addPage() {
@@ -134,12 +135,12 @@ export class MeadowGrassBatches {
    * @param {string} options.name
    * @param {number} [options.renderOrder]
    */
-  constructor({ scene, templates, material, name, renderOrder = 0, boundsPadding = null, getDrawPreparation = () => null }) {
+  constructor({ scene, templates, material, name, renderOrder = 0, boundsPadding = null, getDrawPreparation = () => null, lazyPages = false }) {
     this.batches = new Map();
     this.members = new Map();
     this.singleTileOwners = new Map();
     for (const [band, template] of Object.entries(templates)) {
-      this.batches.set(band, new MeadowBandPages({ scene, template, material, name: `${name}-${band}`, renderOrder, boundsPadding, getDrawPreparation }));
+      this.batches.set(band, new MeadowBandPages({ scene, template, material, name: `${name}-${band}`, renderOrder, boundsPadding, getDrawPreparation, lazyPages }));
       this.members.set(band, []);
     }
     for (const batch of this.batches.values()) {

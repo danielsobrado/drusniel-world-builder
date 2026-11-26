@@ -132,7 +132,7 @@ export function retireIdleInstancedRenderers(root, renderers, now, idleMs, prepa
     const since = parts[0].userData.regionalIdleSince ?? now;
     for (const mesh of parts) mesh.userData.regionalIdleSince = since;
     if (now - since < idleMs || retired >= limit) continue;
-    for (const mesh of parts) preparation?.cancel(mesh);
+    for (const mesh of parts) preparation?.cancel?.(mesh);
     disposeInstancedRenderers(root, [parts]);
     renderers[index] = [];
     retired++;
