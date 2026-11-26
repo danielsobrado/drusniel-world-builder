@@ -136,6 +136,8 @@ import { DeferredWorkBudget } from './editor/performance/DeferredWorkBudget.js';
 import { EnvironmentalPassScheduler } from './editor/performance/EnvironmentalPassScheduler.js';
 import { EnvironmentalParticleBudget } from './editor/performance/EnvironmentalParticleBudget.js';
 import { SpatialPerformanceOverlay } from './editor/performance/qa/SpatialPerformanceOverlay.js';
+import { GpuPassProfiler } from './editor/performance/qa/GpuPassProfiler.js';
+import { GpuPassFeedback, bindGpuFeedback } from './editor/performance/gpu/GpuPassFeedback.js';
 import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
 import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
 import { withPreparationFrame } from './render/preparation/DrawPreparation.js';
@@ -1662,8 +1664,18 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     editorConfig: config,
   });
   resources.own(perfQa);
+  const gpuAdmissionSettings = terrainView.stylizedConfig?.enhancements;
+  const runtimeGpuProfiler = gpuAdmissionSettings?.measuredGpuAdmission && !perfQa?.gpuProfiler?.enabled
+    ? new GpuPassProfiler(terrainView.renderer, { requested: true, sampleEvery: gpuAdmissionSettings.gpuAdmissionBudget.sampleEvery, retainHistory: false }) : null;
+  if (runtimeGpuProfiler) resources.own(runtimeGpuProfiler);
+  const admissionGpuProfiler = runtimeGpuProfiler ?? perfQa?.gpuProfiler;
+  if (gpuAdmissionSettings?.measuredGpuAdmission && admissionGpuProfiler?.enabled) {
+    const gpuFeedback = new GpuPassFeedback(admissionGpuProfiler, gpuAdmissionSettings.gpuAdmissionBudget);
+    resources.own(gpuFeedback);
+    resources.defer(bindGpuFeedback(terrainView.renderer, gpuFeedback));
+  }
   const spatialOverlay = terrainView.stylizedConfig?.enhancements?.spatialPerformanceOverlay
-    ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay, gpuProfiler: perfQa?.gpuProfiler }) : null;
+    ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay, gpuProfiler: admissionGpuProfiler }) : null;
   if (spatialOverlay) resources.own(spatialOverlay);
   if (perfQa) {
     perfQa.mount(root);
@@ -1727,7 +1739,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     // Inside an instanced location the world is not drawn or advanced; it resumes where it stopped.
     if (locations.runtime.active) {
       spatialOverlay?.update(frameTimestamp, true);
-      locations.runtime.frame(frameTimestamp);
+      runtimeGpuProfiler?.beginFrame(frameTimestamp);
+      try { locations.runtime.frame(frameTimestamp); }
+      finally { runtimeGpuProfiler?.endFrame(); }
       viewModeUi.update(frameTimestamp);
       return;
     }
@@ -2086,7 +2100,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     roadsideDetails.editingVisible = viewModeController.mode === PLAYER_MODE_EDIT && !gameplayOverlayController.isWorldInputBlocked();
     roadsideDetailsUi.update();
     if (import.meta.env.DEV) window.__worldVisualQa?.visualDiagnostics.syncMaterials();
-    terrainView.render(viewModeController.camera);
+    runtimeGpuProfiler?.beginFrame(frameTimestamp);
+    try { terrainView.render(viewModeController.camera); }
+    finally { runtimeGpuProfiler?.endFrame(); }
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();
     spatialOverlay?.update(frameTimestamp);
