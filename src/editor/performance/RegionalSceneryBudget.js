@@ -30,10 +30,19 @@ export function evaluateSceneryDemand(cells, previous, settings, geometryCosts =
         addRenderCost(layer.requested, cost.requested);
         addRenderCost(layer.selected, cost.selected);
       }
-      const effective = effectiveRenderCost(requested, settings.spatialReflectionPassWeight);
+      // Town tier selection is independent of spatial pressure. Reserve its current
+      // published cost instead of charging every distant building at the near tier.
+      const town = demand.renderCost.layers?.town;
+      const pressureCost = { ...requested };
+      if (town && town.selected.unknown === 0) {
+        for (const field of Object.keys(pressureCost)) {
+          pressureCost[field] = Math.max(0, pressureCost[field] - town.requested[field] + town.selected[field]);
+        }
+      }
+      const effective = effectiveRenderCost(pressureCost, settings.spatialReflectionPassWeight);
       peakTriangles = Math.max(peakTriangles, effective.triangles);
       peakDraws = Math.max(peakDraws, effective.draws);
-      const fallback = requested.unknown > 0;
+      const fallback = pressureCost.unknown > 0;
       if (fallback) fallbackChunks++;
       pressure = effective.triangles > settings.spatialTriangleBudget * ratio
         || effective.draws > settings.spatialDrawBudget * ratio || (fallback && pressure);
