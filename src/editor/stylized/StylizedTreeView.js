@@ -1,3 +1,4 @@
+import { RegionalImpostorResidency } from './impostor/RegionalImpostorResidency.js';
 import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import * as THREE from 'three/webgpu';
 import { uniform } from 'three/tsl';
@@ -754,6 +755,41 @@ export class StylizedTreeView {
       expectedPrototypeCount: this.prototypes.length,
       expectedSourceSignature: this.prototypeSignature,
     });
+    if (this.config.enhancements?.regionalLazyTrees && !forceBake) {
+      const manifest = await loader.loadManifest(settings.manifest).catch(error => {
+        console.warn('Regional impostor manifest unavailable; using normal fallback.', error);
+        return null;
+      });
+      if (this.disposed) return null;
+      if (manifest) {
+        this.impostorAtlases = Array(this.prototypes.length).fill(null);
+        this.impostorBatches = Array(this.prototypes.length).fill(null);
+        this.regionalImpostors = new RegionalImpostorResidency({
+          load: index => loader.loadPrototype(manifest, index),
+          install: (index, atlas) => {
+            const batch = this.createImpostorBatch(atlas, capacity);
+            this.impostorAtlases[index] = atlas;
+            this.impostorBatches[index] = batch;
+            this.impostorVersion++;
+            this.lastUpdateKey = null;
+            this.updateImpostorCounters();
+          },
+          release: atlas => disposeTreeImpostorAtlases([atlas]),
+          remove: index => {
+            this.impostorBatches[index]?.dispose();
+            disposeTreeImpostorAtlases([this.impostorAtlases[index]]);
+            this.impostorBatches[index] = null;
+            this.impostorAtlases[index] = null;
+            this.impostorVersion++;
+            this.lastUpdateKey = null;
+            this.updateImpostorCounters();
+          },
+        });
+        this.impostorVersion++;
+        this.lastUpdateKey = null;
+        return this.impostorAtlases;
+      }
+    }
     let atlases = forceBake ? null : await loader.load(settings.manifest).catch((error) => {
       this.impostorFailure = error.message;
       console.warn(settings.runtimeBake !== false
@@ -776,27 +812,33 @@ export class StylizedTreeView {
 
     this.impostorAtlases = [...atlases];
     this.impostorFailure = null;
-    this.impostorBatches = this.impostorAtlases.map((atlas) => new TreeImpostorBatch({
+    this.impostorBatches = this.impostorAtlases.map(atlas => this.createImpostorBatch(atlas, capacity));
+    this.impostorVersion += 1;
+    this.lastUpdateKey = null;
+    this.updateImpostorCounters();
+    return this.impostorAtlases;
+  }
+
+  createImpostorBatch(atlas, capacity) {
+    const batch = new TreeImpostorBatch({
       renderer: this.terrainView.renderer,
       scene: this.terrainView.scene,
-      atlas,
-      capacity,
+      atlas, capacity,
       name: `stylized-pine-impostor-${atlas.prototypeIndex}`,
       ambientEffects: this.config.ambientEffects,
       gpuCulling: this.config.lod?.gpuCulling?.enabled !== false,
       auxiliaryViews: this.config.enhancements?.waterReflections?.enabled === true,
-    }));
-    for (const batch of this.impostorBatches) {
-      applyCloudShadow(batch.batch.material, this.config.sky);
-      if (batch.auxiliary) applyCloudShadow(batch.auxiliary.material, this.config.sky);
-    }
-    this.impostorVersion += 1;
-    this.lastUpdateKey = null;
-    PerfCounters.set('treeImpostorAtlasBytes', this.impostorAtlases.reduce((total, atlas) => (
-      total + foliageTextureBytes(atlas.albedo) + foliageTextureBytes(atlas.normal)
-    ), 0));
-    PerfCounters.set('treeImpostorCompressedAtlases', this.impostorAtlases.filter(atlas => atlas.albedo.isCompressedTexture).length);
-    return this.impostorAtlases;
+    });
+    applyCloudShadow(batch.batch.material, this.config.sky);
+    if (batch.auxiliary) applyCloudShadow(batch.auxiliary.material, this.config.sky);
+    return batch;
+  }
+
+  updateImpostorCounters() {
+    const atlases = this.impostorAtlases.filter(Boolean);
+    PerfCounters.set('treeImpostorAtlasBytes', atlases.reduce((total, atlas) => total + foliageTextureBytes(atlas.albedo) + foliageTextureBytes(atlas.normal), 0));
+    PerfCounters.set('treeImpostorCompressedAtlases', atlases.filter(atlas => atlas.albedo.isCompressedTexture).length);
+    PerfCounters.set('regionalImpostorAtlases', atlases.length);
   }
 
   update(timestamp, camera, rockSource = null) {
@@ -894,6 +936,7 @@ export class StylizedTreeView {
     const renderer = this.terrainView.renderer;
     const computeQueue = typeof renderer?.compute === 'function' ? [] : null;
     for (const batch of this.impostorBatches) {
+      if (!batch) continue;
       const result = batch.update(camera, origin, timestamp, computeQueue);
       if (Number.isFinite(result.submitted)) {
         submitted[result.mode] += result.submitted;
@@ -913,6 +956,7 @@ export class StylizedTreeView {
     const completed = stepViewRebuild(this, job, shouldYield, job => iterateTreeLod({
       plan: job.plan,
       getDrawPreparation: () => this.terrainView.drawPreparation,
+      onImpostorDemand: indices => this.regionalImpostors?.setDemand(indices),
       anchor: this.instanceAnchor,
       beforePublish: () => {
         const origin = this.terrainView.floatingOrigin.getState();
@@ -941,7 +985,7 @@ export class StylizedTreeView {
 
   retireRegionalPools(now, idleMs, limit) {
     if (this.stagedRebuild || this.pendingLodRebuild) return 0;
-    let retired = 0;
+    let retired = this.regionalImpostors?.retireIdle(now, idleMs, limit) ?? 0;
     for (const pool of [this.renderers, this.proxyRenderers, this.fallbackImpostorRenderers]) {
       retired += retireIdleInstancedRenderers(this.root, pool, now, idleMs, this.terrainView.drawPreparation, Math.max(0, limit - retired));
     }
@@ -1018,7 +1062,7 @@ export class StylizedTreeView {
 
   async exportImpostors() {
     await this.impostorReady;
-    if (this.impostorAtlases.length === 0) {
+    if (this.regionalImpostors || this.impostorAtlases.length === 0) {
       throw new Error('No runtime-baked tree impostors are available to export.');
     }
     return downloadTreeImpostorBundle(this.impostorAtlases, this.prototypeSignature);
@@ -1033,7 +1077,8 @@ export class StylizedTreeView {
     disposeInstancedRenderers(this.root, this.fallbackImpostorRenderers);
     disposeInstancedRenderers(this.root, this.clusterRenderers);
     disposeInstancedRenderers(this.root, this.understoryRenderers);
-    for (const batch of this.impostorBatches) batch.dispose();
+    this.regionalImpostors?.dispose();
+    for (const batch of this.impostorBatches) batch?.dispose();
     disposeTreeImpostorAtlases(this.impostorAtlases);
     disposePrototypeParts(this.prototypes);
     disposePrototypeParts(this.proxyPrototypes);

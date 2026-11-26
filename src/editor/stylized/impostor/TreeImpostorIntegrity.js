@@ -2,17 +2,19 @@
 export function treeImpostorIntegrity(view) {
   const settings = view?.config?.lod?.impostor;
   const expected = Boolean(view?.config?.trees?.enabled && settings?.enabled);
-  const atlases = view?.impostorAtlases ?? [];
+  const atlases = (view?.impostorAtlases ?? []).filter(Boolean);
+  const regional = view?.regionalImpostors;
   const prototypeCount = view?.prototypes?.length ?? 0;
   const indices = new Set(atlases.map(atlas => atlas.prototypeIndex));
   const complete = prototypeCount > 0 && atlases.length === prototypeCount
     && indices.size === prototypeCount
     && [...indices].every(index => Number.isInteger(index) && index >= 0 && index < prototypeCount);
   const offline = atlases.every(atlas => atlas.source === 'asset');
-  const batchCount = view?.impostorBatches?.length ?? 0;
-  const ready = !expected || (complete && batchCount === prototypeCount && (settings.runtimeBake !== false || offline));
+  const batchCount = (view?.impostorBatches ?? []).filter(Boolean).length;
+  const ready = !expected || (regional ? regional.ready : (complete && batchCount === prototypeCount && (settings.runtimeBake !== false || offline)));
   return {
     ready, expected, prototypeCount, atlasCount: atlases.length,
+    regional: Boolean(regional), demanded: regional?.demand.size ?? prototypeCount,
     batchCount,
     runtimeSignature: view?.prototypeSignature ?? null,
     sources: [...new Set(atlases.map(atlas => atlas.source ?? 'runtime'))],

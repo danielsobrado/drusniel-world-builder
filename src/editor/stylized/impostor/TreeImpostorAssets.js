@@ -113,7 +113,7 @@ export class TreeImpostorAssetLoader {
     return resolveAssetUrl(this.baseUrl, path);
   }
 
-  async load(manifestPath) {
+  async loadManifest(manifestPath) {
     if (!manifestPath) return null;
     const response = await this.fetchImpl(this.resolve(manifestPath), { cache: 'no-cache' });
     if (!response.ok) {
@@ -130,6 +130,26 @@ export class TreeImpostorAssetLoader {
       );
       return null;
     }
+    return manifest;
+  }
+
+  async loadPrototype(manifest, index) {
+    const prototype = manifest.prototypes[index];
+    if (!prototype) throw new RangeError(`Unknown tree impostor prototype ${index}.`);
+    const assetVersion = manifest.generatedAt ?? manifest.sourceSignature;
+    const held = this.compressed && !this.compressedLoader ? acquireFoliageKtx2Loader(this.renderer, this.baseUrl) : null;
+    try {
+      const compressedLoader = this.compressed ? this.compressedLoader ?? held?.loader ?? null : null;
+      const resolveVersionedPath = path => versionAssetUrl(this.resolve(path),
+        path === prototype.albedoKtx2 ? prototype.albedoKtx2Metadata?.sha256 ?? assetVersion : assetVersion);
+      const textures = await loadAtlasTextures(this.loader, resolveVersionedPath, prototype, compressedLoader, this.mipLoader);
+      return Object.freeze({ ...prototype, ...textures, source: 'asset' });
+    } finally { held?.release(); }
+  }
+
+  async load(manifestPath) {
+    const manifest = await this.loadManifest(manifestPath);
+    if (!manifest) return null;
     const assetVersion = manifest.generatedAt ?? manifest.sourceSignature;
     const held = this.compressed && !this.compressedLoader
       ? acquireFoliageKtx2Loader(this.renderer, this.baseUrl) : null;
@@ -208,7 +228,7 @@ export async function downloadTreeImpostorBundle(atlases, sourceSignature) {
 
 export function disposeTreeImpostorAtlases(atlases) {
   for (const atlas of atlases ?? []) {
-    atlas.albedo?.dispose?.();
-    atlas.normal?.dispose?.();
+    atlas?.albedo?.dispose?.();
+    atlas?.normal?.dispose?.();
   }
 }

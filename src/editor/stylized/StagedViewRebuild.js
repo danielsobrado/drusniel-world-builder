@@ -11,7 +11,7 @@ export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty
   }
   if (shouldYield?.()) return false;
   const revision = view.revisionTracker?.revision ?? 0;
-  const prototypes = `${view.prototypeRevision ?? 0}:${job.rockSource?.prototypeRevision ?? 0}:${view.biomeAssetPalette?.revision ?? 0}`;
+  const prototypes = `${view.prototypeRevision ?? 0}:${view.impostorVersion ?? 0}:${job.rockSource?.prototypeRevision ?? 0}:${view.biomeAssetPalette?.revision ?? 0}`;
   let state = view.stagedRebuild;
   const moved = state?.job.focus && job.focus
     && (state.job.focus.chunkX !== job.focus.chunkX || state.job.focus.chunkZ !== job.focus.chunkZ);

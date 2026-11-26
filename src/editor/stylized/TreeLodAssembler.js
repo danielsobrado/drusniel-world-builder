@@ -210,6 +210,7 @@ export function* iterateTreeLod({
   anchor = null,
   beforePublish = null,
   getDrawPreparation = () => null,
+  onImpostorDemand = null,
 }) {
   PerfCounters.inc('treeRebuilds');
   const leaf = { tint: resolveLeafTint, snow: resolveLeafSnow };
@@ -220,6 +221,7 @@ export function* iterateTreeLod({
   const impostors = createInstances(prototypeCount);
   const understory = createInstances(1);
   const active = new Set();
+  const impostorDemand = new Set();
   const ordered = [...plan.entries].sort((left, right) => (
     left.chunkDistance - right.chunkDistance
     || left.chunkZ - right.chunkZ
@@ -281,6 +283,7 @@ export function* iterateTreeLod({
           yield;
           const prototypeIndex = resolvePrototypeIndex?.(placement)
             ?? placement.prototypeIndex;
+          if (isTreeImpostorMorphologyCompatible(placement)) impostorDemand.add(prototypeIndex);
           const atlas = impostorAtlases[prototypeIndex];
           const batch = impostorBatches[prototypeIndex];
           if (atlas && batch && isTreeImpostorMorphologyCompatible(placement)) {
@@ -320,6 +323,7 @@ export function* iterateTreeLod({
         }
 
         if (representation.band === 'impostor') {
+          if (isTreeImpostorMorphologyCompatible(placement)) impostorDemand.add(prototypeIndex);
           const atlas = impostorAtlases[prototypeIndex];
           const batch = impostorBatches[prototypeIndex];
           const physical = selectTreePhysicalRepresentation({
@@ -395,6 +399,7 @@ export function* iterateTreeLod({
     gpu: { requested: 0, accepted: 0, dropped: 0 },
   };
   for (let index = 0; index < impostorBatches.length; index += 1) {
+    if (!impostorBatches[index]) continue;
     const records = impostors[index] ?? [];
     const stats = impostorBatches[index].setRecords(records);
     recordBatchStats(statsByMode, stats);
@@ -405,6 +410,7 @@ export function* iterateTreeLod({
     PerfCounters.set(`treeImpostorRecordsAccepted.${mode}`, statsByMode[mode].accepted);
     PerfCounters.set(`treeImpostorRecordsDropped.${mode}`, statsByMode[mode].dropped);
   }
+  onImpostorDemand?.(impostorDemand);
   PerfCounters.set('treeNearInstances', nearCount);
   PerfCounters.set('treeProxyInstances', proxyCount);
   PerfCounters.set('treeImpostorInstances', impostorCount);
