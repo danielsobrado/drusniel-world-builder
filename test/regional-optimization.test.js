@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { terrainRegionalFeatures, TERRAIN_FEATURES as F, FULL_TERRAIN_FEATURES } from '../src/editor/materials/TerrainRegionalFeatures.js';
-import { RegionalDensityBudget } from '../src/editor/performance/RegionalDensityBudget.js';
+import { RegionalDensityBudget, regionalLodProtected, regionalLodThresholds } from '../src/editor/performance/RegionalDensityBudget.js';
 import { pruneRegionalMaterials } from '../src/editor/performance/RegionalMaterialCache.js';
 import { RegionalImpostorResidency } from '../src/editor/stylized/impostor/RegionalImpostorResidency.js';
 import { RegionalResourceBudget, estimateRegionalTextureBytes } from '../src/editor/performance/RegionalResourceBudget.js';
@@ -103,4 +103,29 @@ test('regional flags are independent and experimental by default', () => {
   assert.equal(enabled.regionalResourceBudget, true);
   assert.equal(enabled.regionalTerrainProfiles, false);
   assert.throws(() => resolveRenderEnhancements({ regionalBudget: { maxRendererMiB: 0 } }), /maxRendererMiB/);
+});
+
+test('scenery pressure adjusts detail without moving the terminal visibility threshold', () => {
+  const thresholds = { nearPixels: 32, proxyPixels: 8, impostorPixels: 2, clusterPixels: 0, hysteresisRatio: 0.15 };
+  assert.equal(regionalLodThresholds(thresholds, 1), thresholds);
+  assert.deepEqual(regionalLodThresholds(thresholds, 0.5), { ...thresholds, nearPixels: 64, proxyPixels: 16 });
+  assert.deepEqual(regionalLodThresholds({ ...thresholds, clusterPixels: 0.5 }, 0.5), {
+    ...thresholds, nearPixels: 64, proxyPixels: 16, impostorPixels: 4, clusterPixels: 0.5,
+  });
+  const budget = new RegionalDensityBudget({ sampleIntervalMs: 100, triangleBudget: 100, drawBudget: 100,
+    townInstanceBudget: 100, recoveryRatio: 0.75, farGrassPressure: 0.85, sceneryLodPressure: 0.9 });
+  assert.equal(budget.sceneryFactor, 1);
+  budget.update(0, { draws: 101 });
+  assert.equal(budget.sceneryFactor, 0.9);
+  budget.update(100, { draws: 70 });
+  assert.equal(budget.sceneryFactor, 1);
+});
+
+test('scenery pressure protects both predictive focus and canonical camera ring', () => {
+  const focus = { chunkX: 12, chunkZ: 8 };
+  const camera = { position: { x: 5, z: -5 } };
+  const origin = { x: 100, z: -100 };
+  assert.equal(regionalLodProtected(12, 9, focus, camera, origin, 10, 1), true);
+  assert.equal(regionalLodProtected(10, 11, focus, camera, origin, 10, 1), true);
+  assert.equal(regionalLodProtected(15, 15, focus, camera, origin, 10, 1), false);
 });
