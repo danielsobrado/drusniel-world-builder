@@ -17,6 +17,9 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   regionalInstancePublicationBudget: false,
   farShadowAdmission: false,
   reflectionAdmission: false,
+  townDecorationAdmission: false,
+  townDecorationBudget: Object.freeze({ triangleBudget: 60000, drawBudget: 24, protectMeters: 100,
+    omitDistanceMeters: 180, refreshMeters: 6, recoveryRatio: 0.85 }),
   auxiliaryPassBudget: Object.freeze({ farShadowIntervalMs: 33, farShadowMaxAgeMs: 100, farShadowMoveMeters: 0.5,
     farShadowTurnDegrees: 1, farShadowSunDegrees: 0.15, frameCpuPressureMs: 12,
     cubeCaptureCpuBudgetMs: 1.5, planarCaptureCpuBudgetMs: 2, reflectionUrgentDeferralMs: 80, reflectionMaxDeferralMs: 250 }),
@@ -52,6 +55,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     regionalBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget, ...source.regionalBudget,
       spatialWeights: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, ...source.regionalBudget?.spatialWeights },
       admissionPriorities: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, ...source.regionalBudget?.admissionPriorities } },
+    townDecorationBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.townDecorationBudget, ...source.townDecorationBudget },
     auxiliaryPassBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.auxiliaryPassBudget, ...source.auxiliaryPassBudget },
     surfaceAnisotropy: { ...RENDER_ENHANCEMENT_DEFAULTS.surfaceAnisotropy, ...source.surfaceAnisotropy },
     waterReflections: { ...RENDER_ENHANCEMENT_DEFAULTS.waterReflections, ...source.waterReflections } };
@@ -80,11 +84,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -109,6 +113,13 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, key)
         || !Number.isFinite(priority) || priority < 0 || priority > 100) throw new RangeError(`Invalid regionalBudget.admissionPriorities.${key}.`);
   }
+  const decorations = value.townDecorationBudget;
+  for (const [key, min, max] of [['triangleBudget', 1000, 10000000], ['drawBudget', 1, 1000], ['protectMeters', 36, 320],
+    ['omitDistanceMeters', 100, 1000], ['refreshMeters', 1, 16], ['recoveryRatio', 0.1, 1]]) {
+    const n = decorations[key];
+    if (!Number.isFinite(n) || n < min || n > max || (['triangleBudget', 'drawBudget'].includes(key) && !Number.isInteger(n))) throw new RangeError(`townDecorationBudget.${key} must be in [${min}, ${max}].`);
+  }
+  if (decorations.omitDistanceMeters < decorations.protectMeters + decorations.refreshMeters) throw new RangeError('Town decoration omission must be beyond the protected area.');
   const auxiliary = value.auxiliaryPassBudget;
   for (const [key, min, max] of [['farShadowIntervalMs', 0, 500], ['farShadowMaxAgeMs', 0, 1000],
     ['farShadowMoveMeters', 0, 5], ['farShadowTurnDegrees', 0, 10], ['farShadowSunDegrees', 0, 2],
