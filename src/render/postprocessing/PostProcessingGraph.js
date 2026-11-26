@@ -1,3 +1,4 @@
+import { atmosphericLayerBudget } from './AtmosphericPassAdmission.js';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import * as THREE from 'three/webgpu';
 import {
@@ -250,12 +251,12 @@ export class PostProcessingGraph {
     this.ambientOcclusion?.updateUniforms(
       frameState,
       settings?.ambientOcclusion ?? this.ambientOcclusion.settings,
-      atmosphere,
+      atmosphericLayerBudget(atmosphere, 'ao'),
     );
     this.screenSpaceShafts?.updateUniforms(
       frameState,
       settings?.screenSpaceShafts ?? this.screenSpaceShafts.settings,
-      atmosphere,
+      atmosphericLayerBudget(atmosphere, 'shafts'),
     );
     if (
       this.ssr
@@ -274,7 +275,7 @@ export class PostProcessingGraph {
       this.hierarchicalDepth.resize(outputWidth, outputHeight);
       this.ssr.resize(outputWidth, outputHeight);
     }
-    this.ssr?.updateUniforms(frameState, settings?.ssr ?? this.ssr.settings, atmosphere);
+    this.ssr?.updateUniforms(frameState, settings?.ssr ?? this.ssr.settings, atmosphericLayerBudget(atmosphere, 'ssr'));
     if (this.taaResolve) {
       this.taaResolve.settings = settings?.antiAliasing ?? this.taaResolve.settings;
       this.taaResolve.updateUniforms(frameState);
@@ -287,7 +288,7 @@ export class PostProcessingGraph {
     this.bloom?.updateUniforms(
       settings?.bloom ?? this.bloom.settings,
       toneMapping?.exposure ?? 1,
-      atmosphere,
+      atmosphericLayerBudget(atmosphere, 'bloom'),
     );
     this.toneMapping.updateUniforms(
       toneMapping,
