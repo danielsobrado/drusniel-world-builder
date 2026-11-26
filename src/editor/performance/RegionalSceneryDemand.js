@@ -37,13 +37,16 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     if (!cell) cells.set(key, cell = {});
     cell[kind] = (cell[kind] ?? 0) + count;
   };
-  const addCost = (key, estimate) => {
+  const addCost = (key, kind, estimate) => {
     if (!estimate || !inWindow(key, focus, settings.spatialChunkRadius)) return;
     let cell = cells.get(key);
     if (!cell) cells.set(key, cell = {});
-    cell.renderCost ??= { requested: emptyRenderCost(), selected: emptyRenderCost() };
+    cell.renderCost ??= { requested: emptyRenderCost(), selected: emptyRenderCost(), layers: {} };
+    const layer = cell.renderCost.layers[kind] ??= { requested: emptyRenderCost(), selected: emptyRenderCost() };
     addRenderCost(cell.renderCost.requested, estimate.requested);
     addRenderCost(cell.renderCost.selected, estimate.selected);
+    addRenderCost(layer.requested, estimate.requested);
+    addRenderCost(layer.selected, estimate.selected);
   };
   const caches = [
     ['tree', surface.treeView?.manifestStore?.cache, surface.treeView],
@@ -58,7 +61,7 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
       if (remaining-- <= 0) break;
       add(key, kind, entry.placements?.length ?? 0);
       if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) {
-        addCost(key, yield* costModel.manifest(view, kind, key, entry.placements));
+        addCost(key, kind, yield* costModel.manifest(view, kind, key, entry.placements));
       }
       yield;
     }
@@ -71,7 +74,7 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
       if (tile.band != null) {
         const key = sceneryChunkKey(tile.centerX, tile.centerZ, size);
         add(key, kind, tile.output?.count ?? 0);
-        if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) addCost(key, costModel.grass(layer, tile, kind));
+        if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) addCost(key, kind, costModel.grass(layer, tile, kind));
       }
       yield;
     }
@@ -93,13 +96,18 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     }
     if (costModel) {
       const costs = yield* costModel.town(town, size, sceneryChunkKey);
+      const selected = yield* costModel.selectedTown(town, size, sceneryChunkKey);
       for (const [key, cost] of costs ?? []) {
         const estimate = costModel.townPasses(cost);
-        addCost(key, { requested: estimate, selected: estimate });
+        addCost(key, 'town', { requested: estimate, selected: selected ? {} : { unknown: cached.cells.get(key) ?? 1 } });
         yield;
       }
       if (!costs) for (const [key, count] of cached.cells) {
-        addCost(key, { requested: { unknown: count }, selected: { unknown: count } });
+        addCost(key, 'town', { requested: { unknown: count }, selected: selected ? {} : { unknown: count } });
+        yield;
+      }
+      for (const [key, cost] of selected ?? []) {
+        addCost(key, 'town', { requested: {}, selected: cost });
         yield;
       }
     }
@@ -109,7 +117,7 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     if (slot.hasWaterCoverage && Number.isInteger(d?.chunkX) && Number.isInteger(d?.chunkZ)) {
       const key = `${d.chunkX}:${d.chunkZ}`;
       add(key, 'water', 1);
-      if (costModel) addCost(key, costModel.water(slot));
+      if (costModel) addCost(key, 'water', costModel.water(slot));
     }
     yield;
   }
