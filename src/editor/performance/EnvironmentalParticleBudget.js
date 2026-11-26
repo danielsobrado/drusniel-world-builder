@@ -41,11 +41,17 @@ export class EnvironmentalParticleBudget {
     this.requests = {};
     this.factors = Object.fromEntries(LAYERS.map(key => [key, 1]));
     this.nextSample = -Infinity;
+    this.lastTimestamp = null;
     this.pressured = false;
     this.recoverAt = 0;
   }
 
   beginFrame(now, pressure) {
+    if (this.lastTimestamp !== null && now < this.lastTimestamp) {
+      this.recoverAt = 0;
+      this.nextSample = -Infinity;
+    }
+    this.lastTimestamp = now;
     if (pressure) { this.pressured = true; this.recoverAt = now + this.settings.recoveryMs; }
     else if (now >= this.recoverAt) this.pressured = false;
     if (now >= this.nextSample || now < this.nextSample - this.settings.sampleMs) {
