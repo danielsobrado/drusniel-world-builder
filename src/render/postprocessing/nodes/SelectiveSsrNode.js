@@ -341,6 +341,7 @@ export class SelectiveSsrNode {
       edgeFade: this.edgeFade,
     }));
 
+    this.traceNode.renderTarget.texture.name = 'Adaptive SSR Trace';
     const currentDepth = depthPyramid.levels[0];
     this.depthWriteNode = rtt(vec4(currentDepth.sample(screenUV).r), 1, 1, {
       format: THREE.RedFormat,
