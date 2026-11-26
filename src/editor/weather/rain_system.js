@@ -1,3 +1,4 @@
+import { particlePrefix } from '../performance/EnvironmentalParticleBudget.js';
 import * as THREE from "three";
 import { createSplashNodeMaterial } from "./rainNodeMaterial.js";
 import { createRainShaderMaterial, createSplashShaderMaterial } from "./rainShaderMaterial.js";
@@ -39,6 +40,7 @@ class RainWeatherSystem {
     this.hardSplashMaterial = options.isWebGpu ? createSplashNodeMaterial("hard") : createSplashShaderMaterial("hard");
     this.waterSplashMaterial = options.isWebGpu ? createSplashNodeMaterial("water") : createSplashShaderMaterial("water");
     this.rainMesh = new THREE.Mesh(this.rainMaterial.geometry ?? createRainGeometry(seed), this.rainMaterial.material);
+    this.rainCapacity = this.rainMesh.geometry.instanceCount;
     this.rainMesh.name = "weather-rain-streaks";
     this.rainMesh.frustumCulled = false;
     this.rainMesh.renderOrder = 40;
@@ -68,9 +70,21 @@ class RainWeatherSystem {
     this.hardSplashMesh.geometry.instanceCount = Math.round(evaluateLevels(hardSplashes, level, PRECIP_LEVEL_KEYS));
     this.waterSplashMesh.geometry.instanceCount = Math.round(evaluateLevels(waterSplashes, level, PRECIP_LEVEL_KEYS));
   }
-  update(deltaSeconds, elapsedSeconds, cameraPosition, focus) {
+  update(deltaSeconds, elapsedSeconds, cameraPosition, focus, particles = null) {
     void deltaSeconds;
     if (!this.group.visible) return;
+    if (particles) {
+      const count = this.rainMaterial.getRequestedCount?.() ?? this.rainCapacity;
+      const factor = particles.request('precipitation', count);
+      if (this.rainMaterial.setParticleFactor) this.rainMaterial.setParticleFactor(factor);
+      else this.rainMesh.geometry.instanceCount = particlePrefix(count, factor);
+      const level = Math.min(1, Math.max(0, this.settings.intensity));
+      const { hardSplashes, waterSplashes } = this.rainSettings.levels;
+      for (const [mesh, counts] of [[this.hardSplashMesh, hardSplashes], [this.waterSplashMesh, waterSplashes]]) {
+        const requested = Math.round(evaluateLevels(counts, level, PRECIP_LEVEL_KEYS));
+        mesh.geometry.instanceCount = particlePrefix(requested, particles.request('splash', requested));
+      }
+    }
     this.rainCenter.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     this.rainMaterial.setCenter(this.rainCenter);
     // Drift with the world wind at the camera, as the snow does (worldWindCamera).
