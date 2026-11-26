@@ -26,8 +26,9 @@ export class GpuPassProfiler {
       if (this.active) {
         const uid = this.backend.getTimestampUID(context);
         const target = context.renderTarget;
-        const name = context.color === false ? 'shadow/depth'
-          : target?.texture?.name || target?.name || (target ? 'offscreen' : 'screen');
+        const textureName = target?.texture?.name;
+        const name = textureName === 'ShadowMapFarCascade' ? textureName : context.color === false ? 'shadow/depth'
+          : textureName || target?.name || (target ? 'offscreen' : 'screen');
         this.labels.set(uid, `${name} (context ${context.id})`);
       }
       return result;
