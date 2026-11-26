@@ -22,7 +22,7 @@ const scratch = new THREE.Object3D();
 
 /** Icebergs off cold coasts: one instanced draw per shape, and nothing built until one is near. */
 export class IcebergView {
-  constructor({ scene, worldStore, floatingOrigin, seaLevel, sunDirection, snowGroundByTile, seed = 0, getDrawPreparation = () => null, geologyLod = false }) {
+  constructor({ scene, worldStore, floatingOrigin, seaLevel, sunDirection, snowGroundByTile, seed = 0, getDrawPreparation = () => null, geologyLod = false, geologyAdmission = null }) {
     this.worldStore = worldStore;
     this.floatingOrigin = floatingOrigin;
     this.seaLevel = seaLevel;
@@ -35,7 +35,7 @@ export class IcebergView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
-    this.lodBatches = new GeologyLodBatches({ enabled: geologyLod, kinds: ICEBERG_KINDS, cellMeters: ICEBERG_CELL_METERS });
+    this.lodBatches = new GeologyLodBatches({ enabled: geologyLod, kinds: ICEBERG_KINDS, cellMeters: ICEBERG_CELL_METERS, admission: geologyAdmission });
     this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ICEBERG_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
     this.resolve = (cellX, cellZ) => this.resolveCell(cellX, cellZ);
@@ -100,6 +100,7 @@ export class IcebergView {
     if (!admitInstancePublication(publicationBudget, this.lodBatches.count, CAPACITY, 16)) return false;
     this.anchor.follow(this.floatingOrigin.getState());
     if (bergs.length) this.ensureMeshes();
+    this.lodBatches.plan(bergs, this.meshes, CAPACITY);
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix) }));
     for (const mesh of this.meshes) mesh.count = 0;
     const kindCounts = new Uint32Array(ICEBERG_KINDS);
