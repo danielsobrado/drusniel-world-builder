@@ -31,7 +31,7 @@ export class LocationScene {
    * @param {THREE.Camera} options.camera for shader warm-up
    * @param {(stepId: string) => Promise<void>} options.progress marks a loading step and yields a frame
    */
-  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null }) {
+  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null, atmosphericBudget = null }) {
     const location = new LocationScene(site);
     const isIceSite = site.materials?.terrain?.kind === 'ice';
     const isStoneholdSite = Boolean(site.archetypeKey?.startsWith('stonehold') || site.id?.includes('stonehold'));
@@ -133,6 +133,7 @@ export class LocationScene {
           enableSsr: isIceSite && quality.iceSsr !== false,
           enableAo: true,
           enableBloom: true,
+          atmosphericBudget,
         });
       } else {
         await renderer.compileAsync(location.scene, camera);
