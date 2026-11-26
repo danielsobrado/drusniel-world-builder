@@ -36,7 +36,7 @@ export function selectLocationDecorations(entries, point, settings) {
     requested += entry.triangles;
     const { center, radius } = entry.sphere;
     const distance = Math.max(0, Math.hypot(center.x - point.x, center.y - point.y, center.z - point.z) - radius);
-    if (!Number.isFinite(distance) || distance <= settings.protectMeters) {
+    if (!Number.isFinite(distance) || distance <= settings.protectMeters + settings.refreshMeters) {
       admitted.add(entry);
       selected += entry.triangles;
       draws++;
@@ -60,6 +60,7 @@ export class LocationDecorationAdmission {
   constructor(scene, settings) {
     this.settings = settings;
     this.entries = [];
+    this.lastPoint = null;
     scene.traverse(mesh => {
       if (!mesh.userData?.locationDecoration || !mesh.boundingSphere || !mesh.isInstancedMesh) return;
       const geometry = mesh.geometry;
@@ -70,7 +71,15 @@ export class LocationDecorationAdmission {
     });
   }
 
+  dispose() {
+    this.entries.length = 0;
+    this.lastPoint = null;
+    for (const key of ['requested', 'selected', 'draws', 'protectedCount', 'overflow', 'drawOverflow']) PerfCounters.set(`locationDecoration.${key}`, 0);
+  }
+
   update(point) {
+    if (this.lastPoint && Math.hypot(point.x - this.lastPoint.x, point.y - this.lastPoint.y, point.z - this.lastPoint.z) < this.settings.refreshMeters) return;
+    this.lastPoint = { x: point.x, y: point.y, z: point.z };
     const result = selectLocationDecorations(this.entries, point, this.settings);
     for (const entry of this.entries) entry.mesh.visible = result.admitted.has(entry);
     for (const key of ['requested', 'selected', 'draws', 'protectedCount', 'overflow', 'drawOverflow']) {
