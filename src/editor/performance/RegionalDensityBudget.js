@@ -1,4 +1,23 @@
-/** Hysteresis preserves near gameplay geometry; only the far-card reach can shrink. */
+/** Shared pressure state; consumers may reduce distant rendering detail only. */
+export function regionalLodThresholds(thresholds, factor) {
+  if (!Number.isFinite(factor) || factor <= 0 || factor >= 1) return thresholds;
+  return {
+    ...thresholds,
+    nearPixels: thresholds.nearPixels / factor,
+    proxyPixels: thresholds.proxyPixels / factor,
+    impostorPixels: thresholds.clusterPixels > 0
+      ? thresholds.impostorPixels / factor
+      : thresholds.impostorPixels,
+  };
+}
+
+/** Protect the streaming focus and the camera's actual chunk after rebasing. */
+export function regionalLodProtected(chunkX, chunkZ, focus, camera, origin, chunkSize, radius) {
+  if (Math.max(Math.abs(chunkX - focus.chunkX), Math.abs(chunkZ - focus.chunkZ)) <= radius) return true;
+  const cameraChunkX = Math.floor((camera.position.x + origin.x) / chunkSize);
+  const cameraChunkZ = Math.floor(-(camera.position.z + origin.z) / chunkSize);
+  return Math.max(Math.abs(chunkX - cameraChunkX), Math.abs(chunkZ - cameraChunkZ)) <= radius;
+}
 export class RegionalDensityBudget {
   constructor(settings) {
     this.settings = settings;
@@ -14,5 +33,9 @@ export class RegionalDensityBudget {
       this.pressured = this.pressured ? workload > this.settings.recoveryRatio : workload > 1;
     }
     return this.pressured ? this.settings.farGrassPressure : 1;
+  }
+
+  get sceneryFactor() {
+    return this.pressured ? (this.settings.sceneryLodPressure ?? 1) : 1;
   }
 }
