@@ -1,3 +1,4 @@
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import * as THREE from 'three/webgpu';
 import {
   mrt,
@@ -232,6 +233,11 @@ export class LocationPostProcessing {
       this.settings.bloom.enabled ? this.settings.bloom.intensity : 0,
     );
 
+    if (this.atmosphericAdmission) {
+      PerfCounters.set('atmosphericAdmission.location.aoScale', this.ambientOcclusion?.resolutionScale ?? 0);
+      PerfCounters.set('atmosphericAdmission.location.ssrSteps', this.ssr?.maxSteps.value ?? 0);
+      PerfCounters.set('atmosphericAdmission.location.bloomDownsampleTaps', this.bloom ? (this.bloom.reducedFilter?.value ? 5 : 13) : 0);
+    }
     this.pipeline.render();
     if (this.ssr) this.history.latchSsrFrame();
   }
