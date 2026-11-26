@@ -13,6 +13,7 @@ import {
   uint,
   } from 'three/tsl';
 import { markAttributeRangeUpdated, markAttributeSubrangeUpdated } from '../attributeUpload.js';
+import { completeIterator } from '../ResumableIterator.js';
 import { writeImpostorAttribute } from './ImpostorAttributeUpdates.js';
 import { createGpuTreeImpostorMaterial, updateImpostorCameraUniforms } from './TreeImpostorMaterial.js';
 
@@ -148,6 +149,10 @@ export class GpuTreeImpostorBatch {
   }
 
   setRecords(records) {
+    return completeIterator(this.iterateRecordPublication(records));
+  }
+
+  *iterateRecordPublication(records, stage = null) {
     const previousCount = this.recordCount;
     const count = Math.min(records.length, this.capacity);
     const transforms = { min: Infinity, max: -1 };
@@ -155,40 +160,34 @@ export class GpuTreeImpostorBatch {
     const appearances = { min: Infinity, max: -1 };
     let boundsChanged = count !== previousCount;
     for (let index = 0; index < count; index += 1) {
+      if (stage && index > 0 && index % 64 === 0) yield;
       const record = records[index];
       const offset = index * 4;
       const radiusChanged = this.parameterBuffer.array[offset + 3] !== Math.fround(record.radius);
       const transformChanged = writeImpostorAttribute(this.transformBuffer, index,
-        record.x, record.y, record.z, record.scale, transforms);
+        record.x, record.y, record.z, record.scale, transforms, stage);
       boundsChanged ||= transformChanged || radiusChanged;
       writeImpostorAttribute(this.parameterBuffer, index,
-        record.yaw, record.fade, record.seed, record.radius, parameters);
+        record.yaw, record.fade, record.seed, record.radius, parameters, stage);
       const appearance = record.appearance ?? DEFAULT_APPEARANCE;
       writeImpostorAttribute(this.appearanceBuffer, index,
-        appearance[0], appearance[1], appearance[2], appearance[3], appearances);
+        appearance[0], appearance[1], appearance[2], appearance[3], appearances, stage);
     }
-    this.recordCount = count;
-    this.cullStale ||= boundsChanged;
-    this.mesh.visible = count > 0;
-    this.countUniform.value = count;
-    this.indirectNeedsReset ||= previousCount > 0 && count === 0;
+    const finalize = () => {
+      this.recordCount = count;
+      this.cullStale ||= boundsChanged;
+      this.mesh.visible = count > 0;
+      this.countUniform.value = count;
+      this.indirectNeedsReset ||= previousCount > 0 && count === 0;
+    };
     if (count > 0) {
-      markAttributeSubrangeUpdated(
-        this.transformBuffer,
-        transforms.min, transforms.max,
-        { counter: 'treeImpostorAttributeBytesUploaded' },
-      );
-      markAttributeSubrangeUpdated(
-        this.parameterBuffer,
-        parameters.min, parameters.max,
-        { counter: 'treeImpostorAttributeBytesUploaded' },
-      );
-      markAttributeSubrangeUpdated(
-        this.appearanceBuffer,
-        appearances.min, appearances.max,
-        { counter: 'treeImpostorAttributeBytesUploaded' },
-      );
+      for (const [attribute, range] of [[this.transformBuffer, transforms], [this.parameterBuffer, parameters], [this.appearanceBuffer, appearances]]) {
+        if (stage) stage.span(attribute, range, 'treeImpostorAttributeBytesUploaded');
+        else markAttributeSubrangeUpdated(attribute, range.min, range.max, { counter: 'treeImpostorAttributeBytesUploaded' });
+      }
     }
+    if (stage) stage.finalizers.push(finalize);
+    else finalize();
     return count;
   }
 
