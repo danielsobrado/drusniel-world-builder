@@ -10,13 +10,16 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { createServer as createViteServer } from 'vite';
+import viteConfig from '../vite.config.js';
 import { prepareVisualPose } from './lib/world-visual-prepare-pose.mjs';
 import { captureWorldCanvas } from './lib/world-visual-canvas.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const { values: args } = parseArgs({
   options: {
-    url: { type: 'string', default: 'http://localhost:5173' },
+    // Empty: an embedded Vite server that ignores file changes, so a concurrent edit cannot reload the page.
+    url: { type: 'string', default: '' },
     out: { type: 'string', default: 'docs/qa/world-surface-context/pr-06' },
   },
 });
@@ -73,6 +76,19 @@ async function sheet(files, outPath) {
 }
 
 await mkdir(OUT, { recursive: true });
+let server = null;
+let baseUrl = args.url;
+if (!baseUrl) {
+  const baseCfg = typeof viteConfig === 'function'
+    ? await viteConfig({ command: 'serve', mode: 'development', isSsrBuild: false, isPreview: false })
+    : viteConfig;
+  server = await createViteServer({
+    ...baseCfg, configFile: false, root: ROOT,
+    server: { host: '127.0.0.1', port: 5193, strictPort: false, hmr: false, watch: { ignored: ['**/*'] } },
+  });
+  await server.listen();
+  baseUrl = `http://127.0.0.1:${server.httpServer.address().port}`;
+}
 const browser = await chromium.launch({
   headless: false,
   args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--disable-background-timer-throttling',
@@ -82,7 +98,7 @@ const browser = await chromium.launch({
 const files = [];
 try {
   const page = await (await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1 })).newPage();
-  await page.goto(`${args.url}/?qaVisual=1`, { waitUntil: 'domcontentloaded', timeout: 120000 });
+  await page.goto(`${baseUrl}/?qaVisual=1`, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 120000 });
   const backend = await page.evaluate(() => window.__editor?.terrainView?.rendererBackendStatus?.mode);
   if (backend !== 'webgpu') throw new Error(`Hardware WebGPU required, got ${backend}`);
@@ -108,4 +124,5 @@ try {
   }, null, 2)}\n`);
 } finally {
   await browser.close();
+  await server?.close();
 }
