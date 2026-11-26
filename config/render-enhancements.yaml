@@ -11,6 +11,7 @@ regionalDensityBudget: false
 regionalSpatialBudget: false
 regionalGeometryCostBudget: false
 regionalAdmissionBudget: false
+rendererAdmissionBudget: false
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
@@ -29,6 +30,12 @@ regionalBudget:
   spatialTriangleBudget: 200000
   spatialDrawBudget: 100
   spatialReflectionPassWeight: 0.25
+  # Shared estimated cost across the sampled renderer window.
+  rendererAdmissionTriangleBudget: 4000000
+  rendererAdmissionDrawBudget: 1500
+  rendererAdmissionTransitionReserve: 0.15
+  rendererAdmissionUploadHeadroom: 0.5
+  rendererAdmissionMaxChanges: 8
   admissionFactors: [1, 0.85, 0.7, 0.5]
   admissionPriorities:
     tree: 4
