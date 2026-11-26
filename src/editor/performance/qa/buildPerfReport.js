@@ -282,7 +282,9 @@ export function buildPerfReport({
       'sceneryPublicationStagedAttributeRows', 'sceneryPublicationDeferred', 'sceneryPublicationOversizedBytes',
       'farShadowAdmissionRefresh', 'farShadowAdmissionReuse', 'reflectionAdmissionGpuDeferred',
       'reflectionAdmissionPressureDeferred', 'reflectionAdmissionCostDeferred', 'reflectionAdmissionDeadlineTurns',
-      'reflectionAdmissionEligible.cube', 'reflectionAdmissionEligible.planar', 'townDecorationSelections']
+      'reflectionAdmissionEligible.cube', 'reflectionAdmissionEligible.planar', 'townDecorationSelections',
+       'environmentParticles.requested', 'environmentParticles.admitted', 'environmentParticles.reserved',
+       'environmentParticles.limit', 'environmentParticles.overflow', 'environmentParticles.pressured']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
