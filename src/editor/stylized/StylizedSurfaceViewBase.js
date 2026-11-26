@@ -942,6 +942,11 @@ export class StylizedSurfaceView {
       }
       this.meadowGrass?.setRegionalCardBudget(this.regionalSpatial, camera);
     }
+    if (this.config.enhancements?.regionalInstancePublicationBudget) {
+      for (const view of [this.treeView, this.rockView, this.bushView]) {
+        if (view) view.sceneryPublicationBudget = this.publicationBudget ?? null;
+      }
+    }
     this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
     if (camera) {
