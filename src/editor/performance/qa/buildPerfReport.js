@@ -282,7 +282,7 @@ export function buildPerfReport({
       'sceneryPublicationStagedAttributeRows', 'sceneryPublicationDeferred', 'sceneryPublicationOversizedBytes',
       'farShadowAdmissionRefresh', 'farShadowAdmissionReuse', 'reflectionAdmissionGpuDeferred',
       'reflectionAdmissionPressureDeferred', 'reflectionAdmissionCostDeferred', 'reflectionAdmissionDeadlineTurns',
-      'reflectionAdmissionEligible.cube', 'reflectionAdmissionEligible.planar']
+      'reflectionAdmissionEligible.cube', 'reflectionAdmissionEligible.planar', 'townDecorationSelections']
       .map(name => [name, frames.reduce((sum, frame) => sum + Math.max(0, frame.countersDelta?.[name] ?? 0), 0)])),
     hitchFrames: hitches,
     samples,
