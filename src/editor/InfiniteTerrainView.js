@@ -388,6 +388,7 @@ export class InfiniteTerrainView {
       ),
       sunColor: skyConfig?.sunColor ?? '#ffffff',
       finish: resolveCinematicFinish(stylizedConfig?.cinematicFinish),
+      atmosphericBudget: stylizedConfig.enhancements?.atmosphericPassAdmission ? stylizedConfig.enhancements.atmosphericPassBudget : null,
     });
     this.geometry = new THREE.PlaneGeometry(
       this.chunkWorldSize,
