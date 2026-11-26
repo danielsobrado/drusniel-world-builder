@@ -195,9 +195,9 @@ export function buildDustGodRays({
   return Fn(() => {
     const count = activeSamples ?? samples;
     const skyThreshold = float(SKY_DEPTH_THRESHOLD);
-    const delta = uvNode.sub(sunUv).mul(density.div(count)).toConst();
+    const delta = uvNode.sub(sunUv).mul(activeSamples ? density.div(count) : density.mul(1 / samples)).toConst();
     const coord = uvNode.toVar();
-    const sampleScale = float(REFERENCE_SAMPLE_COUNT).div(count);
+    const sampleScale = activeSamples ? float(REFERENCE_SAMPLE_COUNT).div(count) : float(REFERENCE_SAMPLE_COUNT / samples);
     const perSampleDecay = pow(decay, sampleScale);
     const illuminationDecay = float(1).toVar();
     const accumulated = vec3(0).toVar();
