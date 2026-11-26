@@ -405,6 +405,7 @@ async function initializeEditor(restoreState, resources, startup) {
     postProcessingStore,
     sunDirection: terrainView.godRays.sunDirection,
     sunColor: config.stylizedSurface.sky.sunColor,
+    atmosphericBudget: terrainView.stylizedConfig?.enhancements?.atmosphericPassAdmission ? terrainView.stylizedConfig.enhancements.atmosphericPassBudget : null,
     bypassProvider: () => (
       terrainView.godRays.enabled
       && terrainView.godRays.technique === 'volumetric'
