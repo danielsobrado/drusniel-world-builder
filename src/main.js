@@ -2019,6 +2019,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const valleyMist = skyLooks?.current?.mist ?? 0;
     terrainView.updateValleyFog({
       budget: deferredWork,
+      pressured: terrainView.stylizedConfig?.enhancements?.environmentalFragmentAdmission && (
+        PerfCounters.get('frameFixedCpuMs') + PerfCounters.get('frameDeferredCpuMs') > terrainView.stylizedConfig.enhancements.environmentalFragmentBudget.frameCpuPressureMs
+        || PerfCounters.get('framePublicationUploadBytes') > deferredWork.maxUploadBytes / 2),
       focus: viewModeController.camera.position,
       origin: frameOrigin,
       timeSeconds: frameSeconds,
