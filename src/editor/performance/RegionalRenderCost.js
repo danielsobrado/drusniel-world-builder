@@ -86,11 +86,17 @@ export class RegionalRenderCostModel {
     return entries.get(key);
   }
 
-  prototypeCost(view, kind, index, band, impostorCompatible) {
+  physicalBand(view, kind, index, band, compatible) {
+    if (kind !== 'tree' || band !== 'impostor') return band;
+    return compatible && view.impostorAtlases?.[index] && view.impostorBatches?.[index]?.batch?.geometry
+      ? 'impostor' : 'impostor-fallback';
+  }
+
+  prototypeCost(view, kind, index, band) {
     if (band === 'culled') return { triangles: 0, draws: 0, shadowTriangles: 0, shadowDraws: 0 };
     const near = band === 'near' || kind === 'detail';
     let parts = near ? view.prototypes?.[index] : view.proxyPrototypes?.[index];
-    if (kind === 'tree' && band === 'impostor' && impostorCompatible && view.impostorAtlases?.[index]) {
+    if (kind === 'tree' && band === 'impostor') {
       const batch = view.impostorBatches?.[index]?.batch;
       if (batch?.geometry) parts = batch.mesh ?? batch;
     }
@@ -115,23 +121,34 @@ export class RegionalRenderCostModel {
     const entry = this.planEntry(view, key);
     const baseline = entry?.baselineBand ?? (entry?.band === 'culled' || (!entry && view.previousPlan) ? 'culled' : 'near');
     const selectedBand = entry?.band ?? baseline;
-    if (baseline === 'culled' && selectedBand === 'culled') return { requested, selected };
+    const selectedBands = entry?.representations
+      ? [...new Set(entry.representations.filter(rep => rep.fade > 0 && rep.band !== 'culled').map(rep => rep.band))]
+      : selectedBand === 'culled' ? [] : [selectedBand];
+    if (baseline === 'culled' && selectedBands.length === 0) return { requested, selected };
+    const needsImpostor = baseline === 'impostor' || selectedBands.includes('impostor');
     const counts = new Map();
     for (let i = 0; i < placements.length; i++) {
       const placement = placements[i];
       const index = kind === 'tree' && typeof view.resolvePalettePrototypeIndex === 'function'
         ? view.resolvePalettePrototypeIndex(placement) : placement.prototypeIndex;
-      const compatible = kind === 'tree' && (baseline === 'impostor' || selectedBand === 'impostor')
-        && isTreeImpostorMorphologyCompatible(placement);
+      const compatible = kind === 'tree' && needsImpostor && isTreeImpostorMorphologyCompatible(placement);
       const groupKey = `${index}:${Number(compatible)}`;
       let group = counts.get(groupKey);
       if (!group) counts.set(groupKey, group = { index, compatible, count: 0 });
       group.count++;
       if ((i & 63) === 63) yield;
     }
+    const requestedDraws = new Set(), selectedDraws = new Set();
+    const accumulate = (target, seen, index, band, compatible, count) => {
+      const physical = this.physicalBand(view, kind, index, band, compatible);
+      const groupKey = `${index}:${physical}`;
+      const cost = this.prototypeCost(view, kind, index, physical);
+      addRenderCost(target, batchRenderCost(cost, count, this.passes, seen.has(groupKey) ? 0 : 1));
+      seen.add(groupKey);
+    };
     for (const { index, compatible, count } of counts.values()) {
-      addRenderCost(requested, batchRenderCost(this.prototypeCost(view, kind, index, baseline, compatible), count, this.passes));
-      addRenderCost(selected, batchRenderCost(this.prototypeCost(view, kind, index, selectedBand, compatible), count, this.passes));
+      accumulate(requested, requestedDraws, index, baseline, compatible, count);
+      for (const band of selectedBands) accumulate(selected, selectedDraws, index, band, compatible, count);
       yield;
     }
     return { requested, selected };
