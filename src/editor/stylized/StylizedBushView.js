@@ -437,7 +437,8 @@ export class StylizedBushView {
     const viewportHeight = this.terrainView.viewportHeight
       ?? this.terrainView.renderer.domElement.height ?? 1;
     const planKey = `${focus.chunkX}:${focus.chunkZ}:${this.revisionTracker.revision}:${viewportHeight}:${camera.fov}:${camera.zoom}:${this.prototypeRevision}`;
-    const plan = cachedLodPlan(this, planKey, timestamp, settings.transitionMs / 8, () => settings.enabled
+    const regionalLodFactor = this.regionalLodFactor ?? 1;
+    const plan = cachedLodPlan(this, `${planKey}:regional:${regionalLodFactor}`, timestamp, settings.transitionMs / 8, () => settings.enabled
       ? buildChunkLodPlan({
         focus,
         radius: renderRadius + 1,
@@ -447,6 +448,8 @@ export class StylizedBushView {
         viewportHeight,
         objectHeight: this.prototypeHeight,
         thresholds: settings.thresholds,
+        regionalLodFactor,
+        protectedChunkRadius: this.config.enhancements?.regionalBudget?.protectedChunkRadius,
         radii: {
           meshRadius: settings.meshRadius,
           proxyRadius: settings.proxyRadius,
