@@ -15,6 +15,11 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   regionalAdmissionBudget: false,
   rendererAdmissionBudget: false,
   regionalInstancePublicationBudget: false,
+  farShadowAdmission: false,
+  reflectionAdmission: false,
+  auxiliaryPassBudget: Object.freeze({ farShadowIntervalMs: 33, farShadowMaxAgeMs: 100, farShadowMoveMeters: 0.5,
+    farShadowTurnDegrees: 1, farShadowSunDegrees: 0.15, frameCpuPressureMs: 12,
+    cubeCaptureCpuBudgetMs: 1.5, planarCaptureCpuBudgetMs: 2, reflectionUrgentDeferralMs: 80, reflectionMaxDeferralMs: 250 }),
   regionalBudget: Object.freeze({ idleMs: 30000, maxTrackedTextureMiB: 256, maxRendererMiB: 4096, evictionsPerFrame: 1, farGrassPressure: 0.85,
     sceneryLodPressure: 0.85, protectedChunkRadius: 1, spatialChunkRadius: 8, spatialChunkBudget: 1200,
     spatialLodFactor: 0.75, spatialCardFactor: 0.8, spatialWorkItems: 256,
@@ -47,6 +52,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     regionalBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget, ...source.regionalBudget,
       spatialWeights: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, ...source.regionalBudget?.spatialWeights },
       admissionPriorities: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, ...source.regionalBudget?.admissionPriorities } },
+    auxiliaryPassBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.auxiliaryPassBudget, ...source.auxiliaryPassBudget },
     surfaceAnisotropy: { ...RENDER_ENHANCEMENT_DEFAULTS.surfaceAnisotropy, ...source.surfaceAnisotropy },
     waterReflections: { ...RENDER_ENHANCEMENT_DEFAULTS.waterReflections, ...source.waterReflections } };
   const params = new URLSearchParams(search);
@@ -74,11 +80,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'farShadowAdmission', 'reflectionAdmission']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -103,6 +109,14 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, key)
         || !Number.isFinite(priority) || priority < 0 || priority > 100) throw new RangeError(`Invalid regionalBudget.admissionPriorities.${key}.`);
   }
+  const auxiliary = value.auxiliaryPassBudget;
+  for (const [key, min, max] of [['farShadowIntervalMs', 0, 500], ['farShadowMaxAgeMs', 0, 1000],
+    ['farShadowMoveMeters', 0, 5], ['farShadowTurnDegrees', 0, 10], ['farShadowSunDegrees', 0, 2],
+    ['frameCpuPressureMs', 1, 100], ['cubeCaptureCpuBudgetMs', 0.25, 20], ['planarCaptureCpuBudgetMs', 0.25, 20],
+    ['reflectionUrgentDeferralMs', 0, 1000], ['reflectionMaxDeferralMs', 0, 2000]]) {
+    if (!Number.isFinite(auxiliary[key]) || auxiliary[key] < min || auxiliary[key] > max) throw new RangeError(`auxiliaryPassBudget.${key} must be in [${min}, ${max}].`);
+  }
+  if (auxiliary.farShadowIntervalMs > auxiliary.farShadowMaxAgeMs || auxiliary.reflectionUrgentDeferralMs > auxiliary.reflectionMaxDeferralMs) throw new RangeError('Auxiliary pass freshness limits are inverted.');
   const water = value.waterReflections;
   if (![128, 256, 512].includes(water.resolution)) throw new RangeError('Reflection resolution must be 128, 256 or 512.');
   for (const [key, min, max] of [
