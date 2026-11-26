@@ -1,4 +1,5 @@
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
+import { StagedTextureUploads } from './StagedTextureUploads.js';
 
 const MIN_TEXTURE_BYTES = 128 * 1024;
 
@@ -30,12 +31,14 @@ export class StreamedTextureWarmup {
     this.renderer = renderer;
     this.completed = new WeakMap();
     this.jobs = new Map();
+    this.staged = new StagedTextureUploads(renderer);
   }
 
   advance(mesh, material, bytesAvailable, shouldYield, budget, alreadySpent) {
     if (!this.renderer?.initTexture || !this.renderer.backend?.isWebGPUBackend) return { ready: true, bytes: 0 };
     let job = this.jobs.get(mesh);
     if (!job || job.material !== material) {
+      if (job) this.cancel(mesh);
       job = { material, textures: texturesFor(material), index: 0 };
       this.jobs.set(mesh, job);
     }
@@ -48,9 +51,19 @@ export class StreamedTextureWarmup {
       if (!ready || current || (!this.renderer._textures && this.completed.get(texture) === texture.version) || estimate < MIN_TEXTURE_BYTES
           || texture.isRenderTargetTexture || texture.isDepthTexture || texture.isVideoTexture || texture.isExternalTexture
           || texture.isStorageTexture || texture.isCubeTexture || texture.isArrayTexture || texture.isDataArrayTexture || texture.isData3DTexture) {
+        this.staged.cancel(texture);
         job.index++; continue;
       }
-      if (shouldYield?.() || (budget ? !budget.canPublish(alreadySpent + estimate) : estimate > bytesAvailable && alreadySpent > 0)) {
+      const sliced = this.staged.advance(texture, Math.max(0, bytesAvailable - bytes), shouldYield);
+      if (sliced) {
+        bytes += sliced.bytes;
+        if (!sliced.ready) return { ready: false, bytes };
+        job.index++;
+        this.completed.set(texture, texture.version);
+        if (job.index < job.textures.length) return { ready: false, bytes };
+        break;
+      }
+      if (shouldYield?.() || (budget ? !budget.canPublish(alreadySpent + bytes + estimate) : estimate > bytesAvailable - bytes && alreadySpent + bytes > 0)) {
         return { ready: false, bytes };
       }
       const start = performance.now();
@@ -67,6 +80,10 @@ export class StreamedTextureWarmup {
     return { ready: true, bytes };
   }
 
-  cancel(mesh) { this.jobs.delete(mesh); }
-  dispose() { this.jobs.clear(); }
+  cancel(mesh) {
+    const job = this.jobs.get(mesh);
+    if (job) this.staged.cancel(job.textures[job.index]);
+    this.jobs.delete(mesh);
+  }
+  dispose() { this.staged.dispose(); this.jobs.clear(); }
 }
