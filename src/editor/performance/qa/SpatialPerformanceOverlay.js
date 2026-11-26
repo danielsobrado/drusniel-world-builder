@@ -23,8 +23,9 @@ function select(parent, values, labels, title) {
 }
 
 export class SpatialPerformanceOverlay {
-  constructor({ root, surface, settings }) {
+  constructor({ root, surface, settings, gpuProfiler = null }) {
     this.surface = surface;
+    this.gpuProfiler = gpuProfiler;
     this.settings = settings;
     this.nextRefresh = -Infinity;
     this.sample = null;
@@ -38,6 +39,9 @@ export class SpatialPerformanceOverlay {
     controls.className = 'spatial-controls';
     this.metric = select(controls, SPATIAL_METRICS, metricLabels, 'Cost metric');
     this.layer = select(controls, SPATIAL_LAYERS, { all: 'All layers' }, 'Layer filter');
+    const recenter = append(controls, 'button', 'Focus');
+    recenter.type = 'button';
+    recenter.addEventListener('click', () => { this.key = null; this.draw(); });
     this.download = append(controls, 'button', 'Export JSON');
     this.download.type = 'button';
     this.download.disabled = true;
@@ -56,15 +60,16 @@ export class SpatialPerformanceOverlay {
       const rect = this.canvas.getBoundingClientRect(), side = this.settings.radius * 2 + 1;
       const x = Math.max(0, Math.min(side - 1, Math.floor((event.clientX - rect.left) / rect.width * side)));
       const z = Math.max(0, Math.min(side - 1, Math.floor((event.clientY - rect.top) / rect.height * side)));
-      this.key = `${this.sample.focus.chunkX + x - this.settings.radius}:${this.sample.focus.chunkZ + z - this.settings.radius}`;
+      this.key = `${this.sample.focus.chunkX + x - this.settings.radius}:${this.sample.focus.chunkZ - z + this.settings.radius}`;
       this.draw();
     });
     this.canvas.addEventListener('keydown', event => {
-      const delta = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+      const delta = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[event.key];
       if (!delta || !this.sample) return;
       event.preventDefault();
       const [x, z] = (this.key ?? `${this.sample.focus.chunkX}:${this.sample.focus.chunkZ}`).split(':').map(Number);
-      this.key = `${x + delta[0]}:${z + delta[1]}`;
+      const clamp = (value, center) => Math.max(center - this.settings.radius, Math.min(center + this.settings.radius, value));
+      this.key = `${clamp(x + delta[0], this.sample.focus.chunkX)}:${clamp(z + delta[1], this.sample.focus.chunkZ)}`;
       this.draw();
     });
     this.download.addEventListener('click', () => this.export());
@@ -92,6 +97,10 @@ export class SpatialPerformanceOverlay {
       this.context?.clearRect(0, 0, GRID_PIXELS, GRID_PIXELS);
       return;
     }
+    if (this.key) {
+      const [x, z] = this.key.split(':').map(Number);
+      if (Math.max(Math.abs(x - this.sample.focus.chunkX), Math.abs(z - this.sample.focus.chunkZ)) > this.settings.radius) this.key = null;
+    }
     const age = Math.max(0, now - this.sample.timestamp);
     const mode = this.sample.observeOnly ? 'Observe only' : this.sample.rendererAdmission ? 'Renderer admission' : this.sample.admission ? 'Regional admission' : 'Spatial budget';
     this.status.textContent = `${mode} · ${number(age)} ms old · ${number(this.sample.size)} m/chunk`;
@@ -104,10 +113,11 @@ export class SpatialPerformanceOverlay {
     const radius = this.settings.radius, side = radius * 2 + 1, step = GRID_PIXELS / side;
     const limit = spatialMetricLimit(this.metric.value, sample.settings);
     const rows = spatialWindow(sample, radius, this.layer.value, this.metric.value);
+    const key = this.key ?? `${sample.focus.chunkX}:${sample.focus.chunkZ}`;
     ctx.clearRect(0, 0, GRID_PIXELS, GRID_PIXELS);
     for (const { x, z, cell, value } of rows) {
       const px = (x - sample.focus.chunkX + radius) * step;
-      const py = (z - sample.focus.chunkZ + radius) * step;
+      const py = (sample.focus.chunkZ - z + radius) * step;
       ctx.fillStyle = value === null ? '#384553' : `hsl(${120 * (1 - Math.min(1, value / limit))} 55% 34%)`;
       ctx.fillRect(px, py, step - 1, step - 1);
       if (cell && (cell.protected || cell.reduced || cell.requested?.unknown || !cell.requested)) {
@@ -119,38 +129,45 @@ export class SpatialPerformanceOverlay {
         ctx.fillStyle = '#fff';
         ctx.fillRect(px + step / 3, py + step / 3, step / 3, step / 3);
       }
-      if (`${x}:${z}` === this.key) {
+      if (`${x}:${z}` === key) {
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 2;
         ctx.strokeRect(px + 2, py + 2, step - 4, step - 4);
       }
     }
-    const key = this.key ?? `${sample.focus.chunkX}:${sample.focus.chunkZ}`;
     const cell = spatialCell(sample, key, this.layer.value);
     const cost = value => value ? `${number(value.triangles)} tris / ${number(value.draws)} draws (unknown ${number(value.unknown)})` : 'Unavailable';
     this.details.textContent = cell ? [
       `Chunk ${key} · ${this.layer.value}`,
       `Requested: ${cost(cell.requested)}`,
       `Selected: ${cost(cell.selected)}`,
+      ...(cell.effective ? [`Effective requested: ${number(cell.effective.triangles)} tris / ${number(cell.effective.draws)} draws (weighted passes)`] : []),
+      ...(cell.requested ? [`Shadow / reflection tris: ${number(cell.requested.shadowTriangles)} / ${number(cell.requested.reflectionTriangles)}`] : []),
       `Weighted demand: ${number(cell.units)}`,
       `Factors: ${Object.entries(cell.factors).map(([kind, factor]) => `${kind} ${factor}`).join(', ') || 'none'}`,
       `Counts: ${Object.entries(cell.counts).map(([kind, count]) => `${kind} ${number(count)}`).join(', ') || 'none'}`,
       ...cell.reasons,
     ].join('\n') : `Chunk ${key}: no sampled demand (not necessarily empty).`;
     const stats = sample.allocationStats;
+    const gpu = this.gpuProfiler?.samples.at(-1);
     this.global.textContent = [
       'Whole renderer · not per chunk',
       `CPU fixed/deferred: ${PerfCounters.get('frameFixedCpuMs').toFixed(1)} / ${PerfCounters.get('frameDeferredCpuMs').toFixed(1)} ms`,
       `Queued upload: ${number(PerfCounters.get('framePublicationUploadBytes'))} B`,
       ...(stats ? [`Admission changes/deferred: ${number(stats.changes)} / ${number(stats.deferred)}`,
         `Upload / overlap / unknown deferred: ${number(stats.uploadDeferred)} / ${number(stats.overlapDeferred)} / ${number(stats.unknownDeferred)}`] : []),
+      ...(gpu ? [`Measured GPU render passes (QA sample): ${gpu.totalMs.toFixed(2)} ms`,
+        ...Object.entries(gpu.passes).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, ms]) => `${name}: ${ms.toFixed(2)} ms`)] : ['No measured GPU pass sample (requires GPU-enabled QA capture)']),
       'GPU per-region timing unavailable',
     ].join('\n');
   }
 
   export() {
     if (!this.sample) return;
-    const blob = new Blob([JSON.stringify(spatialExport(this.sample), null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ ...spatialExport(this.sample), wholeRenderer: {
+      fixedCpuMs: PerfCounters.get('frameFixedCpuMs'), deferredCpuMs: PerfCounters.get('frameDeferredCpuMs'),
+      queuedUploadBytes: PerfCounters.get('framePublicationUploadBytes'), gpuRenderSample: this.gpuProfiler?.samples.at(-1) ?? null,
+    } }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = this.panel.ownerDocument.createElement('a');
     link.href = url;
@@ -163,5 +180,6 @@ export class SpatialPerformanceOverlay {
     this.panel.remove();
     this.sample = null;
     this.surface = null;
+    this.gpuProfiler = null;
   }
 }
