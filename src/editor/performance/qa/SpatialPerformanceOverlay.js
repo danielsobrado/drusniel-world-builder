@@ -73,7 +73,10 @@ export class SpatialPerformanceOverlay {
       this.draw();
     });
     this.download.addEventListener('click', () => this.export());
-    this.panel.addEventListener('toggle', () => { this.nextRefresh = -Infinity; });
+    this.panel.addEventListener('toggle', () => {
+      this.nextRefresh = -Infinity;
+      this.surface?.spatialDiagnostics?.setDiagnosticPaused(!this.panel.open);
+    });
     for (const event of ['pointerdown', 'pointerup', 'click', 'wheel', 'keydown', 'keyup']) {
       this.panel.addEventListener(event, e => e.stopPropagation());
     }
@@ -103,7 +106,7 @@ export class SpatialPerformanceOverlay {
     }
     const age = Math.max(0, now - this.sample.timestamp);
     const mode = this.sample.observeOnly ? 'Observe only' : this.sample.rendererAdmission ? 'Renderer admission' : this.sample.admission ? 'Regional admission' : 'Spatial budget';
-    this.status.textContent = `${mode} · ${number(age)} ms old · ${number(this.sample.size)} m/chunk`;
+    this.status.textContent = `${mode} · ${number(age)} ms old · ${number(this.sample.size)} m/chunk · sample ${number(this.sample.timestamp - this.sample.startedAt)} ms`;
     this.draw();
   }
 
@@ -177,6 +180,7 @@ export class SpatialPerformanceOverlay {
   }
 
   dispose() {
+    this.surface?.spatialDiagnostics?.setDiagnosticPaused(true);
     this.panel.remove();
     this.sample = null;
     this.surface = null;
