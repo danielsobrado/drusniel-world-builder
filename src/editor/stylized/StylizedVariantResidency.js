@@ -112,8 +112,7 @@ export class StylizedVariantResidency {
    * which biomes are nearby, and a biome large enough to be worth streaming a
    * prop set for is far wider than the sample stride.
    */
-  scanNearbyTileIds(radius = this.scanRadiusChunks) {
-    const focus = this.terrainView.focusChunk;
+  scanNearbyTileIds(radius = this.scanRadiusChunks, focus = this.terrainView.focusChunk) {
     const worldStore = this.terrainView.worldStore;
     const chunkSize = worldStore.chunkSize;
     const stride = Math.max(1, Math.floor(chunkSize / this.samplesPerChunkAxis));
@@ -169,6 +168,9 @@ export class StylizedVariantResidency {
   rescan() {
     const tileIds = this.scanNearbyTileIds();
     const nearTileIds = this.manageRequests ? this.scanNearbyTileIds(1) : null;
+    if (this.manageRequests && this.predictedFocus) {
+      for (const tileId of this.scanNearbyTileIds(2, this.predictedFocus)) tileIds.add(tileId);
+    }
     for (const layer of this.layers) {
       const required = requiredVariantKeys({
         definitions: layer.definitions,
@@ -338,7 +340,8 @@ export class StylizedVariantResidency {
     // installed before this frame's scan can queue more work behind it.
     if (!this.manageRequests) this.pumpApplies(shouldYield);
     const focus = this.terrainView.focusChunk;
-    const scanKey = `${focus.chunkX}:${focus.chunkZ}:${this.biomeAssetPalette?.revision ?? 0}`;
+    const predicted = this.predictedFocus;
+    const scanKey = `${focus.chunkX}:${focus.chunkZ}:${predicted?.chunkX ?? ''}:${predicted?.chunkZ ?? ''}:${this.biomeAssetPalette?.revision ?? 0}`;
     if (scanKey !== this.lastScanKey || now - this.lastScanAt >= this.rescanIntervalMs) {
       this.lastScanKey = scanKey;
       this.lastScanAt = now;

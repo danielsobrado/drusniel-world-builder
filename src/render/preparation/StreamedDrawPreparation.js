@@ -4,6 +4,8 @@ import { BudgetedAttributeInitialization } from './BudgetedAttributeInitializati
 import { acquireReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
 import { DrawUploadEstimate } from './DrawUploadEstimate.js';
 import { StagedGeometryUploads } from './StagedGeometryUploads.js';
+import { DrawPreparationPriority } from './DrawPreparationPriority.js';
+import { StreamedTextureWarmup } from './StreamedTextureWarmup.js';
 
 const MAX_WAIT_FRAMES = 4;
 export const INITIAL_UPLOAD_BYTES_PER_FRAME = 768 * 1024;
@@ -23,6 +25,8 @@ export class StreamedDrawPreparation {
     this.initialUploadAttributes = new Map();
     this.attributeInitialization = new BudgetedAttributeInitialization(renderer);
     this.geometryUploads = new StagedGeometryUploads(renderer);
+    this.priority = new DrawPreparationPriority();
+    this.textureWarmup = new StreamedTextureWarmup(renderer);
     this.hidden = new Map();
     this.disposed = false;
     this.waitFrames = 0;
@@ -128,6 +132,7 @@ export class StreamedDrawPreparation {
       this.cancelDiagnostics(mesh);
       this.attributeInitialization.cancel(this.initialUploadAttributes.get(mesh) ?? []);
       this.geometryUploads.cancel(mesh);
+      this.textureWarmup.cancel(mesh);
       this.initialUploadAttributes.delete(mesh);
       this.initialUploadBytes.delete(mesh);
       this.stagedMaterials.delete(mesh);
@@ -154,7 +159,7 @@ export class StreamedDrawPreparation {
     const uploadStarted = performance.now();
     let budgetedBytes = 0;
     try {
-      for (const mesh of this.pending) {
+      for (const mesh of this.priority.ordered(this.pending, mesh => this.geometryUploads.jobs.has(mesh) || this.textureWarmup.jobs.has(mesh))) {
         if (shouldYield?.()) break;
         const isolated = this.isolated.has(mesh);
         if (isolated && targets.length) break;
@@ -164,6 +169,11 @@ export class StreamedDrawPreparation {
           this.cancel(mesh);
           continue;
         }
+        const texture = this.textureWarmup.advance(mesh, this.stagedMaterials.get(mesh) ?? mesh.material,
+          byteLimit - uploadBytes, shouldYield, budget, uploadBytes);
+        uploadBytes += texture.bytes;
+        budgetedBytes += texture.bytes;
+        if (!texture.ready) break;
         const attributes = this.initialUploadAttributes.get(mesh);
         const budgeted = attributes && this.attributeInitialization.supported;
         if (budgeted) {
@@ -271,6 +281,7 @@ export class StreamedDrawPreparation {
       this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
       this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
       this.geometryUploads.dispose();
+      this.textureWarmup.dispose();
       PerfCounters.inc('streamedDrawPreparationFailures');
       console.warn('Streamed draw preparation unavailable.', error);
     } finally {
@@ -297,5 +308,6 @@ export class StreamedDrawPreparation {
     this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
     this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
     this.geometryUploads.dispose();
+    this.textureWarmup.dispose();
   }
 }

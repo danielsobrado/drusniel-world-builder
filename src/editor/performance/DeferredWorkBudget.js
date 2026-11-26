@@ -92,6 +92,8 @@ export class DeferredWorkBudget {
     PerfCounters.set('frameDeferredPressureFloorMs', this.pressure.floorMs);
     PerfCounters.set('frameFixedCpuMs', this.slack.endFrame());
     PerfCounters.set('frameDeferredCpuMs', this.slack.deferredMs);
+    PerfCounters.set('frameMaxDeferredUnitMs', this.slack.maxDeferredUnitMs);
+    PerfCounters.set('framePeakFixedCpuMs', this.slack.peakFixedMs ?? 0);
     PerfCounters.set('frameDeferredBudgetMs', this.settings.enabled
       ? this.slack.strictAvailable(6)
       : 6);

@@ -2040,6 +2040,15 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         : { x: 0.3, z: 0.1 },
       viewModeController.mode === PLAYER_MODE_WALK,
     );
+    const drawOrigin = floatingOrigin.readState?.(frameOriginScratch) ?? floatingOrigin.getState();
+    drawPreparation.priority.update(canonicalFocus, drawOrigin, frameTimestamp);
+    if (stylizedSurface.variantResidency) {
+      const predicted = drawPreparation.priority.predicted;
+      const chunkMeters = terrainView.worldStore.chunkSize * terrainView.worldStore.tileSize;
+      stylizedSurface.variantResidency.predictedFocus = {
+        chunkX: Math.floor(predicted.x / chunkMeters), chunkZ: Math.floor(-predicted.z / chunkMeters),
+      };
+    }
     drawPreparation.flushBudgeted(viewModeController.camera, deferredWork);
     if (profiling) perfQa.mark('ambiencePreparation');
     drawPreparation.hidePending();

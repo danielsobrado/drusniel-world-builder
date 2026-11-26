@@ -22,6 +22,8 @@ export class FrameSlack {
     this.maximumMs = maximumMs;
     this.now = now;
     this.fixedMs = null;
+    this.peakFixedMs = null;
+    this.maxDeferredUnitMs = 0;
     this.frameStart = 0;
     this.deferredMs = 0;
     this.deferredStart = null;
@@ -33,6 +35,7 @@ export class FrameSlack {
     this.frameId = (this.frameId ?? 0) + 1;
     this.frameStart = this.now();
     this.deferredMs = 0;
+    this.maxDeferredUnitMs = 0;
     this.allowanceMs = null;
     this.deadline = null;
   }
@@ -70,7 +73,7 @@ export class FrameSlack {
 
   strictAvailable(maxMs = Infinity) {
     const inProgressMs = this.deferredStart === null ? 0 : this.now() - this.deferredStart;
-    const predictedFixedMs = this.fixedMs ?? 0;
+    const predictedFixedMs = Math.max(this.fixedMs ?? 0, this.peakFixedMs ?? 0);
     const predicted = this.targetMs - this.reserveMs - predictedFixedMs
       - this.deferredMs - inProgressMs;
     const elapsed = Math.max(0, this.now() - this.frameStart);
@@ -97,7 +100,7 @@ export class FrameSlack {
     const inProgressMs = this.deferredStart === null ? 0 : this.now() - this.deferredStart;
     if (this.allowanceMs === null) {
       const predicted = this.fixedMs === null ? maxMs
-        : this.targetMs - this.reserveMs - this.fixedMs;
+        : this.targetMs - this.reserveMs - Math.max(this.fixedMs, this.peakFixedMs ?? 0);
       this.allowanceMs = Math.min(this.maximumMs, Math.max(floorMs, predicted));
     }
     const remaining = this.allowanceMs - this.deferredMs - inProgressMs;
@@ -115,7 +118,9 @@ export class FrameSlack {
     try {
       return work();
     } finally {
-      this.deferredMs += this.now() - started;
+      const elapsed = this.now() - started;
+      this.deferredMs += elapsed;
+      this.maxDeferredUnitMs = Math.max(this.maxDeferredUnitMs, elapsed);
       this.deferredStart = null;
     }
   }
@@ -123,6 +128,7 @@ export class FrameSlack {
   endFrame() {
     const fixed = Math.max(0, this.now() - this.frameStart - this.deferredMs);
     this.fixedMs = this.fixedMs === null ? fixed : this.fixedMs + (fixed - this.fixedMs) * this.smoothing;
+    this.peakFixedMs = this.peakFixedMs === null ? fixed : Math.max(fixed, this.peakFixedMs * 0.9);
     return this.fixedMs;
   }
 }
