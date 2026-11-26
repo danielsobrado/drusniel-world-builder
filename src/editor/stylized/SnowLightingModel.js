@@ -2,9 +2,9 @@ import { PhysicalLightingModel } from 'three/webgpu';
 import { diffuseColor, float, max, mix, normalView, vec3 } from 'three/tsl';
 
 /** Snowflow (MIT) deep snow scattering tint: light reaching a snow hollow loses red first. */
-const CAVE_BLUE_TINT = vec3(0.55, 0.72, 1.0);
-/** Snow wrap diffuse width (Snowflow: 0.5–0.7 softens the terminator past Lambert). */
-const SNOW_WRAP = 0.56;
+const CAVE_BLUE_TINT = vec3(0.52, 0.72, 1.0);
+/** Snow wrap diffuse width (softer terminator than Lambert while preserving crisp drift modeling). */
+const SNOW_WRAP = 0.48;
 const INV_WRAP_DENOM = 1 / ((1 + SNOW_WRAP) * (1 + SNOW_WRAP));
 const INV_PI = 1 / Math.PI;
 
@@ -62,8 +62,8 @@ export class SnowLightingModel extends PhysicalLightingModel {
       outgoingLight.addAssign(this.snowBounce);
     }
     if (this.cavityOcclusion) {
-      const ao = this.cavityOcclusion.clamp(0.45, 1.0);
-      const caveTint = mix(vec3(1, 1, 1), CAVE_BLUE_TINT, ao.oneMinus().mul(0.82));
+      const ao = this.cavityOcclusion.clamp(0.42, 1.0);
+      const caveTint = mix(vec3(1, 1, 1), CAVE_BLUE_TINT, ao.oneMinus().mul(0.88));
       outgoingLight.mulAssign(caveTint.mul(ao));
     }
   }

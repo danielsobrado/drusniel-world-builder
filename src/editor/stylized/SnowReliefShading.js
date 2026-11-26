@@ -40,7 +40,7 @@ export function createSnowReliefNodes({ local, chunkCenter, snow, pathMask, worl
       return base.sub(relief.x.div(0.06).clamp(-1, 1).mul(0.06).mul(snow));
     },
     normal(base) {
-      const fine = relief.yz.mul(settings.fineNormal);
+      const fine = relief.yz.mul(settings.fineNormal * 1.45);
       const slope = cameraViewMatrix.mul(vec4(fine.x.add(drift.slope.x).negate(), 0,
         fine.y.add(drift.slope.y).negate(), 0)).xyz;
       const lean = sun ? cameraViewMatrix.mul(vec4(sun.xz.x, 0, sun.xz.y, 0)).xyz

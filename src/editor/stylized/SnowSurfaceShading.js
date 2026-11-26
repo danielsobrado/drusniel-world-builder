@@ -33,22 +33,23 @@ import { resolveSnowSurfaceConfig } from './SnowSurfaceConfig.js';
 /**
  * Upgraded Snowflow-inspired snow optical response (MIT, Maksymilian Dendura):
  *
- *  - World-locked dual-octave crystalline glints (0.052 m & 0.185 m) with subtle
- *    prismatic RGB dispersion and relaxed noon legibility (never crawling across
- *    TAA frames and never glowing in cast shadow because SnowLightingModel scales
- *    `sunResponse` by `lightColor`).
+ *  - World-locked 3-tier crystalline glints (0.048 m fine, 0.155 m mid, 0.34 m
+ *    distance shimmer) with subtle prismatic ice-crystal RGB dispersion, legible
+ *    under both low sun and midday sun (never crawling across TAA frames and
+ *    never glowing in cast shadow because SnowLightingModel scales `sunResponse`
+ *    by `lightColor`).
  *  - Thickness-inverted back-scatter SSS (thin drift lips & crests glow cool-white
- *    widely; deep pack transmits tight deep blue).
- *  - Powder velvet grazing rim (`(1 - N·V)^2.4`) giving snow ridges a soft fuzzy
+ *    widely; deep pack transmits tight glacial blue).
+ *  - Powder velvet grazing rim (`(1 - N·V)^2.3`) giving snow ridges a soft fuzzy
  *    micro-powder halo instead of matte clay.
- *  - Snow-to-snow upward bounce (`bounceUp = clamp(-N.y * 0.5 + 0.5)`) keeping
- *    shaded troughs luminous cool blue-white.
+ *  - Snow-to-snow upward bounce keeping shaded troughs luminous glacier blue-white.
  */
 
-const FINE_CELL_METERS = 0.052;
-const COARSE_CELL_METERS = 0.185;
-const FACET_SHARE = 0.44;
-const GLINT_FADE = [0.55, 2.2];
+const FINE_CELL_METERS = 0.048;
+const COARSE_CELL_METERS = 0.155;
+const FAR_CELL_METERS = 0.34;
+const FACET_SHARE = 0.52;
+const GLINT_FADE = [0.6, 2.8];
 
 function cellHash(originMeters, cell, salt) {
   return latticeHashNode(
@@ -64,18 +65,18 @@ function glintOctave({ localMeters, originMeters, cellMeters, salt, normal, half
   const local = fract(point);
   const jitter = vec2(cellHash(originMeters, cell, salt), cellHash(originMeters, cell, salt + 1));
   const centre = jitter.mul(0.72).add(0.14);
-  const distance = length(local.sub(centre)).div(0.19);
+  const distance = length(local.sub(centre)).div(0.24);
   const disc = clamp(float(1).sub(distance.mul(distance)), 0, 1);
   const angle = cellHash(originMeters, cell, salt + 2).mul(Math.PI * 2);
-  const tilt = cellHash(originMeters, cell, salt + 3).mul(0.32).add(0.08);
+  const tilt = cellHash(originMeters, cell, salt + 3).mul(0.42).add(0.06);
   const up = select(normal.y.abs().greaterThan(0.95), vec3(1, 0, 0), vec3(0, 1, 0));
   const tangent = normalize(cross(up, normal));
   const bitangent = cross(normal, tangent);
   const facet = normalize(normal.add(tangent.mul(angle.cos()).add(bitangent.mul(angle.sin())).mul(tilt)));
   const response = disc.mul(clamp(dot(facet, halfVector), 0, 1).pow(sharpness));
   const prism = cellHash(originMeters, cell, salt + 5);
-  // Subtle prismatic ice-crystal dispersion (cool cyan-white to faint warm gold spark).
-  const tint = mix(vec3(0.84, 0.96, 1.12), vec3(1.08, 1.0, 0.9), prism);
+  // Subtle prismatic ice-crystal dispersion (cool ice-cyan diamond spark to faint warm gold spark).
+  const tint = mix(vec3(0.82, 0.96, 1.15), vec3(1.10, 1.02, 0.92), prism);
   const holds = cellHash(originMeters, cell, salt + 4).lessThan(FACET_SHARE);
   return select(holds, tint.mul(response), vec3(0));
 }
@@ -90,6 +91,7 @@ export function createSnowSurfaceNodes({
   baseNormal = null,
   pathMask = float(0),
   crestMask = float(0),
+  sparkleMask = float(0.75),
   settings = resolveSnowSurfaceConfig(stylizedConfig?.snowSurface),
 }) {
   const sky = stylizedConfig?.sky;
@@ -109,61 +111,69 @@ export function createSnowSurfaceNodes({
   const footprint = length(fwidth(localMeters));
   const compacted = pathMask.clamp(0, 1);
   const ndv = clamp(dot(normal, view), 0, 1);
-  // Relaxed grazing curve so sunlit slopes visibly sparkle even under high midday sun.
-  const graze = float(1).sub(ndv).pow(2.0).mul(0.82).add(0.18);
+  // Broad enough grazing curve so sunlit snow visibly sparkles both near the player's boots and across mid-field slopes.
+  const graze = float(1).sub(ndv).pow(1.6).mul(0.62).add(0.38);
   const facingSun = clamp(dot(normal, sun), 0, 1);
-  const lightGate = smoothstep(0.02, 0.25, facingSun)
-    .mul(smoothstep(0.75, 1.0, facingSun).mul(0.32).oneMinus());
+  const lightGate = smoothstep(0.02, 0.22, facingSun);
+  const crystalDensity = sparkleMask.smoothstep(0.2, 0.85).mul(0.55).add(0.45);
 
   const glints = Fn(() => {
     const result = vec3(0).toVar();
     If(snow.greaterThan(0.02).and(normal.y.greaterThanEqual(-1)).and(footprint.greaterThanEqual(0)), () => {
       const fine = glintOctave({
-        localMeters, originMeters, cellMeters: FINE_CELL_METERS, salt: 11, normal, halfVector, sharpness: 420,
+        localMeters, originMeters, cellMeters: FINE_CELL_METERS, salt: 11, normal, halfVector, sharpness: 115,
       }).mul(float(1).sub(smoothstep(FINE_CELL_METERS * GLINT_FADE[0], FINE_CELL_METERS * GLINT_FADE[1], footprint)));
       const coarse = glintOctave({
-        localMeters, originMeters, cellMeters: COARSE_CELL_METERS, salt: 53, normal, halfVector, sharpness: 920,
+        localMeters, originMeters, cellMeters: COARSE_CELL_METERS, salt: 53, normal, halfVector, sharpness: 240,
       }).mul(float(1).sub(smoothstep(COARSE_CELL_METERS * GLINT_FADE[0], COARSE_CELL_METERS * GLINT_FADE[1], footprint)))
-        .mul(1.35);
-      result.assign(fine.add(coarse).mul(graze).mul(lightGate).mul(snow).mul(compacted.mul(0.8).oneMinus()));
+        .mul(1.25);
+      const farShimmer = glintOctave({
+        localMeters, originMeters, cellMeters: FAR_CELL_METERS, salt: 97, normal, halfVector, sharpness: 185,
+      }).mul(smoothstep(0.04, 0.14, footprint))
+        .mul(float(1).sub(smoothstep(FAR_CELL_METERS * 0.8, FAR_CELL_METERS * 2.8, footprint)))
+        .mul(0.48);
+      result.assign(
+        fine.add(coarse).add(farShimmer)
+          .mul(graze).mul(lightGate).mul(crystalDensity).mul(snow).mul(compacted.mul(0.75).oneMinus()),
+      );
     });
     return result;
   })();
 
-  const shade = float(1).sub(smoothstep(0.05, 0.62, max(dot(normal, sun), 0)));
+  const shade = float(1).sub(smoothstep(0.04, 0.64, max(dot(normal, sun), 0)));
   const backscatter = snow.mul(shade).mul(snowLightUniforms.shade);
 
   // Thickness-inverted Snowflow SSS: thin drift crests & lips transmit wide and bright;
-  // deep flats transmit tight and bluer (red absorbed over longer path).
-  const thickness = mix(float(1), float(0.28), max(compacted.mul(0.65), crestMask.clamp(0, 1))).toVar();
+  // deep flats transmit tight and glacial blue (red absorbed over longer path).
+  const thickness = mix(float(1), float(0.24), max(compacted.mul(0.65), crestMask.clamp(0, 1))).toVar();
   const transmitted = normalize(sun.add(normal.mul(0.28)));
   const lobe = dot(view, transmitted.negate()).clamp(0, 1)
-    .pow(mix(float(3), float(9), thickness))
-    .mul(mix(float(1), float(0.28), thickness));
-  const transmissionTint = mix(vec3(0.94, 0.965, 1.0), vec3(0.55, 0.72, 1.0), thickness);
-  const subsurface = transmissionTint.mul(lobe).mul(settings.subsurfaceStrength * 1.45).mul(snow);
+    .pow(mix(float(2.8), float(8.5), thickness))
+    .mul(mix(float(1.1), float(0.32), thickness));
+  const transmissionTint = mix(vec3(0.95, 0.975, 1.0), vec3(0.52, 0.72, 1.0), thickness);
+  const subsurface = transmissionTint.mul(lobe).mul(settings.subsurfaceStrength * 1.65).mul(snow);
 
-  // Powder velvet grazing rim: softens snow silhouettes into fuzzy backlit powder.
-  const velvetRim = float(1).sub(ndv).pow(2.4)
-    .mul(smoothstep(0.05, 0.65, facingSun.add(0.25)))
+  // Powder velvet grazing rim: softens snow silhouettes into luminous fuzzy backlit powder.
+  const velvetRim = float(1).sub(ndv).pow(2.3)
+    .mul(smoothstep(0.04, 0.62, facingSun.add(0.25)))
     .mul(compacted.mul(0.7).oneMinus())
     .mul(snow);
-  const velvet = mix(vec3(0.76, 0.88, 1.0), vec3(1.0, 0.98, 0.95), smoothstep(0.15, 0.7, dot(view.negate(), sun)))
-    .mul(velvetRim.mul(0.26));
+  const velvet = mix(vec3(0.74, 0.87, 1.0), vec3(1.0, 0.985, 0.96), smoothstep(0.15, 0.7, dot(view.negate(), sun)))
+    .mul(velvetRim.mul(0.30));
 
-  // Snow-to-snow upward bounce (Snowflow): shaded troughs receive cool blue sky bounce.
+  // Snow-to-snow upward bounce (Snowflow): shaded troughs receive luminous cool sky bounce.
   const bounceUp = clamp(normal.y.negate().mul(0.5).add(0.5), 0, 1);
   const snowBounce = snowLightUniforms.shadeTint
     .mul(skyLightUniforms.reflectionTint)
     .mul(skyLightUniforms.brightness)
-    .mul(bounceUp.mul(0.055).mul(snow));
+    .mul(bounceUp.mul(0.068).mul(snow));
 
   return {
     apply(color) {
       const albedo = mix(color, color.mul(snowLightUniforms.brightness), snow);
       return mix(albedo, albedo.mul(snowLightUniforms.shadeTint), backscatter);
     },
-    sunResponse: glints.mul(2.8).add(subsurface).add(velvet),
+    sunResponse: glints.mul(2.4).add(subsurface).add(velvet),
     snowBounce,
   };
 }

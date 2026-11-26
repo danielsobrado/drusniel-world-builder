@@ -44,8 +44,12 @@ await sharp(grainPixels, { raw: { width: SIZE, height: SIZE, channels: 4 } })
   .toFile('public/assets/textures/snow/snow-grain-rnm.png');
 console.log('wrote public/assets/textures/snow/snow-grain-rnm.png');
 
-// 2. Snow drift & puffiness pack (CC0 noise library: directional wind sastrugi + soft pillow mounds).
-const sastrugi = blendChannels(await grey('super-perlin/super-perlin-05'), await grey('gabor/gabor-03'), 0.22);
+// 2. Snow drift & puffiness pack (CC0 noise library: crisp directional wind sastrugi + soft pillow mounds).
+const sastrugi = blendChannels(
+  blendChannels(await grey('super-perlin/super-perlin-05'), await grey('gabor/gabor-05'), 0.42),
+  await grey('streak/streak-03'),
+  0.16,
+);
 const pillow = await grey('perlin/perlin-05');
 const crystal = await grey('grainy/grainy-05');
 await sharp(packRgb(sastrugi, pillow, crystal), { raw: { width: SIZE, height: SIZE, channels: 3 } })

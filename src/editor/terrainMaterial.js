@@ -7,6 +7,7 @@ import * as THREE from 'three/webgpu';
 import {
   abs,
   cameraPosition,
+  cameraWorldMatrix,
   clamp,
   cos,
   distance,
@@ -26,6 +27,7 @@ import {
   uv,
   vec2,
   vec3,
+  vec4,
   uniformArray,
 } from 'three/tsl';
 import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from './stylized/worldNoiseLayout.js';
@@ -427,12 +429,15 @@ export function createTerrainMaterial({
         .mul(bakedSurface.worldNoiseMultiplier ?? vec3(1));
       bakedSurface.color = mix(bakedSurface.color, blades, volumeMask.mul(volume.x));
     }
-    // A desert's dried crust lies in patches with rippled sand between them: as a
-    // half-blend under everything, the cracks ran beneath every ripple.
+    // A desert's dried crust lies in deflated pans with wind-rippled sand between them:
+    // keep crust feathered softly so wind ripples transition naturally into clay pans.
     const crackedFloor = meadowGround?.floor
       ? float(meadowGround.floor.layers.y.round().equal(GROUND_LAYERS.cracked)) : float(0);
     const floorBlend = meadowGround?.floor
-      ? mix(meadowGround.floor.blend, meadowGround.floor.blend.smoothstep(0.45, 0.75), crackedFloor) : float(0);
+      ? mix(meadowGround.floor.blend, meadowGround.floor.blend.smoothstep(0.42, 0.88), crackedFloor) : float(0);
+    const snowSun = sunDirection ? normalize(frameUniform(sunDirection)) : null;
+    let desertSandSunResponse = vec3(0);
+    let desertLooseSand = float(0);
     if (aridFeatures && transitionPatterns && bakedSurface.normal) {
       // The ecotone nudge carries the water tile up to 2.8 m onto a dry bank, and
       // the ripples stopped on that lobe in a hard, dotted curve: there the
@@ -442,13 +447,29 @@ export function createTerrainMaterial({
       const ecotoneTileId = tileSample.a.mul(255).round();
       const aridTileId = select(ecotoneTileId.equal(stylizedConfig.water?.tileId ?? 0),
         slotTexel('tileTexture', tileTexture, terrainUv, width).a.mul(255).round(), ecotoneTileId);
+      // Smoothly filter sand & mineral tile membership so desert edges feather organically instead of stepping in 2 m squares.
+      const aridConfig = stylizedConfig.biomeLooks?.arid ?? { sand: [1], mineral: [2] };
+      const makeTileShare = (ids) => {
+        if (!ids?.length) return float(0);
+        const table = new Array(256).fill(0);
+        for (const id of ids) if (id >= 0 && id < 256) table[id] = 1;
+        const arr = uniformArray(table, 'float');
+        return slotBilinearLoad('tileTexture', tileTexture, terrainUv, (value) =>
+          arr.element(value.a.mul(255).round().toInt()));
+      };
       const arid = createAridSubstrateNodes({ tileId: aridTileId,
         bare: oneMinus(grassCoverage).mul(oneMinus(bakedSurface.snow ?? float(0)))
           .mul(oneMinus(pathMask)).mul(oneMinus(smoothstep(0, 0.5, surfaceMask.b))),
-        patterns: transitionPatterns, localXZ, cameraDistance, arid: stylizedConfig.biomeLooks?.arid,
+        patterns: transitionPatterns, localXZ, cameraDistance, arid: aridConfig,
         dunes: stylizedConfig.biomeLooks?.surface?.dunes,
-        crust: floorBlend.mul(crackedFloor) });
+        crust: floorBlend.mul(crackedFloor),
+        sandShare: makeTileShare(aridConfig.sand),
+        mineralShare: makeTileShare(aridConfig.mineral),
+        terrainUv, chunkWorldSize, chunkCenter, material,
+        sun: snowSun, baseNormal: bakedSurface.normal });
       Object.assign(bakedSurface, arid.apply(bakedSurface.color, bakedSurface.roughness, bakedSurface.normal));
+      desertSandSunResponse = arid.sunResponse;
+      desertLooseSand = arid.sandWeight;
     }
     if (bakedSurface.rock && bakedSurface.normal) {
       // Snow country's faces are snow-plastered (biome-looks rock tint): their
@@ -492,9 +513,11 @@ export function createTerrainMaterial({
     const paintedSurface = pathPaint
       ? { ...bakedSurface, ...pathPaint.apply(bakedSurface.color, bakedRoughness) }
       : { ...bakedSurface, roughness: bakedRoughness };
-    // The floor scan is soil structure: it read as bare rock under snow and as moss on stone.
+    // The floor scan is soil/pebble structure: keep it off snow, rock, and loose windblown erg sand
+    // (while still letting deflated cracked clay pans and worn paths show through naturally).
     if (pathPaint && bakedSurface.snow) {
-      paintedSurface.color = mix(paintedSurface.color, bakedSurface.color, max(bakedSurface.snow, bakedSurface.rock));
+      const pureSandKeep = desertLooseSand.mul(oneMinus(crackedFloor.mul(floorBlend))).mul(oneMinus(pathMask)).mul(0.82);
+      paintedSurface.color = mix(paintedSurface.color, bakedSurface.color, max(max(bakedSurface.snow, bakedSurface.rock), pureSandKeep));
     }
     const coastPatterns = waterFeatures && coastPatternsTemplate && slotPatternOrigins('coastPatterns', coastPatternsTemplate);
     // The interpolated mesh height keeps narrow wash fronts smooth between
@@ -516,8 +539,12 @@ export function createTerrainMaterial({
       oceanMask,
       organic: waterContext?.organic,
       cold: waterContext?.cold,
+      terrainUv, chunkWorldSize, chunkCenter, material,
+      sun: snowSun, baseNormal: bakedSurface.normal,
     });
     const beachSurface = sand ? sand.apply(paintedSurface.color, paintedSurface.roughness) : paintedSurface;
+    if (sand?.normal && bakedSurface.normal) bakedSurface.normal = sand.normal(bakedSurface.normal);
+    const coastSandSunResponse = sand?.sunResponse ?? vec3(0);
     if (waterContext) {
       // Snow lying at the waterline stays snow: a damp brown ring on it read as mud.
       const wet = waterContext.wet.mul(oneMinus(grassCoverage).max(.15)).mul(oneMinus(bakedSurface.snow ?? float(0)));
@@ -600,7 +627,6 @@ export function createTerrainMaterial({
       config: stylizedConfig.snowWake,
     });
     const snowSettings = resolveSnowSurfaceConfig(stylizedConfig.snowSurface);
-    const snowSun = sunDirection ? normalize(frameUniform(sunDirection)) : null;
     const snowPressed = max(pathMask, footprints.pressed);
     const gpuDeform = bakedSurface.snow ? createGpuSnowDeformNodes({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow,
@@ -618,6 +644,7 @@ export function createTerrainMaterial({
       terrainUv, chunkWorldSize, chunkCenter, snow: bakedSurface.snow, stylizedConfig, sunDirection,
       baseNormal: snowNormal, pathMask: snowPressed,
       crestMask: max(snowDetail?.crest ?? float(0), gpuDeform?.crest ?? float(0)),
+      sparkleMask: snowDetail?.sparkleMask ?? float(0.75),
       settings: snowSettings,
     }) : null;
     const drift = createTerrainDriftNodes({worldXZ,grassCoverage,snow:bakedSurface.snow,
@@ -644,10 +671,12 @@ export function createTerrainMaterial({
     material.roughnessNode = filteredRoughness;
     if (snowSurface) {
       // Glints and transmitted light belong to the powder, not to the bare ice beside it.
+      // Sand quartz glints & sunlit grazing sheen share the same sun-shadowed specular path.
       const powder = glacierIce ? glacierIce.share.oneMinus() : float(1);
-      const sunResponse = glacierIce
+      const sandSunResponse = desertSandSunResponse.add(coastSandSunResponse).mul(oneMinus(bakedSurface.snow));
+      const sunResponse = (glacierIce
         ? snowSurface.sunResponse.mul(powder).add(glacierIce.sunGlaze)
-        : snowSurface.sunResponse.mul(powder);
+        : snowSurface.sunResponse.mul(powder)).add(sandSunResponse);
       const combinedCavity = snowDetail?.cavity
         ? (gpuDeform ? snowDetail.cavity.mul(gpuDeform.cavity) : snowDetail.cavity)
         : (gpuDeform?.cavity ?? null);
@@ -665,7 +694,10 @@ export function createTerrainMaterial({
     if (bakedSurface.normal) material.normalNode = footprints.relief(bakedSurface.normal);
     if (snowDetail) {
       material.roughnessNode = snowDetail.roughness(filteredRoughness);
-      if (snowNormal) material.normalNode = snowNormal;
+      if (snowNormal) {
+        material.normalNode = snowNormal;
+        material.normalNode = footprints.relief(material.normalNode);
+      }
     }
     if (gpuDeform) {
       material.roughnessNode = gpuDeform.applyRoughness(material.roughnessNode);
@@ -675,15 +707,20 @@ export function createTerrainMaterial({
       if (material.normalNode) material.normalNode = glacierIce.normal(material.normalNode);
     }
     if (puddles && material.normalNode) material.normalNode = puddles.normal(material.normalNode);
-    // Rime on the up-facing faces, keyed on the same baked snow: the deposition the
-    // terrain would otherwise wash out. Needs a surface normal, so it too compiles
-    // to nothing where the terrain has no normal to read.
-    const frost = surfaceEffects?.frost?.enabled && bakedSurface.normal && bakedSurface.snow
+    // Rime on the up-facing faces along cold snow margins: convert view-space normal to world space
+    // and fade out on deep snow so full snowfields retain their crisp drift relief, blue cavity AO, and footprints.
+    const frostWorldNormal = bakedSurface.normal
+      ? normalize(cameraWorldMatrix.mul(vec4(bakedSurface.normal, 0)).xyz)
+      : null;
+    const frostCold = bakedSurface.snow
+      ? (glacierIce ? bakedSurface.snow.mul(glacierIce.share.oneMinus()) : bakedSurface.snow)
+        .mul(oneMinus(smoothstep(0.32, 0.82, bakedSurface.snow)))
+      : null;
+    const frost = surfaceEffects?.frost?.enabled && frostWorldNormal && frostCold
       ? createFrostShading({
-        normal: bakedSurface.normal,
+        normal: frostWorldNormal,
         worldXZ,
-        // Rime is powder's: on bare glacier ice the per-texel snow weight drew it in 2 m squares.
-        cold: glacierIce ? bakedSurface.snow.mul(glacierIce.share.oneMinus()) : bakedSurface.snow,
+        cold: frostCold,
         settings: surfaceEffects.frost,
       })
       : null;
