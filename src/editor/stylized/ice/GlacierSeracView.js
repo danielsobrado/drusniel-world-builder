@@ -30,7 +30,7 @@ function cellHash(cx, cz, salt) {
  * meshes are not even instantiated until a glacier/ice cell enters residency.
  */
 export class GlacierSeracView {
-  constructor({ scene, terrainView, glacierByTile = [], seaLevel = 0, sunDirection = null, pathClearance = null, geologyLod = false }) {
+  constructor({ scene, terrainView, glacierByTile = [], seaLevel = 0, sunDirection = null, pathClearance = null, geologyLod = false, geologyAdmission = null }) {
     this.terrainView = terrainView;
     this.floatingOrigin = terrainView.floatingOrigin;
     this.glacierByTile = glacierByTile;
@@ -42,7 +42,7 @@ export class GlacierSeracView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
-    this.lodBatches = new GeologyLodBatches({ enabled: geologyLod, kinds: GLACIER_SERAC_KINDS, cellMeters: SERAC_CELL_METERS });
+    this.lodBatches = new GeologyLodBatches({ enabled: geologyLod, kinds: GLACIER_SERAC_KINDS, cellMeters: SERAC_CELL_METERS, admission: geologyAdmission });
     this.publicationPending = false;
     this.residency = new CellResidency({
       cellMeters: SERAC_CELL_METERS,
@@ -145,6 +145,7 @@ export class GlacierSeracView {
     if (!admitInstancePublication(publicationBudget, this.lodBatches.count, CAPACITY, 17)) return false;
     this.anchor.follow(this.floatingOrigin.getState());
     if (seracs.length) this.ensureMeshes();
+    this.lodBatches.plan(seracs, this.meshes, CAPACITY);
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), seed: new InstanceDirtySpan(mesh.geometry.attributes.instanceSeed) }));
     for (const mesh of this.meshes) mesh.count = 0;
     const kindCounts = new Uint32Array(GLACIER_SERAC_KINDS);
