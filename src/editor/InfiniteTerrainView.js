@@ -408,6 +408,7 @@ export class InfiniteTerrainView {
       getRevision: () => `${worldStore.baseTerrainRevision}:${worldStore.revision}`,
       config: skyConfig?.valleyFog,
       quality: skyConfig?.valleyFog?.quality,
+      fragmentBudget: stylizedConfig.enhancements?.environmentalFragmentAdmission ? stylizedConfig.enhancements.environmentalFragmentBudget : null,
     });
     this.slots = [];
 
@@ -527,9 +528,9 @@ export class InfiniteTerrainView {
    * colours and the region weight that fades the mist out where there are no
    * gorges. A no-op without the config, so worlds that do not want it pay nothing.
    */
-  updateValleyFog({ focus, origin, timeSeconds, weight, sunDirection, sunColor, fogColor, budget } = {}) {
+  updateValleyFog({ focus, origin, timeSeconds, weight, sunDirection, sunColor, fogColor, budget, pressured = false } = {}) {
     if (!focus || !origin) return;
-    this.valleyFog?.update(focus, origin, { timeSeconds, weight, sunDirection, sunColor, fogColor, budget });
+    this.valleyFog?.update(focus, origin, { timeSeconds, weight, sunDirection, sunColor, fogColor, budget, pressured });
   }
 
   /**
