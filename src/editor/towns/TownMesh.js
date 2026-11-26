@@ -119,10 +119,14 @@ export class TownMesh {
     if (this.decorationLod === lod && !decorationPointsChanged(this.decorationPoints, local, settings.refreshMeters)) return;
     const result = yield* planTownDecorations(this.decorationModules, local, lod, lodSettings, settings, this.decorationPressured);
     if (!isCurrent()) return;
+    // A partly completed selection must be refreshed even if the viewer returns to the old point.
+    this.decorationLod = null;
     for (const plan of result.plans) {
       if (!(yield* plan.instances.decorationJob(plan.tiers, budget, isCurrent))) return;
+      plan.instances.decorationBaselineTiers = plan.baselineTiers;
       yield;
     }
+    if (!isCurrent()) return;
     this.decorationLod = lod;
     this.decorationPoints = local;
     this.decorationPressured = result.pressured;
