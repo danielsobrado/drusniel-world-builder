@@ -207,6 +207,12 @@ const APRON_RINGS = Object.freeze([[-APRON.tuck, 0, 1], [0.2, 0.15, 1], [APRON.r
 /** Walls and towers wear a wider strip: patrols, carts and rain-off keep their foot bare. */
 const DEFENCE_KINDS = new Set(['wall', 'tower']);
 const DEFENCE_APRON_SPREAD = 1.7;
+/**
+ * How far an apron's rim swells and draws in, as a share of its reach, over
+ * noise a few metres across (WSC PR 7): trodden ground spreads where feet and
+ * rain-off go, so the rim is not the footprint grown by a ruled margin.
+ */
+const APRON_WOBBLE = Object.freeze({ share: 0.8, scale: 3.3 });
 
 /** The perimeter of a footprint grown by `offset`, `perSide` points to a side. */
 function footprintRing(building, offset, perSide) {
@@ -239,8 +245,16 @@ function addApron(buffer, building, heightAt) {
   const perSide = Math.max(2, Math.ceil(Math.max(building.width, building.depth) / STEP));
   const spread = DEFENCE_KINDS.has(building.kind) ? DEFENCE_APRON_SPREAD : 1;
   let previous = null;
+  const wall = footprintRing(building, 0, perSide);
   for (const [offset, edge, tone] of APRON_RINGS) {
-    const row = footprintRing(building, offset > 0 ? offset * spread : offset, perSide).map(([x, z]) => buffer.vertex(x, z, edge, heightAt, tone));
+    const reach = offset > 0 ? offset * spread : offset;
+    const row = footprintRing(building, reach, perSide).map(([x, z], index) => {
+      if (offset <= 0) return buffer.vertex(x, z, edge, heightAt, tone);
+      // Every ring of one side swells with the same noise, read at the wall, so rings never cross.
+      const [wx, wz] = wall[index];
+      const swell = 1 + (drift(wx, wz, APRON_WOBBLE.scale) - 0.5) * APRON_WOBBLE.share;
+      return buffer.vertex(wx + (x - wx) * swell, wz + (z - wz) * swell, edge, heightAt, tone);
+    });
     if (previous) {
       for (let index = 0; index < row.length; index += 1) {
         const next = (index + 1) % row.length;

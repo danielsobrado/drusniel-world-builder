@@ -7,6 +7,10 @@ import { mossCoat } from '../../editor/stylized/surfaceCoatings/MossCoat.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from './townWetness.js';
 import { filterSpecularRoughness } from './specularAntialiasing.js';
 import { buildingShadeEmission } from '../../editor/stylized/forest/foliageLight.js';
+import { NOISE, planarNoise } from '../../editor/locations/materials/locationNoise.js';
+import { TOWN_GROUND, groundTownFoundation } from './townGroundContact.js';
+
+export { TOWN_GROUND };
 
 /**
  * One palette for a whole town — and for every workshop building, so a house
@@ -19,7 +23,6 @@ import { buildingShadeEmission } from '../../editor/stylized/forest/foliageLight
  * limewash, ochre or rose render, its timber tone (SettlementProfile,
  * SettlementDressing) — so no two peoples' towns read alike.
  */
-export const TOWN_GROUND = Object.freeze([0.47, 0.41, 0.33]);
 
 /** A multiplier per material family, in linear colour. */
 const FAMILY_GRADE = Object.freeze({
@@ -112,17 +115,28 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
   let albedo = painted.mul(vec3(...(rubble ? FAMILY_GRADE.stone : tone)));
   const hued = rubble ? KIT_HUE.rubble : slot === 'mortar' ? (plastered ? KIT_HUE.render : null) : KIT_HUE[slot];
   if (hued) albedo = kitHued(albedo, hued);
+  const place = positionGeometry.add(vec3(spread, 0, spread.mul(0.61)));
   const weathered = weatherTownLayers(albedo, {
-    place: positionGeometry.add(vec3(spread, 0, spread.mul(0.61))),
+    place,
     up: normalWorld.y,
     height: positionGeometry.y,
     family,
   });
   // Moss under the wet film: rain darkens and glosses it with the stone it grows on.
-  const baseRoughness = material.roughnessNode ?? materialRoughness;
+  let baseRoughness = material.roughnessNode ?? materialRoughness;
   const baseNormal = material.normalNode ?? materialNormal;
+  let footColor = weathered.color;
+  if (slot !== 'roof') {
+    // The wall's foot in the soil of the terrain it stands on (WSC PR 7), under moss and rain.
+    const footing = groundTownFoundation({ color: footColor, roughness: baseRoughness }, {
+      height: positionGeometry.y,
+      noise: planarNoise(NOISE.patch, place.xz.mul(0.9)).sub(0.5),
+    });
+    footColor = footing.color;
+    baseRoughness = footing.roughness;
+  }
   const mossLayer = mossCoat(weathered.moss);
-  const mossed = blendCoat({ color: weathered.color, roughness: baseRoughness, normal: baseNormal }, {
+  const mossed = blendCoat({ color: footColor, roughness: baseRoughness, normal: baseNormal }, {
     color: mossLayer.color,
     roughness: mossLayer.roughness ?? baseRoughness,
     normal: mossLayer.normal(baseNormal),

@@ -5,7 +5,7 @@ import { treadPaving } from '../../../../render/materials/townWeathering.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from '../../../../render/materials/townWetness.js';
 import { buildingShadeEmission } from '../../../stylized/forest/foliageLight.js';
 import { sampleWetnessField, wetnessFieldEnabled } from '../../../weather/wetness/wetnessField.js';
-import { TOWN_GROUND } from '../view/SettlementGrade.js';
+import { TOWN_GROUND, townEarthNode } from '../../../../render/materials/townGroundContact.js';
 
 /** Paving wears a hint of the town's own stone over the photographed surface. */
 const STONE_TINT = Object.freeze({
@@ -49,7 +49,7 @@ export function createShadeMaterial() {
  */
 export function createPavingMaterial(layer, set, stoneStyle) {
   const material = new THREE.MeshStandardNodeMaterial({
-    // Earth is the town's one ground tone — the same the walls are washed with at their feet.
+    // Earth's tone outside the WSC window: the town's ground, as the walls' feet are there.
     color: layer === 'earth'
       ? new THREE.Color().setRGB(TOWN_GROUND[0] * EARTH_LIFT, TOWN_GROUND[1] * EARTH_LIFT, TOWN_GROUND[2] * EARTH_LIFT)
       : (STONE_TINT[stoneStyle] ?? '#ffffff'),
@@ -84,7 +84,9 @@ export function createPavingMaterial(layer, set, stoneStyle) {
   const family = wetnessFieldEnabled()
     ? { ...TOWN_WET_FAMILIES.stone, wetness: sampleWetnessField(positionWorld.xz).film }
     : TOWN_WET_FAMILIES.stone;
-  const wet = wetTownSurface(untiledColour(set.color, set.arm, material.color), texture(set.arm, uv()).g, float(1), family);
+  // Earth is the soil of the terrain it is laid on (WSC PR 7), TOWN_GROUND beyond the WSC window.
+  const tint = layer === 'earth' ? townEarthNode('pavingEarth').mul(EARTH_LIFT) : color(material.color);
+  const wet = wetTownSurface(untiledColour(set.color, set.arm, tint), texture(set.arm, uv()).g, float(1), family);
   material.colorNode = wet.color;
   material.roughnessNode = wet.roughness;
   material.emissiveNode = buildingShadeEmission(material.colorNode, { fill: 1.35, bounce: 0.8 });
@@ -119,6 +121,6 @@ function untiledColour(map, arm, tint) {
   const blend = smoothstep(-0.28, 0.28, planarNoise(NOISE.patch, laid.mul(0.31).add(0.5)));
   const drift = planarNoise(NOISE.broad, laid.mul(0.11).add(3.7)).mul(0.16).add(1);
   const joints = mix(float(JOINT_SHADE), float(1), smoothstep(0.25, 0.85, texture(arm, laid).r));
-  const surface = mix(texture(map, laid).rgb, texture(map, turned).rgb, blend).mul(color(tint)).mul(drift).mul(joints);
+  const surface = mix(texture(map, laid).rgb, texture(map, turned).rgb, blend).mul(tint).mul(drift).mul(joints);
   return treadPaving(surface, laid);
 }
