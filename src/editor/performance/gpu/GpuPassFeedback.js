@@ -43,7 +43,7 @@ export class GpuPassFeedback {
 
   read(scope, now, bypass = false) {
     if (this.scope !== scope) this.reset(scope);
-    if (this.profiler.active) this.profiler.scope = scope;
+    this.profiler.markScope(scope);
     const sample = this.profiler.latestSample;
     const age = sample ? now - sample.timestamp : Infinity;
     const valid = !bypass && this.profiler.enabled && !this.profiler.error && sample?.scope === scope
