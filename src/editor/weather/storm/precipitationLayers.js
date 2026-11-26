@@ -78,3 +78,16 @@ export function precipitationDensity(layers, channel, slots) {
 export function layerAllocation(layers) {
   return layers.map((layer) => Math.ceil(Math.max(...layer.counts)));
 }
+
+/** Scale all populations together, preserving authored intensity and opacity. */
+export function scalePrecipitationDensity(demand, slots, factor) {
+  if (factor >= 1) return demand;
+  const share = Math.max(0, Math.min(1, factor));
+  const live = demand.live.map(count => count * share);
+  let instanceCount = 0;
+  for (let i = 0; i < live.length; i++) {
+    if (live[i] > 0) instanceCount = Math.max(instanceCount, slots[i][Math.ceil(live[i]) - 1] + 1);
+  }
+  return { live, density: live.map((count, i) => slots[i].length ? count / slots[i].length : 0),
+    instanceCount, fade: demand.fade };
+}
