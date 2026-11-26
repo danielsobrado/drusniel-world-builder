@@ -38,7 +38,7 @@ export class GeologyLodBatches {
   plan(items, meshes, capacity) {
     if (!this.admission) return;
     this.admitted = null;
-    const result = planGeologyAdmission(items, meshes, capacity, this, this.admission);
+    const result = planGeologyAdmission(items, meshes, capacity, this, this.admission, this.stats?.pressured);
     this.admitted = result.indices;
     this.stats = result.stats;
   }
@@ -48,7 +48,8 @@ export class GeologyLodBatches {
     const distance = Math.hypot(item.x - this.focus.x, item.z - this.focus.z);
     const previousFar = this.tiers.get(item) === true;
     const multiplier = previousFar ? NEAR_SCALE_MULTIPLIER : FAR_SCALE_MULTIPLIER;
-    const far = distance > Math.max(MIN_NEAR_DISTANCE, item.scale * Math.max(1, item.stretch ?? 1) * multiplier);
+    const protectedDistance = this.admission ? this.admission.protectMeters + this.sectorMeters / 32 : MIN_NEAR_DISTANCE;
+    const far = distance > Math.max(protectedDistance, item.scale * Math.max(1, item.stretch ?? 1) * multiplier);
     this.tiers.set(item, far);
     if (!far) return item.kind;
     return this.farIndex(item);
