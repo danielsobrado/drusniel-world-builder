@@ -225,7 +225,7 @@ function widenDirtyRange(range, index) {
   if (index > range.max) range.max = index;
 }
 
-function writeDitherInstance(attribute, index, fade, seed, colorVariation, range) {
+function writeDitherInstance(attribute, index, fade, seed, colorVariation, range, stage = null) {
   const array = attribute.array;
   const offset = index * 3;
   // Compare the float32 values the GPU buffer holds, as for instance matrices.
@@ -237,27 +237,33 @@ function writeDitherInstance(attribute, index, fade, seed, colorVariation, range
     && array[offset + 1] === seed
     && array[offset + 2] === colorVariation
   ) return;
-  array[offset] = fade;
-  array[offset + 1] = seed;
-  array[offset + 2] = colorVariation;
+  if (stage) stage.record(attribute, index, [fade, seed, colorVariation]);
+  else {
+    array[offset] = fade;
+    array[offset + 1] = seed;
+    array[offset + 2] = colorVariation;
+  }
   widenDirtyRange(range, index);
 }
 
-function writeVector4Instance(attribute, index, value, range) {
+function writeVector4Instance(attribute, index, value, range, stage = null) {
   const array = attribute.array;
   const offset = index * 4;
   let changed = false;
   for (let channel = 0; channel < 4; channel += 1) {
     const component = Math.fround(value[channel]);
     if (array[offset + channel] !== component) {
-      array[offset + channel] = component;
+      if (!stage) array[offset + channel] = component;
       changed = true;
     }
   }
-  if (changed) widenDirtyRange(range, index);
+  if (changed) {
+    if (stage) stage.record(attribute, index, value);
+    widenDirtyRange(range, index);
+  }
 }
 
-function writeVector3Instance(attribute, index, value, range) {
+function writeVector3Instance(attribute, index, value, range, stage = null) {
   const array = attribute.array;
   const offset = index * 3;
   const x = Math.fround(value[0]);
@@ -268,9 +274,12 @@ function writeVector3Instance(attribute, index, value, range) {
     && array[offset + 1] === y
     && array[offset + 2] === z
   ) return;
-  array[offset] = x;
-  array[offset + 1] = y;
-  array[offset + 2] = z;
+  if (stage) stage.record(attribute, index, value);
+  else {
+    array[offset] = x;
+    array[offset + 1] = y;
+    array[offset + 2] = z;
+  }
   widenDirtyRange(range, index);
 }
 
@@ -280,7 +289,7 @@ function writeVector3Instance(attribute, index, value, range) {
  * the float64 matrix nearly every element differed, so every rebuild re-uploaded
  * every instance it kept.
  */
-function writeMatrixInstance(attribute, index, matrix, range, offsetX, offsetZ) {
+function writeMatrixInstance(attribute, index, matrix, range, offsetX, offsetZ, stage = null) {
   const array = attribute.array;
   const offset = index * 16;
   const elements = matrix.elements;
@@ -289,9 +298,12 @@ function writeMatrixInstance(attribute, index, matrix, range, offsetX, offsetZ) 
       ? elements[12] - offsetX
       : element === 14 ? elements[14] - offsetZ : elements[element];
     if (array[offset + element] !== Math.fround(value)) {
-      array.set(elements, offset);
-      array[offset + 12] = elements[12] - offsetX;
-      array[offset + 14] = elements[14] - offsetZ;
+      if (stage) stage.record(attribute, index, elements, offsetX, offsetZ);
+      else {
+        array.set(elements, offset);
+        array[offset + 12] = elements[12] - offsetX;
+        array[offset + 14] = elements[14] - offsetZ;
+      }
       widenDirtyRange(range, index);
       return;
     }
@@ -317,21 +329,28 @@ const BIOME_LOOK_RANGE = { min: Infinity, max: -1 };
  *   prototype; null entries compare the full publication, empty entries only set counts
  */
 export function writeInstances(renderers, instancesByPrototype, anchor = null, rowsByPrototype = null) {
+  return completeIterator(iterateInstanceWrites(renderers, instancesByPrototype, anchor, rowsByPrototype));
+}
+
+/** Stage only changed rows when a publication plan is provided. */
+export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor = null, rowsByPrototype = null, stage = null) {
   const offsetX = anchor?.x ?? 0;
   const offsetZ = anchor?.z ?? 0;
   let total = 0;
-  renderers.forEach((parts, prototypeIndex) => {
+  for (const [prototypeIndex, parts] of renderers.entries()) {
     const instances = instancesByPrototype[prototypeIndex] ?? [];
     for (const mesh of parts) {
       const capacity = mesh.instanceMatrix.count;
       const writableCount = Math.min(instances.length, capacity);
       const dropped = instances.length - writableCount;
-      if (dropped > 0) PerfCounters.inc('stylizedInstancesDroppedByCapacity', dropped);
       const previousCount = mesh.count;
-      mesh.count = writableCount;
-      // Three updates object/material bindings before rejecting a zero-count
-      // draw. Empty prototype pools should not reach that work every frame.
-      mesh.visible = writableCount > 0;
+      const publishCount = () => {
+        if (dropped > 0) PerfCounters.inc('stylizedInstancesDroppedByCapacity', dropped);
+        mesh.count = writableCount;
+        // Empty pools should not reach object/material binding work every frame.
+        mesh.visible = writableCount > 0;
+      };
+      if (!stage) publishCount();
       const dither = mesh.geometry.getAttribute('instanceDither');
       const tints = mesh.geometry.getAttribute('instanceLeafTint');
       const morphologies = mesh.geometry.getAttribute('instanceMorphology');
@@ -339,19 +358,20 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
       const surfaces = mesh.geometry.getAttribute('instanceSurface');
       const plantRoots = mesh.geometry.getAttribute('instancePlantRoot');
       const biomeLooks = mesh.geometry.getAttribute('instanceBiomeLook');
-      const biomeLookRange = resetDirtyRange(BIOME_LOOK_RANGE);
-      const matrixRange = resetDirtyRange(MATRIX_RANGE);
-      const ditherRange = resetDirtyRange(DITHER_RANGE);
-      const tintRange = resetDirtyRange(TINT_RANGE);
-      const morphologyRange = resetDirtyRange(MORPHOLOGY_RANGE);
-      const surfaceRange = resetDirtyRange(SURFACE_RANGE);
-      const plantRange = resetDirtyRange(PLANT_ROOT_RANGE);
+      const biomeLookRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(BIOME_LOOK_RANGE);
+      const matrixRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(MATRIX_RANGE);
+      const ditherRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(DITHER_RANGE);
+      const tintRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(TINT_RANGE);
+      const morphologyRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(MORPHOLOGY_RANGE);
+      const surfaceRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(SURFACE_RANGE);
+      const plantRange = stage ? { min: Infinity, max: -1 } : resetDirtyRange(PLANT_ROOT_RANGE);
       const selectedRows = rowsByPrototype?.[prototypeIndex];
       // A partial write never reads the unselected rows, so keep the largest scale seen.
       let plantScaleSquared = selectedRows && plantRoots ? mesh.userData.plantScaleSquared ?? 1 : 1;
       const visits = selectedRows?.length ?? writableCount;
       PerfCounters.inc('stylizedInstanceRowsCompared', visits);
       for (let visit = 0; visit < visits; visit += 1) {
+        if (stage && visit > 0 && visit % 64 === 0) yield;
         const index = selectedRows ? selectedRows[visit] : visit;
         if (index >= writableCount) continue;
         const instance = instances[index];
@@ -362,10 +382,10 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
             e[4] ** 2 + e[5] ** 2 + e[6] ** 2,
             e[8] ** 2 + e[9] ** 2 + e[10] ** 2);
           PLANT_ROOT[0] = e[12] - offsetX; PLANT_ROOT[1] = e[13]; PLANT_ROOT[2] = e[14] - offsetZ;
-          writeVector3Instance(plantRoots, index, PLANT_ROOT, plantRange);
+          writeVector3Instance(plantRoots, index, PLANT_ROOT, plantRange, stage);
         }
-        if (surfaces) writeVector3Instance(surfaces, index, instance.surfaceData ?? DRY_SURFACE, surfaceRange);
-        if (biomeLooks) writeVector4Instance(biomeLooks, index, instance.biomeLook ?? NEUTRAL_BIOME_LOOK, biomeLookRange);
+        if (surfaces) writeVector3Instance(surfaces, index, instance.surfaceData ?? DRY_SURFACE, surfaceRange, stage);
+        if (biomeLooks) writeVector4Instance(biomeLooks, index, instance.biomeLook ?? NEUTRAL_BIOME_LOOK, biomeLookRange, stage);
         if (roots) {
           const fit = instance.rootFit;
           const e = instance.matrix.elements;
@@ -374,9 +394,9 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
             ? [(fit.slopeX * e[0] + fit.slopeZ * e[2]) / up,
               (fit.slopeX * e[8] + fit.slopeZ * e[10]) / up, fit.conformHeight]
             : [0, 0, 0];
-          writeVector3Instance(roots, index, bend, morphologyRange);
+          writeVector3Instance(roots, index, bend, morphologyRange, stage);
         }
-        writeMatrixInstance(mesh.instanceMatrix, index, instance.matrix, matrixRange, offsetX, offsetZ);
+        writeMatrixInstance(mesh.instanceMatrix, index, instance.matrix, matrixRange, offsetX, offsetZ, stage);
         writeDitherInstance(
           dither,
           index,
@@ -384,6 +404,7 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
           instance.seed,
           instance.colorVariation ?? 1,
           ditherRange,
+          stage,
         );
         if (tints) {
           const tint = instance.leafTint ?? UNTINTED;
@@ -391,7 +412,7 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
           LEAF_TINT[1] = tint[1];
           LEAF_TINT[2] = tint[2];
           LEAF_TINT[3] = instance.leafSnow ?? 0;
-          writeVector4Instance(tints, index, LEAF_TINT, tintRange);
+          writeVector4Instance(tints, index, LEAF_TINT, tintRange, stage);
         }
         if (morphologies) {
           let morphology = instance.morphology ?? IDENTITY_MORPHOLOGY;
@@ -403,38 +424,43 @@ export function writeInstances(renderers, instancesByPrototype, anchor = null, r
             TRUNK_MORPHOLOGY[2] = morphology[2];
             morphology = TRUNK_MORPHOLOGY;
           }
-          writeVector3Instance(morphologies, index, morphology, morphologyRange);
+          writeVector3Instance(morphologies, index, morphology, morphologyRange, stage);
         }
       }
-      markAttributeSubrangeUpdated(mesh.instanceMatrix, matrixRange.min, matrixRange.max);
-      markAttributeSubrangeUpdated(dither, ditherRange.min, ditherRange.max);
-      if (tints) markAttributeSubrangeUpdated(tints, tintRange.min, tintRange.max);
-      if (roots) markAttributeSubrangeUpdated(roots, morphologyRange.min, morphologyRange.max);
-      if (surfaces) markAttributeSubrangeUpdated(surfaces, surfaceRange.min, surfaceRange.max);
-      if (biomeLooks) markAttributeSubrangeUpdated(biomeLooks, biomeLookRange.min, biomeLookRange.max);
-      if (plantRoots) markAttributeSubrangeUpdated(plantRoots, plantRange.min, plantRange.max);
-      if (morphologies) {
-        markAttributeSubrangeUpdated(
-          morphologies,
-          morphologyRange.min,
-          morphologyRange.max,
-        );
-      }
-      if (plantRoots) mesh.userData.plantScaleSquared = plantScaleSquared;
-      if (matrixRange.max >= 0 || writableCount !== previousCount) {
-        // Only a swaying reach is added after the fit, so only it forces a full refit.
-        // shortcut: the WSC conform morph (<= maxOffsetMeters) is not in the bounds; add it if culling ever clips bases.
-        const reach = plantRoots ? (mesh.material.userData.plantMotionReach ?? 0) : 0;
-        if (selectedRows && !(reach > 0)) extendInstanceBounds(mesh, selectedRows);
-        else mesh.computeBoundingSphere();
-        if (reach > 0) mesh.boundingSphere.radius += reach * Math.sqrt(plantScaleSquared);
-      }
+      const publishRange = (attribute, range) => {
+        if (stage) stage.span(attribute, range);
+        else markAttributeSubrangeUpdated(attribute, range.min, range.max);
+      };
+      publishRange(mesh.instanceMatrix, matrixRange);
+      publishRange(dither, ditherRange);
+      if (tints) publishRange(tints, tintRange);
+      if (roots) publishRange(roots, morphologyRange);
+      if (surfaces) publishRange(surfaces, surfaceRange);
+      if (biomeLooks) publishRange(biomeLooks, biomeLookRange);
+      if (plantRoots) publishRange(plantRoots, plantRange);
+      if (morphologies) publishRange(morphologies, morphologyRange);
+      const finalize = () => {
+        if (stage) publishCount();
+        if (plantRoots) mesh.userData.plantScaleSquared = plantScaleSquared;
+        if (matrixRange.max >= 0 || writableCount !== previousCount) {
+          // Only a swaying reach is added after the fit, so only it forces a full refit.
+          // shortcut: the WSC conform morph (<= maxOffsetMeters) is not in the bounds; add it if culling ever clips bases.
+          const reach = plantRoots ? (mesh.material.userData.plantMotionReach ?? 0) : 0;
+          if (selectedRows && !(reach > 0)) extendInstanceBounds(mesh, selectedRows);
+          else mesh.computeBoundingSphere();
+          if (reach > 0) mesh.boundingSphere.radius += reach * Math.sqrt(plantScaleSquared);
+        }
+      };
+      if (stage) {
+        stage.finalizers.push(finalize);
+        yield;
+      } else finalize();
     }
     total += Math.min(
       instances.length,
       parts[0]?.instanceMatrix.count ?? (lazyPools.has(renderers) ? 0 : instances.length),
     );
-  });
+  }
   return total;
 }
 
