@@ -9,11 +9,12 @@ export class ReflectionAdmission {
 
   reset() { this.wait = null; }
 
-  allow({ now, due, kind, invalid, partial, estimate, contended, gpuBusy }) {
+  allow({ now, due, kind, invalid, partial, estimate, contended, gpuBusy, turn = true }) {
     if (!due) { this.reset(); return false; }
     if (!this.wait || this.wait.kind !== kind || now < this.wait.since) this.wait = { kind, since: now };
     const age = now - this.wait.since;
     PerfCounters.set('reflectionAdmissionWaitMs', age);
+    if (!turn) return false;
     if (gpuBusy) {
       PerfCounters.inc('reflectionAdmissionGpuDeferred');
       return false;
