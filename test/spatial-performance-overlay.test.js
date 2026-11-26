@@ -114,6 +114,25 @@ test('existing spatial admission can publish a diagnostic snapshot without geome
   assert.equal(controller.diagnosticSample, null);
 });
 
+test('collapsing the observer cancels its work, while active admission cannot be paused by diagnostics', () => {
+  const observer = new RegionalSceneryBudget({ ...settings, spatialWorkItems: 1 }, { observeOnly: true });
+  const world = surface();
+  observer.update(world, 0);
+  assert.ok(observer.job);
+  observer.setDiagnosticPaused(true);
+  assert.equal(observer.job, null);
+  observer.update(world, 100);
+  assert.equal(observer.job, null);
+  observer.setDiagnosticPaused(false);
+  observer.update(world, 101);
+  assert.ok(observer.job);
+  const active = new RegionalSceneryBudget(settings, { captureDiagnostics: true });
+  active.setDiagnosticPaused(true);
+  active.update(world, 0);
+  assert.equal(active.factorForKey('2:0'), settings.spatialLodFactor);
+  assert.equal(active.diagnosticPaused, false);
+});
+
 test('overlay flag is independent and display limits are validated', () => {
   const config = resolveRenderEnhancements({}, '?spatialPerformanceOverlay=1');
   assert.equal(config.spatialPerformanceOverlay, true);
