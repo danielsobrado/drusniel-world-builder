@@ -529,7 +529,10 @@ export function buildChunkLodPlan({
         ? clampBandToRadii(selectLodBand(pixels, null, thresholds, thresholds.hysteresisRatio), lodDistance, radii)
         : undefined;
       let target = clampBandToRadii(selected, lodDistance, radii);
-      if (admissionFactors && factor < 1 && target === 'culled' && baselineBand !== 'culled') target = baselineBand;
+      if (admissionFactors && factor < 1 && target === 'culled') {
+        target = baselineBand !== 'culled' ? baselineBand
+          : clampBandToRadii(selectLodBand(pixels, previous, thresholds, thresholds.hysteresisRatio), lodDistance, radii);
+      }
       if (previous !== null && previous !== target) {
         onTransition?.({
           chunkX,
