@@ -232,26 +232,79 @@ function sampleWorldNoiseLayer(pixels, layer, u, v, out) {
 }
 
 /**
+ * Computes exact GPU `bilinearTexels` (`TerrainSlotBindings.js`) texel-centre
+ * indices and weights for normalized `(u, v)` in `[0, 1]` on a `res x res` map.
+ * Zero allocations: writes into caller-supplied scratch object.
+ */
+export function bilinearTexelCoords(u, v, res, out) {
+  const tx = clamp01(u) * res - 0.5;
+  const tz = clamp01(v) * res - 0.5;
+  const bx = Math.floor(tx);
+  const bz = Math.floor(tz);
+  const fx = tx - bx;
+  const fz = tz - bz;
+  const maxIdx = res - 1;
+  const x0 = bx < 0 ? 0 : (bx > maxIdx ? maxIdx : bx);
+  const x1 = bx + 1 < 0 ? 0 : (bx + 1 > maxIdx ? maxIdx : bx + 1);
+  const z0 = bz < 0 ? 0 : (bz > maxIdx ? maxIdx : bz);
+  const z1 = bz + 1 < 0 ? 0 : (bz + 1 > maxIdx ? maxIdx : bz + 1);
+  out.i00 = z0 * res + x0;
+  out.i10 = z0 * res + x1;
+  out.i01 = z1 * res + x0;
+  out.i11 = z1 * res + x1;
+  out.w00 = (1 - fx) * (1 - fz);
+  out.w10 = fx * (1 - fz);
+  out.w01 = (1 - fx) * fz;
+  out.w11 = fx * fz;
+  return out;
+}
+
+const BILINEAR_SCRATCH = { i00: 0, i10: 0, i01: 0, i11: 0, w00: 1, w10: 0, w01: 0, w11: 0 };
+
+/**
+ * Samples an RGBA8 texture (`size x size`, `LinearFilter`) at normalized `(u, v)`
+ * using exact texel-centre bilinear interpolation into `out` (`[r, g, b, a]` in `0..1`).
+ */
+export function sampleRgba8Bilinear(pixels, size, u, v, out) {
+  const c = bilinearTexelCoords(u, v, size, BILINEAR_SCRATCH);
+  const o00 = c.i00 * 4;
+  const o10 = c.i10 * 4;
+  const o01 = c.i01 * 4;
+  const o11 = c.i11 * 4;
+  const inv = 1 / 255;
+  out[0] = (pixels[o00] * c.w00 + pixels[o10] * c.w10 + pixels[o01] * c.w01 + pixels[o11] * c.w11) * inv;
+  out[1] = (pixels[o00 + 1] * c.w00 + pixels[o10 + 1] * c.w10 + pixels[o01 + 1] * c.w01 + pixels[o11 + 1] * c.w11) * inv;
+  out[2] = (pixels[o00 + 2] * c.w00 + pixels[o10 + 2] * c.w10 + pixels[o01 + 2] * c.w01 + pixels[o11 + 2] * c.w11) * inv;
+  out[3] = (pixels[o00 + 3] * c.w00 + pixels[o10 + 3] * c.w10 + pixels[o01 + 3] * c.w01 + pixels[o11 + 3] * c.w11) * inv;
+  return out;
+}
+
+/**
  * Samples baked material channels (`materialWeights`, `wetnessShoreline`,
- * `macroTint`) at normalized chunk coordinates `(u, v)` into a caller-supplied
- * scratch object (zero per-texel allocations).
+ * `macroTint`, `terrainShape`) at normalized chunk coordinates `(u, v)` using
+ * the exact GPU `bilinearLoad` texel-centre kernel (`TerrainSlotBindings.js`),
+ * writing into a caller-supplied scratch object with zero per-call allocations.
  */
 export function sampleMaterialBakeChannels(materialBake, u, v, out) {
   const channels = materialBake?.channels;
   const res = materialBake?.resolution ?? 0;
   if (!channels || res <= 0) return false;
 
-  const x = clamp(Math.floor(u * res), 0, res - 1);
-  const z = clamp(Math.floor(v * res), 0, res - 1);
-  const idx = z * res + x;
+  const c = bilinearTexelCoords(u, v, res, BILINEAR_SCRATCH);
+  const { i00, i10, i01, i11, w00, w10, w01, w11 } = c;
+  const inv255 = 1 / 255;
 
   const mw = channels.materialWeights;
   if (mw) {
-    const o = idx * 4;
-    const g = mw[o] / 255;
-    const d = mw[o + 1] / 255;
-    const r = mw[o + 2] / 255;
-    const s = mw[o + 3] / 255;
+    const o00 = i00 * 4;
+    const o10 = i10 * 4;
+    const o01 = i01 * 4;
+    const o11 = i11 * 4;
+    const g = (mw[o00] * w00 + mw[o10] * w10 + mw[o01] * w01 + mw[o11] * w11) * inv255;
+    const d = (mw[o00 + 1] * w00 + mw[o10 + 1] * w10 + mw[o01 + 1] * w01 + mw[o11 + 1] * w11) * inv255;
+    const r = (mw[o00 + 2] * w00 + mw[o10 + 2] * w10 + mw[o01 + 2] * w01 + mw[o11 + 2] * w11) * inv255;
+    const s = (mw[o00 + 3] * w00 + mw[o10 + 3] * w10 + mw[o01 + 3] * w01 + mw[o11 + 3] * w11) * inv255;
+    // Match `normalizedWeights(samples.materialWeights)` (`TerrainMaterialBakedNodes.js:54-60`).
     const sum = g + d + r + s;
     const inv = sum > 1e-4 ? 1 / sum : 0;
     out.grassWeight = sum > 1e-4 ? g * inv : 0;
@@ -267,8 +320,12 @@ export function sampleMaterialBakeChannels(materialBake, u, v, out) {
 
   const ws = channels.wetnessShoreline;
   if (ws) {
-    out.wetness = ws[idx * 2] / 255;
-    out.shoreline = ws[idx * 2 + 1] / 255;
+    const o00 = i00 * 2;
+    const o10 = i10 * 2;
+    const o01 = i01 * 2;
+    const o11 = i11 * 2;
+    out.wetness = (ws[o00] * w00 + ws[o10] * w10 + ws[o01] * w01 + ws[o11] * w11) * inv255;
+    out.shoreline = (ws[o00 + 1] * w00 + ws[o10 + 1] * w10 + ws[o01 + 1] * w01 + ws[o11 + 1] * w11) * inv255;
   } else {
     out.wetness = 0;
     out.shoreline = 0;
@@ -276,10 +333,16 @@ export function sampleMaterialBakeChannels(materialBake, u, v, out) {
 
   const mt = channels.macroTint;
   if (mt) {
-    const o = idx * 4;
-    out.macroR = clamp((mt[o] / 255) * 2, 0.65, 1.35);
-    out.macroG = clamp((mt[o + 1] / 255) * 2, 0.65, 1.35);
-    out.macroB = clamp((mt[o + 2] / 255) * 2, 0.65, 1.35);
+    const o00 = i00 * 4;
+    const o10 = i10 * 4;
+    const o01 = i01 * 4;
+    const o11 = i11 * 4;
+    const mr = (mt[o00] * w00 + mt[o10] * w10 + mt[o01] * w01 + mt[o11] * w11) * inv255;
+    const mg = (mt[o00 + 1] * w00 + mt[o10 + 1] * w10 + mt[o01 + 1] * w01 + mt[o11 + 1] * w11) * inv255;
+    const mb = (mt[o00 + 2] * w00 + mt[o10 + 2] * w10 + mt[o01 + 2] * w01 + mt[o11 + 2] * w11) * inv255;
+    out.macroR = clamp(mr * 2, 0.65, 1.35);
+    out.macroG = clamp(mg * 2, 0.65, 1.35);
+    out.macroB = clamp(mb * 2, 0.65, 1.35);
   } else {
     out.macroR = 1;
     out.macroG = 1;
@@ -289,8 +352,14 @@ export function sampleMaterialBakeChannels(materialBake, u, v, out) {
   const ts = channels.terrainShape;
   if (ts) {
     const fromHalf = THREE.DataUtils.fromHalfFloat;
-    out.slope = fromHalf(ts[idx * 2]);
-    out.curvature = fromHalf(ts[idx * 2 + 1]);
+    const o00 = i00 * 2;
+    const o10 = i10 * 2;
+    const o01 = i01 * 2;
+    const o11 = i11 * 2;
+    out.slope = fromHalf(ts[o00]) * w00 + fromHalf(ts[o10]) * w10
+      + fromHalf(ts[o01]) * w01 + fromHalf(ts[o11]) * w11;
+    out.curvature = fromHalf(ts[o00 + 1]) * w00 + fromHalf(ts[o10 + 1]) * w10
+      + fromHalf(ts[o01 + 1]) * w01 + fromHalf(ts[o11 + 1]) * w11;
   } else {
     out.slope = 0;
     out.curvature = 0;

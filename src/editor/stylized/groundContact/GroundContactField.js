@@ -5,6 +5,7 @@ import { resolvePathPaint } from '../path/terrainPathPaint.js';
 import { sampleHeight } from '../scatterMath.js';
 import { acquireWorldNoise } from '../worldNoise.js';
 import {
+  WSC_BORDER_FADE_M,
   WSC_DEFAULT_ROUGHNESS_BYTE,
   WSC_RESOLUTION,
   WSC_SPAN_M,
@@ -17,6 +18,7 @@ import {
 import {
   createTerrainSurfaceEvaluator,
   sampleMaterialBakeChannels,
+  sampleRgba8Bilinear,
   srgbByteToLinear,
 } from '../worldSurfaceContext/TerrainSurfaceEvaluator.js';
 
@@ -124,6 +126,7 @@ export class GroundContactField {
     this.lastSlotSignature = '';
     this.uploadDeferredAt = null;
     this.slotsByChunk = new Map();
+    this.publishedChunkRevisions = new Map();
     this.disposed = false;
   }
 
@@ -172,6 +175,7 @@ export class GroundContactField {
         PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
       }
       this.lastSlotSignature = '';
+      this.publishedChunkRevisions.clear();
       this.uploadDeferredAt = null;
       return false;
     }
@@ -180,8 +184,29 @@ export class GroundContactField {
       if (publicationBudget && !publicationBudget.canPublish(WSC_UPLOAD_BYTES)) {
         this.uploadDeferredAt ??= now;
         if (now - this.uploadDeferredAt < MAX_UPLOAD_DEFERRAL_MS) {
-          wscUniforms.active.value = 0;
-          return false;
+          // Retain the previously published WSC window if it still validly covers
+          // the focus chunk with unchanged revision (prevents contact popping on
+          // routine 16 m walking recenters); hide stale coverage otherwise.
+          const focusChunkKey = `${Math.floor(fx / chunkWorldSize)}:${Math.floor(-fz / chunkWorldSize)}`;
+          const focusSlot = this.slotsByChunk.get(focusChunkKey);
+          const focusInsidePrev = Number.isFinite(this.centerX)
+            && Math.abs(fx - this.centerX) < (half - WSC_BORDER_FADE_M)
+            && Math.abs(fz - this.centerZ) < (half - WSC_BORDER_FADE_M);
+          const prevCoversFocus = focusInsidePrev
+            && this.lastSlotSignature !== ''
+            && focusSlot
+            && this.publishedChunkRevisions.get(focusChunkKey) === focusSlot.pageRevision;
+          if (!prevCoversFocus) {
+            wscUniforms.active.value = 0;
+            return false;
+          }
+          const minX = this.centerX - half;
+          const minZ = this.centerZ - half;
+          wscUniforms.canonicalOrigin.value.set(minX, minZ);
+          wscUniforms.renderOrigin.value.set(minX - ox, minZ - oz);
+          wscUniforms.inverseSpan.value = 1 / this.span;
+          wscUniforms.active.value = 1;
+          return true;
         }
         PerfCounters.inc('wscUploadDeadlineOverrides');
       }
@@ -189,6 +214,10 @@ export class GroundContactField {
       this.centerZ = targetZ;
       this.rebuild(targetX, targetZ, chunkSize, tileSize, chunkWorldSize);
       this.lastSlotSignature = signature;
+      this.publishedChunkRevisions.clear();
+      for (const [k, slot] of this.slotsByChunk) {
+        this.publishedChunkRevisions.set(k, slot.pageRevision);
+      }
       PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
     }
     this.uploadDeferredAt = null;
@@ -260,6 +289,8 @@ export class GroundContactField {
       curvature: 0,
     };
     const surfaceOut = { r: 0, g: 0, b: 0, roughness: WSC_DEFAULT_ROUGHNESS_BYTE / 255 };
+    const ffScratch = [0, 0, 0, 0];
+    const maskScratch = [0, 0, 0, 0];
     const evalInput = {
       tileId: 0,
       tileR: 0,
@@ -341,37 +372,46 @@ export class GroundContactField {
           continue;
         }
 
-        // Central-difference terrain normal (uses neighbour slots seamlessly across chunk edges).
-        let hL = fastHeight(worldX - halfStep, worldZ, chunkX, chunkZ, slot);
-        let hR = fastHeight(worldX + halfStep, worldZ, chunkX, chunkZ, slot);
-        let hN = fastHeight(worldX, worldZ - halfStep, chunkX, chunkZ, slot);
-        let hS = fastHeight(worldX, worldZ + halfStep, chunkX, chunkZ, slot);
-        if (!Number.isFinite(hL)) hL = h;
-        if (!Number.isFinite(hR)) hR = h;
-        if (!Number.isFinite(hN)) hN = h;
-        if (!Number.isFinite(hS)) hS = h;
-        const gx = (hL - hR) / step;
-        const gz = (hN - hS) / step;
+        // Central-difference terrain normal across resident neighbours; falls back
+        // to exact one-sided derivative beside an unloaded slot instead of halving slope.
+        const hL = fastHeight(worldX - halfStep, worldZ, chunkX, chunkZ, slot);
+        const hR = fastHeight(worldX + halfStep, worldZ, chunkX, chunkZ, slot);
+        const hN = fastHeight(worldX, worldZ - halfStep, chunkX, chunkZ, slot);
+        const hS = fastHeight(worldX, worldZ + halfStep, chunkX, chunkZ, slot);
+        const hasL = Number.isFinite(hL);
+        const hasR = Number.isFinite(hR);
+        const gx = (hasL && hasR)
+          ? (hL - hR) / step
+          : (hasL ? (hL - h) / halfStep : (hasR ? (h - hR) / halfStep : 0));
+        const hasN = Number.isFinite(hN);
+        const hasS = Number.isFinite(hS);
+        const gz = (hasN && hasS)
+          ? (hN - hS) / step
+          : (hasN ? (hN - h) / halfStep : (hasS ? (h - hS) / halfStep : 0));
         const invLen = 1 / Math.hypot(gx, 1, gz);
 
+        const normU = localX / chunkSize;
+        const normV = localZ / chunkSize;
         let canopy = 0;
         let contact = 0;
         let litter = 0;
         if (slot.forestFloorPixels && slot.forestFloorSize > 0) {
-          const fSize = slot.forestFloorSize;
-          const fx = Math.max(0, Math.min(fSize - 1, Math.floor((localX / chunkSize) * fSize)));
-          const fz = Math.max(0, Math.min(fSize - 1, Math.floor((localZ / chunkSize) * fSize)));
-          const fIdx = (fz * fSize + fx) * 4;
-          canopy = slot.forestFloorPixels[fIdx] / 255;
-          contact = slot.forestFloorPixels[fIdx + 1] / 255;
-          litter = slot.forestFloorPixels[fIdx + 2] / 255;
+          sampleRgba8Bilinear(slot.forestFloorPixels, slot.forestFloorSize, normU, normV, ffScratch);
+          canopy = ffScratch[0];
+          contact = ffScratch[1];
+          litter = ffScratch[2];
         }
 
         const cellIdx = Math.floor(localZ) * chunkSize + Math.floor(localX);
         const tileId = slot.page.tiles ? slot.page.tiles[cellIdx] : 0;
         const maskPixels = slot.page.surfaceMaskPixels;
-        const pathByte = maskPixels ? (maskPixels[cellIdx * 4] ?? 0) : 0;
-        const vegByte = maskPixels ? (maskPixels[cellIdx * 4 + 1] ?? 0) : 0;
+        let pathMaskVal = 0;
+        let vegMaskVal = 0;
+        if (maskPixels) {
+          sampleRgba8Bilinear(maskPixels, chunkSize, normU, normV, maskScratch);
+          pathMaskVal = maskScratch[0];
+          vegMaskVal = maskScratch[1];
+        }
         const tilePixels = slot.page.tilePixels;
 
         let sr;
@@ -384,8 +424,8 @@ export class GroundContactField {
           const tileB = tilePixels ? srgbByteToLinear(tilePixels[cellIdx * 4 + 2]) : soilTable[(tileId & 255) * 3 + 2];
           const hasBake = sampleMaterialBakeChannels(
             slot.materialBake,
-            localX / chunkSize,
-            localZ / chunkSize,
+            normU,
+            normV,
             bakeScratch,
           );
           evalInput.tileId = tileId;
@@ -395,8 +435,8 @@ export class GroundContactField {
           evalInput.worldX = worldX;
           evalInput.worldZ = worldZ;
           evalInput.height = h;
-          evalInput.grassCoverage = vegByte / 255;
-          evalInput.pathMask = pathByte / 255;
+          evalInput.grassCoverage = vegMaskVal;
+          evalInput.pathMask = pathMaskVal;
           evalInput.canopy = canopy;
           evalInput.litter = litter;
           evalInput.bakeSample = hasBake ? bakeScratch : null;
@@ -427,7 +467,7 @@ export class GroundContactField {
         // Ecological vegetation coverage: mirrors forestFloor canopy suppression & path wear
         // so WSC `eco.a` and diagnostic `D11` reflect actual ecological blade density (PR 3).
         const coreDensity = this.forestGrassCoreDensity[tileId & 255];
-        const effectiveVeg = clamp01((vegByte / 255) * (1 - canopy * (1 - coreDensity)) * (1 - pathByte / 255));
+        const effectiveVeg = clamp01(vegMaskVal * (1 - canopy * (1 - coreDensity)) * (1 - pathMaskVal));
 
         ecoData[offset] = Math.round(clamp01(contact) * 255);
         ecoData[offset + 1] = Math.round(clamp01(canopy) * 255);
@@ -445,6 +485,7 @@ export class GroundContactField {
   dispose() {
     this.disposed = true;
     this.slotsByChunk.clear();
+    this.publishedChunkRevisions.clear();
     clearWorldSurfaceContext();
   }
 }

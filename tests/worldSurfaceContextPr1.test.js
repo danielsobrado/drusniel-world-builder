@@ -338,3 +338,96 @@ test('PR 1 negative large coordinates, recentering hysteresis, and floating-orig
   assert.ok(Math.abs(afterRecenter.vegetationCoverage - before.vegetationCoverage) < 0.01);
   field.dispose();
 });
+
+test('PR 1 unloaded neighbour slots preserve exact slope normal via one-sided derivatives', () => {
+  clearWorldSurfaceContext();
+  const chunkSize = 16;
+  const tileSize = 2; // 32 m chunk covering x in [0, 32), z in (-32, 0]
+  const slopeX = 0.3;
+  const slopeZ = -0.18;
+  const heightFn = (x, z) => 15 + slopeX * x + slopeZ * z;
+  const onlySlot = makeSlot({ chunkX: 0, chunkZ: 0, chunkSize, tileSize, heightFn });
+  const field = new WorldSurfaceContextField({
+    terrainView: { worldStore: { chunkSize, tileSize }, slots: [onlySlot] },
+    config: {},
+  });
+  try {
+    assert.equal(field.update({ x: 16, z: -16 }, { x: 0, z: 0 }), true);
+    const invLen = 1 / Math.hypot(-slopeX, 1, -slopeZ);
+    const expectedNx = -slopeX * invLen;
+    const expectedNy = invLen;
+    const expectedNz = -slopeZ * invLen;
+
+    // Sample interior plus all four unloaded-neighbour chunk edges and an exposed corner.
+    const probes = [
+      ['interior', 16, -16],
+      ['west-edge', 0.5, -16],
+      ['east-edge', 31.5, -16],
+      ['north-edge', 16, -0.5],
+      ['south-edge', 16, -31.5],
+      ['nw-corner', 0.5, -0.5],
+    ];
+    for (const [label, px, pz] of probes) {
+      const s = sampleWorldSurfaceContextCpu(px, pz);
+      assert.equal(s.texelValidity, 1, `${label} should be valid`);
+      assert.ok(
+        Math.abs(s.normal[0] - expectedNx) < 0.015,
+        `${label} nx=${s.normal[0].toFixed(4)} expected ${expectedNx.toFixed(4)}`,
+      );
+      assert.ok(
+        Math.abs(s.normal[1] - expectedNy) < 0.015,
+        `${label} ny=${s.normal[1].toFixed(4)} expected ${expectedNy.toFixed(4)}`,
+      );
+      assert.ok(
+        Math.abs(s.normal[2] - expectedNz) < 0.015,
+        `${label} nz=${s.normal[2].toFixed(4)} expected ${expectedNz.toFixed(4)}`,
+      );
+    }
+  } finally {
+    field.dispose();
+  }
+});
+
+test('PR 1 saturated publication budget retains valid WSC window on routine walking recenter without popping', () => {
+  clearWorldSurfaceContext();
+  const chunkSize = 64;
+  const tileSize = 2; // 128 m chunk covering x in [0, 128), z in (-128, 0]
+  const slot = makeSlot({ chunkX: 0, chunkZ: 0, chunkSize, tileSize, heightFn: () => 24, pageRevision: 7 });
+  const field = new WorldSurfaceContextField({
+    terrainView: { worldStore: { chunkSize, tileSize }, slots: [slot] },
+    config: {},
+  });
+  const origin = { x: 0, z: 0 };
+  const saturated = { canPublish: () => false };
+  try {
+    // Initial publish centred at (64, -64).
+    assert.equal(field.update({ x: 64, z: -64 }, origin), true);
+    assert.equal(wscUniforms.active.value, 1);
+    const version = wscGeoTexture.version;
+
+    // Walk +20 m (>16 m hysteresis) while still inside the valid interior of the previous
+    // window on the same resident chunk with unchanged pageRevision: retain active window!
+    assert.equal(field.update({ x: 84, z: -64 }, origin, saturated, 10), true);
+    assert.equal(wscUniforms.active.value, 1);
+    assert.equal(wscGeoTexture.version, version);
+    assert.ok(sampleWorldSurfaceContextCpu(84, -64).validity > 0.99);
+
+    assert.equal(field.update({ x: 86, z: -64 }, origin, saturated, 60), true);
+    assert.equal(wscUniforms.active.value, 1);
+    assert.equal(wscGeoTexture.version, version);
+
+    // Once MAX_UPLOAD_DEFERRAL_MS (100 ms) elapses, deadline override publishes recentered field.
+    assert.equal(field.update({ x: 88, z: -64 }, origin, saturated, 120), true);
+    assert.equal(wscGeoTexture.version, version + 1);
+    assert.equal(wscUniforms.active.value, 1);
+
+    // If focus chunk pageRevision changes under a saturated budget, stale coverage IS hidden!
+    const versionAfterPublish = wscGeoTexture.version;
+    slot.pageRevision = 8;
+    assert.equal(field.update({ x: 88, z: -64 }, origin, saturated, 130), false);
+    assert.equal(wscUniforms.active.value, 0);
+    assert.equal(wscGeoTexture.version, versionAfterPublish);
+  } finally {
+    field.dispose();
+  }
+});

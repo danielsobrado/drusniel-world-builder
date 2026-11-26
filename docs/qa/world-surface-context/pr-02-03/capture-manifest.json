@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "suite": "wsc-pr2-pr3-qa",
+  "generatedAt": "2026-11-26T02:20:10.595Z",
+  "git": {
+    "commit": "f87676a5b2b1e64bf2f700b511a2f056addf718f",
+    "branch": "main",
+    "dirty": true
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "rois": {
+    "lowerGround": {
+      "x0": 0.05,
+      "y0": 0.42,
+      "x1": 0.95,
+      "y1": 0.96
+    },
+    "lodPatch": {
+      "x0": 0.25,
+      "y0": 0.48,
+      "x1": 0.75,
+      "y1": 0.88
+    }
+  },
+  "lodDistancesMeters": [
+    0,
+    12,
+    32,
+    45,
+    58,
+    95
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "description": "",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "captures": [
+    {
+      "id": "B14-C02-overcast",
+      "world": "eldara",
+      "pose": {
+        "x": 2366321.4022676707,
+        "z": -2373888.4437549873,
+        "yaw": 0.6968797486042275,
+        "pitch": -0.34,
+        "mode": "fly",
+        "heightAboveGround": 0.8,
+        "fov": 62
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 0.35
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D12",
+        "D15",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 2366321.4022676707,
+          "z": -2373888.4437549873
+        },
+        "origin": {
+          "x": 2366208,
+          "z": -2373888
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B14-C01-overcast",
+      "world": "eldara",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 0.35
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D11",
+        "D18",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 30,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 2366324.1219881824,
+          "z": -2373880.9202504624
+        },
+        "origin": {
+          "x": 2366208,
+          "z": -2373888
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B14-C05-clear",
+      "world": "eldara",
+      "pose": {
+        "x": 2366305.4239096637,
+        "z": -2373932.644344072,
+        "yaw": 0.3968797486042276,
+        "pitch": -0.16,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D11",
+        "D12",
+        "D15",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 30,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 2366305.4239096637,
+          "z": -2373932.644344072
+        },
+        "origin": {
+          "x": 2366208,
+          "z": -2373888
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B01-C02-clear",
+      "world": "procedural",
+      "pose": {
+        "label": "Ground-level grass contact",
+        "x": -1869,
+        "z": -4003,
+        "yaw": 2.488,
+        "pitch": -0.34,
+        "mode": "fly",
+        "heightAboveGround": 0.75,
+        "fov": 62
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D12",
+        "D15",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": -1869,
+          "z": -4003
+        },
+        "origin": {
+          "x": 0,
+          "z": 0
+        },
+        "biomeId": 4
+      }
+    },
+    {
+      "id": "B02-C02-clear",
+      "world": "procedural",
+      "pose": {
+        "label": "Trunk and grass close-up",
+        "x": 8693,
+        "z": 15741,
+        "yaw": 0,
+        "pitch": -0.28,
+        "mode": "fly",
+        "heightAboveGround": 0.9,
+        "fov": 62
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 31,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 8693,
+          "z": 15741
+        },
+        "origin": {
+          "x": 8832,
+          "z": 15232
+        },
+        "biomeId": 6
+      }
+    },
+    {
+      "id": "B03-C02-clear",
+      "world": "procedural",
+      "pose": {
+        "label": "Sparse blades & trunk base",
+        "x": 10119,
+        "z": 5719,
+        "yaw": 0.785,
+        "pitch": -0.3,
+        "mode": "fly",
+        "heightAboveGround": 0.85,
+        "fov": 62
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D12",
+        "D15",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 10119,
+          "z": 5719
+        },
+        "origin": {
+          "x": 10112,
+          "z": 5632
+        },
+        "biomeId": 8
+      }
+    },
+    {
+      "id": "B04-C02-clear",
+      "world": "procedural",
+      "pose": {
+        "label": "Understory & grass contact",
+        "x": 12991,
+        "z": -1419,
+        "yaw": -0.785,
+        "pitch": -0.28,
+        "mode": "fly",
+        "heightAboveGround": 0.85,
+        "fov": 62
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "modes": [
+        "D00",
+        "D01",
+        "D24"
+      ],
+      "settle": {
+        "ready": true,
+        "loaded": 49,
+        "baked": 25,
+        "forestFloor": 49,
+        "wscValid": true,
+        "canonical": {
+          "x": 12991,
+          "z": -1419
+        },
+        "origin": {
+          "x": 12928,
+          "z": -1408
+        },
+        "biomeId": 7
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "file": "pr2-parity-sheet.jpg",
+      "sha256": "a7d6a986ede1e237a1fce48750c571698460a74e58f726022f307d15a4ea4e6c",
+      "bytes": 235068
+    },
+    {
+      "file": "pr3-stillmeadow-hero.jpg",
+      "sha256": "6f0fcbc04735a2d4b614e48df17f6c85c1ff4bbb4d206dff0981601b3c5c0ad4",
+      "bytes": 64339
+    },
+    {
+      "file": "pr3-biomes-sheet.jpg",
+      "sha256": "2deae2ce50f27a09284e3fbaa36fabb2bf2dd30c452b8e02df14955761c67887",
+      "bytes": 191138
+    },
+    {
+      "file": "pr3-lod-sweep-sheet.jpg",
+      "sha256": "1542d68a1962638202f3e23237ee084e7bd00109e2f9f8d00769c4c351058b88",
+      "bytes": 303553
+    },
+    {
+      "file": "metrics.json",
+      "sha256": "189249c96b74506fc8241df8140b027cdebbd6bdc645d393628102f006845b2b",
+      "bytes": 31261
+    }
+  ],
+  "browserErrors": {
+    "eldara": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    },
+    "B01": {
+      "count": 1,
+      "errors": [
+        {
+          "kind": "pageerror",
+          "message": "Error: Visual camera cut superseded.\n    at WorldVisualQa.cut (http://127.0.0.1:5189/src/editor/performance/qa/WorldVisualQa.js:77:32)"
+        }
+      ],
+      "truncated": false
+    },
+    "B02": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    },
+    "B03": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    },
+    "B04": {
+      "count": 0,
+      "errors": [],
+      "truncated": false
+    }
+  }
+}

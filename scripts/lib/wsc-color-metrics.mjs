@@ -304,6 +304,158 @@ export function buildFamilyMask({
   return mask;
 }
 
+/**
+ * Builds a strict valid-interior mask from a D15 WSC validity image.
+ * D15 renders valid interior texels as green (`[0.12, 0.82, 0.24]` linear -> ~[98, 234, 134] sRGB,
+ * or ACES/filmic variants where G strongly dominates both R and B), excluding red outside-window,
+ * yellow border-fade (`R ≈ G`), and magenta missing-slot (`R ≈ B >> G`) regions.
+ */
+export function buildD15ValidInteriorMask({ data, width, height, channels = 3 }) {
+  const mask = new Uint8Array(width * height);
+  for (let i = 0; i < width * height; i += 1) {
+    const o = i * channels;
+    const r = data[o];
+    const g = data[o + 1];
+    const b = data[o + 2];
+    if (g >= 80 && g > r + 35 && g > b + 20) {
+      mask[i] = 1;
+    }
+  }
+  return mask;
+}
+
+/** Logical AND of two equal-length pixel masks. */
+export function intersectMasks(maskA, maskB) {
+  const out = new Uint8Array(maskA.length);
+  for (let i = 0; i < maskA.length; i += 1) {
+    if (maskA[i] && maskB[i]) out[i] = 1;
+  }
+  return out;
+}
+
+/**
+ * Paired per-pixel CIEDE2000 & linear-luminance comparison between two co-registered
+ * frames (`imgA`, `imgB`, e.g. D12 vs D01 on identical frozen camera/world state).
+ * Reports exact per-pixel distribution (`median`, `p90`, `p95`, `p99`, `pctAbove5`,
+ * `pctAbove10`) in addition to aggregate mean color difference so opposing local errors
+ * cannot cancel out.
+ */
+export function comparePairedPixels(imgA, imgB, { roi = null, mask = null, kind = 'contact' } = {}) {
+  const width = imgA.width;
+  const height = imgA.height;
+  const chA = imgA.channels ?? 3;
+  const chB = imgB.channels ?? 3;
+  const x0 = roi ? Math.max(0, Math.floor(roi.x0 * width)) : 0;
+  const y0 = roi ? Math.max(0, Math.floor(roi.y0 * height)) : 0;
+  const x1 = roi ? Math.min(width, Math.ceil(roi.x1 * width)) : width;
+  const y1 = roi ? Math.min(height, Math.ceil(roi.y1 * height)) : height;
+
+  const deltas = [];
+  let sumDe = 0;
+  let above5 = 0;
+  let above10 = 0;
+  let sumRA = 0;
+  let sumGA = 0;
+  let sumBA = 0;
+  let sumRB = 0;
+  let sumGB = 0;
+  let sumBB = 0;
+  let sumLumaA = 0;
+  let sumLumaB = 0;
+  let totalRoiPixels = 0;
+
+  for (let y = y0; y < y1; y += 1) {
+    for (let x = x0; x < x1; x += 1) {
+      totalRoiPixels += 1;
+      const pIdx = y * width + x;
+      if (mask && !mask[pIdx]) continue;
+      const oA = pIdx * chA;
+      const oB = pIdx * chB;
+      const rA = imgA.data[oA];
+      const gA = imgA.data[oA + 1];
+      const bA = imgA.data[oA + 2];
+      const rB = imgB.data[oB];
+      const gB = imgB.data[oB + 1];
+      const bB = imgB.data[oB + 2];
+
+      const de = ciede2000(srgbToLab(rA, gA, bA), srgbToLab(rB, gB, bB));
+      deltas.push(de);
+      sumDe += de;
+      if (de > 5) above5 += 1;
+      if (de > 10) above10 += 1;
+
+      sumRA += rA;
+      sumGA += gA;
+      sumBA += bA;
+      sumRB += rB;
+      sumGB += gB;
+      sumBB += bB;
+      sumLumaA += srgbToLinearLuminance(rA, gA, bA);
+      sumLumaB += srgbToLinearLuminance(rB, gB, bB);
+    }
+  }
+
+  const count = deltas.length;
+  if (count === 0) {
+    return {
+      count: 0,
+      coverage: 0,
+      pairedDeltaE00: { mean: 0, median: 0, p90: 0, p95: 0, p99: 0, max: 0 },
+      pctAbove5: 0,
+      pctAbove10: 0,
+      meanRgbA: [0, 0, 0],
+      meanRgbB: [0, 0, 0],
+      meanColorDeltaE00: 0,
+      meanLinearLuminanceA: 0,
+      meanLinearLuminanceB: 0,
+      lumaDiffPct: 0,
+      flag: 'no-pixels',
+    };
+  }
+
+  deltas.sort((a, b) => a - b);
+  const meanRgbA = [sumRA / count, sumGA / count, sumBA / count];
+  const meanRgbB = [sumRB / count, sumGB / count, sumBB / count];
+  const lumaA = sumLumaA / count;
+  const lumaB = sumLumaB / count;
+  const lumaDiffPct = lumaB > 1e-6 ? Number((((lumaA - lumaB) / lumaB) * 100).toFixed(2)) : 0;
+  const meanColorDeltaE00 = Number(
+    ciede2000(srgbToLab(...meanRgbA), srgbToLab(...meanRgbB)).toFixed(3),
+  );
+  const median = Number(percentile(deltas, 0.5).toFixed(3));
+  const p95 = Number(percentile(deltas, 0.95).toFixed(3));
+
+  let flag = 'ok';
+  if (kind === 'contact') {
+    if (median > 10 || p95 > 18) flag = 'major-mismatch-candidate';
+    else if (median > 5 || p95 > 10) flag = 'investigate';
+  } else if (kind === 'floating-origin') {
+    if (median > 1.0 || p95 > 2.5) flag = 'investigate';
+  }
+
+  return {
+    count,
+    coverage: Number((totalRoiPixels > 0 ? count / totalRoiPixels : 0).toFixed(4)),
+    pairedDeltaE00: {
+      mean: Number((sumDe / count).toFixed(3)),
+      median,
+      p90: Number(percentile(deltas, 0.9).toFixed(3)),
+      p95,
+      p99: Number(percentile(deltas, 0.99).toFixed(3)),
+      max: Number(deltas[count - 1].toFixed(3)),
+    },
+    pctAbove5: Number(((above5 / count) * 100).toFixed(2)),
+    pctAbove10: Number(((above10 / count) * 100).toFixed(2)),
+    meanRgbA: meanRgbA.map((v) => Number(v.toFixed(2))),
+    meanRgbB: meanRgbB.map((v) => Number(v.toFixed(2))),
+    meanColorDeltaE00,
+    meanLinearLuminanceA: Number(lumaA.toFixed(5)),
+    meanLinearLuminanceB: Number(lumaB.toFixed(5)),
+    lumaDiffPct,
+    flag,
+  };
+}
+
 /** Compares two analyzed regions and tags PR 0 investigation thresholds. */
 export function compareRegions(regionA, regionB, { kind = 'contact' } = {}) {
   const deltaE00 = Number(ciede2000(regionA.lab, regionB.lab).toFixed(3));

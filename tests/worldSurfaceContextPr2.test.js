@@ -2,14 +2,22 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import yaml from 'js-yaml';
+import * as THREE from 'three/webgpu';
+import { float, vec2 } from 'three/tsl';
 import {
   TERRAIN_SURFACE_CONSTANTS,
   WorldSurfaceContextField,
+  bilinearTexelCoords,
   clearWorldSurfaceContext,
   createTerrainSurfaceEvaluator,
+  sampleMaterialBakeChannels,
+  sampleRgba8Bilinear,
   sampleWorldSurfaceContextCpu,
 } from '../src/editor/stylized/worldSurfaceContext/WorldSurfaceContextField.js';
 import { createTerrainMaterialBakeConfig } from '../src/editor/materials/TerrainMaterialBakeConfig.js';
+import { createTerrainWeatheringState } from '../src/editor/materials/TerrainMaterialWeatheringNodes.js';
+import { terrainSubstrateResponse } from '../src/editor/materials/TerrainSubstrateMath.js';
+import { evaluateShaderNode } from '../test/helpers/evaluateShaderNode.js';
 
 function loadStylizedConfig() {
   const editorCfg = yaml.load(readFileSync(new URL('../editor.config.yaml', import.meta.url), 'utf8'));
@@ -156,7 +164,7 @@ test('PR 2 WSC base texture publishes spatial roads vs grass without baking cont
     tileSize,
     tileId: 4,
     cellSetup: (x) => (x < 8
-      ? { path: 0, grass: 1, contact: x === 2 ? 0.9 : 0 }
+      ? { path: 0, grass: 1, contact: (x === 2 || x === 3) ? 0.9 : 0 }
       : { path: 1, grass: 0, contact: 0 }),
   });
   const field = new WorldSurfaceContextField({
@@ -166,7 +174,7 @@ test('PR 2 WSC base texture publishes spatial roads vs grass without baking cont
 
   assert.equal(field.update({ x: 16, z: -16 }, { x: 0, z: 0 }), true);
   const onOpenGrass = sampleWorldSurfaceContextCpu(12, -16);
-  const onContactGrass = sampleWorldSurfaceContextCpu(5, -16);
+  const onContactGrass = sampleWorldSurfaceContextCpu(6, -16);
   const onRoad = sampleWorldSurfaceContextCpu(24, -16);
 
   // Spatial separation: open grass is greenish, road is brownish on the EXACT same biome tile!
@@ -186,7 +194,7 @@ test('PR 2 WSC base texture publishes spatial roads vs grass without baking cont
   slotNoContact.forestFloorKey = 'ff-no-contact';
   field.terrainView.slots = [slotNoContact];
   assert.equal(field.update({ x: 16, z: -16 }, { x: 0, z: 0 }), true);
-  const samePointNoContact = sampleWorldSurfaceContextCpu(5, -16);
+  const samePointNoContact = sampleWorldSurfaceContextCpu(6, -16);
   assert.equal(samePointNoContact.contact, 0);
   assert.deepEqual(samePointNoContact.albedo, onContactGrass.albedo,
     'contact AO must not darken WSC base albedo at the same canonical coordinate');
@@ -266,5 +274,253 @@ test('PR 2 negative canonical coordinates, terrainShape weathering, worldNoise, 
     assert.ok(rebuildMs < 60, `expected median 128x128 WSC rebuild < 60 ms in Node, got ${rebuildMs.toFixed(2)} ms`);
   } finally {
     field.dispose();
+  }
+});
+
+test('PR 2 CPU material-bake and RGBA8 bilinear sampling match GPU bilinearTexels at centres, half-texels, quarters, edges, and negative coords', () => {
+  const res = 4;
+  const n = res * res;
+  const materialWeights = new Uint8Array(n * 4);
+  const wetnessShoreline = new Uint8Array(n * 2);
+  const macroTint = new Uint8Array(n * 4);
+  const terrainShape = new Uint16Array(n * 2);
+  const rgba8 = new Uint8Array(n * 4);
+  const toHalf = THREE.DataUtils.toHalfFloat;
+  const fromHalf = THREE.DataUtils.fromHalfFloat;
+
+  for (let z = 0; z < res; z += 1) {
+    for (let x = 0; x < res; x += 1) {
+      const idx = z * res + x;
+      // Intentionally varied weights (including non-255 sums to exercise post-filter renormalization).
+      materialWeights[idx * 4] = 40 + x * 45;
+      materialWeights[idx * 4 + 1] = 30 + z * 40;
+      materialWeights[idx * 4 + 2] = 15 + ((x + z) % 3) * 35;
+      materialWeights[idx * 4 + 3] = 10 + (x * z) * 12;
+      wetnessShoreline[idx * 2] = 20 + x * 55;
+      wetnessShoreline[idx * 2 + 1] = 15 + z * 60;
+      macroTint[idx * 4] = 96 + x * 16;
+      macroTint[idx * 4 + 1] = 112 + z * 12;
+      macroTint[idx * 4 + 2] = 120 + (x - z) * 8;
+      macroTint[idx * 4 + 3] = 255;
+      terrainShape[idx * 2] = toHalf(0.05 + x * 0.14 + z * 0.07);
+      terrainShape[idx * 2 + 1] = toHalf(-0.08 + x * 0.03 + z * 0.04);
+      rgba8[idx * 4] = 30 + x * 50;
+      rgba8[idx * 4 + 1] = 20 + z * 55;
+      rgba8[idx * 4 + 2] = 40 + (x + z) * 25;
+      rgba8[idx * 4 + 3] = 255;
+    }
+  }
+  const bake = {
+    descriptor: { key: 'bilinear-parity-4x4' },
+    resolution: res,
+    channels: { materialWeights, wetnessShoreline, macroTint, terrainShape },
+  };
+
+  // Independent reference of GPU `bilinearTexels` (`TerrainSlotBindings.js:65-73`).
+  const gpuBilinearRef = (u, v, readTexel) => {
+    const cu = Math.max(0, Math.min(1, u));
+    const cv = Math.max(0, Math.min(1, v));
+    const tx = cu * res - 0.5;
+    const tz = cv * res - 0.5;
+    const bx = Math.floor(tx);
+    const bz = Math.floor(tz);
+    const wx = tx - bx;
+    const wz = tz - bz;
+    const cl = (k) => Math.max(0, Math.min(res - 1, k));
+    const a = readTexel(cl(bx), cl(bz));
+    const b = readTexel(cl(bx + 1), cl(bz));
+    const c = readTexel(cl(bx), cl(bz + 1));
+    const d = readTexel(cl(bx + 1), cl(bz + 1));
+    return (a * (1 - wx) + b * wx) * (1 - wz) + (c * (1 - wx) + d * wx) * wz;
+  };
+
+  // Texel centres, exact half-texel boundaries, quarter positions, and chunk edges (0, 1).
+  const uvPoints = [
+    [0, 0], [1, 1], [0, 0.5], [1, 0.5],
+    [0.125, 0.125], [0.625, 0.375],
+    [0.25, 0.5], [0.5, 0.75],
+    [0.1875, 0.4375], [0.8125, 0.0625],
+  ];
+  const out = {};
+  const rgbaOut = [0, 0, 0, 0];
+  const coordOut = {};
+  for (const [u, v] of uvPoints) {
+    bilinearTexelCoords(u, v, res, coordOut);
+    assert.ok(Math.abs((coordOut.w00 + coordOut.w10 + coordOut.w01 + coordOut.w11) - 1) < 1e-12);
+
+    assert.equal(sampleMaterialBakeChannels(bake, u, v, out), true);
+    const rawG = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4] / 255);
+    const rawD = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 1] / 255);
+    const rawR = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 2] / 255);
+    const rawS = gpuBilinearRef(u, v, (x, z) => materialWeights[(z * res + x) * 4 + 3] / 255);
+    const rawSum = rawG + rawD + rawR + rawS;
+    assert.ok(Math.abs(out.grassWeight - rawG / rawSum) < 1e-6);
+    assert.ok(Math.abs(out.dirtWeight - rawD / rawSum) < 1e-6);
+    assert.ok(Math.abs(out.rockWeight - rawR / rawSum) < 1e-6);
+    assert.ok(Math.abs(out.snowWeight - rawS / rawSum) < 1e-6);
+    assert.ok(Math.abs((out.grassWeight + out.dirtWeight + out.rockWeight + out.snowWeight) - 1) < 1e-6);
+
+    const refWet = gpuBilinearRef(u, v, (x, z) => wetnessShoreline[(z * res + x) * 2] / 255);
+    const refShore = gpuBilinearRef(u, v, (x, z) => wetnessShoreline[(z * res + x) * 2 + 1] / 255);
+    assert.ok(Math.abs(out.wetness - refWet) < 1e-6);
+    assert.ok(Math.abs(out.shoreline - refShore) < 1e-6);
+
+    const refMacroR = Math.max(0.65, Math.min(1.35, gpuBilinearRef(u, v, (x, z) => macroTint[(z * res + x) * 4] / 255) * 2));
+    assert.ok(Math.abs(out.macroR - refMacroR) < 1e-6);
+
+    const refSlope = gpuBilinearRef(u, v, (x, z) => fromHalf(terrainShape[(z * res + x) * 2]));
+    const refCurv = gpuBilinearRef(u, v, (x, z) => fromHalf(terrainShape[(z * res + x) * 2 + 1]));
+    assert.ok(Math.abs(out.slope - refSlope) < 1e-6);
+    assert.ok(Math.abs(out.curvature - refCurv) < 1e-6);
+
+    sampleRgba8Bilinear(rgba8, res, u, v, rgbaOut);
+    for (let ch = 0; ch < 3; ch += 1) {
+      const refCh = gpuBilinearRef(u, v, (x, z) => rgba8[(z * res + x) * 4 + ch] / 255);
+      assert.ok(Math.abs(rgbaOut[ch] - refCh) < 1e-6);
+    }
+  }
+
+  // Verify bilinear smoothing inside WorldSurfaceContextField at negative canonical coordinates.
+  clearWorldSurfaceContext();
+  const chunkSize = 16;
+  const tileSize = 2; // 32 m chunk
+  const negChunkX = -50;
+  const negChunkZ = 30;
+  const stepBake = makeBake({ res: 2, key: 'step-neg' });
+  // West texel (x=0): full grass; East texel (x=1): full snow.
+  for (let z = 0; z < 2; z += 1) {
+    stepBake.channels.materialWeights[(z * 2 + 0) * 4] = 255;
+    stepBake.channels.materialWeights[(z * 2 + 0) * 4 + 3] = 0;
+    stepBake.channels.materialWeights[(z * 2 + 1) * 4] = 0;
+    stepBake.channels.materialWeights[(z * 2 + 1) * 4 + 3] = 255;
+  }
+  const negSlot = makeRichSlot({
+    chunkX: negChunkX,
+    chunkZ: negChunkZ,
+    chunkSize,
+    tileSize,
+    tileId: 4,
+    materialBake: stepBake,
+  });
+  const field = new WorldSurfaceContextField({
+    terrainView: { worldStore: { chunkSize, tileSize }, slots: [negSlot] },
+    config: loadStylizedConfig(),
+  });
+  try {
+    const cx = negChunkX * 32 + 16;
+    const cz = -(negChunkZ * 32 + 16);
+    assert.equal(field.update({ x: cx, z: cz }, { x: 0, z: 0 }), true);
+    const west = sampleWorldSurfaceContextCpu(cx - 10, cz);
+    const mid = sampleWorldSurfaceContextCpu(cx, cz);
+    const east = sampleWorldSurfaceContextCpu(cx + 10, cz);
+    // Midpoint straddles the bilinear ramp between green grass (west) and bright snow (east).
+    assert.ok(mid.albedo[0] > west.albedo[0] + 0.08 && mid.albedo[0] < east.albedo[0] - 0.08,
+      `expected smooth bilinear transition at negative canonical seam: west=${west.albedo[0].toFixed(3)} mid=${mid.albedo[0].toFixed(3)} east=${east.albedo[0].toFixed(3)}`);
+  } finally {
+    field.dispose();
+  }
+});
+
+test('PR 2 CPU TerrainSurfaceEvaluator matches GPU TSL weathering and substrate math', () => {
+  const stylized = loadStylizedConfig();
+  const weatheringCfg = stylized.materialBake.families.weathering;
+  const substratesCfg = stylized.materialBake.families.substrates;
+
+  // 1. Compare weathering multiplier & roughness offset directly against TSL `createTerrainWeatheringState`.
+  const weatheringCases = [
+    { slope: 0.1, curvature: 0.0, wetness: 0.0, canopy: 0.0, shoreline: 0.0 },
+    { slope: 0.55, curvature: 0.06, wetness: 0.75, canopy: 0.8, shoreline: 0.2 },
+    { slope: 0.3, curvature: -0.04, wetness: 0.25, canopy: 0.1, shoreline: 0.9 },
+  ];
+  for (const tc of weatheringCases) {
+    const tslState = createTerrainWeatheringState({
+      terrainShape: vec2(tc.slope, tc.curvature),
+      wetness: float(tc.wetness),
+      canopy: float(tc.canopy),
+      shoreline: float(tc.shoreline),
+      cameraDistance: float(10), // 100% visibility inside WSC window
+      weathering: weatheringCfg,
+    });
+    const rawMul = evaluateShaderNode(tslState.colorMultiplier);
+    const gpuMul = Array.isArray(rawMul) ? rawMul[0] : rawMul;
+    const gpuRough = evaluateShaderNode(tslState.roughnessOffset);
+
+    // Isolate weathering effect in TerrainSurfaceEvaluator by disabling genomes/worldNoise/substrates.
+    const isolatedCfg = {
+      ...stylized,
+      materialBake: {
+        ...stylized.materialBake,
+        families: {
+          ...stylized.materialBake.families,
+          genomes: { ...stylized.materialBake.families.genomes, enabled: false },
+          worldNoise: { ...stylized.materialBake.families.worldNoise, enabled: false },
+          substrates: null,
+        },
+      },
+    };
+    const evalWithWeather = createTerrainSurfaceEvaluator(isolatedCfg);
+    const evalNoWeather = createTerrainSurfaceEvaluator({
+      ...isolatedCfg,
+      materialBake: {
+        ...isolatedCfg.materialBake,
+        families: {
+          ...isolatedCfg.materialBake.families,
+          weathering: { ...weatheringCfg, enabled: false },
+        },
+      },
+    });
+    const input = {
+      tileId: 4, tileR: 0.15, tileG: 0.22, tileB: 0.1, height: 10, grassCoverage: 1, pathMask: 0,
+      canopy: tc.canopy, litter: 0,
+      bakeSample: {
+        grassWeight: 1, dirtWeight: 0, rockWeight: 0, snowWeight: 0,
+        wetness: tc.wetness, shoreline: tc.shoreline, macroR: 1, macroG: 1, macroB: 1,
+        slope: tc.slope, curvature: tc.curvature,
+      },
+    };
+    const withW = evalWithWeather.evaluate(input);
+    const noW = evalNoWeather.evaluate(input);
+    assert.ok(
+      Math.abs((withW.roughness - noW.roughness) - gpuRough) < 1e-5,
+      `weathering roughness mismatch: cpu=${(withW.roughness - noW.roughness).toFixed(6)} gpu=${gpuRough.toFixed(6)}`,
+    );
+    // When un-clamped and without shoreline/canopy override, near/mid albedo scales directly by gpuMul.
+    if (tc.shoreline === 0 && tc.canopy === 0) {
+      const cpuRatio = withW.g / noW.g;
+      assert.ok(
+        Math.abs(cpuRatio - gpuMul) < 1e-4,
+        `weathering color multiplier mismatch: cpu=${cpuRatio.toFixed(6)} gpu=${gpuMul.toFixed(6)}`,
+      );
+    }
+  }
+
+  // 2. Compare zero-alloc substrate response against canonical `terrainSubstrateResponse`.
+  const subOnlyCfg = {
+    ...stylized,
+    materialBake: {
+      ...stylized.materialBake,
+      families: {
+        ...stylized.materialBake.families,
+        genomes: { ...stylized.materialBake.families.genomes, enabled: false },
+        weathering: { ...weatheringCfg, enabled: false },
+        worldNoise: { ...stylized.materialBake.families.worldNoise, enabled: false },
+      },
+    },
+  };
+  const evalSub = createTerrainSurfaceEvaluator(subOnlyCfg);
+  for (const [tileId, canopy, wetness, shoreline] of [[1, 0, 0.2, 0.1], [8, 0.85, 0.1, 0], [10, 0, 0.4, 0.3]]) {
+    const ref = terrainSubstrateResponse({ tileId, canopy, wetness, shoreline }, substratesCfg);
+    const res = evalSub.evaluate({
+      tileId, tileR: 0.12, tileG: 0.12, tileB: 0.12, height: 10, grassCoverage: 0, pathMask: 0,
+      canopy, litter: 0,
+      bakeSample: {
+        grassWeight: 0, dirtWeight: 1, rockWeight: 0, snowWeight: 0,
+        wetness, shoreline, macroR: 1, macroG: 1, macroB: 1, slope: 0, curvature: 0,
+      },
+    });
+    assert.ok(
+      Math.abs(res.roughness - ref.roughness) < 1e-5,
+      `substrate roughness mismatch for tile ${tileId}: cpu=${res.roughness} ref=${ref.roughness}`,
+    );
   }
 });

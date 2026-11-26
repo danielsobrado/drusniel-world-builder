@@ -1,0 +1,1342 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-26T02:20:10.596Z",
+  "git": {
+    "commit": "f87676a5b2b1e64bf2f700b511a2f056addf718f",
+    "branch": "main",
+    "dirty": true
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "pr2PairedParity": [
+    {
+      "sceneId": "B14-C02-overcast",
+      "label": "B14-C02-overcast: D12 WSC albedo vs D01 unlit terrain (masked by D24 terrain ∩ D15 valid)",
+      "roi": {
+        "x0": 0.05,
+        "y0": 0.42,
+        "x1": 0.95,
+        "y1": 0.96
+      },
+      "allValidTerrain": {
+        "count": 447707,
+        "coverage": 0.9965,
+        "pairedDeltaE00": {
+          "mean": 4.904,
+          "median": 4.55,
+          "p90": 8.269,
+          "p95": 9.192,
+          "p99": 12.022,
+          "max": 20.658
+        },
+        "pctAbove5": 42.6,
+        "pctAbove10": 2.93,
+        "meanRgbA": [
+          92.52,
+          92.27,
+          53.66
+        ],
+        "meanRgbB": [
+          92.42,
+          91.37,
+          52.71
+        ],
+        "meanColorDeltaE00": 0.356,
+        "meanLinearLuminanceA": 0.10273,
+        "meanLinearLuminanceB": 0.10311,
+        "lumaDiffPct": -0.37,
+        "flag": "ok"
+      }
+    },
+    {
+      "sceneId": "B14-C05-clear",
+      "label": "B14-C05-clear: D12 WSC albedo vs D01 unlit terrain (masked by D24 terrain ∩ D15 valid)",
+      "roi": {
+        "x0": 0.05,
+        "y0": 0.42,
+        "x1": 0.95,
+        "y1": 0.96
+      },
+      "allValidTerrain": {
+        "count": 229754,
+        "coverage": 0.5114,
+        "pairedDeltaE00": {
+          "mean": 4.361,
+          "median": 3.672,
+          "p90": 8.127,
+          "p95": 10.175,
+          "p99": 14.063,
+          "max": 24.036
+        },
+        "pctAbove5": 31.37,
+        "pctAbove10": 5.31,
+        "meanRgbA": [
+          91.27,
+          93.03,
+          54.41
+        ],
+        "meanRgbB": [
+          87.95,
+          89.03,
+          51.19
+        ],
+        "meanColorDeltaE00": 1.413,
+        "meanLinearLuminanceA": 0.10395,
+        "meanLinearLuminanceB": 0.09681,
+        "lumaDiffPct": 7.37,
+        "flag": "investigate"
+      },
+      "roadOnly": {
+        "count": 186539,
+        "coverage": 0.4152,
+        "pairedDeltaE00": {
+          "mean": 4.109,
+          "median": 3.634,
+          "p90": 7.348,
+          "p95": 8.7,
+          "p99": 11.866,
+          "max": 22.865
+        },
+        "pctAbove5": 29.6,
+        "pctAbove10": 2.52,
+        "meanRgbA": [
+          92.94,
+          93.13,
+          54.87
+        ],
+        "meanRgbB": [
+          90.33,
+          88.99,
+          52
+        ],
+        "meanColorDeltaE00": 1.425,
+        "meanLinearLuminanceA": 0.10488,
+        "meanLinearLuminanceB": 0.09755,
+        "lumaDiffPct": 7.52,
+        "flag": "ok"
+      },
+      "naturalOnly": {
+        "count": 43215,
+        "coverage": 0.0962,
+        "pairedDeltaE00": {
+          "mean": 5.446,
+          "median": 3.88,
+          "p90": 12,
+          "p95": 13.527,
+          "p99": 16.082,
+          "max": 24.036
+        },
+        "pctAbove5": 39.03,
+        "pctAbove10": 17.31,
+        "meanRgbA": [
+          84.09,
+          92.61,
+          52.42
+        ],
+        "meanRgbB": [
+          77.69,
+          89.2,
+          47.71
+        ],
+        "meanColorDeltaE00": 1.698,
+        "meanLinearLuminanceA": 0.09989,
+        "meanLinearLuminanceB": 0.09364,
+        "lumaDiffPct": 6.68,
+        "flag": "investigate"
+      }
+    },
+    {
+      "sceneId": "B01-C02-clear",
+      "label": "B01-C02-clear: D12 WSC albedo vs D01 unlit terrain (masked by D24 terrain ∩ D15 valid)",
+      "roi": {
+        "x0": 0.05,
+        "y0": 0.42,
+        "x1": 0.95,
+        "y1": 0.96
+      },
+      "allValidTerrain": {
+        "count": 284896,
+        "coverage": 0.6341,
+        "pairedDeltaE00": {
+          "mean": 7.111,
+          "median": 6.619,
+          "p90": 12.005,
+          "p95": 13.558,
+          "p99": 16.303,
+          "max": 23.93
+        },
+        "pctAbove5": 67.71,
+        "pctAbove10": 20.46,
+        "meanRgbA": [
+          117.49,
+          123.37,
+          75.61
+        ],
+        "meanRgbB": [
+          122.14,
+          119.47,
+          75.41
+        ],
+        "meanColorDeltaE00": 3.43,
+        "meanLinearLuminanceA": 0.18631,
+        "meanLinearLuminanceB": 0.18324,
+        "lumaDiffPct": 1.67,
+        "flag": "investigate"
+      }
+    },
+    {
+      "sceneId": "B03-C02-clear",
+      "label": "B03-C02-clear: D12 WSC albedo vs D01 unlit terrain (masked by D24 terrain ∩ D15 valid)",
+      "roi": {
+        "x0": 0.05,
+        "y0": 0.42,
+        "x1": 0.95,
+        "y1": 0.96
+      },
+      "allValidTerrain": {
+        "count": 422164,
+        "coverage": 0.9396,
+        "pairedDeltaE00": {
+          "mean": 4.47,
+          "median": 4.285,
+          "p90": 7.142,
+          "p95": 8.171,
+          "p99": 9.974,
+          "max": 18.753
+        },
+        "pctAbove5": 35.81,
+        "pctAbove10": 0.97,
+        "meanRgbA": [
+          80.61,
+          82.59,
+          49.94
+        ],
+        "meanRgbB": [
+          79.76,
+          83.81,
+          47.26
+        ],
+        "meanColorDeltaE00": 1.433,
+        "meanLinearLuminanceA": 0.08091,
+        "meanLinearLuminanceB": 0.08394,
+        "lumaDiffPct": -3.61,
+        "flag": "ok"
+      }
+    }
+  ],
+  "pr2StreamingChecks": {
+    "recenter20m": {
+      "beforeOrigin": {
+        "x": 0,
+        "z": 0
+      },
+      "afterOrigin": {
+        "x": 0,
+        "z": 0
+      },
+      "beforeValidCoverage": 1,
+      "afterValidCoverage": 0.9998,
+      "beforeWscValid": true,
+      "afterWscValid": true
+    },
+    "floatingOriginRoundtrip": {
+      "beforeOrigin": {
+        "x": 0,
+        "z": 0
+      },
+      "afterOrigin": {
+        "x": -1920,
+        "z": -3968
+      },
+      "pairedD00": {
+        "count": 449280,
+        "coverage": 1,
+        "pairedDeltaE00": {
+          "mean": 3.885,
+          "median": 2.325,
+          "p90": 8.89,
+          "p95": 12.084,
+          "p99": 19.893,
+          "max": 52.697
+        },
+        "pctAbove5": 23.56,
+        "pctAbove10": 7.86,
+        "meanRgbA": [
+          125.01,
+          127.31,
+          75.44
+        ],
+        "meanRgbB": [
+          120.04,
+          123.18,
+          72.62
+        ],
+        "meanColorDeltaE00": 1.714,
+        "meanLinearLuminanceA": 0.21126,
+        "meanLinearLuminanceB": 0.19678,
+        "lumaDiffPct": 7.36,
+        "flag": "investigate"
+      }
+    }
+  },
+  "pr3GrassGround": [
+    {
+      "sceneId": "B14-C02-overcast",
+      "d00Lit": {
+        "grass": {
+          "count": 71,
+          "coverage": 0.00015803062678062678,
+          "meanRgb": [
+            16.94,
+            22.89,
+            20.7
+          ],
+          "medianRgb": [
+            17,
+            23,
+            21
+          ],
+          "meanLinearLuminance": 0.00791,
+          "luminancePercentiles": {
+            "p10": 0.00554,
+            "p50": 0.00796,
+            "p90": 0.00994
+          },
+          "meanHueDeg": 160.7,
+          "meanSaturation": 0.2685,
+          "saturationP90": 0.3333,
+          "lab": {
+            "L": 7.100696035441544,
+            "a": -3.042321673679724,
+            "b": 0.43363277802195843
+          }
+        },
+        "terrain": {
+          "count": 447707,
+          "coverage": 0.9964988425925926,
+          "meanRgb": [
+            19.76,
+            24.01,
+            20.49
+          ],
+          "medianRgb": [
+            19,
+            24,
+            20
+          ],
+          "meanLinearLuminance": 0.00872,
+          "luminancePercentiles": {
+            "p10": 0.00593,
+            "p50": 0.00842,
+            "p90": 0.01196
+          },
+          "meanHueDeg": 134.1,
+          "meanSaturation": 0.2098,
+          "saturationP90": 0.3143,
+          "lab": {
+            "L": 7.7004835671987415,
+            "a": -2.8223314622799616,
+            "b": 2.0173820750240603
+          }
+        },
+        "comparison": {
+          "deltaE00": 1.537,
+          "lumaDiffPct": -9.29,
+          "contrastRatio": 1.014,
+          "flag": "ok"
+        }
+      },
+      "d01Unlit": {
+        "grass": {
+          "count": 71,
+          "coverage": 0.00015803062678062678,
+          "meanRgb": [
+            83.38,
+            87.41,
+            47.94
+          ],
+          "medianRgb": [
+            84,
+            89,
+            48
+          ],
+          "meanLinearLuminance": 0.09051,
+          "luminancePercentiles": {
+            "p10": 0.0672,
+            "p50": 0.09357,
+            "p90": 0.10688
+          },
+          "meanHueDeg": 65.7,
+          "meanSaturation": 0.4595,
+          "saturationP90": 0.4778,
+          "lab": {
+            "L": 35.730629907716214,
+            "a": -8.431619539324336,
+            "b": 22.089803992602143
+          }
+        },
+        "terrain": {
+          "count": 447707,
+          "coverage": 0.9964988425925926,
+          "meanRgb": [
+            92.42,
+            91.37,
+            52.71
+          ],
+          "medianRgb": [
+            92,
+            91,
+            51
+          ],
+          "meanLinearLuminance": 0.10311,
+          "luminancePercentiles": {
+            "p10": 0.07053,
+            "p50": 0.10063,
+            "p90": 0.13991
+          },
+          "meanHueDeg": 58.3,
+          "meanSaturation": 0.4426,
+          "saturationP90": 0.5663,
+          "lab": {
+            "L": 37.86882676039125,
+            "a": -6.019128486809327,
+            "b": 22.043996642527908
+          }
+        },
+        "comparison": {
+          "deltaE00": 2.751,
+          "lumaDiffPct": -12.22,
+          "contrastRatio": 1.09,
+          "flag": "ok"
+        }
+      }
+    },
+    {
+      "sceneId": "B14-C01-overcast",
+      "d00Lit": {
+        "grass": {
+          "count": 15083,
+          "coverage": 0.03357149216524217,
+          "meanRgb": [
+            63.27,
+            75.51,
+            71.29
+          ],
+          "medianRgb": [
+            62,
+            74,
+            70
+          ],
+          "meanLinearLuminance": 0.06829,
+          "luminancePercentiles": {
+            "p10": 0.04816,
+            "p50": 0.0643,
+            "p90": 0.08425
+          },
+          "meanHueDeg": 159.4,
+          "meanSaturation": 0.1659,
+          "saturationP90": 0.2,
+          "lab": {
+            "L": 31.068055807083915,
+            "a": -6.354820204240386,
+            "b": 1.2403901327002753
+          }
+        },
+        "terrain": {
+          "count": 332760,
+          "coverage": 0.7406517094017094,
+          "meanRgb": [
+            62.78,
+            72.25,
+            69.3
+          ],
+          "medianRgb": [
+            55,
+            64,
+            61
+          ],
+          "meanLinearLuminance": 0.07,
+          "luminancePercentiles": {
+            "p10": 0.0332,
+            "p50": 0.04875,
+            "p90": 0.13878
+          },
+          "meanHueDeg": 158.3,
+          "meanSaturation": 0.1446,
+          "saturationP90": 0.193,
+          "lab": {
+            "L": 29.71587267393364,
+            "a": -4.348107337279861,
+            "b": 0.5594779639577996
+          }
+        },
+        "comparison": {
+          "deltaE00": 2.499,
+          "lumaDiffPct": -2.44,
+          "contrastRatio": 1.014,
+          "flag": "ok"
+        }
+      },
+      "d01Unlit": {
+        "grass": {
+          "count": 15083,
+          "coverage": 0.03357149216524217,
+          "meanRgb": [
+            92.54,
+            104.2,
+            61.34
+          ],
+          "medianRgb": [
+            93,
+            104,
+            61
+          ],
+          "meanLinearLuminance": 0.12823,
+          "luminancePercentiles": {
+            "p10": 0.08903,
+            "p50": 0.12617,
+            "p90": 0.17165
+          },
+          "meanHueDeg": 76.2,
+          "meanSaturation": 0.4149,
+          "saturationP90": 0.4646,
+          "lab": {
+            "L": 42.09993819305787,
+            "a": -11.998317477468573,
+            "b": 22.832432407709824
+          }
+        },
+        "terrain": {
+          "count": 332760,
+          "coverage": 0.7406517094017094,
+          "meanRgb": [
+            89.81,
+            93.48,
+            53.65
+          ],
+          "medianRgb": [
+            90,
+            94,
+            52
+          ],
+          "meanLinearLuminance": 0.10555,
+          "luminancePercentiles": {
+            "p10": 0.07464,
+            "p50": 0.10409,
+            "p90": 0.13635
+          },
+          "meanHueDeg": 65.4,
+          "meanSaturation": 0.4395,
+          "saturationP90": 0.5481,
+          "lab": {
+            "L": 38.320656855114244,
+            "a": -7.972792112110411,
+            "b": 21.99834856709768
+          }
+        },
+        "comparison": {
+          "deltaE00": 4.499,
+          "lumaDiffPct": 21.49,
+          "contrastRatio": 1.146,
+          "flag": "ok"
+        }
+      }
+    },
+    {
+      "sceneId": "B01-C02-clear",
+      "d00Lit": {
+        "grass": {
+          "count": 105901,
+          "coverage": 0.23571269586894586,
+          "meanRgb": [
+            129,
+            130.82,
+            75.25
+          ],
+          "medianRgb": [
+            127,
+            130,
+            74
+          ],
+          "meanLinearLuminance": 0.22062,
+          "luminancePercentiles": {
+            "p10": 0.13629,
+            "p50": 0.20951,
+            "p90": 0.32057
+          },
+          "meanHueDeg": 62.1,
+          "meanSaturation": 0.4362,
+          "saturationP90": 0.5227,
+          "lab": {
+            "L": 53.39323472250227,
+            "a": -9.657100719516698,
+            "b": 29.964954068927053
+          }
+        },
+        "terrain": {
+          "count": 284896,
+          "coverage": 0.6341168091168091,
+          "meanRgb": [
+            126.7,
+            127.38,
+            72.12
+          ],
+          "medianRgb": [
+            125,
+            126,
+            69
+          ],
+          "meanLinearLuminance": 0.20932,
+          "luminancePercentiles": {
+            "p10": 0.12804,
+            "p50": 0.19849,
+            "p90": 0.30634
+          },
+          "meanHueDeg": 60.9,
+          "meanSaturation": 0.4476,
+          "saturationP90": 0.5481,
+          "lab": {
+            "L": 52.016528279689126,
+            "a": -8.66281485434206,
+            "b": 29.83281486121824
+          }
+        },
+        "comparison": {
+          "deltaE00": 1.521,
+          "lumaDiffPct": 5.4,
+          "contrastRatio": 1.044,
+          "flag": "ok"
+        }
+      },
+      "d01Unlit": {
+        "grass": {
+          "count": 105901,
+          "coverage": 0.23571269586894586,
+          "meanRgb": [
+            123.97,
+            123.43,
+            78.03
+          ],
+          "medianRgb": [
+            123,
+            123,
+            77
+          ],
+          "meanLinearLuminance": 0.19355,
+          "luminancePercentiles": {
+            "p10": 0.14731,
+            "p50": 0.18899,
+            "p90": 0.24758
+          },
+          "meanHueDeg": 59.4,
+          "meanSaturation": 0.3813,
+          "saturationP90": 0.4407,
+          "lab": {
+            "L": 50.68883728608222,
+            "a": -7.01252765966065,
+            "b": 24.7741746657374
+          }
+        },
+        "terrain": {
+          "count": 284896,
+          "coverage": 0.6341168091168091,
+          "meanRgb": [
+            122.14,
+            119.47,
+            75.41
+          ],
+          "medianRgb": [
+            122,
+            119,
+            74
+          ],
+          "meanLinearLuminance": 0.18324,
+          "luminancePercentiles": {
+            "p10": 0.12648,
+            "p50": 0.17881,
+            "p90": 0.24641
+          },
+          "meanHueDeg": 56.7,
+          "meanSaturation": 0.3915,
+          "saturationP90": 0.488,
+          "lab": {
+            "L": 49.30096408235292,
+            "a": -6.008808016419009,
+            "b": 24.631136334389993
+          }
+        },
+        "comparison": {
+          "deltaE00": 1.614,
+          "lumaDiffPct": 5.63,
+          "contrastRatio": 1.044,
+          "flag": "ok"
+        }
+      }
+    },
+    {
+      "sceneId": "B02-C02-clear",
+      "d00Lit": {
+        "grass": {
+          "count": 10059,
+          "coverage": 0.022389155982905983,
+          "meanRgb": [
+            71.78,
+            92.61,
+            51.25
+          ],
+          "medianRgb": [
+            70,
+            92,
+            50
+          ],
+          "meanLinearLuminance": 0.09847,
+          "luminancePercentiles": {
+            "p10": 0.05165,
+            "p50": 0.0915,
+            "p90": 0.15791
+          },
+          "meanHueDeg": 91.1,
+          "meanSaturation": 0.4434,
+          "saturationP90": 0.4792,
+          "lab": {
+            "L": 36.82789058535768,
+            "a": -16.29999483532624,
+            "b": 21.547549697775736
+          }
+        },
+        "terrain": {
+          "count": 433586,
+          "coverage": 0.9650685541310541,
+          "meanRgb": [
+            57.7,
+            80.14,
+            46.66
+          ],
+          "medianRgb": [
+            58,
+            80,
+            46
+          ],
+          "meanLinearLuminance": 0.07169,
+          "luminancePercentiles": {
+            "p10": 0.03871,
+            "p50": 0.06832,
+            "p90": 0.10859
+          },
+          "meanHueDeg": 100.5,
+          "meanSaturation": 0.4147,
+          "saturationP90": 0.5238,
+          "lab": {
+            "L": 31.444367934480425,
+            "a": -15.587043691634495,
+            "b": 16.7916536306313
+          }
+        },
+        "comparison": {
+          "deltaE00": 5.063,
+          "lumaDiffPct": 37.36,
+          "contrastRatio": 1.22,
+          "flag": "investigate"
+        }
+      },
+      "d01Unlit": {
+        "grass": {
+          "count": 10059,
+          "coverage": 0.022389155982905983,
+          "meanRgb": [
+            114.46,
+            123.15,
+            78.68
+          ],
+          "medianRgb": [
+            117,
+            125,
+            80
+          ],
+          "meanLinearLuminance": 0.18663,
+          "luminancePercentiles": {
+            "p10": 0.13254,
+            "p50": 0.18945,
+            "p90": 0.23695
+          },
+          "meanHueDeg": 71.9,
+          "meanSaturation": 0.364,
+          "saturationP90": 0.4144,
+          "lab": {
+            "L": 49.86747472650339,
+            "a": -11.130917381175998,
+            "b": 22.980689177483814
+          }
+        },
+        "terrain": {
+          "count": 433586,
+          "coverage": 0.9650685541310541,
+          "meanRgb": [
+            97.95,
+            110.33,
+            66.08
+          ],
+          "medianRgb": [
+            98,
+            111,
+            65
+          ],
+          "meanLinearLuminance": 0.14508,
+          "luminancePercentiles": {
+            "p10": 0.09805,
+            "p50": 0.14348,
+            "p90": 0.19333
+          },
+          "meanHueDeg": 76.7,
+          "meanSaturation": 0.4045,
+          "saturationP90": 0.5156,
+          "lab": {
+            "L": 44.435731253871246,
+            "a": -12.511180558388679,
+            "b": 23.054840791892207
+          }
+        },
+        "comparison": {
+          "deltaE00": 5.401,
+          "lumaDiffPct": 28.64,
+          "contrastRatio": 1.213,
+          "flag": "investigate"
+        }
+      }
+    },
+    {
+      "sceneId": "B03-C02-clear",
+      "d00Lit": {
+        "grass": {
+          "count": 20922,
+          "coverage": 0.04656784188034188,
+          "meanRgb": [
+            67.37,
+            81.17,
+            51.11
+          ],
+          "medianRgb": [
+            64,
+            79,
+            49
+          ],
+          "meanLinearLuminance": 0.07853,
+          "luminancePercentiles": {
+            "p10": 0.03943,
+            "p50": 0.06829,
+            "p90": 0.13209
+          },
+          "meanHueDeg": 88.2,
+          "meanSaturation": 0.3697,
+          "saturationP90": 0.4286,
+          "lab": {
+            "L": 32.51816061812009,
+            "a": -11.664985404890416,
+            "b": 15.88753445773542
+          }
+        },
+        "terrain": {
+          "count": 422164,
+          "coverage": 0.9396456552706552,
+          "meanRgb": [
+            54.73,
+            64.49,
+            40.79
+          ],
+          "medianRgb": [
+            54,
+            64,
+            40
+          ],
+          "meanLinearLuminance": 0.04849,
+          "luminancePercentiles": {
+            "p10": 0.03082,
+            "p50": 0.04618,
+            "p90": 0.06619
+          },
+          "meanHueDeg": 84.9,
+          "meanSaturation": 0.3629,
+          "saturationP90": 0.4754,
+          "lab": {
+            "L": 25.680756275108607,
+            "a": -8.552105738774657,
+            "b": 12.885451762428445
+          }
+        },
+        "comparison": {
+          "deltaE00": 5.926,
+          "lumaDiffPct": 61.95,
+          "contrastRatio": 1.305,
+          "flag": "investigate"
+        }
+      },
+      "d01Unlit": {
+        "grass": {
+          "count": 20922,
+          "coverage": 0.04656784188034188,
+          "meanRgb": [
+            90.21,
+            98.91,
+            59.05
+          ],
+          "medianRgb": [
+            90,
+            100,
+            60
+          ],
+          "meanLinearLuminance": 0.11666,
+          "luminancePercentiles": {
+            "p10": 0.07513,
+            "p50": 0.11604,
+            "p90": 0.15746
+          },
+          "meanHueDeg": 72.8,
+          "meanSaturation": 0.4074,
+          "saturationP90": 0.506,
+          "lab": {
+            "L": 40.26778016478245,
+            "a": -10.755537260528026,
+            "b": 21.58424653189902
+          }
+        },
+        "terrain": {
+          "count": 422164,
+          "coverage": 0.9396456552706552,
+          "meanRgb": [
+            79.76,
+            83.81,
+            47.26
+          ],
+          "medianRgb": [
+            80,
+            84,
+            46
+          ],
+          "meanLinearLuminance": 0.08394,
+          "luminancePercentiles": {
+            "p10": 0.0569,
+            "p50": 0.08228,
+            "p90": 0.11203
+          },
+          "meanHueDeg": 66.5,
+          "meanSaturation": 0.4424,
+          "saturationP90": 0.5679,
+          "lab": {
+            "L": 34.501160551225276,
+            "a": -8.176625806608328,
+            "b": 21.069787585122857
+          }
+        },
+        "comparison": {
+          "deltaE00": 5.291,
+          "lumaDiffPct": 38.98,
+          "contrastRatio": 1.244,
+          "flag": "investigate"
+        }
+      }
+    },
+    {
+      "sceneId": "B04-C02-clear",
+      "d00Lit": {
+        "grass": {
+          "count": 272068,
+          "coverage": 0.6055644586894587,
+          "meanRgb": [
+            38.03,
+            65.85,
+            36.24
+          ],
+          "medianRgb": [
+            37,
+            65,
+            36
+          ],
+          "meanLinearLuminance": 0.0466,
+          "luminancePercentiles": {
+            "p10": 0.02451,
+            "p50": 0.04265,
+            "p90": 0.07395
+          },
+          "meanHueDeg": 118.3,
+          "meanSaturation": 0.4694,
+          "saturationP90": 0.5217,
+          "lab": {
+            "L": 25.062530163932017,
+            "a": -17.831145260188087,
+            "b": 15.007886289828642
+          }
+        },
+        "terrain": {
+          "count": 147893,
+          "coverage": 0.3291777955840456,
+          "meanRgb": [
+            38.61,
+            60.54,
+            38.36
+          ],
+          "medianRgb": [
+            32,
+            58,
+            35
+          ],
+          "meanLinearLuminance": 0.0422,
+          "luminancePercentiles": {
+            "p10": 0.02107,
+            "p50": 0.03433,
+            "p90": 0.07523
+          },
+          "meanHueDeg": 123.5,
+          "meanSaturation": 0.4334,
+          "saturationP90": 0.5294,
+          "lab": {
+            "L": 23.36707712533626,
+            "a": -14.255662297750437,
+            "b": 11.508437829856078
+          }
+        },
+        "comparison": {
+          "deltaE00": 3.006,
+          "lumaDiffPct": 10.43,
+          "contrastRatio": 1.048,
+          "flag": "ok"
+        }
+      },
+      "d01Unlit": {
+        "grass": {
+          "count": 272068,
+          "coverage": 0.6055644586894587,
+          "meanRgb": [
+            86.64,
+            111.4,
+            56.57
+          ],
+          "medianRgb": [
+            87,
+            112,
+            56
+          ],
+          "meanLinearLuminance": 0.13921,
+          "luminancePercentiles": {
+            "p10": 0.10507,
+            "p50": 0.13852,
+            "p90": 0.1753
+          },
+          "meanHueDeg": 87.2,
+          "meanSaturation": 0.4947,
+          "saturationP90": 0.534,
+          "lab": {
+            "L": 43.78555111430658,
+            "a": -18.90566403153546,
+            "b": 27.11029803146079
+          }
+        },
+        "terrain": {
+          "count": 147893,
+          "coverage": 0.3291777955840456,
+          "meanRgb": [
+            79.91,
+            99.62,
+            54.21
+          ],
+          "medianRgb": [
+            74,
+            98,
+            50
+          ],
+          "meanLinearLuminance": 0.11365,
+          "luminancePercentiles": {
+            "p10": 0.07727,
+            "p50": 0.10371,
+            "p90": 0.16897
+          },
+          "meanHueDeg": 86.8,
+          "meanSaturation": 0.4711,
+          "saturationP90": 0.5366,
+          "lab": {
+            "L": 39.725010176704764,
+            "a": -16.324959715438652,
+            "b": 23.609978824349753
+          }
+        },
+        "comparison": {
+          "deltaE00": 4.097,
+          "lumaDiffPct": 22.49,
+          "contrastRatio": 1.156,
+          "flag": "ok"
+        }
+      }
+    }
+  ],
+  "pr3EmissiveCheck": {
+    "sceneId": "B14-C01-overcast",
+    "grassMeanRgb": [
+      12.38,
+      16.31,
+      6.3
+    ],
+    "terrainMeanRgb": [
+      5.15,
+      6.59,
+      1.1
+    ],
+    "grassMeanLuma": 0.00644,
+    "terrainMeanLuma": 0.0019
+  },
+  "pr3LodSweep": [
+    {
+      "distanceMeters": 0,
+      "roi": {
+        "x0": 0.25,
+        "y0": 0.48,
+        "x1": 0.75,
+        "y1": 0.88
+      },
+      "region": {
+        "count": 184960,
+        "coverage": 1,
+        "meanRgb": [
+          111.2,
+          136.9,
+          70.55
+        ],
+        "medianRgb": [
+          111,
+          139,
+          67
+        ],
+        "meanLinearLuminance": 0.22562,
+        "luminancePercentiles": {
+          "p10": 0.14058,
+          "p50": 0.22141,
+          "p90": 0.31919
+        },
+        "meanHueDeg": 83.8,
+        "meanSaturation": 0.4842,
+        "saturationP90": 0.5781,
+        "lab": {
+          "L": 53.734606417395995,
+          "a": -20.878734851511595,
+          "b": 32.22639324579226
+        }
+      },
+      "stepFromPrevious": null
+    },
+    {
+      "distanceMeters": 12,
+      "roi": {
+        "x0": 0.25,
+        "y0": 0.48,
+        "x1": 0.75,
+        "y1": 0.88
+      },
+      "region": {
+        "count": 184960,
+        "coverage": 1,
+        "meanRgb": [
+          116.67,
+          141.9,
+          75.61
+        ],
+        "medianRgb": [
+          113,
+          140,
+          69
+        ],
+        "meanLinearLuminance": 0.24601,
+        "luminancePercentiles": {
+          "p10": 0.14479,
+          "p50": 0.22743,
+          "p90": 0.38523
+        },
+        "meanHueDeg": 83.3,
+        "meanSaturation": 0.4756,
+        "saturationP90": 0.5772,
+        "lab": {
+          "L": 55.7351804622141,
+          "a": -20.413975399102835,
+          "b": 32.15300038789085
+        }
+      },
+      "stepFromPrevious": {
+        "deltaE00": 1.918,
+        "lumaDiffPct": 9.04,
+        "contrastRatio": 1.074,
+        "flag": "ok"
+      }
+    },
+    {
+      "distanceMeters": 32,
+      "roi": {
+        "x0": 0.25,
+        "y0": 0.48,
+        "x1": 0.75,
+        "y1": 0.88
+      },
+      "region": {
+        "count": 184960,
+        "coverage": 1,
+        "meanRgb": [
+          116.08,
+          137.74,
+          74.13
+        ],
+        "medianRgb": [
+          115,
+          137,
+          73
+        ],
+        "meanLinearLuminance": 0.22996,
+        "luminancePercentiles": {
+          "p10": 0.14549,
+          "p50": 0.22141,
+          "p90": 0.3276
+        },
+        "meanHueDeg": 81,
+        "meanSaturation": 0.4657,
+        "saturationP90": 0.5413,
+        "lab": {
+          "L": 54.432360477937635,
+          "a": -18.993772816044196,
+          "b": 31.578965857172903
+        }
+      },
+      "stepFromPrevious": {
+        "deltaE00": 1.431,
+        "lumaDiffPct": -6.52,
+        "contrastRatio": 1.057,
+        "flag": "ok"
+      }
+    },
+    {
+      "distanceMeters": 45,
+      "roi": {
+        "x0": 0.25,
+        "y0": 0.48,
+        "x1": 0.75,
+        "y1": 0.88
+      },
+      "region": {
+        "count": 184960,
+        "coverage": 1,
+        "meanRgb": [
+          116.24,
+          124.24,
+          73.26
+        ],
+        "medianRgb": [
+          116,
+          124,
+          71
+        ],
+        "meanLinearLuminance": 0.19246,
+        "luminancePercentiles": {
+          "p10": 0.12151,
+          "p50": 0.18737,
+          "p90": 0.26846
+        },
+        "meanHueDeg": 69.7,
+        "meanSaturation": 0.4172,
+        "saturationP90": 0.5047,
+        "lab": {
+          "L": 50.227161664304234,
+          "a": -11.629971157051388,
+          "b": 26.833269502857526
+        }
+      },
+      "stepFromPrevious": {
+        "deltaE00": 5.947,
+        "lumaDiffPct": -16.31,
+        "contrastRatio": 1.155,
+        "flag": "investigate"
+      }
+    },
+    {
+      "distanceMeters": 58,
+      "roi": {
+        "x0": 0.25,
+        "y0": 0.48,
+        "x1": 0.75,
+        "y1": 0.88
+      },
+      "region": {
+        "count": 184960,
+        "coverage": 1,
+        "meanRgb": [
+          135.52,
+          146.38,
+          87.16
+        ],
+        "medianRgb": [
+          141,
+          152,
+          88
+        ],
+        "meanLinearLuminance": 0.27875,
+        "luminancePercentiles": {
+          "p10": 0.17884,
+          "p50": 0.28892,
+          "p90": 0.37562
+        },
+        "meanHueDeg": 71.8,
+        "meanSaturation": 0.4052,
+        "saturationP90": 0.4917,
+        "lab": {
+          "L": 58.490179114384034,
+          "a": -13.374943556374363,
+          "b": 30.052337731996705
+        }
+      },
+      "stepFromPrevious": {
+        "deltaE00": 8.052,
+        "lumaDiffPct": 44.84,
+        "contrastRatio": 1.356,
+        "flag": "investigate"
+      }
+    },
+    {
+      "distanceMeters": 95,
+      "roi": {
+        "x0": 0.25,
+        "y0": 0.48,
+        "x1": 0.75,
+        "y1": 0.88
+      },
+      "region": {
+        "count": 184960,
+        "coverage": 1,
+        "meanRgb": [
+          109.38,
+          131.58,
+          71.97
+        ],
+        "medianRgb": [
+          110,
+          136,
+          70
+        ],
+        "meanLinearLuminance": 0.21012,
+        "luminancePercentiles": {
+          "p10": 0.13186,
+          "p50": 0.21347,
+          "p90": 0.28577
+        },
+        "meanHueDeg": 82.8,
+        "meanSaturation": 0.4488,
+        "saturationP90": 0.5537,
+        "lab": {
+          "L": 52.08668881859357,
+          "a": -18.97595843236499,
+          "b": 29.615662821358757
+        }
+      },
+      "stepFromPrevious": {
+        "deltaE00": 6.986,
+        "lumaDiffPct": -24.62,
+        "contrastRatio": 1.264,
+        "flag": "investigate"
+      }
+    }
+  ]
+}

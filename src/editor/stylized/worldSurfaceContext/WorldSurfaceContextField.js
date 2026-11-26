@@ -18,7 +18,10 @@ export {
 } from './WorldSurfaceContextState.js';
 export {
   TERRAIN_SURFACE_CONSTANTS,
+  bilinearTexelCoords,
   createTerrainSurfaceEvaluator,
+  resolveTerrainWorldNoiseMean,
   sampleMaterialBakeChannels,
+  sampleRgba8Bilinear,
   srgbByteToLinear,
 } from './TerrainSurfaceEvaluator.js';

@@ -101,7 +101,8 @@
     "qa:world:visual": "node scripts/run-world-visual-qa.mjs",
     "qa:look": "node scripts/run-environment-look-qa.mjs",
     "qa:biome-surface": "node scripts/run-biome-surface-qa.mjs",
-    "qa:wsc:pr0": "node scripts/run-wsc-pr0-capture.mjs"
+    "qa:wsc:pr0": "node scripts/run-wsc-pr0-capture.mjs",
+    "qa:wsc:pr2-pr3": "node scripts/run-wsc-pr2-pr3-qa.mjs"
   },
   "dependencies": {
     "@drusniel/procedural-stone": "github:danielsobrado/drusniel-procedural-stones#94a51a3",
