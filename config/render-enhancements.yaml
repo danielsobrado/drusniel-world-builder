@@ -34,6 +34,22 @@ farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false
 environmentalParticleAdmission: false
+atmosphericPassAdmission: false
+atmosphericPassBudget:
+  targetFrameMs: 16.7
+  recoveryFrameMs: 13
+  pressureMs: 300
+  recoveryMs: 2000
+  minimumDwellMs: 3000
+  maxFrameGapMs: 250
+  ssrStepFactor: 0.65
+  ssrMinimumSteps: 12
+  shaftSampleFactor: 0.5
+  shaftMinimumSamples: 8
+  volumetricStepFactor: 0.6
+  volumetricMinimumSteps: 16
+  aoResolutionFactor: 0.75
+  aoMinimumResolution: 0.25
 environmentalFragmentAdmission: false
 coastalSprayCompaction: false
 environmentalFragmentBudget:
