@@ -15,6 +15,14 @@ rendererAdmissionBudget: false
 regionalInstancePublicationBudget: false
 farShadowAdmission: false
 reflectionAdmission: false
+townDecorationAdmission: false
+townDecorationBudget:
+  triangleBudget: 60000
+  drawBudget: 24
+  protectMeters: 100
+  omitDistanceMeters: 180
+  refreshMeters: 6
+  recoveryRatio: 0.85
 auxiliaryPassBudget:
   farShadowIntervalMs: 33
   farShadowMaxAgeMs: 100
