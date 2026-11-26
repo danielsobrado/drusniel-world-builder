@@ -47,7 +47,7 @@ const TWO_PI = Math.PI * 2;
  * @param {object} options.intensity overall opacity uniform
  * @param {{ sunDirection: object, sunColor: object, skyColor: object }} options.light uniforms
  */
-export function createWaterfallMistMaterial({ puffs, time, intensity, light }) {
+export function createWaterfallMistMaterial({ puffs, time, intensity, light, alphaCutoff = 0 }) {
   const spawn = attribute('mistSpawn', 'vec4');
   const motion = attribute('mistMotion', 'vec4');
   const shape = attribute('mistShape', 'vec4');
@@ -80,6 +80,7 @@ export function createWaterfallMistMaterial({ puffs, time, intensity, light }) {
     forceSinglePass: true,
   });
   material.name = 'Waterfall mist';
+  material.alphaTest = alphaCutoff;
   material.fog = true;
   material.positionNode = center
     .add(right.mul(screen.x.mul(size)))
