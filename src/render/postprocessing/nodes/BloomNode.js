@@ -191,6 +191,7 @@ export class BloomNode {
       );
     })();
     this.targets.push(createHdrTarget(prefiltered));
+    this.targets[0].renderTarget.texture.name = 'Adaptive Bloom Prefilter';
 
     for (let level = 1; level < this.levelCount; level += 1) {
       const source = this.targets[level - 1];
@@ -199,6 +200,7 @@ export class BloomNode {
         1,
       ))();
       this.targets.push(createHdrTarget(downsampled));
+      this.targets[level].renderTarget.texture.name = `Adaptive Bloom Downsample ${level}`;
     }
 
     let combined = this.targets[this.levelCount - 1];
