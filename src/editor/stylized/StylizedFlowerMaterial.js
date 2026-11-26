@@ -34,6 +34,7 @@ import { applySkywardNormal, foliageSkyFill } from './forest/foliageLight.js';
 import { foliageMaterialClass } from './forest/FoliageNodeMaterial.js';
 import { createFlowerPalette } from './FlowerPalette.js';
 import { sampleGroundContactAt } from './groundContact/GroundContactState.js';
+import { surfaceMaskTextureUv } from '../world/SurfaceMaskTexture.js';
 
 function colorNode(value) {
   const color = new THREE.Color(value);
@@ -60,7 +61,7 @@ export function createStylizedFlowerMaterial({
     float(0.5).sub(base.z.div(chunkWorldSize)),
   );
   const worldXZ = base.xz.add(wrapNoiseOrigin(chunkCenter));
-  const surface = texture(surfaceMaskTexture, localUv);
+  const surface = texture(surfaceMaskTexture, surfaceMaskTextureUv(localUv, surfaceMaskTexture));
   const tile = tileTexture ? texture(tileTexture, localUv) : null;
   const ground = tile ? createMeadowGroundShading(config, tile, worldXZ) : null;
   const petals = tile ? createFlowerPalette(config, tile) : null;

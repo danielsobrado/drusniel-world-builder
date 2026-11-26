@@ -4,6 +4,7 @@
  * (~O(chunkCells)) instead of nested getTile scans (~O(chunkCells × searchArea)).
  */
 
+import { SURFACE_MASK_TEXTURE_PAD } from './SurfaceMaskTexture.js';
 import { grassHabitatCoverage, grassHabitatHaloCells } from './GrassHabitatCoverage.js';
 import { prepareGrassHabitatHalo } from './GrassHabitatHalo.js';
 import { grassPatchCover } from './GrassPatchiness.js';
@@ -256,6 +257,7 @@ export function buildSurfaceMaskPixels({
   snowCoverOut = null,
   tilePixelsOut = null,
   tileColor = null,
+  paddedOut = null,
 }) {
   const blendCells = Math.max(0.5, maskConfig.blendCells);
   const waterlineDepth = Math.max(0.01, maskConfig.waterlineDepth ?? 0.35);
@@ -336,16 +338,20 @@ export function buildSurfaceMaskPixels({
     blurredDensity = weighted.map((value, i) => (share[i] > 1e-6 ? value / share[i] : 1));
   }
 
-  for (let localZ = 0; localZ < chunkSize; localZ += 1) {
-    for (let localX = 0; localX < chunkSize; localX += 1) {
+  // `paddedOut` (SurfaceMaskTexture.js) also takes one border cell on each side,
+  // from the same halo the neighbours read for their own edge cells.
+  const pad = paddedOut ? SURFACE_MASK_TEXTURE_PAD : 0;
+  const paddedSize = chunkSize + pad * 2;
+  for (let localZ = -pad; localZ < chunkSize + pad; localZ += 1) {
+    for (let localX = -pad; localX < chunkSize + pad; localX += 1) {
+      const inside = localX >= 0 && localZ >= 0 && localX < chunkSize && localZ < chunkSize;
       const cellIndex = localZ * chunkSize + localX;
       const haloIndex = (localZ + searchRadius) * haloSize + (localX + searchRadius);
       const nearestRoad = distances[haloIndex];
       const pathInfluence = nearestRoad < DIST_INF / 2
         ? clamp(1 - Math.max(0, nearestRoad - 0.35) / blendCells, 0, 1)
         : 0;
-      const offset = cellIndex * 4;
-      mask[offset] = Math.round(pathInfluence * 255);
+      const path = Math.round(pathInfluence * 255);
       // Thin biomes grow islands of grass over bare ground; the habitat edge
       // thins the same way, so a sward dissolves into a desert in patches.
       let grass = coverage[haloIndex];
@@ -356,14 +362,29 @@ export function buildSurfaceMaskPixels({
       // A bank cell partly under water keeps grass by its dry share: the habitat
       // edge alone grew blades out across the shallows of a gently shelving bank.
       const dry = 1 - habitat.water[haloIndex];
-      mask[offset + 1] = Math.round(grass * dry * dry);
-      mask[offset + 2] = Math.round(habitat.water[haloIndex] * 255);
-      // Continuous dry share for the bake's snow (255 dry); B stays the gate.
-      mask[offset + 3] = wetness
+      const grassByte = Math.round(grass * dry * dry);
+      const waterByte = Math.round(habitat.water[haloIndex] * 255);
+      // Continuous dry share for the bake's snow (255 dry); B stays the gate. The
+      // vertex wetness covers this chunk only, so a border cell takes its dry share.
+      const dryByte = wetness && inside
         ? Math.round((1 - (wetness[localZ * (chunkSize + 1) + localX] + wetness[localZ * (chunkSize + 1) + localX + 1]
           + wetness[(localZ + 1) * (chunkSize + 1) + localX] + wetness[(localZ + 1) * (chunkSize + 1) + localX + 1]) / 4) * 255)
         : Math.round((1 - habitat.water[haloIndex]) * 255);
-      if (snowCoverOut) snowCoverOut[cellIndex] = Math.round((snowCover?.[haloIndex] ?? 0) * 255);
+      if (inside) {
+        const offset = cellIndex * 4;
+        mask[offset] = path;
+        mask[offset + 1] = grassByte;
+        mask[offset + 2] = waterByte;
+        mask[offset + 3] = dryByte;
+        if (snowCoverOut) snowCoverOut[cellIndex] = Math.round((snowCover?.[haloIndex] ?? 0) * 255);
+      }
+      if (paddedOut) {
+        const offset = ((localZ + pad) * paddedSize + localX + pad) * 4;
+        paddedOut[offset] = path;
+        paddedOut[offset + 1] = grassByte;
+        paddedOut[offset + 2] = waterByte;
+        paddedOut[offset + 3] = dryByte;
+      }
     }
   }
 
@@ -391,7 +412,10 @@ export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinit
     }
     return color;
   };
+  const paddedSize = chunkSize + SURFACE_MASK_TEXTURE_PAD * 2;
+  page.surfaceMaskTexturePixels = new Uint8Array(paddedSize * paddedSize * 4);
   page.surfaceMaskPixels = buildSurfaceMaskPixels({
+    paddedOut: page.surfaceMaskTexturePixels,
     snowCoverOut: page.snowBiomeCover,
     tilePixelsOut: page.tilePixels,
     tileColor,

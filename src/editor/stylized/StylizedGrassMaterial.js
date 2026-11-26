@@ -41,6 +41,7 @@ import {
   GRASS_LOD_WIDEN_DEFAULTS,
 } from './grassLodMath.js';
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
+import { surfaceMaskTextureUv } from '../world/SurfaceMaskTexture.js';
 
 const TWO_PI = Math.PI * 2;
 
@@ -121,7 +122,7 @@ export function createStylizedGrassMaterial({
   // `bladeCenter` restores that per-blade sample instead of making a whole clump
   // disappear, recolour or sway as one visible unit.
   const worldXZ = base.xz.add(sampleOffset).add(wrapNoiseOrigin(chunkCenter));
-  const surface = texture(surfaceMaskTexture, localUv);
+  const surface = texture(surfaceMaskTexture, surfaceMaskTextureUv(localUv, surfaceMaskTexture));
   const surfaceClass = createSurfaceClassNodes(surface);
   const trampleSample = texture(trampleTexture, localUv);
   const trampleDirection = trampleSample.xy.mul(2).sub(1);

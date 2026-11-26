@@ -36,6 +36,7 @@ import {
   classifySceneMesh,
   resolveWscDiagnosticMode,
 } from './wscDiagnosticModes.js';
+import { surfaceMaskTextureUv } from '../../world/SurfaceMaskTexture.js';
 
 function srgbByteToLinearNode([r, g, b]) {
   const c = new THREE.Color().setRGB(r / 255, g / 255, b / 255, THREE.SRGBColorSpace);
@@ -357,7 +358,7 @@ export class WorldVisualDiagnostics {
         const maskTex = isTerrain ? terrainSlotTemplate(this.editor, 'surfaceMaskTexture') : null;
         if (maskTex) {
           const ffTex = terrainSlotTemplate(this.editor, 'forestFloorTexture');
-          const rawCov = slotTexture('surfaceMaskTexture', maskTex, uv()).g;
+          const rawCov = slotTexture('surfaceMaskTexture', maskTex, surfaceMaskTextureUv(uv(), maskTex)).g;
           const fallbackCov = ffTex
             ? rawCov.mul(oneMinus(slotTexture('forestFloorTexture', ffTex, forestFloorUv(uv())).r.mul(0.84)))
             : rawCov;
@@ -392,7 +393,7 @@ export class WorldVisualDiagnostics {
       }
       case 'D21': {
         const maskTex = isTerrain ? terrainSlotTemplate(this.editor, 'surfaceMaskTexture') : null;
-        const shore = maskTex ? slotTexture('surfaceMaskTexture', maskTex, uv()).b : float(0);
+        const shore = maskTex ? slotTexture('surfaceMaskTexture', maskTex, surfaceMaskTextureUv(uv(), maskTex)).b : float(0);
         const wet = clamp(surfaceWetnessUniform.max(shore), 0, 1);
         return mix(vec3(0.08, 0.08, 0.1), vec3(0.08, 0.65, 0.98), wet);
       }

@@ -87,3 +87,39 @@ test('edited corner influences all adjoining pages with exactly matching halo ou
     for(let z=0;z<16;z++)for(let x=0;x<16;x++)assert.equal(grass(page.surfaceMaskPixels,16,x,z),grass(whole,32,(cx+2)*16+x,(cz+2)*16+z));
   }
 });
+
+test('the padded GPU mask carries the neighbour chunk\'s own edge cells across the border', async () => {
+  const { padSurfaceMaskByClamping, SURFACE_MASK_TEXTURE_PAD } = await import('../src/editor/world/SurfaceMaskTexture.js');
+  // Desert to grass with a road crossing the shared edge at x = 0: coverage and path both vary there.
+  const g = generator((x, z) => (z === 3 ? config.roadTileId : (x < -3 ? 2 : 4)));
+  const size = 8;
+  const build = (originX) => {
+    const tiles = Uint8Array.from({ length: size ** 2 }, (_, i) => g.sampleTile(originX + i % size, Math.floor(i / size)));
+    const heights = new Float32Array((size + 1) ** 2);
+    const paddedOut = new Uint8Array((size + 2 * SURFACE_MASK_TEXTURE_PAD) ** 2 * 4);
+    const mask = buildSurfaceMaskPixels({ tiles, heights, originX, originZ: 0, chunkSize: size,
+      sampleTile: (a, b) => g.sampleTile(a, b), sampleHeight: (a, b) => g.sampleHeight(a, b),
+      sampleWater: (a, b) => g.sampleWater(a, b), maskConfig: { ...config, worldSeed: 918273 }, paddedOut });
+    return { mask, paddedOut };
+  };
+  const west = build(-size);
+  const east = build(0);
+  const padded = size + 2;
+  let varied = 0;
+  for (let z = 0; z < size; z += 1) {
+    for (let c = 0; c < 3; c += 1) {
+      // West's border column (padded x = size + 1) is east's first column, and the reverse.
+      assert.equal(west.paddedOut[((z + 1) * padded + size + 1) * 4 + c], east.mask[(z * size) * 4 + c], `row ${z} ch ${c}`);
+      assert.equal(east.paddedOut[((z + 1) * padded) * 4 + c], west.mask[(z * size + size - 1) * 4 + c], `row ${z} ch ${c}`);
+    }
+    // The interior is the unpadded mask.
+    assert.deepEqual([...west.paddedOut.subarray(((z + 1) * padded + 1) * 4, ((z + 1) * padded + 1 + size) * 4)],
+      [...west.mask.subarray(z * size * 4, (z + 1) * size * 4)]);
+    if (east.mask[(z * size) * 4 + 1] !== west.mask[(z * size + size - 1) * 4 + 1]
+      || east.mask[(z * size) * 4] !== west.mask[(z * size + size - 1) * 4]) varied += 1;
+  }
+  assert.ok(varied > 0, 'the fields vary across the edge, so the border is not trivially equal');
+  // The clamping fallback repeats edge cells.
+  const clamped = padSurfaceMaskByClamping(west.mask, size);
+  assert.deepEqual([...clamped.subarray(0, 4)], [...west.mask.subarray(0, 4)]);
+});

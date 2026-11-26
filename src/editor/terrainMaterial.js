@@ -91,6 +91,7 @@ import {
   slotVector2,
 } from './materials/TerrainSlotBindings.js';
 import { TERRAIN_SURFACE_CONSTANTS } from './stylized/worldSurfaceContext/TerrainSurfaceEvaluator.js';
+import { surfaceMaskTextureUv } from './world/SurfaceMaskTexture.js';
 
 const {
   HEIGHT_SHADE_SCALE,
@@ -173,7 +174,7 @@ export function createTerrainMaterial({
   }));
   const tileColor = tileSample.rgb;
   const terrainHeight = slotTexture('heightTexture', heightTexture, terrainUv).r;
-  const surfaceMask = slotTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
+  const surfaceMask = slotTexture('surfaceMaskTexture', surfaceMaskTexture, surfaceMaskTextureUv(terrainUv, surfaceMaskTexture));
   const forestFloorSample = slotTexture('forestFloorTexture', forestFloorTexture, forestFloorUv(terrainUv));
   const forestFloor = forestFloorSample.r;
   // The don't-hover patch under trunks and boulders: ambient occlusion rather than

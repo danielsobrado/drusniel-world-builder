@@ -60,6 +60,7 @@ import { inspectRendererCapabilities } from '../render/RendererCapabilities.js';
 import { GpuOcclusion } from '../render/occlusion/GpuOcclusion.js';
 import { resolveCinematicFinish } from './stylized/cinematicFinish.js';
 import { FOREST_FLOOR_SIZE } from './stylized/forestFloorTexture.js';
+import { SURFACE_MASK_TEXTURE_PAD, markPaddedSurfaceMask, padSurfaceMaskByClamping } from './world/SurfaceMaskTexture.js';
 import { createTerrainOccluderGeometry } from './world/terrainOccluderProxy.js';
 import { createSlotGeometry, fitSlotBounds } from './world/TerrainSlotBounds.js';
 
@@ -180,13 +181,15 @@ function createSlot({ slotIndex, scene, geometry, worldStore, stylizedConfig, sh
   tileTexture.generateMipmaps = false;
   tileTexture.colorSpace = THREE.SRGBColorSpace;
 
-  const surfaceMaskTexture = new THREE.DataTexture(
-    surfaceMaskPixels,
-    chunkSize,
-    chunkSize,
+  const surfaceMaskTextureSize = chunkSize + SURFACE_MASK_TEXTURE_PAD * 2;
+  const surfaceMaskTexturePixels = new Uint8Array(surfaceMaskTextureSize * surfaceMaskTextureSize * 4);
+  const surfaceMaskTexture = markPaddedSurfaceMask(new THREE.DataTexture(
+    surfaceMaskTexturePixels,
+    surfaceMaskTextureSize,
+    surfaceMaskTextureSize,
     THREE.RGBAFormat,
     THREE.UnsignedByteType,
-  );
+  ));
   surfaceMaskTexture.magFilter = THREE.LinearFilter;
   surfaceMaskTexture.minFilter = THREE.LinearFilter;
   surfaceMaskTexture.generateMipmaps = false;
@@ -253,6 +256,7 @@ function createSlot({ slotIndex, scene, geometry, worldStore, stylizedConfig, sh
     pageRevision: -1,
     texturePixels,
     surfaceMaskPixels,
+    surfaceMaskTexturePixels,
     heightPixels,
     forestFloorPixels,
     forestFloorSize,
@@ -872,6 +876,8 @@ export class InfiniteTerrainView {
     const commitStartedAt = performance.now();
     slot.texturePixels.set(ready.tilePixels);
     slot.surfaceMaskPixels.set(ready.surfaceMaskPixels);
+    if (ready.surfaceMaskTexturePixels) slot.surfaceMaskTexturePixels.set(ready.surfaceMaskTexturePixels);
+    else padSurfaceMaskByClamping(ready.surfaceMaskPixels, this.chunkSize, slot.surfaceMaskTexturePixels);
     slot.heightPixels.set(ready.heights);
     fitSlotBounds(slot.mesh.geometry, ready.heights, this.chunkWorldSize);
     this.attachOccluderProxy(slot, ready);

@@ -128,6 +128,9 @@ self.addEventListener('message', async (event) => {
     if (page.surfaceMaskPixels?.buffer) {
       transfer.push(page.surfaceMaskPixels.buffer);
     }
+    if (page.surfaceMaskTexturePixels?.buffer) {
+      transfer.push(page.surfaceMaskTexturePixels.buffer);
+    }
     if (page.snowBiomeCover?.buffer) {
       transfer.push(page.snowBiomeCover.buffer);
     }

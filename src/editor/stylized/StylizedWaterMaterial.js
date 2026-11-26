@@ -66,6 +66,7 @@ import { createWaterAppearanceNodes } from './WaterAppearanceNodes.js';
 import { createFrozenWaterNodes } from './FrozenWaterNodes.js';
 import { rippleFieldSlope } from '../water/rippleFieldNode.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
+import { surfaceMaskTextureUv } from '../world/SurfaceMaskTexture.js';
 
 const FRESNEL_POWER = 5;
 const LOW_SURFACE_RAMP_MIN = 0.2;
@@ -142,7 +143,7 @@ export function createStylizedWaterMaterial({
   const fieldUv = terrainUv
     .mul((waterFieldSize - 1) / waterFieldSize)
     .add(0.5 / waterFieldSize);
-  const surface = sampleTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
+  const surface = sampleTexture('surfaceMaskTexture', surfaceMaskTexture, surfaceMaskTextureUv(terrainUv, surfaceMaskTexture));
   const exactCoverage = createSurfaceClassNodes(surface).waterCoverage;
   const waterField = sampleTexture('waterFieldTexture', waterFieldTexture, fieldUv);
   const appearance = waterAppearanceTexture ? createWaterAppearanceNodes(
