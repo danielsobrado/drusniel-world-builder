@@ -43,9 +43,15 @@ export class GpuPassProfiler {
     if (!this.enabled || this.pending || this.error || this.frame++ % this.sampleEvery !== 0) return;
     this.active = true;
     this.scope = null;
+    this.mixedScope = false;
     this.timestamp = timestamp;
     this.labels.clear();
     this.backend.trackTimestamp = true;
+  }
+  markScope(scope) {
+    if (!this.active || this.mixedScope) return;
+    if (this.scope && this.scope !== scope) { this.mixedScope = true; this.scope = null; }
+    else this.scope = scope;
   }
   endFrame() {
     if (!this.active) return;
