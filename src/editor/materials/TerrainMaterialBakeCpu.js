@@ -148,8 +148,9 @@ function sampleCanopy(source, x, z, resolution) {
   const pixels = source.canopyPixels;
   const size = source.canopySize;
   if (!pixels || !Number.isInteger(size) || size < 1) return 0;
-  const sampleX = clamp(Math.floor((x + 0.5) * size / resolution), 0, size - 1);
-  const sampleZ = clamp(Math.floor((z + 0.5) * size / resolution), 0, size - 1);
+  // Edge-aligned canopy texels (forestFloorTexture.js): nearest to this bake texel's centre.
+  const sampleX = clamp(Math.round((x + 0.5) / resolution * (size - 1)), 0, size - 1);
+  const sampleZ = clamp(Math.round((z + 0.5) / resolution * (size - 1)), 0, size - 1);
   // Four bytes a texel: R is the canopy, G the contact shade the streamed ground
   // also reads (see `StylizedSurfaceViewBase.paintContactShade`). The stride is the
   // whole contract between the two — a one-byte stride here would read the canopy

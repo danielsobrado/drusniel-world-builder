@@ -47,6 +47,7 @@ import { buildChunkContactShadeKey, collectChunkContactShadeSources } from './gr
 import {
   FOREST_FLOOR_CANOPY_SAMPLES,
   canopySampleCoord,
+  forestFloorTexelMeters,
   writeForestFloorCanopy,
   writeForestFloorLitter,
 } from './forestFloorTexture.js';
@@ -1188,7 +1189,7 @@ export class StylizedSurfaceView {
    */
   paintForestLitter(terrainSlot, descriptor, grassFloor, samples) {
     const size = terrainSlot.forestFloorSize;
-    const texel = this.chunkWorldSize / size;
+    const texel = forestFloorTexelMeters(this.chunkWorldSize, size);
     const half = this.chunkWorldSize * 0.5;
     const tileSize = this.terrainView.worldStore.tileSize;
     const seed = (this.terrainView.worldStore.generator?.toMetadata?.().seed ?? 0) ^ CANOPY_FLOOR_PATCH_SALT;
@@ -1202,8 +1203,8 @@ export class StylizedSurfaceView {
         const floor = bilinearSample(grassFloor, samples, sx, sz);
         if (floor >= 1) return 0;
         return 1 - canopyFloorCover(
-          (descriptor.centerWorldX - half + (x + 0.5) * texel) / tileSize,
-          -(descriptor.centerWorldZ + half - (z + 0.5) * texel) / tileSize,
+          (descriptor.centerWorldX - half + x * texel) / tileSize,
+          -(descriptor.centerWorldZ + half - z * texel) / tileSize,
           floor,
           seed,
         );

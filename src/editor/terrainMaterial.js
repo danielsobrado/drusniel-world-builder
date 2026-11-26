@@ -76,6 +76,7 @@ import { applyMeadowGroundDetail } from './stylized/meadow/meadowGroundDetail.js
 import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
 import { FOREST_FLOOR_FILL, foliageSkyFill } from './stylized/forest/foliageLight.js';
+import { forestFloorUv } from './stylized/forestFloorTexture.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
 import { createPuddleShading } from './stylized/PuddleShading.js';
@@ -173,7 +174,7 @@ export function createTerrainMaterial({
   const tileColor = tileSample.rgb;
   const terrainHeight = slotTexture('heightTexture', heightTexture, terrainUv).r;
   const surfaceMask = slotTexture('surfaceMaskTexture', surfaceMaskTexture, terrainUv);
-  const forestFloorSample = slotTexture('forestFloorTexture', forestFloorTexture, terrainUv);
+  const forestFloorSample = slotTexture('forestFloorTexture', forestFloorTexture, forestFloorUv(terrainUv));
   const forestFloor = forestFloorSample.r;
   // The don't-hover patch under trunks and boulders: ambient occlusion rather than
   // shadow, so it does not move with the sun and it holds past the shadow map.

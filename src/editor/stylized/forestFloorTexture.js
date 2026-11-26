@@ -16,12 +16,27 @@ export const FOREST_FLOOR_SIZE = 128;
 export const FOREST_FLOOR_CANOPY_SAMPLES = 16;
 
 /**
- * A texel centre's position in canopy sample space. The samples are edge-aligned,
- * so the border texels of two neighbouring chunks read the same shared sample:
- * centre-aligned samples clamped at the rim stepped at every chunk edge.
+ * The texture's texels are edge-aligned too: texel 0 and `size - 1` sit on the
+ * chunk's edges, `forestFloorTexelMeters` apart, so two neighbouring chunks hold
+ * the same value on their shared border. Centre-aligned texels left half a texel
+ * of clamped edge value on each side, and the ground stepped by a whole texel's
+ * gradient at every chunk edge (seen in D00 and D10 from above).
+ */
+export function forestFloorTexelMeters(chunkWorldSize, size = FOREST_FLOOR_SIZE) {
+  return chunkWorldSize / (size - 1);
+}
+
+/** The texture coordinate that reads an edge-aligned texel at a chunk `uv` (TSL node). */
+export function forestFloorUv(uvNode, size = FOREST_FLOOR_SIZE) {
+  return uvNode.mul((size - 1) / size).add(0.5 / size);
+}
+
+/**
+ * A texel's position in canopy sample space. Both grids are edge-aligned, so the
+ * border texels of two neighbouring chunks read the same shared sample.
  */
 export function canopySampleCoord(texel, size, samples) {
-  return (texel + 0.5) / size * (samples - 1);
+  return texel / (size - 1) * (samples - 1);
 }
 
 /**

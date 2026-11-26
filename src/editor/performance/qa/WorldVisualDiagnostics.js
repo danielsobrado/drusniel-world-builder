@@ -22,6 +22,7 @@ import {
   sampleGroundContactAt,
 } from '../../stylized/groundContact/GroundContactState.js';
 import { slotTexture } from '../../materials/TerrainSlotBindings.js';
+import { forestFloorUv } from '../../stylized/forestFloorTexture.js';
 import { meadowPatchColors } from '../../stylized/meadow/meadowColorNodes.js';
 import { MEADOW_GRASS_DEFAULTS } from '../../stylized/meadow/meadowGrassConfig.js';
 import { worldNoiseField } from '../../stylized/worldNoise.js';
@@ -346,7 +347,7 @@ export class WorldVisualDiagnostics {
       case 'D10': {
         const ffTex = isTerrain ? terrainSlotTemplate(this.editor, 'forestFloorTexture') : null;
         if (ffTex) {
-          const litter = slotTexture('forestFloorTexture', ffTex, uv()).b;
+          const litter = slotTexture('forestFloorTexture', ffTex, forestFloorUv(uv())).b;
           return mix(vec3(0.05, 0.05, 0.06), vec3(0.95, 0.58, 0.12), litter);
         }
         return mix(vec3(0.16, 0.16, 0.18), vec3(0.95, 0.58, 0.12), gc.litter);
@@ -358,7 +359,7 @@ export class WorldVisualDiagnostics {
           const ffTex = terrainSlotTemplate(this.editor, 'forestFloorTexture');
           const rawCov = slotTexture('surfaceMaskTexture', maskTex, uv()).g;
           const fallbackCov = ffTex
-            ? rawCov.mul(oneMinus(slotTexture('forestFloorTexture', ffTex, uv()).r.mul(0.84)))
+            ? rawCov.mul(oneMinus(slotTexture('forestFloorTexture', ffTex, forestFloorUv(uv())).r.mul(0.84)))
             : rawCov;
           // Inside WSC window, display published ecological blade coverage (`eco.a`) directly.
           const ecoCov = mix(fallbackCov, gc.vegetationCoverage, gc.inside);

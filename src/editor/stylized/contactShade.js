@@ -13,6 +13,7 @@
  * rather than shadow — it does not move.
  */
 import { ROOT_LOBE, footprintLobeAt, footprintShape } from './groundContact/ecologicalFootprint.js';
+import { forestFloorTexelMeters } from './forestFloorTexture.js';
 
 export const DEFAULT_CONTACT_SHADE = Object.freeze({
   enabled: true,
@@ -115,9 +116,10 @@ export function paintContactShade({
     throw new Error('Contact shade needs a positive chunk world size.');
   }
   const half = chunkWorldSize / 2;
-  const metersPerTexel = chunkWorldSize / size;
-  const toTexelX = (worldX) => (worldX - (centerWorldX - half)) / metersPerTexel - 0.5;
-  const toTexelZ = (worldZ) => ((centerWorldZ + half) - worldZ) / metersPerTexel - 0.5;
+  // Edge-aligned texels (forestFloorTexture.js): texel 0 and size - 1 lie on the chunk edges.
+  const metersPerTexel = forestFloorTexelMeters(chunkWorldSize, size);
+  const toTexelX = (worldX) => (worldX - (centerWorldX - half)) / metersPerTexel;
+  const toTexelZ = (worldZ) => ((centerWorldZ + half) - worldZ) / metersPerTexel;
   let painted = 0;
   for (const source of sources ?? []) {
     const radius = Number(source?.radius);

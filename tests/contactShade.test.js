@@ -60,8 +60,12 @@ test('a canopy-sized patch darkens the middle of the texture', () => {
 });
 
 test('the falloff is quadratic, so the patch has no rim', () => {
-  const { pixels } = paint([{ x: CENTER.x, z: CENTER.z, radius: 64, strength: 1 }]);
   const mid = Math.floor(SIZE / 2);
+  // Centred on texel (mid, mid) of the edge-aligned grid, reaching 8 texels out.
+  const texel = CHUNK / (SIZE - 1);
+  const { pixels } = paint([{
+    x: CENTER.x - CHUNK / 2 + mid * texel, z: CENTER.z + CHUNK / 2 - mid * texel, radius: 8 * texel, strength: 1,
+  }]);
   // Sampling outward from the centre along one row: the value has to fall, and
   // fall as a square — that is what makes a soft patch rather than a disc with a
   // visible edge. Half way out, the value is a quarter of the centre's.
@@ -174,8 +178,8 @@ test('the forest floor keeps the canopy coarse and upsamples it smoothly', () =>
   // The habitat is sampled at the old 16 × 16, not per texel.
   assert.equal(calls, samples * samples);
   const row = Array.from({ length: size }, (_, x) => pixels[(10 * size + x) * 4]);
-  // Edge-aligned samples: each texel reads the ramp at its own centre.
-  for (let x = 0; x < size; x += 1) assert.ok(Math.abs(row[x] - (x + 0.5) / size * 255) <= 0.5 + 1e-9);
+  // Edge-aligned texels over edge-aligned samples: texel 0 and size - 1 read the edge samples.
+  for (let x = 0; x < size; x += 1) assert.ok(Math.abs(row[x] - x / (size - 1) * 255) <= 0.5 + 1e-9);
   // Shade and blue are cleared for the contact pass; alpha is opaque.
   assert.equal(pixels[1], 0);
   assert.equal(pixels[2], 0);
@@ -193,7 +197,28 @@ test('neighbouring chunks agree on the canopy at their shared edge', () => {
     return pixels;
   };
   const west = chunk(0), east = chunk(128);
+  // Both border texels lie on the shared edge, so they hold the same value: a step
+  // "no larger than one texel's gradient" was still a visible seam from above.
   const step = Math.abs(west[(size - 1) * 4] - east[0]);
-  const inner = Math.abs(west[(size - 1) * 4] - west[(size - 2) * 4]);
-  assert.ok(step <= inner + 1, `edge step ${step} vs ${inner} one texel inside`);
+  assert.ok(step <= 1, `edge step ${step}`);
+});
+
+test('a patch straddling two chunks paints the same shade on both sides of their border', () => {
+  const size = FOREST_FLOOR_SIZE;
+  const source = { x: 128.6, z: 13.3, radius: 5.5, strength: 1, phase: 1.7 };
+  const chunk = centerWorldX => {
+    const pixels = new Uint8Array(size * size * 4);
+    paintContactShade({ pixels, size, centerWorldX, centerWorldZ: 0, chunkWorldSize: 128, sources: [source] });
+    return pixels;
+  };
+  const west = chunk(64);
+  const east = chunk(192);
+  let painted = 0;
+  for (let z = 0; z < size; z += 1) {
+    const a = west[(z * size + size - 1) * 4 + 1];
+    const b = east[(z * size) * 4 + 1];
+    if (a > 0 || b > 0) painted += 1;
+    assert.ok(Math.abs(a - b) <= 1, `row ${z}: ${a} vs ${b}`);
+  }
+  assert.ok(painted > 4, 'the patch reaches the border');
 });
