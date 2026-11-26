@@ -88,9 +88,10 @@ export class StylizedSurfaceView {
     this.config = config;
     this.regionalResources = config.enhancements?.regionalResourceBudget ? new RegionalResourceBudget(config.enhancements.regionalBudget) : null;
     this.regionalDensity = config.enhancements?.regionalDensityBudget ? new RegionalDensityBudget(config.enhancements.regionalBudget) : null;
-    const admission = config.enhancements?.regionalAdmissionBudget === true;
+    const rendererAdmission = config.enhancements?.rendererAdmissionBudget === true;
+    const admission = config.enhancements?.regionalAdmissionBudget === true || rendererAdmission;
     this.regionalSpatial = config.enhancements?.regionalSpatialBudget || config.enhancements?.regionalGeometryCostBudget || admission
-      ? new RegionalSceneryBudget(config.enhancements.regionalBudget, { geometryCosts: config.enhancements.regionalGeometryCostBudget || admission, admission }) : null;
+      ? new RegionalSceneryBudget(config.enhancements.regionalBudget, { geometryCosts: config.enhancements.regionalGeometryCostBudget || admission, admission, rendererAdmission }) : null;
     // The dark patch where trunks and boulders meet the ground, resolved once.
     this.contactShadeSettings = resolveContactShade(config);
     this.enabled = Boolean(config?.enabled);
