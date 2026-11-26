@@ -152,15 +152,15 @@ export class SpatialPerformanceOverlay {
       ...cell.reasons,
     ].join('\n') : `Chunk ${key}: no sampled demand (not necessarily empty).`;
     const stats = sample.allocationStats;
-    const gpu = this.gpuProfiler?.samples.at(-1);
+    const gpu = this.gpuProfiler?.latestSample;
     this.global.textContent = [
       'Whole renderer · not per chunk',
       `CPU fixed/deferred: ${PerfCounters.get('frameFixedCpuMs').toFixed(1)} / ${PerfCounters.get('frameDeferredCpuMs').toFixed(1)} ms`,
       `Queued upload: ${number(PerfCounters.get('framePublicationUploadBytes'))} B`,
       ...(stats ? [`Admission changes/deferred: ${number(stats.changes)} / ${number(stats.deferred)}`,
         `Upload / overlap / unknown deferred: ${number(stats.uploadDeferred)} / ${number(stats.overlapDeferred)} / ${number(stats.unknownDeferred)}`] : []),
-      ...(gpu ? [`Measured GPU render passes (QA sample): ${gpu.totalMs.toFixed(2)} ms`,
-        ...Object.entries(gpu.passes).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, ms]) => `${name}: ${ms.toFixed(2)} ms`)] : ['No measured GPU pass sample (requires GPU-enabled QA capture)']),
+      ...(gpu ? [`Measured GPU render passes (sample): ${gpu.totalMs.toFixed(2)} ms`,
+        ...Object.entries(gpu.passes).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, ms]) => `${name}: ${ms.toFixed(2)} ms`)] : ['No measured GPU pass sample (requires supported timestamp capture)']),
       'GPU per-region timing unavailable',
     ].join('\n');
   }
@@ -169,7 +169,7 @@ export class SpatialPerformanceOverlay {
     if (!this.sample) return;
     const blob = new Blob([JSON.stringify({ ...spatialExport(this.sample), wholeRenderer: {
       fixedCpuMs: PerfCounters.get('frameFixedCpuMs'), deferredCpuMs: PerfCounters.get('frameDeferredCpuMs'),
-      queuedUploadBytes: PerfCounters.get('framePublicationUploadBytes'), gpuRenderSample: this.gpuProfiler?.samples.at(-1) ?? null,
+      queuedUploadBytes: PerfCounters.get('framePublicationUploadBytes'), gpuRenderSample: this.gpuProfiler?.latestSample ?? null,
     } }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = this.panel.ownerDocument.createElement('a');
