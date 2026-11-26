@@ -206,6 +206,26 @@ export class MeadowGrassField {
     this.cards.layoutState[4] = Number.NaN;
   }
 
+  setRegionalCardBudget(budget, camera) {
+    if (!this.cards || !camera || !this.terrainView.focusChunk) return;
+    const focus = this.terrainView.focusChunk;
+    const origin = this.terrainView.floatingOrigin.getState();
+    const size = this.terrainView.chunkWorldSize;
+    if (!(size > 0)) return;
+    const cameraChunk = {
+      chunkX: Math.floor((camera.position.x + origin.x) / size),
+      chunkZ: Math.floor(-(camera.position.z + origin.z) / size),
+    };
+    const signature = `${budget.revision}:${size}:${focus.chunkX}:${focus.chunkZ}:${cameraChunk.chunkX}:${cameraChunk.chunkZ}`;
+    if (signature === this.regionalCardBudgetSignature) return;
+    this.regionalCardBudgetSignature = signature;
+    const anchor = { chunkX: focus.chunkX, chunkZ: focus.chunkZ };
+    this.cards.countFactorForTile = (x, z, halfSize) => budget.cardFactor(
+      x, z, halfSize, anchor, cameraChunk, size, this.uniforms.cardFadeIn.value.y,
+    );
+    this.cards.layoutState[4] = Number.NaN;
+  }
+
   setGrowth(source) {
     applyMeadowGrowth(this,resolveMeadowGrowth(source,undefined,this.shapeOverrides,this.settings.growth));
   }
