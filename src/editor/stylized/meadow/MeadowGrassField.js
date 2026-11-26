@@ -167,6 +167,9 @@ export class MeadowGrassField {
         detail: 1, count: bandStemCount(far.tileSize, far.density), tileSize: far.tileSize, cards: true,
       });
       const start = this.uniforms.cardFadeIn.value.x;
+      this.cardDistance = far.distance;
+      this.baseCardDistance = far.distance;
+      this.baseFarFade = this.uniforms.farFade.value.clone();
       this.cardBoundsPadding = meadowCardBoundsPadding(this.uniforms);
       this.cards = new MeadowTileLayer({
         scene,
@@ -177,7 +180,7 @@ export class MeadowGrassField {
         material: this.cardMaterial,
         // Include tiles in the incoming overlap, including small card tiles
         // entirely inside the blade range.
-        selectBand: (nearest, farthest) => (nearest < far.distance ** 2 && farthest > start ** 2 ? 'cards' : null),
+        selectBand: (nearest, farthest) => (nearest < this.cardDistance ** 2 && farthest > start ** 2 ? 'cards' : null),
         reach: far.distance,
         ground: this.ground,
         preparer: this.preparer,
@@ -187,6 +190,18 @@ export class MeadowGrassField {
       });
     }
     this.stats = {};
+  }
+
+  setRegionalCardReach(factor) {
+    if (!this.cards) return;
+    const minimum = this.uniforms.cardFadeIn.value.y + this.cards.tileSize;
+    const distance = Math.min(this.baseCardDistance, Math.max(minimum, this.baseCardDistance * factor));
+    if (distance === this.cardDistance) return;
+    this.cardDistance = distance;
+    this.cards.reach = distance;
+    const fadeWidth = this.baseFarFade.y - this.baseFarFade.x;
+    this.uniforms.farFade.value.set(Math.max(this.uniforms.cardFadeIn.value.y, distance - fadeWidth), distance);
+    this.cards.layoutState[4] = Number.NaN;
   }
 
   setGrowth(source) {

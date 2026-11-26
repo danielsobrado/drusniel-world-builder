@@ -9,7 +9,8 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   regionalLazyTrees: false,
   regionalResourceBudget: false,
   regionalDensityBudget: false,
-  regionalBudget: Object.freeze({ idleMs: 30000, maxTrackedTextureMiB: 256, evictionsPerFrame: 1, farGrassPressure: 0.85 }),
+  regionalBudget: Object.freeze({ idleMs: 30000, maxTrackedTextureMiB: 256, evictionsPerFrame: 1, farGrassPressure: 0.85,
+    sampleIntervalMs: 1000, triangleBudget: 4000000, drawBudget: 1500, townInstanceBudget: 3000, recoveryRatio: 0.75 }),
   r187: Object.freeze({ depthOnlyOcclusion: false, prioritizedRequests: false, maxConcurrentRequests: 6, maxConcurrentDecodes: 2, requestMaxWaitMs: 500 }),
   surfaceAnisotropy: Object.freeze({ enabled: true, level: 16 }),
   waterReflections: Object.freeze({
@@ -70,7 +71,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   if (!Number.isFinite(value.detailTurnMarginDegrees) || value.detailTurnMarginDegrees < 8 || value.detailTurnMarginDegrees > 45) {
     throw new RangeError('detailTurnMarginDegrees must be within [8, 45] to cover pending camera turns.');
   }
-  for (const [key, min, max] of [['idleMs', 1000, 300000], ['maxTrackedTextureMiB', 16, 8192], ['evictionsPerFrame', 1, 8], ['farGrassPressure', 0.1, 1]]) {
+  for (const [key, min, max] of [['idleMs', 1000, 300000], ['maxTrackedTextureMiB', 16, 8192], ['evictionsPerFrame', 1, 8], ['farGrassPressure', 0.1, 1], ['sampleIntervalMs', 250, 10000], ['triangleBudget', 100000, 100000000], ['drawBudget', 50, 20000], ['townInstanceBudget', 100, 100000], ['recoveryRatio', 0.1, 0.99]]) {
     const n = value.regionalBudget[key];
     if (!Number.isFinite(n) || n < min || n > max || (key === 'evictionsPerFrame' && !Number.isInteger(n))) throw new RangeError(`regionalBudget.${key} must be in [${min}, ${max}].`);
   }

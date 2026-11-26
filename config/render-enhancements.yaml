@@ -12,6 +12,11 @@ regionalBudget:
   maxTrackedTextureMiB: 256
   evictionsPerFrame: 1
   farGrassPressure: 0.85
+  sampleIntervalMs: 1000
+  triangleBudget: 4000000
+  drawBudget: 1500
+  townInstanceBudget: 3000
+  recoveryRatio: 0.75
 detailTurnMarginDegrees: 12
 r187:
   depthOnlyOcclusion: false

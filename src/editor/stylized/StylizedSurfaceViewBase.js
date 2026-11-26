@@ -1,3 +1,5 @@
+import { RegionalResourceBudget } from '../performance/RegionalResourceBudget.js';
+import { RegionalDensityBudget } from '../performance/RegionalDensityBudget.js';
 import { AlpineRockView } from './alpine/AlpineRockView.js';
 import { PathBridgeView } from './path/PathBridgeView.js';
 import { IcebergView } from './ice/IcebergView.js';
@@ -83,6 +85,8 @@ export class StylizedSurfaceView {
     this.terrainView = terrainView;
     this.objectMap = objectMap;
     this.config = config;
+    this.regionalResources = config.enhancements?.regionalResourceBudget ? new RegionalResourceBudget(config.enhancements.regionalBudget) : null;
+    this.regionalDensity = config.enhancements?.regionalDensityBudget ? new RegionalDensityBudget(config.enhancements.regionalBudget) : null;
     // The dark patch where trunks and boulders meet the ground, resolved once.
     this.contactShadeSettings = resolveContactShade(config);
     this.enabled = Boolean(config?.enabled);
@@ -895,6 +899,15 @@ export class StylizedSurfaceView {
     }
     if (this.reflections) this.reflections.residencyReady = true;
     if (!landStreaming) return;
+    if (this.regionalDensity && this.meadowGrass) {
+      const factor = this.regionalDensity.update(timestamp, {
+        triangles: PerfCounters.get('rendererTriangles'), draws: PerfCounters.get('rendererDrawCalls'),
+        townInstances: this.terrainView.townRuntime?.streamer.stats.instances ?? 0,
+        vegetationInstances: PerfCounters.get('treeNearInstances') + PerfCounters.get('treeProxyInstances') + (this.meadowGrass.blades.stats.stems ?? 0),
+      });
+      this.meadowGrass.setRegionalCardReach(factor);
+      PerfCounters.set('regionalFarGrassReachFactor', factor);
+    }
     this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
     if (camera) {
@@ -938,6 +951,11 @@ export class StylizedSurfaceView {
     if (this.runDeferredWork) this.runDeferredWork(updateObstacles);
     else updateObstacles();
     this.prewarmOneDistantWaterSlot();
+    if (this.regionalResources) {
+      const retire = () => this.regionalResources.update(this, timestamp, this.shouldYieldWork);
+      if (this.runDeferredWork) this.runDeferredWork(retire);
+      else retire();
+    }
 
     const focusChunk = this.terrainView.focusChunkKey ? this.terrainView.focusChunk : null;
     // Canonical camera XZ, once for the whole pass. Grass thins by how far each
