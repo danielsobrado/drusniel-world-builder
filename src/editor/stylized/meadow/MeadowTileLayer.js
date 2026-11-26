@@ -534,12 +534,19 @@ export class MeadowTileLayer {
   commit() {
     if (!this.batchDirty) return;
     this.batches.begin();
+    let requestedCards = 0, selectedCards = 0;
     let tiles = 0;
     let visibleMissing = 0, visibleCapacityLag = 0;
     let inViewMissing = 0, inViewCapacityLag = 0;
     for (const tile of this.tiles.values()) {
       if (tile.band === null || !tile.output || tile.output.count === 0) continue;
       this.batches.add(tile.builtBand, tile);
+      if (this.regionalCardBudgetEnabled) {
+        const count = Math.min(tile.output.count, this.templates[tile.builtBand].instanceCount);
+        requestedCards += count;
+        selectedCards += (tile.regionalCountFactor ?? 1) < 1
+          ? Math.max(1, Math.floor(count * tile.regionalCountFactor)) : count;
+      }
       tiles += 1;
     }
     const uploadStartedAt = performance.now();
@@ -562,6 +569,11 @@ export class MeadowTileLayer {
     this.stats.inViewMissing = inViewMissing;
     this.stats.inViewCapacityLag = inViewCapacityLag;
     this.stats.stems = Object.values(this.stats.bands).reduce((sum, value) => sum + value, 0);
+    if (this.regionalCardBudgetEnabled) {
+      PerfCounters.set('regionalSpatialCardsRequested', requestedCards);
+      PerfCounters.set('regionalSpatialCardsSelected', selectedCards);
+      PerfCounters.set('regionalSpatialCardsPublished', this.stats.stems);
+    }
     this.batchDirty = this.batches.pending > 0;
   }
 
