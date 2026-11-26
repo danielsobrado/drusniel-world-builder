@@ -1954,7 +1954,7 @@ from the town's signature (`SettlementSignature`): radial (walled_radial, the
 former planner), grid (planned_grid) and linear (road_village; along the shore
 for a port). Avenues, named markets with secondary squares (a harbour market for
 coastal_harbor towns) and §27 traits landed with it — see
-`docs/settlement-rendering.md`, "Town identity". Not yet: river_linear,
+`docs/settlement-rendering-2026-11-26.md`, "Town identity". Not yet: river_linear,
 crossroads, organic_cluster, hill_fort, terraced_mountain; the planner has no
 river or slope input yet.
 

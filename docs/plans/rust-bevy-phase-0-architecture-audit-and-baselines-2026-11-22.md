@@ -657,7 +657,7 @@ Read accepted PR-00A outputs and docs/plans/rust-bevy-phase-0-architecture-audit
 
 - [Parent Rust + Bevy roadmap](rust-bevy-incremental-migration-2026-11-22.md)
 - [Repository guidance](../../CLAUDE.md) and [AGENTS.md](../../AGENTS.md)
-- [README](../../README.md), [Performance QA guide](../perf-qa.md), [Adding a biome](../adding-a-biome.md), [Settlement rendering](../settlement-rendering.md)
+- [README](../../README.md), [Performance QA guide](../perf-qa.md), [Adding a biome](../adding-a-biome.md), [Settlement rendering](../settlement-rendering-2026-11-26.md)
 - [Simulation API](../../src/sim/index.js), [Canonical checksum](../../src/sim/persistence/canonicalSerialize.js), [Snapshot](../../src/sim/persistence/snapshot.js)
 - [Coordinate conversion](../../src/editor/world/WorldCoordinates.js), [World document](../../src/editor/WorldDocument.js), [Chunk codec](../../src/editor/world/ChunkDocumentCodec.js)
 - [Simulation browser persistence QA](../../scripts/run-simulation-persistence-qa.mjs), [Performance harness](../../scripts/run-perf-qa.mjs), [Visual QA harness](../../scripts/run-world-visual-qa.mjs)

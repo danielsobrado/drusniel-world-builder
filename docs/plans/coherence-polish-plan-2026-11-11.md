@@ -644,7 +644,7 @@ from `core-taiga-air-off-12` (coherence §6.4 gate). Full A/B.
 4. **Fix the undefined styles.** `config/visual-identity.yaml` references
    `swamp-thatch` and `timber-thatch`, which no style defines. Map them or
    define them.
-5. Correct `docs/settlement-rendering.md:324` (it states 55 %/45 % hue keep;
+5. Correct `docs/settlement-rendering-2026-11-26.md:324` (it states 55 %/45 % hue keep;
    the code holds 0.78/0.55/0.72/0.65).
 
 **Gates.** `town-off-12`: `satP95Min` at 1.3× baseline and `chromaSdMin` at

@@ -181,7 +181,7 @@ thickness.
 ## Shared look with SettlementView
 
 The kit and the game's default town renderer share one material language
-(docs/settlement-rendering.md, "Kit parity"): the slate tint (`roof`), aged
+(docs/settlement-rendering-2026-11-26.md, "Kit parity"): the slate tint (`roof`), aged
 cloth dyes, pale crown glass that the game lights with firelight at dusk, and
 paving bedded 3 cm proud with cobble sides (`PAVING_PROUD`, `PAVING_LAP`).
 Interior furniture (`modules/interior.py`) is built the way SettlementView's

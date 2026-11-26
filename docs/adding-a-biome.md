@@ -165,7 +165,7 @@ until the player is near it.
   arrive with them. Ground scans are shared floor sets chosen by name in the
   ground-detail row, so a new biome normally adds none. Settlement surfaces
   load on approach through `SettlementSurfaceLibrary`
-  ([settlement-rendering.md](settlement-rendering.md)).
+  ([settlement-rendering-2026-11-26.md](settlement-rendering-2026-11-26.md)).
 - **Grass costs no assets.** It is procedural: a new biome's grass is a palette
   and a growth row.
 - **Budgets.** A new layer or a raised `perChunk` needs the perf A/B of

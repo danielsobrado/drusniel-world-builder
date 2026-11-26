@@ -325,8 +325,17 @@ joint shadow do the drawing.
   `render/materials/townGrade.js`; the workshop's finishes are paint-box bright, its
   stone palettes lean teal), bare masonry's joint mortar is darkened below its
   stone, and vertex colours are folded into the graded colour: three applies
-  them after `colorNode`, which would undo the grade. The paving's earth layer
-  is tinted to `TOWN_GROUND`.
+  them after `colorNode`, which would undo the grade.
+- **Ground from the terrain (WSC PR 7).** A wall's foot meets its ground through
+  the World Surface Context `foundation` contact profile
+  (`render/materials/townGroundContact.js`): the band follows the terrain's
+  height at the foot, so it runs with a slope, in a soil made from the terrain
+  albedo there. Only vertices within 2.5 m of the ground line read the WSC. The
+  paving's earth layer (lanes, gate approaches and the apron round every
+  building) takes the same soil: dark earth in a meadow town, sand in a desert
+  one, the terrain's own path earth on road tiles. `TOWN_GROUND` is only the
+  fallback beyond the 128 m WSC window. Apron rims swell and draw in with
+  plan-space noise rather than following the footprint at a ruled margin.
 - **One grade everywhere.** The grade itself lives in
   `render/materials/townGrade.js` (`gradeTownMaterial`) and the leaded glass in
   `render/materials/townGlass.js` (`glazeWindowRecess`). `SettlementGrade` and

@@ -3,7 +3,7 @@
 Azgaar burgs become walkable towns built from the medieval kit.
 
 This is opt-in: open the editor with `?towns=kit` (`src/editor/towns/townMode.js`).
-By default `SettlementView` draws burgs (docs/settlement-rendering.md). With the
+By default `SettlementView` draws burgs (docs/settlement-rendering-2026-11-26.md). With the
 kit on, it is disabled and its settlement colliders give way to the towns' own,
 because both draw houses on the same plots.
 

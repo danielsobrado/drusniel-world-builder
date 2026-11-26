@@ -118,7 +118,7 @@ style, never through realm branches in code.
 ## Settlements
 
 Towns are drawn by `SettlementView` from derived plans — see
-[settlement rendering](docs/settlement-rendering.md). Surface textures are
+[settlement rendering](docs/settlement-rendering-2026-11-26.md). Surface textures are
 per-settlement dressings loaded on approach through `SettlementSurfaceLibrary`;
 do not load them at startup, and keep tintable sets (plaster, stone, roof,
 timber) neutral, because the workshop's vertex colours already carry the hue.
