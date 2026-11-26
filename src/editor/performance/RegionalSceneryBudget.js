@@ -1,3 +1,4 @@
+import { allocateRegionalWindow, regionalCardEligible } from './RegionalAdmission.js';
 import { RegionalRenderCostModel, addRenderCost, effectiveRenderCost, emptyRenderCost } from './RegionalRenderCost.js';
 import { PerfCounters } from './qa/PerfCounters.js';
 import { chunkRingDistance, collectRegionalSceneryDemand, sceneryChunkKey } from './RegionalSceneryDemand.js';
@@ -59,10 +60,22 @@ function sameKeys(a, b) {
 }
 
 /** Sample in bounded slices, publish only a complete demand estimate. */
+function sameDecisions(a, b) {
+  if (a.size !== b.size) return false;
+  for (const [key, factors] of a) {
+    const next = b.get(key);
+    if (!next || Object.keys(factors).length !== Object.keys(next).length
+      || Object.entries(factors).some(([kind, factor]) => next[kind] !== factor)) return false;
+  }
+  return true;
+}
+
 export class RegionalSceneryBudget {
-  constructor(settings, { geometryCosts = false } = {}) {
+  constructor(settings, { geometryCosts = false, admission = false } = {}) {
     this.settings = settings;
-    this.geometryCosts = geometryCosts;
+    this.geometryCosts = geometryCosts || admission;
+    this.admission = admission;
+    this.decisions = new Map();
     this.costModel = null;
     this.townCache = new WeakMap();
     this.pressured = new Set();
@@ -72,10 +85,13 @@ export class RegionalSceneryBudget {
     this.sampleWindow = null;
   }
 
-  update(surface, now, shouldYield = () => false) {
+  update(surface, now, shouldYield = () => false, camera = null) {
     const focus = surface.terrainView.focusChunk;
     const size = surface.terrainView.chunkWorldSize;
     if (!focus || !(size > 0)) return;
+    const origin = this.admission && camera ? surface.terrainView.floatingOrigin?.getState() : null;
+    const cameraChunk = origin ? { chunkX: Math.floor((camera.position.x + origin.x) / size),
+      chunkZ: Math.floor(-(camera.position.z + origin.z) / size) } : null;
     const window = this.job ?? this.sampleWindow;
     if (window && (window.size !== size
       || chunkRingDistance(focus.chunkX, focus.chunkZ, window.focus) > this.settings.spatialChunkRadius / 2)) {
@@ -83,7 +99,7 @@ export class RegionalSceneryBudget {
       this.job = null;
       this.sampleWindow = null;
       this.nextSample = now;
-      this.publish(new Set());
+      this.publish(new Set(), new Map());
     }
     if (!this.job && now >= this.nextSample) {
       const anchor = { chunkX: focus.chunkX, chunkZ: focus.chunkZ };
@@ -91,15 +107,20 @@ export class RegionalSceneryBudget {
         this.costModel ??= new RegionalRenderCostModel(surface);
         this.costModel.refreshPasses();
       }
-      this.job = { focus: anchor, size,
-        iterator: collectRegionalSceneryDemand(surface, anchor, size, this.settings, this.townCache, this.costModel) };
+      const admissionContext = this.admission ? { cameraChunk, handoffEnd: surface.meadowGrass?.uniforms?.cardFadeIn?.value?.y } : null;
+      this.job = { focus: anchor, size, cameraChunk,
+        iterator: collectRegionalSceneryDemand(surface, anchor, size, this.settings, this.townCache, this.costModel, admissionContext) };
     }
     if (!this.job) return;
     for (let i = 0; i < this.settings.spatialWorkItems && !shouldYield(); i++) {
       const step = this.job.iterator.next();
       if (!step.done) continue;
       const result = evaluateSceneryDemand(step.value, this.pressured, this.settings, this.geometryCosts);
-      this.publish(result.pressured);
+      if (this.admission) {
+        const allocation = allocateRegionalWindow(step.value, this.settings, this.decisions, focus, cameraChunk);
+        this.publish(new Set(allocation.decisions.keys()), allocation.decisions);
+        for (const [key, value] of Object.entries(allocation.stats)) PerfCounters.set(`regionalAdmission.${key}`, value);
+      } else this.publish(result.pressured);
       PerfCounters.set('regionalSpatialSampledChunks', step.value.size);
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
       PerfCounters.set('regionalSpatialPeakChunkUnits', result.maxUnits);
@@ -128,15 +149,16 @@ export class RegionalSceneryBudget {
     }
   }
 
-  publish(next) {
-    if (!sameKeys(this.pressured, next)) {
-      this.pressured = next;
-      this.revision++;
-    }
+  publish(next, decisions = this.decisions) {
+    const changed = !sameKeys(this.pressured, next) || (this.admission && !sameDecisions(this.decisions, decisions));
+    this.pressured = next;
+    this.decisions = decisions;
+    if (changed) this.revision++;
     PerfCounters.set('regionalSpatialPressuredChunks', this.pressured.size);
   }
 
-  factorForKey(key) {
+  factorForKey(key, layer = null) {
+    if (this.admission) return this.decisions.get(key)?.[layer] ?? 1;
     return this.pressured.has(key) ? this.settings.spatialLodFactor : 1;
   }
 
@@ -144,18 +166,8 @@ export class RegionalSceneryBudget {
   cardFactor(x, z, halfSize, focus, cameraChunk, chunkSize, handoffEnd) {
     const key = sceneryChunkKey(x, z, chunkSize);
     if (!this.pressured.has(key)) return 1;
-    const cx = Math.floor(x / chunkSize), cz = Math.floor(-z / chunkSize);
-    const minX = cx * chunkSize, maxX = minX + chunkSize;
-    const maxZ = -cz * chunkSize, minZ = maxZ - chunkSize;
-    if (x - halfSize < minX || x + halfSize > maxX || z - halfSize < minZ || z + halfSize > maxZ) return 1;
-    const radius = this.settings.protectedChunkRadius;
-    if (chunkRingDistance(cx, cz, focus) <= radius || chunkRingDistance(cx, cz, cameraChunk) <= radius) return 1;
-    const cameraMinX = cameraChunk.chunkX * chunkSize, cameraMaxX = cameraMinX + chunkSize;
-    const cameraMaxZ = -cameraChunk.chunkZ * chunkSize, cameraMinZ = cameraMaxZ - chunkSize;
-    const dx = Math.max(cameraMinX - x - halfSize, x - halfSize - cameraMaxX, 0);
-    const dz = Math.max(cameraMinZ - z - halfSize, z - halfSize - cameraMaxZ, 0);
-    if (dx * dx + dz * dz <= handoffEnd * handoffEnd) return 1;
-    return this.settings.spatialCardFactor;
+    if (!regionalCardEligible(x, z, halfSize, focus, cameraChunk, chunkSize, handoffEnd, this.settings.protectedChunkRadius)) return 1;
+    return this.admission ? this.factorForKey(key, 'card') : this.settings.spatialCardFactor;
   }
 
   dispose() {
@@ -163,6 +175,6 @@ export class RegionalSceneryBudget {
     this.sampleWindow = null;
     this.costModel = null;
     this.townCache = new WeakMap();
-    this.publish(new Set());
+    this.publish(new Set(), new Map());
   }
 }
