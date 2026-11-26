@@ -7,6 +7,7 @@ import {
   dot,
   exp,
   float,
+  int,
   mix,
   positionWorld as positionWorldNode,
   smoothstep,
@@ -104,6 +105,8 @@ export function createValleyFogNodes({
   time = timeNode,
   weight = float(1),
   quality = 1,
+  activeSteps = null,
+  protectedDistance = 0,
   sunDirection = null,
   sunColor = null,
   fogColor = null,
@@ -131,38 +134,46 @@ export function createValleyFogNodes({
     If(weight.greaterThan(ACTIVE_WEIGHT), () => {
       const ray = worldPosition.sub(cameraPosition).toVar();
       const distance = ray.length().toVar();
-      const direction = ray.normalize().toVar();
+      const direction = activeSteps ? ray.div(distance.max(1e-4)).toVar() : ray.normalize().toVar();
       // The patch under the camera is bounded, so the march is clamped to it;
       // the mist fades before the clamp so the boundary never shows.
       const length = distance.min(config.maxDistance).toVar();
-      const step = length.mul(stepFraction).toVar();
-      Loop(steps, ({ i }) => {
-        const along = float(i).add(0.5).mul(step);
-        // The first metres stay clear, so a wall beside the camera is not washed out.
-        If(along.greaterThan(range[0]), () => {
-          const point = cameraPosition.add(direction.mul(along));
-          const above = point.y.sub(sampleGround(point.x, point.z)).max(0).toVar();
-          If(above.lessThan(config.ceiling), () => {
-            // Height is folded into the pocket coordinates so the tops of the
-            // banks are ragged rather than flat.
-            const cell = point.xz.mul(config.pocketScale).add(drift)
-              .add(vec2(point.y.mul(HEIGHT_IN_POCKETS), 0));
-            const pockets = stylizedFbm2(cell).mul(2).sub(1);
-            const banks = mix(
-              float(1 - config.pocketStrength),
-              float(1 + config.pocketStrength),
-              smoothstep(-0.45, 0.45, pockets),
-            );
-            const clear = smoothstep(range[0], range[1], along);
-            const ceiling = smoothstep(config.ceiling * 0.6, config.ceiling, above).oneMinus();
-            const fade = smoothstep(config.maxDistance * config.farFade, config.maxDistance, distance).oneMinus();
-            depth.addAssign(
-              exp(above.div(-config.height))
-                .mul(banks).mul(clear).mul(ceiling).mul(fade).mul(step),
-            );
+      const march = () => {
+        const count = activeSteps ? distance.lessThanEqual(protectedDistance).select(int(steps), activeSteps.clamp(1, steps)).toVar() : null;
+        const step = (count ? length.div(float(count)) : length.mul(stepFraction)).toVar();
+        const fade = activeSteps ? smoothstep(config.maxDistance * config.farFade, config.maxDistance, distance).oneMinus().toVar() : null;
+        Loop(count ?? steps, ({ i }) => {
+          const along = float(i).add(0.5).mul(step);
+          // The first metres stay clear, so a wall beside the camera is not washed out.
+          If(along.greaterThan(range[0]), () => {
+            const point = cameraPosition.add(direction.mul(along));
+            const above = point.y.sub(sampleGround(point.x, point.z)).max(0).toVar();
+            If(above.lessThan(config.ceiling), () => {
+              // Height is folded into the pocket coordinates so the tops of the
+              // banks are ragged rather than flat.
+              const cell = point.xz.mul(config.pocketScale).add(drift)
+                .add(vec2(point.y.mul(HEIGHT_IN_POCKETS), 0));
+              const pockets = stylizedFbm2(cell).mul(2).sub(1);
+              const banks = mix(
+                float(1 - config.pocketStrength),
+                float(1 + config.pocketStrength),
+                smoothstep(-0.45, 0.45, pockets),
+              );
+              const clear = smoothstep(range[0], range[1], along);
+              const ceiling = smoothstep(config.ceiling * 0.6, config.ceiling, above).oneMinus();
+              const distanceFade = fade ?? smoothstep(config.maxDistance * config.farFade, config.maxDistance, distance).oneMinus();
+              depth.addAssign(
+                exp(above.div(-config.height))
+                  .mul(banks).mul(clear).mul(ceiling).mul(distanceFade).mul(step),
+              );
+            });
           });
         });
-      });
+      };
+      if (activeSteps) {
+        const contributes = distance.greaterThan(range[0]);
+        If(config.farFade < 1 ? contributes.and(distance.lessThan(config.maxDistance)) : contributes, march);
+      } else march();
     });
     return depth.mul(config.density).mul(weight).mul(quality);
   })();
