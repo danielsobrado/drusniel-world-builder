@@ -1,3 +1,5 @@
+import { completeIterator } from '../ResumableIterator.js';
+
 const equal = (a, b) => a && b && a.objectId === b.objectId && a.matrix === b.matrix
   && a.quantizedFade === b.quantizedFade && a.ditherDirection === b.ditherDirection;
 
@@ -25,11 +27,32 @@ export class InstanceLodRows {
   }
 
   patch(changes, transitions) {
+    return completeIterator(this.iteratePatch(changes, transitions));
+  }
+
+  /** Copy only touched prototype storage before a cancellable publication. */
+  *fork() {
+    const copy = new InstanceLodRows(this.bands);
+    for (const band of this.bands) {
+      const rows = this.buckets[band];
+      for (let i = 0; i < rows.length; i++) {
+        copy.buckets[band].push(rows[i]);
+        copy.indices[band].set(rows[i].objectId, i);
+        if (i % 64 === 63) yield;
+      }
+      copy.versions[band] = this.versions[band];
+      yield;
+    }
+    return copy;
+  }
+
+  *iteratePatch(changes, transitions) {
     const baseVersions = { ...this.versions }, changedRows = {};
     for (const band of this.bands) {
       const rows = this.buckets[band], indices = this.indices[band], dirty = new Set();
-      let changed = false;
+      let changed = false, visits = 0;
       for (const [id, representations] of changes) {
+        if (visits++ > 0 && visits % 64 === 1) yield;
         const next = representations.find(row => row.band === band);
         const index = indices.get(id);
         if (next) {
