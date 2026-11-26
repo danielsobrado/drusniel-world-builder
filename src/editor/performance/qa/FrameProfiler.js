@@ -149,6 +149,8 @@ export class FrameProfiler {
         avgMs: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0,
         p50Ms: percentile(values, 0.5),
         p95Ms: percentile(values, 0.95),
+        p99Ms: percentile(values, 0.99),
+        p999Ms: percentile(values, 0.999),
         maxMs: values.at(-1) ?? 0,
       };
     }
@@ -165,6 +167,7 @@ export class FrameProfiler {
         p50Ms: percentile(dts, 0.5),
         p95Ms: percentile(dts, 0.95),
         p99Ms: percentile(dts, 0.99),
+        p999Ms: percentile(dts, 0.999),
         maxMs: dts.at(-1) ?? null,
         meanMs: dts.length
           ? dts.reduce((sum, value) => sum + value, 0) / dts.length

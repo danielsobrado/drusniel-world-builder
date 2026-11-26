@@ -88,9 +88,9 @@ export class TownMesh {
     drainJob(this.splitJob(x, z, radius));
   }
 
-  *splitJob(x, z, radius) {
+  *splitJob(x, z, radius, budget = null) {
     this.lod = TOWN_LOD_SPLIT;
-    for (const instances of this.modules) { yield* instances.splitJob(x, z, radius); yield; }
+    for (const instances of this.modules) { yield* instances.splitJob(x, z, radius, budget); yield; }
     this.splitCentre = { x, z };
   }
 
@@ -99,8 +99,8 @@ export class TownMesh {
     drainJob(this.cullInteriorsJob(x, z, radius));
   }
 
-  *cullInteriorsJob(x, z, radius) {
-    for (const instances of this.modules) { yield* instances.cullJob(x, z, radius); yield; }
+  *cullInteriorsJob(x, z, radius, budget = null) {
+    for (const instances of this.modules) { yield* instances.cullJob(x, z, radius, budget); yield; }
     this.interiorCentre = { x, z };
   }
 

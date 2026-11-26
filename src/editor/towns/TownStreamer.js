@@ -1,6 +1,7 @@
 import { TownLayoutBuilder } from './TownLayout.js';
 import { TOWN_LOD_DEFAULTS, TOWN_LOD_NEAR, needsRefresh, selectTownLod, townEdgeDistance, townSplits } from './TownLod.js';
 import { TownMesh } from './TownMesh.js';
+import { WAIT_FOR_TOWN_PUBLICATION } from './TownInstancePublication.js';
 import { stagedDrawPublication, WAIT_FOR_DRAW_PREPARATION } from '../../render/preparation/StagedDrawPublication.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { settlementPreparationFor } from '../world/settlements/SettlementPreparation.js';
@@ -76,7 +77,7 @@ export class TownStreamer {
       this.nextQueryAt = nowMs + this.queryIntervalMs;
       this.refresh(generator, focus);
     }
-    const select = () => this.updateLods(focus, budget?.shouldYield);
+    const select = () => this.updateLods(focus, budget?.shouldYield, budget);
     (budget?.runner ?? (run => run()))(select);
     if (this.pending.size === 0 && !this.buildJob) return;
     if (!this.assets.ready) {
@@ -148,7 +149,7 @@ export class TownStreamer {
     return { pending, errors, ready: pending === 0 && errors.length === 0 };
   }
 
-  updateLods(focus, shouldYield = () => false) {
+  updateLods(focus, shouldYield = () => false, budget = null) {
     const count = this.towns.size;
     if (!count) { this.lodCursor = null; return; }
     this.lodCursor ??= this.towns.values();
@@ -160,16 +161,18 @@ export class TownStreamer {
       }
       if (next.done) return;
       const town = next.value;
-      town.selectionJob ??= this.selection(town, { ...focus });
+      town.selectionJob ??= this.selection(town, { ...focus }, budget);
       while (!shouldYield()) {
-        if (town.selectionJob.next().done) { town.selectionJob = null; break; }
+        const step = town.selectionJob.next();
+        if (step.done) { town.selectionJob = null; break; }
+        if (step.value === WAIT_FOR_TOWN_PUBLICATION) break;
       }
     }
   }
 
-  *selection(town, focus) {
+  *selection(town, focus, budget = null) {
     if (town.split) {
-      yield* this.updateSplit(town, focus);
+      yield* this.updateSplit(town, focus, budget);
       return;
     }
     const distance = townEdgeDistance(town.layout.anchor, town.reach, focus.x, focus.z);
@@ -179,19 +182,19 @@ export class TownStreamer {
     const x = focus.x - town.layout.anchor.x;
     const z = focus.z - town.layout.anchor.z;
     if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
-      yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius);
+      yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius, budget);
     }
   }
 
   /** A split town: re-pick the near placements (and the interiors) as the viewer moves. */
-  *updateSplit(town, focus) {
+  *updateSplit(town, focus, budget = null) {
     const x = focus.x - town.layout.anchor.x;
     const z = focus.z - town.layout.anchor.z;
     if (needsRefresh(town.mesh.splitCentre, x, z, this.lod.splitRefresh)) {
-      yield* town.mesh.splitJob(x, z, this.lod.splitRadius);
+      yield* town.mesh.splitJob(x, z, this.lod.splitRadius, budget);
     }
     if (needsRefresh(town.mesh.interiorCentre, x, z, this.lod.interiorRefresh)) {
-      yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius);
+      yield* town.mesh.cullInteriorsJob(x, z, this.lod.interiorRadius, budget);
     }
   }
 

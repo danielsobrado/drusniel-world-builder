@@ -29,6 +29,7 @@ export class StreamedDrawPreparation {
     this.uploadEstimate = new DrawUploadEstimate();
     this.hierarchy = null;
     this.hierarchyLease = null;
+    this.preparationCostMs = null;
   }
   beginFrame(budget) {
     this.revealPending();
@@ -142,6 +143,11 @@ export class StreamedDrawPreparation {
     const plannedBuffers = new Set();
     const started = performance.now();
     let uploadBytes = 0;
+    // The pass itself cannot yield. Limit the batch using the last observed
+    // cost, while retaining the one-job progress guarantee.
+    const slackMs = budget?.slack?.strictAvailable?.() ?? Infinity;
+    const targetLimit = this.preparationCostMs === null ? this.settings.meshesPerFrame
+      : Math.min(this.settings.meshesPerFrame, Math.max(1, Math.floor(slackMs / this.preparationCostMs)));
     const uploadStarted = performance.now();
     let budgetedBytes = 0;
     try {
@@ -175,7 +181,7 @@ export class StreamedDrawPreparation {
         this.pending.delete(mesh);
         uploadBytes += bytes;
         targets.push(mesh);
-        if (isolated || targets.length >= this.settings.meshesPerFrame || uploadBytes >= byteLimit) break;
+        if (isolated || targets.length >= targetLimit || uploadBytes >= byteLimit) break;
       }
       PerfCounters.inc('streamedInitialUploadCpuMs', performance.now() - uploadStarted);
       PerfCounters.set('meadowInitialGpuUploadMaxFrameBytes',
@@ -187,7 +193,7 @@ export class StreamedDrawPreparation {
       for (const target of targets) target.material = this.stagedMaterials.get(target) ?? target.material;
       this.hierarchyLease ??= acquireReflectionShadowRegistry(this.scene);
       this.hierarchy = this.hierarchyLease.registry;
-      const prepareStarted = this.enqueuedAt ? performance.now() : 0;
+      const prepareStarted = performance.now();
       if (this.enqueuedAt) {
         PerfCounters.inc('streamedDrawPassRequests');
         for (const target of targets) {
@@ -223,8 +229,14 @@ export class StreamedDrawPreparation {
           return false;
         }
       });
+      const preparedAt = performance.now();
+      const sample = Math.max(0.01, (preparedAt - prepareStarted) / targets.length);
+      this.preparationCostMs = this.preparationCostMs === null ? sample
+        : Math.max(sample, this.preparationCostMs * 0.75 + sample * 0.25);
+      PerfCounters.set('streamedDrawPreparationEstimatedMeshMs', this.preparationCostMs);
+      // Count attempted publication even when a shader error forces isolation.
+      PerfCounters.inc('streamedDrawInitialUploadBytes', uploadBytes - budgetedBytes);
       if (!prepared) return;
-      const preparedAt = this.enqueuedAt ? performance.now() : 0;
       if (this.enqueuedAt) {
         PerfCounters.inc('streamedDrawPassCpuMs', preparedAt - prepareStarted);
         PerfCounters.inc('streamedDrawJobsCompleted', targets.length);
@@ -243,7 +255,6 @@ export class StreamedDrawPreparation {
       }
       this.invalidateHistory?.();
       PerfCounters.inc('streamedDrawsPrepared', targets.length);
-      PerfCounters.inc('streamedDrawInitialUploadBytes', uploadBytes - budgetedBytes);
     } catch (error) {
       this.cancelAllDiagnostics();
       this.settings = { ...this.settings, enabled: false };

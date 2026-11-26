@@ -1,6 +1,6 @@
 import { drainJob } from '../world/settlements/SettlementArrayJobs.js';
 import { townBoundsJob } from './TownBoundsJob.js';
-import { writeTownInstanceRows } from './TownInstancePublication.js';
+import { estimateTownPublicationBytes, WAIT_FOR_TOWN_PUBLICATION, writeTownInstanceRows } from './TownInstancePublication.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
@@ -168,11 +168,18 @@ export class TownModuleInstances {
    * copying only changed slots and uploading their separate contiguous runs.
    */
   writeSubset(meshes, indices, count) {
+    drainJob(this.writeSubsetJob(meshes, indices, count));
+  }
+
+  *writeSubsetJob(meshes, indices, count, budget = null) {
     const previous = this.shown.get(meshes) ?? { indices: new Uint32Array(this.count).fill(0xffffffff), count: -1 };
     const dirty = [];
     for (let k = 0; k < count; k++) {
-      if (previous.indices[k] === indices[k] && k < previous.count) continue;
-      dirty.push(k);
+      if (previous.indices[k] !== indices[k] || k >= previous.count) dirty.push(k);
+      if (k % 64 === 63) yield;
+    }
+    if (budget?.canPublish) {
+      while (!budget.canPublish(estimateTownPublicationBytes(meshes, dirty))) yield WAIT_FOR_TOWN_PUBLICATION;
     }
     writeTownInstanceRows(meshes, this.matrices, this.colours, indices, count, dirty);
     for (const slot of dirty) previous.indices[slot] = indices[slot];
@@ -189,7 +196,7 @@ export class TownModuleInstances {
     drainJob(this.splitJob(x, z, radius));
   }
 
-  *splitJob(x, z, radius) {
+  *splitJob(x, z, radius, budget = null) {
     if (this.interior || this.farMeshes.length === 0) return;
     const initial = !this.nearSlots;
     this.nearSlots ??= new SlotSet(this.count);
@@ -258,6 +265,17 @@ export class TownModuleInstances {
       }
       toNear.sort((a, b) => a - b);
       leftNear.sort((a, b) => a - b);
+      if (budget?.canPublish) {
+        const changes = new Set();
+        for (const list of [toNear, leftNear, leftFar, toFar]) {
+          for (const i of list) { changes.add(i); if (++units % 64 === 0) yield; }
+        }
+        for (const i of changes) {
+          yield* this.publishTierChange(i, next.has(i), wantsFar(i), budget);
+          if (++units % 64 === 0) yield;
+        }
+        return;
+      }
       for (const [slots, dirty, remove, add] of [[this.nearSlots, nearDirty, leftNear, toNear], [this.farSlots, farDirty, leftFar, toFar]]) {
         for (const i of remove) { slots.set(i, false, dirty); if (++units % 64 === 0) yield; }
         for (const i of add) { slots.set(i, true, dirty); if (++units % 64 === 0) yield; }
@@ -268,6 +286,30 @@ export class TownModuleInstances {
     yield;
     this.writeSlots(this.nearMeshes, this.nearSlots, nearDirty);
     this.writeSlots(this.farMeshes, this.farSlots, farDirty);
+    this.setLod(TOWN_LOD_SPLIT);
+  }
+
+  /** Move both tiers together, including slot-map changes used by animated doors. */
+  *publishTierChange(index, wantsNear, wantsFar, budget) {
+    const dirtyFor = (slots, wanted) => {
+      const slot = slots.slotOf[index];
+      if (wanted) return slot < 0 ? [slots.count] : [];
+      return slot >= 0 && slot !== slots.count - 1 ? [slot] : [];
+    };
+    let nearDirty, farDirty;
+    for (;;) {
+      nearDirty = dirtyFor(this.nearSlots, wantsNear);
+      farDirty = dirtyFor(this.farSlots, wantsFar);
+      const bytes = estimateTownPublicationBytes(this.nearMeshes, nearDirty)
+        + estimateTownPublicationBytes(this.farMeshes, farDirty);
+      if (budget.canPublish(bytes)) break;
+      yield WAIT_FOR_TOWN_PUBLICATION;
+    }
+    const near = [], far = [];
+    this.nearSlots.set(index, wantsNear, near);
+    this.farSlots.set(index, wantsFar, far);
+    this.writeSlots(this.nearMeshes, this.nearSlots, near);
+    this.writeSlots(this.farMeshes, this.farSlots, far);
     this.setLod(TOWN_LOD_SPLIT);
   }
 
@@ -296,7 +338,7 @@ export class TownModuleInstances {
     drainJob(this.cullJob(x, z, radius));
   }
 
-  *cullJob(x, z, radius) {
+  *cullJob(x, z, radius, budget = null) {
     if (!this.interior) return;
     let count = 0, units = 0;
     for (const i of this.spatial.near(x, z, radius)) {
@@ -307,7 +349,7 @@ export class TownModuleInstances {
     }
     this.visibleIndices.subarray(0, count).sort();
     yield;
-    this.writeSubset(this.nearMeshes, this.visibleIndices, count);
+    yield* this.writeSubsetJob(this.nearMeshes, this.visibleIndices, count, budget);
     this.setLod(this.lod);
   }
 }

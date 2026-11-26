@@ -24,3 +24,34 @@ export function writeTownInstanceRows(meshes, matrices, colours, placementAt, co
     }
   }
 }
+
+export const WAIT_FOR_TOWN_PUBLICATION = 'wait-for-town-publication';
+
+// A publication can merge queued ranges into one span. Bound the extra bytes
+// conservatively without assuming that a hidden mesh has consumed its ranges.
+export function estimateTownPublicationBytes(meshes, dirty) {
+  if (!dirty.length) return 0;
+  let min = Infinity, max = -1;
+  for (const slot of dirty) {
+    min = Math.min(min, slot);
+    max = Math.max(max, slot);
+  }
+  let bytes = 0;
+  for (const mesh of meshes) {
+    for (const attribute of [mesh.instanceMatrix, mesh.instanceColor]) {
+      if (!attribute) continue;
+      const ranges = attribute.updateRanges ?? [];
+      if (ranges.length + dirty.length <= 8) {
+        bytes += dirty.length * attribute.itemSize * attribute.array.BYTES_PER_ELEMENT;
+      } else {
+        let start = min * attribute.itemSize, end = (max + 1) * attribute.itemSize;
+        for (const range of ranges) {
+          start = Math.min(start, range.start);
+          end = Math.max(end, range.start + range.count);
+        }
+        bytes += (end - start) * attribute.array.BYTES_PER_ELEMENT;
+      }
+    }
+  }
+  return bytes;
+}

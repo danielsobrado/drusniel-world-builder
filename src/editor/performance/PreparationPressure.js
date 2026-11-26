@@ -26,7 +26,7 @@ export function hasPreparationBacklog(surface) {
     for (const town of towns.towns?.values() ?? []) if (town.selectionJob) return true;
   }
   for (const view of [surface.alpineRockView, surface.glacierSeracView, surface.icebergView]) {
-    if (view?.publicationPending || view?.residency?.pending.length > 0) return true;
+    if (view?.publicationPending || view?.residency?.pending?.length > 0) return true;
   }
   return (surface.meadowGrass?.blades?.staleTiles?.length ?? 0)
     + (surface.meadowGrass?.cards?.staleTiles?.length ?? 0) > 0;
