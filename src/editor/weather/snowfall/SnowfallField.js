@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { Rng } from '../../_clod_shims/seed.js';
 import { DEFAULT_WEATHER_EFFECTS } from '../WeatherEffectsConfig.js';
 import { createSnowfallMaterial, createSnowfallUniforms } from './snowfallFieldMaterial.js';
-import { interleaveLayers, layerAllocation, precipitationDensity } from '../storm/precipitationLayers.js';
+import { interleaveLayers, layerAllocation, precipitationDensity, scalePrecipitationDensity } from '../storm/precipitationLayers.js';
 
 /** Populations allocated at their densest level; `count` is that allocation. */
 export function snowfallPopulations(settings = DEFAULT_WEATHER_EFFECTS.snowfall) {
@@ -72,7 +72,13 @@ export function createSnowfallField(settings = DEFAULT_WEATHER_EFFECTS.snowfall,
   };
   let lastTime = null;
   let disposed = false;
-  let density = precipitationDensity(settings.layers, 0, geometry.userData.slots);
+  let demand = precipitationDensity(settings.layers, 0, geometry.userData.slots);
+  let density = demand, particleFactor = 1;
+  const applyDensity = () => {
+    density = scalePrecipitationDensity(demand, geometry.userData.slots, particleFactor);
+    density.density.forEach((share, layer) => { uniforms.densities.array[layer] = share; });
+    geometry.instanceCount = density.instanceCount;
+  };
   return {
     material, geometry, uniforms,
     setTime(seconds) {
@@ -92,12 +98,13 @@ export function createSnowfallField(settings = DEFAULT_WEATHER_EFFECTS.snowfall,
      */
     setIntensity(value) {
       const channel = Math.max(0, Number(value) || 0);
-      density = precipitationDensity(settings.layers, Math.min(1, channel), geometry.userData.slots);
-      density.density.forEach((share, layer) => { uniforms.densities.array[layer] = share; });
-      geometry.instanceCount = density.instanceCount;
+      demand = precipitationDensity(settings.layers, Math.min(1, channel), geometry.userData.slots);
+      applyDensity();
       uniforms.intensity.value = density.fade * Math.max(1, channel);
     },
     getDensity: () => density,
+    getRequestedCount: () => demand.instanceCount,
+    setParticleFactor: factor => { if (factor !== particleFactor) { particleFactor = factor; applyDensity(); } },
     setCenter(center) { uniforms.center.value.copy(center); updatePhases(); },
     setOrigin(value) { origin.set(value?.x ?? 0, value?.z ?? 0); updatePhases(); },
     setWind(x, z) { wind.set(x, z); },
