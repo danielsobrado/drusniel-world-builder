@@ -103,7 +103,7 @@ export class RegionalSceneryBudget {
       || (cameraChunk && window.cameraChunk && chunkRingDistance(cameraChunk.chunkX, cameraChunk.chunkZ, window.cameraChunk) > this.settings.spatialChunkRadius / 2));
     if (window && (window.size !== size || cameraMoved
       || chunkRingDistance(focus.chunkX, focus.chunkZ, window.focus) > this.settings.spatialChunkRadius / 2)) {
-      if (this.job) PerfCounters.inc('regionalSpatialSamplesCancelled');
+      if (this.job && !this.observeOnly) PerfCounters.inc('regionalSpatialSamplesCancelled');
       this.job = null;
       this.sampleWindow = null;
       this.diagnosticSample = null;
