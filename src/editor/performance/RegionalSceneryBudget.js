@@ -59,7 +59,6 @@ function sameKeys(a, b) {
   return true;
 }
 
-/** Sample in bounded slices, publish only a complete demand estimate. */
 function sameDecisions(a, b) {
   if (a.size !== b.size) return false;
   for (const [key, factors] of a) {
@@ -70,6 +69,7 @@ function sameDecisions(a, b) {
   return true;
 }
 
+/** Sample in bounded slices, publish only a complete demand estimate. */
 export class RegionalSceneryBudget {
   constructor(settings, { geometryCosts = false, admission = false } = {}) {
     this.settings = settings;
