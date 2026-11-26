@@ -35,6 +35,7 @@ export function createTownRuntime({
   baseUrl,
   getFocusCanonical,
   getWalkerCanonical,
+  getCameraCanonical = null,
   isNight = () => false,
   sampleSnow = null,
 }) {
@@ -44,6 +45,8 @@ export function createTownRuntime({
     createGlass: createTownGlassMaterial,
   });
   const sun = sunElevationReader(terrainView.scene);
+  const regional = terrainView.stylizedConfig?.enhancements;
+  const decorationSettings = regional?.townDecorationAdmission ? regional.townDecorationBudget : null;
   const streamer = new TownStreamer({
     scene: terrainView.scene,
     getGenerator,
@@ -55,6 +58,7 @@ export function createTownRuntime({
     collisionSource: townCollisionSource,
     sampleSnow,
     getDrawPreparation: () => terrainView.drawPreparation,
+    decorationSettings,
   });
   const doors = new TownDoorController({ streamer, collisionSource: townCollisionSource });
   const atmosphere = new TownInteriorAtmosphere({
@@ -67,7 +71,6 @@ export function createTownRuntime({
   let lastTimestamp = null;
   let walker = null;
   let idleSince = null;
-  const regional = terrainView.stylizedConfig?.enhancements;
   const idleMs = regional?.regionalResourceBudget ? regional.regionalBudget.idleMs : Infinity;
 
   return {
@@ -85,7 +88,8 @@ export function createTownRuntime({
       const delta = lastTimestamp === null ? 0 : (timestamp - lastTimestamp) / 1000;
       lastTimestamp = timestamp;
       townKitShared.sunElevation.value = isNight() ? NIGHT_ELEVATION : sun();
-      streamer.update(timestamp, getFocusCanonical(), budget);
+      if (decorationSettings) walker = getWalkerCanonical();
+      streamer.update(timestamp, getFocusCanonical(), budget, decorationSettings ? [getCameraCanonical?.(), walker] : []);
       if (streamer.towns.size || streamer.pending.size || streamer.buildJob || !assets.ready) idleSince = null;
       else {
         idleSince ??= timestamp;
@@ -96,7 +100,7 @@ export function createTownRuntime({
           PerfCounters.inc('regionalTownKitEvictions');
         }
       }
-      walker = getWalkerCanonical();
+      if (!decorationSettings) walker = getWalkerCanonical();
       const focused = doors.focus(walker);
       prompt.show(focused ? (doors.isOpen(focused) ? 'Close door' : 'Open door') : '');
       doors.update(Math.min(delta, 0.1));
