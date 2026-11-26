@@ -8,6 +8,7 @@ regionalLazyTrees: false
 regionalTreeSourceRelease: false
 regionalResourceBudget: false
 regionalDensityBudget: false
+regionalSpatialBudget: false
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
@@ -16,6 +17,21 @@ regionalBudget:
   farGrassPressure: 0.85
   sceneryLodPressure: 0.85
   protectedChunkRadius: 1
+  # Relative demand units, not measured GPU time or triangles.
+  spatialChunkRadius: 8
+  spatialChunkBudget: 1200
+  spatialLodFactor: 0.75
+  spatialCardFactor: 0.8
+  spatialWorkItems: 256
+  spatialWeights:
+    town: 1
+    tree: 8
+    rock: 3
+    bush: 2
+    blade: 0.01
+    card: 0.15
+    detail: 1
+    water: 50
   sampleIntervalMs: 1000
   triangleBudget: 4000000
   drawBudget: 1500
