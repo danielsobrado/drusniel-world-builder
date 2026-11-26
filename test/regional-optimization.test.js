@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { terrainRegionalFeatures, TERRAIN_FEATURES as F, FULL_TERRAIN_FEATURES } from '../src/editor/materials/TerrainRegionalFeatures.js';
+import { TreeSourceOwnership } from '../src/editor/stylized/forest/TreeSourceOwnership.js';
 import { RegionalDensityBudget, regionalLodProtected, regionalLodThresholds } from '../src/editor/performance/RegionalDensityBudget.js';
 import { pruneRegionalMaterials } from '../src/editor/performance/RegionalMaterialCache.js';
 import { RegionalImpostorResidency } from '../src/editor/stylized/impostor/RegionalImpostorResidency.js';
@@ -128,4 +129,30 @@ test('scenery pressure protects both predictive focus and canonical camera ring'
   assert.equal(regionalLodProtected(12, 9, focus, camera, origin, 10, 1), true);
   assert.equal(regionalLodProtected(10, 11, focus, camera, origin, 10, 1), true);
   assert.equal(regionalLodProtected(15, 15, focus, camera, origin, 10, 1), false);
+});
+
+test('tree source ownership detaches and deduplicates texture channels', () => {
+  const owned = [];
+  const texture = { isTexture: true, clone() { return { isTexture: true, source: this.source }; }, source: {} };
+  const source = { isMaterial: true, map: texture, alphaMap: texture, clone() { return { ...this }; } };
+  const ownership = new TreeSourceOwnership(value => owned.push(value));
+  const detached = ownership.detach(source);
+  assert.notEqual(detached, source);
+  assert.notEqual(detached.map, texture);
+  assert.equal(detached.map, detached.alphaMap);
+  assert.equal(detached.map.source, texture.source);
+  assert.equal(detached.map.needsUpdate, true);
+  assert.equal(ownership.detach(source), detached);
+  assert.deepEqual(owned, [detached.map]);
+  assert.equal(ownership.canRelease, true);
+  const unsupported = { isMaterial: true, isNodeMaterial: true };
+  assert.equal(ownership.detach(unsupported), unsupported);
+  assert.equal(ownership.canRelease, false);
+});
+
+test('tree source release remains independently opt-in', () => {
+  assert.equal(resolveRenderEnhancements().regionalTreeSourceRelease, false);
+  const settings = resolveRenderEnhancements({}, '?regionalTreeSourceRelease=1');
+  assert.equal(settings.regionalTreeSourceRelease, true);
+  assert.equal(settings.regionalLazyTrees, false);
 });
