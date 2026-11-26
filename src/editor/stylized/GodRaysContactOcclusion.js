@@ -1,5 +1,6 @@
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { float, mix, screenUV, uniform } from 'three/tsl';
+import { reducedResolution } from '../../render/postprocessing/AtmosphericPassAdmission.js';
 
 /**
  * Contact occlusion shared by the cinematic and volumetric god-ray pipelines.
@@ -30,6 +31,10 @@ export function createContactOcclusion({ depth, camera, settings }) {
   const intensity = uniform(settings.intensity ?? 0.6);
   return {
     intensity,
+    applyAtmosphericBudget(settings, atmosphere) {
+      const scale = settings?.resolutionScale ?? 0.5;
+      trace.resolutionScale = atmosphere ? reducedResolution(scale, atmosphere.aoResolutionFactor, atmosphere.aoMinimumResolution) : scale;
+    },
     // Multiplies the scene colour: a restrained contact shadow, not a dirty outline.
     factor: mix(float(1), trace.getTextureNode().sample(screenUV).r, intensity),
     dispose: () => trace.dispose(),
