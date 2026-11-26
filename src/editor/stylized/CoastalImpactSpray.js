@@ -27,7 +27,6 @@ function createSprayMaterial(clock, alphaCutoff) {
     transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true,
   });
   material.name = 'coastal-impact-droplets';
-  material.alphaTest = alphaCutoff;
   material.fog = true;
   material.positionNode = center
     .add(right.mul(positionGeometry.x.mul(style.x)))
@@ -36,6 +35,7 @@ function createSprayMaterial(clock, alphaCutoff) {
   const life = smoothstep(0, 0.07, age)
     .mul(oneMinus(smoothstep(0.7, 1, age.div(duration))));
   material.opacityNode = circular.mul(style.y).mul(life);
+  if (alphaCutoff > 0) material.maskNode = material.opacityNode.greaterThan(alphaCutoff);
   material.colorNode = mix(color('#e4f6ff'), color('#c0dce8'), style.z);
   return material;
 }
