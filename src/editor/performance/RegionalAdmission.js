@@ -4,7 +4,10 @@ export const ADMISSION_LAYERS = Object.freeze(['tree', 'rock', 'bush', 'card']);
 const zero = () => ({ triangles: 0, draws: 0 });
 const add = (a, b) => ({ triangles: a.triangles + b.triangles, draws: a.draws + b.draws });
 const fits = (cost, limit) => cost.triangles <= limit.triangles && cost.draws <= limit.draws;
-const known = cost => cost && cost.unknown === 0;
+const known = cost => cost && cost.unknown === 0
+  && Number.isFinite(cost.triangles) && Number.isFinite(cost.draws)
+  && Number.isFinite(cost.shadowTriangles) && Number.isFinite(cost.shadowDraws)
+  && Number.isFinite(cost.reflectionTriangles) && Number.isFinite(cost.reflectionDraws);
 
 /** Card tiles must fit entirely outside both protected rings and the handoff. */
 export function regionalCardEligible(x, z, halfSize, focus, cameraChunk, chunkSize, handoffEnd, radius) {
@@ -34,7 +37,7 @@ export function allocateRegionalCell(layers, settings, previous = null) {
     requested = add(requested, cost);
     if (!known(fixed)) unknown = true;
     const options = ADMISSION_LAYERS.includes(kind) && layer.options?.length
-      && layer.options.every(option => known(option.cost))
+      && layer.options[0].factor === 1 && layer.options.every(option => known(option.cost))
       ? layer.options.map(option => ({ factor: option.factor, cost: effectiveRenderCost(option.cost, weight) })) : null;
     if (!options || !known(fixed)) {
       reserved = add(reserved, cost);
@@ -78,10 +81,11 @@ export function allocateRegionalCell(layers, settings, previous = null) {
 export function allocateRegionalWindow(cells, settings, previous, focus, cameraChunk) {
   const decisions = new Map();
   const stats = { chunks: 0, reducedChunks: 0, overflowChunks: 0, unknownChunks: 0,
-    requestedTriangles: 0, admittedTriangles: 0, requestedDraws: 0, admittedDraws: 0 };
+    requestedTriangles: 0, admittedTriangles: 0, requestedDraws: 0, admittedDraws: 0,
+    reservedTriangles: 0, reservedDraws: 0, protectedChunks: 0, treeReduced: 0, rockReduced: 0, bushReduced: 0, cardReduced: 0 };
   for (const [key, cell] of cells) {
     const layers = cell.renderCost?.layers;
-    if (!layers) continue;
+    if (!layers) { stats.unknownChunks++; continue; }
     const [x, z] = key.split(':').map(Number);
     const protectedCell = [focus, cameraChunk].some(point => point
       && Math.max(Math.abs(x - point.chunkX), Math.abs(z - point.chunkZ)) <= settings.protectedChunkRadius);
@@ -89,13 +93,20 @@ export function allocateRegionalWindow(cells, settings, previous, focus, cameraC
       ? Object.fromEntries(Object.entries(layers).map(([kind, layer]) => [kind, { ...layer, options: null }]))
       : layers, settings, previous.get(key));
     stats.chunks++;
+    if (protectedCell || !cameraChunk) stats.protectedChunks++;
     if (result.unknown) stats.unknownChunks++;
     if (result.overflow) stats.overflowChunks++;
     stats.requestedTriangles += result.requested.triangles;
     stats.admittedTriangles += result.admitted.triangles;
     stats.requestedDraws += result.requested.draws;
     stats.admittedDraws += result.admitted.draws;
-    if (Object.keys(result.factors).length) { decisions.set(key, result.factors); stats.reducedChunks++; }
+    stats.reservedTriangles += result.reserved.triangles;
+    stats.reservedDraws += result.reserved.draws;
+    if (Object.keys(result.factors).length) {
+      decisions.set(key, result.factors);
+      stats.reducedChunks++;
+      for (const kind of Object.keys(result.factors)) stats[`${kind}Reduced`]++;
+    }
   }
   return { decisions, stats };
 }
