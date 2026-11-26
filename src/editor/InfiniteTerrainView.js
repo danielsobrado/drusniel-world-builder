@@ -350,7 +350,7 @@ export class InfiniteTerrainView {
       forceWebGL: rendererConfig.forceWebGL,
       powerPreference: rendererConfig.powerPreference ?? 'high-performance',
       requiredLimits: this.requiredLimits,
-      trackTimestamp: new URLSearchParams(window.location.search).get('gpuTimings') === '1',
+      trackTimestamp: new URLSearchParams(window.location.search).get('gpuTimings') === '1' || stylizedConfig?.enhancements?.measuredGpuAdmission === true,
     });
     this.samplerPruning = installUnusedSamplerPruning(this.renderer);
     this.emptyDrawSkip = installEmptyDrawSkip(this.renderer);
