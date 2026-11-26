@@ -124,7 +124,7 @@ export class RegionalRenderCostModel {
     const selectedBands = entry?.representations
       ? [...new Set(entry.representations.filter(rep => rep.fade > 0 && rep.band !== 'culled').map(rep => rep.band))]
       : selectedBand === 'culled' ? [] : [selectedBand];
-    if (baseline === 'culled' && selectedBands.length === 0) return { requested, selected };
+    if (baseline === 'culled' && selectedBands.length === 0 && (!transitionCosts || selectedBand === 'culled')) return { requested, selected };
     const options = entry?.admissionOptions?.map(option => ({ ...option, cost: emptyRenderCost(), seen: new Set(),
       ...(transitionCosts ? { transitionCost: emptyRenderCost(), transitionSeen: new Set() } : {}) }));
     const activeBands = transitionCosts ? [...new Set([...selectedBands, selectedBand].filter(band => band !== 'culled'))] : [];
