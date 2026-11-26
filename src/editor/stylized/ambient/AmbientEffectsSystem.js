@@ -108,6 +108,16 @@ export class AmbientEffectsSystem {
     }
   }
 
+  applyParticleBudget(particles) {
+    if (!particles) return;
+    for (const field of this.fields) {
+      if (field.current <= 0) continue;
+      const count = field.requestedCount;
+      field.mesh.count = particlePrefix(count, particles.request('ambient', count));
+      field.mesh.visible = field.mesh.count > 0;
+    }
+  }
+
   /** Follow the scene's lights: sun colour × intensity and the sky's fill. */
   setLight({ sunColor, sunIntensity, skyColor, skyIntensity }) {
     if (!this.enabled) return;
@@ -202,11 +212,6 @@ export class AmbientEffectsSystem {
         * windFactor(this.windiness, s.windResponse);
       field.setIntensity(this.step(field.current, Math.min(field.target, 1)));
       if (!field.mesh.visible && field.target <= 0) continue;
-      if (state.particles && field.mesh.visible) {
-        const count = field.requestedCount;
-        field.mesh.count = particlePrefix(count, state.particles.request('ambient', count));
-        field.mesh.visible = field.mesh.count > 0;
-      }
       const speed = s.wind.speed * (1 + (Math.min(this.windiness, 2) - 1) * s.wind.follow) * gust;
       this.wind.x = axis.x * Math.max(speed, 0);
       this.wind.z = axis.z * Math.max(speed, 0);
