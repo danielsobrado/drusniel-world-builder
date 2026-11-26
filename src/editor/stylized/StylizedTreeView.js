@@ -853,7 +853,8 @@ export class StylizedTreeView {
       ?? this.terrainView.renderer.domElement.height ?? 1;
     const planKey = `${focus.chunkX}:${focus.chunkZ}:${this.revisionTracker.revision}:${
       this.manifestStore.version ?? 0}:${viewportHeight}:${camera.fov}:${camera.zoom}:${this.impostorVersion}`;
-    const plan = cachedLodPlan(this, planKey, timestamp,
+    const regionalLodFactor = this.regionalLodFactor ?? 1;
+    const plan = cachedLodPlan(this, `${planKey}:regional:${regionalLodFactor}`, timestamp,
       Math.min(this.lodRebuildIntervalMs, settings.transitionMs / 8), () => settings.enabled
       ? buildChunkLodPlan({
         focus,
@@ -864,6 +865,8 @@ export class StylizedTreeView {
         viewportHeight,
         objectHeight: this.prototypeHeight,
         thresholds: settings.thresholds,
+        regionalLodFactor,
+        protectedChunkRadius: this.config.enhancements?.regionalBudget?.protectedChunkRadius,
         radii: settings,
         transitionStates: this.chunkLodStates,
         timestamp,
