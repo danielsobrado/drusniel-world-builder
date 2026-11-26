@@ -1,23 +1,40 @@
+import { RegionalRenderCostModel, addRenderCost, effectiveRenderCost, emptyRenderCost } from './RegionalRenderCost.js';
 import { PerfCounters } from './qa/PerfCounters.js';
 import { chunkRingDistance, collectRegionalSceneryDemand, sceneryChunkKey } from './RegionalSceneryDemand.js';
 
-export function evaluateSceneryDemand(cells, previous, settings) {
+export function evaluateSceneryDemand(cells, previous, settings, geometryCosts = false) {
   const pressured = new Set();
   let maxUnits = 0;
   let totalUnits = 0;
   const totals = {};
+  const requestedCost = emptyRenderCost(), selectedCost = emptyRenderCost();
+  let peakTriangles = 0, peakDraws = 0, fallbackChunks = 0;
   for (const [key, demand] of cells) {
     let units = 0;
     for (const [kind, count] of Object.entries(demand)) {
+      if (kind === 'renderCost') continue;
       units += count * (settings.spatialWeights[kind] ?? 0);
       totals[kind] = (totals[kind] ?? 0) + count;
     }
     maxUnits = Math.max(maxUnits, units);
     totalUnits += units;
-    const limit = settings.spatialChunkBudget * (previous.has(key) ? settings.recoveryRatio : 1);
-    if (units > limit) pressured.add(key);
+    const ratio = previous.has(key) ? settings.recoveryRatio : 1;
+    let pressure = units > settings.spatialChunkBudget * ratio;
+    if (geometryCosts && demand.renderCost) {
+      const { requested, selected } = demand.renderCost;
+      addRenderCost(requestedCost, requested);
+      addRenderCost(selectedCost, selected);
+      const effective = effectiveRenderCost(requested, settings.spatialReflectionPassWeight);
+      peakTriangles = Math.max(peakTriangles, effective.triangles);
+      peakDraws = Math.max(peakDraws, effective.draws);
+      const fallback = requested.unknown > 0;
+      if (fallback) fallbackChunks++;
+      pressure = effective.triangles > settings.spatialTriangleBudget * ratio
+        || effective.draws > settings.spatialDrawBudget * ratio || (fallback && pressure);
+    } else if (geometryCosts) fallbackChunks++;
+    if (pressure) pressured.add(key);
   }
-  return { pressured, maxUnits, totalUnits, totals };
+  return { pressured, maxUnits, totalUnits, totals, requestedCost, selectedCost, peakTriangles, peakDraws, fallbackChunks };
 }
 
 function sameKeys(a, b) {
@@ -28,8 +45,10 @@ function sameKeys(a, b) {
 
 /** Sample in bounded slices, publish only a complete demand estimate. */
 export class RegionalSceneryBudget {
-  constructor(settings) {
+  constructor(settings, { geometryCosts = false } = {}) {
     this.settings = settings;
+    this.geometryCosts = geometryCosts;
+    this.costModel = null;
     this.townCache = new WeakMap();
     this.pressured = new Set();
     this.revision = 0;
@@ -53,20 +72,31 @@ export class RegionalSceneryBudget {
     }
     if (!this.job && now >= this.nextSample) {
       const anchor = { chunkX: focus.chunkX, chunkZ: focus.chunkZ };
+      if (this.geometryCosts) {
+        this.costModel ??= new RegionalRenderCostModel(surface);
+        this.costModel.refreshPasses();
+      }
       this.job = { focus: anchor, size,
-        iterator: collectRegionalSceneryDemand(surface, anchor, size, this.settings, this.townCache) };
+        iterator: collectRegionalSceneryDemand(surface, anchor, size, this.settings, this.townCache, this.costModel) };
     }
     if (!this.job) return;
     for (let i = 0; i < this.settings.spatialWorkItems && !shouldYield(); i++) {
       const step = this.job.iterator.next();
       if (!step.done) continue;
-      const result = evaluateSceneryDemand(step.value, this.pressured, this.settings);
+      const result = evaluateSceneryDemand(step.value, this.pressured, this.settings, this.geometryCosts);
       this.publish(result.pressured);
       PerfCounters.set('regionalSpatialSampledChunks', step.value.size);
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
       PerfCounters.set('regionalSpatialPeakChunkUnits', result.maxUnits);
       for (const kind of Object.keys(this.settings.spatialWeights)) {
         PerfCounters.set(`regionalSpatialDemand.${kind}`, result.totals[kind] ?? 0);
+      }
+      if (this.geometryCosts) {
+        for (const [key, value] of Object.entries(result.requestedCost)) PerfCounters.set(`regionalCostRequested.${key}`, value);
+        for (const [key, value] of Object.entries(result.selectedCost)) PerfCounters.set(`regionalCostSelected.${key}`, value);
+        PerfCounters.set('regionalCostPeakEffectiveTriangles', result.peakTriangles);
+        PerfCounters.set('regionalCostPeakEffectiveDraws', result.peakDraws);
+        PerfCounters.set('regionalCostFallbackChunks', result.fallbackChunks);
       }
       PerfCounters.inc('regionalSpatialSamples');
       this.sampleWindow = { focus: this.job.focus, size: this.job.size };
@@ -109,6 +139,7 @@ export class RegionalSceneryBudget {
   dispose() {
     this.job = null;
     this.sampleWindow = null;
+    this.costModel = null;
     this.townCache = new WeakMap();
     this.publish(new Set());
   }
