@@ -22,9 +22,30 @@ export class AtmosphericPassAdmission {
     this.slowMs = 0;
     this.fastMs = 0;
     this.reduced = false;
+    this.measured = false;
+    this.qualityKey = 'full';
   }
 
-  update(now, bypass = false) {
+  update(now, bypass = false, measured = null) {
+    if (!bypass && measured) {
+      this.measured = true;
+      this.last = now;
+      this.slowMs = this.fastMs = 0;
+      const groups = measured.groups;
+      const previous = this.qualityKey;
+      this.qualityKey = groups.length ? groups.join(',') : 'full';
+      this.reduced = groups.length > 0;
+      if (previous !== this.qualityKey) PerfCounters.inc(`atmosphericAdmission.${this.name}.transitions`);
+      PerfCounters.set(`atmosphericAdmission.${this.name}.reduced`, Number(this.reduced));
+      return this.reduced ? { ...this.settings, groups } : null;
+    }
+    if (this.measured) {
+      this.measured = false;
+      this.reduced = false;
+      this.last = null;
+      this.changedAt = -Infinity;
+      this.slowMs = this.fastMs = 0;
+    }
     const delta = this.last === null ? 0 : now - this.last;
     this.last = now;
     if (bypass || !Number.isFinite(delta) || delta <= 0 || delta > this.settings.maxFrameGapMs) {
@@ -43,6 +64,7 @@ export class AtmosphericPassAdmission {
       }
     }
     PerfCounters.set(`atmosphericAdmission.${this.name}.reduced`, Number(this.reduced));
+    this.qualityKey = this.reduced ? 'all' : 'full';
     return this.reduced ? this.settings : null;
   }
 
@@ -54,4 +76,9 @@ export class AtmosphericPassAdmission {
     this.fastMs = 0;
     PerfCounters.inc(`atmosphericAdmission.${this.name}.transitions`);
   }
+}
+
+/** Legacy cadence profiles apply to all effects; measured profiles only to their groups. */
+export function atmosphericLayerBudget(profile, group) {
+  return profile && (!profile.groups || profile.groups.includes(group)) ? profile : null;
 }
