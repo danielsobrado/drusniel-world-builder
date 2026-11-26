@@ -518,7 +518,11 @@ export function buildChunkLodPlan({
         activeThresholds = thresholdCache.get(factor);
       }
       const selected = selectLodBand(pixels, previous, activeThresholds, thresholds.hysteresisRatio);
-      const target = clampBandToRadii(selected, distanceForChunk?.(chunkX, chunkZ) ?? chunkDistance, radii);
+      const lodDistance = distanceForChunk?.(chunkX, chunkZ) ?? chunkDistance;
+      const target = clampBandToRadii(selected, lodDistance, radii);
+      const baselineBand = regionalSpatialBudget?.geometryCosts
+        ? clampBandToRadii(selectLodBand(pixels, null, thresholds, thresholds.hysteresisRatio), lodDistance, radii)
+        : undefined;
       if (previous !== null && previous !== target) {
         onTransition?.({
           chunkX,
@@ -543,6 +547,7 @@ export function buildChunkLodPlan({
         chunkZ,
         chunkDistance,
         band: target,
+        baselineBand,
         ready,
         representations: state.representations,
         lodAnchor: Object.freeze({ x: canonicalX, y: anchor?.y ?? 0, z: canonicalZ }),
