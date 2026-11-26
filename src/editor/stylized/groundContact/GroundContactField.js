@@ -21,6 +21,7 @@ import {
   sampleRgba8Bilinear,
   srgbByteToLinear,
 } from '../worldSurfaceContext/TerrainSurfaceEvaluator.js';
+import { WscRebuildCache, slotChunkSignature } from './wscRebuildCache.js';
 
 const RECENTER_THRESHOLD_M = 16;
 const MAX_UPLOAD_DEFERRAL_MS = 100;
@@ -127,6 +128,8 @@ export class GroundContactField {
     this.uploadDeferredAt = null;
     this.slotsByChunk = new Map();
     this.publishedChunkRevisions = new Map();
+    this.rebuildCache = new WscRebuildCache(resolution);
+    this.texelHeights = new Float64Array(resolution * resolution);
     this.disposed = false;
   }
 
@@ -165,13 +168,14 @@ export class GroundContactField {
       if (!d || !slot.page || slot.loading) continue;
       if (d.chunkX < minChunkX || d.chunkX > maxChunkX || d.chunkZ < minChunkZ || d.chunkZ > maxChunkZ) continue;
       this.slotsByChunk.set(`${d.chunkX}:${d.chunkZ}`, slot);
-      signature += `|${d.key}:${slot.pageRevision}:${slot.forestFloorKey ?? ''}:${slot.materialBake?.descriptor?.key ?? ''}`;
+      signature += `|${slotChunkSignature(slot)}`;
       residentCount += 1;
     }
 
     if (residentCount === 0) {
       if (this.lastSlotSignature || wscUniforms.active.value !== 0) {
         clearWorldSurfaceContext();
+        this.rebuildCache.invalidate();
         PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
       }
       this.lastSlotSignature = '';
@@ -308,6 +312,16 @@ export class GroundContactField {
       stormSnow: 0,
     };
 
+    // A recentre keeps every texel whose chunks are unchanged and evaluates only the
+    // strip it uncovers (~1/8 of the window for a 16 m step).
+    const heights = this.texelHeights;
+    const previous = this.rebuildCache;
+    const reuse = previous.plan({
+      originX, originZ, step, halfStep, noiseVersion: this.worldNoiseVersion, slotsByChunk: this.slotsByChunk,
+      chunkX: (x) => Math.floor(x / chunkWorldSize), chunkZ: (z) => Math.floor(-z / chunkWorldSize),
+    });
+    let reused = 0;
+
     // Cache chunk slot lookup for row/column interior texels to avoid 80k+ string keys.
     const fastSlot = (cx, cz, curCx, curCz, curSlot) => (
       cx === curCx && cz === curCz ? curSlot : this.slotsByChunk.get(`${cx}:${cz}`)
@@ -336,7 +350,23 @@ export class GroundContactField {
           cachedSlot = this.slotsByChunk.get(`${chunkX}:${chunkZ}`);
         }
         const slot = cachedSlot;
-        const offset = (iz * res + ix) * 4;
+        const texel = iz * res + ix;
+        const offset = texel * 4;
+        const source = reuse ? reuse.sourceIndex(ix, iz) : -1;
+        if (source >= 0) {
+          const from = source * 4;
+          for (let c = 0; c < 4; c += 1) {
+            geoData[offset + c] = previous.geo[from + c];
+            baseData[offset + c] = previous.base[from + c];
+            ecoData[offset + c] = previous.eco[from + c];
+          }
+          const reusedHeight = previous.heights[source];
+          heights[texel] = reusedHeight;
+          if (Number.isFinite(reusedHeight)) geoData[offset] = toHalf(reusedHeight - baseHeight);
+          reused += 1;
+          continue;
+        }
+        heights[texel] = Number.NaN;
         if (!slot?.page?.heights) {
           geoData[offset] = zeroHalf;
           geoData[offset + 1] = zeroHalf;
@@ -454,6 +484,7 @@ export class GroundContactField {
           sb = soilTable[tIdx + 2] * (1 - litterBlend) + forestLitter[2] * litterBlend;
         }
 
+        heights[texel] = h;
         geoData[offset] = toHalf(h - baseHeight);
         geoData[offset + 1] = toHalf(gx * invLen);
         geoData[offset + 2] = toHalf(gz * invLen);
@@ -476,6 +507,12 @@ export class GroundContactField {
       }
     }
 
+    previous.store({
+      originX, originZ, noiseVersion: this.worldNoiseVersion, slotsByChunk: this.slotsByChunk,
+      geo: geoData, base: baseData, eco: ecoData, heights,
+    });
+    PerfCounters.inc('wscTexelsReused', reused);
+    PerfCounters.inc('wscTexelsEvaluated', res * res - reused);
     wscUniforms.baseHeight.value = baseHeight;
     wscGeoTexture.needsUpdate = true;
     wscBaseTexture.needsUpdate = true;
@@ -488,6 +525,7 @@ export class GroundContactField {
     this.cancelNoiseSubscription = null;
     this.slotsByChunk.clear();
     this.publishedChunkRevisions.clear();
+    this.rebuildCache.invalidate();
     clearWorldSurfaceContext();
   }
 }
