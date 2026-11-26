@@ -88,8 +88,9 @@ export class StylizedSurfaceView {
     this.config = config;
     this.regionalResources = config.enhancements?.regionalResourceBudget ? new RegionalResourceBudget(config.enhancements.regionalBudget) : null;
     this.regionalDensity = config.enhancements?.regionalDensityBudget ? new RegionalDensityBudget(config.enhancements.regionalBudget) : null;
-    this.regionalSpatial = config.enhancements?.regionalSpatialBudget || config.enhancements?.regionalGeometryCostBudget
-      ? new RegionalSceneryBudget(config.enhancements.regionalBudget, { geometryCosts: config.enhancements.regionalGeometryCostBudget }) : null;
+    const admission = config.enhancements?.regionalAdmissionBudget === true;
+    this.regionalSpatial = config.enhancements?.regionalSpatialBudget || config.enhancements?.regionalGeometryCostBudget || admission
+      ? new RegionalSceneryBudget(config.enhancements.regionalBudget, { geometryCosts: config.enhancements.regionalGeometryCostBudget || admission, admission }) : null;
     // The dark patch where trunks and boulders meet the ground, resolved once.
     this.contactShadeSettings = resolveContactShade(config);
     this.enabled = Boolean(config?.enabled);
@@ -932,7 +933,7 @@ export class StylizedSurfaceView {
       PerfCounters.set('regionalSceneryLodFactor', sceneryFactor);
     }
     if (this.regionalSpatial) {
-      const sample = () => this.regionalSpatial.update(this, timestamp, this.shouldYieldWork);
+      const sample = () => this.regionalSpatial.update(this, timestamp, this.shouldYieldWork, camera);
       if (this.runDeferredWork) this.runDeferredWork(sample);
       else sample();
       for (const view of [this.treeView, this.rockView, this.bushView]) {
