@@ -136,3 +136,17 @@ test('geometry cost flag is opt-in and thresholds are validated', () => {
   assert.throws(() => resolveRenderEnhancements({ regionalBudget: { spatialTriangleBudget: 0 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ regionalBudget: { spatialReflectionPassWeight: 2 } }), RangeError);
 });
+
+test('pressure reserves published town tiers while preserving full near demand telemetry', () => {
+  const requested = { ...emptyRenderCost(), triangles: 400000, draws: 4 };
+  const selected = { ...emptyRenderCost(), triangles: 20000, draws: 4 };
+  const cells = new Map([['3:0', { town: 200, renderCost: { requested, selected,
+    layers: { town: { requested, selected } } } }]]);
+  const result = evaluateSceneryDemand(cells, new Set(), settings, true);
+  assert.equal(result.requestedCost.triangles, 400000);
+  assert.equal(result.selectedCost.triangles, 20000);
+  assert.equal(result.peakTriangles, 20000);
+  assert.equal(result.pressured.size, 0);
+  selected.unknown = 1;
+  assert.equal(evaluateSceneryDemand(cells, new Set(), settings, true).pressured.has('3:0'), true);
+});
