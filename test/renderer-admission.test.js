@@ -159,3 +159,47 @@ test('renderer admission activates dependencies and remains disabled by default'
   assert.equal(budget.admission, true);
   assert.equal(budget.geometryCosts, true);
 });
+
+test('unknown external workload defers promotion in a known chunk', () => {
+  const cells = new Map([['2:0', cell({ tree: layer(300, 100, 0.5) })],
+    ['12:0', cell({ detail: { ...fixed(20), active: { ...cost(20), unknown: 1 } } })]]);
+  const previous = new Map([['2:0', { tree: 0.5 }]]);
+  const result = finalizeRendererAdmission(plan(cells, {}, previous), settings);
+  assert.deepEqual([...result.decisions], [...previous]);
+  assert.equal(result.stats.unknownActiveChunks, 1);
+  assert.equal(result.stats.unknownDeferred, 1);
+});
+
+test('existing overloaded region can demote once despite staged work, without upload contention', () => {
+  const cells = new Map([['2:0', cell({ card: layer(700, 100) })],
+    ['5:0', cell({ card: layer(700, 100) })]]);
+  const result = finalizeRendererAdmission(plan(cells), settings, { busy: true });
+  assert.equal(result.stats.changes, 1);
+  assert.equal(result.stats.emergencyDemotions, 1);
+  assert.equal(finalizeRendererAdmission(plan(cells), settings, { contended: true }).stats.changes, 0);
+});
+
+test('renderer budget publishes shared decisions only after completed demand and allocation passes', () => {
+  const surface = { config: {}, waterSlots: [],
+    terrainView: { focusChunk: focus, chunkWorldSize: 128, floatingOrigin: { getState: () => ({ x: 0, z: 0 }) } },
+    meadowGrass: { uniforms: { cardFadeIn: { value: { y: 100 } } },
+      cards: { tileSize: 16, templates: { cards: { index: { count: 12 }, instanceCount: 200 } },
+        tiles: new Map([['near', { centerX: 320, centerZ: -64, band: 'cards', output: { count: 175 } }],
+          ['far', { centerX: 704, centerZ: -64, band: 'cards', output: { count: 175 } }]]) } } };
+  const budget = new RegionalSceneryBudget({ ...settings, spatialWorkItems: 1 }, { rendererAdmission: true });
+  const camera = { position: { x: 64, z: -64 } };
+  let sampling = false;
+  for (let i = 0; i < 100 && !budget.decisions.size; i++) {
+    budget.update(surface, i, () => false, camera);
+    if (budget.job?.cells) {
+      sampling = true;
+      assert.equal(budget.decisions.size, 0);
+    }
+  }
+  assert.equal(sampling, true);
+  assert.equal(budget.factorForKey('5:0', 'card'), 0.5);
+  assert.equal(budget.factorForKey('2:0', 'card'), 0.5);
+  camera.position.x = 12800;
+  budget.update(surface, 100, () => true, camera);
+  assert.equal(budget.decisions.size, 0);
+});
