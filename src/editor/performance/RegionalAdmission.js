@@ -78,14 +78,14 @@ export function allocateRegionalCell(layers, settings, previous = null) {
   return { factors, requested, admitted, reserved, unknown: false, overflow: !fits(admitted, limit) };
 }
 
-export function allocateRegionalWindow(cells, settings, previous, focus, cameraChunk) {
+export function* iterateRegionalWindow(cells, settings, previous, focus, cameraChunk) {
   const decisions = new Map();
   const stats = { chunks: 0, reducedChunks: 0, overflowChunks: 0, unknownChunks: 0,
     requestedTriangles: 0, admittedTriangles: 0, requestedDraws: 0, admittedDraws: 0,
     reservedTriangles: 0, reservedDraws: 0, protectedChunks: 0, treeReduced: 0, rockReduced: 0, bushReduced: 0, cardReduced: 0 };
   for (const [key, cell] of cells) {
     const layers = cell.renderCost?.layers;
-    if (!layers) { stats.unknownChunks++; continue; }
+    if (!layers) { stats.unknownChunks++; yield; continue; }
     const [x, z] = key.split(':').map(Number);
     const protectedCell = [focus, cameraChunk].some(point => point
       && Math.max(Math.abs(x - point.chunkX), Math.abs(z - point.chunkZ)) <= settings.protectedChunkRadius);
@@ -107,6 +107,14 @@ export function allocateRegionalWindow(cells, settings, previous, focus, cameraC
       stats.reducedChunks++;
       for (const kind of Object.keys(result.factors)) stats[`${kind}Reduced`]++;
     }
+    yield;
   }
   return { decisions, stats };
+}
+
+export function allocateRegionalWindow(...args) {
+  const iterator = iterateRegionalWindow(...args);
+  let step;
+  do { step = iterator.next(); } while (!step.done);
+  return step.value;
 }
