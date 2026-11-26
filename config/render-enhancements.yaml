@@ -13,6 +13,8 @@ regionalBudget:
   maxRendererMiB: 4096
   evictionsPerFrame: 1
   farGrassPressure: 0.85
+  sceneryLodPressure: 0.85
+  protectedChunkRadius: 1
   sampleIntervalMs: 1000
   triangleBudget: 4000000
   drawBudget: 1500
