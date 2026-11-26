@@ -710,6 +710,7 @@ const kitTowns = kitTownsEnabled();
     floatingOrigin, walkMode: PLAYER_MODE_WALK, baseUrl: import.meta.env.BASE_URL,
     decorationBudget: terrainView.stylizedConfig?.enhancements?.locationDecorationAdmission
       ? terrainView.stylizedConfig.enhancements.locationDecorationBudget : null,
+    atmosphericBudget: terrainView.stylizedConfig?.enhancements?.atmosphericPassAdmission ? terrainView.stylizedConfig.enhancements.atmosphericPassBudget : null,
   });
   resources.own(locations);
 
