@@ -173,6 +173,7 @@ export class ScreenSpaceShaftNode {
       depthBuffer: false,
     });
     this.radianceNode.renderTarget.texture.generateMipmaps = false;
+    this.radianceNode.renderTarget.texture.name = 'Adaptive Shaft Radiance';
 
     this.compositeNode = rtt(Fn(() => {
       const source = sourceNode.sample(screenUV);
