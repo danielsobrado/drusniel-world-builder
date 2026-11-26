@@ -547,11 +547,11 @@ export function buildChunkLodPlan({
         chunkZ,
         chunkDistance,
         band: target,
-        baselineBand,
         ready,
         representations: state.representations,
         lodAnchor: Object.freeze({ x: canonicalX, y: anchor?.y ?? 0, z: canonicalZ }),
       });
+      if (baselineBand !== undefined) entries[entries.length - 1].baselineBand = baselineBand;
       signatures.push(chunkEntrySignature(key, target, ready, state.representations, fadeSteps));
     }
   }
