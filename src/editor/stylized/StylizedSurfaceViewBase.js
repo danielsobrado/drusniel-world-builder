@@ -899,14 +899,19 @@ export class StylizedSurfaceView {
     }
     if (this.reflections) this.reflections.residencyReady = true;
     if (!landStreaming) return;
-    if (this.regionalDensity && this.meadowGrass) {
+    if (this.regionalDensity) {
       const factor = this.regionalDensity.update(timestamp, {
         triangles: PerfCounters.get('rendererTriangles'), draws: PerfCounters.get('rendererDrawCalls'),
         townInstances: this.terrainView.townRuntime?.streamer.stats.instances ?? 0,
-        vegetationInstances: PerfCounters.get('treeNearInstances') + PerfCounters.get('treeProxyInstances') + (this.meadowGrass.blades.stats.stems ?? 0),
+        vegetationInstances: PerfCounters.get('treeNearInstances') + PerfCounters.get('treeProxyInstances') + (this.meadowGrass?.blades.stats.stems ?? 0) + PerfCounters.get('treeImpostorInstances') + PerfCounters.get('rockNearInstances') + PerfCounters.get('rockProxyInstances') + PerfCounters.get('bushNearInstances') + PerfCounters.get('bushProxyInstances'),
       });
-      this.meadowGrass.setRegionalCardReach(factor);
+      this.meadowGrass?.setRegionalCardReach(factor);
+      const sceneryFactor = this.regionalDensity.sceneryFactor;
+      for (const view of [this.treeView, this.rockView, this.bushView]) {
+        if (view) view.regionalLodFactor = sceneryFactor;
+      }
       PerfCounters.set('regionalFarGrassReachFactor', factor);
+      PerfCounters.set('regionalSceneryLodFactor', sceneryFactor);
     }
     this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
