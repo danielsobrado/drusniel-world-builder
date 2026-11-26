@@ -1,4 +1,5 @@
 import { RegionalResourceBudget } from '../performance/RegionalResourceBudget.js';
+import { RegionalSceneryBudget } from '../performance/RegionalSceneryBudget.js';
 import { RegionalDensityBudget } from '../performance/RegionalDensityBudget.js';
 import { AlpineRockView } from './alpine/AlpineRockView.js';
 import { PathBridgeView } from './path/PathBridgeView.js';
@@ -87,6 +88,7 @@ export class StylizedSurfaceView {
     this.config = config;
     this.regionalResources = config.enhancements?.regionalResourceBudget ? new RegionalResourceBudget(config.enhancements.regionalBudget) : null;
     this.regionalDensity = config.enhancements?.regionalDensityBudget ? new RegionalDensityBudget(config.enhancements.regionalBudget) : null;
+    this.regionalSpatial = config.enhancements?.regionalSpatialBudget ? new RegionalSceneryBudget(config.enhancements.regionalBudget) : null;
     // The dark patch where trunks and boulders meet the ground, resolved once.
     this.contactShadeSettings = resolveContactShade(config);
     this.enabled = Boolean(config?.enabled);
@@ -928,6 +930,15 @@ export class StylizedSurfaceView {
       PerfCounters.set('regionalFarGrassReachFactor', factor);
       PerfCounters.set('regionalSceneryLodFactor', sceneryFactor);
     }
+    if (this.regionalSpatial) {
+      const sample = () => this.regionalSpatial.update(this, timestamp, this.shouldYieldWork);
+      if (this.runDeferredWork) this.runDeferredWork(sample);
+      else sample();
+      for (const view of [this.treeView, this.rockView, this.bushView]) {
+        if (view) view.regionalSpatialBudget = this.regionalSpatial;
+      }
+      this.meadowGrass?.setRegionalCardBudget(this.regionalSpatial, camera);
+    }
     this.meadowGrass?.updateFrame(timestamp, camera, body);
     this.rockView?.update(timestamp, camera);
     if (camera) {
@@ -1212,6 +1223,7 @@ export class StylizedSurfaceView {
   }
 
   dispose() {
+    this.regionalSpatial?.dispose();
     this.preparedPlacement?.dispose();
     this.terrainView.preparedPlacement = null;
     this.terrainView.stylizedSurface = null;
