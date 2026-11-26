@@ -21,15 +21,41 @@ Roadmap: [Three r187 roadmap](../../plans/three-r187-improvement-roadmap-2026-11
   proxy pass's own GPU time (0.41 → 0.22 ms), but the whole-frame GPU p95 is within run noise
   of the colour-target arm.
 - Hi-Z itself cuts GPU p95 by 16% and drops about 17% of draws and 13% of triangles, but the route is
-  CPU-bound: frame p50 rises by ~0.6–0.9 ms and average FPS does not improve. The proxy render
-  costs ~4.3 ms of CPU per frame (`renderSceneCpuMs:occlusionDepthProxy` ≈ 3.0 s over ~690 frames).
+  CPU-bound: frame p50 rises by ~0.6–0.9 ms and average FPS does not improve. Per frame, occlusion
+  prepare costs ~1.2 ms of CPU, while the main pass gets ~1.4 ms cheaper (7.22 → 5.75 ms). The
+  `renderScene*` counters accumulate over the whole session, including warmup and settle, so
+  divide by their call count; the proxy render alone is ~0.5 ms.
 - Gate (§7): 15% p95 improvement in the occlusion-heavy scene with no >5% standard-path
   regression. GPU time passes; frame time does not. With frame p95 at ~34 ms in every arm, the
   hard 60 FPS floor is limited by CPU and streaming hitches, not GPU raster.
 
 **Decision:** keep `renderer.gpuOcclusion.enabled` and `r187.depthOnlyOcclusion` off. If Hi-Z is
-enabled later, enable it with the depth-only target, which has the cheaper proxy pass. The next
-step is reducing the proxy pass's CPU submission, not the GPU-side target.
+enabled later, enable it with the depth-only target, which has the cheaper proxy pass.
+
+### Follow-up: prepare CPU split and the duplicate scene walk (`04fffd75`)
+
+A CPU profile of the depth-only arm split prepare (1.19 ms/frame) into collect 0.65, proxy render
+0.45 and dispatch 0.10 ms. About a third of collect was `scene.updateMatrixWorld()`, which the main
+pass then repeated in full. Once-per-mesh bounding-box scans of newly streamed settlement meshes
+appeared too, but they are load-time costs, not per-frame ones. `04fffd75` skips the main pass's
+walk on frames where collect already did it, and adds the accumulated counters
+`gpuOcclusionPrepares`, `gpuOcclusionPrepareCpuMs`, `gpuOcclusionCollectCpuMs` and
+`gpuOcclusionDispatchCpuMs`. The profile confirms the walk is gone from the draw path; the
+remaining walks are streamed-preparation prewarms.
+
+Same route, frozen snapshots, interleaved, two runs each (control `74a3df4e`, candidate `04fffd75`):
+
+| Arm | Avg FPS | Frame p50 / p95 ms | Main pass CPU ms | Proxy CPU ms | GPU p95 ms | Draws |
+| --- | --- | --- | --- | --- | --- | --- |
+| Candidate, no occlusion | 70.95 / 71.49 | 13.1 / 16.9, 13.0 / 20.6 | 5.19 / 5.06 | — | 7.30 / 7.22 | 411 / 410 |
+| Control, depth-only Hi-Z | 68.56 / 66.97 | 13.7 / 17.3, 14.0 / 19.0 | 4.95 / 6.22 | 0.39 / 0.39 | 7.37 / 7.33 | — |
+| Candidate, depth-only Hi-Z | 68.21 / 70.09 | 13.8 / 17.1, 13.4 / 16.5 | 4.88 / 4.66 | 0.41 / 0.39 | 7.35 / 7.31 | 340 / 339 |
+
+The whole route is faster on this `main` (~71 FPS) than in the first round (~58 FPS), and GPU p95
+no longer differs between culled and unculled. Culling still saves ~0.4 ms of main-pass CPU, but
+prepare costs ~1.1 ms, so Hi-Z remains a net loss on this route and stays off. The change keeps
+the opt-in path cheaper and has no effect while occlusion is off. Hi-Z can only pay where the frame
+is GPU-bound and dense with occluded geometry; re-evaluate it on such a route before more CPU work.
 
 ## Asset request arms (PR 06)
 
