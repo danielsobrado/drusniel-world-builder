@@ -1663,7 +1663,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   });
   resources.own(perfQa);
   const spatialOverlay = terrainView.stylizedConfig?.enhancements?.spatialPerformanceOverlay
-    ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay }) : null;
+    ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay, gpuProfiler: perfQa?.gpuProfiler }) : null;
   if (spatialOverlay) resources.own(spatialOverlay);
   if (perfQa) {
     perfQa.mount(root);
