@@ -13,6 +13,7 @@ import {
 import { PostProcessingResources } from './PostProcessingResources.js';
 import { createPostProcessingWarmupVariants } from './PostProcessingWarmup.js';
 import { isPostProcessingEnabled } from './nodes/PostCommon.js';
+import { AtmosphericPassAdmission } from './AtmosphericPassAdmission.js';
 
 const MAX_TEMPORAL_FRAME_GAP_MS = 250;
 
@@ -25,6 +26,7 @@ export class PostProcessingController {
     sunColor = '#ffffff',
     bypassProvider = null,
     focusDistanceProvider = null,
+    atmosphericBudget = null,
   }) {
     this.renderer = renderer;
     this.scene = scene;
@@ -33,6 +35,7 @@ export class PostProcessingController {
     this.sunColor = sunColor;
     this.bypassProvider = bypassProvider;
     this.focusDistanceProvider = focusDistanceProvider;
+    this.atmosphericAdmission = atmosphericBudget ? new AtmosphericPassAdmission(atmosphericBudget, 'world') : null;
     this.settings = postProcessingStore.get();
     this.topologySignature = createPostProcessingTopologySignature(this.settings);
     this.graph = null;
@@ -159,6 +162,7 @@ export class PostProcessingController {
       topologySignature,
       sunDirection: this.sunDirection,
       sunColor: this.sunColor,
+      adaptiveAtmosphere: Boolean(this.atmosphericAdmission),
     });
   }
 
@@ -178,6 +182,7 @@ export class PostProcessingController {
     graph = this.graph,
     settings = this.settings,
     timestampMs = typeof performance !== 'undefined' ? performance.now() : 0,
+    atmosphere = null,
   ) {
     const globallyReactive = this.invalidation.consumeReactiveFrame();
     if (globallyReactive) this.history.ssrValid = false;
@@ -190,7 +195,7 @@ export class PostProcessingController {
       globallyReactive,
     );
     this.updateFocusDistance(camera, settings);
-    graph.updateUniforms(this.frameState, settings);
+    graph.updateUniforms(this.frameState, settings, atmosphere);
   }
 
   updateFocusDistance(camera, settings = this.settings) {
@@ -228,7 +233,10 @@ export class PostProcessingController {
     try {
       this.ensureGraph(camera);
       frameStarted = true;
-      this.updateFrame(camera, this.graph, this.settings, timestampMs);
+      const before = this.atmosphericAdmission?.reduced;
+      const atmosphere = this.atmosphericAdmission?.update(timestampMs, this.settings.diagnostics?.enabled === true && this.settings.diagnostics.debugView !== 'final') ?? null;
+      if (before !== this.atmosphericAdmission?.reduced) this.invalidation.invalidate(POST_PROCESSING_RESET_REASONS.RENDER_PATH_CHANGED);
+      this.updateFrame(camera, this.graph, this.settings, timestampMs, atmosphere);
       this.graph.render();
       rendered = true;
       this.diagnostics.frameRendered();
