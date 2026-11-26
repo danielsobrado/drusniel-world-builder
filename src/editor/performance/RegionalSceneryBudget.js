@@ -72,8 +72,11 @@ function sameDecisions(a, b) {
 
 /** Sample in bounded slices, publish only a complete demand estimate. */
 export class RegionalSceneryBudget {
-  constructor(settings, { geometryCosts = false, admission = false, rendererAdmission = false } = {}) {
+  constructor(settings, { geometryCosts = false, admission = false, rendererAdmission = false, captureDiagnostics = false, observeOnly = false } = {}) {
     this.settings = settings;
+    this.captureDiagnostics = captureDiagnostics || observeOnly;
+    this.observeOnly = observeOnly;
+    this.diagnosticSample = null;
     this.geometryCosts = geometryCosts || admission || rendererAdmission;
     this.admission = admission || rendererAdmission;
     this.rendererAdmission = rendererAdmission;
@@ -91,7 +94,7 @@ export class RegionalSceneryBudget {
     const focus = surface.terrainView.focusChunk;
     const size = surface.terrainView.chunkWorldSize;
     if (!focus || !(size > 0)) return;
-    const origin = this.admission && camera ? surface.terrainView.floatingOrigin?.getState() : null;
+    const origin = (this.admission || this.captureDiagnostics) && camera ? surface.terrainView.floatingOrigin?.getState() : null;
     const cameraChunk = origin ? { chunkX: Math.floor((camera.position.x + origin.x) / size),
       chunkZ: Math.floor(-(camera.position.z + origin.z) / size) } : null;
     const window = this.job ?? this.sampleWindow;
@@ -103,8 +106,9 @@ export class RegionalSceneryBudget {
       if (this.job) PerfCounters.inc('regionalSpatialSamplesCancelled');
       this.job = null;
       this.sampleWindow = null;
+      this.diagnosticSample = null;
       this.nextSample = now;
-      this.publish(new Set(), new Map());
+      if (!this.observeOnly) this.publish(new Set(), new Map());
     }
     if (!this.job && now >= this.nextSample) {
       const anchor = { chunkX: focus.chunkX, chunkZ: focus.chunkZ };
@@ -129,13 +133,27 @@ export class RegionalSceneryBudget {
       }
       const cells = this.job.cells ?? step.value;
       const result = evaluateSceneryDemand(cells, this.pressured, this.settings, this.geometryCosts);
+      let allocationStats = null;
       if (this.admission) {
         const allocation = this.rendererAdmission
           ? finalizeRendererAdmission(step.value, this.settings, rendererPublicationState(surface, this.settings)) : step.value;
         this.publish(new Set(allocation.decisions.keys()), allocation.decisions);
+        allocationStats = allocation.stats;
         const prefix = this.rendererAdmission ? 'rendererAdmission' : 'regionalAdmission';
         for (const [key, value] of Object.entries(allocation.stats)) PerfCounters.set(`${prefix}.${key}`, value);
-      } else this.publish(result.pressured);
+      } else if (!this.observeOnly) this.publish(result.pressured);
+      if (this.captureDiagnostics) {
+        this.diagnosticSample = { cells, timestamp: now, focus: this.job.focus, cameraChunk: this.job.cameraChunk,
+          size, geometryCosts: this.geometryCosts, admission: this.admission, rendererAdmission: this.rendererAdmission,
+          observeOnly: this.observeOnly, pressured: this.pressured, localPressure: result.pressured,
+          decisions: this.decisions, allocationStats, settings: this.settings };
+      }
+      if (this.observeOnly) {
+        this.sampleWindow = { focus: this.job.focus, size: this.job.size, cameraChunk: this.job.cameraChunk };
+        this.job = null;
+        this.nextSample = now + this.settings.sampleIntervalMs;
+        break;
+      }
       PerfCounters.set('regionalSpatialSampledChunks', cells.size);
       PerfCounters.set('regionalSpatialDemandUnits', result.totalUnits);
       PerfCounters.set('regionalSpatialPeakChunkUnits', result.maxUnits);
@@ -189,7 +207,8 @@ export class RegionalSceneryBudget {
     this.job = null;
     this.sampleWindow = null;
     this.costModel = null;
+    this.diagnosticSample = null;
     this.townCache = new WeakMap();
-    this.publish(new Set(), new Map());
+    if (!this.observeOnly) this.publish(new Set(), new Map());
   }
 }
