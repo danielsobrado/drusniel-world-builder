@@ -1,3 +1,4 @@
+import { buildDecorationBatches } from '../LocationDecorationAdmission.js';
 import * as THREE from 'three/webgpu';
 import {
   attribute, clamp, color, float, mix, positionLocal, positionWorld, sin, smoothstep, time, vec3,
@@ -163,6 +164,7 @@ export function buildLocationAlpineUnderstory({
   maxIceShards = 220,
   maxTundraSedge = 160,
   maxTundraLichen = 160,
+  decorationBudget = null,
 }) {
   const { positions, normals } = surface;
   const count = positions.length / 3;
@@ -317,9 +319,9 @@ export function buildLocationAlpineUnderstory({
         });
       });
       const sedgeMat = createAlpineFloraMaterial('location-alpine-sedge', { wind, swayAmp: 0.055, frostAmount: 0.38 });
-      const mesh = buildInstancedLayer('location-alpine-tundra-sedge', sedgeGeo, sedgeMat, records, { alignToNormal: false });
+      meshes.push(...buildDecorationBatches(records, decorationBudget, batch =>
+        buildInstancedLayer('location-alpine-tundra-sedge', sedgeGeo, sedgeMat, batch, { alignToNormal: false })));
       sedgeGeo.dispose();
-      if (mesh) meshes.push(mesh);
     }
   }
 
@@ -343,9 +345,9 @@ export function buildLocationAlpineUnderstory({
         });
       });
       const lichenMat = createAlpineFloraMaterial('location-alpine-lichen', { wind, swayAmp: 0, frostAmount: 0.32 });
-      const mesh = buildInstancedLayer('location-alpine-tundra-lichen', lichenGeo, lichenMat, records, { alignToNormal: true });
+      meshes.push(...buildDecorationBatches(records, decorationBudget, batch =>
+        buildInstancedLayer('location-alpine-tundra-lichen', lichenGeo, lichenMat, batch, { alignToNormal: true })));
       lichenGeo.dispose();
-      if (mesh) meshes.push(mesh);
     }
   }
 
