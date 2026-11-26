@@ -977,9 +977,12 @@ export class StylizedTreeView {
       getDrawPreparation: () => this.terrainView.drawPreparation,
       onImpostorDemand: indices => this.regionalImpostors?.setDemand(indices),
       anchor: this.instanceAnchor,
-      beforePublish: () => {
+      getPublicationBudget: this.sceneryPublicationBudget ? () => this.sceneryPublicationBudget : null,
+      getPublicationAnchor: () => this.instanceAnchor.proposed(this.terrainView.floatingOrigin.getState()),
+      beforePublish: proposed => {
         const origin = this.terrainView.floatingOrigin.getState();
-        this.instanceAnchor.follow(origin);
+        if (proposed) { this.instanceAnchor.x = proposed.x; this.instanceAnchor.z = proposed.z; }
+        else this.instanceAnchor.follow(origin);
         this.instanceAnchor.place(this.root, origin);
       },
       rockSource: job.rockSource,
