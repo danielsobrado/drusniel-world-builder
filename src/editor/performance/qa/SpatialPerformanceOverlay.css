@@ -1,0 +1,26 @@
+.spatial-perf-overlay {
+  position: fixed;
+  right: 12px;
+  bottom: 18px;
+  z-index: 110;
+  width: min(340px, calc(100vw - 24px));
+  max-height: 80vh;
+  overflow: auto;
+  background: #17212cF5;
+  color: #e4eaf2;
+  border: 1px solid #546579;
+  border-radius: 8px;
+  padding: 10px;
+  font: 12px/1.45 system-ui, sans-serif;
+  box-shadow: 0 4px 18px #0006;
+}
+.spatial-perf-overlay summary { cursor: pointer; font-weight: 700; font-size: 13px; }
+.spatial-perf-overlay .spatial-controls { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+.spatial-perf-overlay select, .spatial-perf-overlay button {
+  background: #263545; color: inherit; border: 1px solid #617386; border-radius: 4px; padding: 4px;
+  font: inherit; min-width: 0;
+}
+.spatial-perf-overlay canvas { display: block; width: 100%; aspect-ratio: 1; cursor: crosshair; image-rendering: pixelated; }
+.spatial-perf-overlay pre { font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; }
+.spatial-perf-overlay .spatial-legend { color: #bac9d7; font-size: 11px; }
+.spatial-perf-overlay :focus-visible { outline: 2px solid #80c7ff; }
