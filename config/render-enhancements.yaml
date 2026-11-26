@@ -5,6 +5,7 @@ geologyLod: false
 # Opt-in until regional visual and GPU acceptance.
 regionalTerrainProfiles: false
 regionalLazyTrees: false
+regionalTreeSourceRelease: false
 regionalResourceBudget: false
 regionalDensityBudget: false
 regionalBudget:
