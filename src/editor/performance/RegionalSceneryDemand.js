@@ -1,3 +1,4 @@
+import { regionalCardEligible } from './RegionalAdmission.js';
 import { addRenderCost, emptyRenderCost } from './RegionalRenderCost.js';
 
 export function sceneryChunkKey(x, z, size) {
@@ -29,7 +30,7 @@ export function* townSceneryCells(layout, size) {
 }
 
 /** Read resident data without scheduling new manifests or touching their LRU clocks. */
-export function* collectRegionalSceneryDemand(surface, focus, size, settings, townCache, costModel = null) {
+export function* collectRegionalSceneryDemand(surface, focus, size, settings, townCache, costModel = null, admissionContext = null) {
   const cells = new Map();
   const add = (key, kind, count) => {
     if (!(count > 0) || !Number.isFinite(count) || !inWindow(key, focus, settings.spatialChunkRadius)) return;
@@ -47,6 +48,13 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
     addRenderCost(cell.renderCost.selected, estimate.selected);
     addRenderCost(layer.requested, estimate.requested);
     addRenderCost(layer.selected, estimate.selected);
+    if (admissionContext && ['tree', 'rock', 'bush', 'card'].includes(kind)) {
+      layer.options ??= settings.admissionFactors.map(factor => ({ factor, cost: emptyRenderCost() }));
+      for (const option of layer.options) {
+        const cost = estimate.options?.find(candidate => candidate.factor === option.factor)?.cost ?? estimate.requested;
+        addRenderCost(option.cost, cost);
+      }
+    }
   };
   const caches = [
     ['tree', surface.treeView?.manifestStore?.cache, surface.treeView],
@@ -74,7 +82,11 @@ export function* collectRegionalSceneryDemand(surface, focus, size, settings, to
       if (tile.band != null) {
         const key = sceneryChunkKey(tile.centerX, tile.centerZ, size);
         add(key, kind, tile.output?.count ?? 0);
-        if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) addCost(key, kind, costModel.grass(layer, tile, kind));
+        if (costModel && inWindow(key, focus, settings.spatialChunkRadius)) {
+          const eligible = kind === 'card' && admissionContext && regionalCardEligible(tile.centerX, tile.centerZ,
+            layer.tileSize / 2, focus, admissionContext.cameraChunk, size, admissionContext.handoffEnd, settings.protectedChunkRadius);
+          addCost(key, kind, costModel.grass(layer, tile, kind, admissionContext ? settings.admissionFactors : null, eligible));
+        }
       }
       yield;
     }
