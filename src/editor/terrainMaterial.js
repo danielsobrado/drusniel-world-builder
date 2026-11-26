@@ -710,6 +710,8 @@ export function createTerrainMaterial({
         time: surfaceEffects.valleyFog.uniforms.time,
         weight: surfaceEffects.valleyFog.uniforms.weight,
         quality: surfaceEffects.valleyFog.quality,
+        activeSteps: surfaceEffects.valleyFog.uniforms.activeSteps ?? null,
+        protectedDistance: surfaceEffects.valleyFog.fragmentBudget?.fogProtectedDistanceMeters ?? 0,
         sunDirection: surfaceEffects.valleyFog.uniforms.sunDirection,
         sunColor: surfaceEffects.valleyFog.uniforms.sunColor,
         fogColor: surfaceEffects.valleyFog.uniforms.fogColor,
