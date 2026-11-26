@@ -87,7 +87,7 @@ export class WorldAmbience {
    * @param {number} state.snowCountry 0..1
    * @param {object | null} [state.player] the walker, for breath
    */
-  update(delta, { camera, walking, orbitFocus, weather, skyPreset, night, snowCountry, player = null, budget = null }) {
+  update(delta, { camera, walking, orbitFocus, weather, skyPreset, night, snowCountry, player = null, budget = null, particles = null }) {
     if (!this.system.enabled) return;
     const origin = this.terrainView.floatingOrigin.getState();
     const point = walking || !orbitFocus ? camera.position : orbitFocus;
@@ -128,6 +128,7 @@ export class WorldAmbience {
       seaLevel: this.getGenerator()?.seaLevel ?? 0,
       player,
       budget,
+      particles,
     });
   }
 
