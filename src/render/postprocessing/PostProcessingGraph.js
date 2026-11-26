@@ -150,6 +150,7 @@ export class PostProcessingGraph {
         materialNode: this.inputs.material,
         settings: settings.bloom,
         exposure: settings?.toneMapping?.exposure ?? 1,
+        adaptiveAtmosphere,
       })
       : null;
     this.bloomTextureNode = this.bloom?.outputNode ?? null;
@@ -284,6 +285,7 @@ export class PostProcessingGraph {
     this.bloom?.updateUniforms(
       settings?.bloom ?? this.bloom.settings,
       toneMapping?.exposure ?? 1,
+      atmosphere,
     );
     this.toneMapping.updateUniforms(
       toneMapping,
