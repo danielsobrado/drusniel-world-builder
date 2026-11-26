@@ -1460,6 +1460,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       viewModeController.readFocusWorld(townFocus);
       return floatingOrigin.toCanonical(townFocus.x, townFocus.z);
     },
+    getCameraCanonical: () => {
+      const position = viewModeController.camera?.position;
+      return position ? floatingOrigin.toCanonical(position.x, position.z) : null;
+    },
     // Night skies light the world with the moon; windows still need to know it is night.
     isNight: () => Boolean(skyLooks?.night),
     getWalkerCanonical: () => {
