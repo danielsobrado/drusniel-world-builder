@@ -452,6 +452,7 @@ export class StylizedBushView {
         thresholds: settings.thresholds,
         regionalLodFactor,
         regionalSpatialBudget,
+        regionalLayer: 'bush',
         protectedChunkRadius: this.config.enhancements?.regionalBudget?.protectedChunkRadius,
         radii: {
           meshRadius: settings.meshRadius,
