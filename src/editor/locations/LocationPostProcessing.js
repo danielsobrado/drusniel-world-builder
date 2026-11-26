@@ -16,7 +16,8 @@ import { BloomNode } from '../../render/postprocessing/nodes/BloomNode.js';
 import { HierarchicalDepthNode } from '../../render/postprocessing/nodes/HierarchicalDepthNode.js';
 import { SelectiveSsrNode } from '../../render/postprocessing/nodes/SelectiveSsrNode.js';
 import { ToneMappingNode } from '../../render/postprocessing/nodes/ToneMappingNode.js';
-import { AtmosphericPassAdmission } from '../../render/postprocessing/AtmosphericPassAdmission.js';
+import { AtmosphericPassAdmission, atmosphericLayerBudget } from '../../render/postprocessing/AtmosphericPassAdmission.js';
+import { readGpuFeedback } from '../performance/gpu/GpuPassFeedback.js';
 
 const DEFAULT_AO_SETTINGS = Object.freeze({
   enabled: true,
@@ -222,12 +223,14 @@ export class LocationPostProcessing {
 
     this.scenePass.camera = camera;
     const frameState = { camera, width: size.x, height: size.y, pixelRatio: pr };
-    const previous = this.atmosphericAdmission?.reduced;
-    const atmosphere = this.atmosphericAdmission?.update(performance.now()) ?? null;
-    if (previous !== this.atmosphericAdmission?.reduced) this.history.ssrValid = false;
-    this.ambientOcclusion?.updateUniforms(frameState, this.settings.ao, atmosphere);
-    this.ssr?.updateUniforms(frameState, this.settings.ssr, atmosphere);
-    this.bloom?.updateUniforms(this.settings.bloom, this.settings.toneMapping.exposure, atmosphere);
+    const previous = this.atmosphericAdmission?.qualityKey;
+    const now = performance.now();
+    const measured = readGpuFeedback(this.renderer, 'location', now);
+    const atmosphere = this.atmosphericAdmission?.update(now, false, measured) ?? null;
+    if (previous !== this.atmosphericAdmission?.qualityKey) this.history.ssrValid = false;
+    this.ambientOcclusion?.updateUniforms(frameState, this.settings.ao, atmosphericLayerBudget(atmosphere, 'ao'));
+    this.ssr?.updateUniforms(frameState, this.settings.ssr, atmosphericLayerBudget(atmosphere, 'ssr'));
+    this.bloom?.updateUniforms(this.settings.bloom, this.settings.toneMapping.exposure, atmosphericLayerBudget(atmosphere, 'bloom'));
     this.toneMapping.updateUniforms(
       this.settings.toneMapping,
       this.settings.bloom.enabled ? this.settings.bloom.intensity : 0,
