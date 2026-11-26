@@ -1,3 +1,5 @@
+import { isTreeImpostorMorphologyCompatible } from '../stylized/TreeLodAssembler.js';
+
 export const COST_FIELDS = Object.freeze(['triangles', 'draws', 'shadowTriangles', 'shadowDraws', 'reflectionTriangles', 'reflectionDraws', 'unknown']);
 export function emptyRenderCost() {
   return Object.fromEntries(COST_FIELDS.map(key => [key, 0]));
@@ -61,6 +63,11 @@ export class RegionalRenderCostModel {
     this.prototypeCosts = new WeakMap();
     this.plans = new WeakMap();
     this.townCosts = new WeakMap();
+    this.refreshPasses();
+  }
+
+  refreshPasses() {
+    const surface = this.surface;
     const enhancements = surface.config?.enhancements;
     this.passes = {
       shadow: enhancements?.shadowCascades ?? 1,
@@ -79,14 +86,13 @@ export class RegionalRenderCostModel {
     return entries.get(key);
   }
 
-  prototypeCost(view, kind, index, band) {
+  prototypeCost(view, kind, index, band, impostorCompatible) {
     if (band === 'culled') return { triangles: 0, draws: 0, shadowTriangles: 0, shadowDraws: 0 };
     const near = band === 'near' || kind === 'detail';
     let parts = near ? view.prototypes?.[index] : view.proxyPrototypes?.[index];
-    if (kind === 'tree' && band === 'impostor') {
+    if (kind === 'tree' && band === 'impostor' && impostorCompatible && view.impostorAtlases?.[index]) {
       const batch = view.impostorBatches?.[index]?.batch;
-      // Not all morphologies can use an atlas; the proxy is the safe estimate.
-      if (!parts && batch?.geometry) parts = { geometry: batch.geometry };
+      if (batch?.geometry) parts = batch.mesh ?? batch;
     }
     // Cluster aggregation is estimated by per-tree proxy cost, not a fabricated cluster count.
     if (!parts) return null;
@@ -107,19 +113,24 @@ export class RegionalRenderCostModel {
       return { requested, selected };
     }
     const entry = this.planEntry(view, key);
-    const baseline = entry?.baselineBand ?? (entry?.band === 'culled' ? 'culled' : 'near');
+    const baseline = entry?.baselineBand ?? (entry?.band === 'culled' || (!entry && view.previousPlan) ? 'culled' : 'near');
     const selectedBand = entry?.band ?? baseline;
     const counts = new Map();
     for (let i = 0; i < placements.length; i++) {
       const placement = placements[i];
       const index = kind === 'tree' && typeof view.resolvePalettePrototypeIndex === 'function'
         ? view.resolvePalettePrototypeIndex(placement) : placement.prototypeIndex;
-      counts.set(index, (counts.get(index) ?? 0) + 1);
+      const compatible = kind === 'tree' && (baseline === 'impostor' || selectedBand === 'impostor')
+        && isTreeImpostorMorphologyCompatible(placement);
+      const groupKey = `${index}:${Number(compatible)}`;
+      let group = counts.get(groupKey);
+      if (!group) counts.set(groupKey, group = { index, compatible, count: 0 });
+      group.count++;
       if ((i & 63) === 63) yield;
     }
-    for (const [index, count] of counts) {
-      addRenderCost(requested, batchRenderCost(this.prototypeCost(view, kind, index, baseline), count, this.passes));
-      addRenderCost(selected, batchRenderCost(this.prototypeCost(view, kind, index, selectedBand), count, this.passes));
+    for (const { index, compatible, count } of counts.values()) {
+      addRenderCost(requested, batchRenderCost(this.prototypeCost(view, kind, index, baseline, compatible), count, this.passes));
+      addRenderCost(selected, batchRenderCost(this.prototypeCost(view, kind, index, selectedBand, compatible), count, this.passes));
       yield;
     }
     return { requested, selected };
