@@ -30,7 +30,10 @@ export class AtmosphericPassAdmission {
     if (bypass || !Number.isFinite(delta) || delta <= 0 || delta > this.settings.maxFrameGapMs) {
       this.slowMs = 0;
       this.fastMs = 0;
-      if (bypass) this.setReduced(false, now);
+      if (bypass || delta < 0 || delta > this.settings.maxFrameGapMs) {
+        this.setReduced(false, now);
+        this.changedAt = -Infinity;
+      }
     } else {
       this.slowMs = delta > this.settings.targetFrameMs ? this.slowMs + delta : 0;
       this.fastMs = delta < this.settings.recoveryFrameMs ? this.fastMs + delta : 0;
