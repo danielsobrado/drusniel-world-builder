@@ -9,6 +9,7 @@ regionalTreeSourceRelease: false
 regionalResourceBudget: false
 regionalDensityBudget: false
 regionalSpatialBudget: false
+regionalGeometryCostBudget: false
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
@@ -23,6 +24,10 @@ regionalBudget:
   spatialLodFactor: 0.75
   spatialCardFactor: 0.8
   spatialWorkItems: 256
+  # Geometry-based pressure: estimated pass submissions, not GPU timings.
+  spatialTriangleBudget: 200000
+  spatialDrawBudget: 100
+  spatialReflectionPassWeight: 0.25
   spatialWeights:
     town: 1
     tree: 8
