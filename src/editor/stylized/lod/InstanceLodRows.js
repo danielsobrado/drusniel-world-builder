@@ -27,7 +27,7 @@ export class InstanceLodRows {
   }
 
   patch(changes, transitions) {
-    return completeIterator(this.iteratePatch(changes, transitions));
+    return completeIterator(this.iteratePatch(changes, transitions, false));
   }
 
   /** Copy only touched prototype storage before a cancellable publication. */
@@ -46,13 +46,13 @@ export class InstanceLodRows {
     return copy;
   }
 
-  *iteratePatch(changes, transitions) {
+  *iteratePatch(changes, transitions, resumable = true) {
     const baseVersions = { ...this.versions }, changedRows = {};
     for (const band of this.bands) {
       const rows = this.buckets[band], indices = this.indices[band], dirty = new Set();
       let changed = false, visits = 0;
       for (const [id, representations] of changes) {
-        if (visits++ > 0 && visits % 64 === 1) yield;
+        if (resumable && visits++ > 0 && visits % 64 === 1) yield;
         const next = representations.find(row => row.band === band);
         const index = indices.get(id);
         if (next) {
