@@ -33,6 +33,18 @@ export class TreeImpostorBatch {
     });
   }
 
+  /** GPU record uploads join the same atomic scenery publication. CPU camera compaction remains separate. */
+  *prepareRecords(records, stage) {
+    const count = this.batch.iterateRecordPublication
+      ? yield* this.batch.iterateRecordPublication(records, stage)
+      : Math.min(records.length, this.batch.capacity);
+    stage.finalizers.push(() => {
+      this.acceptedRecords = this.batch.iterateRecordPublication ? count : this.batch.setRecords(records);
+      this.auxiliary?.setRecords(records);
+    });
+    return { mode: this.mode, requested: records.length, accepted: count, dropped: records.length - count };
+  }
+
   update(camera, origin, timestamp = 0, computeQueue = null) {
     return Object.freeze({
       mode: this.mode,
