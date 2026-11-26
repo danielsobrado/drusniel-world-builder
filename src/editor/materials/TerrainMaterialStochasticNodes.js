@@ -240,6 +240,7 @@ export function createTerrainMaterialFamilyMultiplier({
   wetness,
   canopy,
   families,
+  regionalBranches = false,
 }) {
   if (!atlas || !families?.enabled) return vec3(1);
   // One `Fn`, so the variables below are declared once (see the note at the top).
@@ -258,12 +259,14 @@ export function createTerrainMaterialFamilyMultiplier({
       families,
       microVisibility,
     });
-    const topDetail = topPrimary.toVar();
-    If(blend.greaterThan(0), () => {
+    const topDetail = topPrimary.toVar('terrainTopDetail');
+    const addTopSecondary = () => {
       const secondary = projectedDetail({ atlas, planarMeters: worldXZ, familyIndex: pair.secondaryIndex, families, microVisibility, secondary: true });
       topDetail.assign(mix(topDetail, secondary, blend));
-    });
-    const topVar = topDetail.toVar();
+    };
+    if (regionalBranches) If(blend.greaterThan(0), addTopSecondary);
+    else addTopSecondary();
+    const topVar = topDetail;
     const vertical = terrainHeight.mul(families.projection.verticalScale);
     const sidePlanar = select(
       abs(farNormal.r).greaterThan(abs(farNormal.g)),
@@ -271,14 +274,18 @@ export function createTerrainMaterialFamilyMultiplier({
       vec2(worldXZ.x, vertical),
     );
     const slope = terrainShape.r;
-    const sideVar = topVar.toVar();
-    If(slope.greaterThanEqual(families.projection.slopeStart), () => {
+    const sideVar = vec3(topVar).toVar('terrainSideDetail');
+    const addSide = () => {
       sideVar.assign(projectedDetail({ atlas, planarMeters: sidePlanar, familyIndex: pair.primaryIndex, families, microVisibility }));
-      If(blend.greaterThan(0), () => {
+      const addSecondary = () => {
         const secondary = projectedDetail({ atlas, planarMeters: sidePlanar, familyIndex: pair.secondaryIndex, families, microVisibility, secondary: true });
         sideVar.assign(mix(sideVar, secondary, blend));
-      });
-    });
+      };
+      if (regionalBranches) If(blend.greaterThan(0), addSecondary);
+      else addSecondary();
+    };
+    if (regionalBranches) If(slope.greaterThanEqual(families.projection.slopeStart), addSide);
+    else addSide();
     const projectionBlend = smoothstep(
       families.projection.slopeStart,
       families.projection.slopeFull,

@@ -10,6 +10,7 @@ regionalDensityBudget: false
 regionalBudget:
   idleMs: 30000
   maxTrackedTextureMiB: 256
+  maxRendererMiB: 4096
   evictionsPerFrame: 1
   farGrassPressure: 0.85
   sampleIntervalMs: 1000

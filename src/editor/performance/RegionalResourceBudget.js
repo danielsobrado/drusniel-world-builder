@@ -22,8 +22,11 @@ export class RegionalResourceBudget {
   }
 
   update(surface, now, shouldYield = () => false) {
+    shouldYield ??= () => false;
     if (shouldYield()) return;
-    const manager = surface.terrainView.renderer?._textures;
+    const renderer = surface.terrainView.renderer;
+    const manager = renderer?._textures;
+    const info = renderer?.info;
     const settings = this.settings;
     let remaining = settings.evictionsPerFrame;
     if (now >= this.nextSample) {
@@ -46,25 +49,32 @@ export class RegionalResourceBudget {
       const eligible = [];
       for (const [texture, active] of candidates) {
         if (!manager?.has?.(texture)) { this.idle.delete(texture); continue; }
-        const size = estimateRegionalTextureBytes(texture);
+        const accounted = info?.memoryMap?.get(texture);
+        const size = Number.isFinite(accounted) && accounted > 0 ? accounted : estimateRegionalTextureBytes(texture);
         bytes += size;
         if (active) { this.idle.delete(texture); continue; }
         if (!this.idle.has(texture)) this.idle.set(texture, now);
         if (now - this.idle.get(texture) >= settings.idleMs) eligible.push({ texture, size, since: this.idle.get(texture) });
       }
       bytes += PerfCounters.get('treeImpostorAtlasBytes') + PerfCounters.get('terrainMaterialFamilyAtlasBytes');
+      const total = info?.memory?.total;
+      let rendererBytes = Number.isFinite(total) ? total : 0;
       eligible.sort((a, b) => a.since - b.since || b.size - a.size);
       for (const item of eligible) {
-        if (remaining <= 0 || shouldYield() || bytes <= settings.maxTrackedTextureMiB * MIB) break;
+        if (remaining <= 0 || shouldYield() || (bytes <= settings.maxTrackedTextureMiB * MIB && rendererBytes <= settings.maxRendererMiB * MIB)) break;
         item.texture.dispose();
         this.idle.delete(item.texture);
         bytes -= item.size;
+        rendererBytes = Math.max(0, rendererBytes - item.size);
         remaining--;
         PerfCounters.inc('regionalTextureEvictions');
         PerfCounters.inc('regionalTextureBytesEvicted', item.size);
       }
       this.trackedBytes = bytes;
       PerfCounters.set('regionalTrackedTextureBytes', bytes);
+      PerfCounters.set('regionalRendererAccountedBytes', Number.isFinite(info?.memory?.total) ? info.memory.total : rendererBytes);
+      PerfCounters.set('regionalRendererBudgetExceededBytes', Math.max(0, rendererBytes - settings.maxRendererMiB * MIB));
+      PerfCounters.set('regionalRendererAccountingAvailable', Number.isFinite(total) ? 1 : 0);
       PerfCounters.set('regionalTextureBudgetExceededBytes', Math.max(0, bytes - settings.maxTrackedTextureMiB * MIB));
     }
     if (remaining > 0 && !shouldYield()) remaining -= surface.treeView?.retireRegionalPools(now, settings.idleMs, remaining) ?? 0;

@@ -267,6 +267,7 @@ export function createTerrainMaterialBakedSurface({
     wetness: samples.wetnessShoreline.r,
     canopy: samples.canopyWater.r,
     families,
+    regionalBranches: stylizedConfig.enhancements?.regionalTerrainProfiles === true,
   });
   const familyMultiplier = vec3(1).add(
     sampledFamilyMultiplier.sub(1).mul(genome.detailScale),
