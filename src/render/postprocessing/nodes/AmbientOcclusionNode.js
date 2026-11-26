@@ -10,6 +10,7 @@ import {
   vec4,
 } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
+import { reducedResolution } from '../AtmosphericPassAdmission.js';
 
 /**
  * Screen-space ambient occlusion over the world scene pass.
@@ -71,7 +72,7 @@ export class AmbientOcclusionNode {
     this.intensity.value = settings.intensity;
   }
 
-  updateUniforms(frameState, settings) {
+  updateUniforms(frameState, settings, atmosphere = null) {
     // The graph keeps its topology across editor/player camera switches, and
     // GTAO captured the first camera's matrices and clip planes by reference.
     const camera = frameState.camera;
@@ -83,6 +84,8 @@ export class AmbientOcclusionNode {
       this.aoPass._cameraFar.object = camera;
     }
     this.applySettings(settings ?? this.settings);
+    const authored = this.settings.resolutionScale;
+    this.aoPass.resolutionScale = atmosphere ? reducedResolution(authored, atmosphere.aoResolutionFactor, atmosphere.aoMinimumResolution) : authored;
   }
 
   dispose() {
