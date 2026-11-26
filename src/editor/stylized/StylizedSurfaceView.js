@@ -43,20 +43,19 @@ export class StylizedSurfaceView extends StylizedSurfaceViewBase {
     try {
       let sharedScene = null;
       if (needsScene) {
-        this.sharedScenePath = this.config.assets.scene;
-        sharedScene = await this.sceneAssets.acquire(this.sharedScenePath, { priority: 'high' });
+        sharedScene = await this.acquireTreeSource(this.config.assets.scene, { priority: 'high' });
       }
       const treeVariants = this.config.trees.enabled
         ? await loadOptionalTreeVariants({
           definitions: this.config.assets.treeVariants ?? [],
-          acquire: (scene) => this.sceneAssets.acquire(scene),
-          onLoaded: (scene) => this.treeVariantPaths.push(scene),
+          acquire: (scene) => this.acquireTreeSource(scene),
         })
         : [];
       await Promise.all([
         this.treeView?.buildFromScene(sharedScene, treeVariants),
         this.flowerView?.ready,
       ].filter(Boolean));
+      this.releaseDetachedTreeSources();
       return null;
     } catch (error) {
       console.warn('Some stylized assets failed to load; remaining layers stay active.', error);
