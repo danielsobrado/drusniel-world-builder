@@ -577,6 +577,11 @@ export class InfiniteTerrainView {
     PerfCounters.set(PERF_COUNTER_OCCLUSION_OCCLUDERS, stats.occluders);
     PerfCounters.set(PERF_COUNTER_OCCLUSION_CULLED_DRAWS, stats.culledDraws);
     PerfCounters.set(PERF_COUNTER_OCCLUSION_PREPARE_MS, this.occlusion.lastPrepareMs);
+    // Accumulated, so a report divides by the prepare count rather than trusting one frame.
+    PerfCounters.inc('gpuOcclusionPrepares');
+    PerfCounters.inc('gpuOcclusionPrepareCpuMs', this.occlusion.lastPrepareMs);
+    PerfCounters.inc('gpuOcclusionCollectCpuMs', stats.collectMs);
+    PerfCounters.inc('gpuOcclusionDispatchCpuMs', stats.dispatchMs);
   }
 
   prewarmPostProcessing(camera) {

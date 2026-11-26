@@ -77,6 +77,7 @@ export class GpuOcclusion {
     this.frame = 0;
     this.cooldown = 0;
     this.lastPrepareMs = 0;
+    this.walkedScene = null;
     this.boundsCache = new WeakMap();
     this.stagingCapacity = 0;
     this.stagingBuffer = null;
@@ -89,7 +90,7 @@ export class GpuOcclusion {
     this.visibilityInput = null;
     this.visibilityOutput = null;
     this.visibilityPyramid = null;
-    this.stats = { supported: false, candidates: 0, occluders: 0, culledDraws: 0, culledTriangles: 0 };
+    this.stats = { supported: false, candidates: 0, occluders: 0, culledDraws: 0, culledTriangles: 0, collectMs: 0, dispatchMs: 0 };
   }
 
   #init() {
@@ -221,7 +222,10 @@ export class GpuOcclusion {
     // GrassDemo walks the graph once per frame and then clears
     // matrixWorldAutoUpdate for the frame's passes; walking it again here cost
     // another ~1.7 ms on the frames that prepare occlusion.
-    if (scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
+    if (scene.matrixWorldAutoUpdate) {
+      scene.updateMatrixWorld();
+      this.walkedScene = scene;
+    }
     camera.updateMatrixWorld();
     this.projectionView.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
     this.frustum.setFromProjectionMatrix(this.projectionView, camera.coordinateSystem);
@@ -330,6 +334,8 @@ export class GpuOcclusion {
 
   #prepare(prepareStarted) {
     this.active.clear();
+    this.walkedScene = null;
+    this.stats.collectMs = this.stats.dispatchMs = 0;
     if (!this.enabled || this.disposed) return;
     // In open views, periodically probe instead of paying for a depth pass that
     // saves almost no geometry. Bypassed frames draw everything normally; no old
@@ -344,7 +350,9 @@ export class GpuOcclusion {
       this.renderer.getDrawingBufferSize(this.size);
       const [width, height] = this.#occlusionSize();
       this.#resize(width, height);
+      const collectStarted = performance.now();
       const entries = this.#collect(width, height);
+      this.stats.collectMs = performance.now() - collectStarted;
       if (!entries.length || !this.stats.occluders) {
         this.backoffIfEmpty();
         return;
@@ -364,7 +372,9 @@ export class GpuOcclusion {
         this.renderer.setMRT?.(previousMrt);
         this.renderer.autoClear = previousAutoClear;
       }
+      const dispatchStarted = performance.now();
       this.#dispatch(entries, prepareStarted);
+      this.stats.dispatchMs = performance.now() - dispatchStarted;
     } catch (error) {
       this.active.clear();
       this.enabled = false;
@@ -471,6 +481,16 @@ export class GpuOcclusion {
   // A renderer-level hook would temporarily leak indirect arguments into nested
   // shadow renders. This bridge is deliberately isolated to the WebGPU backend.
   render(draw) {
+    // Collect just walked the whole graph; the main pass would walk it again
+    // (~0.3 ms in a settlement). Host draw callbacks must not move scene objects.
+    const walked = this.walkedScene;
+    this.walkedScene = null;
+    if (walked) walked.matrixWorldAutoUpdate = false;
+    try { return this.#renderIndirect(draw); }
+    finally { if (walked) walked.matrixWorldAutoUpdate = true; }
+  }
+
+  #renderIndirect(draw) {
     if (!this.active.size) return draw();
     const backend = this.renderer.backend;
     const previous = backend.draw;

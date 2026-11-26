@@ -194,3 +194,19 @@ test('retained group buffers cannot supply stale visibility to current or other-
     material.dispose();
   }
 });
+
+test('the main draw skips its scene walk only on the frame occlusion already walked it', () => {
+  const scene = new THREE.Scene();
+  const occlusion = new GpuOcclusion({ renderer: { backend: null }, scene, camera: new THREE.PerspectiveCamera() });
+  const seen = [];
+  const draw = () => seen.push(scene.matrixWorldAutoUpdate);
+  occlusion.walkedScene = scene;
+  occlusion.render(draw);
+  occlusion.render(draw);
+  assert.deepEqual(seen, [false, true], 'the next frame walks again');
+  assert.equal(scene.matrixWorldAutoUpdate, true);
+  occlusion.walkedScene = scene;
+  assert.throws(() => occlusion.render(() => { throw new Error('draw failed'); }), /draw failed/);
+  assert.equal(scene.matrixWorldAutoUpdate, true, 'restored after a failed draw');
+  occlusion.dispose();
+});
