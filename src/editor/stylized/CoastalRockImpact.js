@@ -139,7 +139,7 @@ export class CoastalRockImpact {
       this.spray?.reset();
     }
     this.refresh(camera, time);
-    this.spray?.beginFrame(time);
+    this.spray?.beginFrame?.(time);
     if (this.sites.length === 0) {
       if (this.field.enabled) this.field.reset();
       this.field.disable();
