@@ -66,6 +66,9 @@ export function createTownRuntime({
   const prompt = new TownInteractionPrompt();
   let lastTimestamp = null;
   let walker = null;
+  let idleSince = null;
+  const regional = terrainView.stylizedConfig?.enhancements;
+  const idleMs = regional?.regionalResourceBudget ? regional.regionalBudget.idleMs : Infinity;
 
   return {
     streamer,
@@ -83,6 +86,16 @@ export function createTownRuntime({
       lastTimestamp = timestamp;
       townKitShared.sunElevation.value = isNight() ? NIGHT_ELEVATION : sun();
       streamer.update(timestamp, getFocusCanonical(), budget);
+      if (streamer.towns.size || streamer.pending.size || streamer.buildJob || !assets.ready) idleSince = null;
+      else {
+        idleSince ??= timestamp;
+        if (timestamp - idleSince >= idleMs && !budget?.shouldYield?.()) {
+          palette.dispose();
+          assets.releaseResident();
+          idleSince = null;
+          PerfCounters.inc('regionalTownKitEvictions');
+        }
+      }
       walker = getWalkerCanonical();
       const focused = doors.focus(walker);
       prompt.show(focused ? (doors.isOpen(focused) ? 'Close door' : 'Open door') : '');

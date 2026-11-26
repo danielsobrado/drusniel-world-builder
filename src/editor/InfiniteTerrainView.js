@@ -1,3 +1,4 @@
+import { pruneRegionalMaterials } from './performance/RegionalMaterialCache.js';
 import { FULL_TERRAIN_FEATURES, terrainRegionalFeatures } from './materials/TerrainRegionalFeatures.js';
 import { waterFieldHasCoverage } from './water/WaterField.js';
 import * as THREE from 'three/webgpu';
@@ -118,6 +119,7 @@ function createSharedTerrainMaterialSource({
   valleyFog = null,
 }) {
   const materials = new Map();
+  const idle = new Map();
   // Resolved once, from the ambient layer's block, and handed to the material as
   // resolved settings: a bad shape key is already an error at config load (see
   // validateStylizedLodConfig), so this cannot fail for a caller that got here.
@@ -151,6 +153,7 @@ function createSharedTerrainMaterialSource({
     materials.set(key, material);
     return material;
   };
+  get.retireIdle = (active, now, idleMs, limit) => pruneRegionalMaterials(materials, idle, active, now, idleMs, limit);
   get.dispose = () => { for (const material of materials.values()) material.dispose(); materials.clear(); };
   return get;
 }
@@ -986,6 +989,17 @@ export class InfiniteTerrainView {
       slot.mesh.material = desired;
       slot.material = desired;
     } else preparation.requestMaterial(slot.mesh, desired);
+  }
+
+  retireRegionalMaterials(now, idleMs, limit) {
+    const active = new Set();
+    for (const slot of this.slots) {
+      if (slot.mesh.material) active.add(slot.mesh.material);
+      if (slot.desiredMaterial) active.add(slot.desiredMaterial);
+      const staged = this.drawPreparation?.stagedMaterials?.get(slot.mesh);
+      if (staged) active.add(staged);
+    }
+    return this.sharedTerrainMaterial?.retireIdle(active, now, idleMs, limit) ?? 0;
   }
 
   updateTerrainMaterialProfiles() {

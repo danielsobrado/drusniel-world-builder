@@ -140,6 +140,16 @@ export class StylizedWaterSlot {
     terrainView.scene.add(this.mesh);
   }
 
+  releaseRegionalMaterials() {
+    if (!this.sharedMaterials || !this.config.enhancements?.regionalResourceBudget) return;
+    this.terrainView.drawPreparation?.cancel?.(this.mesh);
+    this.material = this.sharedMaterials.placeholder;
+    this.refractiveMaterial = null;
+    this.refractionPrewarmed = false;
+    this.mesh.material = this.material;
+    this.mesh.visible = false;
+  }
+
   createMaterial(enableRefraction) {
     if (this.sharedMaterials) return this.sharedMaterials.get(this.materialOptions, enableRefraction, this.features);
     const material = createStylizedWaterMaterial({
@@ -227,6 +237,7 @@ export class StylizedWaterSlot {
       this.hasOceanWater = false;
       this.hasRiverWater = false;
       this.uploadedPage = null;
+      this.releaseRegionalMaterials();
       this.terrainView.drawPreparation?.cancel?.(this.mesh);
       return;
     }
@@ -246,6 +257,7 @@ export class StylizedWaterSlot {
       this.hasOceanWater = false;
       this.hasRiverWater = false;
       this.uploadedPage = null;
+      this.releaseRegionalMaterials();
       this.mesh.userData.skipWarmup = true;
       this.mesh.userData.deferInitialPreparation = true;
       return;
@@ -264,6 +276,7 @@ export class StylizedWaterSlot {
         this.uploadedPage = page;
         this.uploadedFieldRevision = page.waterFieldRevision ?? 0;
         this.seaPhaseDescriptor = null;
+        this.releaseRegionalMaterials();
         PerfCounters.inc(PERF_COUNTER_WATER_CHUNKS_DRY);
         PerfCounters.inc('waterDryUploadsSkipped');
         return;

@@ -109,6 +109,19 @@ export class TownKitAssets {
     return this.interior.has(module);
   }
 
+  releaseResident() {
+    if (!this.ready) return false;
+    this.dispose();
+    this.promise = null;
+    this.ready = false;
+    this.failed = null;
+    this.interior.clear();
+    this.atlas = null;
+    this.glassSource = null;
+    this.kit = null;
+    return true;
+  }
+
   dispose() {
     for (const map of [this.modules, this.farModules]) {
       for (const { opaque, glass } of map.values()) {

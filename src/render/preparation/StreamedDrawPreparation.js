@@ -107,13 +107,13 @@ export class StreamedDrawPreparation {
   markPrepared(mesh, material) {
     this.prepared.add(mesh);
     let variants = this.preparedVariants.get(mesh);
-    if (!variants) this.preparedVariants.set(mesh, variants = new Set());
+    if (!variants) this.preparedVariants.set(mesh, variants = new WeakSet());
     variants.add(material);
     this.uploadEstimate.mark(mesh);
   }
   markBypassed(mesh, material) {
     let variants = this.bypassedVariants.get(mesh);
-    if (!variants) this.bypassedVariants.set(mesh, variants = new Set());
+    if (!variants) this.bypassedVariants.set(mesh, variants = new WeakSet());
     variants.add(material);
     if (this.enqueuedAt?.delete(mesh)) PerfCounters.inc('streamedDrawJobsBypassed');
   }

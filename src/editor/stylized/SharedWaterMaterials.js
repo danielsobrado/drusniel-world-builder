@@ -1,3 +1,4 @@
+import { pruneRegionalMaterials } from '../performance/RegionalMaterialCache.js';
 import { DoubleSide, MeshBasicMaterial } from 'three/webgpu';
 import { uniform } from 'three/tsl';
 import { ALL_WATER_FEATURES } from './WaterFeatureProfile.js';
@@ -13,6 +14,7 @@ export class SharedWaterMaterials {
     this.reflections = reflections;
     this.oceanFft = oceanFft;
     this.materials = new Map();
+    this.idle = new Map();
     this.placeholder = new MeshBasicMaterial();
     this.bindings = null;
     this.disposed = false;
@@ -44,6 +46,16 @@ export class SharedWaterMaterials {
     this.materials.set(key, material);
     material.userData.waterFeatureProfile = features;
     return material;
+  }
+
+  retireIdle(slots, now, idleMs, limit) {
+    const active = new Set();
+    for (const slot of slots) {
+      for (const material of [slot.material, slot.refractiveMaterial, slot.mesh.material]) if (material) active.add(material);
+      const pending = slot.terrainView.drawPreparation?.stagedMaterials?.get(slot.mesh);
+      if (pending) active.add(pending);
+    }
+    return pruneRegionalMaterials(this.materials, this.idle, active, now, idleMs, limit);
   }
 
   dispose() {
