@@ -881,6 +881,7 @@ export class StylizedTreeView {
         thresholds: settings.thresholds,
         regionalLodFactor,
         regionalSpatialBudget,
+        regionalLayer: 'tree',
         protectedChunkRadius: this.config.enhancements?.regionalBudget?.protectedChunkRadius,
         radii: settings,
         transitionStates: this.chunkLodStates,
