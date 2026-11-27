@@ -59,6 +59,8 @@ export class GpuTreeImpostorBatch {
     this.computePending = null;
     this.indirectNeedsReset = false;
     this.cullStale = true;
+    this.surfaceCullInvalid = false;
+    this.surfaceBounds = null;
     this.viewState = new Float64Array(VIEW_STATE_SIZE);
     this.disposed = false;
     this.frustum = new THREE.Frustum();
@@ -185,9 +187,17 @@ export class GpuTreeImpostorBatch {
     const parameters = { min: Infinity, max: -1 };
     const appearances = { min: Infinity, max: -1 };
     let boundsChanged = count !== previousCount;
+    const bounds = { minX: Infinity, minZ: Infinity, maxX: -Infinity, maxZ: -Infinity };
+    let validBounds = true;
     for (let index = 0; index < count; index += 1) {
       if (stage && index > 0 && index % 64 === 0) yield;
       const record = records[index];
+      const x = Math.fround(record.x), z = Math.fround(record.z), radius = Math.fround(record.radius);
+      validBounds &&= Number.isFinite(x) && Number.isFinite(z) && Number.isFinite(radius) && radius >= 0;
+      bounds.minX = Math.min(bounds.minX, x - radius);
+      bounds.minZ = Math.min(bounds.minZ, z - radius);
+      bounds.maxX = Math.max(bounds.maxX, x + radius);
+      bounds.maxZ = Math.max(bounds.maxZ, z + radius);
       const offset = index * 4;
       const radiusChanged = this.parameterBuffer.array[offset + 3] !== Math.fround(record.radius);
       const transformChanged = writeImpostorAttribute(this.transformBuffer, index,
@@ -201,8 +211,9 @@ export class GpuTreeImpostorBatch {
     }
     const finalize = () => {
       this.recordCount = count;
+      this.surfaceBounds = count > 0 && validBounds ? bounds : null;
       this.cullStale ||= boundsChanged;
-      this.mesh.visible = count > 0;
+      this.mesh.visible = count > 0 && !this.surfaceCullInvalid;
       this.countUniform.value = count;
       this.indirectNeedsReset ||= previousCount > 0 && count === 0;
     };
@@ -279,11 +290,41 @@ export class GpuTreeImpostorBatch {
     return changed;
   }
 
+  /** The indirect count and visible indices are derived GPU state, never authoritative CPU data. */
+  invalidateSurfaceCull() {
+    this.surfaceCullInvalid = true;
+    this.cullStale = true;
+    this.initialComputePrepared = false;
+    this.indirectNeedsReset = true;
+    this.mesh.visible = false;
+  }
+
+  regenerateSurfaceCull(camera, origin) {
+    if (typeof this.renderer.compute !== 'function' || this.computePending) return false;
+    this.viewChanged(camera, origin);
+    if (this.recordCount > 0) {
+      this.updatePlanes(camera);
+      this.computeCull.dispatchSize = this.recordCount;
+    }
+    const nodes = this.recordCount > 0 ? this.cullPass : this.computeReset;
+    if (!this.submitComputes(nodes, null)) return false;
+    this.surfaceCullInvalid = false;
+    this.indirectNeedsReset = false;
+    this.cullStale = false;
+    this.mesh.visible = this.recordCount > 0;
+    PerfCounters.inc('locationSurface.impostorRegenerations');
+    return true;
+  }
+
   /** @param {?Array} [computeQueue] collects the passes for one shared `renderer.compute` */
   update(camera, origin, timestamp = 0, computeQueue = null) {
     if (this.disposed) return null;
     updateImpostorCameraUniforms(this.uniforms, camera, timestamp);
     this.originUniform.value.set(origin.x, 0, origin.z);
+    if (this.surfaceCullInvalid) {
+      this.regenerateSurfaceCull(camera, origin);
+      return this.recordCount === 0 ? 0 : null;
+    }
     if (this.recordCount === 0) {
       if (this.indirectNeedsReset) {
         this.indirectNeedsReset = !this.submitComputes(this.computeReset, computeQueue);

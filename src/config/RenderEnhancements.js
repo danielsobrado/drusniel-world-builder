@@ -14,7 +14,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
     portalEnabled: false, portalCull: false, portalCellMeters: 12, portalMaxCells: 8192, portalMaxSampleReads: 8000000,
     generationEnabled: false, generationWorker: true, generationSliceMs: 4, generationMaxCopyBytes: 67108864, generationWorkerTimeoutMs: 120000,
     lightingEnabled: false, lightingSliceMs: 4,
-    surfaceReclamationEnabled: false, surfaceMeadowReclamationEnabled: false, surfaceMeadowProtectMeters: 32, surfaceSceneryReclamationEnabled: false, surfaceSceneryProtectMeters: 64, surfaceProtectMeters: 192, surfaceIdleMs: 5000, surfaceSampleMs: 500,
+    surfaceReclamationEnabled: false, surfaceMeadowReclamationEnabled: false, surfaceMeadowProtectMeters: 32, surfaceSceneryReclamationEnabled: false, surfaceGpuImpostorReclamationEnabled: false, surfaceSceneryProtectMeters: 64, surfaceProtectMeters: 192, surfaceIdleMs: 5000, surfaceSampleMs: 500,
     surfaceEvictionsPerSample: 4, surfaceMaxEvictedBytes: 33554432, surfaceRestoreBytesPerFrame: 2097152, surfaceRestoresPerFrame: 4 }),
   geologyAdmissionBudget: Object.freeze({ triangleBudget: 100000, protectMeters: 64, minimumScaleMultiplier: 24, maxExtraDraws: 8, recoveryRatio: 0.85 }),
   locationDecorationBudget: Object.freeze({ cellMeters: 24, protectMeters: 24, maxDistanceMeters: 100, triangleBudget: 60000, drawBudget: 24, recoveryMeters: 4, boundsPaddingMeters: 1, refreshMeters: 1 }),
@@ -140,6 +140,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.shadowCascades = 2;
     value.roadsideLanterns = true;
   }
+  if (params.has('locationSurfaceGpuImpostorReclamation')) value.locationStructureBudget.surfaceGpuImpostorReclamationEnabled = params.get('locationSurfaceGpuImpostorReclamation') === '1';
   if (params.has('locationSurfaceSceneryReclamation')) value.locationStructureBudget.surfaceSceneryReclamationEnabled = params.get('locationSurfaceSceneryReclamation') === '1';
   if (params.has('locationSurfaceMeadowReclamation')) value.locationStructureBudget.surfaceMeadowReclamationEnabled = params.get('locationSurfaceMeadowReclamation') === '1';
   if (params.has('locationSurfaceReclamation')) value.locationStructureBudget.surfaceReclamationEnabled = params.get('locationSurfaceReclamation') === '1';
@@ -195,7 +196,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   }
   if (value.locationStructureBudget.protectMeters < value.locationStructureBudget.cellMeters || !Number.isInteger(value.locationStructureBudget.evictionsPerSample) || !Number.isInteger(value.locationStructureBudget.minPropTriangles)) throw new RangeError('Invalid location structure protection or integer budget.');
   const structure = value.locationStructureBudget;
-  for (const key of ['portalEnabled', 'portalCull', 'generationEnabled', 'generationWorker', 'lightingEnabled', 'surfaceReclamationEnabled', 'surfaceMeadowReclamationEnabled', 'surfaceSceneryReclamationEnabled']) if (typeof structure[key] !== 'boolean') throw new TypeError(`locationStructureBudget.${key} must be a boolean.`);
+  for (const key of ['portalEnabled', 'portalCull', 'generationEnabled', 'generationWorker', 'lightingEnabled', 'surfaceReclamationEnabled', 'surfaceMeadowReclamationEnabled', 'surfaceSceneryReclamationEnabled', 'surfaceGpuImpostorReclamationEnabled']) if (typeof structure[key] !== 'boolean') throw new TypeError(`locationStructureBudget.${key} must be a boolean.`);
   for (const key of ['portalMaxCells', 'portalMaxSampleReads', 'generationMaxCopyBytes', 'generationWorkerTimeoutMs', 'surfaceEvictionsPerSample', 'surfaceMaxEvictedBytes', 'surfaceRestoreBytesPerFrame', 'surfaceRestoresPerFrame']) if (!Number.isInteger(structure[key])) throw new RangeError(`locationStructureBudget.${key} must be an integer.`);
   if (typeof structure.prefetchEnabled !== 'boolean') throw new TypeError('locationStructureBudget.prefetchEnabled must be a boolean.');
   if (!Number.isInteger(structure.prefetchSliceBytes) || structure.prefetchSliceBytes % 4 !== 0
