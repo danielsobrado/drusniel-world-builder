@@ -983,7 +983,7 @@ export class StylizedSurfaceView {
       if (this.runDeferredWork) this.runDeferredWork(sample);
       else sample();
     }
-    if (this.config.enhancements?.regionalInstancePublicationBudget) {
+    if (this.config.enhancements?.regionalInstancePublicationBudget || this.config.enhancements?.slicedInstancePublication) {
       for (const view of [this.treeView, this.rockView, this.bushView]) {
         if (view) view.sceneryPublicationBudget = this.publicationBudget ?? null;
       }
