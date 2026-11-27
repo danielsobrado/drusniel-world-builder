@@ -37,6 +37,8 @@ locationStructureBudget:
   surfaceMeadowProtectMeters: 32
   surfaceSceneryReclamationEnabled: false
   surfaceGpuImpostorReclamationEnabled: false
+  surfaceTownReclamationEnabled: false
+  surfaceTownProtectMeters: 96
   surfaceSceneryProtectMeters: 64
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000

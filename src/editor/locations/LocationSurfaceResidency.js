@@ -1,5 +1,6 @@
 import { REVISION } from 'three/webgpu';
 import { AttributeType } from 'three/src/renderers/common/Constants.js';
+import { collectLocationTownAttributes } from './LocationTownResidency.js';
 import { collectLocationGpuImpostorAttributes } from './LocationGpuImpostorResidency.js';
 import { collectLocationSceneryAttributes } from './LocationSceneryResidency.js';
 import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
@@ -57,7 +58,8 @@ export class LocationSurfaceResidency {
     }
     for (const entry of [...collectLocationMeadowAttributes(this.surface, this.renderer, anchor, this.settings),
       ...collectLocationSceneryAttributes(this.surface, this.renderer, anchor, this.settings),
-      ...collectLocationGpuImpostorAttributes(this.surface, this.renderer, anchor, this.settings)]) {
+      ...collectLocationGpuImpostorAttributes(this.surface, this.renderer, anchor, this.settings),
+      ...collectLocationTownAttributes(this.surface, this.renderer, anchor, this.settings)]) {
       const previous = candidates.get(entry.resource);
       if (previous) {
         previous.protected ||= entry.protected;
@@ -128,17 +130,19 @@ export class LocationSurfaceResidency {
   }
 
   publish() {
-    let textures = 0, meadow = 0, scenery = 0, impostor = 0;
+    let textures = 0, meadow = 0, scenery = 0, impostor = 0, town = 0;
     for (const entry of this.evicted.values()) {
       if (entry.kind === 'meadow') meadow++;
       else if (entry.kind === 'scenery') scenery++;
       else if (entry.kind === 'impostor') impostor++;
+      else if (entry.kind === 'town') town++;
       else textures++;
     }
     PerfCounters.set('locationSurface.pendingTextures', textures);
     PerfCounters.set('locationSurface.pendingMeadowAttributes', meadow);
     PerfCounters.set('locationSurface.pendingSceneryAttributes', scenery);
     PerfCounters.set('locationSurface.pendingImpostorAttributes', impostor);
+    PerfCounters.set('locationSurface.pendingTownAttributes', town);
     PerfCounters.set('locationSurface.pendingBytes', this.evictedBytes);
   }
 

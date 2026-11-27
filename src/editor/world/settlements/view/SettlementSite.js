@@ -117,6 +117,7 @@ export class SettlementSite {
     this.paving = new THREE.Group();
     this.paving.name = `settlement-paving-${this.id}`;
     this.pavingReady = false;
+    this.surfaceResidencyMeshes = [];
     this.job = this.prepare(generator, tileSize);
   }
 
@@ -190,6 +191,7 @@ export class SettlementSite {
     }
     yield* stagedDrawPublication(this.paving, this.stagedMeshes, this.getDrawPreparation());
     this.paving.add(...this.stagedMeshes);
+    this.surfaceResidencyMeshes = this.stagedMeshes;
     this.stagedMeshes = null;
     this.interiorArrays = null;
     this.pavingArrays = null;
@@ -225,6 +227,7 @@ export class SettlementSite {
     this.stagedMeshes = null;
     this.interiorArrays = null;
     this.pavingArrays = null;
+    this.surfaceResidencyMeshes = [];
     this.paving.clear();
     this.paving.removeFromParent();
     this.releaseSurfaces();
