@@ -381,6 +381,7 @@ export class LocationBuilder {
     alpineUnderstory = null,
     decorationBudget = null,
     structureBudget = null,
+    preparedSurface = null,
   }) {
     const group = new THREE.Group();
     const preparedProps = [];
@@ -418,7 +419,7 @@ export class LocationBuilder {
       preparedProps.push({ key, entry, geometry });
     }
 
-    const surface = extractSurface(this.grid);
+    const surface = preparedSurface ?? extractSurface(this.grid);
     if (materials.terrain?.ice > 0) {
       // Feature-preserving Taubin smoothing removes 0.5 m voxel quad faceting on curved ice walls & pillars.
       smoothSurfaceTaubin(surface, this.grid, { passes: 2, lambda: 0.42, mu: -0.44, creaseCos: 0.72 });

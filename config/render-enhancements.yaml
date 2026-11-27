@@ -25,6 +25,11 @@ locationStructureBudget:
   portalCellMeters: 12
   portalMaxCells: 8192
   portalMaxSampleReads: 8000000
+  generationEnabled: false
+  generationWorker: true
+  generationSliceMs: 4
+  generationMaxCopyBytes: 67108864
+  generationWorkerTimeoutMs: 120000
 geologyAdmissionBudget:
   triangleBudget: 100000
   protectMeters: 64

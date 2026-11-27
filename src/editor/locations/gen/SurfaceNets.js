@@ -7,8 +7,21 @@
  *   normals point into open air.
  */
 export function extractSurface(grid) {
+  return finish(extractSurfaceSteps(grid));
+}
+
+function finish(steps) {
+  let step = steps.next();
+  while (!step.done) step = steps.next();
+  return step.value;
+}
+
+const VERTEX_BATCH = 1024;
+const TRIANGLE_BATCH = 3072;
+
+export function* extractSurfaceSteps(grid) {
   const { nx, ny, nz, sy, sz, data, voxel, min } = grid;
-  const cellVertex = new Int32Array(nx * ny * nz).fill(-1);
+  const cellVertex = new Int32Array(sz * 2).fill(-1);
   const positions = [];
   const indices = [];
   const corner = new Float32Array(8);
@@ -23,9 +36,13 @@ export function extractSurface(grid) {
   };
 
   for (let k = 0; k < nz - 1; k += 1) {
+    const current = (k % 2) * sz, previous = sz - current;
+    cellVertex.fill(-1, current, current + sz);
     for (let j = 0; j < ny - 1; j += 1) {
       for (let i = 0; i < nx - 1; i += 1) {
-        const base = i + j * sy + k * sz;
+        const row = i + j * sy;
+        const base = row + k * sz;
+        const slot = current + row, prior = previous + row;
         let mask = 0;
         for (let c = 0; c < 8; c += 1) {
           corner[c] = data[base + offsets[c]];
@@ -41,21 +58,22 @@ export function extractSurface(grid) {
           pz += ((a >> 2) & 1) + (((b >> 2) & 1) - ((a >> 2) & 1)) * t;
           crossings += 1;
         }
-        cellVertex[base] = positions.length / 3;
+        cellVertex[slot] = positions.length / 3;
         positions.push(min.x + (i + px / crossings) * voxel,
           min.y + (j + py / crossings) * voxel, min.z + (k + pz / crossings) * voxel);
         const solid = (mask & 1) === 1;
         // Each cut edge leaving corner 0 is shared by four cells, all already visited.
         if (j > 0 && k > 0 && solid !== (((mask >> 1) & 1) === 1)) {
-          quad(cellVertex[base], cellVertex[base - sy], cellVertex[base - sy - sz], cellVertex[base - sz], solid);
+          quad(cellVertex[slot], cellVertex[slot - sy], cellVertex[prior - sy], cellVertex[prior], solid);
         }
         if (i > 0 && k > 0 && solid !== (((mask >> 2) & 1) === 1)) {
-          quad(cellVertex[base], cellVertex[base - sz], cellVertex[base - sz - 1], cellVertex[base - 1], solid);
+          quad(cellVertex[slot], cellVertex[prior], cellVertex[prior - 1], cellVertex[slot - 1], solid);
         }
         if (i > 0 && j > 0 && solid !== (((mask >> 4) & 1) === 1)) {
-          quad(cellVertex[base], cellVertex[base - 1], cellVertex[base - 1 - sy], cellVertex[base - sy], solid);
+          quad(cellVertex[slot], cellVertex[slot - 1], cellVertex[slot - 1 - sy], cellVertex[slot - sy], solid);
         }
       }
+      yield;
     }
   }
 
@@ -65,10 +83,11 @@ export function extractSurface(grid) {
   for (let v = 0; v < count; v += 1) {
     grid.gradient(positions[v * 3], positions[v * 3 + 1], positions[v * 3 + 2], normal);
     normals[v * 3] = normal.x; normals[v * 3 + 1] = normal.y; normals[v * 3 + 2] = normal.z;
+    if ((v + 1) % VERTEX_BATCH === 0) yield;
   }
   const result = { positions: new Float32Array(positions), normals, indices: new Uint32Array(indices) };
-  faceTowardNormals(result);
-  result.indices = removeDegenerateTriangles(result.positions, result.indices);
+  yield* faceTowardNormalsSteps(result);
+  result.indices = yield* removeDegenerateTriangleSteps(result.positions, result.indices);
   return result;
 }
 
@@ -77,8 +96,13 @@ export function extractSurface(grid) {
  * and rasterization never emit black spikes along sharp fracture creases.
  */
 export function removeDegenerateTriangles(positions, indices, minAreaSq = 1e-8) {
+  return finish(removeDegenerateTriangleSteps(positions, indices, minAreaSq));
+}
+
+function* removeDegenerateTriangleSteps(positions, indices, minAreaSq = 1e-8) {
   const kept = [];
   for (let t = 0; t < indices.length; t += 3) {
+    if (t > 0 && t % TRIANGLE_BATCH === 0) yield;
     const ia = indices[t], ib = indices[t + 1], ic = indices[t + 2];
     if (ia === ib || ib === ic || ic === ia) continue;
     const a = ia * 3, b = ib * 3, c = ic * 3;
@@ -171,8 +195,11 @@ export function smoothSurfaceTaubin(surface, grid, {
 }
 
 /** Winds every triangle to agree with its vertices' normals. */
-function faceTowardNormals({ positions: p, normals: n, indices }) {
+function faceTowardNormals(surface) { finish(faceTowardNormalsSteps(surface)); }
+
+function* faceTowardNormalsSteps({ positions: p, normals: n, indices }) {
   for (let t = 0; t < indices.length; t += 3) {
+    if (t > 0 && t % TRIANGLE_BATCH === 0) yield;
     const a = indices[t] * 3, b = indices[t + 1] * 3, c = indices[t + 2] * 3;
     const ux = p[b] - p[a], uy = p[b + 1] - p[a + 1], uz = p[b + 2] - p[a + 2];
     const vx = p[c] - p[a], vy = p[c + 1] - p[a + 1], vz = p[c + 2] - p[a + 2];

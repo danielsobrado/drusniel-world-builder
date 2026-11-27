@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { generateLocation } from './LocationBuilder.js';
+import { prepareLocationSurface } from './gen/LocationSurfacePreparation.js';
 import { createFlameEmbers, createFlames, createHalos, createLightShaft, createParticles } from './LocationEffects.js';
 import { createBreath, createEmitters } from './LocationEmitters.js';
 import { LocationPostProcessing } from './LocationPostProcessing.js';
@@ -56,6 +57,8 @@ export class LocationScene {
       if (!builder.spawns.entry) throw new Error(`Location "${site.id}" generated no entry spawn.`);
       if (builder.exits.length === 0) throw new Error(`Location "${site.id}" generated no exit.`);
 
+      const structure = !builder.grid.open && !site.lighting.sky && !builder.reflectors.length ? structureBudget : null;
+      const preparedSurface = structure?.generationEnabled ? await prepareLocationSurface(builder.grid, structure) : null;
       await progress('bake-lighting');
       const crystalScale = quality.crystalScale ?? 1;
       const rawCrystalField = site.params?.crystalField ?? null;
@@ -77,7 +80,6 @@ export class LocationScene {
         }
         : null;
 
-      const structure = !builder.grid.open && !site.lighting.sky && !builder.reflectors.length ? structureBudget : null;
       location.scene.add(builder.build({
         materials,
         absorption: site.lighting.absorption,
@@ -88,6 +90,7 @@ export class LocationScene {
         alpineUnderstory,
         decorationBudget,
         structureBudget: structure,
+        preparedSurface,
       }));
       if (structure?.portalEnabled && !enableLocationPost && !materials.terrain?.ice
           && !materials.terrain.material.transparent && !materials.terrain.material.transmission
