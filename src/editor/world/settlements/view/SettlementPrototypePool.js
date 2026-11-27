@@ -233,7 +233,7 @@ export class SettlementPrototypePool {
    * re-creates the renderers from their own geometry, so a second town of the
    * same style costs a buffer, not a regeneration.
    */
-  tier(entry, name, count) {
+  tier(entry, name, count, holdRows = false) {
     const tier = entry[name];
     if (!tier || count <= tier.capacity) return tier;
     let capacity = tier.capacity;
@@ -249,7 +249,7 @@ export class SettlementPrototypePool {
       castShadow: tier.castShadow,
     });
     const result = { ...tier, meshes, capacity, publication: null };
-    if (!this.publications.stage(result, tier)) {
+    if (!this.publications.stage(result, tier, holdRows)) {
       this.publications.release(tier);
       this.stage(meshes);
     }

@@ -51,3 +51,31 @@ test('cancelling initial settlement publication releases its stage exactly once'
     assert.equal(releases, 1);
   } finally { preparation.dispose(); geometry.dispose(); material.dispose(); }
 });
+
+test('capacity replacement waits for both prepared draws and committed rows', () => {
+  const scene = new Scene(), root = new Group(); scene.add(root);
+  const geometry = new BoxGeometry(), material = new MeshBasicMaterial();
+  const old = { meshes: [new Mesh(geometry, material)] };
+  const next = { meshes: [new Mesh(geometry, material)] };
+  root.add(...old.meshes);
+  const preparation = new StreamedDrawPreparation({ scene, renderer: {},
+    settings: { enabled: true, meshesPerFrame: 1 }, render: () => {} });
+  const disposed = [];
+  const publications = new SettlementTierPublication(root, () => preparation,
+    meshes => { for (const mesh of meshes) { disposed.push(mesh); mesh.removeFromParent(); } });
+  try {
+    assert.equal(publications.stage(next, old, true), true);
+    while (preparation.pending.size) preparation.flush({});
+    publications.advance(2);
+    assert.equal(next.publication.prepared, true);
+    assert.equal(next.publication.rowsReady, false);
+    assert.equal(old.meshes[0].parent, root);
+    assert.equal(next.meshes[0].parent, null);
+    assert.equal(disposed.length, 0);
+    publications.completeRows(next);
+    assert.equal(next.publication, undefined);
+    assert.equal(next.meshes[0].parent, root);
+    assert.deepEqual(disposed, old.meshes);
+    publications.release(next);
+  } finally { preparation.dispose(); geometry.dispose(); material.dispose(); }
+});

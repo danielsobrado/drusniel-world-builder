@@ -1,4 +1,5 @@
 import { Frustum, Group, Matrix4, Sphere } from 'three/webgpu';
+import { ITERATOR_PENDING } from '../../../stylized/ResumableIterator.js';
 import { PerfCounters } from '../../../performance/qa/PerfCounters.js';
 import { SettlementSurfaceLibrary } from '../surfaces/SettlementSurfaceLibrary.js';
 import { SettlementPrototypePool } from './SettlementPrototypePool.js';
@@ -101,7 +102,14 @@ export class SettlementView {
     this.disposed = false;
   }
 
+  cancelSelection() {
+    this.selectionJob?.return();
+    this.selectionJob = null;
+    this.dirty = true;
+  }
+
   reset() {
+    this.cancelSelection();
     this.plans.release(this);
     for (const site of this.sites.values()) site.dispose();
     this.sites.clear();
@@ -109,7 +117,6 @@ export class SettlementView {
     this.pool.clear();
     this.rows.clear();
     this.rowPlacementState = null;
-    this.selectionJob = null;
     this.nextRefresh = 0;
     this.dirty = true;
   }
@@ -146,8 +153,7 @@ export class SettlementView {
         snowGroundByTile: this.snowGroundByTile });
       this.pavingRoot.add(site.paving);
       this.sites.set(id, site);
-      this.selectionJob = null;
-      this.dirty = true;
+      this.cancelSelection();
     }
     let left = false;
     for (const [id, site] of this.sites) {
@@ -157,7 +163,7 @@ export class SettlementView {
       left = true;
     }
     if (!left) return;
-    this.selectionJob = null;
+    this.cancelSelection();
     // Meshes are pooled per dressing and style; keep the ones a town in view still wears.
     const prefixes = [...this.sites.values()].map((site) => site.poolPrefix);
     this.pool.prune((key) => prefixes.some((prefix) => key.startsWith(prefix)));
@@ -253,12 +259,12 @@ export class SettlementView {
    * @param {() => boolean} shouldYield whether this frame's deferred budget is spent
    * @param {?THREE.Camera} camera the active camera, in render space; placements outside its view are not drawn
    */
-  update(focus, timestamp, shouldYield = () => false, camera = null) {
+  update(focus, timestamp, shouldYield = () => false, camera = null, budget = null) {
     if (this.disposed) return;
     this.root.visible = this.enabled;
     this.pavingRoot.visible = this.enabled;
     this.skyline.root.visible = this.enabled;
-    if (!this.enabled) return;
+    if (!this.enabled) { if (this.selectionJob) this.cancelSelection(); return; }
     const view = this.terrainView;
     const generator = view.worldStore.generator;
     if (generator !== this.generator) {
@@ -298,7 +304,7 @@ export class SettlementView {
       site.paving.position.set(site.centre.x - origin.x, 0, site.centre.z - origin.z);
     }
     if (!this.selectionJob && (this.dirty || this.fading || moved || turned)) {
-      this.selectionJob = settlementSelectionJob(this, { ...focus }, timestamp, SETTLEMENT_VIEW);
+      this.selectionJob = settlementSelectionJob(this, { ...focus }, timestamp, SETTLEMENT_VIEW, budget);
       this.selected.x = focus.x; this.selected.z = focus.z;
       this.dirty = false;
     }
@@ -310,6 +316,7 @@ export class SettlementView {
       steps += 1;
       const step = this.selectionJob.next();
       if (step.done) { this.selectionJob = null; this.fading = step.value; }
+      else if (step.value === ITERATOR_PENDING) break;
     }
     placeSettlementRows(this);
     PerfCounters.inc('settlementViewCpuMs', performance.now() - started);

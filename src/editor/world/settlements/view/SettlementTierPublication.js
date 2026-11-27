@@ -7,16 +7,30 @@ export class SettlementTierPublication {
     this.pending = new Set();
   }
 
-  stage(tier, previous = null) {
+  stage(tier, previous = null, holdRows = false) {
     const preparation = this.getPreparation();
     if (!preparation?.settings.enabled) return false;
     if (previous?.publication) previous = this.cancel(previous);
     const job = stagedDrawPublication(this.root, tier.meshes, preparation);
-    const publication = { tier, previous, job };
+    const publication = { tier, previous, job, prepared: false, rowsReady: !holdRows };
     tier.publication = publication;
     this.pending.add(publication);
-    if (job.next().done) this.publish(publication);
+    this.advancePreparation(publication);
     return true;
+  }
+
+  advancePreparation(publication) {
+    if (!publication.prepared) publication.prepared = publication.job.next().done;
+    if (!publication.prepared || !publication.rowsReady) return false;
+    this.publish(publication);
+    return true;
+  }
+
+  completeRows(tier) {
+    const publication = tier.publication;
+    if (!publication) return;
+    publication.rowsReady = true;
+    if (publication.prepared) this.publish(publication);
   }
 
   publish(publication) {
@@ -24,7 +38,7 @@ export class SettlementTierPublication {
     this.pending.delete(publication);
     delete tier.publication;
     this.root.add(...tier.meshes);
-    for (const mesh of tier.meshes) mesh.visible = true;
+    for (const mesh of tier.meshes) mesh.visible = !mesh.isInstancedMesh || mesh.count > 0;
     if (previous) this.disposeMeshes(previous.meshes);
   }
 
@@ -32,8 +46,7 @@ export class SettlementTierPublication {
     let published = 0;
     for (const publication of this.pending) {
       if (published >= limit) break;
-      if (!publication.job.next().done) continue;
-      this.publish(publication);
+      if (!this.advancePreparation(publication)) continue;
       published++;
     }
   }

@@ -1913,7 +1913,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     stylizedSurface.workBudgetMs = deferredWork.peek(stylizedSurface.frameBudgetMs);
     stylizedSurface.update(frameTimestamp, viewModeController.camera, playerBody);
     exploration.update(frameTimestamp, canonicalFocus, playerBody, deferredWork);
-    deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield, viewModeController.camera));
+    deferredWork.run(() => settlementView.update(canonicalFocus, frameTimestamp, deferredWork.shouldYield, viewModeController.camera, deferredWork));
     const nearestTown = settlementView.enabled ? settlementView.nearestTown(canonicalFocus) : null;
     settlementAmbience.update(frameTimestamp / 1000, nearestTown, Boolean(skyLooks?.night));
     settlementGroundBounce.update(nearestTown ?? townRuntime?.streamer.nearestTown(canonicalFocus) ?? null);

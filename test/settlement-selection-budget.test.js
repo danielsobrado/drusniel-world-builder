@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { BoxGeometry, Group, Matrix4, MeshBasicNodeMaterial } from 'three/webgpu';
 import { settlementSelectionJob, placeSettlementRows, settlementSiteDrawn } from '../src/editor/world/settlements/view/SettlementSelection.js';
-import { SETTLEMENT_VIEW } from '../src/editor/world/settlements/view/SettlementView.js';
+import { SETTLEMENT_VIEW, SettlementView } from '../src/editor/world/settlements/view/SettlementView.js';
+import { publishSettlementRows } from '../src/editor/world/settlements/view/SettlementRowPublication.js';
+import { ITERATOR_PENDING } from '../src/editor/stylized/ResumableIterator.js';
 import { createInstancedRenderers, disposeInstancedRenderers } from '../src/editor/stylized/lod/StylizedLodRuntime.js';
 import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 
@@ -126,4 +128,71 @@ test('a settled pass sends no row changes, and a tier that left and returned is 
   entry.state = 'ready'; for (const time of [2000, 2400, 2800]) run(f.view, time);
   assert.notEqual(f.view.rows.get('house-0'), rows);
   assert.equal(count('house-0'), total, 'every placement is sent to the new rows');
+});
+
+test('cancelled settlement pass resends uncommitted classifications', t => {
+  const f = fixture(t);
+  run(f.view, 0);
+  const budget = { settings: { enabled: true }, canPublish: () => false,
+    slicedInstanceUploads: { *stage() { yield ITERATOR_PENDING; return false; } } };
+  const job = settlementSelectionJob(f.view, { x: 0, z: 0 }, 400, SETTLEMENT_VIEW, budget);
+  for (let i = 0; i < 100; i++) {
+    const step = job.next();
+    assert.equal(step.done, false);
+    if (step.value === ITERATOR_PENDING) break;
+  }
+  assert.ok(f.placements.some(p => p.sent?.near > 0));
+  f.view.selectionJob = job;
+  SettlementView.prototype.cancelSelection.call(f.view);
+  assert.equal(f.view.selectionJob, null);
+  run(f.view, 800);
+  assert.equal([...f.entries.values()].reduce((sum, e) => sum + e.near.meshes[0].count, 0), 1000);
+});
+
+test('staged rebase keeps old anchor and rows until atomic publication', t => {
+  const f = fixture(t); run(f.view, 0); run(f.view, 400);
+  const rows = f.view.rows.get('house-0'), mesh = f.entries.get('house-0').near.meshes[0];
+  const initial = mesh.instanceMatrix.array[12] + mesh.position.x;
+  const old = mesh.instanceMatrix.array.slice();
+  f.view.origin.x = 4096; placeSettlementRows(f.view);
+  const budget = { settings: { enabled: true }, canPublish: () => true,
+    slicedInstanceUploads: { *stage() { yield ITERATOR_PENDING; return false; } } };
+  const job = publishSettlementRows(f.view, 'house-0', new Map(), budget);
+  let paused = false;
+  for (let i = 0; i < 1000; i++) {
+    const step = job.next();
+    if (step.value === ITERATOR_PENDING) { paused = true; break; }
+    assert.equal(step.done, false);
+  }
+  assert.ok(paused);
+  assert.equal(rows.anchor.x, 0);
+  assert.deepEqual(mesh.instanceMatrix.array, old);
+  f.view.origin.x = 5000; placeSettlementRows(f.view);
+  assert.equal(mesh.instanceMatrix.array[12] + mesh.position.x + 5000, initial);
+  while (!job.next().done) {}
+  assert.equal(rows.anchor.x, 4096);
+  assert.equal(mesh.instanceMatrix.array[12] + mesh.position.x + 5000, initial);
+});
+
+test('a cancelled rebase never publishes its proposed anchor or version', t => {
+  const f = fixture(t); run(f.view, 0); run(f.view, 400);
+  const rows = f.view.rows.get('house-0'), mesh = f.entries.get('house-0').near.meshes[0];
+  const before = mesh.instanceMatrix.array.slice(), published = rows.published.near;
+  f.view.origin.x = 4096;
+  let cleaned = false;
+  const budget = { settings: { enabled: true }, canPublish: () => true,
+    slicedInstanceUploads: { *stage() { try { yield ITERATOR_PENDING; return false; } finally { cleaned = true; } } } };
+  const job = publishSettlementRows(f.view, 'house-0', new Map(), budget);
+  for (let i = 0; i < 1000; i++) {
+    const step = job.next();
+    if (step.value === ITERATOR_PENDING) break;
+    assert.equal(step.done, false);
+  }
+  job.return();
+  assert.equal(cleaned, true);
+  assert.equal(rows.anchor.x, 0);
+  assert.equal(rows.published.near, published);
+  assert.deepEqual(mesh.instanceMatrix.array, before);
+  run(f.view, 800);
+  assert.equal(rows.anchor.x, 4096);
 });
