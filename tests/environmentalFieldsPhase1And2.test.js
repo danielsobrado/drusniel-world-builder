@@ -17,7 +17,6 @@ import {
   sampleEnvironmentalPoint,
 } from '../src/editor/world/EnvironmentalField.js';
 import {
-  buildSurfaceMaskPixels,
   createSurfaceMaskConfig,
   enrichPageRenderPixels,
   getSurfaceMaskChunkRadius,
