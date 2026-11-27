@@ -16,7 +16,7 @@ export const DEFAULT_CANOPY_GRADE = Object.freeze({
   enabled: true,
   // Grounded olive-forest shadow and warm sunlit canopy green aligned with the
   // meadow sward, understory, and town palette rather than high-chroma pastel cutouts.
-  shadow: '#2f5236',
+  shadow: '#265840',
   light: '#8ca358',
   tint: 0.9,
   /**

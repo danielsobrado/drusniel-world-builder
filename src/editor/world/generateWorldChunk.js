@@ -44,10 +44,15 @@ function resolveMaskConfig(request) {
       blendCells: provided.blendCells,
       roadTileId: provided.roadTileId,
       waterTileId: provided.waterTileId ?? 0,
+      aridTileIds: Array.isArray(provided.aridTileIds) ? [...provided.aridTileIds] : [],
+      aridKinds: provided.aridKinds ?? null,
+      biomeLooks: provided.biomeLooks ?? null,
+      soilColorByTile: provided.soilColorByTile ? { ...provided.soilColorByTile } : {},
       grassTileIds: [...provided.grassTileIds],
       waterlineDepth: provided.waterlineDepth,
       snow: provided.snow ?? null,
       grassDensityByTile: provided.grassDensityByTile ?? null,
+      environment: provided.environment ?? null,
     };
   }
   return createSurfaceMaskConfig(null);

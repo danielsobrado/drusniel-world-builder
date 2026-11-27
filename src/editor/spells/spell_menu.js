@@ -1,10 +1,12 @@
 import { emitAudio } from '../_clod_shims/audio.js';
+import { createKeycapBadge } from '../../ui/design-system/components.js';
 import { grimoireGlyph } from './grimoire/grimoire_icons.js';
 import { defaultSpellConfig } from './spell_config.js';
 import { spellGlyph } from './spell_icons.js';
+import { SpellTooltip } from './spell_tooltip.js';
 
 const MISS_FLASH_MS = 280;
-const CAST_LABEL_MS = 1100;
+const CAST_LABEL_MS = 1400;
 const PAGE_STORAGE_KEY = 'simcity-dnd.spell-dock.page';
 const SPELL_BUTTONS = Object.freeze([
   { id: 'fire', key: 1, method: 'playFire' },
@@ -45,7 +47,7 @@ function storePage(pageId) {
   }
 }
 
-function createSpellButton({ id, key, label, glyph, onClick }) {
+function createSpellButton({ id, key, label, glyph, onClick, onInspect, onBlur }) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'spell-slot';
@@ -56,15 +58,21 @@ function createSpellButton({ id, key, label, glyph, onClick }) {
   button.innerHTML = `
     <span class="spell-slot__glyph">${glyph}</span>
     <svg class="spell-slot__channel" viewBox="0 0 48 48" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="46" height="46" rx="2" pathLength="100"/>
+      <rect x="1" y="1" width="46" height="46" rx="3" pathLength="100"/>
     </svg>
     <span class="spell-slot__sweep"></span>
+    <span class="spell-slot__cooldown" aria-hidden="true"></span>
+    <span class="spell-slot__mana-pip" aria-hidden="true"></span>
     <kbd class="spell-slot__key">${key}</kbd>
     <span class="spell-slot__label"></span>
   `;
   // Labels come from spells YAML and the grimoire catalog, so they are set as text.
   button.querySelector('.spell-slot__label').textContent = label;
   button.addEventListener('click', onClick);
+  button.addEventListener('pointerenter', onInspect);
+  button.addEventListener('focus', onInspect);
+  button.addEventListener('pointerleave', onBlur);
+  button.addEventListener('blur', onBlur);
   return button;
 }
 
@@ -79,13 +87,14 @@ function createGrip(title) {
 
 /**
  * Feedback for a cast that started: the ring round the slot drains over the
- * cast, and the spell's name surfaces above it for a moment. Web Animations
- * restart cleanly when the same spell is cast again before the ring empties.
+ * cast, the cooldown readout counts down cleanly, and the selected ability
+ * readout surfaces briefly.
  */
 function playCastFeedback(button, durationMs) {
   const ring = button.querySelector('.spell-slot__channel rect');
   const label = button.querySelector('.spell-slot__label');
   const sweep = button.querySelector('.spell-slot__sweep');
+  const cooldown = button.querySelector('.spell-slot__cooldown');
   button.castAnimations?.forEach((animation) => animation.cancel());
   button.castAnimations = [
     sweep?.animate?.(
@@ -101,6 +110,27 @@ function playCastFeedback(button, durationMs) {
       { duration: CAST_LABEL_MS, easing: 'ease-out' },
     ),
   ].filter(Boolean);
+
+  if (cooldown) {
+    window.clearInterval(button.cooldownInterval);
+    if (durationMs >= 1000) {
+      const endAt = performance.now() + durationMs;
+      const tick = () => {
+        const remaining = (endAt - performance.now()) / 1000;
+        if (remaining <= 0.05) {
+          cooldown.textContent = '';
+          window.clearInterval(button.cooldownInterval);
+          button.cooldownInterval = 0;
+          return;
+        }
+        cooldown.textContent = remaining >= 10 ? String(Math.ceil(remaining)) : remaining.toFixed(1);
+      };
+      tick();
+      button.cooldownInterval = window.setInterval(tick, 100);
+    } else {
+      cooldown.textContent = '';
+    }
+  }
 }
 
 /**
@@ -131,8 +161,8 @@ function elementsPage(config, controller) {
 /**
  * The spell dock: school tabs above a quiet spell row, dragged by its grip, paged
  * by tabs (or `[` and `]`). Casting from a slot and casting from the number
- * keys (`castSlot`) share one path, so both get the same ring, miss flash and
- * cast sound.
+ * keys (`castSlot`) share one path, so both get the same ring, miss flash,
+ * detailed tooltip, and cast sound.
  *
  * @param {object} deps
  * @param {object} [deps.config] spells YAML config
@@ -140,7 +170,8 @@ function elementsPage(config, controller) {
  * @param {Array<{ id: string, title: string, spells: Array<{ id: string, label: string, castMs: number }> }>} [deps.extraPages]
  * @param {(spellId: string) => boolean} [deps.castExtra] casts a spell from an extra page
  * @param {(castMs: number) => boolean} [deps.canCast] whether the caster can pay for a cast
- * @param {(castMs: number) => void} [deps.onCast] a cast started
+ * @param {(castMs: number, spellId?: string) => void} [deps.onCast] a cast started
+ * @param {() => void} [deps.onActivity] hotbar interaction or school switch
  */
 export function createSpellMenu(deps = {}) {
   const config = deps.config ?? defaultSpellConfig;
@@ -148,7 +179,9 @@ export function createSpellMenu(deps = {}) {
   const { root, owned } = resolveMenuRoot(config.menu.rootId, deps.root);
   const resetTimers = new Map();
   let missFlashTimer = 0;
+  let readoutTimer = 0;
   let dragOffset = null;
+  const tooltip = new SpellTooltip(document.body);
 
   const pages = [
     elementsPage(config, controller),
@@ -172,15 +205,34 @@ export function createSpellMenu(deps = {}) {
   root.dataset.captureUi = '';
   root.setAttribute('aria-label', 'Spell menu');
 
+  const readout = document.createElement('div');
+  readout.className = 'spell-menu-readout';
+  readout.setAttribute('aria-live', 'polite');
+
+  const tabsBar = document.createElement('div');
+  tabsBar.className = 'spell-menu-tabs-bar';
+  const prevKey = createKeycapBadge('[', { className: 'spell-menu-nav-key' });
+  const nextKey = createKeycapBadge(']', { className: 'spell-menu-nav-key' });
   const grip = createGrip(config.menu.title);
   const tabs = document.createElement('div');
   tabs.className = 'spell-menu-tabs';
   tabs.setAttribute('role', 'tablist');
+  tabsBar.append(prevKey, tabs, nextKey);
+
   const slots = document.createElement('div');
   slots.className = 'spell-menu-slots';
   const buttons = new Map();
   const pageSlots = [];
   const tabButtons = [];
+
+  const updateReadout = (label, school, slotNumber) => {
+    window.clearTimeout(readoutTimer);
+    readout.textContent = `${label} · ${school} · Quick slot ${slotNumber}`;
+    readout.classList.add('is-visible');
+    readoutTimer = window.setTimeout(() => {
+      readout.classList.remove('is-visible');
+    }, 2400);
+  };
 
   const flashMiss = (button) => {
     window.clearTimeout(missFlashTimer);
@@ -192,7 +244,7 @@ export function createSpellMenu(deps = {}) {
     }, MISS_FLASH_MS);
   };
 
-  const castSpell = (descriptor) => {
+  const castSpell = (descriptor, pageTitle, slotNumber) => {
     const button = buttons.get(descriptor.slotKey);
     if (!button) return false;
 
@@ -212,9 +264,11 @@ export function createSpellMenu(deps = {}) {
       return false;
     }
 
-    deps.onCast?.(descriptor.castDurationMs);
+    deps.onCast?.(descriptor.castDurationMs, descriptor.id);
+    deps.onActivity?.();
     button.setAttribute('aria-pressed', 'true');
     playCastFeedback(button, descriptor.castDurationMs);
+    updateReadout(descriptor.label, pageTitle, slotNumber);
     if (descriptor.audio) {
       emitAudio(descriptor.audio.event, {
         volume: descriptor.audio.volume,
@@ -223,12 +277,16 @@ export function createSpellMenu(deps = {}) {
     }
     resetTimers.set(descriptor.slotKey, window.setTimeout(() => {
       button.setAttribute('aria-pressed', 'false');
+      const cooldown = button.querySelector('.spell-slot__cooldown');
+      if (cooldown) cooldown.textContent = '';
+      window.clearInterval(button.cooldownInterval);
       resetTimers.delete(descriptor.slotKey);
     }, descriptor.castDurationMs));
     return true;
   };
 
   const showPage = (index) => {
+    tooltip.hide();
     activePage = ((index % pages.length) + pages.length) % pages.length;
     pageSlots.forEach((group, pageIndex) => {
       group.hidden = pageIndex !== activePage;
@@ -237,6 +295,7 @@ export function createSpellMenu(deps = {}) {
       tab.setAttribute('aria-selected', pageIndex === activePage ? 'true' : 'false');
     });
     storePage(pages[activePage].id);
+    deps.onActivity?.();
   };
 
   pages.forEach((page, pageIndex) => {
@@ -256,12 +315,25 @@ export function createSpellMenu(deps = {}) {
     page.spells.forEach((descriptor, slotIndex) => {
       // Pages may share a spell id (Elements and Evocation both hold a fireball).
       descriptor.slotKey = `${page.id}:${descriptor.id}`;
+      const slotNumber = slotIndex + 1;
       const button = createSpellButton({
         id: descriptor.id,
-        key: slotIndex + 1,
+        key: slotNumber,
         label: descriptor.label,
         glyph: descriptor.glyph,
-        onClick: () => castSpell(descriptor),
+        onClick: () => castSpell(descriptor, page.title, slotNumber),
+        onInspect: () => {
+          const insufficientMana = button.getAttribute('aria-disabled') === 'true';
+          const coolingDown = button.getAttribute('aria-pressed') === 'true';
+          tooltip.show(button, descriptor, {
+            school: page.title,
+            slot: slotNumber,
+            insufficientMana,
+            coolingDown,
+          });
+          deps.onActivity?.();
+        },
+        onBlur: () => tooltip.hide(),
       });
       buttons.set(descriptor.slotKey, button);
       group.append(button);
@@ -271,7 +343,7 @@ export function createSpellMenu(deps = {}) {
   });
   showPage(activePage);
 
-  root.append(grip, tabs, slots);
+  root.append(readout, tabsBar, grip, slots);
   root.addEventListener('pointerdown', stopUiPropagation);
   root.addEventListener('click', stopUiPropagation);
 
@@ -311,21 +383,22 @@ export function createSpellMenu(deps = {}) {
 
   const findDescriptor = (spellId) => {
     for (const page of pages) {
-      const descriptor = page.spells.find(({ id }) => id === spellId);
-      if (descriptor) return descriptor;
+      const idx = page.spells.findIndex(({ id }) => id === spellId);
+      if (idx >= 0) return { descriptor: page.spells[idx], pageTitle: page.title, slot: idx + 1 };
     }
     return null;
   };
 
   return {
     cast: (spellId) => {
-      const descriptor = findDescriptor(spellId);
-      return descriptor ? castSpell(descriptor) : false;
+      const found = findDescriptor(spellId);
+      return found ? castSpell(found.descriptor, found.pageTitle, found.slot) : false;
     },
     /** Casts slot `index` (0-based) of the page on show. */
     castSlot: (index) => {
-      const descriptor = pages[activePage].spells[index];
-      return descriptor ? castSpell(descriptor) : false;
+      const page = pages[activePage];
+      const descriptor = page.spells[index];
+      return descriptor ? castSpell(descriptor, page.title, index + 1) : false;
     },
     hasSlot: (index) => Boolean(pages[activePage].spells[index]),
     /** Greys out the spells `deps.canCast` refuses; call when the resource changes. */
@@ -336,28 +409,35 @@ export function createSpellMenu(deps = {}) {
         }
       }
     },
+    setResting: (resting) => {
+      root.classList.toggle('spell-dock--resting', Boolean(resting));
+      if (resting) tooltip.hide();
+    },
     cyclePage: (delta) => showPage(activePage + delta),
     get activePageId() {
       return pages[activePage].id;
     },
-    castFire: () => castSpell(pages[0].spells[0]),
-    castWater: () => castSpell(pages[0].spells[1]),
-    castAir: () => castSpell(pages[0].spells[2]),
-    castEarth: () => castSpell(pages[0].spells[3]),
-    castLightning: () => castSpell(pages[0].spells[4]),
-    castFireball: () => castSpell(pages[0].spells[5]),
+    castFire: () => castSpell(pages[0].spells[0], pages[0].title, 1),
+    castWater: () => castSpell(pages[0].spells[1], pages[0].title, 2),
+    castAir: () => castSpell(pages[0].spells[2], pages[0].title, 3),
+    castEarth: () => castSpell(pages[0].spells[3], pages[0].title, 4),
+    castLightning: () => castSpell(pages[0].spells[4], pages[0].title, 5),
+    castFireball: () => castSpell(pages[0].spells[5], pages[0].title, 6),
     dispose() {
       for (const timer of resetTimers.values()) window.clearTimeout(timer);
       resetTimers.clear();
-      window.clearTimeout(missFlashTimer);
       for (const button of buttons.values()) {
+        window.clearInterval(button.cooldownInterval);
         button.castAnimations?.forEach((animation) => animation.cancel());
       }
-      if (dragOffset) onDragEnd();
-      grip.removeEventListener('pointerdown', onDragStart);
+      window.clearTimeout(missFlashTimer);
+      window.clearTimeout(readoutTimer);
+      window.removeEventListener('pointermove', onDragMove);
+      window.removeEventListener('pointerup', onDragEnd);
       root.removeEventListener('pointerdown', stopUiPropagation);
       root.removeEventListener('click', stopUiPropagation);
-      root.classList.remove('spell-dock');
+      grip.removeEventListener('pointerdown', onDragStart);
+      tooltip.dispose();
       if (owned) root.remove();
       else root.replaceChildren();
     },

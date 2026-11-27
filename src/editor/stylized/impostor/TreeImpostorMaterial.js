@@ -1,6 +1,6 @@
 import { frameUniform } from '../../../render/FrameUniforms.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
-import { crownLocalGroundBounce, treeBarkEmission, treeFoliageEmission } from '../forest/foliageLight.js';
+import { canopyPainterlyHarmony, crownLocalGroundBounce, treeBarkEmission, treeFoliageEmission } from '../forest/foliageLight.js';
 import { decodeTreeCanopyVisibilityNode, decodeTreeFoliageMaskNode } from './TreeImpostorNormalEncoding.js';
 import * as THREE from 'three/webgpu';
 import {
@@ -30,8 +30,6 @@ import {
   vec3,
   vec4,
 } from 'three/tsl';
-import { worldNoiseField } from '../worldNoise.js';
-import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
 import { sampleWorldSurfaceContextAt } from '../worldSurfaceContext/WorldSurfaceContextState.js';
 import {
   TREE_COLOR_VARIATION_MIN,
@@ -139,17 +137,16 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const variation = parameters.z
     .mul(TREE_COLOR_VARIATION_RANGE)
     .add(TREE_COLOR_VARIATION_MIN);
-  // Match near-crown per-tree hue temperature and macro landscape patch harmony so
-  // LOD handoffs never shift tint.
-  const treeTemp = mix(vec3(0.95, 1.01, 1.03), vec3(1.05, 1.00, 0.93), fract(parameters.z.mul(7.31)));
-  const macroPatch = varying(
-    worldNoiseField(WORLD_NOISE_LAYERS.macro)(canonicalFromRender(transform.xz).mul(0.012)).r,
-    'impostorMacroPatch',
-  );
-  const landscapeHarmony = mix(vec3(0.96, 1.01, 1.02), vec3(1.05, 1.01, 0.92), macroPatch);
+  // Match near-crown per-tree hue temperature, macro landscape patch harmony, and world-space strokes.
+  const harmony = canopyPainterlyHarmony({
+    canonicalXZ: canonicalFromRender(worldPosition.xz),
+    worldPos: worldPosition,
+    seed: parameters.z,
+    label: 'impostor',
+  });
   const colorMultiplier = mix(
     vec3(variation),
-    appearance.yzw.mul(variation).mul(treeTemp).mul(landscapeHarmony),
+    appearance.yzw.mul(variation).mul(harmony),
     foliageMask,
   );
   const signedFade = parameters.y;

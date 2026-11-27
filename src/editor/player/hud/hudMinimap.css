@@ -1,33 +1,30 @@
 /*
- * Heading-up minimap dial, lower right, dressed as grass-test's: a dark ring with a
- * vignette so the map melts into it, the north badge riding the rim and the biome
- * as a pill on the lower rim. `HudMinimap` docks the editor's `.minimap-frame`
- * inside the dial and publishes three values on `.hud-minimap`:
- *   --hud-heading  camera yaw
- *   --hud-map-x/z  player offset from the bitmap centre, in window fractions
- *
- * The size follows the shorter screen side; `--minimap-size` lives on the HUD so
- * the frame-rate readout can sit beside the dial.
+ * Desaturated cartographic minimap dial: thin antique-gold hairline ring,
+ * heading-up rotation, subtle radial vignette, and transient region subtitle.
  */
 .player-hud {
-  --minimap-size: clamp(84px, 19vmin, 184px);
+  --minimap-size: calc(clamp(96px, 17vmin, 168px) * var(--ds-hud-scale, 1));
 }
 
 .hud-minimap {
   --hud-map-size: var(--minimap-size);
 
   position: absolute;
-  right: var(--hud-inset-x);
-  bottom: var(--hud-inset-y);
+  top: var(--hud-inset-y, 24px);
+  right: var(--hud-inset-x, 24px);
   display: block;
   width: var(--hud-map-size);
-  animation: hud-minimap-in 600ms ease both;
+  animation: hud-minimap-in 240ms var(--ds-ease-out, ease-out) both;
+}
+
+.hud-minimap[hidden] {
+  display: none;
 }
 
 @keyframes hud-minimap-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(-4px);
   }
 }
 
@@ -41,24 +38,22 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border: 1px solid #000;
+  border: 1px solid var(--ds-border-gold, rgb(184 161 118 / 42%));
   border-radius: 50%;
-  background: #0d1a22;
+  background: #141e25;
   box-shadow:
-    0 0 0 3px var(--hud-plate-line),
-    0 0 0 4px var(--hud-leather),
-    0 6px 16px #0008,
-    inset 0 0 18px #0006;
+    0 4px 18px rgb(0 0 0 / 50%),
+    inset 0 0 18px rgb(0 0 0 / 52%);
   isolation: isolate;
 }
 
-/* Vignette so the map edge melts into the ring. */
+/* Soft vignette so map edges melt cleanly into the obsidian ring. */
 .hud-minimap__dial::after {
   position: absolute;
   inset: 0;
   z-index: 3;
   border-radius: 50%;
-  background: radial-gradient(circle, transparent 62%, #0a111a73 100%);
+  background: radial-gradient(circle, transparent 60%, rgb(15 21 26 / 76%) 100%);
   content: '';
   pointer-events: none;
 }
@@ -74,11 +69,6 @@
   background: transparent;
 }
 
-/*
- * Both layers are the bitmap's size times the zoom, pinned by their top-left
- * corner to the dial centre. Read right to left: slide the player's point onto
- * that corner, turn by the yaw.
- */
 .hud-minimap .minimap-frame canvas,
 .hud-minimap .minimap-burgs {
   position: absolute;
@@ -100,11 +90,9 @@
 
 .hud-minimap .minimap-frame canvas {
   image-rendering: auto;
-  /* Natural, slightly settled colour: the donor's map is terrain, not a legend. */
-  filter: saturate(0.78) brightness(0.92) contrast(1.04);
+  filter: saturate(0.76) contrast(1.06) brightness(0.94);
 }
 
-/* Settlement names undo the turn so they read level. */
 .hud-minimap .minimap-burg {
   transform:
     translate(-50%, -50%)
@@ -112,34 +100,34 @@
 }
 
 .hud-minimap .minimap-burg__dot {
-  background: #f0d68e;
-  box-shadow: 0 0 0 1.5px #13211de0;
+  background: var(--ds-parchment, #e5dcc8);
+  box-shadow: 0 0 0 1.5px var(--ds-obsidian, #151b20);
 }
 
 .hud-minimap .minimap-burg__name {
-  color: #f6f1e4;
-  font: 700 8.5px/1 var(--hud-font);
-  text-shadow: 0 1px 2px #000c, 0 0 4px #000a;
+  color: var(--ds-parchment, #e5dcc8);
+  font: 600 8.5px/1 var(--ds-font-ui, Inter, sans-serif);
+  text-shadow: 0 1px 2px #000, 0 0 4px #000c;
 }
 
 .hud-minimap .minimap-burg.is-capital .minimap-burg__dot {
+  background: var(--ds-antique-gold, #b8a176);
   box-shadow:
-    0 0 0 1.5px #13211de0,
-    0 0 0 3px #d5bd86;
+    0 0 0 1.5px var(--ds-obsidian, #151b20),
+    0 0 0 2.5px var(--ds-antique-gold, #b8a176);
 }
 
-/* The view cone: the map is heading-up, so it always points straight up. */
 .hud-minimap__view {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: conic-gradient(
-    from -34deg at 50% 50%,
-    rgb(240 246 255 / 34%) 0deg 68deg,
-    transparent 68deg
+    from -32deg at 50% 50%,
+    rgb(229 220 200 / 24%) 0deg 64deg,
+    transparent 64deg
   );
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 6%, transparent 48%);
-  mask-image: radial-gradient(circle at 50% 50%, #000 0 6%, transparent 48%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 6%, transparent 46%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 0 6%, transparent 46%);
 }
 
 .hud-minimap__player {
@@ -147,120 +135,81 @@
   top: 50%;
   left: 50%;
   z-index: 2;
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   overflow: visible;
-  transform: translate(-50%, -58%);
-  fill: #f4f1ea;
-  stroke: #12202a;
-  stroke-width: 1.6;
+  transform: translate(-50%, -56%);
+  fill: var(--ds-parchment, #e5dcc8);
+  stroke: var(--ds-obsidian, #151b20);
+  stroke-width: 1.5;
   stroke-linejoin: round;
-  filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 55%));
 }
 
-/* North is the bitmap's top; the badge rides the ring there and stays upright. */
 .hud-minimap__compass {
   position: absolute;
   inset: 0;
   z-index: 4;
   transform: rotate(var(--hud-heading, 0rad));
   pointer-events: none;
-  /* Its own layer, so turning the masked ticks composites instead of repainting. */
   will-change: transform;
 }
 
-/* Engraved bearing ticks, turning with north. */
 .hud-minimap__compass::before {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: repeating-conic-gradient(from -1deg, var(--hud-trim-light) 0 2deg, #0000 2deg 30deg);
+  background: repeating-conic-gradient(from -0.75deg, rgb(184 161 118 / 45%) 0 1.5deg, #0000 1.5deg 45deg);
   content: '';
-  -webkit-mask-image: radial-gradient(closest-side, transparent 92%, #000 93%);
-  mask-image: radial-gradient(closest-side, transparent 92%, #000 93%);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 94%, #000 95%);
+  mask-image: radial-gradient(closest-side, transparent 94%, #000 95%);
 }
 
 .hud-minimap__north {
   position: absolute;
-  top: 4px;
+  top: -7px;
   left: 50%;
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
-  margin-left: -8px;
+  width: 15px;
+  height: 15px;
+  margin-left: -7.5px;
+  border: 1px solid var(--ds-border-gold-strong, rgb(184 161 118 / 60%));
   border-radius: 50%;
-  background: var(--hud-leather);
-  box-shadow: 0 0 0 1px var(--hud-plate-line);
-  color: var(--hud-trim-light);
-  font: 700 10px/1 var(--hud-tome-font);
+  background: var(--ds-obsidian, #151b20);
+  color: var(--ds-antique-gold, #b8a176);
+  font: 700 8.5px/1 var(--ds-font-display, Georgia, serif);
   transform: rotate(calc(-1 * var(--hud-heading, 0rad)));
 }
 
-/* The biome rides the dial's lower rim instead of taking a row of its own. */
-.hud-minimap__place {
-  position: absolute;
-  bottom: -7px;
-  left: 50%;
-  z-index: 5;
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  max-width: calc(var(--hud-map-size) + 40px);
-  padding: 3px 9px;
-  overflow: hidden;
-  transform: translateX(-50%);
-  border: 1px solid var(--hud-plate-line);
-  border-radius: 999px;
-  background: var(--hud-leather);
-  color: var(--hud-trim-light);
-  font: 600 9px/1.2 var(--hud-tome-font);
-  letter-spacing: 0.12em;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.hud-minimap__place[hidden] {
-  display: none;
-}
-
-.hud-minimap__swatch {
-  display: none;
-}
-
-/* The Azgaar region rides above the dial, clear of the turning north badge. */
 .hud-minimap__region {
-  top: -30px;
-  bottom: auto;
+  margin-top: 8px;
+  color: var(--ds-parchment, #e5dcc8);
+  font: 500 calc(11px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-lore, Georgia, serif);
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: var(--ds-shadow-text);
+  transition: opacity 400ms ease;
+}
+
+.hud-minimap__region.is-fading {
+  opacity: 0.35;
+}
+
+.hud-minimap__region[hidden] {
+  display: none;
 }
 
 @media (max-width: 760px), (max-height: 500px) {
   .hud-minimap {
-    top: var(--hud-phone-top);
+    top: var(--hud-phone-top, 96px);
+    right: var(--hud-inset-x, 16px);
     bottom: auto;
   }
 
   .hud-minimap__north {
-    width: 14px;
-    height: 14px;
-    margin-left: -7px;
+    width: 13px;
+    height: 13px;
+    margin-left: -6.5px;
     font-size: 7px;
-  }
-
-  /* Hung from the dial's right edge: centred, a long biome name runs off the screen. */
-  .hud-minimap__place {
-    right: 0;
-    left: auto;
-    max-width: 200px;
-    transform: none;
-    padding: 2px 7px;
-    font-size: 7px;
-    letter-spacing: 0.1em;
-  }
-
-  /* The dial sits at the top of a phone screen, so the region hangs below the biome. */
-  .hud-minimap__region {
-    top: calc(100% + 14px);
   }
 }

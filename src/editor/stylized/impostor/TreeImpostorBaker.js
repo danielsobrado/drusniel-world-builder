@@ -59,7 +59,7 @@ class TreeBakeMaterial extends (foliageMaterialClass(THREE.MeshBasicNodeMaterial
 function createBakeSurface(part) {
   const material = new TreeBakeMaterial({ side: part.kind === 'leaf' ? THREE.DoubleSide : THREE.FrontSide });
   const source = part.material ?? {};
-  for (const key of ['normalNode', 'normalMap', 'normalMapType', 'normalScale', 'bumpMap', 'bumpScale', 'flatShading', 'foliageShapeNormalNode', 'foliageNormalBlendNode', 'contextNode']) {
+  for (const key of ['normalNode', 'normalMap', 'normalMapType', 'normalScale', 'bumpMap', 'bumpScale', 'flatShading', 'foliageShapeNormalNode', 'foliageNormalBlendNode', 'foliageRimRuffleNode', 'contextNode']) {
     if (source[key] !== undefined) material[key] = source[key];
   }
   return material;

@@ -77,11 +77,11 @@ export function createRockSnowCapMaterial({
       const vertexWorld = modelWorldMatrix.mul(vec4(pos, 1));
       const vGround = sampleWorldSurfaceContextAt(vertexWorld.xz, GEO_ONLY);
       const feather = float(1).sub(thickness).clamp(0, 1);
-      // Clamp basal snowbank crest height in real metres (<= 0.42 m above terrain)
-      // so 8.5x formation keystones grow natural knee-high snowbanks instead of tall cones.
-      const maxWorldAbove = thickness.mul(0.42).sub(feather.mul(0.03));
+      // Clamp basal snowbank crest height in real metres (<= 0.34 m above terrain)
+      // and tuck outer toe smoothly below the snowfield for a seamless perimeter.
+      const maxWorldAbove = thickness.mul(0.34).sub(feather.mul(0.045));
       const rawAbove = vertexWorld.y.sub(vGround.height);
-      const clampedAbove = clamp(rawAbove, float(-0.04), maxWorldAbove);
+      const clampedAbove = clamp(rawAbove, float(-0.06), maxWorldAbove);
       const bankDelta = clampedAbove.sub(rawAbove);
       pos.y.addAssign(bankDelta.mul(vGround.validity));
     });
@@ -108,18 +108,24 @@ export function createRockSnowCapMaterial({
   const shadeFill = mix(snowLightUniforms.shadeTint, vec3(1, 1, 1), smoothstep(0.24, 0.84, snowFacing));
 
   // Subtle blue occlusion where the upper cap's underside or snowbank crest tucks into rock.
-  const innerSeam = isBank.mul(thickness.smoothstep(0.62, 1.0)).mul(0.16)
+  const innerSeam = isBank.mul(thickness.smoothstep(0.58, 1.0)).mul(0.24)
     .add(isBank.oneMinus().mul(thickness.smoothstep(0.55, 0.15)).mul(0.18));
-  const seamAo = mix(vec3(1, 1, 1), vec3(0.76, 0.85, 0.97), innerSeam.clamp(0, 0.34));
+  const seamAo = mix(vec3(1, 1, 1), vec3(0.72, 0.82, 0.96), innerSeam.clamp(0, 0.38));
 
-  const groundSnow = mix(color(SNOW_GROUND_COLOR), groundContact.albedo.max(vec3(0.45)), groundContact.validity.mul(0.65));
-  const baseTint = mix(color(CAP_SNOW_COLOR), groundSnow, isBank.mul(float(1).sub(thickness.mul(0.45))));
-  const snowColor = baseTint
+  // Match the snowfield's resolved WSC albedo at the basal snowbank toe (without
+  // double-lifting brightness) so the snowbank melts invisibly into the snowfield.
+  const toeFactor = isBank.mul(float(1).sub(thickness.mul(0.65))).clamp(0, 1);
+  const wscGround = mix(color(SNOW_GROUND_COLOR), groundContact.albedo, groundContact.validity);
+  const capLit = color(CAP_SNOW_COLOR)
     .mul(shadeFill)
-    .mul(seamAo)
     .mul(snowLightUniforms.brightness.max(0.84))
-    .mul(coat?.tint ?? vec3(1))
-    .add(vec3(0.84, 0.92, 1.0).mul(velvet));
+    .mul(coat?.tint ?? vec3(1));
+  const bankLit = wscGround
+    .mul(mix(shadeFill, vec3(1, 1, 1), bankAlign.mul(0.75)))
+    .mul(mix(coat?.tint ?? vec3(1), vec3(1, 1, 1), toeFactor.mul(0.55)));
+  const snowColor = mix(capLit, bankLit, isBank)
+    .mul(seamAo)
+    .add(vec3(0.84, 0.92, 1.0).mul(velvet).mul(toeFactor.oneMinus()));
 
   const baseRoughness = coatSettings.snow.enabled ? coatSettings.snow.roughness : 0.82;
   material.colorNode = snowColor;

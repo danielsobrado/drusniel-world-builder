@@ -62,13 +62,16 @@ function chamferFromSeeds(isSeed, width, height) {
  * full. With `barren` (1 where an ineligible cell is land, not water), grass
  * also fades over the wider GRASS_BARREN_EDGE_METERS from it.
  */
-export function grassHabitatCoverage(eligible, width, height, tileSize, barren = null) {
+export function grassHabitatCoverage(eligible, width, height, tileSize, barren = null, barrenWidthScale = null) {
   if (eligible.length !== width * height) throw new Error('Invalid grass habitat dimensions.');
   const any = chamferFromSeeds((i) => !eligible[i], width, height);
   const land = barren ? chamferFromSeeds((i) => barren[i] === 1, width, height) : null;
   return Uint8Array.from(any, (d, i) => {
     if (!eligible[i]) return 0;
     const edge = grassHabitatEdge(d, tileSize, GRASS_HABITAT_EDGE_METERS, 0);
-    return Math.round((land ? Math.min(edge, grassHabitatEdge(land[i], tileSize, GRASS_BARREN_EDGE_METERS)) : edge) * 255);
+    const barrenEdgeMeters = barrenWidthScale
+      ? GRASS_BARREN_EDGE_METERS * (0.6 + 1.7 * barrenWidthScale[i])
+      : GRASS_BARREN_EDGE_METERS;
+    return Math.round((land ? Math.min(edge, grassHabitatEdge(land[i], tileSize, barrenEdgeMeters)) : edge) * 255);
   });
 }

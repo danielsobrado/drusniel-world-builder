@@ -4,12 +4,13 @@ import { SettlementSamplingPreparation } from '../world/settlements/SettlementSa
 
 /** Gods' End curve traversal, adapted to the current world and floating origin. */
 export class ScenicTour {
-  constructor({ terrainView, viewModeController, settings, container, invalidateHistory }) {
-    Object.assign(this, { terrainView, viewModeController, settings, invalidateHistory });
+  constructor({ terrainView, viewModeController, settings, container, invalidateHistory, onTourStateChange = null }) {
+    Object.assign(this, { terrainView, viewModeController, settings, invalidateHistory, onTourStateChange });
     this.camera = new PerspectiveCamera(55, 1, 0.1, 2000);
     this.active = false; this.elapsed = 0; this.point = new Vector3(); this.ahead = new Vector3();
     this.targetRotation = new Quaternion(); this.generator = null;
     this.preparationGeneration = 0;
+    this.container = container;
     this.button = document.createElement('button'); this.button.type = 'button';
     this.button.dataset.captureUi = '';
     this.button.className = 'scenic-tour-button'; this.button.textContent = 'Scenic tour';
@@ -79,6 +80,9 @@ export class ScenicTour {
     if (view.mode === PLAYER_MODE_WALK) view.pause();
     view.editorCamera.setEnabled(false); document.exitPointerLock?.();
     view.cameraOverride = this.camera; this.active = true; this.elapsed = 0;
+    this.container?.closest?.('[data-view-mode]')?.setAttribute?.('data-scenic-tour', 'true');
+    document.documentElement?.setAttribute?.('data-scenic-tour', 'true');
+    this.onTourStateChange?.(true);
     this.button.textContent = 'Stop tour'; this.update(0, true); this.invalidateHistory?.(); return true;
   }
   update(dt, immediate = false) {
@@ -113,6 +117,9 @@ export class ScenicTour {
     this.button.textContent = 'Scenic tour';
     if (!this.active) return;
     this.active = false; const view = this.viewModeController;
+    this.container?.closest?.('[data-view-mode]')?.removeAttribute?.('data-scenic-tour');
+    document.documentElement?.removeAttribute?.('data-scenic-tour');
+    this.onTourStateChange?.(false);
     view.cameraOverride = null; view.focusOverride = null;
     view.editorCamera.setEnabled(this.previous.editorEnabled);
     if (view.mode === PLAYER_MODE_WALK && !this.previous.paused) view.resume();

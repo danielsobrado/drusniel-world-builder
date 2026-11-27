@@ -7,19 +7,19 @@ import { MAP_ZOOM } from './HudMinimap.js';
 
 /** Canvas resolution; the dial shows it at up to ~310 CSS px after the zoom. */
 const CANVAS_SIZE = 384;
-/** How many Azgaar cells, on average, span the bitmap's window. */
-const SPAN_AZGAAR_CELLS = 16;
+/** Azgaar cells spanning the bitmap window per configurable zoom preset. */
+export const REGION_ZOOM_CELLS = Object.freeze({
+  close: 8,
+  standard: 16,
+  wide: 32,
+});
 /** Burgs sit closer together at this scale, so fewer are named than locally. */
-const MAX_BURGS = 4;
+const MAX_BURGS = 5;
 
 /**
  * The nearby area of the Azgaar map, framed like the editor's minimap so the
  * walking dial can dock it in its place: a `.minimap-frame` holding a canvas
- * and the burg markers, with a window measured in world cells.
- *
- * The window spans a fixed number of Azgaar cells rather than world cells,
- * because an imported world is planet-scale: the editor's local window lies
- * inside a single Azgaar cell and would show one flat biome.
+ * and the burg markers, with a configurable window measured in world cells.
  */
 export class HudRegionMap {
   /**
@@ -34,6 +34,7 @@ export class HudRegionMap {
     this.tileSize = tileSize;
     this.center = { x: 0, z: 0 };
     this.cells = 0;
+    this.zoomPreset = 'standard';
     this.model = null;
     this.modelCampaign = undefined;
 
@@ -53,6 +54,24 @@ export class HudRegionMap {
     return this.resolveModel() != null;
   }
 
+  setZoomPreset(preset) {
+    if (!REGION_ZOOM_CELLS[preset] || preset === this.zoomPreset) return false;
+    this.zoomPreset = preset;
+    this.recomputeWindowCells();
+    return true;
+  }
+
+  recomputeWindowCells() {
+    if (!this.model || !this.modelCampaign?.source) return;
+    const bounds = this.modelCampaign.source.target;
+    const { width, height, cartography } = this.model;
+    const meanCellSource = Math.sqrt((width * height) / Math.max(1, cartography.cellIds.length));
+    const spanAzgaarCells = REGION_ZOOM_CELLS[this.zoomPreset] ?? REGION_ZOOM_CELLS.standard;
+    this.cells = Math.max(1, Math.round(
+      spanAzgaarCells * meanCellSource * bounds.widthCells / this.modelCampaign.source.sourceWidth,
+    ));
+  }
+
   resolveModel() {
     const campaign = this.getCampaign?.() ?? null;
     if (campaign === this.modelCampaign) return this.model;
@@ -66,11 +85,7 @@ export class HudRegionMap {
     const bounds = campaign?.source?.target;
     if (this.model && !(bounds?.widthCells > 0 && campaign.source.sourceWidth > 0)) this.model = null;
     if (this.model) {
-      const { width, height, cartography } = this.model;
-      const meanCellSource = Math.sqrt((width * height) / Math.max(1, cartography.cellIds.length));
-      this.cells = Math.max(1, Math.round(
-        SPAN_AZGAAR_CELLS * meanCellSource * bounds.widthCells / campaign.source.sourceWidth,
-      ));
+      this.recomputeWindowCells();
     }
     return this.model;
   }
@@ -106,6 +121,7 @@ export class HudRegionMap {
     const model = this.resolveModel();
     const campaign = this.modelCampaign;
     if (!model) return;
+    this.recomputeWindowCells();
     this.center = { x: cell.x, z: cell.z };
     const { target: bounds, sourceWidth, sourceHeight } = campaign.source;
     const toSourceX = sourceWidth / bounds.widthCells;
@@ -116,7 +132,7 @@ export class HudRegionMap {
       minY: sourceHeight - (cell.z + half - bounds.minCellZ) * toSourceY,
       width: this.cells * toSourceX,
       height: this.cells * toSourceY,
-    });
+    }, campaign.markers ?? []);
     const markers = selectMinimapBurgs({
       campaign, center: this.center, cells: this.cells, maxMarkers: MAX_BURGS, dialZoom: MAP_ZOOM,
     });

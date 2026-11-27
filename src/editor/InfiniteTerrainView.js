@@ -307,6 +307,7 @@ export class InfiniteTerrainView {
       this.surfaceMaskConfig.blendCells,
       this.chunkSize,
       worldStore.tileSize,
+      this.surfaceMaskConfig.environment,
     );
     this.chunkWorldSize = this.chunkSize * worldStore.tileSize;
     this.waterDistanceField = createWaterDistanceField(this, stylizedConfig);
@@ -864,7 +865,8 @@ export class InfiniteTerrainView {
       {...this.surfaceMaskConfig, worldSeed:this.worldStore.generator?.toMetadata?.().seed ?? 0},
       tileId => this.worldStore.generator?.getTileDefinition?.(tileId),
       {sampleHeight:(x,z)=>this.worldStore.getHeight(x,z),
-        sampleWater:(x,z)=>this.worldStore.sampleWater?.(x,z) ?? this.worldStore.generator?.sampleWater?.(x,z)},
+        sampleWater:(x,z)=>this.worldStore.sampleWater?.(x,z) ?? this.worldStore.generator?.sampleWater?.(x,z),
+        sampleEnvironmentClimate:(x,z,out)=>this.worldStore.generator?.sampleEnvironmentClimate?.(x,z,out)},
     );
   }
 

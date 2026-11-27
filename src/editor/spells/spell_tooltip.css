@@ -1,0 +1,111 @@
+.spell-tooltip {
+  position: fixed;
+  z-index: 35;
+  width: 268px;
+  padding: 12px 14px;
+  border: 1px solid var(--ds-border-gold-strong, rgb(184 161 118 / 58%));
+  border-radius: var(--ds-radius-sm, 4px);
+  background: var(--ds-surface-obsidian-strong, rgb(16 21 25 / 95%));
+  box-shadow: 0 12px 32px rgb(0 0 0 / 62%);
+  pointer-events: none;
+  animation: spell-tooltip-in 120ms var(--ds-ease-out, ease-out) both;
+}
+
+.spell-tooltip[hidden] {
+  display: none;
+}
+
+@keyframes spell-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.spell-tooltip__header {
+  display: grid;
+  gap: 2px;
+}
+
+.spell-tooltip__title {
+  color: var(--ds-parchment, #e5dcc8);
+  font: 600 15px/1.2 var(--ds-font-display, Georgia, serif);
+  letter-spacing: 0.04em;
+}
+
+.spell-tooltip__subtitle {
+  color: var(--ds-antique-gold, #b8a176);
+  font: 600 10px/1.2 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.spell-tooltip__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0 8px;
+}
+
+.spell-tooltip__stat {
+  display: grid;
+  gap: 1px;
+  padding: 4px 6px;
+  border: 1px solid var(--ds-border-slate, rgb(166 173 176 / 22%));
+  border-radius: var(--ds-radius-xs, 2px);
+  background: rgb(255 255 255 / 3%);
+}
+
+.spell-tooltip__stat small {
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 500 9px/1.1 var(--ds-font-ui, Inter, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.spell-tooltip__stat strong {
+  color: var(--ds-parchment, #e5dcc8);
+  font: 600 11px/1.2 var(--ds-font-ui, Inter, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.spell-tooltip__stat.is-mana strong {
+  color: var(--ds-arcane-blue, #729bbc);
+}
+
+.spell-tooltip__stat.is-danger {
+  border-color: rgb(163 77 73 / 62%);
+}
+
+.spell-tooltip__stat.is-danger strong {
+  color: #e4948f;
+}
+
+.spell-tooltip__stat.is-warn strong {
+  color: var(--ds-antique-gold, #b8a176);
+}
+
+.spell-tooltip__rule {
+  margin: 4px 0 8px;
+}
+
+.spell-tooltip__desc {
+  margin: 0;
+  color: rgb(229 220 200 / 88%);
+  font: 400 12.5px/1.45 var(--ds-font-lore, Georgia, serif);
+}
+
+.spell-tooltip__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ds-border-subtle, rgb(229 220 200 / 14%));
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 500 11px/1.1 var(--ds-font-ui, Inter, sans-serif);
+}
+
+.spell-tooltip__footer.is-danger {
+  color: #e4948f;
+}

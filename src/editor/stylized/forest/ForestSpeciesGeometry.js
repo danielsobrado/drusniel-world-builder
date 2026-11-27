@@ -28,7 +28,7 @@ import {
 const CROWN_SEGMENTS = 0;
 // Short of 1 on purpose: fully spherical normals lose the faceting that keeps
 // these crowns from looking like smooth balloons, so a little face normal stays.
-const CROWN_NORMAL_SPHERIFY = 0.85;
+const CROWN_NORMAL_SPHERIFY = 0.88;
 const TRUNK_RING_FRACTIONS = Object.freeze([0, 0.08, 0.22, 0.48, 0.76, 1.0]);
 
 function clamp(value, min, max) {
@@ -261,14 +261,30 @@ function crownLobe({ x, y, z, radiusX, radiusY, radiusZ, angle = 0, tier = 0 }) 
  * — which is what would happen if the cut were applied to the lobes themselves,
  * since the card is only about a fifth opaque.
  */
-function leafCard({ lobe, speciesId, channel, scale }) {
+function leafCard({ lobe, crownCenter, speciesId, channel, scale }) {
   const azimuth = unitRandom(speciesId, channel) * Math.PI * 2;
   // Uniform over the sphere rather than over latitude, so cards do not bunch at the poles.
   const cosPolar = unitRandom(speciesId, channel + 1) * 2 - 1;
   const sinPolar = Math.sqrt(Math.max(0, 1 - cosPolar * cosPolar));
-  const unitX = sinPolar * Math.cos(azimuth);
-  const unitY = cosPolar;
-  const unitZ = sinPolar * Math.sin(azimuth);
+  const outFromCrown = new THREE.Vector3(
+    lobe.x - crownCenter.x,
+    (lobe.y - crownCenter.y) * 0.85 + 0.15,
+    lobe.z - crownCenter.z,
+  );
+  if (outFromCrown.lengthSq() > 1e-6) outFromCrown.normalize();
+  else outFromCrown.set(0, 1, 0);
+  const sample = new THREE.Vector3(
+    sinPolar * Math.cos(azimuth),
+    cosPolar,
+    sinPolar * Math.sin(azimuth),
+  );
+  // Bias cards away from lobe-to-lobe interiors so overlapping tufts concentrate on the outer rim.
+  const inward = sample.dot(outFromCrown);
+  if (inward < -0.15) sample.addScaledVector(outFromCrown, -2 * inward);
+  sample.lerp(outFromCrown, 0.25).normalize();
+  const unitX = sample.x;
+  const unitY = sample.y;
+  const unitZ = sample.z;
 
   // `scale` is the card's half-extent as a fraction of the lobe radius. It has to
   // stay well under 1: the card is centred on the surface, so a half-extent near
@@ -278,6 +294,8 @@ function leafCard({ lobe, speciesId, channel, scale }) {
     * (0.78 + unitRandom(speciesId, channel + 2) * 0.44);
   const geometry = new THREE.PlaneGeometry(size * 2, size * 2);
   geometry.rotateZ(unitRandom(speciesId, channel + 3) * Math.PI * 2);
+  geometry.rotateX((unitRandom(speciesId, channel + 4) - 0.5) * 0.56);
+  geometry.rotateY((unitRandom(speciesId, channel + 5) - 0.5) * 0.56);
 
   // Face the quad along the outward direction, then push it just past the surface
   // so it breaks the lobe's silhouette instead of z-fighting inside it.
@@ -750,13 +768,15 @@ export function createSpeciesPrototypeGeometry(speciesId, { cardsPerLobe = 0, ca
     finalizeGeometry(mergeParts(lobes.map((lobe) => lobe.geometry))),
     { strength: CROWN_NORMAL_SPHERIFY },
   );
+  const crownCenter = leafGeometry.boundingBox.getCenter(new THREE.Vector3());
   const cards = [];
   for (let index = 0; index < lobes.length; index += 1) {
     for (let card = 0; card < cardsPerLobe; card += 1) {
       cards.push(leafCard({
         lobe: lobes[index],
+        crownCenter,
         speciesId,
-        channel: 900 + index * 17 + card * 4,
+        channel: 900 + index * 23 + card * 6,
         scale: cardScale,
       }));
     }
@@ -766,7 +786,7 @@ export function createSpeciesPrototypeGeometry(speciesId, { cardsPerLobe = 0, ca
   const cardGeometry = cards.length > 0
     ? spherifyNormals(
       finalizeGeometry(mergeParts(cards)),
-      { strength: CROWN_NORMAL_SPHERIFY, center: leafGeometry.boundingBox.getCenter(new THREE.Vector3()) },
+      { strength: CROWN_NORMAL_SPHERIFY, center: crownCenter },
     )
     : null;
   const bounds = trunkGeometry.boundingBox.clone().union(leafGeometry.boundingBox);

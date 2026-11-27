@@ -1,4 +1,5 @@
 import { valueNoise } from '../../world/valueNoise2d.js';
+import { sampleEnvironmentalPoint } from '../../world/EnvironmentalField.js';
 import {
   createForestBiomeProfiles,
   forestProfileSignature,
@@ -70,6 +71,8 @@ export class ForestHabitatField {
     waterDistanceAt = null,
     revisionProvider = null,
     regionalCharacterField = null,
+    environmentConfig = null,
+    climateAt = null,
     config = {},
   }) {
     if (!Number.isFinite(tileSize) || tileSize <= 0) {
@@ -87,6 +90,10 @@ export class ForestHabitatField {
     this.waterDistanceAt = typeof waterDistanceAt === 'function' ? waterDistanceAt : null;
     this.revisionProvider = typeof revisionProvider === 'function' ? revisionProvider : null;
     this.regionalCharacterField = regionalCharacterField;
+    this.environmentConfig = environmentConfig?.enabled
+      ? environmentConfig
+      : (config.environment?.enabled ? config.environment : null);
+    this.climateAt = typeof climateAt === 'function' ? climateAt : null;
     this.cacheRevision = this.revisionProvider?.() ?? 0;
     this.cacheLimit = Math.max(256, Math.trunc(config.cacheSamples) || 32768);
     this.sampleCache = new Map();
@@ -134,6 +141,7 @@ export class ForestHabitatField {
       this.waterDistanceAt ? 'riparian' : 'nowater',
       this.patchField.signature,
       this.regionalCharacterField?.signature ?? 'uniform-regions',
+      this.environmentConfig?.enabled ? 'env1' : 'env0',
       forestProfileSignature(this.profiles),
     ].join('|');
   }
@@ -278,16 +286,34 @@ export class ForestHabitatField {
     const elevation = terrain?.elevation ?? this.heightAt(x, z);
     const slope = terrain?.slope ?? this.slopeAt(x, z);
     const patch = this.patchAt(x, z, profile);
-    const elevationFactor = rangeWeight(
-      elevation,
-      profile.elevationMin,
-      profile.elevationMax,
-      profile.elevationFade,
-    );
-    const slopeFactor = slopeWeight(slope, profile.preferredSlope, profile.maximumSlope);
     const distanceToWater = withWater
       ? this.waterDistanceAt?.(x, z) ?? Number.POSITIVE_INFINITY
       : Number.POSITIVE_INFINITY;
+    let treelineShift = 0;
+    let envSuitability = 1;
+    if (this.environmentConfig?.enabled && !terrain) {
+      const env = sampleEnvironmentalPoint({
+        x,
+        z,
+        tileSize: this.tileSize,
+        worldSeed: this.seed,
+        tileAt: this.tileAt,
+        heightAt: this.heightAt,
+        climateAt: this.climateAt,
+        waterDistance: distanceToWater,
+        environmentConfig: this.environmentConfig,
+      });
+      treelineShift = (env.solar - 0.5) * 130;
+      const thermalPenalty = smoothstep(0.05, 0.35, Math.max(0, -0.55 - env.temperature));
+      envSuitability = clamp01(0.42 + 0.55 * env.fertility + 0.25 * env.moisture) * (1 - thermalPenalty);
+    }
+    const elevationFactor = rangeWeight(
+      elevation,
+      profile.elevationMin,
+      profile.elevationMax + treelineShift,
+      profile.elevationFade,
+    );
+    const slopeFactor = slopeWeight(slope, profile.preferredSlope, profile.maximumSlope);
     const waterFactor = waterWeight(distanceToWater, profile);
     const riparian = riparianCoverage(distanceToWater, profile);
     // A gallery wood along a river is not an upland patch that happens to touch
@@ -312,7 +338,8 @@ export class ForestHabitatField {
       * Math.max(coverage, succession)
       * elevationFactor
       * slopeFactor
-      * waterFactor,
+      * waterFactor
+      * envSuitability,
     );
 
     return Object.freeze({

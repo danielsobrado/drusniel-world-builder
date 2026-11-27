@@ -393,7 +393,7 @@ export function applyRockWeathering(material, {
       .mul(snowGround.smoothstep(0.35, 0.9))
       .mul(up.smoothstep(0.65, -0.35))
       .mul(rockFootHeight.smoothstep(2.4, 0.15))
-      .mul(0.09);
+      .mul(0.045);
     // Crisp cool rock-to-snow base contact AO so the stone roots firmly into the snowbank.
     const snowBaseAo = groundContact
       ? float(1).sub(

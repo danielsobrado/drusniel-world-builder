@@ -1,0 +1,185 @@
+/*
+ * Shared contextual interaction card and dynamic 4-state crosshair.
+ */
+.hud-interaction {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 26px);
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+  max-width: min(320px, 44vw);
+  padding: 9px 13px;
+  transform: translateY(-50%);
+  border: 1px solid var(--ds-border-gold, rgb(184 161 118 / 36%));
+  border-radius: var(--ds-radius-sm, 4px);
+  background: var(--ds-surface-obsidian, rgb(21 27 32 / 88%));
+  box-shadow: var(--ds-shadow-card);
+  color: var(--ds-parchment, #e5dcc8);
+  pointer-events: none;
+  animation: hud-interact-in 140ms var(--ds-ease-out, ease-out) both;
+}
+
+.hud-interaction[hidden] {
+  display: none;
+}
+
+@keyframes hud-interact-in {
+  from {
+    opacity: 0;
+    transform: translate(-4px, -50%);
+  }
+}
+
+.hud-interaction__head {
+  display: grid;
+  gap: 1px;
+}
+
+.hud-interaction__title {
+  color: var(--ds-parchment, #e5dcc8);
+  font: 600 calc(13.5px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-display, Georgia, serif);
+  letter-spacing: 0.04em;
+}
+
+.hud-interaction__subtitle {
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 500 calc(11px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-ui, Inter, sans-serif);
+}
+
+.hud-interaction__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  color: var(--ds-antique-gold, #b8a176);
+  font: 600 calc(12px * var(--ds-hud-scale, 1)) / 1.1 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.03em;
+}
+
+.hud-interaction__snippet {
+  margin: 3px 0 0;
+  color: rgb(229 220 200 / 88%);
+  font: italic 400 calc(12px * var(--ds-hud-scale, 1)) / 1.35 var(--ds-font-lore, Georgia, serif);
+}
+
+.hud-interaction__footnote {
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 600 10px/1.1 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hud-interaction__subtitle[hidden],
+.hud-interaction__action[hidden],
+.hud-interaction__snippet[hidden],
+.hud-interaction__footnote[hidden] {
+  display: none;
+}
+
+/* ── Dynamic Context Reticle ─────────────────────────────────────────────── */
+.hud-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.hud-reticle[hidden] {
+  display: none;
+}
+
+.hud-reticle__dot,
+.hud-reticle__diamond,
+.hud-reticle__cast,
+.hud-reticle__target {
+  position: absolute;
+  inset: 0;
+  transition: opacity 150ms ease, transform 150ms var(--ds-ease-out, ease-out);
+}
+
+.hud-reticle__dot {
+  inset: 10px;
+  border-radius: 50%;
+  background: rgb(229 220 200 / 52%);
+  box-shadow: 0 0 2px rgb(0 0 0 / 60%);
+}
+
+.hud-reticle__diamond {
+  inset: 6px;
+  border: 1px solid var(--ds-antique-gold, #b8a176);
+  transform: rotate(45deg) scale(0.6);
+  opacity: 0;
+}
+
+.hud-reticle__cast {
+  inset: 2px;
+  border: 1.5px solid var(--ds-arcane-blue, #729bbc);
+  border-radius: 50%;
+  transform: scale(0.7);
+  opacity: 0;
+}
+
+.hud-reticle__target {
+  opacity: 0;
+  transform: scale(1.2);
+}
+
+.hud-reticle__target i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-color: var(--ds-bloodstone, #a34d49);
+  border-style: solid;
+}
+
+.hud-reticle__target i:nth-child(1) { top: 2px; left: 2px; border-width: 1.5px 0 0 1.5px; }
+.hud-reticle__target i:nth-child(2) { top: 2px; right: 2px; border-width: 1.5px 1.5px 0 0; }
+.hud-reticle__target i:nth-child(3) { bottom: 2px; left: 2px; border-width: 0 0 1.5px 1.5px; }
+.hud-reticle__target i:nth-child(4) { bottom: 2px; right: 2px; border-width: 0 1.5px 1.5px 0; }
+
+.hud-reticle[data-state='interact'] .hud-reticle__dot {
+  background: var(--ds-antique-gold, #b8a176);
+}
+
+.hud-reticle[data-state='interact'] .hud-reticle__diamond {
+  opacity: 0.92;
+  transform: rotate(45deg) scale(1);
+}
+
+.hud-reticle[data-state='cast'] .hud-reticle__dot {
+  background: var(--ds-arcane-blue, #729bbc);
+}
+
+.hud-reticle[data-state='cast'] .hud-reticle__cast {
+  opacity: 0.9;
+  transform: scale(1);
+}
+
+.hud-reticle[data-state='target'] .hud-reticle__dot {
+  background: var(--ds-bloodstone, #a34d49);
+}
+
+.hud-reticle[data-state='target'] .hud-reticle__target {
+  opacity: 0.95;
+  transform: scale(1);
+}
+
+@media (max-width: 760px), (max-height: 500px) {
+  .hud-interaction {
+    top: auto;
+    bottom: 138px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 32px);
+    text-align: center;
+    justify-items: center;
+  }
+
+  .hud-interaction__action {
+    justify-content: center;
+  }
+}

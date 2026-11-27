@@ -17,6 +17,7 @@ import { surfaceWetnessUniform } from '../src/editor/weather/surfaceWetness.js';
 import { resolveBarkWeathering } from '../src/editor/stylized/barkWeathering.js';
 import { wetSurfaceRoughness } from '../src/editor/stylized/forest/TreeWetSurface.js';
 import { createStylizedLeafMaterial, createAuthoredTrunkMaterial } from '../src/editor/stylized/StylizedTreeMaterials.js';
+import { createTreeImpostorBakeMaterial } from '../src/editor/stylized/impostor/TreeImpostorBaker.js';
 import { createProceduralBarkTextures } from '../src/editor/stylized/forest/ProceduralBarkTextures.js';
 import { createDitheredMaterial } from '../src/editor/stylized/lod/StylizedDitheredMaterial.js';
 import { createCpuTreeImpostorMaterial } from '../src/editor/stylized/impostor/TreeImpostorMaterial.js';
@@ -169,7 +170,14 @@ test('wrapped diffuse and airy rim glow soften the crown terminator while respec
 
   const rimGrazing = evaluate(foliageRimGlowResponse(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), float(0.28), float(1)));
   const rimFacing = evaluate(foliageRimGlowResponse(vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), float(0.28), float(1)));
+  const rimAwayFromSun = evaluate(foliageRimGlowResponse(vec3(1, 0, 0), vec3(0, 0, 1), vec3(0, 0, 1), float(0.28), float(1)));
+  const rimBacklitSun = evaluate(foliageRimGlowResponse(vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, 0, 1), float(0.28), float(1)));
+  const rimInnerCore = evaluate(foliageRimGlowResponse(vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, 0, 1), float(0.28), float(0.1)));
   assert.ok(rimGrazing > 0.1 && rimFacing === 0);
+  assert.equal(rimAwayFromSun, 0, 'looking away from the sun leaves outer edges free of rim halo');
+  assert.ok(rimBacklitSun > rimGrazing * 2, 'looking toward the sun lights thin gouache crown edges');
+  assert.ok(rimInnerCore < rimBacklitSun * 0.05, 'dense opaque core does not emit edge backlighting');
+  assert.ok(Math.abs(wrapTerminator - (0.5 ** 1.4) * 0.42 * 1.65) < 1e-5, 'Half-Lambert 1.4 curve at terminator');
 
   const geo = geometry();
   bakeCanopyVisibility([{ kind: 'leaf', geometry: geo }]);
@@ -186,8 +194,17 @@ test('wrapped diffuse and airy rim glow soften the crown terminator while respec
     hasCanopyVisibility: true,
     canopyBounds: { min: [-1, -5, -1], max: [1, 5, 1] },
   });
+  assert.ok(material.foliageRimRuffleNode, 'outer-rim tuft ruffle node wired from canopy bounds');
   const clone = createDitheredMaterial(material, { tinted: true, kind: 'leaf' });
+  assert.equal(clone.foliageRimRuffleNode, material.foliageRimRuffleNode);
+  const bake = createTreeImpostorBakeMaterial({ kind: 'leaf', sourceMap: map, material }, false);
+  assert.equal(bake.foliageRimRuffleNode, material.foliageRimRuffleNode);
   const wgsl = buildShader(new THREE.InstancedMesh(geo, clone, 1));
   assert.doesNotMatch(wgsl.vertexShader, /dpdx|dpdy/);
   buildShader(new THREE.InstancedMesh(geo, clone, 1), shaderTestRenderer({ forceWebGL: true }));
+  bake.dispose();
+  clone.dispose();
+  material.dispose();
+  geo.dispose();
+  map.dispose();
 });

@@ -162,16 +162,16 @@ export function createAridSubstrateNodes({
   const ridgeVec = perDune(tileId, dunes, (d) => swellVector(d, RIDGE_METRES));
   const ridgePhaseFw = broadLattice.dot(ridgeVec).mul(Math.PI * 2).fwidth().toVar('sandRidgeFw');
 
-  // Organic edge softening for sand tiles so desert borders never step in 2 m squares.
+  // Organic edge softening for sand tiles so desert borders feather broadly instead of stepping in 2 m squares.
   const sandAmount = sandShare
-    ? smoothstep(0.06, 0.72, rawHot.add(periodicFbm2(broadLattice).sub(0.5).mul(0.26)))
-      .mul(smoothstep(0.01, 0.12, rawHot))
+    ? smoothstep(0.02, 0.88, rawHot.add(periodicFbm2(broadLattice).sub(0.5).mul(0.32)))
+      .mul(smoothstep(0.005, 0.08, rawHot))
       .mul(bareClamped)
       .toVar('sandAmount')
     : rawHot.mul(bareClamped).toVar('sandAmount');
   const mineralAmount = mineralShare
-    ? smoothstep(0.06, 0.72, rawCold.add(periodicFbm2(broadLattice).sub(0.5).mul(0.24)))
-      .mul(smoothstep(0.01, 0.12, rawCold))
+    ? smoothstep(0.02, 0.88, rawCold.add(periodicFbm2(broadLattice).sub(0.5).mul(0.28)))
+      .mul(smoothstep(0.005, 0.08, rawCold))
       .mul(bareClamped)
       .toVar('mineralAmount')
     : rawCold.mul(bareClamped).toVar('mineralAmount');

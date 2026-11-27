@@ -63,7 +63,7 @@ export class ViewModeUi {
       minimap: hud.minimap ?? null,
       vitals: hud.vitals ?? null,
       getRenderer: hud.getRenderer,
-      getSceneLabel: hud.getSceneLabel,
+      discovery: hud.discovery ?? null,
     });
 
     this.onClick = (event) => {
@@ -114,10 +114,11 @@ export class ViewModeUi {
       const player = this.controller.playerController;
       player.readFrameStatus(this.frameStatus);
       this.vitals.update(deltaSeconds, this.frameStatus);
+      this.hud.syncWaterState(this.frameStatus.waterState);
       player.applyExertion(this.vitals);
       this.respawnIfDead(player);
     }
-    this.hud.update(this.controller.getHeading());
+    this.hud.update(this.controller.getHeading(), nowMs);
   }
 
   respawnIfDead(player) {

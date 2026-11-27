@@ -74,6 +74,8 @@ function createForestField(terrainView, config, regionalCharacterField = null) {
       : null,
     revisionProvider: () => terrainView.worldStore.revision,
     regionalCharacterField,
+    environmentConfig: config.environment ?? null,
+    climateAt: (cellX, cellZ) => terrainView.worldStore.generator?.sampleEnvironmentClimate?.(cellX, cellZ) ?? null,
     config: habitat,
   });
   field.preparedProvider = (x, z) => terrainView.preparedPlacement?.forestSample(x, z);

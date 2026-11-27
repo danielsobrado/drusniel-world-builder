@@ -472,3 +472,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+## Cinzel & Source Serif 4 fonts
+
+Bundled in `public/assets/fonts/` for the Drusniel RPG interface typography:
+
+- `CinzelVariable.woff2` — SIL Open Font License 1.1 (`public/assets/fonts/Cinzel-OFL.txt`)
+- `SourceSerif4Variable.woff2` and `SourceSerif4Variable-Italic.woff2` — SIL Open Font License 1.1 (`public/assets/fonts/SourceSerif4-OFL.txt`)

@@ -1,0 +1,91 @@
+/*
+ * Cinematic upper-center notification banner for location discoveries, arrivals,
+ * quest updates, XP gains, and world events.
+ */
+.hud-notification {
+  position: absolute;
+  top: clamp(86px, 12vh, 134px);
+  left: 50%;
+  z-index: 6;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 240px;
+  max-width: min(520px, calc(100vw - 48px));
+  padding: 12px 28px 14px;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgb(21 27 32 / 84%) 0%,
+    rgb(21 27 32 / 48%) 62%,
+    transparent 100%
+  );
+  text-align: center;
+  pointer-events: none;
+  animation: hud-banner-in 240ms var(--ds-ease-out, ease-out) both;
+}
+
+.hud-notification[hidden] {
+  display: none;
+}
+
+.hud-notification.is-leaving {
+  opacity: 0;
+  transform: translate(-50%, -6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+@keyframes hud-banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+.hud-notification__eyebrow {
+  color: var(--ds-antique-gold, #b8a176);
+  font: 600 calc(10px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-shadow: var(--ds-shadow-text);
+}
+
+.hud-notification__eyebrow[hidden],
+.hud-notification__rule[hidden],
+.hud-notification__region[hidden],
+.hud-notification__subtitle[hidden] {
+  display: none;
+}
+
+.hud-notification__title {
+  color: var(--ds-parchment, #e5dcc8);
+  font: 600 calc(26px * var(--ds-hud-scale, 1)) / 1.15 var(--ds-font-display, Georgia, serif);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 88%);
+}
+
+.hud-notification[data-kind='system'] .hud-notification__title,
+.hud-notification[data-kind='location-entered'] .hud-notification__title {
+  font-size: calc(19px * var(--ds-hud-scale, 1));
+  letter-spacing: 0.14em;
+}
+
+.hud-notification__rule {
+  width: min(240px, 60vw);
+  margin: 3px 0;
+}
+
+.hud-notification__region {
+  color: var(--ds-parchment, #e5dcc8);
+  font: 500 calc(14px * var(--ds-hud-scale, 1)) / 1.25 var(--ds-font-lore, Georgia, serif);
+  letter-spacing: 0.04em;
+  text-shadow: var(--ds-shadow-text);
+}
+
+.hud-notification__subtitle {
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 500 calc(11.5px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.06em;
+  text-shadow: var(--ds-shadow-text);
+}

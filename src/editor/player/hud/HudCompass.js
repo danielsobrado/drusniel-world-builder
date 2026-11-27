@@ -4,7 +4,7 @@ import { HUD_PHASE } from './hudState.js';
 
 /** Degrees either side of straight ahead that the ribbon shows. */
 const FIELD_DEGREES = 90;
-/** A place this close to straight ahead is named above the ribbon. */
+/** A place this close to straight ahead is named below the ribbon. */
 const FOCUS_DEGREES = 12;
 const HEADING_EPSILON = 0.002;
 const PLACE_REFRESH_MS = 500;
@@ -17,20 +17,11 @@ function createMark(className, label = '') {
 }
 
 /**
- * The compass ribbon across the top of the walking HUD: the cardinal points and
- * the nearest settlements, slid along by the camera yaw. Places come from the
- * minimap source and are re-read a couple of times a second; worlds without
- * Azgaar burgs show the points alone.
+ * Skyrim / Kingdom Come-inspired exploration compass across the top center:
+ * restrained antique-gold horizon line, Cinzel cardinal letters, fine ticks,
+ * and settlement / landmark bearings with focused distance readout.
  */
 export class HudCompass {
-  /**
-   * @param {object} [source]
-   * @param {() => { x: number, z: number } | null} [source.getFocusPoint] fractional cell
-   * @param {(point: { x: number, z: number }) => Array<{
-   *   id: number, name: string, capital: boolean, color: string,
-   *   worldDx: number, worldDz: number, metres: number,
-   * }>} [source.getPlaces]
-   */
   constructor({ getFocusPoint = () => null, getPlaces = () => [] } = {}) {
     this.getFocusPoint = getFocusPoint;
     this.getPlaces = getPlaces;
@@ -39,6 +30,7 @@ export class HudCompass {
     this.placesSignature = '';
     this.placeMarks = [];
     this.focusText = '';
+    this.enabled = true;
 
     this.element = document.createElement('div');
     this.element.className = 'hud-compass';
@@ -46,22 +38,28 @@ export class HudCompass {
     this.element.setAttribute('aria-hidden', 'true');
     this.focus = createMark('hud-compass__focus');
     this.track = createMark('hud-compass__track');
-    this.element.append(this.focus, this.track, createMark('hud-compass__pointer'));
+    this.element.append(this.track, createMark('hud-compass__pointer'), this.focus);
     this.pointMarks = COMPASS_POINTS.map((point) => {
       const element = createMark(`hud-compass__point${point.label ? '' : ' is-tick'}`, point.label);
       if (point.label.length === 1) element.classList.add('is-cardinal');
+      if (point.label === 'N') element.classList.add('is-north');
       return { ...point, element };
     });
     this.track.append(...this.pointMarks.map(({ element }) => element));
   }
 
+  setEnabled(enabled) {
+    this.enabled = Boolean(enabled);
+    if (!this.enabled) this.element.hidden = true;
+  }
+
   render(phase) {
-    this.element.hidden = phase !== HUD_PHASE.walking;
+    this.element.hidden = phase !== HUD_PHASE.walking || !this.enabled;
     if (this.element.hidden) this.heading = Number.NaN;
   }
 
   update(heading, nowMs) {
-    if (!Number.isFinite(heading)) return;
+    if (!this.enabled || !Number.isFinite(heading)) return;
     const placesChanged = nowMs >= this.nextPlacesAt && this.refreshPlaces(nowMs);
     if (!placesChanged && Math.abs(heading - this.heading) < HEADING_EPSILON) return;
     this.heading = heading;
@@ -76,14 +74,12 @@ export class HudCompass {
         focusedBearing = bearing;
       }
     }
-    // Burg names come from the imported map, so they are set as text.
     const text = focused ? `${focused.name} · ${formatDistance(focused.metres)}` : '';
     if (text === this.focusText) return;
     this.focusText = text;
     this.focus.textContent = text;
   }
 
-  /** Returns whether anything changed, so a stationary camera still redraws it. */
   refreshPlaces(nowMs) {
     this.nextPlacesAt = nowMs + PLACE_REFRESH_MS;
     const point = this.getFocusPoint();
@@ -95,8 +91,9 @@ export class HudCompass {
       for (const { element } of this.placeMarks) element.remove();
       this.placeMarks = places.map((place) => {
         const element = createMark('hud-compass__place');
-        element.classList.toggle('is-capital', place.capital);
-        element.style.setProperty('--place-color', place.color);
+        element.classList.toggle('is-capital', Boolean(place.capital));
+        element.classList.toggle('is-landmark', place.kind === 'landmark');
+        element.style.setProperty('--place-color', place.color ?? 'var(--ds-parchment)');
         this.track.append(element);
         return { ...place, element };
       });
@@ -114,7 +111,6 @@ export class HudCompass {
 function placeMark(mark, heading) {
   const bearing = relativeBearing(mark.worldDx, mark.worldDz, heading);
   const visible = Math.abs(bearing) <= FIELD_DEGREES;
-  // Inherit when shown: an explicit 'visible' outlived the HUD's capture-hide.
   mark.element.style.visibility = visible ? '' : 'hidden';
   if (visible) mark.element.style.setProperty('--mark-at', (bearing / FIELD_DEGREES).toFixed(4));
   return bearing;

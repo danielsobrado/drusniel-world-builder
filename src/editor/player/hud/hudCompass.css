@@ -1,36 +1,41 @@
 /*
- * Compass ribbon at the top, dressed as a tooled leather strap between brass rails.
- * `HudCompass` publishes --mark-at on each mark, -1 (left edge of the field) to 1
- * (right edge), and the width lives here.
+ * Restrained Drusniel exploration compass: top-center horizon bar with tapered
+ * antique-gold hairline, Cinzel cardinals, and settlement / landmark pips.
  */
 .hud-compass {
-  --compass-half: min(320px, 50vw - 24px);
+  --compass-half: min(260px, 38vw - 24px);
 
   position: absolute;
-  top: 58px;
+  top: var(--hud-inset-y, 24px);
   left: 50%;
   width: calc(var(--compass-half) * 2);
-  height: 34px;
+  height: calc(30px * var(--ds-hud-scale, 1));
   transform: translateX(-50%);
-  filter: drop-shadow(0 2px 4px #000a);
-  animation: glade-rise-in 320ms ease both;
+  animation: hud-compass-in 220ms var(--ds-ease-out, ease-out) both;
 }
 
 .hud-compass[hidden] {
   display: none;
 }
 
+@keyframes hud-compass-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+}
+
 .hud-compass__track {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: block;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background:
-    var(--hud-brass) top / 100% 2px no-repeat,
-    var(--hud-brass) bottom / 100% 2px no-repeat,
-    var(--hud-marble);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10% 90%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 10% 90%, transparent);
+    linear-gradient(90deg, transparent, rgb(184 161 118 / 38%) 20% 80%, transparent) bottom / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(21 27 32 / 56%), rgb(21 27 32 / 14%));
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12% 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12% 88%, transparent);
 }
 
 .hud-compass__point,
@@ -42,80 +47,76 @@
 }
 
 .hud-compass__point {
-  color: #cdb27a;
-  font: 600 12px/1 var(--hud-tome-font);
-  letter-spacing: 0.06em;
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 600 calc(10px * var(--ds-hud-scale, 1)) / 1 var(--ds-font-display, Georgia, serif);
+  letter-spacing: 0.08em;
+  text-shadow: var(--ds-shadow-text);
 }
 
 .hud-compass__point.is-cardinal {
-  color: var(--hud-trim-light);
-  font-size: 18px;
+  color: var(--ds-parchment, #e5dcc8);
+  font-size: calc(13px * var(--ds-hud-scale, 1));
   font-weight: 700;
-  text-shadow: 0 1px 0 #000, 0 0 8px #d8a94a66;
 }
 
-/* The diamonds turn on a pseudo-element: `rotate` would also turn the mark's slide. */
-.hud-compass__point.is-tick,
-.hud-compass__place {
-  width: 5px;
+.hud-compass__point.is-north {
+  color: var(--ds-antique-gold, #b8a176);
+}
+
+.hud-compass__point.is-tick {
+  width: 1px;
   height: 5px;
-}
-
-.hud-compass__point.is-tick::before,
-.hud-compass__place::before {
-  position: absolute;
-  inset: 0;
-  background: var(--hud-plate-line);
-  content: '';
-  rotate: 45deg;
+  background: rgb(166 173 176 / 48%);
 }
 
 .hud-compass__place {
   z-index: 1;
-  width: 11px;
-  height: 11px;
+  width: 7px;
+  height: 7px;
 }
 
 .hud-compass__place::before {
-  background: var(--place-color);
-  box-shadow: 0 0 0 1.5px var(--hud-trim-light), 0 0 0 3px var(--hud-leather);
+  position: absolute;
+  inset: 0;
+  background: var(--place-color, var(--ds-parchment));
+  border: 1px solid var(--ds-obsidian, #151b20);
+  content: '';
+  transform: rotate(45deg);
 }
 
-/* Burgs a kingdom answers to wear a second band. */
 .hud-compass__place.is-capital {
-  width: 14px;
-  height: 14px;
+  width: 9px;
+  height: 9px;
 }
 
 .hud-compass__place.is-capital::before {
-  box-shadow: 0 0 0 1.5px var(--hud-trim-light), 0 0 0 3px #7c1d1d, 0 0 0 4px var(--hud-trim-light);
+  background: var(--ds-antique-gold, #b8a176);
+  box-shadow: 0 0 0 1px var(--ds-obsidian, #151b20);
 }
 
 .hud-compass__pointer {
   position: absolute;
-  top: -5px;
+  top: -3px;
   left: 50%;
-  width: 18px;
-  height: 11px;
-  transform: translateX(-50%);
-  background: var(--hud-brass);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid var(--ds-antique-gold, #b8a176);
+  border-bottom: 1px solid var(--ds-antique-gold, #b8a176);
+  background: var(--ds-obsidian, #151b20);
+  transform: translateX(-50%) rotate(45deg);
 }
 
-/* The place ahead is named on a parchment slip hanging from the strap. */
 .hud-compass__focus {
   position: absolute;
-  top: calc(100% + 5px);
+  top: calc(100% + 4px);
   left: 50%;
   max-width: 100%;
-  padding: 3px 18px;
   overflow: hidden;
   transform: translateX(-50%);
-  background: var(--hud-parchment);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 50%, 100% 100%, 0 100%, 8px 50%);
-  color: #3a2614;
-  font: italic 600 13px/1.2 var(--hud-tome-font);
-  letter-spacing: 0.02em;
+  color: var(--ds-parchment, #e5dcc8);
+  font: 500 calc(11.5px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-lore, Georgia, serif);
+  letter-spacing: 0.04em;
+  text-shadow: var(--ds-shadow-text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -124,25 +125,18 @@
   display: none;
 }
 
-/* The status line sits below the ribbon and its place name while walking. */
+/* Status chip drops smoothly beneath the compass & focused place label. */
 .player-hud[data-hud-phase='walking'] .hud-status {
-  top: 124px;
+  top: calc(var(--hud-inset-y, 24px) + 52px);
 }
 
-/* On a phone the status clears the vitals and minimap hanging under the ribbon. */
 @media (max-width: 760px), (max-height: 500px) {
-  .player-hud[data-hud-phase='walking'] .hud-status {
-    top: calc(var(--hud-phone-top) + var(--minimap-size) + 16px);
-  }
-}
-
-/* Wide enough for the ribbon to clear the corner mode switch: it takes the top edge. */
-@media (min-width: 900px) and (min-height: 501px) {
   .hud-compass {
-    top: 14px;
+    --compass-half: min(170px, 46vw - 12px);
+    top: 54px;
   }
 
   .player-hud[data-hud-phase='walking'] .hud-status {
-    top: 80px;
+    top: calc(var(--hud-phone-top, 96px) + var(--minimap-size) + 18px);
   }
 }

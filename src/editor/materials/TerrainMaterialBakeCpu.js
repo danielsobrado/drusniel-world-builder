@@ -9,6 +9,7 @@ import { encodeTerrainMaterialWeights } from './TerrainMaterialBakePacking.js';
 import { snowAtPoint } from './SnowAccumulation.js';
 import { terrainBakeMacroSeed, terrainBakeValueNoise as valueNoise } from './TerrainBakeNoise.js';
 import { padTerrainMaterialBakeSource } from './TerrainMaterialBakeSourcePad.js';
+import { ENV_CHANNELS, ENV_CHANNEL_COUNT } from '../world/EnvironmentalField.js';
 
 const DISTANCE_INFINITY = 1e9;
 const SQRT_TWO = Math.SQRT2;
@@ -194,6 +195,8 @@ export function captureTerrainMaterialBakeSource({
     // Tile ids are the Azgaar biome ids: snow cover follows glacier and tundra.
     tiles: page.tiles ? Uint8Array.from(page.tiles) : null,
     snowBiomeCover: page.snowBiomeCover instanceof Uint8Array ? page.snowBiomeCover.slice() : null,
+    aridEcotone: page.aridEcotone instanceof Uint8Array ? page.aridEcotone.slice() : null,
+    envField: page.envField instanceof Uint8Array ? page.envField.slice() : null,
     surfaceMaskPixels: page.surfaceMaskPixels.slice(),
     heights: page.heights.slice(),
     canopyPixels: canopyPixels instanceof Uint8Array ? canopyPixels.slice() : null,
@@ -297,6 +300,11 @@ export async function bakeTerrainMaterialPage({
       const rock = smoothstep(classification.rockSlopeStart, classification.rockSlopeFull, slope) * land;
       const worldX = (source.originX + cellX) * tileSize;
       const worldZ = -(source.originZ + cellZ) * tileSize;
+      const envOffset = padded.envField ? sourceIndex * ENV_CHANNEL_COUNT : -1;
+      const envSolar = envOffset >= 0 ? padded.envField[envOffset + ENV_CHANNELS.SOLAR] / 255 : 0.5;
+      const envTemp = envOffset >= 0 ? (padded.envField[envOffset + ENV_CHANNELS.TEMP] / 255) * 2 - 1 : undefined;
+      const envMoist = envOffset >= 0 ? padded.envField[envOffset + ENV_CHANNELS.MOISTURE] / 255 : null;
+      const envGeo = envOffset >= 0 ? padded.envField[envOffset + ENV_CHANNELS.GEOLOGY] / 255 : null;
       const snow = snowAtPoint({
         height,
         slope,
@@ -305,6 +313,8 @@ export async function bakeTerrainMaterialPage({
         curvature: curvatures[index],
         tileId: padded.tiles ? padded.tiles[sourceIndex] : -1,
         biomeCover: padded.snowBiomeCover ? padded.snowBiomeCover[sourceIndex] / 255 : undefined,
+        solarExposure: envSolar,
+        temperature: envTemp,
         worldX,
         worldZ,
         // The mask's continuous dry share, not the binary water class: cut by
@@ -345,17 +355,19 @@ export async function bakeTerrainMaterialPage({
       canopyWater[index * 2 + 1] = waterByte;
 
       const macroBase = valueNoise(worldX, worldZ, macro.scaleMeters, macroSeed) * 2 - 1;
-      const macroRed = 1 + macroBase * macro.strength;
-      const macroGreen = 1
+      const geoShift = envGeo !== null ? (envGeo - 0.5) * 0.09 : 0;
+      const moistShade = envMoist !== null ? 1 - Math.max(0, envMoist - 0.45) * 0.12 : 1;
+      const macroRed = (1 + macroBase * macro.strength + geoShift) * moistShade;
+      const macroGreen = (1
         + (valueNoise(worldX, worldZ, macro.scaleMeters, macroSeed + 17) * 2 - 1)
-          * macro.strength * 0.72;
-      const macroBlue = 1
+          * macro.strength * 0.72 + geoShift * 0.35) * moistShade;
+      const macroBlue = (1
         + (valueNoise(worldX, worldZ, macro.scaleMeters, macroSeed + 31) * 2 - 1)
-          * macro.strength * 0.55;
+          * macro.strength * 0.55 - geoShift * 0.65) * moistShade;
       macroTint[index * 4] = Math.round(clamp01(macroRed * 0.5) * 255);
       macroTint[index * 4 + 1] = Math.round(clamp01(macroGreen * 0.5) * 255);
       macroTint[index * 4 + 2] = Math.round(clamp01(macroBlue * 0.5) * 255);
-      macroTint[index * 4 + 3] = 255;
+      macroTint[index * 4 + 3] = padded.aridEcotone ? padded.aridEcotone[sourceIndex] : 255;
 
       const heightShade = clamp(
         1 + height * macro.heightShadeScale,

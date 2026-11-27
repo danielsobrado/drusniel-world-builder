@@ -88,7 +88,7 @@ import { SandCover } from './editor/weather/storm/SandCover.js';
 import { createSnowFieldPass } from './editor/weather/storm/snowField/SnowFieldPass.js';
 import { stormLevelUniform, stormRainUniform, stormSandCoverUniform, stormSnowCoverUniform, stormSnowFallUniform } from './editor/weather/storm/stormGroundUniforms.js';
 import { SkyLookController } from './editor/stylized/sky/SkyLookController.js';
-import { DEFAULT_SKY_PRESET, SKY_PRESETS } from './editor/stylized/sky/SkyPresets.js';
+import { SKY_PRESETS } from './editor/stylized/sky/SkyPresets.js';
 import { DayNightCycle, TIME_PRESET_ANCHORS } from './editor/stylized/sky/dayNightCycle.js';
 import { SnowCountryWeight } from './editor/stylized/sky/SnowCountryWeight.js';
 import { SkyRegionSampler } from './editor/stylized/sky/SkyRegionSampler.js';
@@ -612,6 +612,10 @@ async function initializeEditor(restoreState, resources, startup) {
 let townKeyHandler = null;
 const detachTownHotkey = attachCaptureHotkey(() => townKeyHandler);
 resources.defer(() => { townKeyHandler = null; detachTownHotkey(); });
+// Walk-mode HUD shortcuts (N, H, -, =); registered before the player controller swallows keys.
+let hudKeyHandler = null;
+const detachHudHotkey = attachCaptureHotkey(() => hudKeyHandler);
+resources.defer(() => { hudKeyHandler = null; detachHudHotkey(); });
 // `?towns=kit` draws burgs with the medieval kit instead of SettlementView (towns/townMode.js).
 const kitTowns = kitTownsEnabled();
 
@@ -952,36 +956,40 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   resources.own(editorWorkspace);
   resources.defer(escapeStack.register(ESCAPE_PRIORITY.modal, (event) => editorWorkspace.escape(event), { label: 'editor workspace' }));
   ui.syncCommandButtons();
-  const sceneLabel = (preset) => {
-    const label = SKY_PRESETS[preset]?.label ?? '';
-    return preset === 'configured' || preset === DEFAULT_SKY_PRESET
-      ? 'Drusniel World'
-      : label.replace(/\s*\(.*\)\s*$/, '');
-  };
   const playerVitals = new PlayerVitals();
+  const hudMinimapSource = createHudMinimapSource({
+    ui,
+    controller,
+    tileMap,
+    getBaseTerrain: () => worldMapController.getBaseTerrain(),
+    getLocationLabel: () => {
+      const site = locations.runtime.activeSite;
+      return site ? { label: site.title, color: site.theme?.accent ?? '#ff9a4a' } : null;
+    },
+  });
   const viewModeUi = new ViewModeUi({
     root,
     controller: viewModeController,
     hud: {
       vitals: playerVitals,
-      minimap: createHudMinimapSource({
-        ui,
-        controller,
-        tileMap,
-        getBaseTerrain: () => worldMapController.getBaseTerrain(),
-        getLocationLabel: () => {
-          const site = locations.runtime.activeSite;
-          return site ? { label: site.title, color: site.theme?.accent ?? '#ff9a4a' } : null;
-        },
-      }),
+      minimap: hudMinimapSource,
       getRenderer: () => terrainView.renderer,
-      // The time of day titles the legend, as the donor's scene preset did:
-      // "Emberfall (golden hour)" reads as "Emberfall". Read lazily — the sky
-      // looks are built after the HUD.
-      getSceneLabel: () => locations.runtime.activeSite?.title ?? sceneLabel(skyLooks?.preset),
+      discovery: {
+        tileSize: config.map.tileSize,
+        getFocusCanonical: () => controller.focusProvider?.() ?? null,
+        getActiveSite: () => locations.runtime.activeSite,
+        getNearestSettlement: (pos) => (
+          settlementView?.enabled ? settlementView.nearestTown(pos) : null
+        ) ?? townRuntime?.streamer?.nearestTown?.(pos) ?? null,
+        describeRegion: (cellX, cellZ) => hudMinimapSource.describeRegion(cellX, cellZ),
+      },
     },
   });
   resources.own(viewModeUi);
+  hudKeyHandler = (event) => {
+    if (gameplayOverlayController.isWorldInputBlocked()) return false;
+    return viewModeUi.hud.handleKeyDown(event);
+  };
 
   let farViewActive = false;
   const applyViewDistance = (active) => {
@@ -1424,6 +1432,12 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
           z: status.position.z,
         };
       },
+      onMenuCast: (durationMs, spellId) => {
+        viewModeUi.hud.notifySpellCast(durationMs, spellId);
+      },
+      onMenuActivity: () => {
+        viewModeUi.hud.notifyHotbarActivity();
+      },
       onCast: () => {
         postProcessingController.notifyReactive(
           POST_PROCESSING_REACTIVE_EVENTS.SPELL_STARTED,
@@ -1437,6 +1451,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       registerKeys: false,
     })
     : null;
+  if (spellRuntime?.menu) viewModeUi.hud.attachSpellMenu(spellRuntime.menu);
   resources.own(spellRuntime);
   // Swamp gas catching on bog islands, through the grimoire's VFX (stylized/bog/BogVents.js).
   const bogVents = spellRuntime?.effects

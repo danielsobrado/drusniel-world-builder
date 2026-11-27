@@ -14,6 +14,7 @@ export function terrainRegionalFeatures(page, config, wet) {
   const arid = config.biomeLooks?.arid ?? { sand: [1], mineral: [2] };
   const aridIds = new Set([...(arid.sand ?? []), ...(arid.mineral ?? [])]);
   const glacier = config.biomeLooks?.glacier;
+  if (page.hasAridEcotone) features |= F.ARID;
   for (const id of page.tiles) {
     if (aridIds.has(id)) features |= F.ARID;
     if (glacier?.[id] > 0) features |= F.GLACIER;

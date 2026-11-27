@@ -10,6 +10,15 @@ const TERRAIN_FIELD_NAMES = Object.freeze([
   'valleyness',
 ]);
 
+const OPTIONAL_TERRAIN_WORKER_FIELDS = Object.freeze([
+  'temperature',
+  'moisture',
+  'wetness',
+  'snowPotential',
+  'forestPotential',
+  'agriculturalPotential',
+]);
+
 function cloneValue(value) {
   return value === undefined ? undefined : structuredClone(value);
 }
@@ -23,6 +32,12 @@ function terrainFields(baseTerrain) {
       throw new Error(`Azgaar terrain worker source is missing field ${name}.`);
     }
     result[name] = structuredClone(payload);
+  }
+  for (const name of OPTIONAL_TERRAIN_WORKER_FIELDS) {
+    const payload = sourceFields?.[name];
+    if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+      result[name] = structuredClone(payload);
+    }
   }
   return result;
 }

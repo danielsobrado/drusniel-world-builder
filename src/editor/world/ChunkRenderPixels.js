@@ -6,9 +6,10 @@
 
 import { SURFACE_MASK_TEXTURE_PAD } from './SurfaceMaskTexture.js';
 import { grassHabitatCoverage, grassHabitatHaloCells } from './GrassHabitatCoverage.js';
-import { prepareGrassHabitatHalo } from './GrassHabitatHalo.js';
+import { prepareGrassHabitatHalo, prepareWaterHalo } from './GrassHabitatHalo.js';
 import { grassPatchCover } from './GrassPatchiness.js';
 import { blurTileField } from './BiomeFieldBlur.js';
+import { buildChunkEnvironmentalField, ENV_CHANNEL_COUNT } from './EnvironmentalField.js';
 import { SNOW_BIOME_BLUR_CELLS, snowBiomeCoverField } from '../materials/SnowAccumulation.js';
 import { resolveMeadowGrowth } from '../stylized/meadow/meadowGrowthProfiles.js';
 import { TILE_BY_ID, hexToRgbBytes } from '../tileCatalog.js';
@@ -91,15 +92,23 @@ function vertexWetness(chunkSize, originX, originZ, field, sampleWater, waterlin
  * snow gate reads the biome snow cover blurred over SNOW_BIOME_BLUR_CELLS, so
  * that blur widens the halo too — and with it how far an edit invalidates.
  */
-export function getSurfaceMaskSearchRadius(blendCells, tileSize = 2) {
-  return Math.max(Math.ceil(Math.max(0.5, blendCells) + 1), grassHabitatHaloCells(tileSize) + SNOW_BIOME_BLUR_CELLS);
+export function getSurfaceMaskSearchRadius(blendCells, tileSize = 2, environment = null) {
+  const base = Math.max(
+    Math.ceil(Math.max(0.5, blendCells) + 1),
+    grassHabitatHaloCells(tileSize) + SNOW_BIOME_BLUR_CELLS,
+  );
+  if (!environment?.enabled) return base;
+  return Math.max(
+    base,
+    environment.ecotone.maxRadiusCells + Math.ceil(environment.ecotone.warpReachCells) + 4,
+  );
 }
 
-export function getSurfaceMaskChunkRadius(blendCells, chunkSize, tileSize = 2) {
+export function getSurfaceMaskChunkRadius(blendCells, chunkSize, tileSize = 2, environment = null) {
   if (!Number.isInteger(chunkSize) || chunkSize < 1) {
     throw new Error('Surface mask chunk size must be a positive integer.');
   }
-  return Math.ceil(getSurfaceMaskSearchRadius(blendCells, tileSize) / chunkSize);
+  return Math.ceil(getSurfaceMaskSearchRadius(blendCells, tileSize, environment) / chunkSize);
 }
 
 
@@ -123,11 +132,16 @@ function grassDensityByTile(stylizedConfig) {
 
 export function createSurfaceMaskConfig(stylizedConfig, { tileSize = null } = {}) {
   const bake = stylizedConfig?.materialBake;
+  const biomeLooks = stylizedConfig?.biomeLooks;
+  const environment = stylizedConfig?.environment?.enabled ? stylizedConfig.environment : null;
+  const aridKinds = biomeLooks?.arid
+    ? { sand: [...(biomeLooks.arid.sand ?? [])], mineral: [...(biomeLooks.arid.mineral ?? [])] }
+    : null;
   return {
     grassDensityByTile: grassDensityByTile(stylizedConfig),
     // Bare-ground colour per biome where it differs from the map colour
     // (config/biome-looks.yaml `soil`); a plain object for the chunk workers.
-    soilColorByTile: { ...(stylizedConfig?.biomeLooks?.soil ?? {}) },
+    soilColorByTile: { ...(biomeLooks?.soil ?? {}) },
     tileSize: tileSize ?? 2,
     snow: bake?.classification && Number.isFinite(tileSize)
       ? { classification: bake.classification, seedOffset: bake.macro.seedOffset, tileSize }
@@ -135,7 +149,16 @@ export function createSurfaceMaskConfig(stylizedConfig, { tileSize = null } = {}
     blendCells: Math.max(0.5, stylizedConfig?.path?.blendCells ?? 2.5),
     roadTileId: stylizedConfig?.path?.tileId ?? 13,
     waterTileId: stylizedConfig?.water?.tileId ?? 0,
-    aridTileIds: Object.values(stylizedConfig?.biomeLooks?.arid ?? {}).flat(),
+    aridTileIds: Object.values(biomeLooks?.arid ?? {}).flat(),
+    aridKinds,
+    environment,
+    biomeLooks: environment && biomeLooks
+      ? {
+        arid: aridKinds,
+        snow: { ground: Array.from(biomeLooks.snow?.ground ?? []) },
+        glacier: Array.from(biomeLooks.glacier ?? []),
+      }
+      : null,
     grassTileIds: [...(stylizedConfig?.grass?.tileIds ?? [3, 4, 5, 6, 7, 8, 9, 10, 12, 14])],
     // Depth at which a cell counts as fully wet for surface classification.
     // Roughly a grass blade's height: shallower than this and blades still
@@ -254,10 +277,14 @@ export function buildSurfaceMaskPixels({
   waterField = null,
   sampleHeight = null,
   sampleWater = null,
+  sampleEnvironmentClimate = null,
   snowCoverOut = null,
   tilePixelsOut = null,
   tileColor = null,
   paddedOut = null,
+  envOut = null,
+  aridOut = null,
+  onHasAridEcotone = null,
 }) {
   const blendCells = Math.max(0.5, maskConfig.blendCells);
   const waterlineDepth = Math.max(0.01, maskConfig.waterlineDepth ?? 0.35);
@@ -270,7 +297,8 @@ export function buildSurfaceMaskPixels({
     throw new Error('Grass habitat water halo requires water sampling.');
   }
   const tileSize = maskConfig.tileSize ?? maskConfig.snow?.tileSize ?? 2;
-  const searchRadius = getSurfaceMaskSearchRadius(blendCells, tileSize);
+  const environmentConfig = maskConfig.environment?.enabled ? maskConfig.environment : null;
+  const searchRadius = getSurfaceMaskSearchRadius(blendCells, tileSize, environmentConfig);
   const roadTileId = maskConfig.roadTileId;
   const { halo, haloSize } = buildHaloTiles({
     tiles,
@@ -282,19 +310,78 @@ export function buildSurfaceMaskPixels({
   });
   const distances = computeRoadDistanceField(halo, haloSize, haloSize, roadTileId);
   const mask = new Uint8Array(chunkSize * chunkSize * 4);
-  const snowCover = maskConfig.snow
-    ? snowBiomeCoverField(halo, haloSize, maskConfig.snow.classification.snowBiomeCover, roadTileId)
-    : null;
   const wetness = vertexWetness(chunkSize, originX, originZ, usableWaterField, sampleWater, waterlineDepth);
-  const habitat = prepareGrassHabitatHalo({halo,haloSize,searchRadius,chunkSize,heights,
-    originX,originZ,maskConfig,sampleHeight,sampleWater,snowCover,
-    coreWater:usableWaterField ? (x,z)=>sampleCellWaterOccupancy(usableWaterField,x,z,waterlineDepth) : null});
+  const coreWater = usableWaterField ? (x, z) => sampleCellWaterOccupancy(usableWaterField, x, z, waterlineDepth) : null;
+  let waterHalo = null;
+  let envResult = null;
+  let snowCover = null;
+  if (environmentConfig) {
+    waterHalo = prepareWaterHalo({
+      halo, haloSize, searchRadius, chunkSize, originX, originZ, maskConfig, sampleWater, coreWater,
+    });
+    envResult = buildChunkEnvironmentalField({
+      halo,
+      haloSize,
+      searchRadius,
+      chunkSize,
+      originX,
+      originZ,
+      tileSize,
+      worldSeed: maskConfig.worldSeed ?? 0,
+      heights,
+      water: waterHalo,
+      sampleHeight,
+      sampleEnvironmentClimate,
+      tileColor,
+      aridKinds: maskConfig.aridKinds ?? { sand: maskConfig.aridTileIds ?? [], mineral: [] },
+      snowCoverByTile: maskConfig.snow?.classification?.snowBiomeCover ?? null,
+      roadTileId,
+      waterTileId: maskConfig.waterTileId,
+      seaLevel: maskConfig.seaLevel ?? -1.5,
+      environmentConfig,
+      biomeLooks: maskConfig.biomeLooks ?? null,
+      tilePixelsOut,
+      tiles,
+    });
+    if (envOut) envOut.set(envResult.envField);
+    if (aridOut) aridOut.set(envResult.aridEcotone);
+    onHasAridEcotone?.(envResult.hasAridEcotone);
+    snowCover = envResult.haloSnowCover;
+  } else {
+    snowCover = maskConfig.snow
+      ? snowBiomeCoverField(halo, haloSize, maskConfig.snow.classification.snowBiomeCover, roadTileId)
+      : null;
+  }
+  const habitat = prepareGrassHabitatHalo({
+    halo,
+    haloSize,
+    searchRadius,
+    chunkSize,
+    heights,
+    originX,
+    originZ,
+    maskConfig,
+    sampleHeight,
+    sampleWater,
+    snowCover,
+    waterHalo,
+    solarHalo: envResult?.haloSolar ?? null,
+    tempHalo: envResult?.haloTemp ?? null,
+    coreWater,
+  });
   // Barren land — not water, not a road, whose verge has its own blend, and not
   // a snow drift on grass ground, which the sward meets — fades the sward over
   // the wider barren edge.
   const barren = Uint8Array.from(habitat.eligibility, (eligible, i) => (
     !eligible && habitat.water[i] < 1 && halo[i] !== roadTileId && !habitat.snowed[i] ? 1 : 0));
-  const coverage = grassHabitatCoverage(habitat.eligibility,haloSize,haloSize,tileSize,barren);
+  const coverage = grassHabitatCoverage(
+    habitat.eligibility,
+    haloSize,
+    haloSize,
+    tileSize,
+    barren,
+    envResult?.haloWidthFactor ?? null,
+  );
   const densityByTile = maskConfig.grassDensityByTile ?? null;
   const worldSeed = maskConfig.worldSeed ?? 0;
   // Stand density blurred across biome borders over grass cells only (water,
@@ -304,7 +391,7 @@ export function buildSurfaceMaskPixels({
   // a cell's own swatch wherever grass thins out, and stepping from one biome's
   // swatch to the next at a cell edge left a notched line around every border.
   // Water and roads neither give nor take colour; the tile id in alpha stays.
-  if (tilePixelsOut && tileColor) {
+  if (!envResult && tilePixelsOut && tileColor) {
     const blends = (t) => t !== maskConfig.waterTileId && t !== roadTileId;
     const share = blurTileField(halo, haloSize, (t) => (blends(t) ? 1 : 0));
     const channels = [0, 1, 2].map((channel) => blurTileField(halo, haloSize,
@@ -356,7 +443,10 @@ export function buildSurfaceMaskPixels({
       // thins the same way, so a sward dissolves into a desert in patches.
       let grass = coverage[haloIndex];
       if (densityByTile && grass > 0) {
-        const density = blurredDensity[haloIndex] * (grass / 255);
+        const envDensityFactor = envResult
+          ? clamp(0.58 + 0.52 * envResult.haloFertility[haloIndex] + 0.16 * (envResult.haloMoisture[haloIndex] - 0.5), 0.25, 1.22)
+          : 1;
+        const density = blurredDensity[haloIndex] * envDensityFactor * (grass / 255);
         grass = Math.round(grass * grassPatchCover(originX + localX + 0.5, originZ + localZ + 0.5, density, worldSeed));
       }
       // A bank cell partly under water keeps grass by its dry share: the habitat
@@ -414,6 +504,10 @@ export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinit
   };
   const paddedSize = chunkSize + SURFACE_MASK_TEXTURE_PAD * 2;
   page.surfaceMaskTexturePixels = new Uint8Array(paddedSize * paddedSize * 4);
+  const envEnabled = Boolean(maskConfig?.environment?.enabled);
+  page.envField = envEnabled ? new Uint8Array(chunkSize * chunkSize * ENV_CHANNEL_COUNT) : null;
+  page.aridEcotone = envEnabled ? new Uint8Array(chunkSize * chunkSize) : null;
+  page.hasAridEcotone = false;
   page.surfaceMaskPixels = buildSurfaceMaskPixels({
     paddedOut: page.surfaceMaskTexturePixels,
     snowCoverOut: page.snowBiomeCover,
@@ -428,6 +522,10 @@ export function enrichPageRenderPixels(page, sampleTile, maskConfig, tileDefinit
     maskConfig,
     sampleHeight: sampling.sampleHeight ? (x,z)=>sampling.sampleHeight(x,z) : null,
     sampleWater: sampling.sampleWater ? (x,z)=>sampling.sampleWater(x,z) : null,
+    sampleEnvironmentClimate: sampling.sampleEnvironmentClimate ? (x,z,out)=>sampling.sampleEnvironmentClimate(x,z,out) : null,
+    envOut: page.envField,
+    aridOut: page.aridEcotone,
+    onHasAridEcotone: (flag) => { page.hasAridEcotone = flag; },
     waterField: page.waterFieldPixels
       ? {
         pixels: page.waterFieldPixels,

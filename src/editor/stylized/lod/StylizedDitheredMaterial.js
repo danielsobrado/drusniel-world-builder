@@ -17,6 +17,7 @@ import {
   vec3,
 } from 'three/tsl';
 import { authoredTexture } from '../AuthoredTextureNode.js';
+import { canopyPainterlyHarmony } from '../forest/foliageLight.js';
 import { worldNoiseField } from '../worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
 import { canonicalFromRender } from '../../weather/wind/worldWindState.js';
@@ -133,15 +134,12 @@ export function createDitheredMaterial(sourceMaterial, {
     const leafTint = tinted ? attribute('instanceLeafTint', 'vec4') : null;
     let variation = leafTint ? leafTint.xyz.mul(colorVariation) : colorVariation;
     if (kind === 'leaf') {
-      // Subtle per-tree hue/temperature individuality from the stable dither seed,
-      // plus gentle macro landscape patch harmony so trees follow dry/lush meadow bands.
-      const treeTemp = mix(vec3(0.95, 1.01, 1.03), vec3(1.05, 1.00, 0.93), fract(seed.mul(7.31)));
-      const macroPatchSample = varying(
-        worldNoiseField(WORLD_NOISE_LAYERS.macro)(canonicalFromRender(positionWorld.xz).mul(0.012)).r,
-        'crownMacroPatch',
-      );
-      const landscapeHarmony = mix(vec3(0.96, 1.01, 1.02), vec3(1.05, 1.01, 0.92), macroPatchSample);
-      variation = variation.mul(treeTemp).mul(landscapeHarmony);
+      variation = variation.mul(canopyPainterlyHarmony({
+        canonicalXZ: canonicalFromRender(positionWorld.xz),
+        worldPos: positionWorld,
+        seed,
+        label: 'crown',
+      }));
     }
     // One mesh, many crowns: each tree reads its own patch of the world noise
     // (by its seed) as warm-lit vs cool-shaded leaf masses a couple of metres across.

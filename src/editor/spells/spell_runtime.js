@@ -175,7 +175,11 @@ export function createSpellRuntime(deps) {
     extraPages: grimoire ? GRIMOIRE_PAGES : [],
     castExtra: castGrimoire,
     canCast: deps.vitals ? (castMs) => deps.vitals.canCast(castMs) : undefined,
-    onCast: deps.vitals ? (castMs) => deps.vitals.spendCast(castMs) : undefined,
+    onCast: (castMs, spellId) => {
+      deps.vitals?.spendCast(castMs);
+      deps.onMenuCast?.(castMs, spellId);
+    },
+    onActivity: () => deps.onMenuActivity?.(),
     controller: {
       playFire: (durationMs) => cast('fire', durationMs),
       playWater: (durationMs) => cast('water', durationMs),
@@ -250,6 +254,7 @@ export function createSpellRuntime(deps) {
     castGrimoire,
     handleKeyDown,
     syncMenuVisibility,
+    menu,
     /** The procedural VFX stack, for QA probes. */
     effects,
     update(nowMs) {

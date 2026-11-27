@@ -1,0 +1,47 @@
+version: 1
+palette:
+  obsidian: "#151B20"
+  slate: "#303A40"
+  antiqueGold: "#B8A176"
+  parchment: "#E5DCC8"
+  bloodstone: "#A34D49"
+  arcaneBlue: "#729BBC"
+  stamina: "#839A67"
+  mysticViolet: "#A08ABF"
+  mutedSilver: "#A6ADB0"
+spacing:
+  - 4
+  - 8
+  - 12
+  - 16
+  - 24
+  - 32
+radii:
+  xs: 2
+  sm: 4
+  md: 6
+motion:
+  fastMs: 120
+  normalMs: 180
+  slowMs: 240
+  notificationDefaultMs: 4200
+hud:
+  scales:
+    - 0.85
+    - 1
+    - 1.15
+    - 1.25
+  navigationModes:
+    - full
+    - compass
+    - immersive
+  minimapZooms:
+    - close
+    - standard
+    - wide
+  contextModes:
+    - exploration
+    - combat
+    - immersive
+    - scenic-tour
+    - building

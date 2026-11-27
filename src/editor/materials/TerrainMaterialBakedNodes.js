@@ -370,6 +370,9 @@ export function createTerrainMaterialBakedSurface({
     snowColor.mul(heightShade),
     stormSnow,
   );
+  const aridCode = samples.macroTint.a;
+  const bakedSandShare = aridCode.sub(128 / 255).div(127 / 255).clamp(0, 1);
+  const bakedMineralShare = float(128 / 255).sub(aridCode).div(128 / 255).clamp(0, 1);
   return {
     color: withFreshSandColor(assembleBakedColor({
       nearDetailed,
@@ -397,6 +400,9 @@ export function createTerrainMaterialBakedSurface({
     shape: samples.terrainShape,
     /** Baked open water (g) and shoreline, which take no puddles. */
     water: max(samples.canopyWater.g, samples.wetnessShoreline.g),
+    /** Continuous baked arid ecotone shares (macroTint.a), or -1 before bake readiness. */
+    sandShare: select(gpuState.ready.greaterThan(0.5), bakedSandShare, float(-1)),
+    mineralShare: select(gpuState.ready.greaterThan(0.5), bakedMineralShare, float(-1)),
     /** Shared low-frequency world-noise reflectance multiplier (keeps post-bake layers like grassVolume aligned). */
     worldNoiseMultiplier: noiseShaping?.multiplier ?? vec3(1),
   };

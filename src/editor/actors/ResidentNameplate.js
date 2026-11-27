@@ -1,3 +1,5 @@
+import { hudInteractionBus } from '../player/hud/HudInteractionBus.js';
+
 const MEMORY_KEY = 'drusniel.worldSim.met.v1';
 
 /**
@@ -30,12 +32,12 @@ function line(text, limit = 150) {
 /**
  * The name of the named resident the player stands beside, with their trade and one
  * line: their own introduction at a first meeting, what is on their mind afterwards.
- * Only the DOM changes when the nearest person changes; the per-frame work is a scan of
- * the few resident walkers.
+ * Publishes into the shared `hudInteractionBus` when `PlayerHud` is active.
  */
 export class ResidentNameplate {
   constructor({ parent, settings, memory = new ResidentMemory() }) {
     Object.assign(this, { settings, memory });
+    this.sourceId = 'resident-nameplate';
     this.element = document.createElement('div');
     this.element.className = 'hud-nearby';
     this.element.setAttribute('role', 'status');
@@ -58,20 +60,44 @@ export class ResidentNameplate {
     const id = entry?.record.id ?? null;
     if (id === this.current) return;
     this.current = id;
-    if (!entry) { this.element.hidden = true; this.element.replaceChildren(); return; }
+    if (!entry) {
+      hudInteractionBus.clear(this.sourceId);
+      this.element.hidden = true;
+      this.element.replaceChildren();
+      return;
+    }
     const person = entry.record.person;
     const before = this.memory.remember(id);
+    const subtitle = [entry.record.professionTitle, person.workplace].filter(Boolean).join(' · ');
+    const snippet = before ? line(person.hooks?.[0]) || `Seems ${person.mood}.` : line(person.introduction);
+    const footnote = before ? `Met ${before.times + 1} times` : 'First meeting';
+
+    if (hudInteractionBus.hasConsumers) {
+      this.element.hidden = true;
+      hudInteractionBus.publish(this.sourceId, {
+        kind: 'npc',
+        target: person.name,
+        subtitle,
+        snippet,
+        footnote,
+      });
+      return;
+    }
+
     const name = document.createElement('strong');
     name.textContent = person.name;
     const trade = document.createElement('span');
     trade.className = 'hud-nearby__trade';
-    trade.textContent = [entry.record.professionTitle, person.workplace].filter(Boolean).join(' · ');
+    trade.textContent = subtitle;
     const said = document.createElement('p');
-    said.textContent = before ? line(person.hooks?.[0]) || `Seems ${person.mood}.` : line(person.introduction);
+    said.textContent = snippet;
     const memory = document.createElement('small');
-    memory.textContent = before ? `Met ${before.times + 1} times` : 'First meeting';
+    memory.textContent = footnote;
     this.element.replaceChildren(name, trade, said, memory);
     this.element.hidden = false;
   }
-  dispose() { this.element.remove(); }
+  dispose() {
+    hudInteractionBus.clear(this.sourceId);
+    this.element.remove();
+  }
 }

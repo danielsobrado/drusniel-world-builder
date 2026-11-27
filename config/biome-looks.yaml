@@ -181,7 +181,7 @@ biomeLooks:
       water: { tint: '#c8d6de', desaturate: 0.45 }
       # Dwarf willow and heath, frost-dulled.
       understory: { tint: '#d0d6c8', tone: 1.05, saturation: 0.6 }
-      snow: { ground: 0.95, canopy: 0.95, grass: 0.8, air: 0.7, fall: 0.75 }
+      snow: { ground: 0.84, canopy: 0.95, grass: 0.8, air: 0.7, fall: 0.75 }
       # Near-freezing meltwater: thick, quick to still.
       ripples: { speed: 0.8, fade: 0.9, splash: 0.7 }
       prints: { lifetime: 240 }

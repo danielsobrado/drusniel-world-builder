@@ -74,6 +74,7 @@ export function createHudMinimapSource({
       metres: distanceCells * tileMap.tileSize,
     })),
     describeRegion: (cellX, cellZ) => (getLocationLabel() ? null : regionMap.describeRegion(cellX, cellZ)),
+    setZoom: (preset) => regionMap.setZoomPreset(preset),
     describeCell: (cellX, cellZ) => {
       const locationLabel = getLocationLabel();
       if (locationLabel) return locationLabel;

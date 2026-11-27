@@ -39,8 +39,12 @@ export function preparePlacementEcology(page, request, generator) {
   } : null;
   const regionalCharacterField = new RegionalCharacterField({ seed, config: regionalPlacement });
   if (trees.habitat?.enabled !== false) {
+    const climateAt = typeof generator.sampleEnvironmentClimate === 'function'
+      ? (cellX, cellZ) => generator.sampleEnvironmentClimate(cellX, cellZ)
+      : null;
     const forest = new ForestHabitatField({ seed, tileSize, tileAt, heightAt,
-      waterDistanceAt, regionalCharacterField, config: trees.habitat });
+      waterDistanceAt, regionalCharacterField, environmentConfig: config.ecology.environment ?? null,
+      climateAt, config: trees.habitat });
     const samples = new Map();
     const sample = (x, z) => samples.set(`${x}:${z}`, forest.sample(x, z));
     const budget = resolveForestCandidateBudget(trees.perChunk, trees.habitat?.candidateBudgetPerChunk);

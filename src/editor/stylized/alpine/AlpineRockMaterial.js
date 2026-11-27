@@ -86,7 +86,7 @@ export function createAlpineRockMaterial() {
     .mul(instanceSnow.smoothstep(0.35, 0.9))
     .mul(n.y.smoothstep(0.65, -0.35))
     .mul(p.y.sub(groundContact.height).clamp(0, 3.0).smoothstep(2.8, 0.2))
-    .mul(0.09);
+    .mul(0.045);
   const groundedStone = screeContact.color.add(snowBounce);
   const stoneNormalBase = screeContact.normal;
   const stoneRoughness = screeContact.roughness;

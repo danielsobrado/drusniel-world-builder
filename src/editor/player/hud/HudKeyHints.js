@@ -1,45 +1,33 @@
 import { HUD_PHASE } from './hudState.js';
 
 /** How long the controls stay up once the player has taken the mouse. */
-const REST_AFTER_MS = 8000;
+const REST_AFTER_MS = 6000;
 
 function hintColumns({ canToggleCamera, canBoost }) {
   return [
-    { key: 'Mouse', label: 'Look around' },
     { key: 'WASD', label: 'Move' },
     { key: 'Shift', label: 'Run' },
-    canBoost ? { key: 'Shift ×2', label: 'Fast travel' } : null,
-    { key: 'Space', label: 'Jump' },
+    canBoost ? { key: 'Shift ×2', label: 'Stride' } : null,
     canToggleCamera ? { key: 'V', label: 'Camera' } : null,
     { key: 'I', label: 'Bag' },
     { key: 'M', label: 'Map' },
+    { key: 'N', label: 'Compass' },
+    { key: 'H', label: 'Hotbar' },
     { key: 'Esc', label: 'Pause' },
   ].filter(Boolean);
 }
 
 /**
- * The lower-left legend, after grass-test's reference HUD: the scene's name with
- * a tagline, and under it the controls as a row of columns — the key in small
- * caps, what it does beneath — set straight on the world with a soft shadow, no
- * panel. The key row rests (fades) once the player has taken the mouse; the scene
- * line stays.
+ * Quiet bottom-left control legend shown briefly when entering exploration mode
+ * and faded out cleanly once the player takes control. Location names now live
+ * in the cinematic discovery banner instead of a permanent debug label here.
  */
 export class HudKeyHints {
-  /**
-   * @param {object} [options]
-   * @param {boolean} [options.canToggleCamera]
-   * @param {() => string} [options.getSceneLabel] the place or time of day to title the legend
-   */
-  constructor({ canToggleCamera = false, canBoost = false, getSceneLabel = () => '' } = {}) {
-    this.getSceneLabel = getSceneLabel;
+  constructor({ canToggleCamera = false, canBoost = false } = {}) {
     this.element = document.createElement('section');
     this.element.className = 'hud-legend';
     this.element.hidden = true;
-    this.element.innerHTML = `
-      <div class="hud-legend__scene"><strong></strong></div>
-      <dl class="hud-keys" aria-label="Controls"></dl>
-    `;
-    this.sceneName = this.element.querySelector('.hud-legend__scene strong');
+    this.element.innerHTML = `<dl class="hud-keys" aria-label="Controls"></dl>`;
     this.keys = this.element.querySelector('.hud-keys');
     for (const column of hintColumns({ canToggleCamera, canBoost })) {
       const cell = document.createElement('div');
@@ -52,13 +40,17 @@ export class HudKeyHints {
     }
     this.engaged = null;
     this.restTimer = 0;
-    this.sceneLabel = null;
+    this.allowed = true;
+  }
+
+  setAllowed(allowed) {
+    this.allowed = Boolean(allowed);
+    if (!this.allowed) this.element.hidden = true;
   }
 
   render(phase, { engaged }) {
-    const visible = phase === HUD_PHASE.walking;
+    const visible = phase === HUD_PHASE.walking && this.allowed;
     this.element.hidden = !visible;
-    this.refreshScene();
     if (!visible) {
       this.engaged = null;
       this.wake();
@@ -70,20 +62,6 @@ export class HudKeyHints {
     if (engaged) {
       this.restTimer = setTimeout(() => this.keys.classList.add('is-resting'), REST_AFTER_MS);
     }
-  }
-
-  /** Cheap to call every frame: it only touches the DOM when the name changes. */
-  refreshScene() {
-    let label = '';
-    try {
-      label = this.getSceneLabel() ?? '';
-    } catch {
-      label = '';
-    }
-    if (label === this.sceneLabel) return;
-    this.sceneLabel = label;
-    this.sceneName.textContent = label;
-    this.sceneName.parentElement.hidden = !label;
   }
 
   wake() {

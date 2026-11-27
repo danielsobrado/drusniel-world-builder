@@ -10,6 +10,7 @@ import { bakeCanopyVisibility } from '../forest/CanopyVisibility.js';
 import { treeFoliageEmission, treeBarkEmission } from '../forest/foliageLight.js';
 import { resolveCanopyGrade } from '../forest/canopyGrade.js';
 import { applyTreeBarkWetSurface } from '../forest/TreeWetSurface.js';
+import { spherifyNormals } from '../forest/proceduralGeometry.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { inheritCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
@@ -105,7 +106,21 @@ export function createTreeProxyPrototype(parts, config) {
     // which reads as a floating crown at proxy distance.
     [0, -0.22, 0, 0.5],
   ].map(([offsetX, offsetY, offsetZ, scale], index) => {
-    const geometry = new THREE.DodecahedronGeometry(0.5, 0);
+    const geometry = new THREE.DodecahedronGeometry(0.5, index < 3 ? 1 : 0);
+    if (index < 3) {
+      const pos = geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i += 1) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = pos.getZ(i);
+        const wave = Math.sin(x * 9.4 + z * 6.7 + index * 1.7) * Math.cos(y * 8.9 - x * 5.3) * 0.65
+          + Math.cos(z * 14.1 - y * 11.3) * 0.35;
+        const scaleR = 1 + wave * 0.07;
+        pos.setXYZ(i, x * scaleR, y * scaleR, z * scaleR);
+      }
+      pos.needsUpdate = true;
+      geometry.computeVertexNormals();
+    }
     geometry.scale(
       crownWidth * scale,
       crownHeight * scale,
@@ -125,6 +140,7 @@ export function createTreeProxyPrototype(parts, config) {
   crownLobeGeometries.forEach((geometry) => geometry.dispose());
   canopyGeometry.computeBoundingBox();
   canopyGeometry.computeBoundingSphere();
+  spherifyNormals(canopyGeometry, { strength: 0.85, center: leafCenter });
   canopyGeometry.userData.trunkConnectorBounds = {
     min: connectorBounds.min.toArray(),
     max: connectorBounds.max.toArray(),

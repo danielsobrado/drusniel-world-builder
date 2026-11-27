@@ -460,14 +460,21 @@ export function createTerrainMaterial({
         return slotBilinearLoad('tileTexture', tileTexture, terrainUv, (value) =>
           arr.element(value.a.mul(255).round().toInt()));
       };
+      const fallbackSandShare = makeTileShare(aridConfig.sand);
+      const fallbackMineralShare = makeTileShare(aridConfig.mineral);
+      const useEnvArid = Boolean(stylizedConfig.environment?.enabled && bakedSurface.sandShare && bakedSurface.mineralShare);
       const arid = createAridSubstrateNodes({ tileId: aridTileId,
         bare: oneMinus(grassCoverage).mul(oneMinus(bakedSurface.snow ?? float(0)))
           .mul(oneMinus(pathMask)).mul(oneMinus(smoothstep(0, 0.5, surfaceMask.b))),
         patterns: transitionPatterns, localXZ, cameraDistance, arid: aridConfig,
         dunes: stylizedConfig.biomeLooks?.surface?.dunes,
         crust: floorBlend.mul(crackedFloor),
-        sandShare: makeTileShare(aridConfig.sand),
-        mineralShare: makeTileShare(aridConfig.mineral),
+        sandShare: useEnvArid
+          ? select(bakedSurface.sandShare.greaterThanEqual(0), bakedSurface.sandShare, fallbackSandShare)
+          : fallbackSandShare,
+        mineralShare: useEnvArid
+          ? select(bakedSurface.mineralShare.greaterThanEqual(0), bakedSurface.mineralShare, fallbackMineralShare)
+          : fallbackMineralShare,
         terrainUv, chunkWorldSize, chunkCenter, material,
         sun: snowSun, baseNormal: bakedSurface.normal });
       Object.assign(bakedSurface, arid.apply(bakedSurface.color, bakedSurface.roughness, bakedSurface.normal));

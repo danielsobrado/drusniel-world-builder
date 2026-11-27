@@ -1,15 +1,19 @@
-import { diffuseColor, float, mix, normalGeometry, normalLocal, normalView, positionViewDirection, vec3 } from 'three/tsl';
+import { diffuseColor, float, mix, normalGeometry, normalLocal, normalView, positionLocal, positionViewDirection, smoothstep, vec3 } from 'three/tsl';
 import { foliageLight } from './foliageLight.js';
 
 const classes = new WeakMap();
 
-/** Thin-sheet scattering uses both the leaf/light angle and its optical depth. */
+/** Thin-sheet gouache scattering: view-to-sun backlighting gated by thin outer canopy edges. */
 export function leafTransmissionResponse(normal, light, view, thickness, visibility = float(1), absorption = float(1.8)) {
   const cosine = normal.dot(light);
-  const path = thickness.mul(absorption).negate().div(cosine.abs().max(0.25)).exp();
+  const opticalDepth = thickness.mul(absorption).div(cosine.abs().mul(0.35).add(0.65));
+  const path = opticalDepth.negate().exp();
   const back = cosine.negate().max(0);
-  const forward = view.negate().dot(light).max(0).pow(2.2);
-  return path.mul(back.mul(0.65).add(forward.mul(0.35))).mul(visibility);
+  const sunBacklight = view.negate().dot(light).max(0);
+  const outerShell = smoothstep(0.35, 0.95, visibility);
+  const gouacheEdge = sunBacklight.pow(1.5).mul(outerShell);
+  const active = back.mul(0.55).add(gouacheEdge.mul(0.65));
+  return path.mul(active).mul(visibility);
 }
 
 /** Bounded dielectric film: already-shadowed direct light, no scene copies. */
@@ -26,18 +30,21 @@ export function foliageSurfaceHighlight(normal, light, view, wetness, needles = 
   return wet.add(needle).mul(fresnel).mul(facing);
 }
 
-/** Soft wrapped-diffuse delta beyond standard Lambert N·L, keeping shadow attenuation intact. */
+/** Custom Half-Lambert (N·L * 0.5 + 0.5)^1.4 wrapped-diffuse delta, keeping shadow attenuation intact. */
 export function foliageWrapDiffuseResponse(normal, light, wrap, visibility = float(1)) {
   const ndl = normal.dot(light);
-  const wrapped = ndl.add(wrap).div(wrap.add(1)).clamp(0, 1);
-  return wrapped.sub(ndl.max(0)).max(0).mul(visibility);
+  const halfLambert = ndl.mul(0.5).add(0.5).clamp(0, 1).pow(1.4);
+  const strength = wrap.mul(1.65).clamp(0, 1);
+  return halfLambert.sub(ndl.max(0)).max(0).mul(strength).mul(visibility);
 }
 
-/** Airy backlit/grazing rim glow on exposed outer crown leaves. */
+/** Directional gouache backlighting along thin outer crown edges (zero halo looking away from sun). */
 export function foliageRimGlowResponse(normal, light, view, rimGlow, visibility = float(1)) {
-  const grazing = normal.dot(view).abs().clamp(0, 1).oneMinus().pow(2.2);
-  const sunSide = normal.dot(light).mul(0.5).add(0.5).clamp(0, 1);
-  return grazing.mul(sunSide).mul(rimGlow).mul(visibility);
+  const grazing = normal.dot(view).abs().clamp(0, 1).oneMinus().pow(1.8);
+  const viewBacklight = view.negate().dot(light).mul(0.5).add(0.5).clamp(0, 1).pow(1.5);
+  const sunWrap = normal.dot(light).mul(0.35).add(0.65).clamp(0, 1);
+  const outerThinness = smoothstep(0.25, 0.92, visibility).mul(visibility);
+  return grazing.mul(viewBacklight).mul(sunWrap).mul(2.1).mul(rimGlow).mul(outerThinness);
 }
 
 /** Retain each authored lighting model and survive the material clones used by LODs. */
@@ -58,6 +65,7 @@ export function foliageMaterialClass(Base) {
       this.foliageNeedleDirectionNode = null;
       this.foliageShapeNormalNode = null;
       this.foliageNormalBlendNode = null;
+      this.foliageRimRuffleNode = null;
       /** World-space ground normal and the share of it a plant's foot takes (applySkywardNormal). */
       this.foliageGroundNormalNode = null;
       this.foliageGroundNormalWeightNode = null;
@@ -79,6 +87,9 @@ export function foliageMaterialClass(Base) {
     }
 
     setupPosition(builder) {
+      if (this.foliageRimRuffleNode) {
+        positionLocal.addAssign(this.foliageRimRuffleNode);
+      }
       if (this.foliageShapeNormalNode) {
         normalLocal.assign(mix(normalGeometry, this.foliageShapeNormalNode, this.foliageNormalBlendNode)
           .add(normalGeometry.mul(0.00001)).normalize());
@@ -109,7 +120,7 @@ export function foliageMaterialClass(Base) {
         const fraction = amount.mul(foliageLight.strength).clamp(0, 1);
         // Reserve a share of reflected energy for transmission and let baked canopy
         // occlusion softly shade sheltered interior leaves from direct sun.
-        const coreSun = mix(float(0.48), float(1), visibility);
+        const coreSun = mix(float(0.56), float(1), visibility);
         const directScale = fraction.mul(snow.oneMinus()).oneMinus().mul(mix(coreSun, float(1), snow));
         direct.call(this, thickness && directional
           ? { ...data, lightColor: data.lightColor.mul(directScale) } : data, nodeBuilder);

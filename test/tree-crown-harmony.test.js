@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import yaml from 'js-yaml';
 import * as THREE from 'three/webgpu';
-import { float, uniform, vec3 } from 'three/tsl';
+import { float, normalWorld, uniform, vec3 } from 'three/tsl';
 import {
   crownLocalGroundBounce,
   foliageLight,
@@ -75,6 +75,16 @@ test('tree crown materials promote Lambert donors to Standard IBL parity and sep
 
   assert.ok(treeFoliageSurfaceEmission(vec3(0.3, 0.5, 0.2)));
   assert.ok(treeFoliageAtmosphereEmission(float(0.2)));
+  syncFoliageLight({ hemisphere: new THREE.HemisphereLight('#a8c8e8', '#405030', 1) });
+  try {
+    const values = new Map([[normalWorld, [0, 1, 0]]]);
+    const core = evaluate(treeFoliageSurfaceEmission(vec3(0.4, 0.5, 0.3), float(0)), { values });
+    const outer = evaluate(treeFoliageSurfaceEmission(vec3(0.4, 0.5, 0.3), float(1)), { values });
+    assert.ok(core[1] > core[0] * 1.4 && core[2] > core[0] * 0.9, 'core AO shifts toward saturated emerald/teal instead of dark grey');
+    assert.ok(outer[1] > core[1], 'outer sky shell remains brighter than sheltered interior');
+  } finally {
+    syncFoliageLight(null);
+  }
   bake.dispose();
   clone.dispose();
   material.dispose();

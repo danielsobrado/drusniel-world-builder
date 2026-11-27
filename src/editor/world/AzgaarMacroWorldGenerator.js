@@ -353,6 +353,28 @@ export class AzgaarMacroWorldGenerator {
     return this.ensureGuidance().sample(cellX, cellZ);
   }
 
+  sampleEnvironmentClimate(cellX, cellZ, out = { temperature: 0, moisture: 0.5, fertility: 0.5, valid: false }) {
+    if (!this.isInside(cellX + 0.5, cellZ + 0.5)) {
+      out.valid = false;
+      return out;
+    }
+    const guidance = this.ensureGuidance();
+    const rawTemperature = guidance.sampleContinuous('temperature', cellX, cellZ);
+    const moisture = guidance.sampleContinuous('moisture', cellX, cellZ);
+    if (rawTemperature === null && moisture === null) {
+      out.valid = false;
+      return out;
+    }
+    const normalizedTemperature = rawTemperature === null ? 0 : clamp((rawTemperature - 8) / 24, -1, 1);
+    const normalizedMoisture = moisture === null ? 0.5 : clamp(moisture, 0, 1);
+    const fertility = guidance.sampleContinuous('agriculturalPotential', cellX, cellZ);
+    out.temperature = normalizedTemperature;
+    out.moisture = normalizedMoisture;
+    out.fertility = fertility === null ? normalizedMoisture : clamp(fertility, 0, 1);
+    out.valid = true;
+    return out;
+  }
+
   sampleBiomeBlend(cellX, cellZ) {
     return this.ensureGuidance().sampleBiomeBlend(cellX, cellZ);
   }

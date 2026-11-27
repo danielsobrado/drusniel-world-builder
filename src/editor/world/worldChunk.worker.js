@@ -30,7 +30,8 @@ async function preparePlans(generator, request) {
   const field = generator.ensureSettlementField?.();
   if (!field) return;
   field.requirePreparedPlans = true;
-  const margin = Math.max(2, getSurfaceMaskSearchRadius(request.surfaceMaskConfig?.blendCells ?? 1),
+  const margin = Math.max(2, getSurfaceMaskSearchRadius(request.surfaceMaskConfig?.blendCells ?? 1,
+    request.surfaceMaskConfig?.tileSize ?? 2, request.surfaceMaskConfig?.environment ?? null),
     ...(request.placementSamplingConfig?.targets ?? []).map(target => Math.ceil(target.maxCells) + 1));
   const centerX = (request.chunkX + .5) * request.chunkSize, centerZ = (request.chunkZ + .5) * request.chunkSize;
   const radius = (request.chunkSize / 2 + margin) * Math.SQRT2;
@@ -133,6 +134,12 @@ self.addEventListener('message', async (event) => {
     }
     if (page.snowBiomeCover?.buffer) {
       transfer.push(page.snowBiomeCover.buffer);
+    }
+    if (page.envField?.buffer) {
+      transfer.push(page.envField.buffer);
+    }
+    if (page.aridEcotone?.buffer) {
+      transfer.push(page.aridEcotone.buffer);
     }
     if (page.grassScatter?.base?.buffer) {
       transfer.push(page.grassScatter.base.buffer, page.grassScatter.parameters.buffer);

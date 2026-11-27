@@ -1,44 +1,48 @@
 @import './spell_tints.css';
+@import './spell_tooltip.css';
 
 /*
- * Spell dock: no tray, just brass-framed leather slots over the world, standing
- * on the vitals, with school tabs above and key numbers in each slot's corner.
- * Gold marks the current school; each slot's element tints its glow and glyph
- * (spell_tints.css). Names appear on demand.
+ * Drusniel Spell Dock: compact obsidian school tabs above restrained 1px-framed
+ * ability slots. Hides smoothly when resting in exploration mode while keeping
+ * digit/bracket hotkeys active, and surfaces inspection tooltips on hover/focus.
  */
 .spell-dock {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--hud-dock-bottom, 16px) + var(--hud-vitals-height, 25px) + 6px);
+  bottom: var(--ds-edge-y, 24px);
   z-index: 13;
   display: grid;
-  grid-template-areas: "tabs grip" "slots slots";
+  grid-template-areas:
+    "readout readout"
+    "tabs grip"
+    "slots slots";
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px 10px;
+  gap: 6px 8px;
   align-items: center;
   box-sizing: border-box;
   width: max-content;
   max-width: calc(100vw - 24px);
   transform: translateX(-50%);
-  color: #f1e6cf;
-  font-family: var(--hud-font, system-ui, sans-serif);
+  color: var(--ds-parchment, #e5dcc8);
+  font-family: var(--ds-font-ui, Inter, sans-serif);
   user-select: none;
   touch-action: none;
   transition:
-    translate var(--glade-spring-ms, 690ms) var(--glade-spring, ease),
+    translate 200ms var(--ds-ease-out, ease-out),
     opacity 200ms ease,
     visibility 0s linear 0s;
 }
 
-.spell-dock.spell-menu-hidden {
+.spell-dock.spell-menu-hidden,
+.spell-dock.spell-dock--resting {
   opacity: 0;
   pointer-events: none;
-  translate: 0 calc(100% + 40px);
+  translate: 0 12px;
   visibility: hidden;
   transition:
-    translate var(--glade-spring-soft-ms, 470ms) var(--glade-spring-soft, ease),
-    opacity 240ms ease 120ms,
-    visibility 0s linear var(--glade-spring-soft-ms, 470ms);
+    translate 220ms ease,
+    opacity 220ms ease,
+    visibility 0s linear 220ms;
 }
 
 body[data-player-mode="choosingSpawn"] .spell-dock {
@@ -49,13 +53,33 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
   transition: none;
 }
 
+.spell-menu-readout {
+  grid-area: readout;
+  justify-self: center;
+  padding: 2px 10px;
+  border-radius: var(--ds-radius-xs, 2px);
+  background: var(--ds-surface-obsidian-soft, rgb(21 27 32 / 72%));
+  color: var(--ds-parchment, #e5dcc8);
+  font: 500 calc(11px * var(--ds-hud-scale, 1)) / 1.2 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.spell-menu-readout.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .spell-menu-grip {
   grid-area: grip;
   display: grid;
   grid-template-columns: repeat(2, 2px);
   gap: 3px;
   padding: 6px;
-  border-radius: 3px;
+  border-radius: var(--ds-radius-xs, 2px);
   cursor: grab;
 }
 
@@ -63,27 +87,38 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
   width: 2px;
   height: 2px;
   border-radius: 50%;
-  background: rgb(241 230 207 / 70%);
-  box-shadow: 0 0 2px rgb(0 0 0 / 80%);
+  background: rgb(166 173 176 / 62%);
 }
 
 .spell-menu-grip:hover {
-  background: rgb(214 176 104 / 12%);
+  background: rgb(184 161 118 / 12%);
 }
 
 .spell-dock.dragging .spell-menu-grip {
   cursor: grabbing;
 }
 
-.spell-menu-slots {
-  grid-area: slots;
-  display: flex;
-  min-width: 0;
+.spell-menu-tabs-bar {
+  grid-area: tabs;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border: 1px solid var(--ds-border-slate, rgb(166 173 176 / 22%));
+  border-radius: var(--ds-radius-sm, 4px);
+  background: var(--ds-surface-obsidian, rgb(21 27 32 / 86%));
+  box-shadow: 0 3px 12px rgb(0 0 0 / 36%);
 }
 
-/* Spell pages: Elements, then the grimoire's schools. One page shows at a time. */
+.spell-menu-nav-key {
+  min-width: 16px;
+  height: 16px;
+  font-size: 9px;
+  border-color: rgb(166 173 176 / 28%);
+  color: var(--ds-muted-silver, #a6adb0);
+}
+
 .spell-menu-tabs {
-  grid-area: tabs;
   display: flex;
   gap: 2px;
   min-width: 0;
@@ -93,43 +128,49 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
   position: relative;
   flex: 1;
   min-width: 0;
-  padding: 5px 8px;
+  padding: 4px 10px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--ds-radius-xs, 2px);
   background: transparent;
-  color: #cdb27a;
-  font: 600 12px/14px var(--hud-tome-font, Georgia, serif);
-  letter-spacing: 0.04em;
+  color: var(--ds-muted-silver, #a6adb0);
+  font: 600 calc(11px * var(--ds-hud-scale, 1)) / 14px var(--ds-font-display, Georgia, serif);
+  letter-spacing: 0.06em;
   text-align: center;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 90%);
+  white-space: nowrap;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease;
 }
 
 .spell-menu-tab:hover,
 .spell-menu-tab:focus-visible {
-  background: rgb(14 16 13 / 45%);
-  color: #f1e6cf;
+  background: rgb(229 220 200 / 8%);
+  color: var(--ds-parchment, #e5dcc8);
 }
 
 .spell-menu-tab:focus-visible {
-  outline: 2px solid var(--hud-gold);
+  outline: 1px solid var(--ds-antique-gold, #b8a176);
   outline-offset: 1px;
 }
 
 .spell-menu-tab[aria-selected='true'] {
-  color: var(--hud-gold);
+  color: var(--ds-parchment, #e5dcc8);
+  background: rgb(184 161 118 / 14%);
 }
 
 .spell-menu-tab[aria-selected='true']::after {
   content: '';
   position: absolute;
-  right: 18px;
+  right: 8px;
   bottom: 0;
-  left: 18px;
-  height: 2px;
-  background: currentColor;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+  left: 8px;
+  height: 1px;
+  background: var(--ds-antique-gold, #b8a176);
+}
+
+.spell-menu-slots {
+  grid-area: slots;
+  display: flex;
+  min-width: 0;
 }
 
 .spell-menu-page {
@@ -137,6 +178,14 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
   gap: 6px;
   min-width: 0;
   flex: 1;
+  animation: spell-page-in 160ms var(--ds-ease-out, ease-out) both;
+}
+
+@keyframes spell-page-in {
+  from {
+    opacity: 0.55;
+    transform: translateY(3px);
+  }
 }
 
 .spell-menu-page[hidden] {
@@ -144,77 +193,75 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 }
 
 .spell-slot {
-  --spell-tint: 220 220 216;
-  --spell-glow: 24%;
+  --spell-tint: 184 161 118;
+  --spell-glow: 18%;
 
   position: relative;
   display: grid;
-  flex: 1 1 48px;
+  flex: 0 0 calc(50px * var(--ds-hud-scale, 1));
   place-items: center;
-  min-width: 0;
-  width: 48px;
+  width: calc(50px * var(--ds-hud-scale, 1));
   aspect-ratio: 1;
   padding: 0;
   box-sizing: border-box;
-  border: 0;
-  border-radius: 3px;
+  border: 1px solid var(--ds-border-slate, rgb(166 173 176 / 26%));
+  border-radius: var(--ds-radius-sm, 4px);
   background:
-    radial-gradient(110% 90% at 50% 100%, rgb(var(--spell-tint) / var(--spell-glow)), transparent 72%),
-    linear-gradient(180deg, rgb(58 60 63 / 92%), rgb(30 32 35 / 94%));
-  box-shadow:
-    inset 0 0 0 1px rgb(154 157 161 / 80%),
-    0 0 0 1px rgb(0 0 0 / 70%),
-    0 2px 5px rgb(0 0 0 / 45%);
-  color: color-mix(in srgb, rgb(var(--spell-tint)) 50%, #eeeeeb);
+    radial-gradient(100% 90% at 50% 100%, rgb(var(--spell-tint) / var(--spell-glow)), transparent 74%),
+    var(--ds-surface-obsidian, rgb(21 27 32 / 88%));
+  box-shadow: 0 3px 10px rgb(0 0 0 / 40%);
+  color: color-mix(in srgb, rgb(var(--spell-tint)) 54%, #e5dcc8);
   cursor: pointer;
   transition:
-    translate var(--glade-spring-ms, 690ms) var(--glade-spring, ease),
-    scale var(--glade-spring-ms, 690ms) var(--glade-spring, ease),
-    box-shadow 180ms ease,
-    background 180ms ease;
+    transform 140ms var(--ds-ease-out, ease-out),
+    border-color 140ms ease,
+    background 160ms ease;
 }
 
 .spell-slot:hover,
 .spell-slot:focus-visible {
-  --spell-glow: 42%;
-
+  --spell-glow: 36%;
   outline: none;
-  translate: 0 -2px;
-  box-shadow:
-    inset 0 0 0 1px var(--hud-trim-light),
-    0 0 0 1px rgb(0 0 0 / 70%),
-    0 3px 7px rgb(0 0 0 / 50%);
+  border-color: var(--ds-antique-gold, #b8a176);
+  transform: translateY(-2px);
 }
 
 .spell-slot:focus-visible {
-  outline: 2px solid var(--hud-gold);
+  outline: 1px solid var(--ds-antique-gold, #b8a176);
   outline-offset: 2px;
 }
 
 .spell-slot:active {
-  scale: 0.92;
+  transform: scale(0.94);
 }
 
 .spell-slot__glyph {
   display: grid;
   place-items: center;
-  transition: scale var(--glade-spring-ms, 690ms) var(--glade-spring, ease);
+  transition: transform 140ms var(--ds-ease-out, ease-out);
 }
 
 .spell-slot__glyph svg {
   display: block;
-  width: 28px;
-  height: 28px;
+  width: calc(28px * var(--ds-hud-scale, 1));
+  height: calc(28px * var(--ds-hud-scale, 1));
   overflow: visible;
 }
 
+.spell-slot .glyph-aura {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.75;
+  opacity: 0.24;
+}
+
 .spell-slot .glyph-fill { fill: currentColor; }
-.spell-slot .glyph-light { fill: #20150d; }
+.spell-slot .glyph-light { fill: #151b20; opacity: 0.75; }
 
 .spell-slot .glyph-line {
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -223,35 +270,71 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 .spell-slot .glyph-shine {
   fill: none;
-  stroke: #20150d;
+  stroke: #151b20;
   stroke-width: 1.8;
   stroke-linecap: round;
 }
 
 .spell-slot__key {
   position: absolute;
-  top: 3px;
-  left: 5px;
-  color: #cdb27a;
-  font: 600 10px/1 var(--hud-tome-font, Georgia, serif);
-  text-shadow: 0 1px 2px rgb(0 0 0 / 90%);
+  bottom: -6px;
+  left: 50%;
+  min-width: 14px;
+  padding: 1px 4px;
+  transform: translateX(-50%);
+  border: 1px solid var(--ds-border-gold, rgb(184 161 118 / 38%));
+  border-radius: 2px;
+  background: var(--ds-obsidian, #151b20);
+  color: var(--ds-parchment, #e5dcc8);
+  font: 600 9px/1.1 var(--ds-font-ui, Inter, sans-serif);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 /* Falls away over the cast; rests hidden until `playCastFeedback` animates it. */
 .spell-slot__sweep {
   position: absolute;
   inset: 1px;
-  background: rgb(0 0 0 / 55%);
+  border-radius: 3px;
+  background: rgb(12 16 19 / 64%);
   pointer-events: none;
   transform: scaleY(0);
   transform-origin: bottom;
 }
 
+.spell-slot__cooldown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ds-parchment, #e5dcc8);
+  font: 700 12px/1 var(--ds-font-ui, Inter, sans-serif);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px #000;
+  pointer-events: none;
+}
+
+.spell-slot__mana-pip {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ds-arcane-blue, #729bbc);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .spell-slot[aria-disabled='true'] {
   --spell-glow: 0%;
-
-  color: rgb(246 236 212 / 35%);
+  border-color: rgb(114 155 188 / 32%);
+  color: rgb(166 173 176 / 38%);
   cursor: not-allowed;
+}
+
+.spell-slot[aria-disabled='true'] .spell-slot__mana-pip {
+  opacity: 0.9;
 }
 
 .spell-slot__channel {
@@ -266,7 +349,7 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 
 .spell-slot__channel rect {
   fill: none;
-  stroke: color-mix(in srgb, rgb(var(--spell-tint)) 70%, #fff);
+  stroke: color-mix(in srgb, rgb(var(--spell-tint)) 72%, #e5dcc8);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-dasharray: 100;
@@ -274,85 +357,61 @@ body[data-player-mode="choosingSpawn"] .spell-dock {
 }
 
 .spell-slot[aria-pressed='true'] {
-  --spell-glow: 60%;
-
-  color: #f2f2ef;
-  translate: 0 -2px;
+  --spell-glow: 52%;
+  border-color: var(--ds-parchment, #e5dcc8);
+  color: #f4efe3;
+  transform: translateY(-2px);
 }
 
 .spell-slot[aria-pressed='true'] .spell-slot__glyph {
-  scale: 1.08;
+  transform: scale(1.06);
 }
 
 .spell-slot[aria-pressed='true'] .spell-slot__channel {
   opacity: 1;
 }
 
+/* Kept in DOM for cast label animation compatibility; suppressed in favor of SpellTooltip & readout. */
 .spell-slot__label {
   position: absolute;
-  bottom: calc(100% + 36px);
-  left: 50%;
-  padding: 6px 10px;
-  border: 1px solid var(--hud-plate-line);
-  border-radius: 3px;
-  background: var(--hud-leather);
-  box-shadow: 0 3px 10px rgb(0 0 0 / 24%);
-  color: var(--hud-trim-light);
-  font: 500 11px/1.2 var(--hud-font, system-ui, sans-serif);
-  white-space: nowrap;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
   opacity: 0;
-  translate: -50% 4px;
   pointer-events: none;
-  transition:
-    opacity 140ms ease,
-    translate var(--glade-spring-soft-ms, 470ms) var(--glade-spring-soft, ease);
-}
-
-.spell-slot:hover .spell-slot__label,
-.spell-slot:focus-visible .spell-slot__label {
-  opacity: 1;
-  translate: -50% 0;
-}
-
-.spell-slot:first-child .spell-slot__label {
-  left: 0;
-  translate: 0 0;
-}
-
-.spell-slot:last-child .spell-slot__label {
-  right: 0;
-  left: auto;
-  translate: 0 0;
 }
 
 .spell-slot.spell-miss {
-  box-shadow: inset 0 0 0 2px var(--glade-danger, #d8645a);
+  border-color: var(--ds-bloodstone, #a34d49);
   animation: spell-miss-shake 0.28s ease-out;
 }
 
 @keyframes spell-miss-shake {
-  0%, 100% { translate: 0 0; }
-  20% { translate: -3px 0; }
-  60% { translate: 3px 0; }
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  60% { transform: translateX(3px); }
 }
 
 @media (max-width: 760px), (max-height: 500px) {
   .spell-dock {
     bottom: max(16px, env(safe-area-inset-bottom));
-    grid-template-areas: "tabs" "slots";
+    grid-template-areas: "readout" "tabs" "slots";
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .spell-menu-grip {
+  .spell-menu-grip,
+  .spell-menu-nav-key {
     display: none;
   }
 
   .spell-menu-page {
-    gap: 4px;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .spell-slot {
-    flex-basis: 42px;
-    width: 42px;
+    flex: 0 0 44px;
+    width: 44px;
   }
 }

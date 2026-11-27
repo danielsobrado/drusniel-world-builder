@@ -1,6 +1,12 @@
 import './NaturalPlayerSettings.css';
 import { readHudMetricsPreference,writeHudMetricsPreference } from '../player/hud/HudMetricsPreference.js';
 import {
+  HUD_PREFERENCES_EVENT,
+  applyHudScaleVariable,
+  readHudPreferences,
+  writeHudPreferences,
+} from '../player/hud/HudPreferences.js';
+import {
   getAudioState,
   setAudioEnabled,
   setMasterVolume,
@@ -37,7 +43,7 @@ function applyReducedMotion(enabled) {
   );
 }
 
-function settingsMarkup({ audioEnabled, masterVolume, reducedMotion, metrics }) {
+function settingsMarkup({ audioEnabled, masterVolume, reducedMotion, metrics, hudPrefs }) {
   const volumePercent = Math.round(masterVolume * 100);
   return `
     <section class="natural-player-settings" aria-label="Player settings">
@@ -76,6 +82,60 @@ function settingsMarkup({ audioEnabled, masterVolume, reducedMotion, metrics }) 
         </span>
         <input type="checkbox" data-natural-setting="reduced-motion" ${reducedMotion ? 'checked' : ''} />
       </label>
+      <div class="natural-player-settings__head natural-player-settings__subhead">
+        <div>
+          <strong>Interface &amp; HUD</strong>
+          <span>Contextual HUD visibility, navigation and scaling.</span>
+        </div>
+      </div>
+      <label class="natural-player-setting natural-player-setting--select">
+        <span>
+          <strong>Navigation aids</strong>
+          <small>Cycle while walking with <kbd>N</kbd></small>
+        </span>
+        <select data-natural-setting="hud-nav-mode">
+          <option value="full" ${hudPrefs.navigationMode === 'full' ? 'selected' : ''}>Compass &amp; Minimap</option>
+          <option value="compass" ${hudPrefs.navigationMode === 'compass' ? 'selected' : ''}>Compass only</option>
+          <option value="immersive" ${hudPrefs.navigationMode === 'immersive' ? 'selected' : ''}>Immersive</option>
+        </select>
+      </label>
+      <label class="natural-player-setting natural-player-setting--select">
+        <span>
+          <strong>Minimap zoom</strong>
+          <small>Adjust while walking with <kbd>-</kbd> / <kbd>=</kbd></small>
+        </span>
+        <select data-natural-setting="hud-map-zoom">
+          <option value="close" ${hudPrefs.minimapZoom === 'close' ? 'selected' : ''}>Close</option>
+          <option value="standard" ${hudPrefs.minimapZoom === 'standard' ? 'selected' : ''}>Standard</option>
+          <option value="wide" ${hudPrefs.minimapZoom === 'wide' ? 'selected' : ''}>Wide</option>
+        </select>
+      </label>
+      <label class="natural-player-setting natural-player-setting--select">
+        <span>
+          <strong>HUD scale</strong>
+          <small>Text and slot sizing</small>
+        </span>
+        <select data-natural-setting="hud-scale">
+          <option value="0.85" ${hudPrefs.scale === 0.85 ? 'selected' : ''}>85%</option>
+          <option value="1" ${hudPrefs.scale === 1 ? 'selected' : ''}>100%</option>
+          <option value="1.15" ${hudPrefs.scale === 1.15 ? 'selected' : ''}>115%</option>
+          <option value="1.25" ${hudPrefs.scale === 1.25 ? 'selected' : ''}>125%</option>
+        </select>
+      </label>
+      <label class="natural-player-setting natural-player-setting--toggle">
+        <span>
+          <strong>Resource labels &amp; values</strong>
+          <small>Display Health, Mana and Stamina percentages</small>
+        </span>
+        <input type="checkbox" data-natural-setting="hud-resource-numbers" ${hudPrefs.showResourceNumbers ? 'checked' : ''} />
+      </label>
+      <label class="natural-player-setting natural-player-setting--toggle">
+        <span>
+          <strong>Auto-hide full resources</strong>
+          <small>Fade out vitals outside combat when full</small>
+        </span>
+        <input type="checkbox" data-natural-setting="hud-auto-hide" ${hudPrefs.autoHideResources ? 'checked' : ''} />
+      </label>
       <label class="natural-player-setting natural-player-setting--toggle">
         <span><strong>Show performance counters</strong></span>
         <input type="checkbox" data-natural-setting="metrics" ${metrics ? 'checked' : ''} />
@@ -102,6 +162,8 @@ class NaturalPlayerSettings {
     const storedMotion = readStoredBoolean(NATURAL_EDITOR_UI_CONFIG.storage.reducedMotionKey);
     this.reducedMotion = storedMotion ?? prefersReducedMotion();
     applyReducedMotion(this.reducedMotion);
+    const hudPrefs = readHudPreferences();
+    applyHudScaleVariable(hudPrefs.scale);
 
     this.host = document.createElement('div');
     this.host.innerHTML = settingsMarkup({
@@ -109,6 +171,7 @@ class NaturalPlayerSettings {
       masterVolume: audio.masterVolume,
       reducedMotion: this.reducedMotion,
       metrics: readHudMetricsPreference(),
+      hudPrefs,
     }).trim();
     this.host = this.host.firstElementChild;
 
@@ -120,6 +183,11 @@ class NaturalPlayerSettings {
     this.volumeOutput = this.host.querySelector('[data-natural-volume-output]');
     this.sound = this.host.querySelector('[data-natural-setting="sound"]');
     this.motion = this.host.querySelector('[data-natural-setting="reduced-motion"]');
+    this.navMode = this.host.querySelector('[data-natural-setting="hud-nav-mode"]');
+    this.mapZoom = this.host.querySelector('[data-natural-setting="hud-map-zoom"]');
+    this.hudScale = this.host.querySelector('[data-natural-setting="hud-scale"]');
+    this.resourceNumbers = this.host.querySelector('[data-natural-setting="hud-resource-numbers"]');
+    this.autoHide = this.host.querySelector('[data-natural-setting="hud-auto-hide"]');
     this.bind();
   }
 
@@ -128,6 +196,20 @@ class NaturalPlayerSettings {
     this.host.querySelector('[data-natural-setting="capture"]').addEventListener('click',()=>{
       this.root.querySelector('.natural-drawer-close')?.click();
       document.dispatchEvent(new CustomEvent('world:hide-hud'));
+    });
+    this.navMode.addEventListener('change', () => writeHudPreferences({ navigationMode: this.navMode.value }));
+    this.mapZoom.addEventListener('change', () => writeHudPreferences({ minimapZoom: this.mapZoom.value }));
+    this.hudScale.addEventListener('change', () => writeHudPreferences({ scale: Number(this.hudScale.value) }));
+    this.resourceNumbers.addEventListener('change', () => writeHudPreferences({ showResourceNumbers: this.resourceNumbers.checked }));
+    this.autoHide.addEventListener('change', () => writeHudPreferences({ autoHideResources: this.autoHide.checked }));
+    globalThis.addEventListener?.(HUD_PREFERENCES_EVENT, (event) => {
+      const prefs = event.detail;
+      if (!prefs) return;
+      this.navMode.value = prefs.navigationMode;
+      this.mapZoom.value = prefs.minimapZoom;
+      this.hudScale.value = String(prefs.scale);
+      this.resourceNumbers.checked = prefs.showResourceNumbers;
+      this.autoHide.checked = prefs.autoHideResources;
     });
     this.sound.addEventListener('change', () => {
       setAudioEnabled(this.sound.checked);

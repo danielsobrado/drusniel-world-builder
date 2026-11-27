@@ -19,7 +19,8 @@ import {
   vec4,
 } from 'three/tsl';
 import { authoredTexture } from './AuthoredTextureNode.js';
-import { stylizedFbm } from './StylizedNoiseNodes.js';
+import { worldNoiseField } from './worldNoise.js';
+import { WORLD_NOISE_LAYERS, WORLD_NOISE_METERS } from './worldNoiseLayout.js';
 import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
 import { crownEdgeNodes } from './forest/crownEdge.js';
@@ -120,9 +121,9 @@ export function createStylizedLeafMaterial({
     authoredColor = attribute('color', 'vec3').mul(colorNode(source?.color ?? '#ffffff'));
   }
   const baseColor = authoredColor ?? paletteColor;
-  const variation = stylizedFbm(
-    positionLocal.xz.add(positionLocal.y).mul(config.trees.variationScale),
-  ).sub(0.5);
+  const variation = worldNoiseField(WORLD_NOISE_LAYERS.meso)(
+    positionLocal.xz.add(positionLocal.y).mul(config.trees.variationScale).div(WORLD_NOISE_METERS.meso),
+  ).g.sub(0.5);
   const leafColor = max(
     baseColor.add(
       colorNode(paletteValue(palette, config, 'variationColor'))
@@ -155,10 +156,10 @@ export function createStylizedLeafMaterial({
     // Graded crowns take a warm-sunlit top to cooler-shaded base & core shift so
     // macro volume separates cleanly like the trunks, understory, and buildings.
     const heightGrade = canopyGrade
-      ? mix(vec3(0.76, 0.80, 0.84), vec3(1.08, 1.05, 0.94), normalizedHeight)
+      ? mix(vec3(0.68, 0.88, 0.86), vec3(1.07, 1.05, 0.93), normalizedHeight)
       : vec3(1);
     const coreGrade = canopyGrade
-      ? mix(vec3(0.78, 0.83, 0.86), vec3(1, 1, 1), surface.visibility)
+      ? mix(vec3(0.62, 0.89, 0.88), vec3(1, 1, 1), surface.visibility)
       : vec3(1);
     const crown = authoredColor.mul(paletteValue(palette, config, 'brightness')).mul(heightGrade).mul(coreGrade);
     const centerXZ = canopyBounds

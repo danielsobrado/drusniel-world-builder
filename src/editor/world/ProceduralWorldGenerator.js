@@ -109,6 +109,18 @@ export class ProceduralWorldGenerator {
     return Object.freeze({ temperature, moisture });
   }
 
+  sampleEnvironmentClimate(cellX, cellZ, out = { temperature: 0, moisture: 0.5, fertility: 0.5, valid: false }) {
+    const { temperature, moisture } = this.sampleClimate(cellX + 0.5, cellZ + 0.5);
+    const clampedTemp = Math.max(-1, Math.min(1, temperature * 1.15));
+    const normalizedMoisture = Math.max(0, Math.min(1, moisture * 0.5 + 0.5));
+    const fertility = Math.max(0, Math.min(1, normalizedMoisture * (1 - Math.abs(clampedTemp - 0.15) * 0.75)));
+    out.temperature = clampedTemp;
+    out.moisture = normalizedMoisture;
+    out.fertility = fertility;
+    out.valid = true;
+    return out;
+  }
+
   sampleBaseTile(cellX, cellZ) {
     const height = (
       this.sampleBaseHeight(cellX, cellZ)

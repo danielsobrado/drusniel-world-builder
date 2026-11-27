@@ -13,8 +13,10 @@ import terrainMaterialBakeConfigSource from '../../config/terrain-material-bake.
 import waterConfigSource from '../../config/water-domain.yaml?compiled';
 import waterVisualConfigSource from '../../config/water-visual.yaml?compiled';
 import weatherEffectsConfigSource from '../../config/weather-effects.yaml?compiled';
+import environmentalFieldsConfigSource from '../../config/environmental-fields.yaml?compiled';
 import wscContactConfigSource from '../../config/wsc-contact.yaml?compiled';
 import { resolveWeatherEffects } from '../editor/weather/WeatherEffectsConfig.js';
+import { resolveEnvironmentalFieldConfig } from '../editor/world/EnvironmentalFieldConfig.js';
 import {
   registerWorldSurfaceContactConfig,
   resolveWorldSurfaceContactConfig,
@@ -83,6 +85,10 @@ export function loadEditorConfig() {
   const biomeSnow = new URLSearchParams(runtimeSearch()).get('biomeSnow') !== '0';
   applyBiomeLooks(config, terrainMaterialBakeSource,
     resolveBiomeLooks(structuredClone(biomeLooksConfigSource)?.biomeLooks, { snow: biomeSnow }));
+  config.stylizedSurface.environment = resolveEnvironmentalFieldConfig(
+    structuredClone(environmentalFieldsConfigSource),
+    runtimeSearch(),
+  );
   config.stylizedSurface.materialBake = createTerrainMaterialBakeConfig(terrainMaterialBakeSource);
   config.stylizedSurface.wetness = resolveSurfaceWetnessConfig(config.stylizedSurface.wetness, runtimeSearch());
   registerWetnessField(config.stylizedSurface.wetness.field);

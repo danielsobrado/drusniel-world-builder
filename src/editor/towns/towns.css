@@ -5,13 +5,14 @@
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 6px;
-  background: rgba(14, 12, 10, 0.72);
-  color: #f3e6cf;
-  font: 500 0.95rem/1.2 system-ui, sans-serif;
-  letter-spacing: 0.02em;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--ds-border-gold, rgb(184 161 118 / 36%));
+  border-radius: var(--ds-radius-sm, 4px);
+  background: var(--ds-surface-obsidian, rgb(21 27 32 / 88%));
+  color: var(--ds-parchment, #e5dcc8);
+  font: 500 13px/1.2 var(--ds-font-ui, Inter, sans-serif);
+  letter-spacing: 0.03em;
   pointer-events: none;
   z-index: 40;
 }
@@ -21,10 +22,12 @@
 }
 
 .town-prompt kbd {
-  min-width: 1.5rem;
-  padding: 0.1rem 0.4rem;
-  border: 1px solid rgba(243, 230, 207, 0.6);
-  border-radius: 4px;
+  min-width: 20px;
+  padding: 2px 6px;
+  border: 1px solid var(--ds-border-gold-strong, rgb(184 161 118 / 58%));
+  border-radius: 2px;
+  background: var(--ds-obsidian, #151b20);
+  color: var(--ds-parchment, #e5dcc8);
   text-align: center;
-  font: 600 0.85rem/1.2 system-ui, sans-serif;
+  font: 600 11px/1.2 var(--ds-font-ui, Inter, sans-serif);
 }

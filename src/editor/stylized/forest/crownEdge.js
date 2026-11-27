@@ -1,12 +1,12 @@
-import { float, max, mix, normalWorld, positionGeometry, positionView, positionViewDirection, smoothstep, vec2, vec3 } from 'three/tsl';
+import { cos, dot, float, max, mix, normalWorld, positionGeometry, positionView, positionViewDirection, sin, smoothstep, vec2, vec3 } from 'three/tsl';
 
 /** Share of a leaf's card cut left to thin at the very edge of the crown. */
 const EDGE_THIN = 0.28;
 /** Alpha above the cut across which a leaf's 1-2 texel rim fades into its body. */
 const FRINGE_ALPHA = 0.30;
 /** How much of a rim texel the sky/air behind it replaces: inside the crown, at its edge. */
-const SKY_INSIDE = 0.06;
-const SKY_EDGE = 0.42;
+const SKY_INSIDE = 0.02;
+const SKY_EDGE = 0.10;
 
 /** True geometric card face normal in view space (after instancing & wind, before puff-normal blending). */
 function cardFacingView() {
@@ -37,11 +37,16 @@ export function crownEdgeNodes(alpha, { cut, radius, height, centerXZ = null }) 
   const outer = smoothstep(0.55, 1, radialXZ.length().div(Math.max(0.001, radius)));
   const edge = max(outer, smoothstep(0.72, 1, height));
   const rim = smoothstep(cut, cut + FRINGE_ALPHA, alpha).oneMinus();
-  const grazingKeep = mix(float(1), smoothstep(0.08, 0.34, cardFacingView()), edge.mul(0.7).add(0.18));
+  const grazingKeep = mix(float(1), smoothstep(0.09, 0.40, cardFacingView()), edge.mul(0.50).add(0.35));
+  // Prototype-space bristle/felt feathering on the outermost alpha fringe (zero screen shimmer).
+  const bristleA = sin(dot(positionGeometry.mul(47.3), vec3(12.9898, 78.233, 37.719)));
+  const bristleB = cos(dot(positionGeometry.mul(91.7), vec3(39.346, 11.135, 83.155)));
+  const bristle = bristleA.mul(0.6).add(bristleB.mul(0.4)).mul(0.5);
+  const feather = float(1).add(bristle.mul(rim).mul(edge).mul(0.28));
   // Favour skyward outer leaves so lower flanks in front of hills or roofs keep crisp contrast.
   const skyExposure = smoothstep(-0.25, 0.55, normalWorld.y).mul(0.55).add(0.45);
   return {
-    opacity: alpha.mul(float(1).sub(edge.mul(EDGE_THIN))).mul(grazingKeep),
+    opacity: alpha.mul(float(1).sub(edge.mul(EDGE_THIN))).mul(grazingKeep).mul(feather).clamp(0, 1),
     sky: rim.mul(edge.mul(SKY_EDGE - SKY_INSIDE).add(SKY_INSIDE)).mul(skyExposure),
   };
 }

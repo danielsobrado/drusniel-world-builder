@@ -30,7 +30,7 @@ export class PreparedPlacementStore {
     this.world.preparedPlacementSamples = this;
     const tileSize = worldStore.tileSize;
     this.ecology = { trees: config.trees, rocks: config.rocks, regionalPlacement: config.regionalPlacement,
-      seed: resolveForestSeed(worldStore), tileSize };
+      environment: config.environment ?? null, seed: resolveForestSeed(worldStore), tileSize };
     this.targets = [];
     const waterRange = Number(config.trees.habitat?.waterRangeMeters) || 0;
     if (waterRange > 0) this.targets.push({ label: 'water', maxCells: Math.ceil(waterRange / tileSize), targetTileId: config.water.tileId ?? 0 });

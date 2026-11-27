@@ -1,0 +1,46 @@
+schemaVersion: 1
+enabled: true
+
+climate:
+  lapseRatePerKm: 0.42
+  solarDirection: [0.35, -0.9367]
+  solarWarmth: 0.16
+  solarDrying: 0.14
+  prevailingWind: [0.8, 0.6]
+  windExposureGain: 0.45
+  concavityMoistureGain: 1.8
+  ridgeSoilLoss: 1.4
+  waterMoistureReachCells: 20
+  waterMoistureGain: 0.26
+  generatorClimateBlend: 0.65
+  variation:
+    macroMeters: 280
+    mesoMeters: 52
+    geologyMeters: 420
+    temperatureSwing: 0.10
+    moistureSwing: 0.15
+    fertilitySwing: 0.18
+
+ecotone:
+  minRadiusCells: 6
+  maxRadiusCells: 18
+  warpMeters: 36
+  warpReachCells: 9
+  widthScaleMeters: 110
+  snowOutlierStrength: 0.42
+  thermalSteppeSoil: '#968d7d'
+
+biomePriors:
+  0: { temperature: 0.05, moisture: 1.00, fertility: 0.00, geology: 0.50 }
+  1: { temperature: 0.86, moisture: 0.06, fertility: 0.07, geology: 0.20 }
+  2: { temperature: -0.26, moisture: 0.14, fertility: 0.18, geology: 0.68 }
+  3: { temperature: 0.62, moisture: 0.28, fertility: 0.44, geology: 0.30 }
+  4: { temperature: 0.20, moisture: 0.46, fertility: 0.74, geology: 0.38 }
+  5: { temperature: 0.58, moisture: 0.64, fertility: 0.78, geology: 0.34 }
+  6: { temperature: 0.18, moisture: 0.62, fertility: 0.80, geology: 0.44 }
+  7: { temperature: 0.68, moisture: 0.92, fertility: 0.86, geology: 0.28 }
+  8: { temperature: 0.14, moisture: 0.88, fertility: 0.84, geology: 0.48 }
+  9: { temperature: -0.42, moisture: 0.52, fertility: 0.46, geology: 0.62 }
+  10: { temperature: -0.68, moisture: 0.38, fertility: 0.22, geology: 0.76 }
+  11: { temperature: -0.94, moisture: 0.62, fertility: 0.02, geology: 0.90 }
+  12: { temperature: 0.12, moisture: 0.94, fertility: 0.76, geology: 0.16 }

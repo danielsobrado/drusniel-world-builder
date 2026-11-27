@@ -17,8 +17,19 @@ export function createEditedChunkSampling(generator, chunkSize, overrides) {
     const north = a + (b - a) * fx;
     return north + (c + (d - c) * fx - north) * fz;
   };
+  const sampleEnvironmentClimate = (cellX, cellZ, out = { temperature: 0, moisture: 0.5, fertility: 0.5, valid: false }) => {
+    if (tileOverrides.getAt(Math.floor(cellX), Math.floor(cellZ)) !== undefined) {
+      out.valid = false;
+      return out;
+    }
+    if (typeof generator.sampleEnvironmentClimate === 'function') {
+      return generator.sampleEnvironmentClimate(cellX, cellZ, out);
+    }
+    out.valid = false;
+    return out;
+  };
   const store = { generator, getTile: sampleTile, sampleHeight, tileOverrides, heightOverrides };
-  return { sampleTile, sampleHeight: vertex,
+  return { sampleTile, sampleHeight: vertex, sampleEnvironmentClimate,
     sampleWater: (x, z) => sampleWorldStoreWater(store, x, z),
     sampleWaterSurface: (x, z) => sampleWorldStoreWaterSurface(store, x, z) };
 }

@@ -502,6 +502,21 @@ export class StylizedTreeView {
         if (pivot === 'trunk') pivotOnTrunkBase(baked);
         attachTreeRoots(baked, `${sourceLabel}:${this.prototypes.length}`, rootProfile);
         if (this.config.trees.foliageLighting?.enabled) bakeCanopyVisibility(baked, this.config.trees);
+        const crownBox = new THREE.Box3();
+        for (const part of baked) {
+          if (part.kind !== 'leaf') continue;
+          part.geometry.computeBoundingBox();
+          crownBox.union(part.geometry.boundingBox);
+        }
+        const unifiedCanopyBounds = crownBox.isEmpty()
+          ? null
+          : { min: crownBox.min.toArray(), max: crownBox.max.toArray() };
+        const unifiedCrownRadius = crownBox.isEmpty()
+          ? 0
+          : Math.max(
+            Math.abs(crownBox.min.x), Math.abs(crownBox.max.x),
+            Math.abs(crownBox.min.z), Math.abs(crownBox.max.z),
+          );
         const sway = this.treeSway(baked);
         const parts = baked.map((part) => {
           const originalSource = firstMaterial(
@@ -524,14 +539,11 @@ export class StylizedTreeView {
             ? createStylizedLeafMaterial({
               source,
               leafMap: sourceMap,
-              bounds: {
-                minY: part.geometry.boundingBox.min.y,
-                maxY: part.geometry.boundingBox.max.y,
-              },
+              bounds: crownBox.isEmpty()
+                ? { minY: part.geometry.boundingBox.min.y, maxY: part.geometry.boundingBox.max.y }
+                : { minY: crownBox.min.y, maxY: crownBox.max.y },
               treeTopY: sway.topY,
-              crownRadius: Math.max(
-                ...['min', 'max'].flatMap((end) => ['x', 'z'].map((axis) => Math.abs(part.geometry.boundingBox[end][axis]))),
-              ),
+              crownRadius: unifiedCrownRadius,
               time: this.time,
               config: this.config,
               preserveSourceColor: gradeLeaf,
@@ -541,7 +553,10 @@ export class StylizedTreeView {
               canopyGrade,
               species: rootProfile,
               hasCanopyVisibility: Boolean(part.geometry.getAttribute('canopyVisibility')),
-              canopyBounds: { min: part.geometry.boundingBox.min.toArray(), max: part.geometry.boundingBox.max.toArray() },
+              canopyBounds: unifiedCanopyBounds ?? {
+                min: part.geometry.boundingBox.min.toArray(),
+                max: part.geometry.boundingBox.max.toArray(),
+              },
             })
             : (preserveSourceAppearance
               ? createAuthoredTrunkMaterial({
@@ -597,6 +612,21 @@ export class StylizedTreeView {
     });
     for (const prototype of generated) {
       if (this.config.trees.foliageLighting?.enabled) bakeCanopyVisibility(prototype.parts, this.config.trees);
+      const crownBox = new THREE.Box3();
+      for (const part of prototype.parts) {
+        if (part.kind !== 'leaf') continue;
+        part.geometry.computeBoundingBox();
+        crownBox.union(part.geometry.boundingBox);
+      }
+      const unifiedCanopyBounds = crownBox.isEmpty()
+        ? null
+        : { min: crownBox.min.toArray(), max: crownBox.max.toArray() };
+      const unifiedCrownRadius = crownBox.isEmpty()
+        ? 0
+        : Math.max(
+          Math.abs(crownBox.min.x), Math.abs(crownBox.max.x),
+          Math.abs(crownBox.min.z), Math.abs(crownBox.max.z),
+        );
       const palette = FOREST_SPECIES_PALETTES[prototype.speciesId] ?? null;
       const sway = this.treeSway(prototype.parts);
       const parts = prototype.parts.map((part) => ({
@@ -610,17 +640,20 @@ export class StylizedTreeView {
             // an interior and does not go see-through.
             leafMap: part.card ? foliageCard : null,
             alphaTest: part.card ? this.config.trees.cardAlphaTest : 0,
-            bounds: {
-              minY: part.geometry.boundingBox.min.y,
-              maxY: part.geometry.boundingBox.max.y,
-            },
+            bounds: crownBox.isEmpty()
+              ? { minY: part.geometry.boundingBox.min.y, maxY: part.geometry.boundingBox.max.y }
+              : { minY: crownBox.min.y, maxY: crownBox.max.y },
+            crownRadius: part.card ? unifiedCrownRadius : 0,
             treeTopY: sway.topY,
             time: this.time,
             config: this.config,
             palette,
             species: prototype.speciesId,
             hasCanopyVisibility: Boolean(part.geometry.getAttribute('canopyVisibility')),
-            canopyBounds: { min: part.geometry.boundingBox.min.toArray(), max: part.geometry.boundingBox.max.toArray() },
+            canopyBounds: unifiedCanopyBounds ?? {
+              min: part.geometry.boundingBox.min.toArray(),
+              max: part.geometry.boundingBox.max.toArray(),
+            },
           })
           : createStylizedTrunkMaterial({
             textures: barkTextures,

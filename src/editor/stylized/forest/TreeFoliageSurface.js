@@ -5,21 +5,21 @@ import { resolveTreeFoliageSettings } from './treeSurfaceSettings.js';
 import { setRuntimeUserData } from '../../../render/materials/runtimeUserData.js';
 
 /** Outward multi-lobe puff normal computed on the GPU in prototype space (no extra buffers). */
-export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.16) {
+export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.22) {
   const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
   const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
   const rel = positionGeometry.sub(center).div(half);
   const macro = rel.add(vec3(0, upBias, 0));
   const macroDir = macro.div(macro.length().max(0.00001));
   if (!(puffStrength > 0)) return macroDir;
-  // Two-octave smooth 3D lobe field breaks a canopy or shrub into stacked, pillowy puffs.
-  const phase = rel.mul(3.4);
+  // Soft low-frequency canopy undulation keeps lighting continuous across the whole tree crown.
+  const phase = rel.mul(2.1);
   const puff = vec3(
     sin(phase.x).mul(cos(phase.y.add(0.6))).mul(cos(phase.z.sub(0.4))),
     cos(phase.x.sub(0.5)).mul(sin(phase.y)).mul(cos(phase.z.add(0.3))).add(0.24),
     cos(phase.x.add(0.4)).mul(cos(phase.y.sub(0.5))).mul(sin(phase.z)),
   );
-  const fine = rel.mul(6.2);
+  const fine = rel.mul(4.3);
   const subPuff = vec3(
     cos(fine.x.add(1.1)).mul(sin(fine.y.sub(0.3))),
     sin(fine.x.sub(0.4)).mul(cos(fine.z.add(0.7))).add(0.15),
@@ -27,6 +27,28 @@ export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.16) 
   ).mul(0.32);
   const combined = macroDir.add(puff.add(subPuff).mul(puffStrength));
   return combined.div(combined.length().max(0.00001));
+}
+
+/**
+ * Bounded outer-rim tuft ruffling in prototype space so silhouettes break into
+ * soft layered pillows along outer normal peaks without disturbing trunk/inner geometry.
+ */
+export function crownRimRuffleNode(bounds, rimRuffle = 0.28) {
+  const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
+  const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
+  const rel = positionGeometry.sub(center).div(half);
+  const radialLen = rel.length();
+  const dir = rel.add(vec3(0, 0.12, 0));
+  const outDir = dir.div(dir.length().max(0.00001));
+  const outerPeak = smoothstep(0.60, 0.96, radialLen).mul(smoothstep(-0.30, 0.55, rel.y));
+  const coarse = sin(positionGeometry.x.mul(5.7).add(positionGeometry.z.mul(4.1)))
+    .mul(cos(positionGeometry.y.mul(5.3).sub(positionGeometry.x.mul(2.9))));
+  const fine = cos(positionGeometry.z.mul(11.3).sub(positionGeometry.y.mul(7.1)))
+    .mul(sin(positionGeometry.x.mul(9.7).add(positionGeometry.z.mul(6.1))));
+  const tuftWave = coarse.mul(0.65).add(fine.mul(0.35));
+  const halfSpanMin = Math.max(0.05, Math.min(...bounds.min.map((value, i) => (bounds.max[i] - value) * 0.5)));
+  const amplitude = halfSpanMin * 0.032 * rimRuffle;
+  return outDir.mul(tuftWave.mul(0.65).add(0.35)).mul(outerPeak).mul(amplitude);
 }
 
 /**
@@ -86,8 +108,12 @@ export function configureTreeFoliageSurface(material, {
   if (bounds && settings.normalBlend > 0) {
     // Normal adjustment happens before instancing; authored geometry stays intact.
     material.foliageShapeNormalNode = crownPuffNormalNode(bounds, settings.puffStrength);
-    // Outer exposed leaves take the full fluffy puff normal; sheltered interior keeps slight structure.
-    material.foliageNormalBlendNode = mix(float(settings.normalBlend * 0.72), float(settings.normalBlend), sky);
+    // Sheltered interior seams blend strongly toward the canopy-wide normal to erase cluster-on-cluster creases.
+    const interiorBlend = Math.min(0.92, settings.normalBlend + 0.08);
+    material.foliageNormalBlendNode = mix(float(interiorBlend), float(settings.normalBlend), sky);
+  }
+  if (bounds && settings.rimRuffle > 0) {
+    material.foliageRimRuffleNode = crownRimRuffleNode(bounds, settings.rimRuffle);
   }
   material.userData.treeFoliageSurface = settings;
   setRuntimeUserData(material, 'canopyVisibilityNode', visibility);

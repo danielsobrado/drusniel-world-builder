@@ -13,8 +13,8 @@ export class ExplorationRuntime {
   constructor({ config, terrainView, viewModeController, container, sceneLoader = null, onInstalled, invalidateHistory, grass = () => null,
     hud = null }) {
     // `grass()` is the meadow field, read each frame: it is rebuilt with the world.
-    Object.assign(this, { config, terrainView, viewModeController, grass });
-    this.lastTimestamp = null; this.mobile = null;
+    Object.assign(this, { config, terrainView, viewModeController, grass, hud });
+    this.lastTimestamp = null; this.mobile = null; this.nextTargetCheckAt = 0;
     this.residents = new SettlementResidents({ scene: terrainView.scene, terrainView,
       roster: config.character.roster, settings: config.exploration.residents,
       baseUrl: import.meta.env.BASE_URL, loader: sceneLoader, onInstalled,
@@ -23,7 +23,14 @@ export class ExplorationRuntime {
     this.nameplate = hud && config.exploration.worldSim.enabled
       ? new ResidentNameplate({ parent: hud.element, settings: config.exploration.worldSim }) : null;
     this.serpents = new SerpentSystem({ scene: terrainView.scene, terrainView, settings: config.exploration.serpents, onInstalled });
-    this.tour = new ScenicTour({ terrainView, viewModeController, settings: config.exploration.tour, container, invalidateHistory });
+    this.tour = new ScenicTour({
+      terrainView,
+      viewModeController,
+      settings: config.exploration.tour,
+      container,
+      invalidateHistory,
+      onTourStateChange: (active) => this.hud?.setScenicTour?.(active),
+    });
     viewModeController.onBeforeModeChange = () => this.tour.stop();
     this.container = container;
     this.onResize = () => this.syncMobile(); window.addEventListener('resize', this.onResize); this.syncMobile();
@@ -54,6 +61,25 @@ export class ExplorationRuntime {
     this.residents.update(this.deltaSeconds, camera, focus, timestamp, budget);
     this.nameplate?.update(this.residents.npcs.entries.values(), focus);
     this.serpents.update(this.deltaSeconds, camera, focus, playerBody, timestamp);
+    if (this.hud && timestamp >= this.nextTargetCheckAt) {
+      this.nextTargetCheckAt = timestamp + 120;
+      let targeted = false;
+      for (const entry of this.serpents.entries.values()) {
+        const pos = entry.serpent?.position ?? entry.root?.position;
+        if (!pos) continue;
+        const dx = pos.x - camera.position.x;
+        const dz = pos.z - camera.position.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 0.5 && dist <= 26) {
+          const yaw = this.viewModeController.getHeading();
+          const fx = -Math.sin(yaw);
+          const fz = -Math.cos(yaw);
+          const dot = (dx * fx + dz * fz) / dist;
+          if (dot > 0.94) { targeted = true; break; }
+        }
+      }
+      this.hud.setTargetingHostile?.(targeted);
+    }
     const grass = this.grass();
     PerfCounters.set('creatureGrassPresses', grass ? pressGrassUnderCreatures({
       press: (x, z, radius) => grass.pressBody(x, z, radius), playerBody, reach: grass.pressReach,

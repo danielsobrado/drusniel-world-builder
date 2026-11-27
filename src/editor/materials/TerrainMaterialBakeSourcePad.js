@@ -12,6 +12,8 @@
  * keeps its gradient and curvature. The bake runtime only bakes once the water
  * halo's pages, which cover these, are resident, so that is the edge case.
  */
+import { ENV_CHANNEL_COUNT } from '../world/EnvironmentalField.js';
+
 export const BAKE_SOURCE_PAD = 2;
 
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
@@ -65,6 +67,8 @@ export function padTerrainMaterialBakeSource({ page, chunkSize, pageAt = null })
 
   const tiles = page.tiles ? new Uint8Array(size * size) : null;
   const snowBiomeCover = page.snowBiomeCover ? new Uint8Array(size * size) : null;
+  const aridEcotone = page.aridEcotone ? new Uint8Array(size * size) : null;
+  const envField = page.envField ? new Uint8Array(size * size * ENV_CHANNEL_COUNT) : null;
   const tilePixels = new Uint8Array(size * size * 4);
   const surfaceMaskPixels = new Uint8Array(size * size * 4);
   for (let z = 0; z < size; z += 1) {
@@ -75,6 +79,8 @@ export function padTerrainMaterialBakeSource({ page, chunkSize, pageAt = null })
       const to = z * size + pad;
       if (tiles) tiles.set(page.tiles.subarray(from, from + chunkSize), to);
       if (snowBiomeCover) snowBiomeCover.set(page.snowBiomeCover.subarray(from, from + chunkSize), to);
+      if (aridEcotone) aridEcotone.set(page.aridEcotone.subarray(from, from + chunkSize), to);
+      if (envField) envField.set(page.envField.subarray(from * ENV_CHANNEL_COUNT, (from + chunkSize) * ENV_CHANNEL_COUNT), to * ENV_CHANNEL_COUNT);
       tilePixels.set(page.tilePixels.subarray(from * 4, (from + chunkSize) * 4), to * 4);
       surfaceMaskPixels.set(page.surfaceMaskPixels.subarray(from * 4, (from + chunkSize) * 4), to * 4);
     }
@@ -86,6 +92,23 @@ export function padTerrainMaterialBakeSource({ page, chunkSize, pageAt = null })
       // Neighbour pages are committed the same way, so they carry the same arrays.
       if (tiles) tiles[to] = at.from.tiles[cell];
       if (snowBiomeCover) snowBiomeCover[to] = at.from.snowBiomeCover[cell];
+      if (aridEcotone) aridEcotone[to] = at.from.aridEcotone ? at.from.aridEcotone[cell] : 128;
+      if (envField) {
+        if (at.from.envField) {
+          envField.set(
+            at.from.envField.subarray(cell * ENV_CHANNEL_COUNT, (cell + 1) * ENV_CHANNEL_COUNT),
+            to * ENV_CHANNEL_COUNT,
+          );
+        } else {
+          envField.set(
+            page.envField.subarray(
+              (clamp(z - pad, 0, chunkSize - 1) * chunkSize + clamp(x - pad, 0, chunkSize - 1)) * ENV_CHANNEL_COUNT,
+              (clamp(z - pad, 0, chunkSize - 1) * chunkSize + clamp(x - pad, 0, chunkSize - 1) + 1) * ENV_CHANNEL_COUNT,
+            ),
+            to * ENV_CHANNEL_COUNT,
+          );
+        }
+      }
       tilePixels.set(at.from.tilePixels.subarray(cell * 4, cell * 4 + 4), to * 4);
       surfaceMaskPixels.set(at.from.surfaceMaskPixels.subarray(cell * 4, cell * 4 + 4), to * 4);
     }
@@ -112,5 +135,5 @@ export function padTerrainMaterialBakeSource({ page, chunkSize, pageAt = null })
       heights[z * vertices + x] = extrapolate(vz => extrapolate(vx => raw(vx, vz), ax, chunkSize), az, chunkSize);
     }
   }
-  return { pad, size, tiles, tilePixels, surfaceMaskPixels, snowBiomeCover, heights };
+  return { pad, size, tiles, tilePixels, surfaceMaskPixels, snowBiomeCover, aridEcotone, envField, heights };
 }

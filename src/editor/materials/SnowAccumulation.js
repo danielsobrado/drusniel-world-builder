@@ -81,10 +81,23 @@ export function snowBiomeCoverAt(tileAt, cellX, cellZ, coverByTile, roadTileId) 
  * @param {number} sample.tileId terrain tile id (Azgaar biome id)
  * @param {number} [sample.biomeCover] blurred biome cover, read instead of the
  *   tile id's own step when given (snowBiomeCoverField / snowBiomeCoverAt)
+ * @param {number} [sample.solarExposure] 0..1 continuous solar exposure (0.5 neutral)
+ * @param {number} [sample.temperature] -1..1 continuous temperature (optional)
  * @param {number} sample.patch 0..1 low-frequency noise at the point
  * @param {object} classification `terrainMaterialBake.classification`
  */
-export function snowAccumulation({ height, slope, dx, dz, curvature, tileId, biomeCover, patch }, classification) {
+export function snowAccumulation({
+  height,
+  slope,
+  dx,
+  dz,
+  curvature,
+  tileId,
+  biomeCover,
+  solarExposure = 0.5,
+  temperature,
+  patch,
+}, classification) {
   const altitude = smoothstep(classification.snowLine, classification.snowLine + classification.snowFade, height);
   const cover = biomeCover ?? classification.snowBiomeCover?.[tileId] ?? 0;
   if (Math.max(altitude, cover) <= 0) return 0;
@@ -107,10 +120,12 @@ export function snowAccumulation({ height, slope, dx, dz, curvature, tileId, bio
     : 0;
   const exposure = facingWind * Math.min(1, slope * 2);
   const wind = exposure * classification.snowWindShift;
+  const solarShift = (solarExposure - 0.5) * (classification.snowSolarShift ?? 0.28) * Math.min(1, 0.35 + slope * 1.8);
+  const tempMelt = temperature !== undefined ? smoothstep(0.12, 0.42, temperature) * (1 - altitude) : 0;
   const patches = (patch - 0.5) * classification.snowPatchStrength;
   // The same drifts decide how steep snow clings, so it runs in tongues down the rock.
   const hold = 1 - smoothstep(classification.snowSlopeMax * 0.7, classification.snowSlopeMax, slope - patches * SLOPE_BREAKUP);
-  return clamp01(base - wind + hollow + patches * (1 - Math.abs(base * 2 - 1) * 0.5)) * hold;
+  return clamp01((base - wind - solarShift + hollow + patches * (1 - Math.abs(base * 2 - 1) * 0.5)) * (1 - tempMelt)) * hold;
 }
 
 /**
