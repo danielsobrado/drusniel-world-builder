@@ -297,7 +297,6 @@ export async function bakeTerrainMaterialPage({
       const slope = slopes[index];
       const height = heights[index];
       const land = 1 - waterCoverage;
-      const rock = smoothstep(classification.rockSlopeStart, classification.rockSlopeFull, slope) * land;
       const worldX = (source.originX + cellX) * tileSize;
       const worldZ = -(source.originZ + cellZ) * tileSize;
       const envOffset = padded.envField ? sourceIndex * ENV_CHANNEL_COUNT : -1;
@@ -305,6 +304,11 @@ export async function bakeTerrainMaterialPage({
       const envTemp = envOffset >= 0 ? (padded.envField[envOffset + ENV_CHANNELS.TEMP] / 255) * 2 - 1 : undefined;
       const envMoist = envOffset >= 0 ? padded.envField[envOffset + ENV_CHANNELS.MOISTURE] / 255 : null;
       const envGeo = envOffset >= 0 ? padded.envField[envOffset + ENV_CHANNELS.GEOLOGY] / 255 : null;
+      const slopeRock = smoothstep(classification.rockSlopeStart, classification.rockSlopeFull, slope) * land;
+      const talusConcavity = envOffset >= 0 ? smoothstep(-0.002, -0.025, curvatures[index]) : 0;
+      const talusSlope = smoothstep(classification.rockSlopeStart * 0.45, classification.rockSlopeFull * 0.85, slope);
+      const talusRock = talusConcavity * talusSlope * land * 0.65;
+      const rock = Math.max(slopeRock, talusRock);
       const snow = snowAtPoint({
         height,
         slope,

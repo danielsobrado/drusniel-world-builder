@@ -7,6 +7,7 @@ import { ridgeFineHeight, ridgeHeight, validateMountainRidges } from './Mountain
 import { landformRelief } from './TerrainLandforms.js';
 import { canyonRelief } from './CanyonRelief.js';
 import { alpineHeight, alpineLakeLift, createAlpineMask } from './AlpineRelief.js';
+import { climateSurfaceRelief } from './MultiscaleTerrainRelief.js';
 import { valueNoise } from './valueNoise2d.js';
 import { createBiomeBoundaryWarp } from './BiomeBoundaryWarp.js';
 import { TrailGrading, validateTrailGrading } from './TrailGrading.js';
@@ -265,6 +266,7 @@ export class AzgaarMacroWorldGenerator {
     this.guidance = null;
     this.hasMorphologyGuidance = ['mountainness', 'ruggedness', 'valleyness']
       .every((name) => hasGuidanceField(source, name));
+    this.hasTemperatureGuidance = hasGuidanceField(source, 'temperature');
     this.biomeBySourceId = new Map(
       source.biomes.map((definition) => [definition.sourceId, definition]),
     );
@@ -303,6 +305,10 @@ export class AzgaarMacroWorldGenerator {
     const canyonBiomes = new Set(source.terrain.canyonBiomes ?? []);
     this.canyonMask = canyonBiomes.size && this.biomeAtlas.some((id) => canyonBiomes.has(id))
       ? Uint8Array.from(this.biomeAtlas, (id) => (canyonBiomes.has(id) ? 1 : 0))
+      : null;
+    // 1 where a texel's biome is sandy desert (Hot desert 1 / Cold desert 2); null when none exists.
+    this.sandMask = this.biomeAtlas.some((id) => id === 1 || id === 2)
+      ? Uint8Array.from(this.biomeAtlas, (id) => (id === 1 || id === 2 ? 1 : 0))
       : null;
     // Tundra and glacier rise into snow mountains (AlpineRelief.js); null when the world has none.
     this.alpineMask = createAlpineMask({
@@ -419,6 +425,11 @@ export class AzgaarMacroWorldGenerator {
   /** 0..1, how far a vertex lies inside canyon country, eased across one atlas texel. */
   canyonWeight(cellX, cellZ) {
     return this.canyonMask ? this.sampleAtlasBilinear(this.canyonMask, cellX, cellZ) : 0;
+  }
+
+  /** 0..1, how far a vertex lies inside sandy desert biomes. */
+  sandWeight(cellX, cellZ) {
+    return this.sandMask ? this.sampleAtlasBilinear(this.sandMask, cellX, cellZ) : 0;
   }
 
   /** 0..1, how far a vertex lies inside cold mountain country. */
@@ -602,10 +613,25 @@ export class AzgaarMacroWorldGenerator {
     const canyon = this.canyonWeight(vertexX, vertexZ);
     // The alpine range carries its own, larger crests in place of the high-ground ridges.
     const alpine = this.alpineWeight(vertexX, vertexZ);
+    const desert = this.sandWeight(vertexX, vertexZ);
+    const climate = this.hasTemperatureGuidance
+      ? this.sampleEnvironmentClimate(
+        vertexX,
+        vertexZ,
+        this._climateScratch ??= { temperature: 0, moisture: 0.5, fertility: 0.5, valid: false },
+      )
+      : null;
+    const tempSnow = climate?.valid ? clamp((-climate.temperature - 0.15) * 1.4, 0, 1) : 0;
+    const snow = Math.max(alpine * 0.8, tempSnow);
+    const sand = desert * (1 - Math.min(1, alpine + tempSnow) * 0.8);
+    const surfaceRelief = (sand > 0.01 || snow > 0.05)
+      ? climateSurfaceRelief(vertexX, vertexZ, this.seed, { sand, snow, mountain: elevationFraction }) * coastFade
+      : 0;
     // The far backdrop skips landforms: it sits heightBias under them, past their reach.
     return base
       + detail * coastFade * ruggedness * this.morphologyScale(vertexX, vertexZ)
       + landformRelief(vertexX, vertexZ, this.seed) * clamp((rawHeight - LAND_HEIGHT) / LANDFORM_COAST_RAW, 0, 1)
+      + surfaceRelief
       + this.ridgeRelief(vertexX, vertexZ, elevationFraction, ridgeHeightWithFine) * coastFade * (1 - canyon) * (1 - alpine)
       + this.alpineRelief(vertexX, vertexZ, alpine * coastFade, true)
       + (canyon > 0 ? canyonRelief(vertexX, vertexZ, this.seed) * canyon * coastFade : 0);

@@ -29,6 +29,7 @@ import {
   createTerrainMaterialFeatureState,
 } from './TerrainMaterialFeatureResponseNodes.js';
 import { createTerrainSurfaceNormal } from './TerrainMaterialSurfaceGradientNodes.js';
+import { applyTerrainMicrogeometryNormal } from './TerrainMicrogeometryNodes.js';
 import {
   applyTerrainWeatheringColor,
   createTerrainWeatheringState,
@@ -286,10 +287,18 @@ export function createTerrainMaterialBakedSurface({
     families.normalFadeEndDistance,
     cameraDistance,
   ));
-  const surfaceNormal = createTerrainSurfaceNormal({
+  const baseSurfaceNormal = createTerrainSurfaceNormal({
     encodedNormal: samples.farNormal,
     detailHeight,
     detailStrength: normalVisibility.mul(families.normalStrength),
+  });
+  const surfaceNormal = applyTerrainMicrogeometryNormal({
+    surfaceNormal: baseSurfaceNormal,
+    worldXZ,
+    materialWeights: weights,
+    pathMask,
+    waterMask: samples.canopyWater.g,
+    cameraDistance,
   });
   const readyNormal = select(
     gpuState.ready.greaterThan(0.5),

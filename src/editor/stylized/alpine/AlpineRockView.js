@@ -18,11 +18,12 @@ const SNOW_CAP_GROUND_Y = -0.15;
 /** Inside the near terrain: past it the far mesh is too coarse to stand a rock on. */
 const REACH_CELLS = 7;
 const CELLS_PER_FRAME = 10;
-const CAPACITY = 220;
+const CAPACITY = 360;
 /** Ground below this height needs a snowy or craggy biome (biome-looks `crags`) to grow these. */
 const ALPINE_HEIGHT = 550;
 const COLD_GROUND_SNOW = 0.5;
 const SLOPE_STEP_METERS = 3;
+const MACRO_SLOPE_STEP_METERS = 40;
 /** Share of a rock's height left in the ground, so it breaks out rather than sits on it. */
 const BURIAL = 0.35;
 const UP = new THREE.Vector3(0, 1, 0);
@@ -82,7 +83,32 @@ export class AlpineRockView {
     const snow = Math.max(biomeSnow, THREE.MathUtils.smoothstep(height, snowLine, snowLine + snowFade));
     const dx = (view.getCanonicalHeight(x + SLOPE_STEP_METERS, z) - height) / SLOPE_STEP_METERS;
     const dz = (view.getCanonicalHeight(x, z + SLOPE_STEP_METERS) - height) / SLOPE_STEP_METERS;
-    return { allowed, slope: Math.hypot(dx, dz), height, dx, dz, snow };
+    const slope = Math.hypot(dx, dz);
+    const hE = view.getCanonicalHeight(x + MACRO_SLOPE_STEP_METERS, z);
+    const hW = view.getCanonicalHeight(x - MACRO_SLOPE_STEP_METERS, z);
+    const hN = view.getCanonicalHeight(x, z + MACRO_SLOPE_STEP_METERS);
+    const hS = view.getCanonicalHeight(x, z - MACRO_SLOPE_STEP_METERS);
+    const macroSlope = Math.hypot(
+      (hE - hW) / (2 * MACRO_SLOPE_STEP_METERS),
+      (hN - hS) / (2 * MACRO_SLOPE_STEP_METERS),
+    );
+    const surroundHeight = (hE + hW + hN + hS) * 0.25;
+    const concavity = surroundHeight - height;
+    const elevationStrength = THREE.MathUtils.smoothstep(height, this.seaLevel + 140, ALPINE_HEIGHT + 80);
+    const macroReliefStrength = THREE.MathUtils.smoothstep(macroSlope, 0.22, 0.65);
+    const biomeCragBoost = this.cragsByTile[tile] === 1 ? 0.25 : 0;
+    const mountainFactor = THREE.MathUtils.clamp(
+      Math.max(macroReliefStrength, elevationStrength * 0.85) + biomeCragBoost * macroReliefStrength,
+      0,
+      1,
+    );
+    const screeFactor = THREE.MathUtils.clamp(
+      THREE.MathUtils.smoothstep(concavity, 1.5, 11) * THREE.MathUtils.smoothstep(macroSlope, 0.14, 0.55)
+      + THREE.MathUtils.smoothstep(slope, 0.28, 0.72) * mountainFactor * 0.45,
+      0,
+      1,
+    );
+    return { allowed, slope, height, dx, dz, snow, mountainFactor, screeFactor };
   }
 
   resolveCell(cellX, cellZ) {
@@ -175,9 +201,11 @@ export class AlpineRockView {
       const batch = this.lodBatches.index(rock);
       const mesh = this.meshes[batch];
       if (mesh.count >= CAPACITY) continue;
-      scratch.position.set(rock.x - this.anchor.x, rock.y + rock.scale * rock.stretch * (0.5 - BURIAL), rock.z - this.anchor.z);
+      const burial = rock.burial ?? BURIAL;
+      scratch.position.set(rock.x - this.anchor.x, rock.y + rock.scale * rock.stretch * (0.5 - burial), rock.z - this.anchor.z);
       // Half way to the slope: crags lean with the mountain without lying flat on it.
-      normal.set(-rock.dx * 0.5, 1, -rock.dz * 0.5).normalize();
+      const tilt = rock.tiltFactor ?? 0.5;
+      normal.set(-rock.dx * tilt, 1, -rock.dz * tilt).normalize();
       scratch.quaternion.setFromUnitVectors(UP, normal).multiply(spin.setFromAxisAngle(UP, rock.yaw));
       scratch.scale.set(rock.scale, rock.scale * rock.stretch, rock.scale);
       scratch.updateMatrix();

@@ -15,13 +15,21 @@ const WARP_REACH_CELLS = 36;
 /** Wavelengths in cells, heights in metres. */
 const SWELL_CELLS = 88;
 const SWELL_DETAIL_CELLS = 37;
-const SWELL_METERS = 9;
+const SWELL_METERS = 8;
 const GULLY_CELLS = 64;
-const GULLY_METERS = 3.5;
+const GULLY_METERS = 3.2;
 /** Mean of the gully crease, kept out so gullies cut without lowering the land. */
 const GULLY_MEAN = 0.2;
-const KNOLL_CELLS = 15;
-const KNOLL_METERS = 1;
+const TRIBUTARY_CELLS = 30;
+const TRIBUTARY_METERS = 1.35;
+const TRIBUTARY_MEAN = 0.22;
+const DEPRESSION_CELLS = 22;
+const DEPRESSION_METERS = 1.4;
+const DEPRESSION_MEAN = 0.16;
+const KNOLL_CELLS = 14;
+const KNOLL_METERS = 0.85;
+const HUMMOCK_CELLS = 5.5;
+const HUMMOCK_METERS = 0.45;
 
 function smoothstep(edge0, edge1, value) {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -38,8 +46,21 @@ export function landformRelief(cellX, cellZ, seed = 0) {
   const swell = valueNoise(x / SWELL_CELLS, z / SWELL_CELLS, s + 4) * 0.72
     + valueNoise(x / SWELL_DETAIL_CELLS, z / SWELL_DETAIL_CELLS, s + 5) * 0.28;
   const crease = (1 - Math.abs(valueNoise(x / GULLY_CELLS, z / GULLY_CELLS, s + 6))) ** 4;
-  return district * (swell * SWELL_METERS - (crease - GULLY_MEAN) * GULLY_METERS)
-    + valueNoise(x / KNOLL_CELLS, z / KNOLL_CELLS, s + 7) * KNOLL_METERS;
+  // Branching tributary channels cut across swells along rotated warp coordinates.
+  const tx = x * 0.8 + z * 0.6;
+  const tz = z * 0.8 - x * 0.6;
+  const tributary = (1 - Math.abs(valueNoise(tx / TRIBUTARY_CELLS, tz / TRIBUTARY_CELLS, s + 8))) ** 3;
+  // Localized swales and wind-scoured depressions without depressing waterlogged coasts globally.
+  const basinRaw = Math.max(0, -valueNoise(x / DEPRESSION_CELLS, z / DEPRESSION_CELLS, s + 9) - 0.18);
+  const depression = (basinRaw * basinRaw - DEPRESSION_MEAN) * DEPRESSION_METERS;
+  const knolls = valueNoise(x / KNOLL_CELLS, z / KNOLL_CELLS, s + 7) * KNOLL_METERS
+    + valueNoise(cellX / HUMMOCK_CELLS, cellZ / HUMMOCK_CELLS, s + 10) * HUMMOCK_METERS;
+  return district * (
+    swell * SWELL_METERS
+    - (crease - GULLY_MEAN) * GULLY_METERS
+    - (tributary - TRIBUTARY_MEAN) * TRIBUTARY_METERS
+    - depression
+  ) + knolls;
 }
 
 /** 0 at the waterline, 1 a few metres above it: coasts and low wetlands keep their height. */

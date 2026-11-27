@@ -30,6 +30,8 @@ import:
     fullRelief: 0.65
     couloirMeters: 45
     notchMeters: 40
+    foothillMeters: 52
+    gullyMeters: 22
     fineMeters: 16
   # Azgaar roads and trails graded into walkable paths (world/TrailGrading.js):
   # the ground along each is cut and filled toward a profile no steeper than

@@ -31,3 +31,18 @@ export function valueNoise(x, z, seed) {
   const south = hash2d(x0, z0 + 1, seed) + (hash2d(x0 + 1, z0 + 1, seed) - hash2d(x0, z0 + 1, seed)) * tx;
   return (north + (south - north) * tz) * 2 - 1;
 }
+
+/** Normalized multi-octave value noise in [-1, 1]. */
+export function fractalValueNoise(x, z, seed, octaves = 2) {
+  let sum = 0;
+  let amplitude = 1;
+  let norm = 0;
+  let frequency = 1;
+  for (let i = 0; i < octaves; i += 1) {
+    sum += valueNoise(x * frequency, z * frequency, seed + i * 101) * amplitude;
+    norm += amplitude;
+    amplitude *= 0.5;
+    frequency *= 2.03;
+  }
+  return norm > 0 ? sum / norm : 0;
+}

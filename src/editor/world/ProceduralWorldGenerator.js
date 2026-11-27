@@ -1,5 +1,6 @@
 import { classifyProceduralBiome } from './proceduralBiomeClassification.js';
 import { createBiomeBoundaryWarp } from './BiomeBoundaryWarp.js';
+import { climateSurfaceRelief, proceduralMountainRelief } from './MultiscaleTerrainRelief.js';
 import { landformRelief, landformShoreFade } from './TerrainLandforms.js';
 import {
   WORLD_DEFAULT_HEIGHT_SCALE,
@@ -95,7 +96,27 @@ export class ProceduralWorldGenerator {
     const height = continental * this.heightScale
       + hills * this.heightScale * 0.34
       + detail * this.heightScale * 0.08;
-    return height + landformRelief(vertexX, vertexZ, this.seed) * landformShoreFade(height - this.seaLevel);
+    const mountainRelief = proceduralMountainRelief(vertexX, vertexZ, this.seed, height, this.seaLevel);
+    const baseAndMountain = height + mountainRelief;
+    const shoreFade = landformShoreFade(baseAndMountain - this.seaLevel);
+    if (shoreFade <= 0) return baseAndMountain;
+    const { temperature, moisture } = this.sampleClimate(vertexX, vertexZ);
+    const normalizedMoisture = Math.max(0, Math.min(1, moisture * 0.5 + 0.5));
+    const elevationSnow = Math.max(0, Math.min(1, (baseAndMountain - this.seaLevel - this.heightScale * 0.85) / 60));
+    const snow = Math.max(
+      Math.max(0, Math.min(1, (-temperature - 0.15) * 1.8)),
+      elevationSnow,
+    );
+    const sand = Math.max(0, Math.min(1, (temperature - 0.05) * 1.6))
+      * Math.max(0, Math.min(1, (0.55 - normalizedMoisture) * 2.2))
+      * (1 - snow);
+    const localRelief = landformRelief(vertexX, vertexZ, this.seed)
+      + climateSurfaceRelief(vertexX, vertexZ, this.seed, {
+        sand,
+        snow,
+        mountain: Math.max(0, Math.min(1, mountainRelief / 120)),
+      });
+    return baseAndMountain + localRelief * shoreFade;
   }
 
   sampleHeight(vertexX, vertexZ) {

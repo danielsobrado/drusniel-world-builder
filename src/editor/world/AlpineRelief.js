@@ -1,4 +1,4 @@
-import { ridgedField, ridgeFineHeight, ridgeHeight } from './MountainRidges.js';
+import { foothillHeight, ridgedField, ridgeFineHeight, ridgeHeight } from './MountainRidges.js';
 
 /**
  * Snow mountains for the cold biomes. Azgaar paints tundra and glacier wherever
@@ -19,7 +19,7 @@ import { ridgedField, ridgeFineHeight, ridgeHeight } from './MountainRidges.js';
 /** Azgaar's standard Tundra and Glacier biome ids (engine terrain ids 10, 11). */
 export const ALPINE_SOURCE_BIOMES = Object.freeze([10, 11]);
 /** Distance over which the range rises from its border, metres. */
-const RAMP_METERS = 2500;
+const RAMP_METERS = 3000;
 /** Mean lift of the range, metres; the massif and crests are centred on it. */
 const UPLIFT_METERS = 250;
 /**
@@ -38,8 +38,17 @@ const ALPINE_RIDGES = Object.freeze({
   fullRelief: 1e-6,
   couloirMeters: 20,
   notchMeters: 18,
+  foothillMeters: 0,
+  gullyMeters: 18,
   fineMeters: 5,
 });
+const ALPINE_FOOTHILL_METERS = 48;
+const ALPINE_FOOTHILL_CONFIG = Object.freeze({
+  startRelief: 0.1,
+  fullRelief: 0.8,
+  foothillMeters: ALPINE_FOOTHILL_METERS,
+});
+const ALPINE_TALUS_METERS = 6;
 
 /** Separable box blur, run twice (a tent), over a width × height Float32Array in place. */
 function blur(values, width, height, radius) {
@@ -111,9 +120,27 @@ export function createAlpineMask({ biomes, heights, features, lakeIds, width, he
  */
 export function alpineHeight(x, z, seed, weight, calm = 0, fine = false) {
   if (weight <= 0) return 0;
-  let crests = (ridgedField(x / MASSIF_STRETCH, z / MASSIF_STRETCH, seed + MASSIF_SEED) - 0.35) * MASSIF_METERS
-    + ridgeHeight(x, z, seed, 1, ALPINE_RIDGES);
-  if (fine) crests += ridgeFineHeight(x, z, seed, 1, ALPINE_RIDGES);
+  // Progressive foothill apron precedes the high massif so peaks grow out of the surrounding terrain.
+  const coreWeight = Math.min(1, Math.max(0, (weight - 0.18) / 0.82));
+  const coreScale = coreWeight * coreWeight * (3 - 2 * coreWeight);
+  const foothillMask = Math.min(1, weight / 0.55) * (1 - 0.45 * coreScale);
+  const foothill = foothillHeight(
+    x,
+    z,
+    seed + 317,
+    0.55,
+    ALPINE_FOOTHILL_CONFIG,
+    foothillMask,
+  );
+  let crests = foothill + (
+    (ridgedField(x / MASSIF_STRETCH, z / MASSIF_STRETCH, seed + MASSIF_SEED) - 0.35) * MASSIF_METERS
+    + ridgeHeight(x, z, seed, 1, ALPINE_RIDGES)
+  ) * coreScale;
+  if (fine) {
+    const talusBelt = Math.max(0, Math.min(1, (weight - 0.08) / 0.55)) * (1 - 0.6 * coreScale);
+    const talus = (ridgedField(x * 0.75, z * 0.75, seed + 5209) - 0.25) * ALPINE_TALUS_METERS * talusBelt;
+    crests += ridgeFineHeight(x, z, seed, 1, ALPINE_RIDGES) * coreScale + talus;
+  }
   return (UPLIFT_METERS + crests * (1 - calm)) * weight;
 }
 
