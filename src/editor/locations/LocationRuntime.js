@@ -153,6 +153,7 @@ export class LocationRuntime {
       this.record.active = { siteId: site.id, anchor };
       this.#write();
       this.state = INSIDE;
+      this.surfaceResidency?.begin(anchor);
     } catch (error) {
       failed = error;
       if (preparation.signal.aborted) {
@@ -184,9 +185,13 @@ export class LocationRuntime {
       theme: { ...this.catalog.returnTheme, subtitle: `Leaving ${leaving.site.title}` },
     });
     let failed = null;
+    const preparation = new AbortController();
+    this.preparation = preparation;
     try {
       session.start('release');
       await nextPaint();
+      await this.surfaceResidency?.restore(preparation.signal);
+      preparation.signal.throwIfAborted();
       // Swap back to the world before anything can fail: its frame loop must be running for the cut.
       this.current = null;
       this.anchor = null;
@@ -206,11 +211,16 @@ export class LocationRuntime {
       }
     } catch (error) {
       failed = error;
+      if (preparation.signal.aborted) {
+        session.finish();
+        return false;
+      }
       console.error('Returning to the surface failed.', error);
       session.fail(error);
     } finally {
+      if (this.preparation === preparation) this.preparation = null;
       player.cutBlocked = false;
-      this.state = IDLE;
+      this.state = this.current ? INSIDE : IDLE;
     }
     if (failed) await new Promise((resolve) => { setTimeout(resolve, FAILURE_NOTICE_MS); });
     session.finish();
@@ -244,6 +254,7 @@ export class LocationRuntime {
       this.renderer.render(this.current.scene, camera);
     }
     if (this.state !== INSIDE) return;
+    this.surfaceResidency?.update();
     const feet = this.playerController.state;
     const exit = this.current.exitNear(feet.x, feet.footY ?? feet.y, feet.z);
     this.nearExit = exit;
@@ -287,6 +298,7 @@ export class LocationRuntime {
   dispose() {
     this.disposed = true;
     this.preparation?.abort();
+    this.surfaceResidency?.dispose();
     this.current?.dispose();
     this.current = null;
     this.playerController.groundOverride = null;

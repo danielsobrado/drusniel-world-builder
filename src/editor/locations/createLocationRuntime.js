@@ -4,6 +4,7 @@ import { TownInteractionPrompt } from '../towns/TownInteractionPrompt.js';
 import { setDefaultMineTimberConfig } from './gen/mineTimberConfig.js';
 import { LOCATION_GENERATORS } from './generators/index.js';
 import { resolveLocationCatalog } from './LocationCatalog.js';
+import { LocationSurfaceResidency } from './LocationSurfaceResidency.js';
 import { LocationRuntime } from './LocationRuntime.js';
 import { LocationDevMenu } from './ui/LocationDevMenu.js';
 
@@ -17,7 +18,7 @@ import { LocationDevMenu } from './ui/LocationDevMenu.js';
 export function createLocationRuntime({
   renderer, loading, playerController, viewModeController, cameraCutCoordinator, floatingOrigin, walkMode, baseUrl,
   decorationBudget = null, structureBudget = null,
-  atmosphericBudget = null,
+  atmosphericBudget = null, surface = null, surfaceBudget = null,
   search = window.location.search, storage = window.localStorage,
 }) {
   setDefaultMineTimberConfig(mineTimberSource);
@@ -26,9 +27,11 @@ export function createLocationRuntime({
     quality: new URLSearchParams(search).get('locationQuality'),
   });
   const prompt = new TownInteractionPrompt();
+  const surfaceResidency = surface && surfaceBudget?.surfaceReclamationEnabled
+    ? new LocationSurfaceResidency(surface, renderer, surfaceBudget) : null;
   const runtime = new LocationRuntime({
     catalog, generators: LOCATION_GENERATORS, renderer, loading, playerController, viewModeController,
-    cameraCutCoordinator, floatingOrigin, prompt, baseUrl, walkMode, storage, decorationBudget, structureBudget, atmosphericBudget,
+    cameraCutCoordinator, floatingOrigin, prompt, baseUrl, walkMode, storage, decorationBudget, structureBudget, atmosphericBudget, surfaceResidency,
   });
   const menu = new LocationDevMenu({
     sites: catalog.showcaseSites().map((site) => ({ id: site.id, title: site.title, subtitle: site.subtitle })),

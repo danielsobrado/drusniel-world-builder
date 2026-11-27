@@ -32,6 +32,14 @@ locationStructureBudget:
   generationWorkerTimeoutMs: 120000
   lightingEnabled: false
   lightingSliceMs: 4
+  surfaceReclamationEnabled: false
+  surfaceProtectMeters: 192
+  surfaceIdleMs: 5000
+  surfaceSampleMs: 500
+  surfaceEvictionsPerSample: 4
+  surfaceMaxEvictedBytes: 33554432
+  surfaceRestoreBytesPerFrame: 2097152
+  surfaceRestoresPerFrame: 4
 geologyAdmissionBudget:
   triangleBudget: 100000
   protectMeters: 64
