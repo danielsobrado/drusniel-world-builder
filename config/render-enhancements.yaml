@@ -12,6 +12,14 @@ locationStructureBudget:
   idleMs: 5000
   sampleMs: 250
   evictionsPerSample: 2
+  prefetchEnabled: false
+  prefetchExtraMeters: 28
+  prefetchLookaheadMs: 1000
+  prefetchMaxLeadMeters: 28
+  prefetchSliceBytes: 262144
+  prefetchMaxDetachedBytes: 33554432
+  prefetchMaxAllocationsPerFrame: 2
+  prefetchMaxMs: 1
 geologyAdmissionBudget:
   triangleBudget: 100000
   protectMeters: 64

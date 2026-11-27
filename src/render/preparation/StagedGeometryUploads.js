@@ -19,12 +19,12 @@ function descriptor(attribute, index = false, minBytes = MIN_STAGED_BYTES, expli
 
 /** Only layouts the pinned backend does not repack. Ordinary instance matrices
  * and colors may be wrapped by Three's nodes; storage attributes are direct. */
-export function stagedGeometryAttributes(mesh, includeSmallInstances = false) {
+export function stagedGeometryAttributes(mesh, includeSmallInstances = false, minStaticBytes = MIN_STAGED_BYTES) {
   const geometry = mesh.geometry;
   const candidates = Object.values(geometry?.attributes ?? {}).map(attribute => descriptor(attribute, false,
     includeSmallInstances && (attribute.isInstancedBufferAttribute || attribute.isStorageInstancedBufferAttribute)
-      ? WORD_BYTES : MIN_STAGED_BYTES));
-  candidates.push(descriptor(geometry?.index, true));
+      ? WORD_BYTES : minStaticBytes));
+  candidates.push(descriptor(geometry?.index, true, minStaticBytes));
   if (mesh.instanceMatrix?.isStorageInstancedBufferAttribute) {
     candidates.push(descriptor(mesh.instanceMatrix, false, includeSmallInstances ? WORD_BYTES : MIN_STAGED_BYTES));
     if (includeSmallInstances && mesh.instanceColor?.isInstancedBufferAttribute
@@ -37,6 +37,7 @@ export class StagedGeometryUploads {
   constructor(renderer, settings = null) {
     this.renderer = renderer;
     this.settings = settings;
+    this.counterPrefix = settings?.counterPrefix ?? 'initialInstance';
     this.jobs = new Map();
     this.fallbacks = new WeakSet();
     this.detachedBytes = 0;
@@ -51,7 +52,7 @@ export class StagedGeometryUploads {
   beginFrame() { this.allocations = 0; }
 
   entries(mesh) {
-    const entries = stagedGeometryAttributes(mesh, Boolean(this.settings && isDirectInstanceMesh(mesh)));
+    const entries = stagedGeometryAttributes(mesh, Boolean(this.settings && isDirectInstanceMesh(mesh)), this.settings?.minStaticBytes);
     const compute = this.settings && initialComputeDraw(mesh);
     if (compute?.isDormant()) {
       for (const attribute of compute.storageAttributes) {
@@ -74,14 +75,14 @@ export class StagedGeometryUploads {
     if (destroy) job.buffer.destroy();
     jobs.delete(attribute);
     this.detachedBytes -= job.size;
-    if (this.settings) PerfCounters.set('initialInstanceDetachedBytes', this.detachedBytes);
+    if (this.settings) PerfCounters.set(`${this.counterPrefix}DetachedBytes`, this.detachedBytes);
   }
 
   fallback(mesh, bytes, reason) {
     this.cancel(mesh);
     this.fallbacks.add(mesh);
-    PerfCounters.inc('initialInstanceFallbacks');
-    PerfCounters.inc(`initialInstanceFallback.${reason}`);
+    PerfCounters.inc(`${this.counterPrefix}Fallbacks`);
+    PerfCounters.inc(`${this.counterPrefix}Fallback.${reason}`);
     return { ready: true, bytes, attributes: [] };
   }
 
@@ -113,7 +114,7 @@ export class StagedGeometryUploads {
           job.version = attribute.version;
           job.array = attribute.array;
           job.offset = 0;
-          PerfCounters.inc('initialInstanceRestarts');
+          PerfCounters.inc(`${this.counterPrefix}Restarts`);
         } else {
           this.drop(jobs, attribute);
           job = null;
@@ -140,8 +141,8 @@ export class StagedGeometryUploads {
         PerfCounters.inc('stagedGeometryAllocationBytes', size);
         PerfCounters.inc('stagedGeometryAllocationMs', performance.now() - started);
         if (this.settings) {
-          PerfCounters.inc('initialInstanceAllocations');
-          PerfCounters.set('initialInstanceDetachedBytes', this.detachedBytes);
+          PerfCounters.inc(`${this.counterPrefix}Allocations`);
+          PerfCounters.set(`${this.counterPrefix}DetachedBytes`, this.detachedBytes);
         }
       }
       if (job.device !== backend.device) return this.fallback(mesh, bytes, 'device');
@@ -159,7 +160,7 @@ export class StagedGeometryUploads {
         }
         job.offset += length; bytes += length;
         PerfCounters.inc('stagedGeometryUploadBytes', length);
-        if (this.settings) PerfCounters.inc('initialInstanceSlicedBytes', length);
+        if (this.settings) PerfCounters.inc(`${this.counterPrefix}SlicedBytes`, length);
         if (job.offset < job.size) return { ready: false, bytes, attributes };
       }
       attributes.push(attribute);
@@ -188,7 +189,7 @@ export class StagedGeometryUploads {
       }
       attribute.clearUpdateRanges();
       this.drop(jobs, attribute, false);
-      if (this.settings) PerfCounters.inc('initialInstanceAdoptedBuffers');
+      if (this.settings) PerfCounters.inc(`${this.counterPrefix}AdoptedBuffers`);
     }
     this.jobs.delete(mesh);
   }
