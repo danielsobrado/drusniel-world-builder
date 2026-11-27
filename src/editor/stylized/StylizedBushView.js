@@ -1,6 +1,6 @@
 import { completeIterator, ITERATOR_PENDING } from './ResumableIterator.js';
 import { cachedLodPlan } from './lod/CachedLodPlan.js';
-import { stepViewRebuild } from './StagedViewRebuild.js';
+import { stepViewRebuild, cancelStagedViewRebuild } from './StagedViewRebuild.js';
 import * as THREE from 'three/webgpu';
 import { understoryLookAt } from '../biomes/understoryRampLooks.js';
 import { valueNoise } from '../world/valueNoise2d.js';
@@ -19,7 +19,6 @@ import {
   pruneStateMap,
 } from './lod/StylizedLodRuntime.js';
 import { drawnRepresentations, ScatterInstanceRows } from './lod/ScatterInstanceRows.js';
-import { admitSceneryPublication } from './lod/InstancePublicationPlan.js';
 import { InstanceAnchor } from './lod/InstanceAnchor.js';
 import { ScatterClusterField } from './forest/ScatterClusterField.js';
 import { canopyShade, forestFloorDensity, understoryClusterDensity } from './forest/ForestFloor.js';
@@ -567,8 +566,7 @@ export class StylizedBushView {
     if (this.sceneryPublicationBudget) {
       const proposed = this.instanceAnchor.proposed(this.terrainView.floatingOrigin.getState());
       const publication = yield* this.instanceRows.prepareCommit(job, this.meshes, this.proxyMeshes, proposed);
-      yield* admitSceneryPublication(() => this.sceneryPublicationBudget, publication.bytes);
-      counts = publication.commit();
+      counts = yield* publication.publish(() => this.sceneryPublicationBudget);
       this.instanceAnchor.x = proposed.x;
       this.instanceAnchor.z = proposed.z;
     } else {
@@ -592,6 +590,7 @@ export class StylizedBushView {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    cancelStagedViewRebuild(this);
     this.terrainView.scene.remove(this.root);
     disposeInstancedRenderers(this.root, this.meshes);
     disposeInstancedRenderers(this.root, this.proxyMeshes);
