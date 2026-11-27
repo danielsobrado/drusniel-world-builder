@@ -1,5 +1,5 @@
 /**
- * The coat coverage a material lays, published on the material itself.
+ * The coat coverage a material lays, recorded against the material itself.
  *
  * Each surface decides where its coats lie from its own masks (see
  * docs/surface-coatings); this is only where it records the result, so a reader
@@ -7,25 +7,38 @@
  * snow, the rock view's snow-aware proxies) sees exactly the coverage drawn,
  * instead of guessing it again from normals and altitude.
  *
- * Coverage nodes are 0..1 TSL nodes in the material's own graph. A reader that
- * builds another material from them must not use material-specific nodes
- * (they are built from geometry, attributes, textures and uniforms only).
+ * Coverage nodes are 0..1 TSL nodes in the material's own graph. They are kept
+ * in a WeakMap, not `userData`: `Material.clone()` deep-copies `userData` through
+ * JSON, which turned every node into an empty object, and a diagnostic built
+ * from one failed WGSL with `[object Object]`. A clone does not inherit coverage
+ * by itself; the code that clones a coated material passes it on with
+ * `inheritCoatCoverage`.
  */
-const KEY = 'coatCoverage';
 export const COAT_LAYERS = Object.freeze(['moss', 'snow', 'wet']);
+const EMPTY = Object.freeze({});
+const coverageByMaterial = new WeakMap();
 
 /** Records `{ moss, snow, wet }` coverage nodes on `material`; layers left out keep what was published before. */
 export function publishCoatCoverage(material, layers) {
-  const current = material.userData[KEY] ?? {};
-  const next = { ...current };
+  const next = { ...(coverageByMaterial.get(material) ?? EMPTY) };
   for (const layer of COAT_LAYERS) {
-    if (layers[layer] !== undefined && layers[layer] !== null) next[layer] = layers[layer];
+    const node = layers[layer];
+    if (node === undefined || node === null) continue;
+    if (!node.isNode) throw new TypeError(`Coat coverage "${layer}" must be a TSL node.`);
+    next[layer] = node;
   }
-  material.userData[KEY] = Object.freeze(next);
+  coverageByMaterial.set(material, Object.freeze(next));
   return material;
 }
 
 /** The coverage a material published, or an empty record. */
 export function coatCoverageOf(material) {
-  return material?.userData?.[KEY] ?? Object.freeze({});
+  return (material && coverageByMaterial.get(material)) ?? EMPTY;
+}
+
+/** Gives `clone` the coverage `source` published, for materials cloned after their coats were laid. */
+export function inheritCoatCoverage(source, clone) {
+  const coverage = source && coverageByMaterial.get(source);
+  if (coverage && clone) coverageByMaterial.set(clone, coverage);
+  return clone;
 }

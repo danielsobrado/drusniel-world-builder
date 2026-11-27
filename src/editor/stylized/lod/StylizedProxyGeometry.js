@@ -11,6 +11,7 @@ import { treeFoliageEmission, treeBarkEmission } from '../forest/foliageLight.js
 import { resolveCanopyGrade } from '../forest/canopyGrade.js';
 import { applyTreeBarkWetSurface } from '../forest/TreeWetSurface.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
+import { inheritCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
 function unionBounds(parts, kind = null) {
   const box = new THREE.Box3();
@@ -217,7 +218,7 @@ export function createRockProxyPrototype(prototype, proxyColor = '#b8ad98') {
   geometry.translate(center.x, center.y, center.z);
   geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
-  const material = prototype.material.clone();
+  const material = inheritCoatCoverage(prototype.material, prototype.material.clone());
   if ('map' in material) material.map = null;
   if ('color' in material) material.color = new THREE.Color(proxyColor);
   material.flatShading = true;

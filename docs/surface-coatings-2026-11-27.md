@@ -73,7 +73,8 @@ the edge.
 | Alpine crags | `stylized/alpine/AlpineRockMaterial.js` | cold stone → snow coat |
 | Workshop houses in settlements | `render/materials/townGrade.js`, then `world/settlements/view/SettlementSnow.js` | graded surface → moss coat → wet film → snow coat |
 | Medieval town kit | `towns/TownKitMaterial.js` | atlas → weathering → moss coat → wet film → snow coat |
-| Tree trunks | `stylized/barkWeathering.js` | bark → moss coat → soil/wet → trunk snow (colour only) |
+| Tree trunks | `stylized/barkWeathering.js` | bark → moss coat → soil/wet → snow coat |
+| Fallen logs, stumps, deadwood flora | `stylized/forest/forestDebrisPrototypes.js` (`deadwoodMaterial`) | graded wood → moss coat → ground contact → snow coat → wet |
 
 `weatherTownLayers` in `render/materials/townWeathering.js` returns the
 weathered colour **without** moss, plus the moss layer
@@ -85,6 +86,16 @@ derives from its normal map.
 Snow comes after moss, so snow covers it without moving the moss beneath.
 On towns, a thinner snowfall raises the hold threshold: fewer faces are
 covered, each fully, instead of every face in a grey film.
+
+## Published coverage (`CoatCoverage.js`)
+
+Every surface above records the coverage it lays on its own material with
+`publishCoatCoverage(material, { moss, snow, wet })`; the terrain publishes its
+baked snow. Readers that are not the surface's own shader use
+`coatCoverageOf(material)` instead of re-deriving coverage: the WSC diagnostics
+D22 (moss) and D23 (snow) draw it in a clone of the source material, unlit, and
+the rock view's snow-aware emission reads it. Publishing is a record, not a
+second coverage system: the masks are still each surface's own.
 
 ## Configuration
 
@@ -100,6 +111,7 @@ only. It is resolved and validated by `resolveSurfaceCoatings` when
 | `snow.roughness`, `moss.roughness` | Coat roughness, 0..1 |
 | `moss.pillowHeight`, `moss.tuftHeight` | Relief in metres (≤ 0.1) |
 | `moss.recessShade` | How much darker the ground between cushions is |
+| `moss.palette.deep`, `.dark`, `.light` | The one moss pigment rocks, trunks and deadwood grow (`#rrggbb`); each surface still tints it by its biome look |
 | `detail.nearDistance`, `detail.farDistance` | Micro-detail fade, metres |
 
 Biome moss and snow amounts stay in `config/biome-looks.yaml`, and the snowline

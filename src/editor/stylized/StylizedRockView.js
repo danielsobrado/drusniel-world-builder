@@ -57,7 +57,7 @@ import { fitRockToGround } from './rockGroundFit.js';
 import { rockWaterContact } from './localRockWater.js';
 import { staticWaterContactAt } from '../water/StaticWaterSample.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
-import { coatCoverageOf } from './surfaceCoatings/CoatCoverage.js';
+import { coatCoverageOf, inheritCoatCoverage } from './surfaceCoatings/CoatCoverage.js';
 
 const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
 /** Minimum triangles for a prototype to be scaled up 4.5–8.5x as a rock formation keystone/stone. */
@@ -369,7 +369,7 @@ export class StylizedRockView {
       const prototype = newPrototypes[i];
       const geometry = proxyOverrides[i] ? bakeSnowNormal(proxyOverrides[i]) : prototype.geometry.clone();
       yield geometry;
-      const material = prototype.material.clone();
+      const material = inheritCoatCoverage(prototype.material, prototype.material.clone());
       yield material;
       newProxyPrototypes.push([{ geometry, material, kind: 'rock',
         instanceSurface: prototype.instanceSurface, instanceBiomeLook: prototype.instanceBiomeLook }]);

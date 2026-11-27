@@ -26,7 +26,7 @@ because no gameplay reads storm snow.
 ### Coverage contract
 
 Coverage stays where `CLAUDE.md` and
-[surface coatings](../surface-coatings-2026-11-17.md) put it. The field lays no
+[surface coatings](../surface-coatings-2026-11-27.md) put it. The field lays no
 snow and adds no second snow coverage system. It only replaces the
 storm-snow **input** that each surface's existing mask already reads:
 

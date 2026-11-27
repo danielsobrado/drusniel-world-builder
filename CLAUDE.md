@@ -39,7 +39,7 @@ there only with a reason.
 
 Snow and moss on rocks, towns and trunks are coats with their own albedo,
 normal and roughness, laid over the surface by its existing coverage mask — see
-[surface coatings](docs/surface-coatings-2026-11-17.md). Coverage stays with each surface's
+[surface coatings](docs/surface-coatings-2026-11-27.md). Coverage stays with each surface's
 masks; never add a second snow or moss coverage system, and never mix moss into
 a colour that the moss coat also lays.
 

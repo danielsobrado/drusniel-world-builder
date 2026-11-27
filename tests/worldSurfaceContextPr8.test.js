@@ -4,7 +4,7 @@ import test from 'node:test';
 import yaml from 'js-yaml';
 import * as THREE from 'three/webgpu';
 import { float } from 'three/tsl';
-import { coatCoverageOf, publishCoatCoverage } from '../src/editor/stylized/surfaceCoatings/CoatCoverage.js';
+import { coatCoverageOf, inheritCoatCoverage, publishCoatCoverage } from '../src/editor/stylized/surfaceCoatings/CoatCoverage.js';
 import { SURFACE_COATING_DEFAULTS, resolveSurfaceCoatings } from '../src/editor/stylized/surfaceCoatings/SurfaceCoatingConfig.js';
 import { applyBarkWeathering, resolveBarkWeathering } from '../src/editor/stylized/barkWeathering.js';
 import { applyRockWeathering, resolveRockWeathering } from '../src/editor/stylized/rockWeathering.js';
@@ -27,6 +27,19 @@ test('PR 8 coat coverage is published per layer and merged, never guessed', () =
   assert.equal(coverage.snow, snow);
   assert.equal(coverage.wet, undefined, 'a null layer is not published');
   assert.ok(Object.isFrozen(coverage));
+  assert.throws(() => publishCoatCoverage(material, { snow: 0.5 }), /TSL node/);
+});
+
+test('PR 8 a cloned material carries real coverage only when it inherits it', () => {
+  const source = new THREE.MeshStandardNodeMaterial();
+  publishCoatCoverage(source, { snow: float(0.4) });
+  // clone() deep-copies userData through JSON; coverage must not ride there as dead objects.
+  const plain = source.clone();
+  assert.deepEqual(coatCoverageOf(plain), {});
+  assert.equal(JSON.stringify(plain.userData).includes('snow'), false);
+  const inherited = inheritCoatCoverage(source, source.clone());
+  assert.equal(coatCoverageOf(inherited).snow, coatCoverageOf(source).snow);
+  assert.ok(coatCoverageOf(inherited).snow.isNode);
 });
 
 test('PR 8 every coated surface publishes the coats it lays', () => {

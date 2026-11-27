@@ -26,6 +26,7 @@ import { setPreInstancePosition } from './preInstancePosition.js';
 import { applyCanopySnow, canopySnowCap, canopySnowTransmission, crownUpNode, trunkSnow, trunkSnowCap, withStormSnow } from '../forest/canopySnow.js';
 import { applyTreeFoliageSnowSurface } from '../forest/TreeFoliageSurface.js';
 import { shapeTreePosition, treeTrunkScaleNode } from '../forest/treeCrownShape.js';
+import { inheritCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
 /**
  * Share of a crown's 25 cm cells that cast a sun shadow. A crown is porous: with
@@ -105,7 +106,8 @@ export function createDitheredMaterial(sourceMaterial, {
   morphologyPivotY = 0,
   crownBounds = null,
 } = {}) {
-  const material = sourceMaterial.clone();
+  // Coat coverage lives beside the material, not in the userData clone() copies.
+  const material = inheritCoatCoverage(sourceMaterial, sourceMaterial.clone());
   // A classic material's clone() drops node properties; keep a position node the
   // source layer gave it (ground-detail wind).
   if (sourceMaterial.positionNode && !material.positionNode) material.positionNode = sourceMaterial.positionNode;

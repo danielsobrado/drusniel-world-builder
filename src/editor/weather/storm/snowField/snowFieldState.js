@@ -4,7 +4,7 @@
  * point, relative to the one global `SnowCover`. `SnowFieldPass` fills it.
  *
  * It only scales the existing storm-snow input each surface's coverage mask
- * already reads (docs/surface-coatings-2026-11-17.md): it lays no snow itself.
+ * already reads (docs/surface-coatings-2026-11-27.md): it lays no snow itself.
  * With the field off, `stormSnowCoverAt` returns `stormSnowCoverUniform`
  * itself, so every reader compiles to the WGSL it had before.
  *
