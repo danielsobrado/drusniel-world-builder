@@ -1,4 +1,6 @@
-import { surfaceShadowOwners, shadowTargetShape } from './LocationShadowWarmup.js';
+import { surfaceShadowOwners } from './LocationShadowWarmup.js';
+import { targetShape } from './LocationTargetWarmup.js';
+import { surfacePostTargets } from './LocationPostTargets.js';
 
 function targetBytes(renderer, target) {
   const manager = renderer._textures;
@@ -30,33 +32,11 @@ export function collectLocationAtmosphereTargets(surface, renderer, settings) {
     }
     entries.set(target, { resource: target, kind, size, distance: Infinity, protected: false,
       deferred: true, target: true, invalidations: new Set([invalidate]),
-      ...(kind === 'shadow' ? { shadowShape: shadowTargetShape(target) } : {}) });
+      targetShape: targetShape(target) });
   };
   const terrain = surface.terrainView;
-  const post = terrain.postProcessing;
-  if (settings.surfacePostReclamationEnabled && post && !post.disposed && !post.rendererState) {
-    const invalidate = () => post.invalidation.invalidate('RENDER_PATH_CHANGED');
-    const rtt = node => add(node?.renderTarget, 'post', invalidate);
-    for (const { graph } of post.resources.graphs.values()) {
-      if (graph.disposed) continue;
-      rtt(graph.scenePass);
-      add(graph.ambientOcclusion?.aoPass?._aoRenderTarget, 'post', invalidate);
-      rtt(graph.ambientOcclusion?.compositeNode);
-      rtt(graph.screenSpaceShafts?.radianceNode);
-      rtt(graph.screenSpaceShafts?.compositeNode);
-      for (const node of graph.hierarchicalDepth?.levels ?? []) rtt(node);
-      rtt(graph.ssr?.traceNode);
-      rtt(graph.ssr?.compositeNode);
-      for (const node of graph.bloom?.targets ?? []) rtt(node);
-      for (const node of graph.bloom?.upsampleTargets ?? []) rtt(node);
-      rtt(graph.depthOfField?.sourceTarget);
-      rtt(graph.sharpen?.sourceTarget);
-      rtt(graph.grain?.sourceTarget);
-    }
-    for (const list of [post.history.taaColourTargets, post.history.taaDepthTargets,
-      post.history.ssrColourTargets, post.history.ssrDepthTargets]) {
-      for (const target of list) add(target, 'post', invalidate);
-    }
+  for (const { target, invalidate } of surfacePostTargets(surface, settings)) {
+    add(target, 'post', invalidate);
   }
   const rays = terrain.godRays;
   if (settings.surfaceAtmosphereReclamationEnabled && rays && !rays.disposed) {

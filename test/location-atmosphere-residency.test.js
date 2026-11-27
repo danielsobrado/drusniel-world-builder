@@ -143,3 +143,82 @@ test('shadow warmup is independently opt-in', () => {
   assert.equal(resolveRenderEnhancements({}, '?locationSurfaceShadowWarmup=1').locationStructureBudget.surfaceShadowWarmupEnabled, true);
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceShadowWarmupMaxBytes: 1.5 } }), RangeError);
 });
+
+function activatePost(surface) {
+  const post = surface.terrainView.postProcessing;
+  post.topologySignature = 'active';
+  post.resources.activeSignature = 'active';
+  post.graph = post.resources.graphs.get('active').graph;
+  post.graph.taaResolve = {};
+  return post;
+}
+
+test('post and shadow allocations share the transition budget and never warm inactive graphs', async t => {
+  const { controller, surface, renderer, settings, records, memoryMap, shadowTarget, world, history, cave } = fixture(t);
+  settings.surfaceShadowWarmupEnabled = true;
+  settings.surfacePostWarmupEnabled = true;
+  settings.surfaceTargetWarmupMaxBytes = 128;
+  renderer.info.memory = { total: 1024 };
+  const post = activatePost(surface);
+  const inactive = new RenderTarget(4, 4);
+  records.set(inactive, {});
+  records.set(inactive.texture, {});
+  memoryMap.set(inactive.texture, 64);
+  inactive.addEventListener('dispose', () => { records.delete(inactive); records.delete(inactive.texture); });
+  t.after(() => inactive.dispose());
+  post.resources.graphs.set('inactive', { graph: { scenePass: { renderTarget: inactive } } });
+  let frames = 0;
+  const warmed = [];
+  controller.pause = async () => { frames++; };
+  renderer.initRenderTarget = target => { warmed.push([target, frames]); records.set(target, {}); };
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  await controller.restore();
+  assert.deepEqual(warmed, [[shadowTarget, 1], [world, 2]]);
+  assert.equal(records.has(history), false);
+  assert.equal(records.has(inactive), false);
+  assert.equal(records.has(cave), true);
+});
+
+test('post warmup allocates selected history without validating temporal contents', async t => {
+  const { controller, surface, renderer, settings, records, world, history, invalidations } = fixture(t);
+  settings.surfacePostWarmupEnabled = true;
+  renderer.info.memory = { total: 1024 };
+  activatePost(surface);
+  const warmed = [];
+  renderer.initRenderTarget = target => { warmed.push(target); records.set(target, {}); };
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  const before = invalidations.length;
+  await controller.restore();
+  assert.deepEqual(warmed, [world, history]);
+  assert.equal(invalidations.length, before + 2);
+  assert.ok(invalidations.every(reason => reason === 'RENDER_PATH_CHANGED'));
+});
+
+test('post warmup rechecks topology and target dimensions after yielding', async t => {
+  for (const mode of ['topology', 'resize', 'bypass', 'disabled-history']) {
+    const { controller, surface, renderer, settings, records, world, history } = fixture(t);
+    settings.surfacePostWarmupEnabled = true;
+    renderer.info.memory = { total: 1024 };
+    const post = activatePost(surface);
+    const warmed = [];
+    renderer.initRenderTarget = target => { warmed.push(target); records.set(target, {}); };
+    controller.begin({ x: 0, z: 0 }, 0);
+    controller.update(10);
+    if (mode === 'disabled-history') post.graph.taaResolve = null;
+    controller.pause = async () => {
+      if (mode === 'topology') post.topologySignature = 'new';
+      if (mode === 'resize') { world.setSize(8, 8); history.setSize(8, 8); }
+      if (mode === 'bypass') post.isBypassed = () => true;
+    };
+    await controller.restore();
+    assert.deepEqual(warmed, mode === 'disabled-history' ? [world] : [], mode);
+  }
+});
+
+test('post warmup and shared target budget are independently configurable', () => {
+  assert.equal(resolveRenderEnhancements().locationStructureBudget.surfacePostWarmupEnabled, false);
+  assert.equal(resolveRenderEnhancements({}, '?locationSurfacePostWarmup=1').locationStructureBudget.surfacePostWarmupEnabled, true);
+  assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceTargetWarmupMaxBytes: 1.5 } }), RangeError);
+});
