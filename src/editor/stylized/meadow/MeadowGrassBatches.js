@@ -220,6 +220,10 @@ export class MeadowGrassBatches {
     return [...this.batches.values()].flatMap((batch) => batch.meshes);
   }
 
+  *surfaceResidencyPages() {
+    for (const batch of this.batches.values()) yield* batch.pages;
+  }
+
   setBoundsPadding(padding) {
     for (const batch of this.batches.values()) batch.setBoundsPadding?.(padding);
   }

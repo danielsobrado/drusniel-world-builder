@@ -33,6 +33,8 @@ locationStructureBudget:
   lightingEnabled: false
   lightingSliceMs: 4
   surfaceReclamationEnabled: false
+  surfaceMeadowReclamationEnabled: false
+  surfaceMeadowProtectMeters: 32
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000
   surfaceSampleMs: 500

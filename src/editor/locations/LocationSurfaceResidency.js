@@ -1,4 +1,6 @@
 import { REVISION } from 'three/webgpu';
+import { AttributeType } from 'three/src/renderers/common/Constants.js';
+import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 const TERRAIN_TEXTURES = ['tileTexture', 'surfaceMaskTexture', 'heightTexture', 'forestFloorTexture'];
@@ -13,7 +15,7 @@ function bytes(texture) {
   return image.data.byteLength;
 }
 
-/** Retire only reversible slot-owned texture allocations while the world is suspended. */
+/** Retire reversible CPU-backed surface allocations while the world is suspended. */
 export class LocationSurfaceResidency {
   constructor(surface, renderer, settings, pause = nextFrame) {
     Object.assign(this, { surface, renderer, settings, pause });
@@ -41,7 +43,7 @@ export class LocationSurfaceResidency {
         if (previous) {
           previous.protected ||= Boolean(protect);
           previous.distance = Math.min(previous.distance, distance);
-        } else candidates.set(texture, { texture, size, distance, protected: Boolean(protect) });
+        } else candidates.set(texture, { resource: texture, kind: 'texture', size, distance, protected: Boolean(protect) });
       }
     };
     const pending = this.surface.terrainView.drawPreparation?.pending;
@@ -51,7 +53,34 @@ export class LocationSurfaceResidency {
     for (const slot of this.surface.waterSlots) {
       add(slot, WATER_TEXTURES, slot.terrainSlot.descriptor, slot.terrainSlot.loading || pending?.has(slot.mesh));
     }
+    for (const entry of collectLocationMeadowAttributes(this.surface, this.renderer, anchor, this.settings)) {
+      const previous = candidates.get(entry.resource);
+      if (previous) {
+        previous.protected ||= entry.protected;
+        previous.distance = Math.min(previous.distance, entry.distance);
+      } else candidates.set(entry.resource, entry);
+    }
     return [...candidates.values()];
+  }
+
+  resident(entry) {
+    return entry.kind === 'meadow' ? this.renderer._attributes.has(entry.resource) : this.renderer._textures.has(entry.resource);
+  }
+
+  retire(entry) {
+    if (entry.kind === 'meadow') this.renderer._attributes.delete(entry.resource);
+    else entry.resource.dispose();
+  }
+
+  warm(entry) {
+    const resource = entry.resource;
+    if (entry.kind === 'meadow') {
+      this.renderer._attributes.update(resource, AttributeType.VERTEX);
+      resource.clearUpdateRanges();
+    } else {
+      resource.needsUpdate = true;
+      this.renderer.initTexture(resource);
+    }
   }
 
   begin(anchor, now = performance.now()) {
@@ -66,23 +95,27 @@ export class LocationSurfaceResidency {
     this.nextSample = now + this.settings.surfaceSampleMs;
     try {
       this.candidates = this.collect(this.anchor).filter(entry => !entry.protected
-        && !this.evicted.has(entry.texture) && this.renderer._textures.has(entry.texture));
+        && !this.evicted.has(entry.resource) && this.resident(entry));
       this.candidates.sort((a, b) => b.distance - a.distance || b.size - a.size);
       let remaining = this.settings.surfaceEvictionsPerSample;
       for (const entry of this.candidates) {
         if (remaining <= 0) break;
         if (this.evictedBytes + entry.size > this.settings.surfaceMaxEvictedBytes) continue;
         remaining--;
-        entry.texture.dispose();
-        if (this.renderer._textures.has(entry.texture)) continue;
-        this.evicted.set(entry.texture, entry);
+        this.retire(entry);
+        if (this.resident(entry)) continue;
+        this.evicted.set(entry.resource, entry);
+        if (entry.kind === 'meadow') {
+          PerfCounters.inc('locationSurface.meadowEvictions');
+          PerfCounters.inc('locationSurface.meadowEvictedBytes', entry.size);
+        }
         this.evictedBytes += entry.size;
         PerfCounters.inc('locationSurface.evictions');
         PerfCounters.inc('locationSurface.evictedBytes', entry.size);
       }
     } catch (error) {
       this.phase = 'paused';
-      console.warn('Surface texture reclamation paused.', error);
+      console.warn('Surface resource reclamation paused.', error);
     } finally {
       this.candidates.length = 0;
       this.publish();
@@ -90,7 +123,13 @@ export class LocationSurfaceResidency {
   }
 
   publish() {
-    PerfCounters.set('locationSurface.pendingTextures', this.evicted.size);
+    let textures = 0, meadow = 0;
+    for (const entry of this.evicted.values()) {
+      if (entry.kind === 'meadow') meadow++;
+      else textures++;
+    }
+    PerfCounters.set('locationSurface.pendingTextures', textures);
+    PerfCounters.set('locationSurface.pendingMeadowAttributes', meadow);
     PerfCounters.set('locationSurface.pendingBytes', this.evictedBytes);
   }
 
@@ -98,37 +137,43 @@ export class LocationSurfaceResidency {
     if (this.phase === 'idle' || this.phase === 'disposed') return;
     this.phase = 'restoring';
     try {
-      const current = new Map(this.collect(this.anchor).map(entry => [entry.texture, entry]));
+      let current = new Map(this.collect(this.anchor).map(entry => [entry.resource, entry]));
       const entries = [...this.evicted.values()].sort((a, b) => a.distance - b.distance);
       let count = 0, uploaded = 0;
       for (const entry of entries) {
         signal?.throwIfAborted();
         if (this.phase !== 'restoring' || this.renderer._isDeviceLost) break;
-        const texture = entry.texture, live = current.get(texture);
-        const size = bytes(texture);
-        if (live && size > 0 && size <= this.settings.surfaceRestoreBytesPerFrame && !this.renderer._textures.has(texture)) {
-          if (count >= this.settings.surfaceRestoresPerFrame || uploaded + size > this.settings.surfaceRestoreBytesPerFrame) {
+        let live = current.get(entry.resource);
+        if (live && !this.resident(live)) {
+          if (count >= this.settings.surfaceRestoresPerFrame || uploaded + live.size > this.settings.surfaceRestoreBytesPerFrame) {
             await this.pause();
             signal?.throwIfAborted();
             if (this.phase !== 'restoring' || this.renderer._isDeviceLost) break;
             count = 0;
             uploaded = 0;
+            current = new Map(this.collect(this.anchor).map(item => [item.resource, item]));
+            live = current.get(entry.resource);
           }
-          texture.needsUpdate = true;
-          this.renderer.initTexture(texture);
-          count++;
-          uploaded += size;
-          PerfCounters.inc('locationSurface.restoredBytes', size);
-          PerfCounters.inc('locationSurface.restores');
+          if (live && !this.resident(live)) {
+            this.warm(live);
+            count++;
+            uploaded += live.size;
+            PerfCounters.inc('locationSurface.restoredBytes', live.size);
+            PerfCounters.inc('locationSurface.restores');
+            if (live.kind === 'meadow') {
+              PerfCounters.inc('locationSurface.meadowRestores');
+              PerfCounters.inc('locationSurface.meadowRestoredBytes', live.size);
+            }
+          }
         }
-        this.evicted.delete(texture);
+        this.evicted.delete(entry.resource);
         this.evictedBytes -= entry.size;
         this.publish();
       }
     } catch (error) {
       if (signal?.aborted) throw error;
       PerfCounters.inc('locationSurface.restoreFailures');
-      console.warn('Surface texture warmup unavailable; using normal renderer upload.', error);
+      console.warn('Surface resource warmup unavailable; using normal renderer upload.', error);
     } finally {
       if (this.phase !== 'disposed') this.reset();
     }
