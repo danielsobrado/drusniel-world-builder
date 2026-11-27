@@ -8,6 +8,7 @@ import { configureTreeFoliageSurface } from '../forest/TreeFoliageSurface.js';
 import { resolveTreeFoliageSettings, resolveTreeBarkSettings } from '../forest/treeSurfaceSettings.js';
 import { bakeCanopyVisibility } from '../forest/CanopyVisibility.js';
 import { treeFoliageEmission, treeBarkEmission } from '../forest/foliageLight.js';
+import { resolveCanopyGrade } from '../forest/canopyGrade.js';
 import { applyTreeBarkWetSurface } from '../forest/TreeWetSurface.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 
@@ -48,7 +49,8 @@ function proxyCanopyColor(parts, fallback) {
 
 function makeTreeLeafMaterial(color, config, bounds, geometry, settings = resolveTreeFoliageSettings(config.trees)) {
   const material = settings.enabled
-    ? new (foliageMaterialClass(THREE.MeshLambertNodeMaterial))({ side: THREE.DoubleSide }) : makeMaterial(color);
+    ? new (foliageMaterialClass(THREE.MeshStandardNodeMaterial))({ roughness: 0.9, metalness: 0, side: THREE.DoubleSide })
+    : makeMaterial(color);
   if (settings.enabled) {
     const value = new THREE.Color(color);
     material.colorNode = vec3(...value.toArray());
@@ -139,6 +141,10 @@ export function createTreeProxyPrototype(parts, config) {
   trunkGeometry.computeBoundingBox();
   trunkGeometry.computeBoundingSphere();
 
+  const grade = resolveCanopyGrade(config.trees?.canopyGrade);
+  const proxyFallback = grade
+    ? new THREE.Color(grade.shadow).lerp(new THREE.Color(grade.light), 0.58)
+    : config.trees.leafTop;
   return {
     height: Math.max(0.1, combinedBounds.max.y - combinedBounds.min.y),
     width: Math.max(0.1, combinedBounds.max.x - combinedBounds.min.x),
@@ -147,7 +153,7 @@ export function createTreeProxyPrototype(parts, config) {
       {
         geometry: canopyGeometry,
         material: makeTreeLeafMaterial(
-          proxyCanopyColor(parts, config.trees.leafTop),
+          proxyCanopyColor(parts, proxyFallback),
           config,
           canopyGeometry.boundingBox,
           canopyGeometry,

@@ -1,12 +1,12 @@
-import { float, max, mix, positionGeometry, positionView, positionViewDirection, smoothstep, vec3 } from 'three/tsl';
+import { float, max, mix, normalWorld, positionGeometry, positionView, positionViewDirection, smoothstep, vec2, vec3 } from 'three/tsl';
 
 /** Share of a leaf's card cut left to thin at the very edge of the crown. */
-const EDGE_THIN = 0.34;
-/** Alpha above the cut across which a leaf's rim fades into its body. */
-const FRINGE_ALPHA = 0.72;
+const EDGE_THIN = 0.28;
+/** Alpha above the cut across which a leaf's 1-2 texel rim fades into its body. */
+const FRINGE_ALPHA = 0.30;
 /** How much of a rim texel the sky/air behind it replaces: inside the crown, at its edge. */
-const SKY_INSIDE = 0.18;
-const SKY_EDGE = 0.82;
+const SKY_INSIDE = 0.06;
+const SKY_EDGE = 0.42;
 
 /** True geometric card face normal in view space (after instancing & wind, before puff-normal blending). */
 function cardFacingView() {
@@ -30,14 +30,19 @@ function cardFacingView() {
  * @param {number} options.radius metres from the trunk axis to the crown's outside
  * @param {object} options.height 0..1 up the crown
  */
-export function crownEdgeNodes(alpha, { cut, radius, height }) {
-  const outer = smoothstep(0.5, 1, positionGeometry.xz.length().div(Math.max(0.001, radius)));
-  const edge = max(outer, smoothstep(0.7, 1, height));
+export function crownEdgeNodes(alpha, { cut, radius, height, centerXZ = null }) {
+  const radialXZ = centerXZ
+    ? positionGeometry.xz.sub(vec2(centerXZ[0], centerXZ[1]))
+    : positionGeometry.xz;
+  const outer = smoothstep(0.55, 1, radialXZ.length().div(Math.max(0.001, radius)));
+  const edge = max(outer, smoothstep(0.72, 1, height));
   const rim = smoothstep(cut, cut + FRINGE_ALPHA, alpha).oneMinus();
   const grazingKeep = mix(float(1), smoothstep(0.08, 0.34, cardFacingView()), edge.mul(0.7).add(0.18));
+  // Favour skyward outer leaves so lower flanks in front of hills or roofs keep crisp contrast.
+  const skyExposure = smoothstep(-0.25, 0.55, normalWorld.y).mul(0.55).add(0.45);
   return {
     opacity: alpha.mul(float(1).sub(edge.mul(EDGE_THIN))).mul(grazingKeep),
-    sky: rim.mul(edge.mul(SKY_EDGE - SKY_INSIDE).add(SKY_INSIDE)),
+    sky: rim.mul(edge.mul(SKY_EDGE - SKY_INSIDE).add(SKY_INSIDE)).mul(skyExposure),
   };
 }
 

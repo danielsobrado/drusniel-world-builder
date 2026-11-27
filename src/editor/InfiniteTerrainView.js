@@ -181,6 +181,7 @@ function createSlot({ slotIndex, scene, geometry, worldStore, stylizedConfig, sh
   tileTexture.generateMipmaps = false;
   tileTexture.colorSpace = THREE.SRGBColorSpace;
 
+  // The GPU's copy carries a border cell from each neighbour (SurfaceMaskTexture.js).
   const surfaceMaskTextureSize = chunkSize + SURFACE_MASK_TEXTURE_PAD * 2;
   const surfaceMaskTexturePixels = new Uint8Array(surfaceMaskTextureSize * surfaceMaskTextureSize * 4);
   const surfaceMaskTexture = markPaddedSurfaceMask(new THREE.DataTexture(
@@ -565,6 +566,9 @@ export class InfiniteTerrainView {
     this.coastalSwash?.update(camera, waterVisualClock.value);
     try {
       this.beforeMainRender?.(camera);
+      // With GPU occlusion on, `draw` runs without the renderer's scene-matrix walk
+      // (GpuOcclusion#collect already did it this frame). Move or add scene objects
+      // in beforeMainRender, never inside `draw`, or they render a frame late.
       const draw = () => {
         if (
           this.godRays.enabled

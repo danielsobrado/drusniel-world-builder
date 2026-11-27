@@ -40,15 +40,21 @@ const FILES = Object.freeze({
 
 /** World-space repeat period (metres) for stratified fractured stone planes. */
 const STONE_METERS = 3.2;
-/** Macro geological variation period (metres), breaks up tiling across big outcrops. */
-const MACRO_METERS = 12;
+/** Fine close-range crystalline / chipped micro-normal period (metres). */
+const MICRO_STONE_METERS = 1.15;
+/** Macro geological variation period (metres), smooth Perlin breaks up tiling across big outcrops. */
+const MACRO_METERS = 24;
 /** Cool weathered alpine granite/slate grade lifting dark basalt into crisp snow-country contrast. */
 const STONE_TINT = '#a4b0be';
+/** Subtle mineral hue shifts (iron-rich dark slate vs pale quartz/feldspar bands). */
+const MINERAL_COOL = '#8693a3';
+const MINERAL_WARM = '#b0aaa0';
 const STONE_GAIN = 2.35;
 const FALLBACK_STONE = '#5c646e';
 /** Wind-packed frost rime tint caught only on upward-facing fractured strata micro-ledges. */
 const RIME_COLOR = '#dfe9f4';
-const NORMAL_STRENGTH = 1.25;
+const NORMAL_STRENGTH = 1.15;
+const MICRO_NORMAL_STRENGTH = 0.42;
 const TRIPLANAR_THRESHOLD = 0.03;
 const BASALT_MEAN = 0.025;
 const LUMA_WEIGHTS = vec3(0.3, 0.55, 0.15);
@@ -122,41 +128,69 @@ export function coldStoneSurface({
   const n = normalize(normal).toVar();
   const blend = abs(n).pow(vec3(5)).toVar();
   const weights = blend.div(blend.x.add(blend.y).add(blend.z).max(1e-5)).toVar();
+  const signX = select(n.x.greaterThanEqual(0), float(1), float(-1));
+  const signY = select(n.y.greaterThanEqual(0), float(1), float(-1));
+  const signZ = select(n.z.greaterThanEqual(0), float(1), float(-1));
 
-  // Triplanar geological fBm (`meso`: R = fine fBm, G = smooth mottle — zero circular pits).
-  const meso = worldNoiseField(WORLD_NOISE_LAYERS.meso);
+  // Smooth triplanar Perlin (`macro`: R/G/B are pure Perlin octaves — NEVER swirly `meso.g`
+  // `super-noise-09`, whose steep ridges folded `warpedY` into closed marble rings).
+  const macro = worldNoiseField(WORLD_NOISE_LAYERS.macro);
   const macroScale = float(1 / MACRO_METERS);
-  const macroNoise = meso(vec2(point.z, point.y).mul(macroScale)).mul(weights.x)
-    .add(meso(vec2(point.x, point.z).mul(macroScale)).mul(weights.y))
-    .add(meso(vec2(point.x, point.y).mul(macroScale)).mul(weights.z))
+  const macroNoise = macro(vec2(point.z, point.y).mul(macroScale)).mul(weights.x)
+    .add(macro(vec2(point.x, point.z).mul(macroScale)).mul(weights.y))
+    .add(macro(vec2(point.x, point.y).mul(macroScale)).mul(weights.z))
     .toVar();
-  const macroTone = mix(float(0.82), float(1.18), macroNoise.r);
-  const strataWarp = macroNoise.g.sub(0.5).mul(0.45);
-  const warpedY = point.y.add(strataWarp);
+  const macroTone = mix(float(0.84), float(1.16), macroNoise.r);
+  // Subtle mineral colour variation: cool blue-slate iron patches vs faint warm quartz/feldspar veins.
+  const mineralTint = mix(color(MINERAL_COOL), color(MINERAL_WARM), macroNoise.b.smoothstep(0.22, 0.78));
+  // Gentle directional geological bedding dip + smooth monotonic undulation (|d/dy| < 0.03: zero folding).
+  const beddingDip = point.x.mul(0.09).add(point.z.mul(-0.06));
+  const strataUndulation = macroNoise.g.sub(0.5).mul(0.24);
+  const bedY = point.y.add(beddingDip).add(strataUndulation);
 
   const maps = acquireColdStoneTextures();
   if (!maps) {
-    const fallback = color(FALLBACK_STONE).mul(macroTone);
+    const fallback = color(FALLBACK_STONE).mul(mineralTint).mul(macroTone);
     return {
       color: fallback,
-      roughness: mix(float(0.76), float(0.92), macroNoise.g),
+      roughness: mix(float(0.84), float(0.96), macroNoise.g),
       normal: baseNormal,
       perturbedUp: n.y,
+      crevice: float(0),
+      height: float(0.5),
     };
   }
 
   // Screen derivatives must stay in uniform control flow outside every `If`.
+  // Compute derivatives from the unwarped linear projection so mip selection stays razor sharp.
   const scale = float(1 / STONE_METERS);
-  const uvX = vec2(point.z, warpedY).mul(scale).toVar();
-  const uvY = vec2(point.x, point.z).mul(scale).toVar();
-  const uvZ = vec2(point.x, warpedY).mul(scale).toVar();
-  const dxX = dFdx(uvX).toVar(), dyX = dFdy(uvX).toVar();
-  const dxY = dFdx(uvY).toVar(), dyY = dFdy(uvY).toVar();
-  const dxZ = dFdx(uvZ).toVar(), dyZ = dFdy(uvZ).toVar();
+  const linX = vec2(point.z, point.y.add(beddingDip)).mul(scale);
+  const linY = vec2(point.x, point.z).mul(scale);
+  const linZ = vec2(point.x, point.y.add(beddingDip)).mul(scale);
+  const uvX = vec2(point.z, bedY).mul(scale).toVar();
+  const uvY = linY.toVar();
+  const uvZ = vec2(point.x, bedY).mul(scale).toVar();
+  const dxX = dFdx(linX).toVar(), dyX = dFdy(linX).toVar();
+  const dxY = dFdx(linY).toVar(), dyY = dFdy(linY).toVar();
+  const dxZ = dFdx(linZ).toVar(), dyZ = dFdy(linZ).toVar();
+
+  // Dominant-axis close-range micro-normal coordinates (1 tap, zero extra WebGPU samplers).
+  const microScale = float(1 / MICRO_STONE_METERS);
+  const topAxis = abs(n.y).greaterThan(0.58);
+  const xAxis = abs(n.x).greaterThan(abs(n.z));
+  const microUv = select(
+    topAxis,
+    vec2(point.x, point.z),
+    select(xAxis, vec2(point.z, bedY), vec2(point.x, bedY)),
+  ).mul(microScale).toVar();
+  const microDx = select(topAxis, linY.dFdx(), select(xAxis, linX.dFdx(), linZ.dFdx()))
+    .mul(STONE_METERS / MICRO_STONE_METERS).toVar();
+  const microDy = select(topAxis, linY.dFdy(), select(xAxis, linX.dFdy(), linZ.dFdy()))
+    .mul(STONE_METERS / MICRO_STONE_METERS).toVar();
 
   const sampledColorRough = Fn(() => {
     const colSum = vec3(0).toVar();
-    const roughSum = float(0.84).toVar();
+    const roughSum = float(0.88).toVar();
 
     const runSamples = () => {
       colSum.assign(vec3(0));
@@ -196,17 +230,35 @@ export function coldStoneSurface({
     const runNormalSamples = () => {
       worldNormalSum.assign(vec3(0));
 
+      // Sign-aware Whiteout triplanar normal blend so -X/-Y/-Z faces orient fracture bevels properly.
       If(weights.x.greaterThan(TRIPLANAR_THRESHOLD), () => {
         const t = repeatMipTextureLoad(maps.normal, uvX, dxX, dyX).xyz.mul(2).sub(1);
-        worldNormalSum.addAssign(vec3(n.x, n.y.add(t.y), n.z.add(t.x)).mul(weights.x));
+        worldNormalSum.addAssign(
+          vec3(n.x.abs().mul(t.z).mul(signX), n.y.add(t.y), n.z.add(t.x.mul(signX))).mul(weights.x),
+        );
       });
       If(weights.y.greaterThan(TRIPLANAR_THRESHOLD), () => {
         const t = repeatMipTextureLoad(maps.normal, uvY, dxY, dyY).xyz.mul(2).sub(1);
-        worldNormalSum.addAssign(vec3(n.x.add(t.x), n.y, n.z.add(t.y)).mul(weights.y));
+        worldNormalSum.addAssign(
+          vec3(n.x.add(t.x), n.y.abs().mul(t.z).mul(signY), n.z.add(t.y)).mul(weights.y),
+        );
       });
       If(weights.z.greaterThan(TRIPLANAR_THRESHOLD), () => {
         const t = repeatMipTextureLoad(maps.normal, uvZ, dxZ, dyZ).xyz.mul(2).sub(1);
-        worldNormalSum.addAssign(vec3(n.x.add(t.x), n.y.add(t.y), n.z).mul(weights.z));
+        worldNormalSum.addAssign(
+          vec3(n.x.add(t.x.mul(signZ)), n.y.add(t.y), n.z.abs().mul(t.z).mul(signZ)).mul(weights.z),
+        );
+      });
+
+      // Close-range micro-normal grain (1 dominant-axis tap, skipped past detailFade).
+      If(detailFade.greaterThan(0.05), () => {
+        const mt = repeatMipTextureLoad(maps.normal, microUv, microDx, microDy).xyz.mul(2).sub(1);
+        const microDelta = select(
+          topAxis,
+          vec3(mt.x, float(0), mt.y),
+          select(xAxis, vec3(float(0), mt.y, mt.x.mul(signX)), vec3(mt.x.mul(signZ), mt.y, float(0))),
+        );
+        worldNormalSum.addAssign(microDelta.mul(MICRO_NORMAL_STRENGTH).mul(detailFade));
       });
     };
 
@@ -220,10 +272,16 @@ export function coldStoneSurface({
 
   const ready = maps.ready;
   const stoneTint = tint ?? color(STONE_TINT);
-  const fallbackAlbedo = color(FALLBACK_STONE).mul(macroTone);
-  // Lift dark basalt scan into legible cool alpine granite/slate while preserving deep crack contrast.
+  const fallbackAlbedo = color(FALLBACK_STONE).mul(mineralTint).mul(macroTone);
+  // Normalized rock relief height & fracture crevice mask derived from the basalt scan.
+  const scanLuma = dot(sampledColorRough.rgb, LUMA_WEIGHTS).max(0.001).div(BASALT_MEAN).pow(0.6).clamp(0.15, 1.85);
+  const surfaceHeight = scanLuma.sub(0.25).div(1.25).clamp(0, 1).toVar();
+  const crevice = surfaceHeight.smoothstep(0.55, 0.08).mul(ready).toVar();
+
+  // Lift dark basalt scan into legible matte alpine granite/slate with subtle mineral colour shifts.
   const scannedAlbedo = sampledColorRough.rgb.max(vec3(0.002)).pow(vec3(0.78))
     .mul(stoneTint)
+    .mul(mix(vec3(1), mineralTint.mul(1.08), 0.45))
     .mul(STONE_GAIN)
     .mul(macroTone);
   const stoneAlbedo = mix(fallbackAlbedo, scannedAlbedo, ready).toVar();
@@ -234,23 +292,26 @@ export function coldStoneSurface({
   const deltaView = cameraViewMatrix.mul(vec4(deltaWorld, 0)).xyz;
   const perturbedViewNormal = normalize(baseNormal.add(deltaView));
 
-  // Delicate frost rime catches only on true upward-facing fractured strata micro-ledges,
-  // leaving vertical faces and deep fractures dark, craggy and high-contrast.
-  const ledgeLip = smoothstep(0.46, 0.84, perturbedWorld.y);
-  const rimeBreakup = smoothstep(0.25, 0.78, macroNoise.g);
-  const rimeMask = ledgeLip.mul(rimeBreakup).mul(rimeAmount).clamp(0, 0.42);
+  // Delicate frost rime catches only on upward-facing fractured strata micro-ledges & seams,
+  // leaving exposed vertical rock faces dark, matte, craggy and high-contrast.
+  const ledgeLip = smoothstep(0.48, 0.84, perturbedWorld.y);
+  const seamShelf = crevice.mul(smoothstep(0.15, 0.65, perturbedWorld.y)).mul(0.55);
+  const rimeBreakup = smoothstep(0.22, 0.78, macroNoise.b);
+  const rimeMask = ledgeLip.add(seamShelf).clamp(0, 1).mul(rimeBreakup).mul(rimeAmount).clamp(0, 0.44);
   const finalAlbedo = mix(stoneAlbedo, color(RIME_COLOR), rimeMask);
 
-  // Mineral cleavage faces glint subtly in cold air; fracture seams & frost stay matte.
-  const stoneRough = mix(float(0.60), float(0.95), sampledColorRough.a.clamp(0, 1));
-  const baseRough = mix(float(0.84), stoneRough, ready);
-  const finalRoughness = mix(baseRough, float(0.92), rimeMask.mul(0.7));
+  // Natural mountain rock stays matte (0.82..0.97) — zero oily/polished marble glare.
+  const stoneRough = mix(float(0.82), float(0.97), sampledColorRough.a.clamp(0, 1));
+  const baseRough = mix(float(0.88), stoneRough, ready);
+  const finalRoughness = mix(baseRough, float(0.94), rimeMask.mul(0.75).max(crevice.mul(0.35)));
 
   return {
     color: finalAlbedo,
     roughness: finalRoughness,
     normal: perturbedViewNormal,
     perturbedUp: perturbedWorld.y,
+    crevice,
+    height: surfaceHeight,
   };
 }
 
@@ -303,13 +364,15 @@ export function rockFractureDetail({
   })();
 
   const ready = maps.ready;
+  const signX = select(n.x.greaterThanEqual(0), float(1), float(-1));
+  const signZ = select(n.z.greaterThanEqual(0), float(1), float(-1));
   const worldN = select(
     top,
     vec3(n.x.add(sampled.x), n.y, n.z.add(sampled.y)),
     select(
       xSide,
-      vec3(n.x, n.y.add(sampled.y), n.z.add(sampled.x)),
-      vec3(n.x.add(sampled.x), n.y.add(sampled.y), n.z),
+      vec3(n.x, n.y.add(sampled.y), n.z.add(sampled.x.mul(signX))),
+      vec3(n.x.add(sampled.x.mul(signZ)), n.y.add(sampled.y), n.z),
     ),
   );
   const deltaWorld = normalize(worldN.add(n.mul(1e-4))).sub(n).mul(strength).mul(ready);

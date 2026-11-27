@@ -8,6 +8,7 @@ import {
   normalViewGeometry,
   normalize,
   positionGeometry,
+  positionWorld,
   sin,
   step,
   smoothstep,
@@ -18,9 +19,7 @@ import {
 import { authoredTexture } from '../AuthoredTextureNode.js';
 import { worldNoiseField } from '../worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
-
-/** Value swing of the leaf masses inside one crown, lightest to darkest. */
-const CROWN_CLUMP_SWING = 0.2;
+import { canonicalFromRender } from '../../weather/wind/worldWindState.js';
 import { orientedScreenDitherThreshold } from './screenDither.js';
 import { characterOcclusionKeep } from '../../character/CharacterOcclusion.js';
 import { setPreInstancePosition } from './preInstancePosition.js';
@@ -130,13 +129,27 @@ export function createDitheredMaterial(sourceMaterial, {
   material.opacityNode = sourceOpacity ? sourceOpacity.mul(fadeMask) : fadeMask;
   if (material.colorNode) {
     const leafTint = tinted ? attribute('instanceLeafTint', 'vec4') : null;
-    const variation = leafTint ? leafTint.xyz.mul(colorVariation) : colorVariation;
+    let variation = leafTint ? leafTint.xyz.mul(colorVariation) : colorVariation;
+    if (kind === 'leaf') {
+      // Subtle per-tree hue/temperature individuality from the stable dither seed,
+      // plus gentle macro landscape patch harmony so trees follow dry/lush meadow bands.
+      const treeTemp = mix(vec3(0.95, 1.01, 1.03), vec3(1.05, 1.00, 0.93), fract(seed.mul(7.31)));
+      const macroPatchSample = varying(
+        worldNoiseField(WORLD_NOISE_LAYERS.macro)(canonicalFromRender(positionWorld.xz).mul(0.012)).r,
+        'crownMacroPatch',
+      );
+      const landscapeHarmony = mix(vec3(0.96, 1.01, 1.02), vec3(1.05, 1.01, 0.92), macroPatchSample);
+      variation = variation.mul(treeTemp).mul(landscapeHarmony);
+    }
     // One mesh, many crowns: each tree reads its own patch of the world noise
-    // (by its seed) as light and dark leaf masses a couple of metres across.
+    // (by its seed) as warm-lit vs cool-shaded leaf masses a couple of metres across.
     // Per vertex and mild; per-pixel noise on textured crowns paints camouflage.
     const clump = kind === 'leaf'
-      ? varying(worldNoiseField(WORLD_NOISE_LAYERS.macro)(positionGeometry.xz.mul(0.045).add(vec2(seed.mul(17.3), seed.mul(5.1)))).b, 'crownClump')
-        .sub(0.5).mul(CROWN_CLUMP_SWING).add(1)
+      ? mix(
+        vec3(0.87, 0.91, 0.94),
+        vec3(1.09, 1.06, 0.96),
+        varying(worldNoiseField(WORLD_NOISE_LAYERS.macro)(positionGeometry.xz.mul(0.045).add(vec2(seed.mul(17.3), seed.mul(5.1)))).b, 'crownClump'),
+      )
       : null;
     material.colorNode = material.colorNode.mul(clump ? variation.mul(clump) : variation);
     if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(variation);
@@ -165,6 +178,13 @@ export function createDitheredMaterial(sourceMaterial, {
       if (material.normalNode) {
         material.normalNode = normalize(mix(material.normalNode, normalViewGeometry, snowCap.mul(0.72)));
       }
+    }
+    // Untinted atmosphere (distance air in-scatter & sky-edge dissolve) is composed
+    // AFTER per-instance leaf/autumn tinting so horizon haze stays true to the sky.
+    if (material.foliageAtmosphereNode) {
+      material.emissiveNode = material.emissiveNode
+        ? material.emissiveNode.add(material.foliageAtmosphereNode)
+        : material.foliageAtmosphereNode;
     }
   }
   applyMorphology(

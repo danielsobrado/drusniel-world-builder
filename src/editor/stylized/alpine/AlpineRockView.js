@@ -7,6 +7,13 @@ import { createPathClearanceField } from '../TreeManifestStore.js';
 import { ALPINE_CELL_METERS, ALPINE_ROCK_KINDS, alpineRocksInCell } from './alpineRockField.js';
 import { createAlpineRockGeometry } from './alpineRockGeometry.js';
 import { createAlpineRockMaterial } from './AlpineRockMaterial.js';
+import { createRockSnowCapGeometry } from '../snow/RockSnowCapGeometry.js';
+import { createRockSnowCapMaterial } from '../snow/RockSnowCapMaterial.js';
+
+/** Minimum regional snow cover (0..1) before near alpine crags mount volumetric snow caps. */
+const SNOW_CAP_MIN = 0.35;
+/** Unit-rock ground line matching `AlpineRockMaterial.js` (`0.5 - BURIAL` below centre). */
+const SNOW_CAP_GROUND_Y = -0.15;
 
 /** Inside the near terrain: past it the far mesh is too coarse to stand a rock on. */
 const REACH_CELLS = 7;
@@ -50,6 +57,8 @@ export class AlpineRockView {
     scene.add(this.root);
     this.anchor = new InstanceAnchor();
     this.meshes = [];
+    this.snowCapMaterial = null;
+    this.snowCapMeshes = [];
     this.lodBatches = new GeologyLodBatches({ enabled: config?.enhancements?.geologyLod, kinds: ALPINE_ROCK_KINDS, cellMeters: ALPINE_CELL_METERS, admission: config?.enhancements?.regionalGeologyAdmission ? config.enhancements.geologyAdmissionBudget : null });
     this.publicationPending = false;
     this.residency = new CellResidency({ cellMeters: ALPINE_CELL_METERS, reachCells: REACH_CELLS, cellsPerFrame: CELLS_PER_FRAME, progressive: true });
@@ -123,7 +132,29 @@ export class AlpineRockView {
       this.root.add(mesh);
       this.meshes.push(mesh);
       this.terrainView.drawPreparation?.register(mesh);
+      this.snowCapMeshes.push(null);
     }
+  }
+
+  ensureSnowCapMesh(batch) {
+    if (this.snowCapMeshes[batch] || this.lodBatches.isFarBatch(batch)) return this.snowCapMeshes[batch];
+    const sourceGeom = this.meshes[batch]?.geometry;
+    if (!sourceGeom) return null;
+    const capGeom = createRockSnowCapGeometry(sourceGeom, { groundY: SNOW_CAP_GROUND_Y });
+    if (!capGeom) return null;
+    capGeom.setAttribute('instanceSnow', new THREE.InstancedBufferAttribute(new Float32Array(CAPACITY), 1));
+    this.snowCapMaterial ??= createRockSnowCapMaterial({ snowSource: 'instanceSnow' });
+    const capMesh = new THREE.InstancedMesh(capGeom, this.snowCapMaterial, CAPACITY);
+    capMesh.name = `alpine-rock-snowcap-${batch}`;
+    capMesh.count = 0;
+    capMesh.visible = false;
+    capMesh.frustumCulled = true;
+    capMesh.castShadow = true;
+    capMesh.receiveShadow = true;
+    this.root.add(capMesh);
+    this.snowCapMeshes[batch] = capMesh;
+    this.terrainView.drawPreparation?.register(capMesh);
+    return capMesh;
   }
 
   write(publicationBudget = null) {
@@ -134,6 +165,10 @@ export class AlpineRockView {
     this.lodBatches.plan(rocks, this.meshes, CAPACITY);
     const dirty = this.meshes.map(mesh => ({ matrix: new InstanceDirtySpan(mesh.instanceMatrix), snow: new InstanceDirtySpan(mesh.geometry.attributes.instanceSnow) }));
     for (const mesh of this.meshes) mesh.count = 0;
+    for (const cap of this.snowCapMeshes) {
+      if (cap) { cap.count = 0; cap.visible = false; }
+    }
+    const capDirty = new Array(this.meshes.length).fill(null);
     const kindCounts = new Uint32Array(ALPINE_ROCK_KINDS);
     for (const rock of rocks) {
       if (kindCounts[rock.kind] >= CAPACITY) continue;
@@ -150,10 +185,32 @@ export class AlpineRockView {
       range.matrix.matrix(mesh.count, scratch.matrix);
       range.snow.scalar(mesh.count, rock.snow);
       mesh.count += 1;
+      if (rock.snow >= SNOW_CAP_MIN && !this.lodBatches.isFarBatch(batch)) {
+        const capMesh = this.ensureSnowCapMesh(batch);
+        if (capMesh && capMesh.count < CAPACITY) {
+          capDirty[batch] ??= {
+            matrix: new InstanceDirtySpan(capMesh.instanceMatrix),
+            snow: new InstanceDirtySpan(capMesh.geometry.attributes.instanceSnow),
+          };
+          capDirty[batch].matrix.matrix(capMesh.count, scratch.matrix);
+          capDirty[batch].snow.scalar(capMesh.count, rock.snow);
+          capMesh.count += 1;
+          capMesh.visible = true;
+        }
+      }
       kindCounts[rock.kind]++;
     }
     for (const range of dirty) { range.matrix.publish(); range.snow.publish(); }
     for (const mesh of this.meshes) mesh.computeBoundingSphere();
+    for (let batch = 0; batch < this.snowCapMeshes.length; batch += 1) {
+      const cap = this.snowCapMeshes[batch];
+      if (!cap) continue;
+      if (capDirty[batch]) {
+        capDirty[batch].matrix.publish();
+        capDirty[batch].snow.publish();
+        cap.computeBoundingSphere();
+      }
+    }
     return true;
   }
 
@@ -173,5 +230,13 @@ export class AlpineRockView {
       mesh.dispose();
     }
     this.meshes[0]?.material.dispose();
+    for (const cap of this.snowCapMeshes) {
+      if (!cap) continue;
+      cap.geometry.dispose();
+      cap.dispose();
+    }
+    this.snowCapMeshes.length = 0;
+    this.snowCapMaterial?.dispose();
+    this.snowCapMaterial = null;
   }
 }

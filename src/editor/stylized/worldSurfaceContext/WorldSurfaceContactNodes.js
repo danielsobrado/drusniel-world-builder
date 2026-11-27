@@ -62,6 +62,7 @@ export function applyWorldSurfaceContact({
   fallbackRoughness = float(0.92),
   noiseOffset = null,
   mask = null,
+  aoMask: callerAoMask = null,
   heightScale = null,
   applyAo = true,
   config = worldSurfaceContactConfig(),
@@ -149,10 +150,13 @@ export function applyWorldSurfaceContact({
   }
 
   // Orthogonal WSC contact AO (never baked into wscBaseTexture).
+  // `callerAoMask` defaults to `callerMask` so snow-country rocks can suppress
+  // mud collars (`mask = 0`) while retaining genuine rock-to-snow base occlusion.
   const aoTop = float(resolved.aoHeightMeters).mul(hScale);
-  const aoMask = smoothstep(float(0), aoTop, heightAbove).oneMinus().clamp(0, 1);
+  const aoBand = smoothstep(float(0), aoTop, heightAbove).oneMinus().clamp(0, 1);
   const aoStrength = wsc.contact.mul(resolved.contactAoField).add(resolved.contactAoBase);
-  const contactAo = float(1).sub(aoMask.mul(aoStrength).mul(callerMask)).clamp(0.45, 1);
+  const effectiveAoMask = callerAoMask ? float(callerAoMask).clamp(0, 1) : callerMask;
+  const contactAo = float(1).sub(aoBand.mul(aoStrength).mul(effectiveAoMask)).clamp(0.45, 1);
   const outColor = applyAo ? colorBlended.color.mul(contactAo) : colorBlended.color;
 
   return {

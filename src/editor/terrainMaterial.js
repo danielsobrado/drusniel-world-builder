@@ -92,6 +92,7 @@ import {
 } from './materials/TerrainSlotBindings.js';
 import { TERRAIN_SURFACE_CONSTANTS } from './stylized/worldSurfaceContext/TerrainSurfaceEvaluator.js';
 import { surfaceMaskTextureUv } from './world/SurfaceMaskTexture.js';
+import { publishCoatCoverage } from './stylized/surfaceCoatings/CoatCoverage.js';
 
 const {
   HEIGHT_SHADE_SCALE,
@@ -679,12 +680,18 @@ export function createTerrainMaterial({
       const sunResponse = (glacierIce
         ? snowSurface.sunResponse.mul(powder).add(glacierIce.sunGlaze)
         : snowSurface.sunResponse.mul(powder)).add(sandSunResponse);
-      const combinedCavity = snowDetail?.cavity
+      // Fold boulder/crag/shrub contact-shade footprints into snow's blue-tinted
+      // cavity occlusion so objects sit in soft cool contact shadows on snowfields.
+      const snowContactAo = stylizedConfig.contactShade?.enabled !== false
+        ? float(1).sub(smoothstep(0.06, 0.72, contactShade).mul(0.32)).clamp(0.62, 1)
+        : float(1);
+      const baseCavity = snowDetail?.cavity
         ? (gpuDeform ? snowDetail.cavity.mul(gpuDeform.cavity) : snowDetail.cavity)
-        : (gpuDeform?.cavity ?? null);
-      const cavityOcclusion = combinedCavity
-        ? mix(float(1), combinedCavity, powder)
-        : null;
+        : (gpuDeform?.cavity ?? float(1));
+      const combinedCavity = baseCavity.mul(snowContactAo);
+      const cavityOcclusion = mix(float(1), combinedCavity, powder);
+      // The baked snow this terrain lays, for the coat diagnostics (D23).
+      publishCoatCoverage(material, { snow: bakedSurface.snow.mul(powder) });
       applySnowLighting(material, sunResponse, {
         snowWeight: bakedSurface.snow.mul(powder),
         cavityOcclusion,

@@ -14,17 +14,17 @@ import { color as colorNode, dot, mix, smoothstep, vec3 } from 'three/tsl';
  */
 export const DEFAULT_CANOPY_GRADE = Object.freeze({
   enabled: true,
-  // Lifted warm-sage shadow and softer sunlit green so crowns read as soft painterly
-  // puffs integrated with the meadow rather than high-contrast cut-outs.
-  shadow: '#3c6e4d',
-  light: '#9cb768',
+  // Grounded olive-forest shadow and warm sunlit canopy green aligned with the
+  // meadow sward, understory, and town palette rather than high-chroma pastel cutouts.
+  shadow: '#2f5236',
+  light: '#8ca358',
   tint: 0.9,
   /**
    * Gain on the leaf luminance before it picks a point on the ramp. Our KTX2
    * leaf atlases average ~0.12 linear luminance, which at 1 parks every crown on
-   * the dark shadow colour; the donor's crowns sit across the whole ramp.
+   * the dark shadow colour; 3.2 spreads leaf sprays across shadow, mid and lit tones.
    */
-  exposure: 3.8,
+  exposure: 3.2,
 });
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
@@ -54,9 +54,8 @@ export function resolveCanopyGrade(source) {
 export function gradeCanopy(sample, grade) {
   if (!grade) return sample;
   const luminance = dot(sample, vec3(0.2126, 0.7152, 0.0722));
-  // Keep per-card texture contrast very gentle (0.34..0.92) so macro puff normals and
-  // crown lighting carry the primary volume instead of speckled card-level contrast.
-  const texRamp = smoothstep(0.03, 0.8, luminance.mul(grade.exposure)).mul(0.58).add(0.34);
+  // Preserve organic spray depth (0.18..0.90) so leaf clusters hold texture without harsh speckle.
+  const texRamp = smoothstep(0.03, 0.82, luminance.mul(grade.exposure)).mul(0.72).add(0.18);
   const ramp = mix(colorNode(grade.shadow), colorNode(grade.light), texRamp);
   // The dark-texel guard stays on the raw luminance: painted branch detail keeps its colour.
   return mix(sample, ramp, smoothstep(0.025, 0.14, luminance).mul(grade.tint));

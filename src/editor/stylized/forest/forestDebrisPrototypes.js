@@ -41,6 +41,11 @@ import {
   createSplitTimberLogGeometry,
   createStumpGeometry,
 } from './forestDebrisGeometry.js';
+import { blendCoat } from '../../../render/materials/surfaceLayers/PbrCoatBlend.js';
+import { mossCoat } from '../surfaceCoatings/MossCoat.js';
+import { snowCoat } from '../surfaceCoatings/SnowCoat.js';
+import { surfaceCoatings } from '../surfaceCoatings/SurfaceCoatingConfig.js';
+import { publishCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
 const BARK_UNDERTONES = Object.freeze({
   beech: '#7a654e',
@@ -246,10 +251,12 @@ export function deadwoodMaterial(
     .max(dampCollar.mul(cushionMask).mul(0.85))
     .max(mossBias.mul(cushionMask.mul(0.7).add(0.3)).mul(0.85));
   const mossCoverage = rawMossWeight.mul(exposedMask.oneMinus()).mul(olderWood ? 0.64 : 0.48);
-  const rawMoss = mix(color('#5e7f2f'), color(floorColor), 0.34);
-  const litMoss = mix(rawMoss, color('#8fae4b'), detailNoise.b.mul(0.64));
+  // The shared moss pigment (surfaceCoatings.moss.palette), leaning a little to the floor it lies on.
+  const coatSettings = surfaceCoatings();
+  const mossPalette = coatSettings.moss.palette;
+  const rawMoss = mix(mix(color(mossPalette.deep), color(mossPalette.dark), deadwoodNoise.g), color(floorColor), 0.2);
+  const litMoss = mix(rawMoss, color(mossPalette.light), detailNoise.b.mul(0.64));
   const biomeMoss = mix(vec3(dot(litMoss, vec3(0.2126, 0.7152, 0.0722))), litMoss, saturation).mul(look.xyz);
-  surface = mix(surface, biomeMoss.mul(mix(0.84, 1.14, detailNoise.r)), mossCoverage);
 
   // Grade bark reflectance identically to standing trees, then compose normals & roughness
   // with the generic WSC contact collar (PR 4) so logs & stumps seamlessly hug sloped terrain.
@@ -279,8 +286,21 @@ export function deadwoodMaterial(
 
   const baseWoodRoughness = mix(normalRoughness.b.max(0.72), float(0.92), exposedMask.mul(0.5))
     .max(rotAmount.mul(0.98))
-    .add(mossCoverage.mul(0.06))
     .clamp(0.45, 1);
+
+  // The moss coat over the finished wood (colour, roughness and cushion relief),
+  // as on stones and trunks; graded bark does not grade the moss on it.
+  const mossLayer = mossCoat({
+    color: biomeMoss.mul(mix(0.84, 1.14, detailNoise.r)),
+    pillow: deadwoodNoise.b,
+    tuft: detailNoise.r,
+    settings: coatSettings,
+  });
+  const mossed = blendCoat({ color: barkTinted, roughness: baseWoodRoughness, normal: baseWoodNormal }, {
+    color: mossLayer.color,
+    roughness: mossLayer.roughness ?? baseWoodRoughness,
+    normal: mossLayer.normal(baseWoodNormal) ?? undefined,
+  }, mossCoverage);
 
   const debrisWsc = sampleWorldSurfaceContextVarying(positionWorld.xz, 'debris');
   const humusFallback = config
@@ -288,7 +308,7 @@ export function deadwoodMaterial(
     : mix(color(soilColor), biomeMoss, deadwoodNoise.b.mul(0.55));
   const soilWaveNoise = deadwoodNoise.b.sub(0.5).mul(0.7).add(detailNoise.g.sub(0.5).mul(0.3));
   const debrisContact = applyWorldSurfaceContact({
-    surface: { color: barkTinted, roughness: baseWoodRoughness, normal: baseWoodNormal },
+    surface: mossed,
     wsc: debrisWsc,
     profile: 'debris',
     fallbackHeight: positionGeometry.y,
@@ -302,10 +322,17 @@ export function deadwoodMaterial(
   const snowCap = smoothstep(0.16, 0.56, normalWorld.y.add(deadwoodNoise.b.sub(0.5).mul(0.48)))
     .mul(snowDepth.mul(1.2).clamp(0, 1))
     .mul(snowDepth.smoothstep(0.14, 0.38));
-  const snowy = mix(debrisContact.color, vec3(0.88, 0.91, 0.95), snowCap.mul(0.88));
-  const finalAlbedo = mix(snowy, snowy.mul(vec3(0.52, 0.53, 0.56)), wet.mul(0.55));
-  const normalNode = debrisContact.normal;
-  const roughnessNode = mix(debrisContact.roughness, debrisContact.roughness.min(0.32), wet.mul(0.65));
+  // The terrain's Snow007C coat, in the log's own frame, as on stones, trunks and roofs.
+  const snowCover = snowCap.mul(0.88);
+  const snowLayer = snowCoat(positionGeometry, normalGeometry, snowCover, coatSettings);
+  const snowed = blendCoat(debrisContact, {
+    color: vec3(0.88, 0.91, 0.95).mul(snowLayer?.tint ?? vec3(1)),
+    roughness: float(coatSettings.snow.enabled ? coatSettings.snow.roughness : 0.78).add(snowLayer?.roughness ?? 0),
+    normal: snowLayer?.normal() ?? undefined,
+  }, snowCover);
+  const finalAlbedo = mix(snowed.color, snowed.color.mul(vec3(0.52, 0.53, 0.56)), wet.mul(0.55));
+  const normalNode = snowed.normal;
+  const roughnessNode = mix(snowed.roughness, snowed.roughness.min(0.32), wet.mul(0.65));
 
   // Deadwood and moss already fold `attribute('color')` into their custom colorNodes; keeping
   // `vertexColors: false` avoids Three.js NodeMaterial multiplying diffuseColor by `vColor` twice.
@@ -319,6 +346,8 @@ export function deadwoodMaterial(
     roughnessNode,
     emissiveNode: treeBarkEmission(finalAlbedo, { height: float(0.45), up: normalWorld.y }),
   });
+
+  publishCoatCoverage(material, { moss: mossCoverage, snow: snowCover, wet });
 
   return {
     material,

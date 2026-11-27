@@ -42,6 +42,7 @@ import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
+import { publishCoatCoverage } from './surfaceCoatings/CoatCoverage.js';
 
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
@@ -92,9 +93,6 @@ function metricPatternPosition(rootNode, fallback) {
   return varying(positionLocal.sub(rootNode)).add(vec3(...SEED_SPREAD).mul(seed));
 }
 
-const MOSS_LIGHT = '#5d6e3e';
-const MOSS_DARK = '#42522d';
-const MOSS_DEEP = '#2f3d21';
 const DUST = '#a89a80';
 const ALGAE = '#4a5a2a';
 const ROCK_SNOW = '#eef3f8';
@@ -240,8 +238,9 @@ export function applyRockWeathering(material, {
   const dampStone = biomeAlbedo.mul(mix(float(1), float(0.88), dampBand));
 
   const shade = rockLuma.mul(0.55).add(0.52);
-  const mossBase = mix(color(MOSS_DEEP), color(MOSS_DARK), clumpTone);
-  const mossVelvet = mix(mossBase, color(MOSS_LIGHT), tuftGrain.smoothstep(0.35, 0.88));
+  const palette = surfaceCoatings().moss.palette;
+  const mossBase = mix(color(palette.deep), color(palette.dark), clumpTone);
+  const mossVelvet = mix(mossBase, color(palette.light), tuftGrain.smoothstep(0.35, 0.88));
   const mossColor = mossVelvet.mul(shade);
   // Two-stage blend: a faint lichen/moss stain lets stone grain read through at the
   // fringes, while the fuller velvety coat builds gradually in damp patch cores.
@@ -276,6 +275,7 @@ export function applyRockWeathering(material, {
     roughness: mossLayer.roughness ?? detailedStoneRoughness.max(0.96),
     normal: mossLayer.normal(detailedStoneNormal),
   }, mossCoatMask);
+  publishCoatCoverage(material, { moss: mossCoatMask });
   let weathered = mossed.color.mul(underside);
   let roughness = mossed.roughness;
   let normal = mossed.normal;
@@ -306,7 +306,7 @@ export function applyRockWeathering(material, {
   if (ground && groundContact && settings.soil > 0) {
     const soilNoise = stylizedFbm2(metricPattern.xz.mul(SOIL_EDGE_PER_METRE)).sub(0.5);
     const fallbackEarth = color(settings.soilColor).mul(look ? look.rgb : vec3(1));
-    // Heavy snow country grounds boulders through the snow-drift apron below instead of soil mud.
+    // Heavy snow country grounds boulders through snowbanks & cool contact AO instead of soil mud.
     const soilMask = look
       ? float(settings.soil).mul(snowGround.smoothstep(0.35, 0.85).oneMinus())
       : float(settings.soil);
@@ -319,6 +319,7 @@ export function applyRockWeathering(material, {
       fallbackAlbedo: fallbackEarth,
       noiseOffset: soilNoise,
       mask: soilMask,
+      aoMask: float(settings.soil),
     });
     weathered = contact.color;
     roughness = contact.roughness;
@@ -369,8 +370,8 @@ export function applyRockWeathering(material, {
   }
 
   // Snow country: fractured alpine cold stone with basalt normal/roughness relief,
-  // frost rime in horizontal strata cracks, and drifted snow caps/aprons grounded
-  // smoothly into the terrain slope normal.
+  // frost rime in horizontal strata cracks, crevice-filling height-blended snow,
+  // snow-to-rock cool bounce lighting, and cool base contact occlusion.
   if (look) {
     const frost = snowGround.smoothstep(0.28, 0.85).mul(FROST_STONE).toVar();
     const cold = coldStoneSurface({
@@ -378,13 +379,32 @@ export function applyRockWeathering(material, {
       normal: normalWorld,
       baseNormal: normal,
       detailFade: coatDetailFade(coatSettings.detail),
-      rimeAmount: snowGround.smoothstep(0.25, 0.85).mul(0.55),
+      rimeAmount: snowGround.smoothstep(0.25, 0.85).mul(0.52),
       gate: frost.greaterThan(0.01),
     });
-    // Preserve broad tonal modulation from the stone's planes while letting the
-    // world-scale fractured basalt scan own close-up rock relief and crevices.
-    const shading = dot(weathered, vec3(0.3, 0.59, 0.11)).mul(FROST_SHADING).clamp(0.72, 1.18);
-    weathered = mix(weathered, cold.color.mul(shading), frost);
+    // Modulate gently by macro plane orientation rather than GLB atlas smudges so
+    // crisp fractured basalt strata and subtle mineral variation stay clean.
+    const macroPlaneShade = mix(float(0.86), float(1.10), tone.mul(0.5).add(up.mul(0.25).add(0.25)));
+    // Cool ambient bounce from surrounding bright snowfield onto lower / side rock faces.
+    const rockFootHeight = groundContact
+      ? world.y.sub(groundContact.height).clamp(0, 2.6)
+      : float(1.2);
+    const snowBounce = vec3(0.76, 0.86, 1.0)
+      .mul(snowGround.smoothstep(0.35, 0.9))
+      .mul(up.smoothstep(0.65, -0.35))
+      .mul(rockFootHeight.smoothstep(2.4, 0.15))
+      .mul(0.09);
+    // Crisp cool rock-to-snow base contact AO so the stone roots firmly into the snowbank.
+    const snowBaseAo = groundContact
+      ? float(1).sub(
+        rockFootHeight.smoothstep(0.0, 0.58).oneMinus()
+          .mul(groundContact.contact.mul(0.26).add(0.18))
+          .mul(groundContact.validity),
+      ).clamp(0.54, 1)
+      : float(1);
+    const snowBaseTint = mix(vec3(0.76, 0.84, 0.96), vec3(1, 1, 1), snowBaseAo);
+    const coldLit = cold.color.mul(macroPlaneShade).mul(snowBaseTint).mul(snowBaseAo).add(snowBounce);
+    weathered = mix(weathered, coldLit, frost);
     roughness = mix(roughness, cold.roughness, frost);
     normal = normalize(mix(normal, cold.normal, frost));
 
@@ -397,40 +417,48 @@ export function applyRockWeathering(material, {
     const tear = mx_noise_float(stretched).mul(0.55)
       .add(mx_noise_float(metricPattern.mul(1.95)).mul(0.30))
       .add(mx_noise_float(metricPattern.mul(4.2)).mul(0.15));
-    const ledgeBoost = cold.perturbedUp.sub(normalWorld.y).max(0).mul(0.55).mul(frost);
-    const { cover, skirt, cap, apron } = snowDeposition({
+    const ledgeBoost = cold.perturbedUp.sub(normalWorld.y).max(0).mul(0.58).mul(frost);
+    const { cover, skirt, cap, apron, thickness } = snowDeposition({
       // A storm's snow settles on any stone; the cold stone stays the biome's.
       snow: snowGround.max(stormSnowCoverAt(positionWorld.xz)),
       breakup: tear,
       ledgeBoost,
+      crevice: cold.crevice.mul(frost),
+      surfaceHeight: mix(float(0.5), cold.height, frost),
       ...(ground ?? {}),
       levelNode: groundLevel,
     });
 
-    // Soften flat-shaded rock facets under snow caps toward sky-up, and align the
-    // basal snow apron's normal to the WSC terrain slope so the snowbank melts into
-    // the snowfield with zero hard horizontal seam or vertical polygon creases.
+    // Soften rock facets under snow caps toward sky-up (stronger on thicker caps for a
+    // pillowed volumetric read), and align basal snow apron normals to the WSC terrain slope.
     const upView = normalize(cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz);
-    const capSmoothNormal = normalize(mix(normalView, upView, cap.mul(smoothstep(0.35, 0.85, up)).mul(0.48)));
+    const capSmoothNormal = normalize(mix(
+      normalView,
+      upView,
+      cap.mul(smoothstep(0.30, 0.85, up)).mul(mix(float(0.45), float(0.72), thickness)),
+    ));
     const groundViewNormal = groundContact
       ? normalize(cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz)
       : upView;
     const apronAlign = groundContact
-      ? apron.mul(groundContact.validity).mul(0.84).clamp(0, 0.88)
+      ? apron.mul(groundContact.validity).mul(0.86).clamp(0, 0.90)
       : float(0);
     const snowBaseNormal = normalize(mix(capSmoothNormal, groundViewNormal, apronAlign));
 
     // World-metre coordinates keep Snow007C grain consistent across boulder and formation scales.
     const snowLayer = snowCoat(metricPattern, normalWorld, cover, coatSettings);
     const view = normalize(cameraPosition.sub(world));
-    const velvet = float(1).sub(dot(normalize(normalWorld), view).clamp(0, 1)).pow(2.5).mul(0.11);
+    const velvet = float(1).sub(dot(normalize(normalWorld), view).clamp(0, 1)).pow(2.4).mul(0.12);
     const snowFacing = mix(up, float(1), apronAlign.mul(0.8));
-    const shadeFill = mix(snowLightUniforms.shadeTint, vec3(1, 1, 1), smoothstep(0.32, 0.86, snowFacing));
+    const shadeFill = mix(snowLightUniforms.shadeTint, vec3(1, 1, 1), smoothstep(0.28, 0.86, snowFacing));
+    // Cool blue-tinted contact shadow right in the snow-to-rock seam pocket.
+    const snowSeamAo = mix(vec3(0.82, 0.89, 0.98), vec3(1, 1, 1), snowBaseAo.smoothstep(0.55, 0.96));
     const skirtBaseColor = groundContact
       ? mix(color(SNOW_GROUND_COLOR), groundContact.albedo.max(vec3(0.45)), groundContact.validity.mul(0.55))
       : color(SNOW_GROUND_COLOR);
     const snowColor = mix(color(ROCK_SNOW), skirtBaseColor, skirt)
       .mul(shadeFill)
+      .mul(snowSeamAo)
       .mul(snowLightUniforms.brightness.max(0.84))
       .mul(snowLayer?.tint ?? vec3(1))
       .add(vec3(0.85, 0.92, 1.0).mul(velvet).mul(apron.oneMinus()));
@@ -445,7 +473,7 @@ export function applyRockWeathering(material, {
     weathered = snowed.color;
     roughness = snowed.roughness;
     normal = snowed.normal;
-    material.userData.rockSnowCoverNode = cover;
+    publishCoatCoverage(material, { snow: cover });
   }
 
   material.colorNode = weathered;

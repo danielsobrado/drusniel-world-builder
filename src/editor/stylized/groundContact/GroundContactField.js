@@ -6,7 +6,6 @@ import { sampleHeight } from '../scatterMath.js';
 import { acquireWorldNoise } from '../worldNoise.js';
 import {
   WSC_BORDER_FADE_M,
-  WSC_DEFAULT_ROUGHNESS_BYTE,
   WSC_RESOLUTION,
   WSC_SPAN_M,
   clearWorldSurfaceContext,
@@ -15,30 +14,21 @@ import {
   wscGeoTexture,
   wscUniforms,
 } from '../worldSurfaceContext/WorldSurfaceContextState.js';
-import {
-  createTerrainSurfaceEvaluator,
-  sampleMaterialBakeChannels,
-  sampleRgba8Bilinear,
-  srgbByteToLinear,
-} from '../worldSurfaceContext/TerrainSurfaceEvaluator.js';
-import { WscRebuildCache, slotChunkSignature } from './wscRebuildCache.js';
+import { createTerrainSurfaceEvaluator } from '../worldSurfaceContext/TerrainSurfaceEvaluator.js';
+import { STALE_SIGNATURE, WscRebuildCache, slotChunkSignature } from './wscRebuildCache.js';
+import { createWscTexelWriter, encodeTexelHeight } from './wscTexelWriter.js';
+
+export { contactGrassSuppression } from './wscTexelWriter.js';
 
 const RECENTER_THRESHOLD_M = 16;
 const MAX_UPLOAD_DEFERRAL_MS = 100;
 const WSC_UPLOAD_BYTES = wscGeoTexture.image.data.byteLength + wscBaseTexture.image.data.byteLength
   + wscEcoTexture.image.data.byteLength;
 const DEFAULT_SOIL_HEX = '#6e5435';
-
-/**
- * Share of grass a contact-shade value clears. The shade and the meadow's root
- * zone share one lobed outline (ecologicalFootprint.js), so the patch value
- * stands in for distance: a default tree's grass is gone where its shade is
- * above ~0.62 (`rootZone.radius`) and back to full below ~0.12 (`+ falloff`).
- */
-export function contactGrassSuppression(contact) {
-  const t = clamp01((contact - 0.12) / 0.5);
-  return t * t * (3 - 2 * t);
-}
+// A cold build (nothing reusable: teleport, noise load) spends at most this much
+// of a budgeted frame, instead of ~28 ms at once. The old window stays shown
+// while it still covers the focus; otherwise WSC is off until the build lands.
+const COLD_BUILD_SLICE_MS = 4;
 
 function clamp01(value) {
   return value < 0 ? 0 : (value > 1 ? 1 : value);
@@ -141,6 +131,10 @@ export class GroundContactField {
     this.publishedChunkRevisions = new Map();
     this.rebuildCache = new WscRebuildCache(resolution);
     this.texelHeights = new Float64Array(resolution * resolution);
+    this.buildGeo = new Uint16Array(wscGeoTexture.image.data.length);
+    this.buildBase = new Uint8Array(wscBaseTexture.image.data.length);
+    this.buildEco = new Uint8Array(wscEcoTexture.image.data.length);
+    this.pendingBuild = null;
     this.disposed = false;
   }
 
@@ -189,6 +183,7 @@ export class GroundContactField {
         this.rebuildCache.invalidate();
         PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
       }
+      this.pendingBuild = null;
       this.lastSlotSignature = '';
       this.publishedChunkRevisions.clear();
       this.uploadDeferredAt = null;
@@ -202,47 +197,70 @@ export class GroundContactField {
           // Retain the previously published WSC window if it still validly covers
           // the focus chunk with unchanged revision (prevents contact popping on
           // routine 16 m walking recenters); hide stale coverage otherwise.
-          const focusChunkKey = `${Math.floor(fx / chunkWorldSize)}:${Math.floor(-fz / chunkWorldSize)}`;
-          const focusSlot = this.slotsByChunk.get(focusChunkKey);
-          const focusInsidePrev = Number.isFinite(this.centerX)
-            && Math.abs(fx - this.centerX) < (half - WSC_BORDER_FADE_M)
-            && Math.abs(fz - this.centerZ) < (half - WSC_BORDER_FADE_M);
-          const prevCoversFocus = focusInsidePrev
-            && this.lastSlotSignature !== ''
-            && focusSlot
-            && this.publishedChunkRevisions.get(focusChunkKey) === focusSlot.pageRevision;
-          if (!prevCoversFocus) {
-            wscUniforms.active.value = 0;
-            return false;
-          }
-          const minX = this.centerX - half;
-          const minZ = this.centerZ - half;
-          wscUniforms.canonicalOrigin.value.set(minX, minZ);
-          wscUniforms.renderOrigin.value.set(minX - ox, minZ - oz);
-          wscUniforms.inverseSpan.value = 1 / this.span;
-          wscUniforms.active.value = 1;
-          return true;
+          return this.publishPreviousIfCovering(fx, fz, ox, oz, chunkWorldSize);
         }
         PerfCounters.inc('wscUploadDeadlineOverrides');
       }
+      // A build in flight for this window continues even if a slot changed since
+      // it began: restarting on every streamed chunk could starve it, and the
+      // chunks that changed are recorded stale and re-evaluated next frame.
+      let job = this.pendingBuild;
+      if (!job || job.centerX !== targetX || job.centerZ !== targetZ) {
+        job = this.beginBuild(targetX, targetZ, chunkSize, tileSize, chunkWorldSize, signature);
+      }
+      const sliced = Boolean(publicationBudget) && !job.reuse && this.lastSlotSignature !== '';
+      if (!this.advanceBuild(job, sliced ? performance.now() + COLD_BUILD_SLICE_MS : Infinity)) {
+        this.pendingBuild = job;
+        PerfCounters.inc('wscColdBuildSlices');
+        return this.publishPreviousIfCovering(fx, fz, ox, oz, chunkWorldSize);
+      }
+      this.pendingBuild = null;
+      this.finishBuild(job);
       this.centerX = targetX;
       this.centerZ = targetZ;
-      this.rebuild(targetX, targetZ, chunkSize, tileSize, chunkWorldSize);
-      this.lastSlotSignature = signature;
+      this.lastSlotSignature = job.signature;
       this.publishedChunkRevisions.clear();
-      for (const [k, slot] of this.slotsByChunk) {
+      for (const [k, slot] of job.slotsByChunk) {
         this.publishedChunkRevisions.set(k, slot.pageRevision);
       }
       PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
     }
     this.uploadDeferredAt = null;
+    this.publishWindow(ox, oz);
+    return true;
+  }
 
+  publishWindow(ox, oz) {
+    const half = this.span * 0.5;
     const minX = this.centerX - half;
     const minZ = this.centerZ - half;
     wscUniforms.canonicalOrigin.value.set(minX, minZ);
     wscUniforms.renderOrigin.value.set(minX - ox, minZ - oz);
     wscUniforms.inverseSpan.value = 1 / this.span;
     wscUniforms.active.value = 1;
+  }
+
+  /**
+   * Keeps the published window while it still validly covers the focus chunk
+   * with an unchanged revision (no contact popping on routine recentres);
+   * hides stale coverage otherwise.
+   */
+  publishPreviousIfCovering(fx, fz, ox, oz, chunkWorldSize) {
+    const half = this.span * 0.5;
+    const focusChunkKey = `${Math.floor(fx / chunkWorldSize)}:${Math.floor(-fz / chunkWorldSize)}`;
+    const focusSlot = this.slotsByChunk.get(focusChunkKey);
+    const focusInsidePrev = Number.isFinite(this.centerX)
+      && Math.abs(fx - this.centerX) < (half - WSC_BORDER_FADE_M)
+      && Math.abs(fz - this.centerZ) < (half - WSC_BORDER_FADE_M);
+    const prevCoversFocus = focusInsidePrev
+      && this.lastSlotSignature !== ''
+      && focusSlot
+      && this.publishedChunkRevisions.get(focusChunkKey) === focusSlot.pageRevision;
+    if (!prevCoversFocus) {
+      wscUniforms.active.value = 0;
+      return false;
+    }
+    this.publishWindow(ox, oz);
     return true;
   }
 
@@ -271,84 +289,52 @@ export class GroundContactField {
     return 0;
   }
 
+  /** Builds the whole window now (tests and unbudgeted callers). */
   rebuild(centerX, centerZ, chunkSize, tileSize, chunkWorldSize) {
-    const res = this.resolution;
+    const job = this.beginBuild(centerX, centerZ, chunkSize, tileSize, chunkWorldSize, null);
+    this.advanceBuild(job, Infinity);
+    this.finishBuild(job);
+  }
+
+  beginBuild(centerX, centerZ, chunkSize, tileSize, chunkWorldSize, signature) {
     const step = this.texelMeters;
     const half = this.span * 0.5;
     const originX = centerX - half;
     const originZ = centerZ - half;
-
-    const baseHeight = this.resolveBaseHeight(centerX, centerZ, chunkSize, tileSize, chunkWorldSize);
-
-    const geoData = wscGeoTexture.image.data;
-    const baseData = wscBaseTexture.image.data;
-    const ecoData = wscEcoTexture.image.data;
-    const soilTable = this.soilTable;
-    const forestLitter = this.forestLitter;
-    const surfaceEvaluator = this.surfaceEvaluator;
-    const halfStep = step * 0.5;
-    const toHalf = THREE.DataUtils.toHalfFloat;
-    const zeroHalf = toHalf(0);
-    const oneHalf = toHalf(1);
-    const bakeScratch = {
-      grassWeight: 0,
-      dirtWeight: 1,
-      rockWeight: 0,
-      snowWeight: 0,
-      wetness: 0,
-      shoreline: 0,
-      macroR: 1,
-      macroG: 1,
-      macroB: 1,
-      slope: 0,
-      curvature: 0,
-    };
-    const surfaceOut = { r: 0, g: 0, b: 0, roughness: WSC_DEFAULT_ROUGHNESS_BYTE / 255 };
-    const ffScratch = [0, 0, 0, 0];
-    const maskScratch = [0, 0, 0, 0];
-    const evalInput = {
-      tileId: 0,
-      tileR: 0,
-      tileG: 0,
-      tileB: 0,
-      worldX: 0,
-      worldZ: 0,
-      height: 0,
-      grassCoverage: 0,
-      pathMask: 0,
-      canopy: 0,
-      litter: 0,
-      bakeSample: null,
-      worldNoisePixels: this.worldNoisePixels,
-      stormSnow: 0,
-    };
-
+    // The build reads this snapshot, not the live map, which update() refills every frame.
+    const slotsByChunk = new Map(this.slotsByChunk);
+    const signatures = new Map([...slotsByChunk].map(([key, slot]) => [key, slotChunkSignature(slot)]));
     // A recentre keeps every texel whose chunks are unchanged and evaluates only the
     // strip it uncovers (~1/8 of the window for a 16 m step).
-    const heights = this.texelHeights;
-    const previous = this.rebuildCache;
-    const reuse = previous.plan({
-      originX, originZ, step, halfStep, noiseVersion: this.worldNoiseVersion, slotsByChunk: this.slotsByChunk,
+    const reuse = this.rebuildCache.plan({
+      originX, originZ, step, halfStep: step * 0.5, noiseVersion: this.worldNoiseVersion, slotsByChunk,
       chunkX: (x) => Math.floor(x / chunkWorldSize), chunkZ: (z) => Math.floor(-z / chunkWorldSize),
     });
-    let reused = 0;
-
-    // Cache chunk slot lookup for row/column interior texels to avoid 80k+ string keys.
-    const fastSlot = (cx, cz, curCx, curCz, curSlot) => (
-      cx === curCx && cz === curCz ? curSlot : this.slotsByChunk.get(`${cx}:${cz}`)
-    );
-    const fastHeight = (wx, wz, curCx, curCz, curSlot) => {
-      const cx = Math.floor(wx / chunkWorldSize);
-      const cz = Math.floor(-wz / chunkWorldSize);
-      const s = fastSlot(cx, cz, curCx, curCz, curSlot);
-      if (!s?.page?.heights) return Number.NaN;
-      const sd = s.descriptor;
-      const lx = Math.max(0, Math.min(chunkSize - 1e-4, wx / tileSize - sd.originCellX));
-      const lz = Math.max(0, Math.min(chunkSize - 1e-4, -wz / tileSize - sd.originCellZ));
-      return sampleHeight(s.page, lx, lz, chunkSize);
+    return {
+      centerX, centerZ, originX, originZ, signature, slotsByChunk, signatures, reuse,
+      noiseVersion: this.worldNoiseVersion, chunkWorldSize, row: 0, reused: 0,
+      baseHeight: this.resolveBaseHeight(centerX, centerZ, chunkSize, tileSize, chunkWorldSize),
+      write: createWscTexelWriter({
+        soilTable: this.soilTable, forestLitter: this.forestLitter,
+        forestGrassCoreDensity: this.forestGrassCoreDensity, surfaceEvaluator: this.surfaceEvaluator,
+        worldNoisePixels: this.worldNoisePixels, slotsByChunk, chunkSize, tileSize, chunkWorldSize, step,
+      }),
     };
+  }
 
-    for (let iz = 0; iz < res; iz += 1) {
+  /** Builds rows into the back buffers until done or past `deadline`; returns whether done. */
+  advanceBuild(job, deadline) {
+    const res = this.resolution;
+    const step = this.texelMeters;
+    const { originX, originZ, chunkWorldSize, reuse, write, baseHeight, slotsByChunk } = job;
+    const previous = this.rebuildCache;
+    const heights = this.texelHeights;
+    const geo = this.buildGeo;
+    const base = this.buildBase;
+    const eco = this.buildEco;
+    for (; job.row < res; job.row += 1) {
+      if (deadline !== Infinity && performance.now() >= deadline) return false;
+      const iz = job.row;
       const worldZ = originZ + (iz + 0.5) * step;
       const chunkZ = Math.floor(-worldZ / chunkWorldSize);
       let cachedChunkX = Number.NaN;
@@ -358,175 +344,48 @@ export class GroundContactField {
         const chunkX = Math.floor(worldX / chunkWorldSize);
         if (chunkX !== cachedChunkX) {
           cachedChunkX = chunkX;
-          cachedSlot = this.slotsByChunk.get(`${chunkX}:${chunkZ}`);
+          cachedSlot = slotsByChunk.get(`${chunkX}:${chunkZ}`);
         }
-        const slot = cachedSlot;
         const texel = iz * res + ix;
         const offset = texel * 4;
         const source = reuse ? reuse.sourceIndex(ix, iz) : -1;
         if (source >= 0) {
           const from = source * 4;
           for (let c = 0; c < 4; c += 1) {
-            geoData[offset + c] = previous.geo[from + c];
-            baseData[offset + c] = previous.base[from + c];
-            ecoData[offset + c] = previous.eco[from + c];
+            geo[offset + c] = previous.geo[from + c];
+            base[offset + c] = previous.base[from + c];
+            eco[offset + c] = previous.eco[from + c];
           }
           const reusedHeight = previous.heights[source];
           heights[texel] = reusedHeight;
-          if (Number.isFinite(reusedHeight)) geoData[offset] = toHalf(reusedHeight - baseHeight);
-          reused += 1;
+          if (Number.isFinite(reusedHeight)) geo[offset] = encodeTexelHeight(reusedHeight, baseHeight);
+          job.reused += 1;
           continue;
         }
-        heights[texel] = Number.NaN;
-        if (!slot?.page?.heights) {
-          geoData[offset] = zeroHalf;
-          geoData[offset + 1] = zeroHalf;
-          geoData[offset + 2] = zeroHalf;
-          geoData[offset + 3] = zeroHalf; // explicit per-texel validity = 0
-          baseData[offset] = 0;
-          baseData[offset + 1] = 0;
-          baseData[offset + 2] = 0;
-          baseData[offset + 3] = WSC_DEFAULT_ROUGHNESS_BYTE;
-          ecoData[offset] = 0;
-          ecoData[offset + 1] = 0;
-          ecoData[offset + 2] = 0;
-          ecoData[offset + 3] = 0;
-          continue;
-        }
-        const d = slot.descriptor;
-        const localX = Math.max(0, Math.min(chunkSize - 1e-4, worldX / tileSize - d.originCellX));
-        const localZ = Math.max(0, Math.min(chunkSize - 1e-4, -worldZ / tileSize - d.originCellZ));
-        const h = sampleHeight(slot.page, localX, localZ, chunkSize);
-        if (!Number.isFinite(h)) {
-          geoData[offset] = zeroHalf;
-          geoData[offset + 1] = zeroHalf;
-          geoData[offset + 2] = zeroHalf;
-          geoData[offset + 3] = zeroHalf;
-          baseData[offset] = 0;
-          baseData[offset + 1] = 0;
-          baseData[offset + 2] = 0;
-          baseData[offset + 3] = WSC_DEFAULT_ROUGHNESS_BYTE;
-          ecoData[offset] = 0;
-          ecoData[offset + 1] = 0;
-          ecoData[offset + 2] = 0;
-          ecoData[offset + 3] = 0;
-          continue;
-        }
-
-        // Central-difference terrain normal across resident neighbours; falls back
-        // to exact one-sided derivative beside an unloaded slot instead of halving slope.
-        const hL = fastHeight(worldX - halfStep, worldZ, chunkX, chunkZ, slot);
-        const hR = fastHeight(worldX + halfStep, worldZ, chunkX, chunkZ, slot);
-        const hN = fastHeight(worldX, worldZ - halfStep, chunkX, chunkZ, slot);
-        const hS = fastHeight(worldX, worldZ + halfStep, chunkX, chunkZ, slot);
-        const hasL = Number.isFinite(hL);
-        const hasR = Number.isFinite(hR);
-        const gx = (hasL && hasR)
-          ? (hL - hR) / step
-          : (hasL ? (hL - h) / halfStep : (hasR ? (h - hR) / halfStep : 0));
-        const hasN = Number.isFinite(hN);
-        const hasS = Number.isFinite(hS);
-        const gz = (hasN && hasS)
-          ? (hN - hS) / step
-          : (hasN ? (hN - h) / halfStep : (hasS ? (h - hS) / halfStep : 0));
-        const invLen = 1 / Math.hypot(gx, 1, gz);
-
-        const normU = localX / chunkSize;
-        const normV = localZ / chunkSize;
-        let canopy = 0;
-        let contact = 0;
-        let litter = 0;
-        if (slot.forestFloorPixels && slot.forestFloorSize > 0) {
-          sampleRgba8Bilinear(slot.forestFloorPixels, slot.forestFloorSize, normU, normV, ffScratch);
-          canopy = ffScratch[0];
-          contact = ffScratch[1];
-          litter = ffScratch[2];
-        }
-
-        const cellIdx = Math.floor(localZ) * chunkSize + Math.floor(localX);
-        const tileId = slot.page.tiles ? slot.page.tiles[cellIdx] : 0;
-        const maskPixels = slot.page.surfaceMaskPixels;
-        let pathMaskVal = 0;
-        let vegMaskVal = 0;
-        if (maskPixels) {
-          sampleRgba8Bilinear(maskPixels, chunkSize, normU, normV, maskScratch);
-          pathMaskVal = maskScratch[0];
-          vegMaskVal = maskScratch[1];
-        }
-        const tilePixels = slot.page.tilePixels;
-
-        let sr;
-        let sg;
-        let sb;
-        let roughnessByte = WSC_DEFAULT_ROUGHNESS_BYTE;
-        if (tilePixels || slot.materialBake?.channels) {
-          const tileR = tilePixels ? srgbByteToLinear(tilePixels[cellIdx * 4]) : soilTable[(tileId & 255) * 3];
-          const tileG = tilePixels ? srgbByteToLinear(tilePixels[cellIdx * 4 + 1]) : soilTable[(tileId & 255) * 3 + 1];
-          const tileB = tilePixels ? srgbByteToLinear(tilePixels[cellIdx * 4 + 2]) : soilTable[(tileId & 255) * 3 + 2];
-          const hasBake = sampleMaterialBakeChannels(
-            slot.materialBake,
-            normU,
-            normV,
-            bakeScratch,
-          );
-          evalInput.tileId = tileId;
-          evalInput.tileR = tileR;
-          evalInput.tileG = tileG;
-          evalInput.tileB = tileB;
-          evalInput.worldX = worldX;
-          evalInput.worldZ = worldZ;
-          evalInput.height = h;
-          evalInput.grassCoverage = vegMaskVal;
-          evalInput.pathMask = pathMaskVal;
-          evalInput.canopy = canopy;
-          evalInput.litter = litter;
-          evalInput.bakeSample = hasBake ? bakeScratch : null;
-          surfaceEvaluator.evaluate(evalInput, surfaceOut);
-          sr = surfaceOut.r;
-          sg = surfaceOut.g;
-          sb = surfaceOut.b;
-          roughnessByte = Math.round(clamp01(surfaceOut.roughness) * 255);
-        } else {
-          // Minimal test/uninitialized fallback when neither tilePixels nor materialBake exist.
-          const tIdx = (tileId & 255) * 3;
-          const litterBlend = Math.min(0.75, litter * 0.55 + canopy * 0.25);
-          sr = soilTable[tIdx] * (1 - litterBlend) + forestLitter[0] * litterBlend;
-          sg = soilTable[tIdx + 1] * (1 - litterBlend) + forestLitter[1] * litterBlend;
-          sb = soilTable[tIdx + 2] * (1 - litterBlend) + forestLitter[2] * litterBlend;
-        }
-
-        heights[texel] = h;
-        geoData[offset] = toHalf(h - baseHeight);
-        geoData[offset + 1] = toHalf(gx * invLen);
-        geoData[offset + 2] = toHalf(gz * invLen);
-        geoData[offset + 3] = oneHalf; // explicit per-texel validity = 1
-
-        baseData[offset] = Math.round(Math.sqrt(clamp01(sr)) * 255);
-        baseData[offset + 1] = Math.round(Math.sqrt(clamp01(sg)) * 255);
-        baseData[offset + 2] = Math.round(Math.sqrt(clamp01(sb)) * 255);
-        baseData[offset + 3] = roughnessByte;
-
-        // Ecological vegetation coverage: mirrors forestFloor canopy suppression & path wear
-        // so WSC `eco.a` and diagnostic `D11` reflect actual ecological blade density (PR 3),
-        // and the grass a trunk or stone clears at its foot (PR 6).
-        const coreDensity = this.forestGrassCoreDensity[tileId & 255];
-        const effectiveVeg = clamp01(vegMaskVal * (1 - canopy * (1 - coreDensity)) * (1 - pathMaskVal)
-          * (1 - contactGrassSuppression(contact)));
-
-        ecoData[offset] = Math.round(clamp01(contact) * 255);
-        ecoData[offset + 1] = Math.round(clamp01(canopy) * 255);
-        ecoData[offset + 2] = Math.round(clamp01(litter) * 255);
-        ecoData[offset + 3] = Math.round(effectiveVeg * 255);
+        heights[texel] = write(cachedSlot, chunkX, chunkZ, worldX, worldZ, geo, base, eco, offset, baseHeight);
       }
     }
+    return true;
+  }
 
-    previous.store({
-      originX, originZ, noiseVersion: this.worldNoiseVersion, slotsByChunk: this.slotsByChunk,
-      geo: geoData, base: baseData, eco: ecoData, heights,
+  /** Publishes a finished build and records it for the next recentre. */
+  finishBuild(job) {
+    const res = this.resolution;
+    // A slot that changed or left while a spread-out build read it is recorded stale.
+    for (const [key, built] of job.signatures) {
+      const slot = this.slotsByChunk.get(key);
+      if (!slot || slotChunkSignature(slot) !== built) job.signatures.set(key, STALE_SIGNATURE);
+    }
+    this.rebuildCache.store({
+      originX: job.originX, originZ: job.originZ, noiseVersion: job.noiseVersion, signatures: job.signatures,
+      geo: this.buildGeo, base: this.buildBase, eco: this.buildEco, heights: this.texelHeights,
     });
-    PerfCounters.inc('wscTexelsReused', reused);
-    PerfCounters.inc('wscTexelsEvaluated', res * res - reused);
-    wscUniforms.baseHeight.value = baseHeight;
+    wscGeoTexture.image.data.set(this.buildGeo);
+    wscBaseTexture.image.data.set(this.buildBase);
+    wscEcoTexture.image.data.set(this.buildEco);
+    PerfCounters.inc('wscTexelsReused', job.reused);
+    PerfCounters.inc('wscTexelsEvaluated', res * res - job.reused);
+    wscUniforms.baseHeight.value = job.baseHeight;
     wscGeoTexture.needsUpdate = true;
     wscBaseTexture.needsUpdate = true;
     wscEcoTexture.needsUpdate = true;
@@ -539,6 +398,7 @@ export class GroundContactField {
     this.slotsByChunk.clear();
     this.publishedChunkRevisions.clear();
     this.rebuildCache.invalidate();
+    this.pendingBuild = null;
     clearWorldSurfaceContext();
   }
 }

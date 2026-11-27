@@ -226,6 +226,11 @@ stylizedSurface:
       tuftHeight: 0.004
       # How much darker the low ground between cushions is than their tops.
       recessShade: 0.3
+      # The one moss pigment on rocks, bark and deadwood (each tints it by its biome look).
+      palette:
+        deep: '#2f3d21'
+        dark: '#42522d'
+        light: '#5d6e3e'
     # Coat micro-detail fades out between these distances (metres) so it does not shimmer.
     detail:
       nearDistance: 20
@@ -2786,28 +2791,28 @@ stylizedSurface:
     canopyOcclusion: { resolution: 16, density: 0.65 }
     foliageLighting:
       enabled: true
-      transmission: 0.88
+      transmission: 0.78
       thickness: 0.5
       absorption: 1.8
-      transmissionColor: '#eef5b8'
-      normalBlend: 0.86
-      wrapDiffuse: 0.5
-      rimGlow: 0.36
-      puffStrength: 0.44
-      occlusionStrength: 0.42
-      minimumVisibility: 0.52
+      transmissionColor: '#e2eba8'
+      normalBlend: 0.74
+      wrapDiffuse: 0.36
+      rimGlow: 0.22
+      puffStrength: 0.36
+      occlusionStrength: 0.62
+      minimumVisibility: 0.34
       wetStrength: 0.55
       wetRoughness: 0.28
       needleSpecular: 0
       species:
         conifer:
           thickness: 0.78
-          transmission: 0.68
-          transmissionColor: '#d2e4b0'
-          normalBlend: 0.6
-          wrapDiffuse: 0.3
-          rimGlow: 0.2
-          puffStrength: 0.3
+          transmission: 0.60
+          transmissionColor: '#cadba8'
+          normalBlend: 0.55
+          wrapDiffuse: 0.26
+          rimGlow: 0.16
+          puffStrength: 0.26
           needleSpecular: 0.06
     barkSurface:
       enabled: true
@@ -2826,8 +2831,8 @@ stylizedSurface:
     # vertex-painted (alpine snow) crowns are left alone.
     canopyGrade:
       enabled: true
-      shadow: '#3c6e4d'
-      light: '#9cb768'
+      shadow: '#2f5236'
+      light: '#8ca358'
       tint: 0.9
     enabled: true
     residentRadius: 2

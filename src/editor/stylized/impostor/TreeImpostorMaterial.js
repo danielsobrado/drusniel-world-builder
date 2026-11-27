@@ -1,6 +1,6 @@
 import { frameUniform } from '../../../render/FrameUniforms.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
-import { treeBarkEmission, treeFoliageEmission } from '../forest/foliageLight.js';
+import { crownLocalGroundBounce, treeBarkEmission, treeFoliageEmission } from '../forest/foliageLight.js';
 import { decodeTreeCanopyVisibilityNode, decodeTreeFoliageMaskNode } from './TreeImpostorNormalEncoding.js';
 import * as THREE from 'three/webgpu';
 import {
@@ -25,10 +25,14 @@ import {
   texture,
   uniform,
   uv,
+  varying,
   vec2,
   vec3,
   vec4,
 } from 'three/tsl';
+import { worldNoiseField } from '../worldNoise.js';
+import { WORLD_NOISE_LAYERS } from '../worldNoiseLayout.js';
+import { sampleWorldSurfaceContextAt } from '../worldSurfaceContext/WorldSurfaceContextState.js';
 import {
   TREE_COLOR_VARIATION_MIN,
   TREE_COLOR_VARIATION_RANGE,
@@ -133,9 +137,17 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const variation = parameters.z
     .mul(TREE_COLOR_VARIATION_RANGE)
     .add(TREE_COLOR_VARIATION_MIN);
+  // Match near-crown per-tree hue temperature and macro landscape patch harmony so
+  // LOD handoffs never shift tint.
+  const treeTemp = mix(vec3(0.95, 1.01, 1.03), vec3(1.05, 1.00, 0.93), fract(parameters.z.mul(7.31)));
+  const macroPatch = varying(
+    worldNoiseField(WORLD_NOISE_LAYERS.macro)(canonicalFromRender(transform.xz).mul(0.012)).r,
+    'impostorMacroPatch',
+  );
+  const landscapeHarmony = mix(vec3(0.96, 1.01, 1.02), vec3(1.05, 1.01, 0.92), macroPatch);
   const colorMultiplier = mix(
     vec3(variation),
-    appearance.yzw.mul(variation),
+    appearance.yzw.mul(variation).mul(treeTemp).mul(landscapeHarmony),
     foliageMask,
   );
   const signedFade = parameters.y;
@@ -145,10 +157,17 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   );
 
   const barkSurface = resolveTreeBarkSettings({ barkSurface: atlas.barkSurface ?? {} });
-  const material = new (foliageMaterialClass(barkSurface.enabled ? THREE.MeshStandardNodeMaterial : THREE.MeshLambertNodeMaterial))({ side: THREE.DoubleSide });
+  const material = new (foliageMaterialClass(THREE.MeshStandardNodeMaterial))({
+    roughness: 0.9,
+    metalness: 0,
+    side: THREE.DoubleSide,
+  });
   material.positionNode = worldPosition;
   const barkWet = surfaceWetnessUniform.mul(barkSurface.enabled ? 0.7 : 0).mul(foliageMask.oneMinus());
   const crown = albedo.rgb.mul(colorMultiplier).mul(barkWet.mul(barkSurface.wetStrength * 0.45).oneMinus());
+  const wscRaw = sampleWorldSurfaceContextAt(transform.xz, { includeBase: true, includeEco: false });
+  const wscGround = varying(vec4(wscRaw.albedo, wscRaw.validity), 'impostorWscGround');
+  const localGroundBounce = crownLocalGroundBounce(wscGround.xyz, wscGround.w);
   const surface = configureTreeFoliageSurface(material, {
     settings: resolveTreeFoliageSettings({ foliageLighting: atlas.foliageSurface ?? {} }),
     visibility: decodeTreeCanopyVisibilityNode(normalSample.a), color: crown,
@@ -157,7 +176,9 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   const cap = canopySnowCap(withStormSnow(canopySnow).mul(foliageMask), worldNormal.y);
   const snowed = applyCanopySnow({
     color: crown,
-    emissive: atlas.foliageLighting ? treeFoliageEmission(crown, null, surface.visibility).mul(foliageMask) : null,
+    emissive: atlas.foliageLighting
+      ? treeFoliageEmission(crown, null, surface.visibility, localGroundBounce).mul(foliageMask)
+      : null,
     cap,
   });
   if (atlas.barkLighting) {
@@ -171,7 +192,7 @@ function createMaterial({ atlas, readTransform, readParameters, readAppearance, 
   // Canopy AO belongs only to foliage; bark uses its own baked material grade.
   if (material.aoNode) material.aoNode = mix(float(1), surface.visibility, foliageMask);
   if (barkSurface.enabled) material.roughnessNode = mix(
-    wetSurfaceRoughness(float(barkSurface.roughness), barkWet, barkSurface), material.roughnessNode ?? float(0.98), foliageMask,
+    wetSurfaceRoughness(float(barkSurface.roughness), barkWet, barkSurface), material.roughnessNode ?? float(0.9), foliageMask,
   );
   material.colorNode = snowed.color;
   material.emissiveNode = snowed.emissive;

@@ -43,6 +43,7 @@ import { buildingShadeEmission } from '../stylized/forest/foliageLight.js';
 import { sampleWorldWind } from '../weather/wind/worldWindState.js';
 import { KIT_DATA_ATTRIBUTE } from './TownKitGeometry.js';
 import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
+import { publishCoatCoverage } from '../stylized/surfaceCoatings/CoatCoverage.js';
 
 /**
  * The one material every opaque town surface draws with.
@@ -247,6 +248,7 @@ export function createTownKitMaterial(atlas, look) {
     roughness: mossLayer.roughness ?? dryRoughness,
     normal: mossLayer.normal(reliefNormal),
   }, weathered.moss.mask);
+  publishCoatCoverage(material, { moss: weathered.moss.mask });
   colour = mossed.color;
   // Setts as SettlementView's streets are: trodden grime that also hides the tile repeat.
   colour = mix(colour, treadPaving(colour, place.xz), isRole(ROLE.paving).add(isCobble));
@@ -264,6 +266,7 @@ export function createTownKitMaterial(atlas, look) {
     metalness: float(0),
     normal: snowLayer?.normal(),
   }, snowCover);
+  publishCoatCoverage(material, { snow: snowCover });
   colour = snowed.color;
 
   material.colorNode = vec4(colour, 1);

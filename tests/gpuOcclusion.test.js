@@ -210,3 +210,25 @@ test('the main draw skips its scene walk only on the frame occlusion already wal
   assert.equal(scene.matrixWorldAutoUpdate, true, 'restored after a failed draw');
   occlusion.dispose();
 });
+
+test('a frame that does not collect never skips the main scene walk', () => {
+  const scene = new THREE.Scene();
+  const occlusion = new GpuOcclusion({ renderer: { backend: null }, scene, camera: new THREE.PerspectiveCamera() },
+    { enabled: true });
+  const seen = [];
+  const draw = () => seen.push(scene.matrixWorldAutoUpdate);
+  try {
+    // Cooldown frame: prepare returns before collecting, so last frame's walk must not carry over.
+    occlusion.walkedScene = scene;
+    occlusion.cooldown = 1;
+    occlusion.prepare();
+    occlusion.render(draw);
+    // A frame whose backend cannot run the pass also walks normally.
+    occlusion.walkedScene = scene;
+    occlusion.prepare();
+    occlusion.render(draw);
+    assert.deepEqual(seen, [true, true]);
+  } finally {
+    occlusion.dispose();
+  }
+});

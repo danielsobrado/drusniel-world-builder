@@ -15,9 +15,11 @@ import {
 } from './StableScatterManifest.js';
 import {
   buildChunkLodPlan,
+  createInstancedRenderers,
   iterateInstancedRenderers,
   disposeInstancedRenderers,
   pruneStateMap,
+  writeInstances,
 } from './lod/StylizedLodRuntime.js';
 import { drawnRepresentations, ScatterInstanceRows } from './lod/ScatterInstanceRows.js';
 import { admitSceneryPublication } from './lod/InstancePublicationPlan.js';
@@ -27,6 +29,9 @@ import { resolveForestSeed } from './forest/ForestRuntimeConfig.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
 import { bakeSnowNormal } from './snowDeposition.js';
+import { buildFracturedAlpineRockPrototypes } from './fracturedRockPrototypes.js';
+import { createRockSnowCapGeometry } from './snow/RockSnowCapGeometry.js';
+import { createRockSnowCapMaterial } from './snow/RockSnowCapMaterial.js';
 
 // Reused across a rebuild: `compose` reads out of these, so only the matrix
 // itself has to be a fresh object per instance.
@@ -47,15 +52,18 @@ import { iterateRockFormations, DEFAULT_ROCK_FORMATIONS } from './rockFormations
 import { applyRockWeathering, resolveRockWeathering } from './rockWeathering.js';
 import { applyGroundContactDeform } from './worldSurfaceContext/GroundContactDeformer.js';
 import { attribute, positionLocal } from 'three/tsl';
-import { biomeLook, placementTileId } from '../biomes/BiomeLooks.js';
+import { LOOK_SNOW_STEPS, biomeLook, placementTileId } from '../biomes/BiomeLooks.js';
 import { fitRockToGround } from './rockGroundFit.js';
 import { rockWaterContact } from './localRockWater.js';
 import { staticWaterContactAt } from '../water/StaticWaterSample.js';
 import { createOceanDistanceField } from '../water/OceanDistanceField.js';
+import { coatCoverageOf } from './surfaceCoatings/CoatCoverage.js';
 
 const ROCK_CLUSTER_SEED_OFFSET = 0xa7;
 /** Minimum triangles for a prototype to be scaled up 4.5–8.5x as a rock formation keystone/stone. */
 const FORMATION_MIN_TRIANGLES = 150;
+/** Minimum regional ground-snow depth (0..1) before near rocks mount volumetric snow-cap geometry. */
+const SNOW_CAP_MIN_GROUND = 0.35;
 
 function geometryTriangles(geometry) {
   if (!geometry) return 0;
@@ -90,15 +98,17 @@ function seatRockOnGround(material, ground) {
  * PBR response (roughness, metalness and flat shading); deleting the map turns
  * its warm, painted rocks into featureless silhouettes.
  */
-export function createStylizedRockMaterial(mesh, config, weathering, geometry = null) {
-  const source = materialList(mesh)[0];
-  const material = cloneAuthoredNodeMaterial(source);
+export function createStylizedRockMaterial(mesh, config, weathering, geometry = null, { flatShading = true } = {}) {
+  const source = mesh ? materialList(mesh)[0] : null;
+  const material = source
+    ? cloneAuthoredNodeMaterial(source)
+    : new THREE.MeshStandardNodeMaterial({ name: 'fractured-alpine-rock' });
   if ('roughness' in material) material.roughness = 1;
   if ('metalness' in material) material.metalness = 0;
   if (config?.rocks?.color && 'color' in material) {
     material.color = new THREE.Color(config.rocks.color);
   }
-  material.flatShading = true;
+  material.flatShading = flatShading;
   const ground = geometry ? rockGroundLine(geometry, config?.rocks?.burial) : null;
   if (ground) seatRockOnGround(material, ground);
   // Preserve painted planes while adding moss, local wetness, fractured cold stone and contact tone.
@@ -116,7 +126,7 @@ export function createStylizedRockMaterial(mesh, config, weathering, geometry = 
     });
   }
   material.emissiveNode = rockShadeEmission(material.colorNode ?? authoredFoliageColor(material), {
-    snowCover: material.userData.rockSnowCoverNode ?? null,
+    snowCover: coatCoverageOf(material).snow ?? null,
   });
   applyJungleMist(material, config?.ambientEffects);
   material.needsUpdate = true;
@@ -187,6 +197,11 @@ export class StylizedRockView {
     this.prototypeEllipses = [];
     this.meshes = [];
     this.proxyMeshes = [];
+    this.snowCapMaterial = null;
+    this.snowCapGeometries = [];
+    this.snowCapMeshes = [];
+    this.snowCapCapacity = 0;
+    this.proceduralAlpineInstalled = false;
     this.placements = [];
     this.placementsByChunk = new Map();
     this.clusterField = null;
@@ -254,6 +269,7 @@ export class StylizedRockView {
     if (!this.config.rocks.enabled || this.disposed || authoredVariants.length === 0) return;
     const firstNewPrototype = this.prototypes.length;
     const extracted = [];
+    const proxyOverrides = [];
     for (const { scene, definition } of authoredVariants) {
       const firstIndex = firstNewPrototype + extracted.length;
       const variants = yield* iterateAuthoredMeshPrototypes(scene, {
@@ -263,7 +279,10 @@ export class StylizedRockView {
       if (variants.length === 0) {
         throw new Error(`Rock variant ${definition.scene} produced no prototypes.`);
       }
-      extracted.push(...variants);
+      for (const variant of variants) {
+        extracted.push({ ...variant, flatShading: true });
+        proxyOverrides.push(null);
+      }
       for (let index = 0; index < variants.length; index += 1) {
         this.prototypeBiomeRules.push({
           tileIds: definition.tileIds ?? null,
@@ -280,14 +299,38 @@ export class StylizedRockView {
         variants.length,
       );
     }
+    // Install procedural fractured alpine/snow rock prototypes once so tundra & glacier
+    // boulders/formations have sharp cleavage silhouettes instead of flat-shaded wedges.
+    if (!this.proceduralAlpineInstalled) {
+      this.proceduralAlpineInstalled = true;
+      const alpineFirstIndex = firstNewPrototype + extracted.length;
+      const alpinePrototypes = buildFracturedAlpineRockPrototypes();
+      for (const alpine of alpinePrototypes) {
+        extracted.push({ geometry: alpine.geometry, source: null, flatShading: false });
+        proxyOverrides.push(alpine.proxyGeometry);
+        this.prototypeBiomeRules.push({
+          tileIds: alpine.tileIds,
+          weight: alpine.weight,
+          character: null,
+          characterStrength: undefined,
+          canopy: undefined,
+        });
+      }
+      registerPrototypeIndices(
+        this.prototypeIndicesByAsset,
+        'procedural-alpine-fractured',
+        alpineFirstIndex,
+        alpinePrototypes.length,
+      );
+    }
     this.prototypeIndexForRoll = createBiomePrototypeSelector({
       rules: this.prototypeBiomeRules,
       regionalCharacterField: this.regionalCharacterField,
     });
     this.prototypeBiomeRulesSignature = JSON.stringify(this.prototypeBiomeRules);
     const newPrototypes = [];
-    for (const { geometry, source } of extracted) {
-      const material = createStylizedRockMaterial(source, this.config, this.rockWeathering(), geometry);
+    for (const { geometry, source, flatShading } of extracted) {
+      const material = createStylizedRockMaterial(source, this.config, this.rockWeathering(), geometry, { flatShading });
       newPrototypes.push({ geometry, material, kind: 'rock',
         instanceSurface: Boolean(this.rockWeatheringSettings),
         instanceBiomeLook: Boolean(this.rockWeatheringSettings) });
@@ -317,12 +360,14 @@ export class StylizedRockView {
       residentRadius: settings.proxyRadius + 1,
       perChunk: this.config.rocks.perChunk,
     });
+    this.snowCapCapacity = Math.max(this.snowCapCapacity, capacity);
     // These authored meshes are already compact enough for the complete rock
     // residency window. Keeping cloned authored parts in the proxy band avoids
     // reverting to the old textureless dodecahedron in the mid-ground.
     const newProxyPrototypes = [];
-    for (const prototype of newPrototypes) {
-      const geometry = prototype.geometry.clone();
+    for (let i = 0; i < newPrototypes.length; i += 1) {
+      const prototype = newPrototypes[i];
+      const geometry = proxyOverrides[i] ? bakeSnowNormal(proxyOverrides[i]) : prototype.geometry.clone();
       yield geometry;
       const material = prototype.material.clone();
       yield material;
@@ -330,6 +375,10 @@ export class StylizedRockView {
         instanceSurface: prototype.instanceSurface, instanceBiomeLook: prototype.instanceBiomeLook }]);
     }
     this.proxyPrototypes.push(...newProxyPrototypes);
+    for (let i = 0; i < newPrototypes.length; i += 1) {
+      this.snowCapGeometries.push(null);
+      this.snowCapMeshes.push([]);
+    }
     this.prototypeHeights.push(...newPrototypes.map((prototype) => {
       prototype.geometry.computeBoundingBox();
       return Math.max(
@@ -736,6 +785,7 @@ export class StylizedRockView {
       counts = this.instanceRows.commit(job, this.meshes, this.proxyMeshes, this.instanceAnchor);
     }
     this.instanceAnchor.place(this.root, this.terrainView.floatingOrigin.getState());
+    this.syncNearSnowCaps();
     if (counts.manifestsChanged) {
       this.placements = this.instanceRows.placements();
       this.signature = placementSignature(this.placements);
@@ -744,6 +794,68 @@ export class StylizedRockView {
     PerfCounters.set('rockProxyInstances', counts.proxy);
     PerfCounters.set('rockPlacementInstances', this.placements.length);
     return true;
+  }
+
+  /**
+   * Lazily publishes volumetric snow-cap + basal snowbank meshes ONLY for near-LOD
+   * rock instances standing in snow country. Zero allocations and zero draws outside snow.
+   */
+  syncNearSnowCaps() {
+    const prototypeCount = this.prototypes.length;
+    if (prototypeCount === 0) return;
+    const snowyNear = new Array(prototypeCount);
+    let anySnowy = false;
+    for (let index = 0; index < prototypeCount; index += 1) {
+      const nearRows = this.instanceRows.storage[index]?.buckets?.near ?? [];
+      let bucket = null;
+      for (let i = 0; i < nearRows.length; i += 1) {
+        const row = nearRows[i];
+        const w = row.biomeLook?.[3] ?? 0;
+        const snowGround = Math.floor(w / 4) / LOOK_SNOW_STEPS;
+        if (snowGround >= SNOW_CAP_MIN_GROUND) {
+          (bucket ??= []).push(row);
+        }
+      }
+      if (bucket) {
+        snowyNear[index] = bucket;
+        anySnowy = true;
+      } else {
+        snowyNear[index] = [];
+      }
+    }
+    if (!anySnowy && !this.snowCapMaterial) return;
+    const burial = Math.max(0, Number(this.config.rocks?.burial) || 0);
+    for (let index = 0; index < prototypeCount; index += 1) {
+      if (snowyNear[index].length === 0 || this.snowCapMeshes[index]?.length) continue;
+      const rockGeom = this.prototypes[index]?.geometry;
+      if (!rockGeom) continue;
+      rockGeom.computeBoundingBox();
+      const { min, max } = rockGeom.boundingBox;
+      const groundY = min.y + burial * Math.max(0.1, max.y - min.y);
+      const capGeom = createRockSnowCapGeometry(rockGeom, { groundY });
+      if (!capGeom) continue;
+      this.snowCapGeometries[index] = capGeom;
+      this.snowCapMaterial ??= createRockSnowCapMaterial({
+        snowSource: 'biomeLook',
+        ambientEffects: this.config?.ambientEffects,
+      });
+      const [meshes] = createInstancedRenderers({
+        root: this.root,
+        partsByPrototype: [[{
+          geometry: capGeom,
+          material: this.snowCapMaterial,
+          kind: 'rock',
+          instanceBiomeLook: true,
+        }]],
+        renderer: this.terrainView.renderer,
+        capacity: Math.max(16, this.snowCapCapacity),
+        name: `stylized-rock-snowcap-${index}`,
+        castShadow: true,
+        prototypeOffset: index,
+      });
+      this.snowCapMeshes[index] = meshes;
+    }
+    writeInstances(this.snowCapMeshes, snowyNear, this.instanceAnchor);
   }
 
   getPlacements() { return this.placements; }
@@ -770,6 +882,12 @@ export class StylizedRockView {
     this.terrainView.scene.remove(this.root);
     disposeInstancedRenderers(this.root, this.meshes);
     disposeInstancedRenderers(this.root, this.proxyMeshes);
+    disposeInstancedRenderers(this.root, this.snowCapMeshes);
+    for (const geometry of this.snowCapGeometries) geometry?.dispose();
+    this.snowCapGeometries.length = 0;
+    this.snowCapMeshes.length = 0;
+    this.snowCapMaterial?.dispose();
+    this.snowCapMaterial = null;
     for (const prototype of this.prototypes) {
       prototype.geometry?.dispose();
       prototype.material?.dispose();

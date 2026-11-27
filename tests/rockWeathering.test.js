@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { coatCoverageOf } from '../src/editor/stylized/surfaceCoatings/CoatCoverage.js';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import yaml from 'js-yaml';
@@ -120,7 +121,8 @@ test('snow country assembles the deposition mask with a ground line and world-me
     ground: { groundY: 0.1, height: 1.2, centre: [0, 0.5, 0] },
   });
   assert.ok(material.colorNode);
-  assert.ok(material.userData.rockSnowCoverNode, 'exposes snow cover for restrained rock emission');
+  assert.ok(coatCoverageOf(material).snow, 'publishes snow cover for restrained rock emission and D23');
+  assert.ok(coatCoverageOf(material).moss, 'publishes moss cover for D22');
   material.dispose();
 });
 

@@ -25,16 +25,16 @@ const SKYWARD_WOODY_NORMAL = 0.10;
 /** Strength of a plant's own normal map over the bent/puff normal. */
 const UNDERSTORY_NORMAL_STRENGTH = 0.35;
 /** Crown in-scatter: metres over which it ramps, and its share of the sky fill. */
-const CROWN_AIR_START = 10;
-const CROWN_AIR_END = 220;
-const CROWN_AIR = 0.48;
+const CROWN_AIR_START = 38;
+const CROWN_AIR_END = 260;
+const CROWN_AIR = 0.26;
 /** Thicker air pulls the ramp in by the root of its fog scale, up to this factor. */
 const MAX_AIR_REACH = 2.5;
 /** Share of the sky fill a crown's and a trunk's shaded faces take. */
-const CROWN_FILL = 0.86;
+const CROWN_FILL = 0.56;
 const BARK_FILL = 1.05;
 /** Share of the ground's bounce light a downward/lower face takes. */
-const CROWN_BOUNCE = 1.45;
+const CROWN_BOUNCE = 1.15;
 const BARK_BOUNCE = 1.3;
 /**
  * Stone takes several times bark's share: under this scene's thin ambient a backlit
@@ -170,22 +170,49 @@ export function withAuthoredNormalMap(material, geometricNormal) {
 }
 
 /**
- * Only sky fill is emissive; sunlight must pass through the shadow system.
- * The added air lifts shaded leaves toward the sky behind them: exp² fog is still
- * near zero at the treeline, where crowns otherwise cut out of the sky.
+ * Blends the global hemisphere ground bounce with the local resolved WSC terrain
+ * reflectance so crown undersides pick up cobblestones, leaf litter, straw or snow.
  */
-export function treeFoliageEmission(crown, skyEdge = null, visibility = float(1)) {
+export function crownLocalGroundBounce(wscAlbedo, wscValidity, share = 0.7) {
+  const local = wscAlbedo.mul(1.25).clamp(0.03, 0.85);
+  return mix(foliageLight.groundColor, local, wscValidity.clamp(0, 1).mul(share));
+}
+
+/**
+ * Surface-albedo indirect fill for a tree crown (sky fill + ground bounce).
+ * Kept separate from distance/rim atmosphere so per-instance leaf tints
+ * (biome hue, autumn colour) tint reflected foliage light without colouring the air.
+ */
+export function treeFoliageSurfaceEmission(crown, visibility = float(1), localGround = null) {
+  const ground = localGround ?? foliageLight.groundColor;
+  // Ground bounce lifts lower and underside puffs toward the local floor beneath the tree.
+  const underside = normalWorld.y.negate().mul(0.5).add(0.5).clamp(0, 1).pow(1.6);
+  return foliageSkyFill(crown, CROWN_FILL).mul(visibility)
+    .add(crown.mul(ground).mul(foliageLight.fill).mul(underside).mul(CROWN_BOUNCE).mul(visibility));
+}
+
+/**
+ * Untinted atmospheric in-scatter and sky-edge dissolve for a tree crown.
+ * Never multiplied by per-instance leaf/autumn tint, so crowns fade cleanly
+ * into the actual horizon fog and sky colour behind them.
+ */
+export function treeFoliageAtmosphereEmission(skyEdge = null) {
   const air = treeAir();
   const edge = skyEdge ?? float(0);
-  // Broadened ground bounce lifts lower and side-facing puffs toward the meadow floor.
-  const underside = normalWorld.y.negate().mul(0.5).add(0.5).clamp(0, 1).pow(1.4);
   // Blend rim atmosphere from horizon mist (sides/lower) to sky (upper crown) to avoid blue halos against hills.
   const edgeColor = mix(foliageLight.airColor, foliageLight.skyColor, normalWorld.y.clamp(0, 1));
-  const airShadeWeight = mix(float(1.15), float(0.85), normalWorld.y.mul(0.5).add(0.5).clamp(0, 1));
-  return foliageSkyFill(crown, CROWN_FILL).mul(visibility)
-    .add(crown.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(underside).mul(CROWN_BOUNCE).mul(visibility))
-    .add(foliageLight.airColor.mul(foliageLight.fill).mul(air).mul(airShadeWeight))
+  const airShadeWeight = mix(float(1.1), float(0.85), normalWorld.y.mul(0.5).add(0.5).clamp(0, 1));
+  return foliageLight.airColor.mul(foliageLight.fill).mul(air).mul(airShadeWeight)
     .add(edgeColor.mul(foliageLight.fill).mul(edge));
+}
+
+/**
+ * Combined sky fill, ground bounce, and atmospheric in-scatter for paths that
+ * already carry their final tinted crown albedo (such as impostors).
+ */
+export function treeFoliageEmission(crown, skyEdge = null, visibility = float(1), localGround = null) {
+  return treeFoliageSurfaceEmission(crown, visibility, localGround)
+    .add(treeFoliageAtmosphereEmission(skyEdge));
 }
 
 function treeAir() {

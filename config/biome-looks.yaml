@@ -128,14 +128,14 @@ biomeLooks:
     # untinted, the donor pack read pale and pasted on.
     4:
       name: grassland
-      canopy: '#86b04a'
+      canopy: '#7ea149'
       soil: '#6b5d3e'
       formations: 0.12
       rock: { tint: '#cfc6b4', tone: 0.9 }
-    5: { name: tropical seasonal forest, canopy: '#6fae3e', soil: '#694e31', rock: { tint: '#cdbfa6', tone: 0.9 } }
+    5: { name: tropical seasonal forest, canopy: '#699c3e', soil: '#694e31', rock: { tint: '#cdbfa6', tone: 0.9 } }
     6:
       name: temperate deciduous forest
-      canopy: '#6da03c'
+      canopy: '#678f3c'
       soil: '#5a3f26'
       formations: 0.08
       rock: { tint: '#c4bfb2', tone: 0.86, moss: 0.8 }

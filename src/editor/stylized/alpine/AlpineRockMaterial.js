@@ -13,6 +13,7 @@ import { snowLightUniforms } from '../sky/skyLight.js';
 import { stormSnowCoverAt } from '../../weather/storm/snowField/snowFieldState.js';
 import { sampleWorldSurfaceContextVarying } from '../worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
+import { publishCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
 const SNOW = '#eef3f8';
 /** AlpineRockView sinks each unit rock to put the ground here, in its own space (0.5 - BURIAL below centre). */
@@ -55,18 +56,21 @@ export function createAlpineRockMaterial() {
   const objectLevel = varying(positionGeometry.y.sub(GROUND_Y).div(1.15));
   const groundLevel = mix(objectLevel, p.y.sub(groundContact.height).div(2.0), groundContact.validity);
 
-  const ledgeBoost = cold.perturbedUp.sub(n.y).max(0).mul(0.55);
-  const { cover: snow, skirt, apron } = snowDeposition({
+  const ledgeBoost = cold.perturbedUp.sub(n.y).max(0).mul(0.58);
+  const { cover: snow, skirt, cap, apron, thickness } = snowDeposition({
     snow: instanceSnow.max(stormSnowCoverAt(p.xz)),
     breakup: breakup.mul(0.62),
     ledgeBoost,
+    crevice: cold.crevice,
+    surfaceHeight: cold.height,
     centre: [0, 0, 0],
     groundY: GROUND_Y,
     height: 1.15,
     levelNode: groundLevel,
   });
 
-  // When snow is sparse or absent, blend a mineral scree / WSC surface collar into the crag base (PR 4).
+  // When snow is sparse or absent, blend a mineral scree / WSC surface collar into the crag base (PR 4),
+  // while keeping base contact AO active even on snowy crags (`aoMask: float(1)`).
   const screeContact = applyWorldSurfaceContact({
     surface: { color: cold.color, roughness: cold.roughness, normal: cold.normal },
     wsc: groundContact,
@@ -76,15 +80,27 @@ export function createAlpineRockMaterial() {
     fallbackAlbedo: color('#6b6a66'),
     noiseOffset: breakup.sub(0.5),
     mask: snow.oneMinus(),
+    aoMask: float(1),
   });
-  const groundedStone = screeContact.color;
+  const snowBounce = vec3(0.76, 0.86, 1.0)
+    .mul(instanceSnow.smoothstep(0.35, 0.9))
+    .mul(n.y.smoothstep(0.65, -0.35))
+    .mul(p.y.sub(groundContact.height).clamp(0, 3.0).smoothstep(2.8, 0.2))
+    .mul(0.09);
+  const groundedStone = screeContact.color.add(snowBounce);
   const stoneNormalBase = screeContact.normal;
   const stoneRoughness = screeContact.roughness;
 
-  // Align basal snow apron normal smoothly to the WSC terrain slope so crags emerge cleanly from snowfields.
+  // Soften crag top cap normals toward sky-up and align basal snow apron normal to WSC terrain slope.
+  const upView = normalize(cameraViewMatrix.mul(vec4(0, 1, 0, 0)).xyz);
+  const capSmoothNormal = normalize(mix(
+    normalView,
+    upView,
+    cap.mul(smoothstep(0.30, 0.85, n.y)).mul(mix(float(0.40), float(0.68), thickness)),
+  ));
   const groundViewNormal = normalize(cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz);
-  const apronAlign = apron.mul(groundContact.validity).mul(0.84).clamp(0, 0.88);
-  const snowBaseNormal = normalize(mix(normalView, groundViewNormal, apronAlign));
+  const apronAlign = apron.mul(groundContact.validity).mul(0.86).clamp(0, 0.90);
+  const snowBaseNormal = normalize(mix(capSmoothNormal, groundViewNormal, apronAlign));
 
   const coat = snowCoat(p, n, snow, settings);
   // Subtle blue skylight fill on side-facing snow + soft powder velvet rim on crag caps.
@@ -108,5 +124,6 @@ export function createAlpineRockMaterial() {
   material.colorNode = surface.color;
   material.roughnessNode = surface.roughness;
   material.normalNode = surface.normal;
+  publishCoatCoverage(material, { snow });
   return material;
 }

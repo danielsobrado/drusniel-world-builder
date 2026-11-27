@@ -6,6 +6,7 @@ import { blendCoat } from '../../../../render/materials/surfaceLayers/PbrCoatBle
 import { snowCoat } from '../../../stylized/surfaceCoatings/SnowCoat.js';
 import { surfaceCoatings } from '../../../stylized/surfaceCoatings/SurfaceCoatingConfig.js';
 import { snowLightUniforms } from '../../../stylized/sky/skyLight.js';
+import { publishCoatCoverage } from '../../../stylized/surfaceCoatings/CoatCoverage.js';
 
 /** Families that hold snow: everything solid. Glass and the dark recesses behind openings do not. */
 const SNOWY_SLOTS = Object.freeze(new Set(['roof', 'stone', 'wood', 'mortar', 'metal']));
@@ -70,6 +71,7 @@ export function snowSettlementMaterial(material, slot, settings = surfaceCoating
   material.roughnessNode = surface.roughness;
   if (metal) material.metalnessNode = surface.metalness;
   if (surface.normal !== baseNormal) material.normalNode = surface.normal;
+  publishCoatCoverage(material, { snow: cover });
   // Restrain heavy stone/timber sky-fill bounce where bright snow covers roofs and ledges.
   if (material.emissiveNode) material.emissiveNode = material.emissiveNode.mul(mix(float(1), float(0.28), cover));
 }

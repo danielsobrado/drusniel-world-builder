@@ -8,6 +8,7 @@ import {
   materialNormal,
   materialRoughness,
   mix,
+  normalGeometry,
   normalWorld,
   normalWorldGeometry,
   positionGeometry,
@@ -18,11 +19,16 @@ import {
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
-import { resolveFoliagePalette } from './forest/foliagePalette.js';
 import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
 import { mossCoat } from './surfaceCoatings/MossCoat.js';
+import { snowCoat } from './surfaceCoatings/SnowCoat.js';
+import { surfaceCoatings } from './surfaceCoatings/SurfaceCoatingConfig.js';
+import { publishCoatCoverage } from './surfaceCoatings/CoatCoverage.js';
+
+/** Trunk snow's roughness when the snow coat is off. */
+const TRUNK_SNOW_ROUGHNESS = 0.78;
 import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 
@@ -83,11 +89,8 @@ export function resolveBarkWeathering(surface, { snow = null } = {}) {
   const configured = surface?.trees?.weathering;
   if (configured?.enabled === false) return null;
   const settings = { ...DEFAULT_BARK_WEATHERING, ...(configured ?? {}) };
-  // Moss is the understory's own green and soil the floor's own litter, so a trunk
-  // wears the ground it stands on rather than a palette of its own.
-  const { base, tip } = resolveFoliagePalette(surface);
-  settings.mossDark = `#${base.getHexString()}`;
-  settings.mossLight = `#${tip.getHexString()}`;
+  // Soil is the floor's own litter, so a trunk wears the ground it stands on. Moss
+  // is the shared moss pigment (surfaceCoatings.moss.palette), as on stones and logs.
   settings.soilColor = surface?.trees?.forestFloor?.litterColor ?? DEFAULT_SOIL;
   for (const key of ['moss', 'wet', 'snow', 'tint', 'base']) {
     const value = Number(settings[key]);
@@ -154,7 +157,8 @@ export function applyBarkWeathering(material, { settings }) {
   const groove = (material.treeBarkHeightNode ?? float(0.5)).clamp(0, 1).oneMinus();
   const moss = facing.mul(patches).mul(low).mul(snowLine.oneMinus())
     .mul(settings.moss).mul(groove.mul(0.6).add(0.7)).clamp(0, 1);
-  const mossColor = mix(color(settings.mossDark), color(settings.mossLight), fract(seed.mul(3.1)))
+  const mossPalette = surfaceCoatings().moss.palette;
+  const mossColor = mix(color(mossPalette.dark), color(mossPalette.light), fract(seed.mul(3.1)))
     .mul(dot(bark, vec3(0.3, 0.59, 0.11)).mul(1.2).add(0.6));
   // One world-noise tap around the trunk: its pits are the cushions, its grit the tufts.
   const micro = worldNoiseField(WORLD_NOISE_LAYERS.micro)(vec2(around, local.y).div(0.8).add(seed.mul(5.3)));
@@ -204,6 +208,7 @@ export function applyBarkWeathering(material, { settings }) {
   if (!settings.snowBand) {
     material.treeWetnessNode = wet;
     material.colorNode = soaked;
+    publishCoatCoverage(material, { moss, wet });
     return material;
   }
   // Snow collects on whatever faces up, plus a low ground-drift collar round
@@ -211,7 +216,23 @@ export function applyBarkWeathering(material, { settings }) {
   const snowFaces = normalWorldGeometry.y.smoothstep(0.3, 0.7).mul(patches.mul(0.5).add(0.5));
   const snowSkirt = smoothstep(0.04, 0.34, heightAbove.add(patches.sub(0.5).mul(0.18))).oneMinus();
   const snow = snowFaces.max(snowSkirt.mul(0.9)).mul(snowLine).mul(settings.snow);
-  material.treeWetnessNode = wet.mul(snow.clamp(0, 1).oneMinus());
-  material.colorNode = mix(soaked, color(settings.snowBand.color), snow.clamp(0, 1));
+  const cover = snow.clamp(0, 1);
+  material.treeWetnessNode = wet.mul(cover.oneMinus());
+  // The terrain's Snow007C coat, as on rocks and roofs: grain, roughness and
+  // normals, in the trunk's own frame so it does not slide with the floating origin.
+  const coatSettings = surfaceCoatings();
+  const snowLayer = snowCoat(positionGeometry, normalGeometry, cover, coatSettings);
+  const trunkRoughness = material.roughnessNode ?? materialRoughness;
+  const trunkNormal = material.normalNode ?? materialNormal;
+  const snowed = blendCoat({ color: soaked, roughness: trunkRoughness, normal: trunkNormal }, {
+    color: color(settings.snowBand.color).mul(snowLayer?.tint ?? vec3(1)),
+    roughness: float(coatSettings.snow.enabled ? coatSettings.snow.roughness : TRUNK_SNOW_ROUGHNESS)
+      .add(snowLayer?.roughness ?? 0),
+    normal: snowLayer?.normal() ?? undefined,
+  }, cover);
+  material.colorNode = snowed.color;
+  material.roughnessNode = snowed.roughness;
+  if (snowed.normal !== trunkNormal) material.normalNode = snowed.normal;
+  publishCoatCoverage(material, { moss, snow: cover, wet });
   return material;
 }

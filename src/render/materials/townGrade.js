@@ -9,6 +9,7 @@ import { filterSpecularRoughness } from './specularAntialiasing.js';
 import { buildingShadeEmission } from '../../editor/stylized/forest/foliageLight.js';
 import { NOISE, planarNoise } from '../../editor/locations/materials/locationNoise.js';
 import { TOWN_GROUND, groundTownFoundation } from './townGroundContact.js';
+import { publishCoatCoverage } from '../../editor/stylized/surfaceCoatings/CoatCoverage.js';
 
 export { TOWN_GROUND };
 
@@ -141,6 +142,7 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
     roughness: mossLayer.roughness ?? baseRoughness,
     normal: mossLayer.normal(baseNormal),
   }, weathered.moss.mask);
+  publishCoatCoverage(material, { moss: weathered.moss.mask });
   material.colorNode = mossed.color;
   const wet = wetTownSurface(material.colorNode, mossed.roughness, normalWorld.y, TOWN_WET_FAMILIES[familyKey]);
   material.colorNode = wet.color;

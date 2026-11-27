@@ -14,6 +14,13 @@ export const SURFACE_COATING_DEFAULTS = Object.freeze({
     tuftHeight: 0.004,
     /** How much darker the low ground between cushions is than their tops. */
     recessShade: 0.3,
+    /**
+     * The one moss pigment every surface grows (rocks, bark, deadwood): deep
+     * shade, body and sunlit tips, in sRGB. Each surface still tints it by its
+     * own biome look; a per-material palette made logs, trunks and stones in one
+     * glade wear three different mosses.
+     */
+    palette: Object.freeze({ deep: '#2f3d21', dark: '#42522d', light: '#5d6e3e' }),
   }),
   /** Metres from the eye: full coat micro-detail before `near`, none past `far`. */
   detail: Object.freeze({ nearDistance: 20, farDistance: 65 }),
@@ -47,6 +54,13 @@ export function resolveSurfaceCoatings(source = {}) {
       }
     }
   }
+  const palette = { ...SURFACE_COATING_DEFAULTS.moss.palette, ...(value.moss.palette ?? {}) };
+  for (const [name, hex] of Object.entries(palette)) {
+    if (!['deep', 'dark', 'light'].includes(name) || typeof hex !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(hex)) {
+      throw new TypeError(`stylizedSurface.surfaceCoatings.moss.palette.${name} must be a #rrggbb colour.`);
+    }
+  }
+  value.moss.palette = Object.freeze(palette);
   for (const field of ['pillowHeight', 'tuftHeight']) {
     if (!Number.isFinite(value.moss[field]) || value.moss[field] < 0 || value.moss[field] > 0.1) {
       throw new RangeError(`stylizedSurface.surfaceCoatings.moss.${field} must be within [0, 0.1] metres.`);

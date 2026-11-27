@@ -26,18 +26,26 @@ import { PREVAILING_WIND } from '../materials/SnowAccumulation.js';
 export const SNOW_GROUND_COLOR = '#e8eef2';
 const WIND = vec2(...PREVAILING_WIND).normalize();
 /** Up-facing value where a full fall starts to cap a face, and how much higher a trace of snow starts. */
-const CAP_START = 0.52;
-const CAP_LIGHT = 0.42;
-const CAP_WIDTH = 0.14;
-/** Skirt height as a share of the drift scale above the ground line, under a full fall. */
-const SKIRT = 0.12;
+const CAP_START = 0.58;
+const CAP_LIGHT = 0.36;
+const CAP_WIDTH = 0.12;
+/**
+ * Skirt height as a share of the drift scale above the ground line, under a full
+ * fall: a drift banked against the stone, not a rim. At 0.12 a boulder sat on the
+ * snowfield with a 16 cm white line round its foot (WSC PR 8, B17).
+ */
+const SKIRT = 0.18;
 /** How much higher the skirt climbs a lee face, and how much lower it sits on the windward one. */
-const SKIRT_LEE = 0.18;
-const SKIRT_SCOUR = 0.045;
+const SKIRT_LEE = 0.26;
+const SKIRT_SCOUR = 0.12;
+/** How far the breakup swings the skirt height round the stone, as a share of it. */
+const SKIRT_SWING = 1.05;
+/** Snow clinging above the skirt line, in recesses and on rough rock, thinning out with height. */
+const CLING_BAND = 0.24;
 /** Drift up a lee face, as a share of the drift scale. */
-const LEE_DRIFT = 0.26;
+const LEE_DRIFT = 0.24;
 /** Crisp feathered edge of settled snow meeting stone. */
-const SKIRT_EDGE = 0.048;
+const SKIRT_EDGE = 0.044;
 
 /**
  * Welds a faceted stone's normals into one smooth normal per position, as the
@@ -93,6 +101,8 @@ export function snowDeposition({
   snow,
   breakup = float(0),
   ledgeBoost = float(0),
+  crevice = float(0),
+  surfaceHeight = float(0.5),
   centre = null,
   groundY = null,
   height = 1,
@@ -104,6 +114,7 @@ export function snowDeposition({
   const surfaceLocal = welded ?? normalLocal;
   const facing = dot(normalWorld.xz, WIND);
   const lee = facing.clamp(0, 1);
+  const scour = facing.negate().clamp(0, 1);
   const depth = snow.clamp(0, 1);
   // A trace switches it off, and taiga's 0.1 / cold desert's 0.2 are bare ground
   // with snow only in hollows: caps start softly above 0.18, while a white basal
@@ -116,11 +127,26 @@ export function snowDeposition({
     // Per vertex: it varies smoothly over a stone, and the fragment pass is the expensive one.
     ? varying(float(0.35).sub(dot(surfaceLocal, normalize(positionGeometry.sub(vec3(...centre))))).mul(1.5).clamp(0, 1))
     : float(0);
-  const start = float(CAP_START).add(depth.oneMinus().mul(CAP_LIGHT)).sub(cavity.mul(0.25));
-  const cap = up.add(ledgeBoost).add(breakup.mul(0.42)).smoothstep(start, start.add(CAP_WIDTH));
+  // Height-blended accumulation: snow settles into rock recesses & cracks first while
+  // sharp ridges poke through thinning snow edges. Wind exposure thins windward lips.
+  const heightBias = float(0.5).sub(surfaceHeight).mul(0.22);
+  const windExposure = lee.mul(0.10).sub(scour.mul(0.09));
+  const start = float(CAP_START).add(depth.oneMinus().mul(CAP_LIGHT)).sub(cavity.mul(0.24)).sub(windExposure);
+  const capSignal = up.add(ledgeBoost).add(heightBias).add(breakup.mul(0.38));
+  const cap = capSignal.smoothstep(start, start.add(CAP_WIDTH));
+  // Snow packing into horizontal/angled geological fracture seams and crevices,
+  // while steep wind-scoured vertical rock faces stay clean and high-contrast.
+  const crackSupport = up.smoothstep(-0.06, 0.52);
+  const crackShelter = float(1).sub(scour.mul(0.42));
+  const crackFill = crevice.mul(crackSupport).mul(crackShelter)
+    .mul(breakup.mul(0.45).add(0.85).clamp(0.4, 1.25))
+    .smoothstep(0.26, 0.68)
+    .mul(depth.smoothstep(0.22, 0.62))
+    .mul(0.88);
+  const capThickness = capSignal.sub(start).div(float(0.42)).clamp(0, 1).mul(capPresent);
   if (groundY === null && !levelNode) {
-    const capOut = cap.mul(capPresent);
-    return { cover: capOut, skirt: float(0), cap: capOut, apron: float(0) };
+    const capOut = max(cap.mul(capPresent), crackFill);
+    return { cover: capOut, skirt: float(0), cap: cap.mul(capPresent), apron: float(0), thickness: capThickness };
   }
 
   const level = levelNode ?? varying(positionGeometry.y.sub(groundY).div(Math.max(1e-3, height)));
@@ -131,21 +157,35 @@ export function snowDeposition({
   // WGSL leaves smoothstep undefined for reversed edges, so falling ramps are oneMinus.
   const driftTop = facing.smoothstep(-0.25, 1).mul(fill).mul(LEE_DRIFT)
     .mul(breakup.mul(0.75).add(1).max(0.2)).max(0.01);
-  const drift = level.smoothstep(driftTop.sub(SKIRT_EDGE), driftTop).oneMinus().mul(up.smoothstep(-0.4, 0.15));
-  const scour = facing.negate().clamp(0, 1);
+  const drift = level.sub(heightBias.mul(0.5)).smoothstep(driftTop.sub(SKIRT_EDGE), driftTop).oneMinus()
+    .mul(up.smoothstep(-0.4, 0.15));
   // Steep overhangs shed the skirt so snow banks naturally into the ground seam rather than climbing shear faces.
   const baseSupport = up.smoothstep(-0.35, 0.35).mul(0.55).add(0.45);
+  // The drift's height swings round the stone with the breakup, so no two feet carry
+  // the same line and a windward face can stand nearly bare beside a deep lee bank.
   const skirtTop = float(SKIRT).add(lee.mul(SKIRT_LEE)).sub(scour.mul(SKIRT_SCOUR))
-    .add(breakup.mul(0.18)).mul(fill).mul(baseSupport).max(0.015);
-  const skirt = level.smoothstep(skirtTop.sub(SKIRT_EDGE), skirtTop).oneMinus();
-  const apron = max(skirt, drift.mul(level.smoothstep(0.02, 0.34).oneMinus()));
+    .mul(breakup.mul(SKIRT_SWING).add(1).clamp(0.32, 1.75))
+    .mul(fill).mul(baseSupport).max(0.015);
+  const skirt = level.sub(heightBias.mul(0.45)).smoothstep(skirtTop.sub(SKIRT_EDGE), skirtTop).oneMinus();
+  // Above the line, snow lodges in recesses, fracture cracks, and on rough rock in torn
+  // patches that thin out with height, instead of the stone starting clean.
+  const clingTop = skirtTop.add(float(CLING_BAND).mul(fill));
+  const clingHeight = level.sub(skirtTop).div(clingTop.sub(skirtTop).max(1e-3)).clamp(0, 1);
+  const cling = breakup.add(cavity.mul(0.45)).add(crevice.mul(0.38)).add(up.mul(0.18))
+    .smoothstep(clingHeight.mul(0.55).sub(0.12), clingHeight.mul(0.55).add(0.02))
+    .mul(clingHeight.oneMinus())
+    .mul(level.greaterThan(skirtTop).select(float(1), float(0)));
+  const apron = max(skirt, drift.mul(level.smoothstep(0.02, 0.36).oneMinus()));
   const capOut = cap.mul(capPresent);
   const driftOut = drift.mul(skirtPresent);
   const skirtOut = skirt.mul(skirtPresent);
+  const clingOut = cling.mul(skirtPresent).mul(0.92);
+  const thickness = max(capThickness, apron.mul(skirtPresent).mul(0.85));
   return {
-    cover: max(max(capOut, driftOut), skirtOut),
+    cover: max(max(capOut, crackFill), max(driftOut, max(skirtOut, clingOut))),
     skirt: skirtOut,
     cap: capOut,
     apron: apron.mul(skirtPresent),
+    thickness,
   };
 }

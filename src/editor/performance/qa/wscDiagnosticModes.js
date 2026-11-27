@@ -73,8 +73,8 @@ export const WSC_DIAGNOSTIC_MODES = Object.freeze({
   D19: Object.freeze({ id: 'D19', slug: 'shadow', label: 'Shadow contribution', supported: true, stage: 'isolated-lighting' }),
   D20: Object.freeze({ id: 'D20', slug: 'lod', label: 'LOD classification', supported: true, stage: 'classification' }),
   D21: Object.freeze({ id: 'D21', slug: 'wetness', label: 'Wetness', supported: true, stage: 'raw-input' }),
-  D22: Object.freeze({ id: 'D22', slug: 'moss', label: 'Moss eligibility (approximate)', supported: 'partial', stage: 'raw-input' }),
-  D23: Object.freeze({ id: 'D23', slug: 'snow', label: 'Snow coverage', supported: true, stage: 'raw-input' }),
+  D22: Object.freeze({ id: 'D22', slug: 'moss', label: 'Moss coat coverage', supported: true, stage: 'raw-input' }),
+  D23: Object.freeze({ id: 'D23', slug: 'snow', label: 'Snow coat coverage', supported: true, stage: 'raw-input' }),
   D24: Object.freeze({ id: 'D24', slug: 'material-family', label: 'Material family', supported: true, stage: 'classification' }),
   D25: Object.freeze({ id: 'D25', slug: 'chunk-boundaries', label: 'Chunk & field boundaries', supported: true, stage: 'overlay' }),
 });

@@ -115,3 +115,70 @@ test('a changed chunk is re-evaluated, and so are its neighbours\' border texels
     field.dispose();
   }
 });
+
+function assertMatchesFull(slots, focus, label) {
+  const incremental = snapshot();
+  const full = fullRebuildAt(slots, focus);
+  assert.equal(incremental.baseHeight, full.baseHeight, `${label}: base height`);
+  assert.deepEqual(incremental.geo, full.geo, `${label}: geo`);
+  assert.deepEqual(incremental.base, full.base, `${label}: base`);
+  assert.deepEqual(incremental.eco, full.eco, `${label}: eco`);
+}
+
+test('reuse declines for chunks that unload, are still loading, or a new world-noise version', () => {
+  const slots = makeSlots();
+  const field = new WorldSurfaceContextField({ terrainView: { worldStore: { chunkSize, tileSize }, slots }, config });
+  const restore = () => { field.lastSlotSignature = ''; field.rebuildCache.invalidate(); };
+  try {
+    field.update({ x: 5, z: -3 }, { x: 0, z: 0 });
+    // Unload under a fixed window.
+    slots.splice(slots.findIndex(slot => slot.descriptor.key === '0:0'), 1);
+    field.update({ x: 5, z: -3 }, { x: 0, z: 0 });
+    assertMatchesFull(slots, { x: 5, z: -3 }, 'unloaded, fixed window');
+    restore(); field.update({ x: 5, z: -3 }, { x: 0, z: 0 });
+    // Unload under a moving window.
+    slots.splice(slots.findIndex(slot => slot.descriptor.key === '1:0'), 1);
+    field.update({ x: 21.4, z: -3 }, { x: 0, z: 0 });
+    assertMatchesFull(slots, { x: 21.4, z: -3 }, 'unloaded, moved window');
+    restore(); field.update({ x: 21.4, z: -3 }, { x: 0, z: 0 });
+    // A slot that starts loading drops out of the window like an unloaded one.
+    slots.find(slot => slot.descriptor.key === '-1:0').loading = true;
+    field.update({ x: 21.4, z: -3 }, { x: 0, z: 0 });
+    assertMatchesFull(slots, { x: 21.4, z: -3 }, 'loading slot');
+    restore(); field.update({ x: 21.4, z: -3 }, { x: 0, z: 0 });
+    // A new world-noise version rebuilds everything.
+    const evaluatedBefore = PerfCounters.get('wscTexelsEvaluated') ?? 0;
+    field.worldNoiseVersion += 1;
+    field.update({ x: 37.4, z: -3 }, { x: 0, z: 0 });
+    assert.equal((PerfCounters.get('wscTexelsEvaluated') ?? 0) - evaluatedBefore, 128 * 128);
+  } finally {
+    field.dispose();
+  }
+});
+
+test('a budgeted cold build after a teleport is spread over frames and lands identical to a full one', () => {
+  const slots = makeSlots();
+  const field = new WorldSurfaceContextField({ terrainView: { worldStore: { chunkSize, tileSize }, slots }, config });
+  const budget = { canPublish: () => true };
+  try {
+    field.update({ x: -90, z: -3 }, { x: 0, z: 0 }, budget);
+    const target = { x: 60, z: -3 }; // 150 m: nothing in the old window is reusable
+    assert.equal(field.update(target, { x: 0, z: 0 }, budget), false, 'old window no longer covers the focus');
+    assert.ok(field.pendingBuild, 'the cold build is still in flight after one slice');
+    // A chunk changes while the build is spread over frames.
+    const index = slots.findIndex(slot => slot.descriptor.key === '2:0');
+    slots[index] = makeSlot(2, 0, 3);
+    let frames = 1;
+    while (field.pendingBuild && frames < 100) { field.update(target, { x: 0, z: 0 }, budget); frames += 1; }
+    assert.equal(field.pendingBuild, null);
+    assert.ok(frames > 2, `finished in ${frames} frames`);
+    // The chunk that changed mid-build was recorded stale; the next frame re-evaluates it.
+    const evaluatedBefore = PerfCounters.get('wscTexelsEvaluated') ?? 0;
+    assert.equal(field.update(target, { x: 0, z: 0 }, budget), true);
+    const evaluated = (PerfCounters.get('wscTexelsEvaluated') ?? 0) - evaluatedBefore;
+    assert.ok(evaluated > 0 && evaluated < 128 * 128, `re-evaluated ${evaluated}`);
+    assertMatchesFull(slots, target, 'after a spread-out cold build');
+  } finally {
+    field.dispose();
+  }
+});

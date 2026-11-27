@@ -482,7 +482,8 @@ export class GpuOcclusion {
   // shadow renders. This bridge is deliberately isolated to the WebGPU backend.
   render(draw) {
     // Collect just walked the whole graph; the main pass would walk it again
-    // (~0.3 ms in a settlement). Host draw callbacks must not move scene objects.
+    // (~0.3 ms in a settlement). So `draw` must not move or add scene objects;
+    // the host says so where it builds its draw callback (InfiniteTerrainView.render).
     const walked = this.walkedScene;
     this.walkedScene = null;
     if (walked) walked.matrixWorldAutoUpdate = false;

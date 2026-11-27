@@ -11,22 +11,30 @@ import {
   positionGeometry,
   positionLocal,
   positionViewDirection,
+  positionWorld,
   pow,
   saturate,
+  varying,
   vec3,
+  vec4,
 } from 'three/tsl';
 import { authoredTexture } from './AuthoredTextureNode.js';
 import { stylizedFbm } from './StylizedNoiseNodes.js';
 import { registerTreeWindTime } from './forest/TreeWindTime.js';
 import { gradeCanopy, resolveCanopyGrade } from './forest/canopyGrade.js';
 import { crownEdgeNodes } from './forest/crownEdge.js';
-import { treeFoliageEmission } from './forest/foliageLight.js';
+import {
+  crownLocalGroundBounce,
+  treeFoliageAtmosphereEmission,
+  treeFoliageSurfaceEmission,
+} from './forest/foliageLight.js';
 import { configureTreeFoliageSurface, treeGeometryVisibility } from './forest/TreeFoliageSurface.js';
 import { resolveTreeFoliageSettings } from './forest/treeSurfaceSettings.js';
 import { addTreeEmission, createTreeSurfaceMaterial } from './forest/TreeSurfaceMaterial.js';
 import { foliageWindPosition } from './forest/foliageWind.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
 import { setRuntimeUserData } from '../../render/materials/runtimeUserData.js';
+import { sampleWorldSurfaceContextAt } from './worldSurfaceContext/WorldSurfaceContextState.js';
 export { createAuthoredTrunkMaterial, createStylizedTrunkMaterial } from './forest/TreeBarkMaterial.js';
 
 function colorNode(value) {
@@ -134,24 +142,42 @@ export function createStylizedLeafMaterial({
     alpha: map ? authoredTexture(map).a : float(1), color: baseColor, bounds: canopyBounds,
   });
   material.positionNode = finalPosition;
+  // Sample local WSC ground reflectance once in the vertex stage (zero extra samplers)
+  // so underside crown bounce reflects cobblestone, forest duff, straw, or snow below.
+  const crownWscRaw = sampleWorldSurfaceContextAt(positionWorld.xz, { includeBase: true, includeEco: false });
+  const crownWscGround = varying(vec4(crownWscRaw.albedo, crownWscRaw.validity), 'crownWscGround');
+  const localGroundBounce = crownLocalGroundBounce(crownWscGround.xyz, crownWscGround.w);
   if (authoredColor && map) {
     // A textured crown is lit the way its donor lit it: the graded leaf colour,
     // sky fill in the shaded interior and sun through the leaves. No rim and no
     // noise variation — on a crown of flat cards both key to each card's own
     // facing and paint it in cream and dark-green camouflage patches.
-    // Graded crowns also take a gentle bottom-to-top lift so macro volume reads softly.
-    const heightLift = canopyGrade ? mix(float(0.86), float(1.09), normalizedHeight) : float(1);
-    const crown = authoredColor.mul(paletteValue(palette, config, 'brightness')).mul(heightLift);
+    // Graded crowns take a warm-sunlit top to cooler-shaded base & core shift so
+    // macro volume separates cleanly like the trunks, understory, and buildings.
+    const heightGrade = canopyGrade
+      ? mix(vec3(0.76, 0.80, 0.84), vec3(1.08, 1.05, 0.94), normalizedHeight)
+      : vec3(1);
+    const coreGrade = canopyGrade
+      ? mix(vec3(0.78, 0.83, 0.86), vec3(1, 1, 1), surface.visibility)
+      : vec3(1);
+    const crown = authoredColor.mul(paletteValue(palette, config, 'brightness')).mul(heightGrade).mul(coreGrade);
+    const centerXZ = canopyBounds
+      ? [(canopyBounds.min[0] + canopyBounds.max[0]) * 0.5, (canopyBounds.min[2] + canopyBounds.max[2]) * 0.5]
+      : null;
     const edge = crownRadius > 0
       ? crownEdgeNodes(authoredTexture(map).a, {
         cut: alphaTest > 0 ? alphaTest : (source?.alphaTest ?? config.trees.cardAlphaTest ?? 0.32),
         radius: crownRadius,
         height: normalizedHeight,
+        centerXZ,
       })
       : null;
     // Lit less as it takes the sky on, or a sunlit rim would out-shine the sky.
     material.colorNode = edge ? crown.mul(edge.sky.oneMinus()) : crown;
-    addTreeEmission(material, treeFoliageEmission(crown, edge?.sky, surface.visibility));
+    // Impostors bake clean leaf albedo without edge-sky darkening (they compose air live).
+    setRuntimeUserData(material, 'impostorAlbedoNode', crown);
+    addTreeEmission(material, treeFoliageSurfaceEmission(crown, surface.visibility, localGroundBounce));
+    material.foliageAtmosphereNode = treeFoliageAtmosphereEmission(edge?.sky);
     setRuntimeUserData(material, 'crownOpacity', edge?.opacity ?? null);
     // Its biome and autumn tints are ratios against the grade, not the palette.
     material.userData.gradedCanopy = canopyGrade;
@@ -159,7 +185,10 @@ export function createStylizedLeafMaterial({
     material.colorNode = applyCanopyRim(leafColor, config, palette);
     // A vertex-painted crown has no leaf map but the same dark interior: without
     // sky fill the alpine conifers render near black beside every other tree.
-    if (authoredColor || material.foliageThicknessNode) addTreeEmission(material, treeFoliageEmission(leafColor, null, surface.visibility));
+    if (authoredColor || material.foliageThicknessNode) {
+      addTreeEmission(material, treeFoliageSurfaceEmission(leafColor, surface.visibility, localGroundBounce));
+      material.foliageAtmosphereNode = treeFoliageAtmosphereEmission(null);
+    }
   }
   if (map) {
     material.opacityNode = material.userData.crownOpacity ?? authoredTexture(map).a;

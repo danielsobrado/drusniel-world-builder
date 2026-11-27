@@ -27,6 +27,11 @@ export const DEFAULT_ROCK_FORMATIONS = Object.freeze({
   keystoneMaxScale: 8.5,
   stoneMinScale: 1.8,
   stoneMaxScale: 5,
+  /** Smaller frost-shattered scree fragments skirted around each formation's foot. */
+  screeMinStones: 5,
+  screeMaxStones: 10,
+  screeMinScale: 0.42,
+  screeMaxScale: 1.35,
   /** Metres above the sea a stone needs: a tor does not stand in the shallows. */
   minimumAboveSea: 0.6,
 });
@@ -57,6 +62,28 @@ export function formationStones(gx, gz, config, shareAt) {
       : lerp(config.stoneMaxScale, config.stoneMinScale, reach / radius) * (0.75 + 0.5 * r(2));
     stones.push({ identity: `${gx}:${gz}:${i}`, x: cx + Math.cos(angle) * reach, z: cz + Math.sin(angle) * reach,
       scale, roll: r(3), rotation: r(4), priority: r(5) });
+  }
+  const screeMin = Math.max(0, Number(config.screeMinStones) || 0);
+  const screeMax = Math.max(screeMin, Number(config.screeMaxStones) || screeMin);
+  if (screeMax > 0) {
+    const screeCount = screeMin + Math.floor(h(6) * (screeMax - screeMin + 1));
+    const screeMinScale = Number(config.screeMinScale) || 0.42;
+    const screeMaxScale = Math.max(screeMinScale, Number(config.screeMaxScale) || 1.35);
+    for (let j = 0; j < screeCount; j += 1) {
+      const r = (channel) => stoneHash01(gx * 53 - j, gz * 29 + j, channel, SALT + 2);
+      const reach = radius * (0.48 + 0.68 * Math.sqrt(r(0)));
+      const angle = r(1) * Math.PI * 2;
+      const scale = lerp(screeMinScale, screeMaxScale, r(2));
+      stones.push({
+        identity: `${gx}:${gz}:s${j}`,
+        x: cx + Math.cos(angle) * reach,
+        z: cz + Math.sin(angle) * reach,
+        scale,
+        roll: r(3),
+        rotation: r(4),
+        priority: r(5),
+      });
+    }
   }
   return { cx, cz, radius, stones };
 }

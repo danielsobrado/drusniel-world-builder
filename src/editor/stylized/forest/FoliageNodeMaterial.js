@@ -68,6 +68,7 @@ export function foliageMaterialClass(Base) {
       this.treeWetnessNode = null;
       this.treeBarkHeightNode = null;
       this.foliageSnowNode = null;
+      this.foliageAtmosphereNode = null;
     }
 
     copy(source) {
@@ -106,9 +107,12 @@ export function foliageMaterialClass(Base) {
         const directional = data.lightNode.light?.isDirectionalLight;
         if (directional && reliefShadow) data = { ...data, lightColor: data.lightColor.mul(reliefShadow) };
         const fraction = amount.mul(foliageLight.strength).clamp(0, 1);
-        // Reserve a share of reflected energy for transmission on tree surfaces.
+        // Reserve a share of reflected energy for transmission and let baked canopy
+        // occlusion softly shade sheltered interior leaves from direct sun.
+        const coreSun = mix(float(0.48), float(1), visibility);
+        const directScale = fraction.mul(snow.oneMinus()).oneMinus().mul(mix(coreSun, float(1), snow));
         direct.call(this, thickness && directional
-          ? { ...data, lightColor: data.lightColor.mul(fraction.mul(snow.oneMinus()).oneMinus()) } : data, nodeBuilder);
+          ? { ...data, lightColor: data.lightColor.mul(directScale) } : data, nodeBuilder);
         if (wetness) data.reflectedLight.directSpecular.addAssign(data.lightColor.mul(
           foliageSurfaceHighlight(normalView, data.lightDirection, positionViewDirection, wetness, needles ?? float(0), roughness ?? float(0.28), needleDirection),
         ));

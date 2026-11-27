@@ -28,7 +28,6 @@ import { MEADOW_GRASS_DEFAULTS } from '../../stylized/meadow/meadowGrassConfig.j
 import { worldNoiseField } from '../../stylized/worldNoise.js';
 import { WORLD_NOISE_LAYERS } from '../../stylized/worldNoiseLayout.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
-import { stormSnowCoverAt } from '../../weather/storm/snowField/snowFieldState.js';
 import {
   WSC_DEFAULT_DIAGNOSTIC_MODE,
   WSC_LOD_CLASSES,
@@ -37,6 +36,14 @@ import {
   resolveWscDiagnosticMode,
 } from './wscDiagnosticModes.js';
 import { surfaceMaskTextureUv } from '../../world/SurfaceMaskTexture.js';
+import { coatCoverageOf } from '../../stylized/surfaceCoatings/CoatCoverage.js';
+
+/** D22 / D23: the coat each surface actually lays (CoatCoverage), bare to full. */
+const COAT_DIAGNOSTICS = Object.freeze({
+  D22: Object.freeze({ layer: 'moss', bare: vec3(0.08, 0.08, 0.08), full: vec3(0.24, 0.78, 0.18) }),
+  D23: Object.freeze({ layer: 'snow', bare: vec3(0.08, 0.1, 0.12), full: vec3(0.85, 0.94, 1.0) }),
+});
+const NO_COAT = vec3(0.16, 0.1, 0.2);
 
 function srgbByteToLinearNode([r, g, b]) {
   const c = new THREE.Color().setRGB(r / 255, g / 255, b / 255, THREE.SRGBColorSpace);
@@ -276,6 +283,18 @@ export class WorldVisualDiagnostics {
       return shadowMat;
     }
 
+    const coat = COAT_DIAGNOSTICS[modeId];
+    const coverage = coat ? coatCoverageOf(source)[coat.layer] : null;
+    if (coverage) {
+      // The coverage was built in the source's own graph (normal stage, instance
+      // attributes, its textures), so it is drawn in a clone of it, unlit, rather
+      // than transplanted into a basic material where it does not compile.
+      const clone = source.clone();
+      clone.colorNode = mix(coat.bare, coat.full, float(coverage).clamp(0, 1));
+      clone.emissiveNode = vec3(0);
+      clone.lights = false;
+      return clone;
+    }
     const diag = new THREE.MeshBasicNodeMaterial();
     copyGeometryBindings(diag, source);
     // Provide null-initialized PBR properties so copied TSL nodes referencing
@@ -397,17 +416,11 @@ export class WorldVisualDiagnostics {
         const wet = clamp(surfaceWetnessUniform.max(shore), 0, 1);
         return mix(vec3(0.08, 0.08, 0.1), vec3(0.08, 0.65, 0.98), wet);
       }
-      case 'D22': {
-        const up = smoothstep(0.35, 0.88, normalWorld.y);
-        const potential = up.mul(gc.canopy.mul(0.6).add(0.4)).clamp(0, 1);
-        return mix(vec3(0.08, 0.08, 0.08), vec3(0.24, 0.78, 0.18), potential);
-      }
-      case 'D23': {
-        const stormSnow = stormSnowCoverAt(positionWorld.xz);
-        const altSnow = smoothstep(700, 950, positionWorld.y);
-        const snow = max(stormSnow, altSnow).clamp(0, 1);
-        return mix(vec3(0.08, 0.1, 0.12), vec3(0.85, 0.94, 1.0), snow);
-      }
+      case 'D22':
+      case 'D23':
+        // A surface that publishes no such coat (CoatCoverage) reads neutral purple,
+        // not as zero coverage; one that does is drawn by buildDiagnosticMaterial.
+        return NO_COAT;
       case 'D24': {
         const entry = WSC_MATERIAL_FAMILIES[cls.family] ?? WSC_MATERIAL_FAMILIES.other;
         return srgbByteToLinearNode(entry.rgb);

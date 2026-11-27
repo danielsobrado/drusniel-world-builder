@@ -138,7 +138,7 @@ export function createTreeImpostorBakeMaterial(part, normalPass) {
   }
 
   const material = createBakeSurface(part);
-  material.colorNode = part.material.colorNode;
+  material.colorNode = part.material.userData?.impostorAlbedoNode ?? part.material.colorNode;
   material.opacityNode = part.material.opacityNode ?? null;
   material.alphaTest = part.material.alphaTest ?? (sourceMap ? 0.5 : 0);
   material.transparent = false;

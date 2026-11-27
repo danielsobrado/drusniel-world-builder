@@ -2,8 +2,12 @@
 // the whole 128x128 window again. A texel depends only on its world position and
 // the chunks its samples reach (its own, plus one half-texel away for the
 // normal), so it is reusable when it was inside the previous window and none of
-// those chunks changed. Heights are kept raw (as doubles) so a new base height re-encodes
-// them exactly as a full rebuild would.
+// those chunks changed. That holds only while texel inputs follow the contract
+// in wscTexelWriter.js. Heights are kept raw (as doubles) so a new base height
+// re-encodes them exactly as a full rebuild would.
+
+/** Recorded for a chunk whose slot changed while a build spread over frames read it. */
+export const STALE_SIGNATURE = '#stale';
 
 export function slotChunkSignature(slot) {
   return `${slot.descriptor.key}:${slot.pageRevision}:${slot.forestFloorKey ?? ''}:${slot.materialBake?.descriptor?.key ?? ''}`;
@@ -73,14 +77,18 @@ export class WscRebuildCache {
     };
   }
 
-  /** Records the window just written so the next recentre can reuse it. */
-  store({ originX, originZ, noiseVersion, slotsByChunk, geo, base, eco, heights }) {
+  /**
+   * Records the window just written so the next recentre can reuse it.
+   * `signatures` maps each chunk key to the signature its texels were built
+   * from; a chunk that changed during the build must carry a value no slot can
+   * match (STALE_SIGNATURE) so the next build re-evaluates it.
+   */
+  store({ originX, originZ, noiseVersion, signatures, geo, base, eco, heights }) {
     this.heights.set(heights);
     this.geo.set(geo);
     this.base.set(base);
     this.eco.set(eco);
-    this.signatures.clear();
-    for (const [key, slot] of slotsByChunk) this.signatures.set(key, slotChunkSignature(slot));
+    this.signatures = new Map(signatures);
     this.originX = originX;
     this.originZ = originZ;
     this.noiseVersion = noiseVersion;

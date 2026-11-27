@@ -5,7 +5,7 @@ import { resolveTreeFoliageSettings } from './treeSurfaceSettings.js';
 import { setRuntimeUserData } from '../../../render/materials/runtimeUserData.js';
 
 /** Outward multi-lobe puff normal computed on the GPU in prototype space (no extra buffers). */
-export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.34) {
+export function crownPuffNormalNode(bounds, puffStrength = 0.34, upBias = 0.16) {
   const center = vec3(...bounds.min.map((value, i) => (value + bounds.max[i]) / 2));
   const half = vec3(...bounds.min.map((value, i) => Math.max(0.05, (bounds.max[i] - value) / 2)));
   const rel = positionGeometry.sub(center).div(half);
