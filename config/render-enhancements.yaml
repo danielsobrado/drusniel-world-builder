@@ -34,6 +34,12 @@ regionalGeometryCostBudget: false
 regionalAdmissionBudget: false
 rendererAdmissionBudget: false
 regionalInstancePublicationBudget: false
+slicedInstancePublication: false
+instanceSliceBudget:
+  sliceBytes: 262144
+  maxStagingBytes: 16777216
+  maxCopyRanges: 8192
+  maxWritesPerSlice: 64
 farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false
