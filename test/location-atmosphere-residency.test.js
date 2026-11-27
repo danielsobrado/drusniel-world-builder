@@ -33,7 +33,7 @@ function fixture(t) {
     getRenderTarget: () => cave, initTexture: () => assert.fail('deferred targets must not warm during exit') };
   const settings = { ...resolveRenderEnhancements().locationStructureBudget, surfacePostReclamationEnabled: true,
     surfaceAtmosphereReclamationEnabled: true, surfaceShadowReclamationEnabled: true, surfaceEnvironmentReclamationEnabled: true,
-    surfaceIdleMs: 10, surfaceSampleMs: 10, surfaceEvictionsPerSample: 16, surfaceMaxEvictedBytes: 32768 };
+    surfaceIdleMs: 10, surfaceSampleMs: 10, surfaceEvictionsPerSample: 16, surfaceMaxEvictedBytes: 8 * 1024 * 1024 };
   const controller = new LocationSurfaceResidency(surface, renderer, settings, async () => {});
   t.after(() => { controller.dispose(); for (const rt of [world, history, shaft, cloud, shadowTarget, cave]) rt.dispose(); texture.dispose(); });
   return { controller, surface, renderer, settings, records, memoryMap, world, history, shaft, cloud, shadowTarget, cave,

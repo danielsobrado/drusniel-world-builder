@@ -2,6 +2,7 @@ import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { surfaceShadowOwners } from './LocationShadowWarmup.js';
 import { surfacePostTargets } from './LocationPostTargets.js';
 import { atmospherePrecedesPost, surfaceAtmosphereTargets } from './LocationAtmosphereTargets.js';
+import { warmLocationEnvironment } from './LocationEnvironmentWarmup.js';
 
 const MIB = 1024 * 1024;
 
@@ -55,11 +56,12 @@ function currentOwners(surface, renderer, settings) {
 
 /** One allocation per yield, with a shared charge ceiling across target owners. */
 export async function warmLocationTargets({ surface, renderer, settings, entries, pause, signal, active }) {
-  if ((!settings.surfaceShadowWarmupEnabled && !settings.surfacePostWarmupEnabled && !settings.surfaceAtmosphereWarmupEnabled)
-      || typeof renderer.initRenderTarget !== 'function') return;
+  const targetEnabled = (settings.surfaceShadowWarmupEnabled || settings.surfacePostWarmupEnabled
+    || settings.surfaceAtmosphereWarmupEnabled) && typeof renderer.initRenderTarget === 'function';
+  if (!targetEnabled && !settings.surfaceEnvironmentWarmupEnabled) return;
   const retired = new Map(entries.filter(entry => entry.target && ['shadow', 'post', 'atmosphere'].includes(entry.kind))
     .map(entry => [entry.resource, entry]));
-  if (!retired.size) return;
+  if (!retired.size && !entries.some(entry => entry.environment)) return;
   const initial = renderer.info?.memory?.total;
   if (!Number.isFinite(initial) || initial < 0) return;
   let reserved = 0;
@@ -69,7 +71,7 @@ export async function warmLocationTargets({ surface, renderer, settings, entries
     post: [settings.surfacePostWarmupMaxBytes, settings.surfacePostWarmupMaxTargetBytes],
     atmosphere: [settings.surfaceAtmosphereWarmupMaxBytes, settings.surfaceAtmosphereWarmupMaxTargetBytes]
   };
-  const owners = currentOwners(surface, renderer, settings);
+  const owners = targetEnabled ? currentOwners(surface, renderer, settings) : new Map();
   for (const [target, owner] of owners) {
     const entry = retired.get(target);
     const kind = owner.kind;
@@ -105,4 +107,5 @@ export async function warmLocationTargets({ surface, renderer, settings, entries
       return;
     }
   }
+  await warmLocationEnvironment({ surface, renderer, settings, entries, pause, signal, active, initial, reserved });
 }

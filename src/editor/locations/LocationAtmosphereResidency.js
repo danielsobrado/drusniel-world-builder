@@ -2,6 +2,7 @@ import { surfaceShadowOwners } from './LocationShadowWarmup.js';
 import { targetShape } from './LocationTargetWarmup.js';
 import { surfacePostTargets } from './LocationPostTargets.js';
 import { surfaceAtmosphereTargets } from './LocationAtmosphereTargets.js';
+import { environmentShape, estimateEnvironmentFilterBytes } from './LocationEnvironmentWarmup.js';
 
 function targetBytes(renderer, target) {
   const manager = renderer._textures;
@@ -52,11 +53,10 @@ export function collectLocationAtmosphereTargets(surface, renderer, settings) {
       && texture.isDataTexture && ArrayBuffer.isView(texture.image?.data) && texture.image.width >= 4) {
     const sourceBytes = renderer.info?.memoryMap?.get(texture);
     // Six RGBA16F faces and at most a full mip chain; generator scratch is retained.
-    const cubeSize = Math.max(16, 2 ** Math.floor(Math.log2(texture.image.width / 4)));
-    const size = sourceBytes + Math.ceil(6 * cubeSize * cubeSize * 8 * 4 / 3);
+    const size = sourceBytes + estimateEnvironmentFilterBytes(texture.image.width);
     if (Number.isFinite(sourceBytes) && sourceBytes > 0 && Number.isSafeInteger(size)) {
       entries.set(texture, { resource: texture, kind: 'environment', size, distance: Infinity,
-        protected: false, deferred: true, environment: true });
+        protected: false, deferred: true, environment: true, sourceBytes, environmentShape: environmentShape(texture) });
     }
   }
   return [...entries.values()];
