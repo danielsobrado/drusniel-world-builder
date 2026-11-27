@@ -59,6 +59,7 @@ export function applySceneEnvironment(scene, settings) {
     });
   return {
     ready,
+    get surfaceTexture() { return !disposed && scene.environment === texture ? texture : null; },
     setLightScale(scale) {
       if (disposed || !Number.isFinite(scale)) return;
       lightScale = Math.max(0, Math.min(1.5, scale));

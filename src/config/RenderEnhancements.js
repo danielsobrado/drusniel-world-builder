@@ -14,7 +14,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
     portalEnabled: false, portalCull: false, portalCellMeters: 12, portalMaxCells: 8192, portalMaxSampleReads: 8000000,
     generationEnabled: false, generationWorker: true, generationSliceMs: 4, generationMaxCopyBytes: 67108864, generationWorkerTimeoutMs: 120000,
     lightingEnabled: false, lightingSliceMs: 4,
-    surfaceReclamationEnabled: false, surfaceMeadowReclamationEnabled: false, surfaceMeadowProtectMeters: 32, surfaceSceneryReclamationEnabled: false, surfaceGpuImpostorReclamationEnabled: false, surfaceTownReclamationEnabled: false, surfaceTerrainBakeReclamationEnabled: false, surfaceOceanFftReclamationEnabled: false, surfaceReflectionReclamationEnabled: false, surfaceTownProtectMeters: 96, surfaceSceneryProtectMeters: 64, surfaceProtectMeters: 192, surfaceIdleMs: 5000, surfaceSampleMs: 500,
+    surfaceReclamationEnabled: false, surfaceMeadowReclamationEnabled: false, surfaceMeadowProtectMeters: 32, surfaceSceneryReclamationEnabled: false, surfaceGpuImpostorReclamationEnabled: false, surfaceTownReclamationEnabled: false, surfaceTerrainBakeReclamationEnabled: false, surfaceOceanFftReclamationEnabled: false, surfaceReflectionReclamationEnabled: false, surfacePostReclamationEnabled: false, surfaceAtmosphereReclamationEnabled: false, surfaceShadowReclamationEnabled: false, surfaceEnvironmentReclamationEnabled: false, surfaceTownProtectMeters: 96, surfaceSceneryProtectMeters: 64, surfaceProtectMeters: 192, surfaceIdleMs: 5000, surfaceSampleMs: 500,
     surfaceEvictionsPerSample: 4, surfaceMaxEvictedBytes: 33554432, surfaceRestoreBytesPerFrame: 2097152, surfaceRestoresPerFrame: 4 }),
   geologyAdmissionBudget: Object.freeze({ triangleBudget: 100000, protectMeters: 64, minimumScaleMultiplier: 24, maxExtraDraws: 8, recoveryRatio: 0.85 }),
   locationDecorationBudget: Object.freeze({ cellMeters: 24, protectMeters: 24, maxDistanceMeters: 100, triangleBudget: 60000, drawBudget: 24, recoveryMeters: 4, boundsPaddingMeters: 1, refreshMeters: 1 }),
@@ -142,7 +142,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   }
   for (const [parameter, key] of [['locationSurfaceTerrainBakeReclamation', 'surfaceTerrainBakeReclamationEnabled'],
     ['locationSurfaceOceanFftReclamation', 'surfaceOceanFftReclamationEnabled'],
-    ['locationSurfaceReflectionReclamation', 'surfaceReflectionReclamationEnabled']]) {
+    ['locationSurfaceReflectionReclamation', 'surfaceReflectionReclamationEnabled', 'surfacePostReclamationEnabled', 'surfaceAtmosphereReclamationEnabled', 'surfaceShadowReclamationEnabled', 'surfaceEnvironmentReclamationEnabled'],
+    ['locationSurfacePostReclamation', 'surfacePostReclamationEnabled'],
+    ['locationSurfaceAtmosphereReclamation', 'surfaceAtmosphereReclamationEnabled'],
+    ['locationSurfaceShadowReclamation', 'surfaceShadowReclamationEnabled'],
+    ['locationSurfaceEnvironmentReclamation', 'surfaceEnvironmentReclamationEnabled']]) {
     if (params.has(parameter)) value.locationStructureBudget[key] = params.get(parameter) === '1';
   }
   if (params.has('locationSurfaceTownReclamation')) value.locationStructureBudget.surfaceTownReclamationEnabled = params.get('locationSurfaceTownReclamation') === '1';

@@ -41,6 +41,10 @@ locationStructureBudget:
   surfaceTerrainBakeReclamationEnabled: false
   surfaceOceanFftReclamationEnabled: false
   surfaceReflectionReclamationEnabled: false
+  surfacePostReclamationEnabled: false
+  surfaceAtmosphereReclamationEnabled: false
+  surfaceShadowReclamationEnabled: false
+  surfaceEnvironmentReclamationEnabled: false
   surfaceTownProtectMeters: 96
   surfaceSceneryProtectMeters: 64
   surfaceProtectMeters: 192
