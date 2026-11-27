@@ -1,6 +1,7 @@
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { surfaceShadowOwners } from './LocationShadowWarmup.js';
 import { surfacePostTargets } from './LocationPostTargets.js';
+import { atmospherePrecedesPost, surfaceAtmosphereTargets } from './LocationAtmosphereTargets.js';
 
 const MIB = 1024 * 1024;
 
@@ -28,18 +29,23 @@ function sameShape(target, shape) {
 
 function currentOwners(surface, renderer, settings) {
   const targets = new Map();
-  const add = (target, kind, invalidate) => {
+  const add = (target, kind, invalidate, warmupKey = null) => {
     if (!target || target === renderer.getRenderTarget?.()) return;
     const existing = targets.get(target);
     if (existing) existing.invalidations.add(invalidate);
-    else targets.set(target, { kind, invalidations: new Set([invalidate]) });
+    else targets.set(target, { kind, invalidations: new Set([invalidate]), warmupKey });
   };
   if (settings.surfaceShadowWarmupEnabled) {
     for (const shadow of surfaceShadowOwners(surface, renderer, settings)) {
       add(shadow.map, 'shadow', () => { shadow.needsUpdate = true; });
     }
   }
-  if (settings.surfacePostWarmupEnabled) {
+  if (settings.surfaceAtmosphereWarmupEnabled) {
+    for (const { target, invalidate, warmupKey } of surfaceAtmosphereTargets(surface, renderer, settings, true)) {
+      add(target, 'atmosphere', invalidate, warmupKey);
+    }
+  }
+  if (settings.surfacePostWarmupEnabled && !atmospherePrecedesPost(surface.terrainView)) {
     for (const { target, invalidate } of surfacePostTargets(surface, settings, true)) {
       add(target, 'post', invalidate);
     }
@@ -49,18 +55,19 @@ function currentOwners(surface, renderer, settings) {
 
 /** One allocation per yield, with a shared charge ceiling across target owners. */
 export async function warmLocationTargets({ surface, renderer, settings, entries, pause, signal, active }) {
-  if ((!settings.surfaceShadowWarmupEnabled && !settings.surfacePostWarmupEnabled)
+  if ((!settings.surfaceShadowWarmupEnabled && !settings.surfacePostWarmupEnabled && !settings.surfaceAtmosphereWarmupEnabled)
       || typeof renderer.initRenderTarget !== 'function') return;
-  const retired = new Map(entries.filter(entry => entry.target && ['shadow', 'post'].includes(entry.kind))
+  const retired = new Map(entries.filter(entry => entry.target && ['shadow', 'post', 'atmosphere'].includes(entry.kind))
     .map(entry => [entry.resource, entry]));
   if (!retired.size) return;
   const initial = renderer.info?.memory?.total;
   if (!Number.isFinite(initial) || initial < 0) return;
   let reserved = 0;
-  const charges = { shadow: 0, post: 0 };
+  const charges = { shadow: 0, post: 0, atmosphere: 0 };
   const budgets = {
     shadow: [settings.surfaceShadowWarmupMaxBytes, settings.surfaceShadowWarmupMaxTargetBytes],
-    post: [settings.surfacePostWarmupMaxBytes, settings.surfacePostWarmupMaxTargetBytes]
+    post: [settings.surfacePostWarmupMaxBytes, settings.surfacePostWarmupMaxTargetBytes],
+    atmosphere: [settings.surfaceAtmosphereWarmupMaxBytes, settings.surfaceAtmosphereWarmupMaxTargetBytes]
   };
   const owners = currentOwners(surface, renderer, settings);
   for (const [target, owner] of owners) {
@@ -75,7 +82,7 @@ export async function warmLocationTargets({ surface, renderer, settings, entries
     signal?.throwIfAborted();
     if (!active() || renderer._isDeviceLost) return;
     const live = currentOwners(surface, renderer, settings).get(target);
-    if (!live || live.kind !== kind || renderer._textures.has(target)
+    if (!live || live.kind !== kind || live.warmupKey !== entry.warmupKey || renderer._textures.has(target)
         || !sameShape(target, entry.targetShape)) continue;
     const total = renderer.info?.memory?.total;
     if (!Number.isFinite(total) || total < 0

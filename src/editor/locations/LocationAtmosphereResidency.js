@@ -1,6 +1,7 @@
 import { surfaceShadowOwners } from './LocationShadowWarmup.js';
 import { targetShape } from './LocationTargetWarmup.js';
 import { surfacePostTargets } from './LocationPostTargets.js';
+import { surfaceAtmosphereTargets } from './LocationAtmosphereTargets.js';
 
 function targetBytes(renderer, target) {
   const manager = renderer._textures;
@@ -21,7 +22,7 @@ function targetBytes(renderer, target) {
 /** Retain graph and texture identities; only release explicitly owned target storage. */
 export function collectLocationAtmosphereTargets(surface, renderer, settings) {
   const entries = new Map();
-  const add = (target, kind, invalidate = () => {}) => {
+  const add = (target, kind, invalidate = () => {}, warmupKey = null) => {
     if (target === renderer.getRenderTarget?.()) return;
     const size = targetBytes(renderer, target);
     if (!size) return;
@@ -32,23 +33,14 @@ export function collectLocationAtmosphereTargets(surface, renderer, settings) {
     }
     entries.set(target, { resource: target, kind, size, distance: Infinity, protected: false,
       deferred: true, target: true, invalidations: new Set([invalidate]),
-      targetShape: targetShape(target) });
+      targetShape: targetShape(target), warmupKey });
   };
   const terrain = surface.terrainView;
   for (const { target, invalidate } of surfacePostTargets(surface, settings)) {
     add(target, 'post', invalidate);
   }
-  const rays = terrain.godRays;
-  if (settings.surfaceAtmosphereReclamationEnabled && rays && !rays.disposed) {
-    for (const node of [rays.scenePass, rays.cloudPass, rays.raysTexture]) {
-      add(node?.renderTarget, 'atmosphere');
-    }
-    add(rays.volumetricRays?._godraysRenderTarget, 'atmosphere');
-    add(rays.volumetricBlur?._horizontalRT, 'atmosphere');
-    add(rays.volumetricBlur?._verticalRT, 'atmosphere');
-    for (const node of [rays.cinematicShafts?.mask, rays.cinematicShafts?.march]) {
-      add(node?.renderTarget, 'atmosphere', () => { node.initialized = false; });
-    }
+  for (const { target, invalidate, warmupKey } of surfaceAtmosphereTargets(surface, renderer, settings)) {
+    add(target, 'atmosphere', invalidate, warmupKey);
   }
   const sky = surface.skyView;
   for (const shadow of surfaceShadowOwners(surface, renderer, settings)) {

@@ -222,3 +222,85 @@ test('post warmup and shared target budget are independently configurable', () =
   assert.equal(resolveRenderEnhancements({}, '?locationSurfacePostWarmup=1').locationStructureBudget.surfacePostWarmupEnabled, true);
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceTargetWarmupMaxBytes: 1.5 } }), RangeError);
 });
+
+function activateAtmosphere(surface, technique) {
+  const rays = surface.terrainView.godRays;
+  Object.assign(rays, { enabled: true, technique, config: { resolutionScale: 0.5, volumetric: { resolutionScale: 0.5 } },
+    screenPipeline: {}, cinematicPipeline: {}, volumetricPipeline: {} });
+  return rays;
+}
+
+test('cinematic warmup shares shadow budget, leaves clouds and post cold, invalidates both shaft passes', async t => {
+  const { controller, surface, renderer, settings, records, shadowTarget, shaft, cloud, world, shaftNode } = fixture(t);
+  const rays = activateAtmosphere(surface, 'cinematic');
+  activatePost(surface);
+  rays.cinematicShafts.march = { initialized: true };
+  settings.surfaceAtmosphereWarmupEnabled = true;
+  settings.surfacePostWarmupEnabled = true;
+  settings.surfaceShadowWarmupEnabled = true;
+  settings.surfaceTargetWarmupMaxBytes = 128;
+  renderer.info.memory = { total: 1024 };
+  let frames = 0;
+  const warmed = [];
+  controller.pause = async () => { frames++; };
+  renderer.initRenderTarget = target => { warmed.push([target, frames]); records.set(target, {}); };
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  shaftNode.initialized = true;
+  rays.cinematicShafts.march.initialized = true;
+  await controller.restore();
+  assert.deepEqual(warmed, [[shadowTarget, 1], [shaft, 2]]);
+  assert.equal(shaftNode.initialized, false);
+  assert.equal(rays.cinematicShafts.march.initialized, false);
+  assert.equal(records.has(cloud), false);
+  assert.equal(records.has(world), false);
+});
+
+test('volumetric and screen-space warmup select only their owned targets', async t => {
+  for (const technique of ['volumetric', 'screen-space']) {
+    const { controller, surface, renderer, settings, records, cloud, shaft } = fixture(t);
+    const rays = activateAtmosphere(surface, technique);
+    rays.volumetricRays = { _godraysRenderTarget: shaft };
+    rays.raysTexture = { renderTarget: shaft };
+    // Use the same allocation as a retired inactive cinematic target to exercise deduplication.
+    settings.surfaceAtmosphereWarmupEnabled = true;
+    renderer.info.memory = { total: 1024 };
+    const warmed = [];
+    renderer.initRenderTarget = target => { warmed.push(target); records.set(target, {}); };
+    controller.begin({ x: 0, z: 0 }, 0);
+    controller.update(10);
+    await controller.restore();
+    assert.deepEqual(warmed, [cloud, shaft], technique);
+  }
+});
+
+test('atmospheric warmup skips disabled effects, post precedence and changed settings after yield', async t => {
+  for (const mode of ['disabled', 'post', 'technique', 'scale', 'canvas', 'disposed', 'budget']) {
+    const { controller, surface, renderer, settings, records } = fixture(t);
+    const rays = activateAtmosphere(surface, mode === 'post' ? 'screen-space' : 'cinematic');
+    renderer.domElement = { width: 800, height: 600 };
+    renderer.info.memory = { total: 1024 };
+    settings.surfaceAtmosphereWarmupEnabled = true;
+    const warmed = [];
+    renderer.initRenderTarget = target => { warmed.push(target); records.set(target, {}); };
+    controller.begin({ x: 0, z: 0 }, 0);
+    controller.update(10);
+    if (mode === 'disabled') rays.enabled = false;
+    if (mode === 'post') surface.terrainView.postProcessing.settings = { enabled: true };
+    if (mode === 'budget') settings.surfaceAtmosphereWarmupMaxTargetBytes = 1;
+    controller.pause = async () => {
+      if (mode === 'technique') rays.technique = 'screen-space';
+      if (mode === 'scale') rays.config.resolutionScale = 0.25;
+      if (mode === 'canvas') renderer.domElement.width = 1024;
+      if (mode === 'disposed') rays.disposed = true;
+    };
+    await controller.restore();
+    assert.deepEqual(warmed, [], mode);
+  }
+});
+
+test('atmosphere target warmup is independently opt-in and validates byte ceilings', () => {
+  assert.equal(resolveRenderEnhancements().locationStructureBudget.surfaceAtmosphereWarmupEnabled, false);
+  assert.equal(resolveRenderEnhancements({}, '?locationSurfaceAtmosphereWarmup=1').locationStructureBudget.surfaceAtmosphereWarmupEnabled, true);
+  assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceAtmosphereWarmupMaxBytes: 1.5 } }), RangeError);
+});
