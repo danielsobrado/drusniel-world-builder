@@ -20,6 +20,11 @@ locationStructureBudget:
   prefetchMaxDetachedBytes: 33554432
   prefetchMaxAllocationsPerFrame: 2
   prefetchMaxMs: 1
+  portalEnabled: false
+  portalCull: false
+  portalCellMeters: 12
+  portalMaxCells: 8192
+  portalMaxSampleReads: 8000000
 geologyAdmissionBudget:
   triangleBudget: 100000
   protectMeters: 64

@@ -4,9 +4,10 @@ import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 /** Keep CPU geometry intact; retire renderer-owned buffers for cold offscreen sections. */
 export class LocationStructureResidency {
-  constructor(scene, renderer, settings) {
+  constructor(scene, renderer, settings, portalVisibility = null) {
     this.renderer = renderer;
     this.settings = settings;
+    this.portalVisibility = portalVisibility;
     this.nextSample = -Infinity;
     this.entries = [];
     this.frustum = new Frustum();
@@ -48,9 +49,11 @@ export class LocationStructureResidency {
       mesh.updateWorldMatrix(true, false);
       this.sphere.copy(mesh.geometry.boundingSphere).applyMatrix4(mesh.matrixWorld);
       const distance = this.sphere.center.distanceTo(this.position) - this.sphere.radius;
-      const visible = this.frustum.intersectsSphere(this.sphere);
+      const inFrustum = this.frustum.intersectsSphere(this.sphere);
+      const visible = inFrustum && !this.portalVisibility?.isHidden(mesh);
       const initialized = this.renderer._geometries.has(mesh.geometry);
-      const predicted = prefetch?.consider(mesh, this.sphere, distance, visible, initialized);
+      const predicted = this.portalVisibility?.settings.portalCull && !this.portalVisibility.canPrefetch(mesh)
+        ? false : prefetch?.consider(mesh, this.sphere, distance, inFrustum, initialized);
       const protectedSection = !Number.isFinite(distance) || distance <= this.settings.protectMeters || visible || predicted;
       if (protectedSection || entry.lastProtected === null || now < entry.lastProtected) entry.lastProtected = now;
       if (protectedSection) protectedCount++;

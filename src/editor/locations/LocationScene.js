@@ -8,6 +8,8 @@ import { locationLight } from './materials/LocationShading.js';
 import { LocationMaterials } from './materials/LocationMaterials.js';
 import { LocationLightPool } from './LocationLightPool.js';
 import { LocationDecorationAdmission } from './LocationDecorationAdmission.js';
+import { LocationPortalGraph } from './gen/LocationPortalGraph.js';
+import { LocationPortalVisibility } from './LocationPortalVisibility.js';
 import { LocationStructureResidency } from './LocationStructureResidency.js';
 
 /** Share of the gap to the target that the indoor/outdoor weather fade closes each frame. */
@@ -87,7 +89,14 @@ export class LocationScene {
         decorationBudget,
         structureBudget: structure,
       }));
-      if (structure) location.structureResidency = new LocationStructureResidency(location.scene, renderer, structure);
+      if (structure?.portalEnabled && !enableLocationPost && !materials.terrain?.ice
+          && !materials.terrain.material.transparent && !materials.terrain.material.transmission
+          && !materials.terrain.material.positionNode && !materials.terrain.material.vertexNode
+          && !materials.terrain.material.displacementMap && !materials.terrain.material.wireframe) {
+        const graph = LocationPortalGraph.build(builder.grid, structure);
+        if (graph) location.portalVisibility = new LocationPortalVisibility(location.scene, graph, structure, builder.grid);
+      }
+      if (structure) location.structureResidency = new LocationStructureResidency(location.scene, renderer, structure, location.portalVisibility);
       if (decorationBudget) location.decorationAdmission = new LocationDecorationAdmission(location.scene, decorationBudget);
       location.lightPool = new LocationLightPool(builder.dynamicLights, {
         gain: site.lighting.dynamicGain ?? (site.lighting.indirectBounce ? 0.28 : 0.14),
@@ -181,6 +190,7 @@ export class LocationScene {
 
   /** The carried lamp sits just below the eye so it lights what is looked at without flattening it. */
   update(camera) {
+    this.portalVisibility?.update(camera);
     this.structureResidency?.update(camera);
     this.decorationAdmission?.update(camera.position);
     locationLight.carriedPosition.value.copy(camera.position);
@@ -211,6 +221,8 @@ export class LocationScene {
     this.lightPool?.dispose();
     this.structureResidency?.dispose();
     this.structureResidency = null;
+    this.portalVisibility?.dispose();
+    this.portalVisibility = null;
     const owned = new Set();
     this.scene.traverse((object) => {
       if (object.isInstancedMesh) object.dispose();
