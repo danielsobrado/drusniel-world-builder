@@ -50,6 +50,10 @@ locationStructureBudget:
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000
   surfaceSampleMs: 500
+  surfaceExitWarmupEnabled: false
+  surfaceExitWarmupMeters: 12
+  surfaceExitWarmupSampleMs: 250
+  surfaceExitWarmupMaxBytes: 33554432
   surfaceAdaptiveReclamationEnabled: false
   surfaceAdaptiveHighMiB: 4096
   surfaceAdaptiveLowMiB: 3584

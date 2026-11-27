@@ -254,8 +254,8 @@ export class LocationRuntime {
       this.renderer.render(this.current.scene, camera);
     }
     if (this.state !== INSIDE) return;
-    this.surfaceResidency?.update();
     const feet = this.playerController.state;
+    this.surfaceResidency?.update(undefined, this.current, feet);
     const exit = this.current.exitNear(feet.x, feet.footY ?? feet.y, feet.z);
     this.nearExit = exit;
     this.prompt.show(exit ? exit.label : '');

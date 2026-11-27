@@ -173,3 +173,71 @@ test('adaptive settings are opt-in and validate recovery thresholds', () => {
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceAdaptiveLowMiB: 4096 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfacePostReclamationEnabled: 'yes' } }), TypeError);
 });
+
+function exitFixture(overrides = {}) {
+  const f = fixture({ surfaceExitWarmupEnabled: true, surfaceExitWarmupSampleMs: 100,
+    surfaceExitWarmupMeters: 12, surfaceExitWarmupMaxBytes: 32, ...overrides });
+  f.renderer.info = { memory: { total: 1024 }, memoryMap: new Map() };
+  f.location = { site: { links: { linked: { site: 'other' } } },
+    exits: [{ id: 'surface', x: 0, y: 0, z: 0 }, { id: 'linked', x: 100, y: 0, z: 0 }] };
+  f.controller.begin({ x: 0, z: 0 }, 0);
+  f.controller.update(10);
+  f.controller.update(20);
+  return f;
+}
+
+test('surface exit approach restores nearest first, respects sample cadence and pins uploads', async () => {
+  const { controller, location, far, restored } = exitFixture();
+  controller.update(30, location, { x: 0, y: 0, z: 0 });
+  assert.deepEqual(restored, [far.tileTexture]);
+  assert.equal(controller.exitWarmup.charge, 16);
+  controller.update(40, location, { x: 0, y: 0, z: 0 });
+  assert.equal(restored.length, 1);
+  controller.update(130, location, { x: 0, y: 0, z: 0 });
+  assert.equal(restored.length, 2);
+  controller.update(200, location, { x: 40, y: 0, z: 0 });
+  assert.equal(controller.evicted.size, 1);
+  await controller.restore();
+  assert.equal(restored.length, 3);
+  assert.equal(controller.exitWarmup.pinned.size, 0);
+});
+
+test('linked exits and vertically distant exits do not trigger predictive restoration', () => {
+  const { controller, location, restored } = exitFixture();
+  controller.update(30, location, { x: 100, y: 0, z: 0 });
+  controller.update(40, location, { x: 0, y: 20, z: 0 });
+  assert.equal(restored.length, 0);
+});
+
+test('predictive restore requires memory headroom and respects its visit cap', () => {
+  const { controller, location, renderer, restored } = exitFixture({ surfaceExitWarmupMaxBytes: 16 });
+  const feet = { x: 0, y: 0, z: 0 };
+  renderer.info.memory.total = 3584 * 1024 * 1024;
+  controller.update(30, location, feet);
+  assert.equal(restored.length, 0);
+  delete renderer.info;
+  controller.update(130, location, feet);
+  assert.equal(restored.length, 0);
+  renderer.info = { memory: { total: 1024 } };
+  controller.update(230, location, feet);
+  controller.update(330, location, feet);
+  assert.equal(restored.length, 1);
+});
+
+test('predictive restore failure leaves normal exit fallback available', async () => {
+  const { controller, location, renderer, restored } = exitFixture();
+  const init = renderer.initTexture;
+  renderer.initTexture = () => { throw new Error('test failure'); };
+  controller.update(30, location, { x: 0, y: 0, z: 0 });
+  assert.equal(controller.exitWarmup.failed, true);
+  assert.equal(controller.evicted.size, 3);
+  renderer.initTexture = init;
+  await controller.restore();
+  assert.equal(restored.length, 3);
+});
+
+test('predictive exit warmup is opt-in and validates the visit budget', () => {
+  assert.equal(resolveRenderEnhancements().locationStructureBudget.surfaceExitWarmupEnabled, false);
+  assert.equal(resolveRenderEnhancements({}, '?locationSurfaceExitWarmup=1').locationStructureBudget.surfaceExitWarmupEnabled, true);
+  assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceExitWarmupMaxBytes: 1.5 } }), RangeError);
+});

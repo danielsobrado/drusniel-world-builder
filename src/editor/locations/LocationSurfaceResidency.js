@@ -6,6 +6,7 @@ import { collectLocationGpuImpostorAttributes } from './LocationGpuImpostorResid
 import { collectLocationSceneryAttributes } from './LocationSceneryResidency.js';
 import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
+import { LocationSurfaceExitWarmup } from './LocationSurfaceExitWarmup.js';
 import { LocationSurfaceMemoryPolicy } from './LocationSurfaceMemoryPolicy.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
@@ -28,6 +29,7 @@ export class LocationSurfaceResidency {
     this.enabled = REVISION === '187' && renderer?.backend?.isWebGPUBackend === true
       && typeof renderer._textures?.has === 'function' && typeof renderer.initTexture === 'function';
     this.memoryPolicy = new LocationSurfaceMemoryPolicy(settings);
+    this.exitWarmup = new LocationSurfaceExitWarmup(settings);
     this.evicted = new Map();
     this.candidates = [];
     this.anchor = null;
@@ -127,14 +129,20 @@ export class LocationSurfaceResidency {
     this.nextSample = now + this.settings.surfaceIdleMs;
   }
 
-  update(now = performance.now()) {
-    if (this.phase !== 'inside' || this.renderer._isDeviceLost || now < this.nextSample) return;
+  update(now = performance.now(), location = null, feet = null) {
+    if (this.phase !== 'inside' || this.renderer._isDeviceLost) return;
+    if (this.exitWarmup.approaching(location, feet)) {
+      this.nextSample = now + this.settings.surfaceIdleMs;
+      this.prefetchExit(now);
+      return;
+    }
+    if (now < this.nextSample) return;
     this.nextSample = now + this.settings.surfaceSampleMs;
     try {
       const mode = this.memoryPolicy.sample(this.renderer);
       if (mode === 'idle') return;
       this.candidates = this.collect(this.anchor).filter(entry => !entry.protected
-        && !this.evicted.has(entry.resource) && this.resident(entry));
+        && !this.evicted.has(entry.resource) && !this.exitWarmup.pinned.has(entry.resource) && this.resident(entry));
       const adaptive = mode === 'pressure';
       const ordered = adaptive ? this.memoryPolicy.rank(this.candidates, this.renderer)
         : this.candidates.sort((a, b) => b.distance - a.distance || b.size - a.size)
@@ -147,7 +155,7 @@ export class LocationSurfaceResidency {
         remaining--;
         const retired = this.retire(entry);
         if (retired === false || this.resident(entry)) continue;
-        this.evicted.set(entry.resource, entry);
+        this.evicted.set(entry.resource, { ...entry, allocationCharge: charge });
         this.memoryPolicy.record(charge);
         if (entry.kind !== 'texture') {
           PerfCounters.inc(`locationSurface.${entry.kind}Evictions`);
@@ -163,6 +171,46 @@ export class LocationSurfaceResidency {
       console.warn('Surface resource reclamation paused.', error);
     } finally {
       this.candidates.length = 0;
+      this.publish();
+    }
+  }
+
+  prefetchExit(now) {
+    if (!this.evicted.size || !this.exitWarmup.beginSample(now)) return;
+    try {
+      const current = new Map(this.collect(this.anchor).map(entry => [entry.resource, entry]));
+      const entries = [...this.evicted.values()].filter(entry => !entry.deferred)
+        .sort((a, b) => a.distance - b.distance);
+      let count = 0, uploaded = 0, reserved = 0;
+      const initialTotal = this.renderer.info?.memory?.total;
+      for (const entry of entries) {
+        if (count >= this.settings.surfaceRestoresPerFrame || this.renderer._isDeviceLost) break;
+        const live = current.get(entry.resource);
+        if (!live || live.deferred || this.resident(live)) continue;
+        if (uploaded + live.size > this.settings.surfaceRestoreBytesPerFrame) continue;
+        // A retired allocation is absent from memoryMap; retain the pre-retirement charge.
+        const charge = Math.max(live.size, entry.allocationCharge ?? entry.size);
+        const total = Math.max(initialTotal + reserved, this.renderer.info?.memory?.total);
+        if (!this.exitWarmup.allows(total, charge)) continue;
+        this.warm(live);
+        count++;
+        uploaded += live.size;
+        reserved += charge;
+        if (!this.resident(live)) {
+          this.exitWarmup.failed = true;
+          break;
+        }
+        this.exitWarmup.record(entry.resource, charge);
+        this.evicted.delete(entry.resource);
+        this.evictedBytes -= entry.size;
+        PerfCounters.inc('locationSurface.exitWarmupRestores');
+        PerfCounters.inc('locationSurface.exitWarmupBytes', live.size);
+      }
+    } catch (error) {
+      this.exitWarmup.failed = true;
+      PerfCounters.inc('locationSurface.exitWarmupFailures');
+      console.warn('Predictive surface warmup paused; using normal exit restoration.', error);
+    } finally {
       this.publish();
     }
   }
@@ -188,6 +236,8 @@ export class LocationSurfaceResidency {
     PerfCounters.set('locationSurface.deferredOutdoorTargets', targets);
     PerfCounters.set('locationSurface.deferredEnvironmentTextures', environments);
     PerfCounters.set('locationSurface.pendingBytes', this.evictedBytes);
+    PerfCounters.set('locationSurface.exitWarmupPinned', this.exitWarmup.pinned.size);
+    PerfCounters.set('locationSurface.exitWarmupChargeBytes', this.exitWarmup.charge);
     PerfCounters.set('locationSurface.adaptiveAccountingAvailable', this.memoryPolicy.accountedTotal === null ? 0 : 1);
     PerfCounters.set('locationSurface.adaptiveRendererBytes', this.memoryPolicy.accountedTotal ?? 0);
     PerfCounters.set('locationSurface.adaptivePressure', this.memoryPolicy.pressure ? 1 : 0);
@@ -243,6 +293,7 @@ export class LocationSurfaceResidency {
 
   reset() {
     this.memoryPolicy.reset();
+    this.exitWarmup.reset();
     this.evicted.clear();
     this.evictedBytes = 0;
     this.anchor = null;
