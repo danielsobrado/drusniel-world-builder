@@ -89,3 +89,19 @@ test('all three options are independently disabled by default', () => {
     assert.equal(resolveRenderEnhancements({}, '?' + parameter + '=1').locationStructureBudget[key], true);
   }
 });
+
+test('reflection warmup only admits the back cube and planar storage while invalid', () => {
+  const targets = [new CubeRenderTarget(16, { type: HalfFloatType }), new CubeRenderTarget(16, { type: HalfFloatType })];
+  const planarTarget = new RenderTarget(32, 16, { type: HalfFloatType });
+  const controller = Object.assign(Object.create(WaterReflectionController.prototype), {
+    view: { renderer: { backend: { isWebGPUBackend: true }, _textures: new Set() } },
+    targets, planarTarget, front: 0, surfaceCapturesSuspended: true,
+    valid: { value: 0 }, planarValid: { value: 0 }, face: 0, gpuPressure: { busy: false },
+  });
+  assert.deepEqual(controller.surfaceWarmupTargets().map(entry => entry.target), [targets[1], planarTarget]);
+  controller.view.renderer._textures.add(targets[1]);
+  assert.deepEqual(controller.surfaceWarmupTargets().map(entry => entry.target), [planarTarget]);
+  controller.valid.value = 1;
+  assert.deepEqual(controller.surfaceWarmupTargets(), []);
+  for (const target of [...targets, planarTarget]) target.dispose();
+});

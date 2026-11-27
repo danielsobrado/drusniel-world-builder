@@ -15,6 +15,8 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
     generationEnabled: false, generationWorker: true, generationSliceMs: 4, generationMaxCopyBytes: 67108864, generationWorkerTimeoutMs: 120000,
     lightingEnabled: false, lightingSliceMs: 4,
     surfaceReclamationEnabled: false, surfaceMeadowReclamationEnabled: false, surfaceMeadowProtectMeters: 32, surfaceSceneryReclamationEnabled: false, surfaceGpuImpostorReclamationEnabled: false, surfaceTownReclamationEnabled: false, surfaceTerrainBakeReclamationEnabled: false, surfaceOceanFftReclamationEnabled: false, surfaceReflectionReclamationEnabled: false, surfacePostReclamationEnabled: false, surfaceAtmosphereReclamationEnabled: false, surfaceShadowReclamationEnabled: false, surfaceEnvironmentReclamationEnabled: false, surfaceTownProtectMeters: 96, surfaceSceneryProtectMeters: 64, surfaceProtectMeters: 192, surfaceIdleMs: 5000, surfaceSampleMs: 500,
+    surfaceOceanFftWarmupEnabled: false, surfaceOceanFftWarmupComputeEnabled: false, surfaceOceanFftWarmupMaxBytes: 67108864,
+    surfaceReflectionWarmupEnabled: false, surfaceReflectionWarmupMaxBytes: 33554432, surfaceWaterWarmupMeters: 192,
     surfaceEnvironmentWarmupEnabled: false, surfaceEnvironmentWarmupMaxBytes: 67108864,
     surfaceAtmosphereWarmupEnabled: false, surfaceAtmosphereWarmupMaxBytes: 67108864, surfaceAtmosphereWarmupMaxTargetBytes: 33554432,
     surfaceTargetWarmupMaxBytes: 134217728, surfacePostWarmupEnabled: false, surfacePostWarmupMaxBytes: 134217728, surfacePostWarmupMaxTargetBytes: 67108864,
@@ -155,6 +157,9 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     ['locationSurfacePostWarmup', 'surfacePostWarmupEnabled'],
     ['locationSurfaceAtmosphereWarmup', 'surfaceAtmosphereWarmupEnabled'],
     ['locationSurfaceEnvironmentWarmup', 'surfaceEnvironmentWarmupEnabled'],
+    ['locationSurfaceOceanFftWarmup', 'surfaceOceanFftWarmupEnabled'],
+    ['locationSurfaceOceanFftWarmupCompute', 'surfaceOceanFftWarmupComputeEnabled'],
+    ['locationSurfaceReflectionWarmup', 'surfaceReflectionWarmupEnabled'],
     ['locationSurfacePostReclamation', 'surfacePostReclamationEnabled'],
     ['locationSurfaceAtmosphereReclamation', 'surfaceAtmosphereReclamationEnabled'],
     ['locationSurfaceShadowReclamation', 'surfaceShadowReclamationEnabled'],
@@ -209,6 +214,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
       portalCellMeters: [4, 64], portalMaxCells: [1, 65536], portalMaxSampleReads: [1000, 64000000],
       generationSliceMs: [0.5, 16], generationMaxCopyBytes: [0, 268435456], generationWorkerTimeoutMs: [1000, 300000], lightingSliceMs: [0.5, 16],
       surfaceMeadowProtectMeters: [0, 2048], surfaceSceneryProtectMeters: [0, 2048], surfaceTownProtectMeters: [0, 2048], surfaceProtectMeters: [0, 2048], surfaceIdleMs: [1000, 60000], surfaceSampleMs: [100, 5000],
+      surfaceOceanFftWarmupMaxBytes: [0, 536870912], surfaceReflectionWarmupMaxBytes: [0, 536870912], surfaceWaterWarmupMeters: [1, 2048],
       surfaceEnvironmentWarmupMaxBytes: [0, 536870912],
       surfaceAtmosphereWarmupMaxBytes: [0, 536870912], surfaceAtmosphereWarmupMaxTargetBytes: [0, 268435456],
       surfaceTargetWarmupMaxBytes: [0, 536870912], surfacePostWarmupMaxBytes: [0, 536870912], surfacePostWarmupMaxTargetBytes: [0, 268435456],
@@ -224,8 +230,8 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   }
   if (value.locationStructureBudget.protectMeters < value.locationStructureBudget.cellMeters || !Number.isInteger(value.locationStructureBudget.evictionsPerSample) || !Number.isInteger(value.locationStructureBudget.minPropTriangles)) throw new RangeError('Invalid location structure protection or integer budget.');
   const structure = value.locationStructureBudget;
-  for (const key of ['portalEnabled', 'portalCull', 'generationEnabled', 'generationWorker', 'lightingEnabled', 'surfaceReclamationEnabled', 'surfaceMeadowReclamationEnabled', 'surfaceSceneryReclamationEnabled', 'surfaceGpuImpostorReclamationEnabled', 'surfaceTownReclamationEnabled', 'surfaceTerrainBakeReclamationEnabled', 'surfaceOceanFftReclamationEnabled', 'surfaceReflectionReclamationEnabled', 'surfacePostReclamationEnabled', 'surfaceAtmosphereReclamationEnabled', 'surfaceShadowReclamationEnabled', 'surfaceEnvironmentReclamationEnabled', 'surfaceAdaptiveReclamationEnabled', 'surfaceExitWarmupEnabled', 'surfaceShadowWarmupEnabled', 'surfacePostWarmupEnabled', 'surfaceAtmosphereWarmupEnabled', 'surfaceEnvironmentWarmupEnabled']) if (typeof structure[key] !== 'boolean') throw new TypeError(`locationStructureBudget.${key} must be a boolean.`);
-  for (const key of ['portalMaxCells', 'portalMaxSampleReads', 'generationMaxCopyBytes', 'generationWorkerTimeoutMs', 'surfaceEvictionsPerSample', 'surfaceMaxEvictedBytes', 'surfaceRestoreBytesPerFrame', 'surfaceRestoresPerFrame', 'surfaceExitWarmupMaxBytes', 'surfaceShadowWarmupMaxBytes', 'surfaceShadowWarmupMaxTargetBytes', 'surfaceTargetWarmupMaxBytes', 'surfacePostWarmupMaxBytes', 'surfacePostWarmupMaxTargetBytes', 'surfaceAtmosphereWarmupMaxBytes', 'surfaceAtmosphereWarmupMaxTargetBytes', 'surfaceEnvironmentWarmupMaxBytes']) if (!Number.isInteger(structure[key])) throw new RangeError(`locationStructureBudget.${key} must be an integer.`);
+  for (const key of ['portalEnabled', 'portalCull', 'generationEnabled', 'generationWorker', 'lightingEnabled', 'surfaceReclamationEnabled', 'surfaceMeadowReclamationEnabled', 'surfaceSceneryReclamationEnabled', 'surfaceGpuImpostorReclamationEnabled', 'surfaceTownReclamationEnabled', 'surfaceTerrainBakeReclamationEnabled', 'surfaceOceanFftReclamationEnabled', 'surfaceReflectionReclamationEnabled', 'surfacePostReclamationEnabled', 'surfaceAtmosphereReclamationEnabled', 'surfaceShadowReclamationEnabled', 'surfaceEnvironmentReclamationEnabled', 'surfaceAdaptiveReclamationEnabled', 'surfaceExitWarmupEnabled', 'surfaceShadowWarmupEnabled', 'surfacePostWarmupEnabled', 'surfaceAtmosphereWarmupEnabled', 'surfaceEnvironmentWarmupEnabled', 'surfaceOceanFftWarmupEnabled', 'surfaceOceanFftWarmupComputeEnabled', 'surfaceReflectionWarmupEnabled']) if (typeof structure[key] !== 'boolean') throw new TypeError(`locationStructureBudget.${key} must be a boolean.`);
+  for (const key of ['portalMaxCells', 'portalMaxSampleReads', 'generationMaxCopyBytes', 'generationWorkerTimeoutMs', 'surfaceEvictionsPerSample', 'surfaceMaxEvictedBytes', 'surfaceRestoreBytesPerFrame', 'surfaceRestoresPerFrame', 'surfaceExitWarmupMaxBytes', 'surfaceShadowWarmupMaxBytes', 'surfaceShadowWarmupMaxTargetBytes', 'surfaceTargetWarmupMaxBytes', 'surfacePostWarmupMaxBytes', 'surfacePostWarmupMaxTargetBytes', 'surfaceAtmosphereWarmupMaxBytes', 'surfaceAtmosphereWarmupMaxTargetBytes', 'surfaceEnvironmentWarmupMaxBytes', 'surfaceOceanFftWarmupMaxBytes', 'surfaceReflectionWarmupMaxBytes']) if (!Number.isInteger(structure[key])) throw new RangeError(`locationStructureBudget.${key} must be an integer.`);
   if (structure.surfaceAdaptiveLowMiB >= structure.surfaceAdaptiveHighMiB) throw new RangeError('Adaptive surface recovery threshold must be below the pressure threshold.');
   if (typeof structure.prefetchEnabled !== 'boolean') throw new TypeError('locationStructureBudget.prefetchEnabled must be a boolean.');
   if (!Number.isInteger(structure.prefetchSliceBytes) || structure.prefetchSliceBytes % 4 !== 0

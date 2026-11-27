@@ -141,6 +141,21 @@ export class WaterReflectionController {
     return true;
   }
 
+  surfaceWarmupTargets() {
+    const renderer = this.view.renderer;
+    if (!this.surfaceCapturesSuspended || this.disposed || this.capturing || this.gpuPressure.busy
+        || !renderer?.backend?.isWebGPUBackend || !renderer._textures?.has
+        || this.valid.value || this.planarValid.value || this.face !== 0) return [];
+    // Only the next capture buffer and optional planar target are needed initially.
+    return [this.targets[1 - this.front], this.planarTarget].filter(target => target
+      && target.texture.type === HalfFloatType && !target.texture.generateMipmaps && !(target.samples > 1)
+      && !renderer._textures.has(target) && !renderer._textures.has(target.texture)
+      && target !== renderer.getRenderTarget?.())
+      .map(target => ({ target, width: target.width, height: target.height,
+        bytes: target.width * target.height * (target.isCubeRenderTarget ? 6 : 1)
+          * (8 + (target.depthBuffer || target.stencilBuffer ? 8 : 0)) }));
+  }
+
   // Validity must follow world/camera changes even when no capture work fits.
   prepare(camera, surface) {
     if (this.disposed || this.capturing) return;

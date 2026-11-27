@@ -50,6 +50,12 @@ locationStructureBudget:
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000
   surfaceSampleMs: 500
+  surfaceOceanFftWarmupEnabled: false
+  surfaceOceanFftWarmupComputeEnabled: false
+  surfaceOceanFftWarmupMaxBytes: 67108864
+  surfaceReflectionWarmupEnabled: false
+  surfaceReflectionWarmupMaxBytes: 33554432
+  surfaceWaterWarmupMeters: 192
   surfaceEnvironmentWarmupEnabled: false
   surfaceEnvironmentWarmupMaxBytes: 67108864
   surfaceAtmosphereWarmupEnabled: false

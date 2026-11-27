@@ -285,7 +285,7 @@ export class LocationSurfaceResidency {
       }
       if (this.phase === 'restoring' && !this.renderer._isDeviceLost) {
         await warmLocationTargets({ surface: this.surface, renderer: this.renderer, settings: this.settings,
-          entries, pause: this.pause, signal, active: () => this.phase === 'restoring' });
+          entries, anchor: this.anchor, pause: this.pause, signal, active: () => this.phase === 'restoring' });
       }
     } catch (error) {
       if (signal?.aborted) throw error;

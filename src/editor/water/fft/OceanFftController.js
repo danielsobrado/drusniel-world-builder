@@ -99,14 +99,31 @@ export class OceanFftController {
     return true;
   }
 
+  prepareSurfaceResources() {
+    const runtime = this.runtime;
+    if (runtime.state !== OCEAN_FFT_STATE.SUSPENDED) return false;
+    if (!runtime.configure({ size: this.profile.size, tileSizes: this.profile.tileSizes, spectra: this.spectrum.current })) return false;
+    this.binding.setSpectra(this.spectrum.current);
+    PerfCounters.inc('locationSurface.fftRegenerations');
+    return true;
+  }
+
+  warmSurfaceTransform(timeSeconds) {
+    const runtime = this.runtime;
+    if (runtime.state !== OCEAN_FFT_STATE.READY || runtime.warming
+        || runtime.renderer.backend.device !== runtime.device || !Number.isFinite(timeSeconds)) return false;
+    if (!admitCompute(runtime.renderer, this, 'fft', runtime.kernels?.dispatchCount ?? 1, false)) {
+      cancelComputeWait(runtime.renderer, this);
+      return false;
+    }
+    // The normal surface prepare owns publication to water materials.
+    return runtime.prepare(timeSeconds);
+  }
+
   /** Once per frame before the main draw, with the shared water clock. */
   prepare(timeSeconds, nowMs = performance.now()) {
     const runtime = this.runtime;
-    if (runtime.state === OCEAN_FFT_STATE.SUSPENDED) {
-      if (!runtime.configure({ size: this.profile.size, tileSizes: this.profile.tileSizes, spectra: this.spectrum.current })) return;
-      this.binding.setSpectra(this.spectrum.current);
-      PerfCounters.inc('locationSurface.fftRegenerations');
-    }
+    if (runtime.state === OCEAN_FFT_STATE.SUSPENDED && !this.prepareSurfaceResources()) return;
     const ready = runtime.state === OCEAN_FFT_STATE.READY || runtime.state === OCEAN_FFT_STATE.ACTIVE;
     const currentDevice = runtime.renderer.backend.device === runtime.device;
     const seek = this.lastPreparedTime === null || timeSeconds < this.lastPreparedTime || timeSeconds - this.lastPreparedTime > MAX_STEP_SECONDS;
