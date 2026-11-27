@@ -1,11 +1,16 @@
 import './SpatialPerformanceOverlay.css';
 import { PerfCounters } from './PerfCounters.js';
-import { SPATIAL_LAYERS, SPATIAL_METRICS, spatialWindow, spatialCell, spatialMetricLimit, spatialExport } from './SpatialPerformanceModel.js';
+import { spatialResourceSnapshot } from './SpatialResourceSnapshot.js';
+import { spatialRendererSnapshot } from './SpatialRendererSnapshot.js';
+import { SPATIAL_LAYERS, SPATIAL_METRICS, spatialWindow, spatialCell, spatialMetricLimit, spatialExport, spatialHotspots, spatialLayerBreakdown } from './SpatialPerformanceModel.js';
 
 const GRID_PIXELS = 340;
 const number = value => Number.isFinite(value) ? Math.round(value).toLocaleString('en-US') : 'n/a';
 const metricLabels = { pressure: 'Estimated pressure', requestedTriangles: 'Requested triangles', selectedTriangles: 'Selected triangles',
-  requestedDraws: 'Requested draws', selectedDraws: 'Selected draws', units: 'Weighted demand' };
+  requestedDraws: 'Requested draws', selectedDraws: 'Selected draws', shadowTriangles: 'Selected shadow triangles',
+  reflectionTriangles: 'Selected reflection triangles', slotTextureBytes: 'Assigned slot texture bytes', units: 'Weighted demand' };
+const mib = value => Number.isFinite(value) ? `${(value / 1048576).toFixed(1)} MiB` : 'n/a';
+const decimal = value => Number.isFinite(value) ? value.toFixed(1) : 'n/a';
 const append = (parent, tag, content = '') => {
   const element = parent.ownerDocument.createElement(tag);
   element.textContent = content;
@@ -51,7 +56,10 @@ export class SpatialPerformanceOverlay {
     this.canvas.setAttribute('aria-label', 'Regional cost heatmap. Select a chunk with arrow keys or click.');
     this.context = this.canvas.getContext('2d');
     append(this.panel, 'div', 'North at top · grey unsampled · blue protected · violet reduced · amber incomplete').className = 'spatial-legend';
-    append(this.panel, 'div', 'Green → red: estimated cost / local target. Layer filter does not hide scene geometry.').className = 'spatial-legend';
+    this.scaleLegend = append(this.panel, 'div', 'Green → red: estimated cost / local target. Layer filter does not hide scene geometry.');
+    this.scaleLegend.className = 'spatial-legend';
+    this.hotspots = append(this.panel, 'div');
+    this.hotspots.className = 'spatial-hotspots';
     this.details = append(this.panel, 'pre', 'Select a chunk to inspect.');
     this.global = append(this.panel, 'pre');
     for (const element of [this.metric, this.layer]) element.addEventListener('change', () => this.draw());
@@ -85,6 +93,7 @@ export class SpatialPerformanceOverlay {
   update(now, insideLocation = false) {
     if (insideLocation) {
       this.panel.hidden = true;
+      this.liveResources = this.rendererSnapshot = null;
       this.nextRefresh = -Infinity;
       return;
     }
@@ -92,11 +101,14 @@ export class SpatialPerformanceOverlay {
     if (!this.panel.open || now < this.nextRefresh) return;
     this.nextRefresh = now + this.settings.refreshMs;
     this.sample = (this.surface.regionalSpatial ?? this.surface.spatialDiagnostics)?.diagnosticSample ?? null;
+    this.liveResources = spatialResourceSnapshot(this.surface, now);
+    this.rendererSnapshot = spatialRendererSnapshot(this.surface, PerfCounters.snapshot(), this.gpuProfiler?.latestSample, now);
     this.download.disabled = !this.sample;
     if (!this.sample) {
       this.status.textContent = 'Waiting for a completed regional sample…';
       this.details.textContent = 'No current sample.';
-      this.global.textContent = '';
+      this.hotspots.replaceChildren();
+      this.drawRenderer();
       this.context?.clearRect(0, 0, GRID_PIXELS, GRID_PIXELS);
       return;
     }
@@ -114,8 +126,12 @@ export class SpatialPerformanceOverlay {
     const sample = this.sample, ctx = this.context;
     if (!sample || !ctx) return;
     const radius = this.settings.radius, side = radius * 2 + 1, step = GRID_PIXELS / side;
-    const limit = spatialMetricLimit(this.metric.value, sample.settings);
-    const rows = spatialWindow(sample, radius, this.layer.value, this.metric.value);
+    const rows = spatialWindow(sample, radius, this.layer.value, this.metric.value, this.liveResources);
+    const resourceMetric = this.metric.value === 'slotTextureBytes';
+    this.layer.disabled = resourceMetric;
+    this.scaleLegend.textContent = resourceMetric ? 'Green → red: assigned slot texture bytes relative to window maximum. Not a VRAM budget.'
+      : 'Green → red: estimated cost / local target. Layer filter does not hide scene geometry.';
+    const limit = resourceMetric ? Math.max(1, ...rows.map(row => row.value ?? 0)) : spatialMetricLimit(this.metric.value, sample.settings);
     const key = this.key ?? `${sample.focus.chunkX}:${sample.focus.chunkZ}`;
     ctx.clearRect(0, 0, GRID_PIXELS, GRID_PIXELS);
     for (const { x, z, cell, value } of rows) {
@@ -138,10 +154,17 @@ export class SpatialPerformanceOverlay {
         ctx.strokeRect(px + 2, py + 2, step - 4, step - 4);
       }
     }
-    const cell = spatialCell(sample, key, this.layer.value);
+    this.hotspots.replaceChildren();
+    append(this.hotspots, 'strong', resourceMetric ? 'Largest assigned slot textures (all layers; relative scale)' : 'Top 5 in visible window');
+    for (const row of spatialHotspots(rows)) {
+      const button = append(this.hotspots, 'button', `${row.x}:${row.z} · ${resourceMetric ? mib(row.value) : this.metric.value === 'pressure' ? `${row.value.toFixed(2)}×` : number(row.value)}`);
+      button.type = 'button';
+      button.addEventListener('click', () => { this.key = `${row.x}:${row.z}`; this.draw(); });
+    }
+    const cell = spatialCell(sample, key, resourceMetric ? 'all' : this.layer.value);
     const cost = value => value ? `${number(value.triangles)} tris / ${number(value.draws)} draws (unknown ${number(value.unknown)})` : 'Unavailable';
     this.details.textContent = cell ? [
-      `Chunk ${key} · ${this.layer.value}`,
+      `Chunk ${key} · ${resourceMetric ? 'all layers' : this.layer.value}`,
       `Requested: ${cost(cell.requested)}`,
       `Selected: ${cost(cell.selected)}`,
       ...(cell.effective ? [`Effective requested: ${number(cell.effective.triangles)} tris / ${number(cell.effective.draws)} draws (weighted passes)`] : []),
@@ -151,26 +174,54 @@ export class SpatialPerformanceOverlay {
       `Counts: ${Object.entries(cell.counts).map(([kind, count]) => `${kind} ${number(count)}`).join(', ') || 'none'}`,
       ...cell.reasons,
     ].join('\n') : `Chunk ${key}: no sampled demand (not necessarily empty).`;
-    const stats = sample.allocationStats;
-    const gpu = this.gpuProfiler?.latestSample;
+    const breakdown = spatialLayerBreakdown(sample, key);
+    if (breakdown.length) this.details.textContent += '\nSelected cost by layer (estimated):\n' + breakdown.map(({ kind, selected }) =>
+      `${kind}: ${cost(selected)}`).join('\n');
+    const resource = this.liveResources?.cells.get(key);
+    if (resource) this.details.textContent += '\n' + [
+      'Assigned slot textures · live snapshot (not total chunk VRAM)',
+      `Accounted: ${mib(resource.accountedTextureBytes)} · estimated: ${mib(resource.estimatedTextureBytes)}`,
+      `Unknown/shared/unallocated: ${resource.unknownTextures}/${resource.sharedTextures}/${resource.unallocatedTextures}`,
+      ...(resource.terrain ? [`Terrain: ${resource.terrain.loading ? 'loading' : resource.terrain.visible ? 'visible' : 'hidden'} · ${resource.terrain.materials.join(', ')}${resource.terrain.pendingMaterial ? ' → pending material' : ''}`] : []),
+      ...(resource.water ? [`Water: ${resource.water.wet ? 'wet' : 'dry'} · ${resource.water.materials.join(', ')}`] : []),
+    ].join('\n');
+    this.drawRenderer();
+  }
+
+  drawRenderer() {
+    const snapshot = this.rendererSnapshot;
+    if (!snapshot) { this.global.textContent = ''; return; }
+    const { cpu, publication, memory, renderer, streaming, compute, auxiliary, gpuRenderSample: gpu } = snapshot;
+    const stats = this.sample?.allocationStats;
     this.global.textContent = [
       'Whole renderer · not per chunk',
-      `CPU fixed/deferred: ${PerfCounters.get('frameFixedCpuMs').toFixed(1)} / ${PerfCounters.get('frameDeferredCpuMs').toFixed(1)} ms`,
-      `Queued upload: ${number(PerfCounters.get('framePublicationUploadBytes'))} B`,
+      `CPU fixed/deferred/max unit: ${decimal(cpu.frameFixedCpuMs)} / ${decimal(cpu.frameDeferredCpuMs)} / ${decimal(cpu.frameMaxDeferredUnitMs)} ms`,
+      `Publication: ${mib(publication.framePublicationUploadBytes)} · backlog ${number(cpu.framePreparationBacklogAgeMs)} ms`,
+      `Reported draws / tris: ${number(renderer.rendererDrawCalls)} / ${number(renderer.rendererTriangles)}`,
+      `Renderer-accounted memory: ${mib(memory.rendererTotalBytes)} · textures ${number(renderer.rendererTextures)} · geometries ${number(renderer.rendererGeometries)}`,
+      `Tracked texture estimate: ${mib(memory.regionalTrackedTextureBytes)} · FFT ${mib(memory.oceanFftBytes)}`,
+      ...(streaming ? [`Terrain resident/loading/capacity: ${streaming.resident}/${streaming.loading}/${streaming.capacity}`,
+        `Commit queue: ${streaming.pendingCommits} · oldest ${number(streaming.maxQueuedCommitAgeMs)} ms`] : []),
+      `Compute credits mandatory/optional: ${number(compute['gpuCompute.mandatoryCredits'])}/${number(compute['gpuCompute.optionalCredits'])}`,
+      `Compute deferrals/deadlines/overflow: ${number(compute['gpuCompute.deferred'])}/${number(compute['gpuCompute.deadlineTurns'])}/${number(compute['gpuCompute.overflowCredits'])}`,
+      `Hi-Z candidates / excluded: ${number(auxiliary.gpuOcclusionCandidates)} / ${number(auxiliary.occlusionLayerExcluded)}`,
+      `Wet / refractive chunks: ${number(auxiliary.waterChunksWet)} / ${number(auxiliary.waterChunksRefractive)}`,
       ...(stats ? [`Admission changes/deferred: ${number(stats.changes)} / ${number(stats.deferred)}`,
         `Upload / overlap / unknown deferred: ${number(stats.uploadDeferred)} / ${number(stats.overlapDeferred)} / ${number(stats.unknownDeferred)}`] : []),
-      ...(gpu ? [`Measured GPU render passes (sample): ${gpu.totalMs.toFixed(2)} ms`,
-        ...Object.entries(gpu.passes).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, ms]) => `${name}: ${ms.toFixed(2)} ms`)] : ['No measured GPU pass sample (requires supported timestamp capture)']),
-      'GPU per-region timing unavailable',
+      ...(gpu ? [`Measured GPU render passes: ${decimal(gpu.totalMs)} ms · ${number(gpu.ageMs)} ms old`,
+        ...Object.entries(gpu.passes).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, ms]) => `${name}: ${decimal(ms)} ms`)] : ['No measured GPU pass sample']),
+      'Per-chunk GPU timing and shader instruction counts unavailable.',
     ].join('\n');
   }
 
   export() {
     if (!this.sample) return;
-    const blob = new Blob([JSON.stringify({ ...spatialExport(this.sample), wholeRenderer: {
-      fixedCpuMs: PerfCounters.get('frameFixedCpuMs'), deferredCpuMs: PerfCounters.get('frameDeferredCpuMs'),
-      queuedUploadBytes: PerfCounters.get('framePublicationUploadBytes'), gpuRenderSample: this.gpuProfiler?.latestSample ?? null,
-    } }, null, 2)], { type: 'application/json' });
+    const resources = this.liveResources;
+    const blob = new Blob([JSON.stringify({ ...spatialExport(this.sample), version: 2,
+      wholeRenderer: this.rendererSnapshot,
+      slotResources: resources ? { timestampMs: resources.timestamp, sharedTextures: resources.sharedTextures,
+        cells: [...resources.cells.values()] } : null,
+    }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = this.panel.ownerDocument.createElement('a');
     link.href = url;
@@ -183,6 +234,7 @@ export class SpatialPerformanceOverlay {
     this.surface?.spatialDiagnostics?.setDiagnosticPaused(true);
     this.panel.remove();
     this.sample = null;
+    this.liveResources = this.rendererSnapshot = null;
     this.surface = null;
     this.gpuProfiler = null;
   }

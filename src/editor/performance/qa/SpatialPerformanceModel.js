@@ -1,7 +1,8 @@
 import { effectiveRenderCost } from '../RegionalRenderCost.js';
+import { spatialResourceBytes } from './SpatialResourceSnapshot.js';
 
 export const SPATIAL_LAYERS = Object.freeze(['all', 'tree', 'rock', 'bush', 'blade', 'card', 'detail', 'town', 'water']);
-export const SPATIAL_METRICS = Object.freeze(['pressure', 'requestedTriangles', 'selectedTriangles', 'requestedDraws', 'selectedDraws', 'units']);
+export const SPATIAL_METRICS = Object.freeze(['pressure', 'requestedTriangles', 'selectedTriangles', 'requestedDraws', 'selectedDraws', 'shadowTriangles', 'reflectionTriangles', 'slotTextureBytes', 'units']);
 const ring = (x, z, point) => point ? Math.max(Math.abs(x - point.chunkX), Math.abs(z - point.chunkZ)) : Infinity;
 
 export function spatialCell(sample, key, layer = 'all') {
@@ -40,6 +41,8 @@ export function spatialMetric(cell, metric, settings) {
     case 'selectedTriangles': return cell.selected?.triangles ?? null;
     case 'requestedDraws': return cell.requested?.draws ?? null;
     case 'selectedDraws': return cell.selected?.draws ?? null;
+    case 'shadowTriangles': return cell.selected?.shadowTriangles ?? null;
+    case 'reflectionTriangles': return cell.selected?.reflectionTriangles ?? null;
     case 'units': return cell.units;
     default: return null;
   }
@@ -52,15 +55,26 @@ export function spatialMetricLimit(metric, settings) {
   return settings.spatialChunkBudget;
 }
 
-export function spatialWindow(sample, radius, layer, metric) {
+export function spatialWindow(sample, radius, layer, metric, resources = null) {
   const cells = [];
   for (let z = sample.focus.chunkZ - radius; z <= sample.focus.chunkZ + radius; z++) {
     for (let x = sample.focus.chunkX - radius; x <= sample.focus.chunkX + radius; x++) {
       const cell = spatialCell(sample, `${x}:${z}`, layer);
-      cells.push({ x, z, cell, value: spatialMetric(cell, metric, sample.settings) });
+      const resource = resources?.cells.get(`${x}:${z}`) ?? null;
+      cells.push({ x, z, cell, resource, value: metric === 'slotTextureBytes' ? spatialResourceBytes(resource) : spatialMetric(cell, metric, sample.settings) });
     }
   }
   return cells;
+}
+
+export function spatialLayerBreakdown(sample, key) {
+  return Object.entries(sample.cells.get(key)?.renderCost?.layers ?? {}).map(([kind, cost]) => ({ kind, selected: cost.selected ?? null }))
+    .sort((a, b) => (b.selected?.triangles ?? -1) - (a.selected?.triangles ?? -1) || a.kind.localeCompare(b.kind));
+}
+
+export function spatialHotspots(rows, limit = 5) {
+  return rows.filter(row => Number.isFinite(row.value) && row.value > 0)
+    .sort((a, b) => b.value - a.value || a.x - b.x || a.z - b.z).slice(0, limit);
 }
 
 export function spatialExport(sample) {

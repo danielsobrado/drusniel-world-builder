@@ -24,3 +24,6 @@
 .spatial-perf-overlay pre { font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; }
 .spatial-perf-overlay .spatial-legend { color: #bac9d7; font-size: 11px; }
 .spatial-perf-overlay :focus-visible { outline: 2px solid #80c7ff; }
+
+.spatial-perf-overlay .spatial-hotspots { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+.spatial-perf-overlay .spatial-hotspots strong { flex-basis: 100%; }

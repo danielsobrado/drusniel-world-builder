@@ -4,7 +4,7 @@ import { resolveRenderEnhancements } from '../src/config/RenderEnhancements.js';
 import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 import { RegionalSceneryBudget } from '../src/editor/performance/RegionalSceneryBudget.js';
 import { emptyRenderCost } from '../src/editor/performance/RegionalRenderCost.js';
-import { spatialCell, spatialMetric, spatialMetricLimit, spatialWindow, spatialExport } from '../src/editor/performance/qa/SpatialPerformanceModel.js';
+import { spatialCell, spatialMetric, spatialMetricLimit, spatialWindow, spatialExport, spatialHotspots, spatialLayerBreakdown } from '../src/editor/performance/qa/SpatialPerformanceModel.js';
 
 const settings = resolveRenderEnhancements().regionalBudget;
 const cost = (triangles, draws, unknown = 0) => ({ ...emptyRenderCost(), triangles, draws, unknown });
@@ -140,4 +140,16 @@ test('overlay flag is independent and display limits are validated', () => {
   assert.equal(config.rendererAdmissionBudget, false);
   assert.throws(() => resolveRenderEnhancements({ spatialOverlay: { radius: 100 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ spatialOverlay: { refreshMs: 1 } }), RangeError);
+});
+
+test('hotspot ranking is deterministic and excludes missing and zero values', () => {
+  const rows = spatialWindow(sample(), 2, 'all', 'selectedTriangles');
+  assert.deepEqual(spatialHotspots(rows).map(row => row.cell.key), ['-2:4', '0:4']);
+  assert.equal(rows.length, 25);
+  assert.equal(spatialHotspots(rows, 1).length, 1);
+});
+
+test('chunk layer breakdown ranks selected geometry and does not fabricate unavailable layers', () => {
+  assert.deepEqual(spatialLayerBreakdown(sample(), '0:4').map(row => row.kind), ['tree', 'rock']);
+  assert.deepEqual(spatialLayerBreakdown(sample(), '100:100'), []);
 });
