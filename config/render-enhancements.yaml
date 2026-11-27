@@ -50,6 +50,12 @@ locationStructureBudget:
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000
   surfaceSampleMs: 500
+  surfaceAdaptiveReclamationEnabled: false
+  surfaceAdaptiveHighMiB: 4096
+  surfaceAdaptiveLowMiB: 3584
+  surfaceAdaptiveMaxMiB: 512
+  surfaceAdaptiveDeferredCost: 4
+  surfaceAdaptiveImpostorCost: 2
   surfaceEvictionsPerSample: 4
   surfaceMaxEvictedBytes: 33554432
   surfaceRestoreBytesPerFrame: 2097152

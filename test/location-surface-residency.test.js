@@ -112,3 +112,64 @@ test('surface reclamation is separately opt-in and budget validated', () => {
   assert.equal(resolveRenderEnhancements({}, '?locationSurfaceReclamation=1').locationStructureBudget.surfaceReclamationEnabled, true);
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceRestoresPerFrame: 1.5 } }), RangeError);
 });
+
+test('adaptive pressure stops at recovery threshold and preserves anchor protection', () => {
+  const mib = 1024 * 1024;
+  const { controller, renderer, resident, near, far, farther, water } = fixture({
+    surfaceAdaptiveReclamationEnabled: true, surfaceAdaptiveHighMiB: 128,
+    surfaceAdaptiveLowMiB: 96, surfaceAdaptiveMaxMiB: 128, surfaceMaxEvictedBytes: 0
+  });
+  renderer.info = { memory: { total: 128 * mib }, memoryMap: new Map() };
+  for (const texture of [far.tileTexture, farther.tileTexture, water.waterFieldTexture]) {
+    renderer.info.memoryMap.set(texture, 32 * mib);
+    texture.addEventListener('dispose', () => { renderer.info.memory.total -= 32 * mib; });
+  }
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  assert.equal(controller.evicted.size, 1);
+  assert.equal(controller.memoryPolicy.evictedCharge, 32 * mib);
+  assert.equal(resident.has(near.tileTexture), true);
+  assert.equal(resident.has(farther.tileTexture), false);
+  controller.update(20);
+  assert.equal(controller.evicted.size, 1);
+  renderer.info.memory.total = 112 * mib;
+  controller.update(30);
+  assert.equal(controller.evicted.size, 1);
+  renderer.info.memory.total = 128 * mib;
+  controller.update(40);
+  assert.equal(controller.evicted.size, 2);
+});
+
+test('adaptive mode below pressure retains resources and missing accounting falls back', () => {
+  const { controller, renderer } = fixture({ surfaceAdaptiveReclamationEnabled: true });
+  renderer.info = { memory: { total: 1 } };
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  assert.equal(controller.evicted.size, 0);
+  delete renderer.info;
+  controller.update(20);
+  assert.equal(controller.evictedBytes, 32);
+});
+
+test('adaptive mode respects the separate allocation cap', () => {
+  const mib = 1024 * 1024;
+  const { controller, renderer, far, farther, water } = fixture({
+    surfaceAdaptiveReclamationEnabled: true, surfaceAdaptiveHighMiB: 128,
+    surfaceAdaptiveLowMiB: 96, surfaceAdaptiveMaxMiB: 32
+  });
+  renderer.info = { memory: { total: 256 * mib }, memoryMap: new Map([
+    [far.tileTexture, 32 * mib], [farther.tileTexture, 64 * mib], [water.waterFieldTexture, 32 * mib]
+  ]) };
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  controller.update(20);
+  assert.equal(controller.evicted.size, 1);
+  assert.equal(controller.memoryPolicy.evictedCharge, 32 * mib);
+});
+
+test('adaptive settings are opt-in and validate recovery thresholds', () => {
+  assert.equal(resolveRenderEnhancements().locationStructureBudget.surfaceAdaptiveReclamationEnabled, false);
+  assert.equal(resolveRenderEnhancements({}, '?locationSurfaceAdaptiveReclamation=1').locationStructureBudget.surfaceAdaptiveReclamationEnabled, true);
+  assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceAdaptiveLowMiB: 4096 } }), RangeError);
+  assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfacePostReclamationEnabled: 'yes' } }), TypeError);
+});

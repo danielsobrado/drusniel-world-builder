@@ -6,6 +6,7 @@ import { collectLocationGpuImpostorAttributes } from './LocationGpuImpostorResid
 import { collectLocationSceneryAttributes } from './LocationSceneryResidency.js';
 import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
+import { LocationSurfaceMemoryPolicy } from './LocationSurfaceMemoryPolicy.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 const TERRAIN_TEXTURES = ['tileTexture', 'surfaceMaskTexture', 'heightTexture', 'forestFloorTexture'];
@@ -26,6 +27,7 @@ export class LocationSurfaceResidency {
     Object.assign(this, { surface, renderer, settings, pause });
     this.enabled = REVISION === '187' && renderer?.backend?.isWebGPUBackend === true
       && typeof renderer._textures?.has === 'function' && typeof renderer.initTexture === 'function';
+    this.memoryPolicy = new LocationSurfaceMemoryPolicy(settings);
     this.evicted = new Map();
     this.candidates = [];
     this.anchor = null;
@@ -129,17 +131,24 @@ export class LocationSurfaceResidency {
     if (this.phase !== 'inside' || this.renderer._isDeviceLost || now < this.nextSample) return;
     this.nextSample = now + this.settings.surfaceSampleMs;
     try {
+      const mode = this.memoryPolicy.sample(this.renderer);
+      if (mode === 'idle') return;
       this.candidates = this.collect(this.anchor).filter(entry => !entry.protected
         && !this.evicted.has(entry.resource) && this.resident(entry));
-      this.candidates.sort((a, b) => b.distance - a.distance || b.size - a.size);
+      const adaptive = mode === 'pressure';
+      const ordered = adaptive ? this.memoryPolicy.rank(this.candidates, this.renderer)
+        : this.candidates.sort((a, b) => b.distance - a.distance || b.size - a.size)
+          .map(entry => ({ entry, charge: this.memoryPolicy.charge(entry, this.renderer) }));
       let remaining = this.settings.surfaceEvictionsPerSample;
-      for (const entry of this.candidates) {
-        if (remaining <= 0) break;
-        if (this.evictedBytes + entry.size > this.settings.surfaceMaxEvictedBytes) continue;
+      for (const { entry, charge } of ordered) {
+        if (remaining <= 0 || (adaptive && this.memoryPolicy.sample(this.renderer) !== 'pressure')) break;
+        if (this.settings.surfaceAdaptiveReclamationEnabled && !this.memoryPolicy.allows(charge)) continue;
+        if (!adaptive && this.evictedBytes + entry.size > this.settings.surfaceMaxEvictedBytes) continue;
         remaining--;
         const retired = this.retire(entry);
         if (retired === false || this.resident(entry)) continue;
         this.evicted.set(entry.resource, entry);
+        this.memoryPolicy.record(charge);
         if (entry.kind !== 'texture') {
           PerfCounters.inc(`locationSurface.${entry.kind}Evictions`);
           PerfCounters.inc(`locationSurface.${entry.kind}EvictedBytes`, entry.size);
@@ -148,6 +157,7 @@ export class LocationSurfaceResidency {
         PerfCounters.inc('locationSurface.evictions');
         PerfCounters.inc('locationSurface.evictedBytes', entry.size);
       }
+      if (adaptive) this.memoryPolicy.sample(this.renderer);
     } catch (error) {
       this.phase = 'paused';
       console.warn('Surface resource reclamation paused.', error);
@@ -178,6 +188,10 @@ export class LocationSurfaceResidency {
     PerfCounters.set('locationSurface.deferredOutdoorTargets', targets);
     PerfCounters.set('locationSurface.deferredEnvironmentTextures', environments);
     PerfCounters.set('locationSurface.pendingBytes', this.evictedBytes);
+    PerfCounters.set('locationSurface.adaptiveAccountingAvailable', this.memoryPolicy.accountedTotal === null ? 0 : 1);
+    PerfCounters.set('locationSurface.adaptiveRendererBytes', this.memoryPolicy.accountedTotal ?? 0);
+    PerfCounters.set('locationSurface.adaptivePressure', this.memoryPolicy.pressure ? 1 : 0);
+    PerfCounters.set('locationSurface.adaptiveEvictedChargeBytes', this.memoryPolicy.evictedCharge);
   }
 
   async restore(signal) {
@@ -228,6 +242,7 @@ export class LocationSurfaceResidency {
   }
 
   reset() {
+    this.memoryPolicy.reset();
     this.evicted.clear();
     this.evictedBytes = 0;
     this.anchor = null;
