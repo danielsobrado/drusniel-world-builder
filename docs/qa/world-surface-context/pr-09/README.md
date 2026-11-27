@@ -4,7 +4,9 @@ Captured with `node scripts/run-wsc-pr9-qa.mjs` (shared frozen-server harness; h
 RTX 4080). Before = clean export of `0eb364df`; after = that plus this PR's changes only.
 Grassland `B01-C01` and Stillmeadow's woodland approach `B14-C01` at sunrise, clear noon,
 overcast, sunset (plus D16 direct-only and D17 indirect-only) and rain; trunk bases and
-understory under the canopy (`B14-C03`, `B14-C04`) at noon in D00 and D17.
+understory under the canopy (`B14-C03`, `B14-C04`) at noon in D00, D01 albedo, D09 canopy and
+D17. The frames in this folder are the follow-up's (below), one condition per run
+(`--scenes … --hours …`): the shared GPU lost the device partway through full sweeps.
 
 [pr9-contact-sheet.jpg](pr9-contact-sheet.jpg) rows: grassland, woodland; columns sunrise,
 clear, overcast, sunset D00 / D16 / D17, rain.
@@ -43,15 +45,31 @@ clear, overcast, sunset D00 / D16 / D17, rain.
   and contact attenuation, local bounce hue and cap, one vertex-stage fetch per receiver, and the
   overcast energy rule.
 
+## Follow-up: storm air and bark (2026-11-27)
+
+- **Woodland rain was a grey wash, from the storm fog.** `stormAirLook` closes the fog to a
+  visibility target per storm level; the storm target was 150 m, so FogExp2 laid ~57 % fog at
+  80 m and turned a wood into a flat grey sheet (scale 461 × the near-view base density; with the
+  fog removed the same frame was 18× darker). Valley mist, weather rain and particles were each
+  under 1 %. The ladder is now near real rain — light 4 km, moderate 1.5 km, heavy 700 m, storm
+  400 m (~11 % fog at 80 m); the 140 m blizzard is unchanged.
+- **That fog was hiding a black storm floor, so a daylight rainstorm now opens the exposure**
+  ×1.8, as snow country stops it down; the sky follows a quarter of it, and snow and night storms
+  are untouched.
+- [storm-before-after.jpg](storm-before-after.jpg): woodland rain 0.0589 → 0.0097, woodland
+  overcast 0.0627 → 0.013–0.027 (the near trunks and shrubs read, only the far wood fades),
+  grassland rain 0.0149 → 0.0342 (overcast 0.0851 > rain, so storms still darken).
+- **Bark under canopy.** A full canopy now takes 85 % of the sky fill (was 65 %): a trunk in a
+  closed wood sees about a seventh of the sky. The D17 glow was mostly albedo, not light:
+  [trunk-modes.jpg](trunk-modes.jpg) shows the bark is 2.05× its litter floor in D01, and lit
+  (D00) the trunk is 3.1× its floor, leaving ~1.5× more light on a vertical face that sees the
+  open sides of the wood than on a floor under the crowns.
+- Run-to-run noise between single-condition captures is ±30 % on unchanged conditions (grassland
+  clear 0.15–0.22 from grass growth and settle framing), so only the storm changes above are
+  read as effects.
+
 ## Not resolved
 
-- **Woodland under rain is a flat grey wash** (woodland/grassland ratio 4.0 in rain, 0.76
-  overcast). It is not the sky fog density: making overcast add rather than multiply regional
-  haze changed it by 3 % and was reverted. It is most likely the valley mist pooling in
-  Stillmeadow's low ground; tuning that is a separate atmospheric pass.
-- **Bark still reads 3× its floor in indirect light.** The canopy attenuation is proportional
-  to measured canopy; the remaining gap is `BARK_FILL` itself, which another session is
-  retuning with the crown lighting in the same file.
 - **No probe GI.** Ponlai PR-G (SH9 bounce probes) remains a specification; its PR F dependency
   does not exist. This PR is the WSC-scale stand-in it describes for stones and bark only;
   buildings keep their fill (owned by the settlement work).

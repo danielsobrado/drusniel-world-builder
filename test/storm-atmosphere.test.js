@@ -52,9 +52,9 @@ test('cloud 0.55 closes over half of the way to the lid (was squared)', () => {
 test('storm fog meets the visibility targets and never thins a look', () => {
   const visibility = (s, share) => 1.73 / stormFogDensity(s, share);
   assert.equal(stormFogDensity(0), 0);
-  assert.ok(Math.abs(visibility(0.25, 0) - 1500) < 1e-6);
-  assert.ok(Math.abs(visibility(0.75, 0) - 250) < 1e-6);
-  assert.ok(Math.abs(visibility(1, 0) - 150) < 1e-6);
+  assert.ok(Math.abs(visibility(0.25, 0) - 4000) < 1e-6);
+  assert.ok(Math.abs(visibility(0.75, 0) - 700) < 1e-6);
+  assert.ok(Math.abs(visibility(1, 0) - 400) < 1e-6);
   assert.ok(Math.abs(visibility(1, 1) - 140) < 1e-6);
   const hazy = { ...day, fogDensityScale: 3 };
   assert.equal(stormAirLook(hazy, { storm: 0.25, snowShare: 0 }, 0.0015).fogDensityScale, 3, 'light rain keeps a hazier look');
@@ -75,6 +75,10 @@ test('rain fog greys toward dark blue-grey, snow toward white with a whiteout', 
   assert.ok(snow.ambientIntensity > rain.ambientIntensity, 'white air lifts the light');
   const night = stormAirLook({ ...day, nightness: 1, fogColor: '#1a2230' }, { storm: 1, snowShare: 1 }, 0.0015);
   assert.ok(luminance(night.fogColor) < luminance(snow.fogColor) * 0.5, 'a night blizzard stays dark');
+  assert.ok(Math.abs(rain.exposure / (day.exposure ?? 1) - 1.8) < 1e-9, 'the eye opens under a daylight storm');
+  assert.equal(snow.exposure, day.exposure ?? 1, 'snow air needs no opening');
+  const nightRain = stormAirLook({ ...day, nightness: 1 }, { storm: 1, snowShare: 0 }, 0.0015);
+  assert.equal(nightRain.exposure, day.exposure ?? 1, 'a night storm stays dark');
 });
 
 test('the controller lays the storm over the look and settles', () => {

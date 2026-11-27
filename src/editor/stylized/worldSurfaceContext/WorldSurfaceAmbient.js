@@ -14,8 +14,8 @@ import { float, mix, vec3 } from 'three/tsl';
  *
  * Outside the WSC window (validity 0) both terms are exactly the old ones.
  */
-/** Share of the sky fill a full canopy overhead takes away. */
-export const AMBIENT_CANOPY_OCCLUSION = 0.65;
+/** Share of the sky fill a full canopy overhead takes away: a trunk in a closed wood sees about a seventh of the sky. */
+export const AMBIENT_CANOPY_OCCLUSION = 0.85;
 /** Share a fully occluded foot (WSC contact) takes away on top of that. */
 export const AMBIENT_CONTACT_OCCLUSION = 0.35;
 /** The ground albedo the hemisphere's ground colour stands for (linear). */

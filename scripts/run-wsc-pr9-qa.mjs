@@ -12,10 +12,12 @@ const { values: args } = parseArgs({
     out: { type: 'string', default: 'docs/qa/world-surface-context/pr-09' },
     // `woodland` for Stillmeadow alone while iterating.
     scenes: { type: 'string', default: 'woodland,grassland' },
+    // A subset such as `rain`, one page per run when a shared GPU loses the device mid-sweep.
+    hours: { type: 'string', default: 'sunrise,clear,overcast,sunset,rain' },
   },
 });
 const CAMERAS = await loadWscCameras();
-const HOURS = ['sunrise', 'clear', 'overcast', 'sunset', 'rain'];
+const HOURS = args.hours.split(',');
 const scenes = args.scenes.split(',');
 
 /** One view under each lighting condition: D00 always, plus D16/D17 at sunset. */
@@ -50,12 +52,13 @@ await runWscCapture({
       };
     };
     if (scenes.includes('woodland')) await sweep(page, take, 'B14-C01', stillmeadow('C01'));
-    // DEF-10: trunk bases and understory under the canopy, lit and indirect-only, at noon.
+    // DEF-10: trunk bases under the canopy at noon: lit, albedo, canopy and indirect-only,
+    // so a bright trunk in D17 can be split into its albedo and its light.
     if (scenes.includes('trunks')) {
       for (const camId of ['C03', 'C04']) {
         const pose = stillmeadow(camId);
         const lighting = CAMERAS.lightingConditions.clear;
-        await take(`B14-${camId}-clear`, { pose, lighting, settled: await settlePose(page, pose, lighting) }, { modes: ['D00', 'D17'] });
+        await take(`B14-${camId}-clear`, { pose, lighting, settled: await settlePose(page, pose, lighting) }, { modes: ['D00', 'D01', 'D09', 'D17'] });
       }
     }
   },
