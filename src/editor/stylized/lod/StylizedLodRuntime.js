@@ -1,3 +1,4 @@
+import { trackInitialInstanceMesh, registerInitialInstanceDraw, cancelInitialInstanceDraw } from '../../../render/preparation/InitialInstancePreparation.js';
 import * as THREE from 'three/webgpu';
 import {
   advanceLodTransition,
@@ -199,6 +200,7 @@ export function* iterateInstancedRenderers({
       // uses a uniform buffer or four interleaved columns instead.
       if (!renderer?.backend?.isWebGLBackend) {
         mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
+        trackInitialInstanceMesh(mesh, renderer);
       }
       mesh.count = 0;
       mesh.visible = false;
@@ -350,6 +352,7 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
         mesh.count = writableCount;
         // Empty pools should not reach object/material binding work every frame.
         mesh.visible = writableCount > 0;
+        if (writableCount > 0) registerInitialInstanceDraw(mesh);
       };
       if (!stage) publishCount();
       const dither = mesh.geometry.getAttribute('instanceDither');
@@ -475,6 +478,7 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
 export function disposeInstancedRenderers(root, renderers) {
   for (const parts of renderers) {
     for (const mesh of parts) {
+      cancelInitialInstanceDraw(mesh);
       root.remove(mesh);
       mesh.geometry.dispose();
       mesh.material.dispose();
