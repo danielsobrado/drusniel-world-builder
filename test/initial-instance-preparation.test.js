@@ -67,6 +67,24 @@ test('new active pools are enqueued at startup and cancellation removes pending 
   preparation.dispose();
 });
 
+test('a pool becoming empty cancels its first-use job but not an explicit material request', () => {
+  const { preparation, mesh } = fixture();
+  const active = mesh({ count: 1 });
+  registerInitialInstanceDraw(active);
+  assert.equal(preparation.pending.size, 1);
+  active.count = 0;
+  registerInitialInstanceDraw(active);
+  assert.equal(preparation.pending.size, 0);
+  assert.equal(active.visible, false);
+  active.count = 1;
+  registerInitialInstanceDraw(active);
+  preparation.requestMaterial(active, {});
+  active.count = 0;
+  registerInitialInstanceDraw(active);
+  assert.equal(preparation.pending.size, 1);
+  preparation.dispose();
+});
+
 test('disabled, WebGL and opt-out paths do not introduce first-use registration', () => {
   for (const options of [{ enabled: false }, { supported: false }, { optIn: false }]) {
     const { preparation, mesh } = fixture(options);
