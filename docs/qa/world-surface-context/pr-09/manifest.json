@@ -1,0 +1,233 @@
+{
+  "suite": "wsc-pr9-qa",
+  "generatedAt": "2026-11-27T02:59:42.476Z",
+  "commit": "6ff1b327ac7fa597390f7113fd87c46e93189fc2",
+  "modes": [
+    "D00"
+  ],
+  "views": [
+    {
+      "name": "B01-C01-sunrise",
+      "pose": {
+        "label": "Wide landscape",
+        "x": -1869,
+        "z": -4003,
+        "yaw": 2.488,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 6.5
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B01-C01-clear",
+      "pose": {
+        "label": "Wide landscape",
+        "x": -1869,
+        "z": -4003,
+        "yaw": 2.488,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B01-C01-overcast",
+      "pose": {
+        "label": "Wide landscape",
+        "x": -1869,
+        "z": -4003,
+        "yaw": 2.488,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 0.35
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B01-C01-sunset",
+      "pose": {
+        "label": "Wide landscape",
+        "x": -1869,
+        "z": -4003,
+        "yaw": 2.488,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 18.6
+      },
+      "settled": true,
+      "modes": [
+        "D00",
+        "D16",
+        "D17"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B01-C01-rain",
+      "pose": {
+        "label": "Wide landscape",
+        "x": -1869,
+        "z": -4003,
+        "yaw": 2.488,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 1
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B14-C01-sunrise",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 6.5
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B14-C01-clear",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 12
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B14-C01-overcast",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 0.35
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B14-C01-sunset",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "off",
+        "hour": 18.6
+      },
+      "settled": true,
+      "modes": [
+        "D00",
+        "D16",
+        "D17"
+      ],
+      "hiddenLayers": []
+    },
+    {
+      "name": "B14-C01-rain",
+      "pose": {
+        "x": 2366324.1219881824,
+        "z": -2373880.9202504624,
+        "yaw": 0.3468797486042276,
+        "pitch": -0.06,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "lighting": {
+        "weather": "rain",
+        "hour": 12,
+        "weatherIntensity": 1
+      },
+      "settled": true,
+      "modes": [
+        "D00"
+      ],
+      "hiddenLayers": []
+    }
+  ]
+}

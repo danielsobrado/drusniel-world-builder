@@ -17,7 +17,7 @@ test('impostor bark gets the live fill at prototype height, and foliage never re
   for (const y of [-.5, -.4, 0, .5]) for (const mask of [0, 1]) {
     const values = new Map([[positionGeometry, [0, y, 0]], [positionView, [0, 0, 10]], [normalWorld, [0, 0, 1]]]);
     const after = evaluate(treeImpostorBarkEmission(vec3(.4, .3, .2), float(mask), vec3(0, 0, 1), atlas), { values });
-    const expected = evaluate(treeBarkEmission(vec3(.4, .3, .2), { height: float(y * 20 + 10), up: float(0) }), { values });
+    const expected = evaluate(treeBarkEmission(vec3(.4, .3, .2), { height: float(y * 20 + 10), up: float(0), ambient: false }), { values });
     after.forEach((channel, i) => assert.ok(Math.abs(channel - expected[i] * (1 - mask)) < 1e-6));
   }
   syncFoliageLight(null);

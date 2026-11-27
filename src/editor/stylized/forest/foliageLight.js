@@ -12,12 +12,16 @@ import {
   normalWorld,
   positionGeometry,
   positionView,
+  positionWorld,
   smoothstep,
+  varying,
   vec2,
   vec4,
 } from 'three/tsl';
 import { frameUniform as uniform } from '../../../render/FrameUniforms.js';
 import { authoredTexture } from '../AuthoredTextureNode.js';
+import { sampleWorldSurfaceContextAt } from '../worldSurfaceContext/WorldSurfaceContextState.js';
+import { worldSurfaceAmbient } from '../worldSurfaceContext/WorldSurfaceAmbient.js';
 
 /** Share of foliage vs woody-stem normals bent to the sky when puff normals are absent. */
 const SKYWARD_FOLIAGE_NORMAL = 0.28;
@@ -223,21 +227,41 @@ function treeAir() {
  * The same air and fill on bark, and the floor's own light on its lower faces: lit
  * only by the sun and a thin ambient, a shaded trunk is a black bar in a green wood.
  */
-export function treeBarkEmission(bark, { height = positionGeometry.y, up = normalWorld.y } = {}) {
+/**
+ * The sky share and ground bounce a receiver at this point gets (WSC PR 9): the
+ * canopy and contact over it dim the sky fill, the ground beside it colours the
+ * bounce. Outside the WSC window it is the plain hemisphere (`worldSurfaceAmbient`).
+ */
+function receiverAmbient(enabled, label) {
+  if (!enabled) return { skyVisibility: float(1), groundBounce: foliageLight.groundColor };
+  // Per vertex, packed into one varying: these materials already carry several, and
+  // the WSC sample's own three would push them toward the inter-stage limit.
+  const ambient = worldSurfaceAmbient(sampleWorldSurfaceContextAt(positionWorld.xz), foliageLight.groundColor);
+  const packed = varying(vec4(ambient.groundBounce, ambient.skyVisibility), label);
+  return { skyVisibility: packed.w, groundBounce: packed.xyz };
+}
+
+export function treeBarkEmission(bark, { height = positionGeometry.y, up = normalWorld.y, ambient = true } = {}) {
   const low = smoothstep(0, BOUNCE_REACH, height).oneMinus();
   const facing = up.negate().mul(0.5).add(0.5);
-  return foliageSkyFill(bark, BARK_FILL)
-    .add(bark.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(low).mul(BARK_BOUNCE))
+  const { skyVisibility, groundBounce } = receiverAmbient(ambient, 'barkAmbient');
+  return foliageSkyFill(bark, BARK_FILL).mul(skyVisibility)
+    .add(bark.mul(groundBounce).mul(foliageLight.fill).mul(facing).mul(low).mul(BARK_BOUNCE))
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }
 
-/** Sky fill and floor bounce for scattered stones, attenuated on bright snow cover so caps keep crisp shading. */
-export function rockShadeEmission(stone, { snowCover = null } = {}) {
+/**
+ * Sky fill and floor bounce for scattered stones, attenuated on bright snow cover so
+ * caps keep crisp shading, and by the canopy and contact over the stone (`DEF-10`:
+ * a boulder under a closed wood no longer glows like one in a meadow).
+ */
+export function rockShadeEmission(stone, { snowCover = null, ambient = true } = {}) {
   const facing = normalWorld.y.negate().mul(0.5).add(0.5);
   const fillGain = snowCover ? mix(float(ROCK_FILL), float(0.42), snowCover.clamp(0, 1)) : float(ROCK_FILL);
   const bounceGain = snowCover ? mix(float(ROCK_BOUNCE), float(0.55), snowCover.clamp(0, 1)) : float(ROCK_BOUNCE);
-  return foliageSkyFill(stone, fillGain)
-    .add(stone.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounceGain))
+  const { skyVisibility, groundBounce } = receiverAmbient(ambient, 'rockAmbient');
+  return foliageSkyFill(stone, fillGain).mul(skyVisibility)
+    .add(stone.mul(groundBounce).mul(foliageLight.fill).mul(facing).mul(bounceGain))
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }
 

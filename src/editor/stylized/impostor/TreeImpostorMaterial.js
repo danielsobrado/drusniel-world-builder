@@ -56,6 +56,8 @@ export function treeImpostorBarkEmission(color, foliageMask, worldNormal, atlas)
   return treeBarkEmission(color, {
     height: positionGeometry.y.mul(atlas.height).add(atlas.centerY),
     up: worldNormal.y,
+    // Far trees: past the WSC window, where the spatial ambient is the hemisphere anyway.
+    ambient: false,
   }).mul(foliageMask.oneMinus());
 }
 

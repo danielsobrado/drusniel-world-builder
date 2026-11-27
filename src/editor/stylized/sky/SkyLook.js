@@ -104,6 +104,9 @@ const STORM_LIGHT = Object.freeze({
   cloudShadowStrength: [1, 0.5, 0.1, 0, 0],
 });
 
+/** How much brighter the sky fill gets under full cover, from the sunlight the cloud scatters. */
+const CLOUD_DIFFUSE_GAIN = 0.6;
+
 /** A per-level ladder read at storm value `storm`, linear between the levels. */
 export function stormLadder(values, storm) {
   const s = Math.max(0, Math.min(1, storm));
@@ -135,8 +138,12 @@ export function overcastSkyLook(look, amount, storm = 0) {
   if (s > 0) result.cloudCore = `#${mixA.set(result.cloudCore).multiplyScalar(1 - 0.35 * s).getHexString()}`;
   result.directionalIntensity = look.directionalIntensity
     * Math.min(1 - 0.85 * t, stormLadder(STORM_LIGHT.directionalIntensity, storm));
+  // Cloud cover turns direct sun into diffuse sky light: the sky term rises while the
+  // sun falls (WSC PR 9). Trimming both darkened the open ground twice — in rain the
+  // grassland fell to a seventh of its overcast value while the woods, lifted by
+  // their fog, stayed bright. A storm deck still darkens through its ladder.
   result.ambientIntensity = look.ambientIntensity
-    * Math.min(1 - 0.15 * t, stormLadder(STORM_LIGHT.ambientIntensity, storm));
+    * (1 + CLOUD_DIFFUSE_GAIN * t) * stormLadder(STORM_LIGHT.ambientIntensity, storm);
   result.shadowRadius = look.shadowRadius * (1 + 1.5 * t);
   result.sunEmission = look.sunEmission * (1 - 0.8 * t);
   result.sunGlowIntensity = look.sunGlowIntensity * (1 - 0.8 * t);

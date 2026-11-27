@@ -32,7 +32,10 @@ test('a storm darkens past full overcast; cloud alone is unchanged', () => {
   assert.ok(Math.abs(overcast.directionalIntensity - day.directionalIntensity * 0.15) < 1e-9);
   const storm = overcastSkyLook(day, 1, 1);
   assert.ok(Math.abs(storm.directionalIntensity - day.directionalIntensity * 0.1) < 1e-9);
-  assert.ok(Math.abs(storm.ambientIntensity - day.ambientIntensity * 0.7) < 1e-9);
+  // Cloud turns sun into sky light (×1.6 under full cover); the storm ladder still darkens past it.
+  assert.ok(Math.abs(overcast.ambientIntensity - day.ambientIntensity * 1.6) < 1e-9);
+  assert.ok(Math.abs(storm.ambientIntensity - day.ambientIntensity * 1.6 * 0.7) < 1e-9);
+  assert.ok(storm.ambientIntensity < overcast.ambientIntensity);
   assert.equal(storm.cloudShadowStrength, 0);
   // Light rain: half the cloud shadow, 60 % sun, even under thin cover.
   const light = overcastSkyLook(day, 0.35, 0.25);

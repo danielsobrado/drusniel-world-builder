@@ -92,12 +92,12 @@ async function contactSheet(files, columns, outPath) {
 
 /**
  * Runs one capture suite. `shoot(page, take)` positions the camera and calls
- * `take(name, detail, { layers })` per view; each view is captured in every
- * mode, one sheet row.
+ * `take(name, detail, { layers, modes })` per view; each view is captured in
+ * every mode, or in its own `modes`.
  *
- * @param {{ suite: string, out: string, url?: string, modes: string[], shoot: Function }} options
+ * @param {{ suite: string, out: string, url?: string, modes: string[], shoot: Function, sheetColumns?: number }} options
  */
-export async function runWscCapture({ suite, out, url = '', modes, shoot }) {
+export async function runWscCapture({ suite, out, url = '', modes, shoot, sheetColumns = modes.length }) {
   const outDir = path.resolve(ROOT, out);
   await mkdir(outDir, { recursive: true });
   const server = url ? null : await startFrozenViteServer();
@@ -116,15 +116,15 @@ export async function runWscCapture({ suite, out, url = '', modes, shoot }) {
     await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 120000 });
     const backend = await page.evaluate(() => window.__editor?.terrainView?.rendererBackendStatus?.mode);
     if (backend !== 'webgpu') throw new Error(`Hardware WebGPU required, got ${backend}`);
-    await shoot(page, async (name, detail = {}, { layers = {} } = {}) => {
-      views.push({ name, ...detail, hiddenLayers: Object.keys(layers).filter(k => layers[k] === false) });
-      for (const mode of modes) {
+    await shoot(page, async (name, detail = {}, { layers = {}, modes: viewModes = modes } = {}) => {
+      views.push({ name, ...detail, modes: viewModes, hiddenLayers: Object.keys(layers).filter(k => layers[k] === false) });
+      for (const mode of viewModes) {
         const file = path.join(outDir, `${name}-${mode}.png`);
         await captureMode(page, mode, file, layers);
         files.push(file);
       }
     });
-    await contactSheet(files, modes.length, path.join(outDir, `${suite}-contact-sheet.jpg`));
+    await contactSheet(files, sheetColumns, path.join(outDir, `${suite}-contact-sheet.jpg`));
     const commit = execSync('git rev-parse HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
     await writeFile(path.join(outDir, 'manifest.json'), `${JSON.stringify({
       suite: `wsc-${suite}-qa`, generatedAt: new Date().toISOString(), commit, modes, views,
