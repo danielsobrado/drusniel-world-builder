@@ -20,6 +20,7 @@ export class StreamedDrawPreparation {
     this.bypassedVariants = new WeakMap();
     this.stagedMaterials = new Map();
     this.pending = new Set();
+    this.firstUsePending = new WeakSet();
     this.isolated = new WeakSet();
     this.enqueuedAt = diagnostics ? new Map() : null;
     this.initialUploadBytes = new Map();
@@ -63,7 +64,7 @@ export class StreamedDrawPreparation {
         const attributes = this.initialUploadAttributes.get(mesh);
         const sliced = attributes && this.attributeInitialization.supported;
         const excluded = sliced ? [...attributes] : [];
-        const staging = this.initialInstanceBudget && this.geometryUploads.supported
+        const staging = this.initialInstanceBudget && this.geometryUploads.supported && !this.geometryUploads.fallbacks.has(mesh)
           ? this.geometryUploads.entries(mesh).map(entry => entry.attribute) : [];
         const estimate = this.uploadEstimate.estimate(mesh, new Set(), [...excluded, ...staging]);
         const initial = this.initialUploadBytes.get(mesh) ?? 0;
@@ -87,8 +88,17 @@ export class StreamedDrawPreparation {
     if (uploadAttributes && this.pending.has(root)) this.initialUploadAttributes.set(root, uploadAttributes);
   }
   registerInitialInstance(mesh) {
-    if (!this.initialInstanceBudget || !this.settings.enabled || this.disposed || !isDirectInstanceMesh(mesh)
-      || mesh.count <= 0 || this.isMaterialReady(mesh, mesh.material)) return;
+    if (!this.initialInstanceBudget || !this.settings.enabled || this.disposed || !isDirectInstanceMesh(mesh)) return;
+    if (mesh.count <= 0) {
+      if (this.firstUsePending.has(mesh) && !this.stagedMaterials.has(mesh)) {
+        this.cancel(mesh);
+        mesh.visible = false;
+        PerfCounters.inc('initialInstanceDormantCancellations');
+      }
+      return;
+    }
+    if (this.isMaterialReady(mesh, mesh.material)) return;
+    this.firstUsePending.add(mesh);
     this.enqueue(mesh);
   }
 
@@ -113,7 +123,10 @@ export class StreamedDrawPreparation {
     // Called after a variant/actor is installed, never scans the scene per frame.
     root.traverse(object => {
       if (!object.isMesh || this.prepared.has(object) || this.isMaterialReady(object, object.material) || object.userData.skipWarmup) return;
-      if (this.initialInstanceBudget && isDirectInstanceMesh(object) && object.count <= 0) return;
+      if (this.initialInstanceBudget && isDirectInstanceMesh(object)) {
+        this.registerInitialInstance(object);
+        return;
+      }
       this.enqueue(object);
     });
   }
@@ -129,6 +142,7 @@ export class StreamedDrawPreparation {
   }
   markPrepared(mesh, material) {
     if (!material) return;
+    this.firstUsePending.delete(mesh);
     this.prepared.add(mesh);
     let variants = this.preparedVariants.get(mesh);
     if (!variants) this.preparedVariants.set(mesh, variants = new WeakSet());
@@ -136,6 +150,7 @@ export class StreamedDrawPreparation {
     this.uploadEstimate.mark(mesh);
   }
   markBypassed(mesh, material) {
+    this.firstUsePending.delete(mesh);
     if (!material) return;
     let variants = this.bypassedVariants.get(mesh);
     if (!variants) this.bypassedVariants.set(mesh, variants = new WeakSet());
@@ -153,6 +168,7 @@ export class StreamedDrawPreparation {
       || this.bypassedVariants.get(mesh)?.has(material) === true;
   }
   cancel(mesh) {
+    this.firstUsePending.delete(mesh);
     if (this.pending.delete(mesh)) {
       this.cancelDiagnostics(mesh);
       this.attributeInitialization.cancel(this.initialUploadAttributes.get(mesh) ?? []);
