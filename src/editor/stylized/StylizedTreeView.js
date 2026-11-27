@@ -33,7 +33,7 @@ import { loadStraightAlphaTexture } from './forest/straightAlphaTexture.js';
 import { instanceCapacity } from './scatterMath.js';
 import { TreeManifestStore } from './TreeManifestStore.js';
 import { iterateTreeLod } from './TreeLodAssembler.js';
-import { stepViewRebuild } from './StagedViewRebuild.js';
+import { stepViewRebuild, cancelStagedViewRebuild } from './StagedViewRebuild.js';
 import {
   buildChunkLodPlan,
   createInstancedRenderers,
@@ -1093,6 +1093,7 @@ export class StylizedTreeView {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    cancelStagedViewRebuild(this);
     this.terrainView.scene.remove(this.root);
     disposeInstancedRenderers(this.root, this.renderers);
     disposeInstancedRenderers(this.root, this.proxyRenderers);
