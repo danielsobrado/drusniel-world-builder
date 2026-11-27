@@ -10,6 +10,7 @@ export function createIteratorBuilder(factory) {
   return {
     get progress() { return progress; },
     get done() { return result !== null; },
+    cancel() { iterator?.return?.(); iterator = null; },
     step({ shouldYield = null, maxSteps = shouldYield ? MAX_BUDGETED_ITERATOR_STEPS : Infinity } = {}) {
       if (result !== null) return result;
       if (shouldYield?.()) return null;
