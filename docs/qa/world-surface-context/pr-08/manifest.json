@@ -1,0 +1,78 @@
+{
+  "suite": "wsc-pr8-qa",
+  "generatedAt": "2026-11-27T01:41:21.833Z",
+  "commit": "207ab467a45d49df1c91de5a424a8335373bd9db",
+  "modes": [
+    "D00",
+    "D01",
+    "D22",
+    "D23"
+  ],
+  "views": [
+    {
+      "name": "B17-C01-clear",
+      "pose": {
+        "label": "Fixture snow-mound & boulders",
+        "x": -10214,
+        "z": 10202,
+        "yaw": -0.78,
+        "pitch": -0.18,
+        "mode": "player",
+        "heightAboveGround": 1.7,
+        "fov": 68
+      },
+      "settled": true,
+      "hiddenLayers": []
+    },
+    {
+      "name": "B17-rock-foot",
+      "rock": {
+        "x": -10213.373099512275,
+        "z": 10196.291788298238,
+        "distance": 5.742532982372741,
+        "radius": 1.7234549239425583
+      },
+      "pose": {
+        "x": -10217.251724721646,
+        "z": 10200.212516098509,
+        "yaw": -0.78,
+        "pitch": -0.2,
+        "mode": "fly",
+        "heightAboveGround": 1.7234549239425583,
+        "fov": 55
+      },
+      "settled": true,
+      "hiddenLayers": []
+    },
+    {
+      "name": "B03-C02-clear",
+      "pose": {
+        "label": "Sparse blades & trunk base",
+        "x": 10119,
+        "z": 5719,
+        "yaw": 0.785,
+        "pitch": -0.3,
+        "mode": "fly",
+        "heightAboveGround": 0.85,
+        "fov": 62
+      },
+      "settled": true,
+      "hiddenLayers": []
+    },
+    {
+      "name": "B02-C02-clear",
+      "pose": {
+        "label": "Trunk and grass close-up",
+        "x": 8693,
+        "z": 15741,
+        "yaw": 0,
+        "pitch": -0.28,
+        "mode": "fly",
+        "heightAboveGround": 0.9,
+        "fov": 62
+      },
+      "settled": false,
+      "hiddenLayers": []
+    }
+  ]
+}
