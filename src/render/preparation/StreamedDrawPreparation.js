@@ -3,6 +3,7 @@ import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { BudgetedAttributeInitialization } from './BudgetedAttributeInitialization.js';
 import { acquireReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
 import { DrawUploadEstimate } from './DrawUploadEstimate.js';
+import { isDirectInstanceMesh, bindInitialInstancePreparation } from './InitialInstancePreparation.js';
 import { StagedGeometryUploads } from './StagedGeometryUploads.js';
 import { DrawPreparationPriority } from './DrawPreparationPriority.js';
 import { StreamedTextureWarmup } from './StreamedTextureWarmup.js';
@@ -12,7 +13,7 @@ export const INITIAL_UPLOAD_BYTES_PER_FRAME = 768 * 1024;
 
 /** New renderers are staged on the same scene/pass cache before publication. */
 export class StreamedDrawPreparation {
-  constructor({ scene, renderer, settings, render, invalidateHistory, diagnostics = false }) {
+  constructor({ scene, renderer, settings, render, invalidateHistory, diagnostics = false, initialInstanceBudget = null }) {
     Object.assign(this, { scene, renderer, settings, render, invalidateHistory });
     this.prepared = new WeakSet();
     this.preparedVariants = new WeakMap();
@@ -24,7 +25,9 @@ export class StreamedDrawPreparation {
     this.initialUploadBytes = new Map();
     this.initialUploadAttributes = new Map();
     this.attributeInitialization = new BudgetedAttributeInitialization(renderer);
-    this.geometryUploads = new StagedGeometryUploads(renderer);
+    this.geometryUploads = new StagedGeometryUploads(renderer, initialInstanceBudget);
+    this.initialInstanceBudget = this.geometryUploads.supported ? initialInstanceBudget : null;
+    this.releaseInitialInstanceBinding = this.initialInstanceBudget ? bindInitialInstancePreparation(renderer, this) : null;
     this.priority = new DrawPreparationPriority();
     this.textureWarmup = new StreamedTextureWarmup(renderer);
     this.hidden = new Map();
@@ -37,7 +40,10 @@ export class StreamedDrawPreparation {
     this.hierarchyLease = null;
     this.preparationCostMs = null;
   }
+  get uploadSliceBytes() { return this.initialInstanceBudget?.sliceBytes ?? INITIAL_UPLOAD_BYTES_PER_FRAME; }
+
   beginFrame(budget) {
+    this.geometryUploads.beginFrame();
     this.revealPending();
     this.reservation?.cancel();
     this.reservation = null;
@@ -58,7 +64,7 @@ export class StreamedDrawPreparation {
         const sliced = attributes && this.attributeInitialization.supported;
         const estimate = this.uploadEstimate.estimate(mesh, new Set(), sliced ? attributes : []);
         const initial = this.initialUploadBytes.get(mesh) ?? 0;
-        const bytes = sliced ? INITIAL_UPLOAD_BYTES_PER_FRAME + estimate.bytes : Math.max(initial, estimate.bytes);
+        const bytes = sliced ? this.uploadSliceBytes + estimate.bytes : Math.max(initial, estimate.bytes);
         this.releaseUpload = budget.reserveUpload?.(bytes);
       }
     }
@@ -68,7 +74,7 @@ export class StreamedDrawPreparation {
     this.reservation = null;
     this.releaseUpload?.();
     this.releaseUpload = null;
-    const bytes = Math.min(INITIAL_UPLOAD_BYTES_PER_FRAME, budget.remainingUploadBytes?.() ?? Infinity);
+    const bytes = Math.min(this.uploadSliceBytes, budget.remainingUploadBytes?.() ?? Infinity);
     if (reservation) reservation.run(shouldYield => this.flush(camera, shouldYield, bytes, budget, true));
     else budget.tryRun(() => this.flush(camera, budget.shouldYield, bytes, budget), 6);
   }
@@ -77,6 +83,12 @@ export class StreamedDrawPreparation {
     if (uploadBytes > 0 && this.pending.has(root)) this.initialUploadBytes.set(root, uploadBytes);
     if (uploadAttributes && this.pending.has(root)) this.initialUploadAttributes.set(root, uploadAttributes);
   }
+  registerInitialInstance(mesh) {
+    if (!this.initialInstanceBudget || !this.settings.enabled || this.disposed || !isDirectInstanceMesh(mesh)
+      || mesh.count <= 0 || this.isMaterialReady(mesh, mesh.material)) return;
+    this.enqueue(mesh);
+  }
+
   enqueue(mesh) {
     if (this.pending.has(mesh)) return;
     this.pending.add(mesh);
@@ -98,11 +110,19 @@ export class StreamedDrawPreparation {
     // Called after a variant/actor is installed, never scans the scene per frame.
     root.traverse(object => {
       if (!object.isMesh || this.prepared.has(object) || this.isMaterialReady(object, object.material) || object.userData.skipWarmup) return;
+      if (this.initialInstanceBudget && isDirectInstanceMesh(object) && object.count <= 0) return;
       this.enqueue(object);
     });
   }
   markInitialScene() {
-    this.scene.traverse(object => { if (object.isMesh && !object.userData.deferInitialPreparation) this.markPrepared(object, object.material); });
+    this.scene.traverse(object => {
+      if (!object.isMesh || object.userData.deferInitialPreparation) return;
+      if (this.initialInstanceBudget && isDirectInstanceMesh(object) && this.geometryUploads.needsInitialInstanceUpload(object)) {
+        this.registerInitialInstance(object);
+        return;
+      }
+      this.markPrepared(object, object.material);
+    });
   }
   markPrepared(mesh, material) {
     if (!material) return;
@@ -144,7 +164,7 @@ export class StreamedDrawPreparation {
       this.hidden.delete(mesh);
     }
   }
-  flush(camera, shouldYield = null, byteLimit = INITIAL_UPLOAD_BYTES_PER_FRAME, budget = null, fifo = false) {
+  flush(camera, shouldYield = null, byteLimit = this.uploadSliceBytes, budget = null, fifo = false) {
     this.revealPending();
     if (shouldYield?.()) return;
     if (this.disposed || !this.settings.enabled || this.pending.size === 0) return;
@@ -204,7 +224,7 @@ export class StreamedDrawPreparation {
         const bytes = budgeted || staged.attributes.length ? estimate.bytes : Math.max(initial, estimate.bytes);
         // An indivisible upload may exceed the local slice only if the shared budget admits it.
         if (uploadBytes + bytes > byteLimit && (targets.length || budgetedBytes > 0
-            || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < INITIAL_UPLOAD_BYTES_PER_FRAME))) break;
+            || (budget ? !budget.canPublish(uploadBytes + bytes) : byteLimit < this.uploadSliceBytes))) break;
         if (budget && bytes > budget.maxUploadBytes) PerfCounters.inc('streamedOversizedPublicationBytes', bytes);
         if (!canDraw()) { PerfCounters.inc('streamedDrawCostDeferredFrames'); break; }
         for (const buffer of estimate.buffers) plannedBuffers.add(buffer);
@@ -299,6 +319,7 @@ export class StreamedDrawPreparation {
       this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
       this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
       this.geometryUploads.dispose();
+      this.releaseInitialInstanceBinding?.();
       this.textureWarmup.dispose();
       PerfCounters.inc('streamedDrawPreparationFailures');
       console.warn('Streamed draw preparation unavailable.', error);
@@ -326,6 +347,7 @@ export class StreamedDrawPreparation {
     this.revealPending(); this.disposed = true; this.pending.clear(); this.stagedMaterials.clear(); this.initialUploadBytes.clear();
     this.attributeInitialization.cancel(); this.initialUploadAttributes.clear();
     this.geometryUploads.dispose();
+    this.releaseInitialInstanceBinding?.();
     this.textureWarmup.dispose();
   }
 }
