@@ -1,13 +1,11 @@
 import { groundGeometry } from './StylizedPrototypeBake.js';
 import { createFracturedRockGeometry } from './alpine/alpineRockGeometry.js';
+import { GEOLOGICAL_ROCK_FAMILIES } from './rockGeologicalFamilies.js';
 
 /**
- * Procedural fractured mountain-rock prototypes for `StylizedRockView` in snow
- * and alpine biomes (tundra = 10, glacier = 11).
+ * Procedural fractured mountain & biome rock prototypes for `StylizedRockView`.
  *
- * Replaces low-poly flat-shaded donor GLB wedges with geological cleavage-planed
- * granite/slate blocks, cleft outcrops, erratic slabs, and frost-shattered scree
- * fragments. Uses smooth vertex normals across high-detail fractured facets
+ * Uses smooth vertex normals across high-detail fractured cleavage facets
  * (zero low-poly flat-shading creases) and omits UVs to stay well inside WebGPU's
  * 8-vertex-buffer pipeline limit.
  */
@@ -16,15 +14,17 @@ const NEAR_DETAIL = 5;
 const PROXY_DETAIL = 3;
 
 /** Tile IDs that favour procedural fractured alpine rock silhouettes. */
-export const ALPINE_BOULDER_TILE_IDS = Object.freeze([10, 11]);
+export const ALPINE_BOULDER_TILE_IDS = GEOLOGICAL_ROCK_FAMILIES.alpineGranite.tileIds;
 
 /** Relative selection weight over global donor rocks in snow biomes (~85% fractured). */
 export const ALPINE_BOULDER_WEIGHT = 6;
 
-const ALPINE_BOULDER_SPECS = Object.freeze([
+const BIOME_FRACTURED_SPECS = Object.freeze([
   Object.freeze({
     id: 'alpine-granite-block',
-    family: 'granite',
+    family: GEOLOGICAL_ROCK_FAMILIES.alpineGranite.id,
+    tileIds: ALPINE_BOULDER_TILE_IDS,
+    weight: ALPINE_BOULDER_WEIGHT,
     scale: 1.05,
     size: [1.14, 0.82, 0.88],
     shatter: 0.44,
@@ -50,7 +50,9 @@ const ALPINE_BOULDER_SPECS = Object.freeze([
   }),
   Object.freeze({
     id: 'alpine-slate-crag',
-    family: 'slate',
+    family: GEOLOGICAL_ROCK_FAMILIES.alpineGranite.id,
+    tileIds: ALPINE_BOULDER_TILE_IDS,
+    weight: ALPINE_BOULDER_WEIGHT,
     scale: 1.02,
     size: [0.92, 1.08, 0.78],
     shatter: 0.50,
@@ -76,7 +78,9 @@ const ALPINE_BOULDER_SPECS = Object.freeze([
   }),
   Object.freeze({
     id: 'alpine-erratic-slab',
-    family: 'granite',
+    family: GEOLOGICAL_ROCK_FAMILIES.alpineGranite.id,
+    tileIds: ALPINE_BOULDER_TILE_IDS,
+    weight: ALPINE_BOULDER_WEIGHT,
     scale: 1.12,
     size: [1.26, 0.62, 0.94],
     shatter: 0.38,
@@ -101,7 +105,9 @@ const ALPINE_BOULDER_SPECS = Object.freeze([
   }),
   Object.freeze({
     id: 'alpine-scree-block',
-    family: 'shattered',
+    family: GEOLOGICAL_ROCK_FAMILIES.alpineGranite.id,
+    tileIds: ALPINE_BOULDER_TILE_IDS,
+    weight: ALPINE_BOULDER_WEIGHT,
     scale: 0.86,
     size: [1.04, 0.70, 0.80],
     shatter: 0.56,
@@ -124,14 +130,66 @@ const ALPINE_BOULDER_SPECS = Object.freeze([
       [0.54, 0.72, 0.44, -0.04, 0.055, 0.095],
     ],
   }),
+  // Sedimentary sandstone mesa-block & stepped ledge (deserts & Stonehold badlands).
+  Object.freeze({
+    id: 'sandstone-strata-block',
+    family: GEOLOGICAL_ROCK_FAMILIES.sedimentarySandstone.id,
+    tileIds: GEOLOGICAL_ROCK_FAMILIES.sedimentarySandstone.tileIds,
+    weight: 3,
+    scale: 1.08,
+    size: [1.28, 0.68, 0.96],
+    shatter: 0.28,
+    strataFreq: 7.2,
+    strataDepth: 0.12,
+    strataTilt: [0.05, -0.04],
+    baseFlare: 0.24,
+    cleaveSmooth: 0.15,
+    chipDepth: 0.036,
+    lobeShift: [0.12, -0.02, -0.08],
+    seed: 631,
+    planes: [
+      [0.08, 0.99, -0.06, 0.74],
+      [0.86, 0.32, 0.39, 0.86],
+      [-0.84, 0.28, 0.46, 0.86],
+      [0.24, 0.36, -0.90, 0.85],
+      [-0.28, 0.34, 0.90, 0.86],
+    ],
+    cracks: [
+      [0.12, 0.98, 0.14, 0.08, 0.05, 0.08],
+      [0.88, 0.28, -0.38, -0.06, 0.055, 0.07],
+    ],
+  }),
+  // Weathered limestone / kopje boulder (grassland & savanna).
+  Object.freeze({
+    id: 'limestone-kopje-block',
+    family: GEOLOGICAL_ROCK_FAMILIES.weatheredLimestone.id,
+    tileIds: GEOLOGICAL_ROCK_FAMILIES.weatheredLimestone.tileIds,
+    weight: 2,
+    scale: 1.04,
+    size: [1.18, 0.76, 0.92],
+    shatter: 0.34,
+    strataFreq: 3.8,
+    strataDepth: 0.075,
+    strataTilt: [0.10, 0.08],
+    baseFlare: 0.22,
+    cleaveSmooth: 0.20,
+    chipDepth: 0.032,
+    lobeShift: [-0.08, 0.03, 0.10],
+    seed: 743,
+    planes: [
+      [0.18, 0.94, 0.28, 0.79],
+      [0.78, 0.46, -0.42, 0.87],
+      [-0.76, 0.50, 0.41, 0.87],
+      [-0.22, 0.42, -0.88, 0.86],
+    ],
+    cracks: [
+      [0.64, 0.68, -0.35, 0.04, 0.06, 0.075],
+    ],
+  }),
 ]);
 
-/**
- * Builds ground-pivoted near + proxy fractured rock prototype geometries scaled
- * to `StylizedRockView`'s metre-sized boulder envelope.
- */
-export function buildFracturedAlpineRockPrototypes() {
-  return ALPINE_BOULDER_SPECS.map((spec) => {
+function buildFromSpecs(specs) {
+  return specs.map((spec) => {
     const geometry = createFracturedRockGeometry(spec, NEAR_DETAIL);
     geometry.scale(spec.scale, spec.scale, spec.scale);
     groundGeometry(geometry);
@@ -145,8 +203,20 @@ export function buildFracturedAlpineRockPrototypes() {
       family: spec.family,
       geometry,
       proxyGeometry,
-      tileIds: ALPINE_BOULDER_TILE_IDS,
-      weight: ALPINE_BOULDER_WEIGHT,
+      tileIds: spec.tileIds,
+      weight: spec.weight,
     };
   });
+}
+
+/** Builds the 4 alpine granite/slate prototypes (preserved API for callers & tests). */
+export function buildFracturedAlpineRockPrototypes() {
+  return buildFromSpecs(
+    BIOME_FRACTURED_SPECS.filter((spec) => spec.family === GEOLOGICAL_ROCK_FAMILIES.alpineGranite.id),
+  );
+}
+
+/** Builds all biome-specific geological rock family prototypes for `StylizedRockView`. */
+export function buildFracturedBiomeRockPrototypes() {
+  return buildFromSpecs(BIOME_FRACTURED_SPECS);
 }

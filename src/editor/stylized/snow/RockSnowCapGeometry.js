@@ -217,12 +217,13 @@ function buildBasalSnowbank(welded, { groundY, above, cx, cz }) {
   const wx = PREVAILING_WIND[0] / windLen;
   const wz = PREVAILING_WIND[1] / windLen;
 
-  // Tight, organic low snowbank skirt hugging the boulder foot.
+  // Compact, wind-sculpted snow fillet banked snugly against the boulder foot so
+  // it transitions naturally into the snowfield without forming a wide flat apron.
   const rings = [
     { rMul: 0.86, hMul: 0.96, yBias: 0, uvX: 0.94 },
-    { rMul: 1.02, hMul: 0.76, yBias: 0, uvX: 1.0 },
-    { rMul: 1.18, hMul: 0.28, yBias: 0, uvX: 0.55 },
-    { rMul: 1.38, hMul: 0.0, yBias: -0.025, uvX: 0.0 },
+    { rMul: 0.98, hMul: 0.68, yBias: 0, uvX: 1.0 },
+    { rMul: 1.06, hMul: 0.22, yBias: 0, uvX: 0.48 },
+    { rMul: 1.13, hMul: 0.0, yBias: -0.025, uvX: 0.0 },
   ];
   const positions = [];
   const uvs = [];
@@ -237,9 +238,9 @@ function buildBasalSnowbank(welded, { groundY, above, cx, cz }) {
       const facing = cosA * wx + sinA * wz;
       const lee = Math.max(0, facing);
       const scour = Math.max(0, -facing);
-      const lobe = 0.78 + 0.26 * Math.sin(angle * 3 + 0.9) + 0.14 * Math.cos(angle * 5 - 0.5);
-      const driftH = Math.min(0.24, Math.max(0.08, above * (0.095 + 0.08 * lee - 0.035 * scour) * lobe));
-      const rReach = radii[s] * ring.rMul + (rIdx >= 2 ? driftH * (rIdx === 2 ? 0.35 : 0.75) * (0.65 + 0.65 * lee) : 0);
+      const lobe = 0.78 + 0.24 * Math.sin(angle * 3 + 0.9) + 0.14 * Math.cos(angle * 5 - 0.5);
+      const driftH = Math.min(0.18, Math.max(0.06, above * (0.075 + 0.06 * lee - 0.028 * scour) * lobe));
+      const rReach = radii[s] * ring.rMul + (rIdx >= 2 ? driftH * (rIdx === 2 ? 0.20 : 0.42) * (0.65 + 0.60 * lee) : 0);
       const y = groundY + driftH * ring.hMul + ring.yBias;
       positions.push(cx + cosA * rReach, y, cz + sinA * rReach);
       uvs.push(ring.uvX, 1);

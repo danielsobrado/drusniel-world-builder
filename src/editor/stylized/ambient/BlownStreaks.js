@@ -67,14 +67,14 @@ export const BLOWN_STREAK_TRAVEL_WRAP = 240;
 export const DEFAULT_BLOWN_STREAKS = Object.freeze({
   enabled: true,
   snow: Object.freeze({
-    // Loose snow lofts easily: near the reference give and almost no packing.
-    strength: 0.45,
-    hardness: 0.25,
-    length: 3,
+    // Loose snow lofts easily: crisp ground-level spindrift streaks across snowfields.
+    strength: 0.52,
+    hardness: 0.22,
+    length: 3.2,
     width: 0.18,
-    patch: 30,
-    reach: 75,
-    maxOpacity: 0.22,
+    patch: 28,
+    reach: 85,
+    maxOpacity: 0.26,
     color: '#dce6ea',
   }),
   sand: Object.freeze({

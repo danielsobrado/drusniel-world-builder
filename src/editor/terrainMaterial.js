@@ -655,6 +655,7 @@ export function createTerrainMaterial({
       baseNormal: snowNormal, pathMask: snowPressed,
       crestMask: max(snowDetail?.crest ?? float(0), gpuDeform?.crest ?? float(0)),
       sparkleMask: snowDetail?.sparkleMask ?? float(0.75),
+      icyCrust: snowDetail?.icyCrust ?? float(0),
       settings: snowSettings,
     }) : null;
     const drift = createTerrainDriftNodes({worldXZ,grassCoverage,snow:bakedSurface.snow,

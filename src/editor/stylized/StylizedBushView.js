@@ -39,6 +39,7 @@ import {
   fitBushToGround,
   varyBushBiomeLook,
 } from './bushInstanceTransform.js';
+import { buildWinterVegetationPrototypes } from './flora/winterVegetationPrototypes.js';
 
 const BUSH_CLUSTER_SEED_OFFSET = 0x5b;
 const BUSH_PRIORITY_CHANNEL = 31;
@@ -130,6 +131,7 @@ export class StylizedBushView {
     this.proxyPrototypes = [];
     this.meshes = [];
     this.proxyMeshes = [];
+    this.winterPrototypesInstalled = false;
     this.placements = [];
     this.manifestCache = new Map();
     this.pendingManifests = new Map();
@@ -207,11 +209,6 @@ export class StylizedBushView {
         variants.length,
       );
     }
-    this.prototypeIndexForRoll = createBiomePrototypeSelector({
-      rules: this.prototypeBiomeRules,
-      regionalCharacterField: this.regionalCharacterField,
-      communities: true,
-    });
     const newPrototypes = [];
     for (const [index, { geometry, source, motion, assetId, scenePath }] of extracted.entries()) {
       const sourceMaterial = materialList(source)[0];
@@ -240,6 +237,46 @@ export class StylizedBushView {
       newPrototypes.push(prototype);
       yield prototype.material;
     }
+    // Install dormant bare-branch winter shrubs & protruding dry grass tufts once
+    // so tundra/glacier biomes grow genuine winter flora instead of white-painted summer bushes.
+    if (!this.winterPrototypesInstalled) {
+      this.winterPrototypesInstalled = true;
+      const winterFirstIndex = firstNewPrototype + newPrototypes.length;
+      const winterPrototypes = buildWinterVegetationPrototypes(this.config);
+      for (const winter of winterPrototypes) {
+        this.prototypeBiomeRules.push({
+          tileIds: winter.tileIds,
+          paletteTileId: winter.paletteTileId,
+          weight: winter.weight,
+          character: null,
+          characterStrength: undefined,
+          canopy: undefined,
+          affinity: null,
+        });
+        newPrototypes.push({
+          geometry: winter.geometry,
+          material: winter.material,
+          kind: 'bush',
+          instanceBiomeLook: true,
+          height: winter.height,
+          prototypeId: winter.id,
+          assetId: winter.id,
+          scenePath: winter.id,
+        });
+        yield winter.material;
+      }
+      registerPrototypeIndices(
+        this.prototypeIndicesByAsset,
+        'procedural-winter-vegetation',
+        winterFirstIndex,
+        winterPrototypes.length,
+      );
+    }
+    this.prototypeIndexForRoll = createBiomePrototypeSelector({
+      rules: this.prototypeBiomeRules,
+      regionalCharacterField: this.regionalCharacterField,
+      communities: true,
+    });
     const proxyColor = bushes.proxyColor ?? bushes.colorLarge;
     const newProxyPrototypes = [];
     for (const [index, prototype] of newPrototypes.entries()) {
@@ -325,9 +362,14 @@ export class StylizedBushView {
       // a taiga's is thin, a savanna's is scattered scrub.
       const biome = bushes.densityByTile?.[candidate.tileId] ?? 1;
       // Shrubs gather into thickets with open floor between: an even shrub
-      // layer read from the air as speckle (2026-11-15 capture).
+      // layer read from the air as speckle (2026-11-15 capture). On deep snow,
+      // tighten clustering (`thicket^3`) so dormant winter shrubs gather in sheltered pockets.
+      const snowGround = this.config.biomeLooks?.snow?.ground?.[candidate.tileId] ?? 0;
       const thicket = valueNoise(candidate.x / THICKET_METERS, candidate.z / THICKET_METERS, THICKET_SEED) * 0.5 + 0.5;
-      const density = Math.min(1, clusterDensity * canopy * fringe * biome * (0.12 + 2.4 * thicket * thicket) + bankBoost * 0.45);
+      const thicketCurve = snowGround >= 0.5
+        ? 0.05 + 3.2 * thicket * thicket * thicket
+        : 0.12 + 2.4 * thicket * thicket;
+      const density = Math.min(1, clusterDensity * canopy * fringe * biome * thicketCurve + bankBoost * 0.45);
       if (candidate.priority >= density) return null;
       const scaled = candidate.scale * (1 + (bushes.edgeScale ?? 0) * edge);
       const seat = fitBushToGround(
@@ -335,9 +377,11 @@ export class StylizedBushView {
         bushes.radius ?? 0.55,
         (x, z) => this.terrainView.getCanonicalHeight(x, z),
       );
+      const snowBurial = snowGround >= 0.5 ? 0.065 * snowGround * scaled : 0;
       return {
         // Edge shrubs stand taller: the step up from grass to crowns.
         scale: scaled,
+        snowBurial,
         groundFitHeight: seat?.groundFitHeight ?? candidate.height,
         groundNormal: seat?.groundNormal ?? null,
         clusterId: cluster.clusterId,

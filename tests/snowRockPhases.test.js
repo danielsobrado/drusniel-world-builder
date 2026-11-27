@@ -11,6 +11,16 @@ import { createRockSnowCapGeometry } from '../src/editor/stylized/snow/RockSnowC
 import { createRockSnowCapMaterial } from '../src/editor/stylized/snow/RockSnowCapMaterial.js';
 import { coatCoverageOf } from '../src/editor/stylized/surfaceCoatings/CoatCoverage.js';
 import { applyWorldSurfaceContact } from '../src/editor/stylized/worldSurfaceContext/WorldSurfaceContactNodes.js';
+import {
+  buildFracturedBiomeRockPrototypes,
+} from '../src/editor/stylized/fracturedRockPrototypes.js';
+import {
+  GEOLOGICAL_ROCK_FAMILIES,
+  geologicalRockFamilyForTile,
+} from '../src/editor/stylized/rockGeologicalFamilies.js';
+import { buildWinterVegetationPrototypes } from '../src/editor/stylized/flora/winterVegetationPrototypes.js';
+import { composeBushMatrix } from '../src/editor/stylized/bushInstanceTransform.js';
+import { createSnowSurfaceNodes } from '../src/editor/stylized/SnowSurfaceShading.js';
 
 test('Phase 1: coldStoneSurface exposes crevice & surface height alongside matte rock PBR', () => {
   const surface = coldStoneSurface({
@@ -113,4 +123,48 @@ test('Phase 5: applyWorldSurfaceContact allows decoupled aoMask while zeroing so
     aoMask: float(1),
   });
   assert.ok(result.color && result.contactAo);
+});
+
+test('Phase 6 & 8: snow surface nodes accept icyCrust and produce warm crest + cool shadow lighting', () => {
+  const nodes = createSnowSurfaceNodes({
+    terrainUv: vec3(0.5, 0.5, 0).xy,
+    chunkWorldSize: 128,
+    chunkCenter: vec3(0, 0, 0).xz,
+    snow: float(0.95),
+    stylizedConfig: {},
+    crestMask: float(0.8),
+    icyCrust: float(0.75),
+  });
+  assert.ok(nodes.apply(vec3(0.9, 0.92, 0.95)));
+  assert.ok(nodes.sunResponse && nodes.snowBounce);
+});
+
+test('Phase 7: dormant winter vegetation prototypes omit UVs, publish snow coverage, and support snow burial', () => {
+  const prototypes = buildWinterVegetationPrototypes({ sky: {}, ambientEffects: {} });
+  assert.equal(prototypes.length, 4);
+  for (const proto of prototypes) {
+    assert.ok(proto.geometry.getAttribute('position').count > 80, `${proto.id} builds detailed winter geometry`);
+    assert.ok(proto.geometry.getAttribute('color'), `${proto.id} carries bark/straw/snow vertex colours`);
+    assert.equal(proto.geometry.getAttribute('uv'), undefined, `${proto.id} strips UVs to stay within WebGPU buffer limit`);
+    assert.ok(coatCoverageOf(proto.material).snow, `${proto.id} publishes snow coverage for D23`);
+    proto.geometry.dispose();
+    proto.material.dispose();
+  }
+  const normal = composeBushMatrix({ x: 0, z: 0, height: 10, scale: 1 });
+  const buried = composeBushMatrix({ x: 0, z: 0, height: 10, scale: 1, snowBurial: 0.08 });
+  assert.ok(buried.elements[13] < normal.elements[13] - 0.07, 'snowBurial sinks winter shrubs partially into snowpack');
+});
+
+test('Phase 11: geological rock families map biomes cleanly and generate multi-biome fractured prototypes', () => {
+  assert.equal(geologicalRockFamilyForTile(10).id, GEOLOGICAL_ROCK_FAMILIES.alpineGranite.id);
+  assert.equal(geologicalRockFamilyForTile(1).id, GEOLOGICAL_ROCK_FAMILIES.sedimentarySandstone.id);
+  assert.equal(geologicalRockFamilyForTile(32).id, GEOLOGICAL_ROCK_FAMILIES.sedimentarySandstone.id);
+  assert.equal(geologicalRockFamilyForTile(4).id, GEOLOGICAL_ROCK_FAMILIES.weatheredLimestone.id);
+  assert.equal(geologicalRockFamilyForTile(6).id, GEOLOGICAL_ROCK_FAMILIES.mossyBasalt.id);
+  const biomeProtos = buildFracturedBiomeRockPrototypes();
+  assert.equal(biomeProtos.length, 6);
+  for (const proto of biomeProtos) {
+    proto.geometry.dispose();
+    proto.proxyGeometry.dispose();
+  }
 });

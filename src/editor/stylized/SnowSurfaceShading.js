@@ -92,6 +92,7 @@ export function createSnowSurfaceNodes({
   pathMask = float(0),
   crestMask = float(0),
   sparkleMask = float(0.75),
+  icyCrust = float(0),
   settings = resolveSnowSurfaceConfig(stylizedConfig?.snowSurface),
 }) {
   const sky = stylizedConfig?.sky;
@@ -168,12 +169,20 @@ export function createSnowSurfaceNodes({
     .mul(skyLightUniforms.brightness)
     .mul(bounceUp.mul(0.068).mul(snow));
 
+  // Crisp directional sun glaze on wind-scoured icy crust patches.
+  const icySpec = clamp(dot(normal, halfVector), 0, 1).pow(42).mul(icyCrust.clamp(0, 1)).mul(lightGate).mul(0.24);
+  const icyGlaze = vec3(0.88, 0.95, 1.04).mul(icySpec).mul(snow);
+
+  // Warm direct-sun crest tint contrasts with cool glacial blue shaded troughs.
+  const warmCrest = facingSun.smoothstep(0.18, 0.78).mul(crestMask.clamp(0, 1)).mul(snow);
+
   return {
     apply(color) {
       const albedo = mix(color, color.mul(snowLightUniforms.brightness), snow);
-      return mix(albedo, albedo.mul(snowLightUniforms.shadeTint), backscatter);
+      const warmLifted = mix(albedo, albedo.mul(vec3(1.03, 1.01, 0.97)), warmCrest.mul(0.65));
+      return mix(warmLifted, warmLifted.mul(snowLightUniforms.shadeTint), backscatter);
     },
-    sunResponse: glints.mul(2.4).add(subsurface).add(velvet),
+    sunResponse: glints.mul(2.5).add(subsurface).add(velvet).add(icyGlaze),
     snowBounce,
   };
 }

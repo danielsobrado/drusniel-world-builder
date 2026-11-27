@@ -115,7 +115,18 @@ export function createSnowDetailNodes({
         });
         const finalUv = driftPoint.sub(offset.mul(0.25));
         const finalDrift = repeatMipTextureLoad(packMaps.drift, finalUv, driftDx, driftDy);
-        const hNow = finalDrift.r.mul(0.74).add(finalDrift.g.mul(0.26));
+        // Rotated golden-ratio macro drift octave breaks up 32 m tiling across open snowfields
+        // and carves broad shallow depressions vs wind-sculpted drift crests (0 extra samplers).
+        const macroUv = vec2(
+          finalUv.x.mul(0.37).sub(finalUv.y.mul(0.21)),
+          finalUv.x.mul(0.21).add(finalUv.y.mul(0.37)),
+        );
+        const macroDx = driftDx.mul(0.42);
+        const macroDy = driftDy.mul(0.42);
+        const macroDrift = repeatMipTextureLoad(packMaps.drift, macroUv, macroDx, macroDy);
+        const hLocal = finalDrift.r.mul(0.74).add(finalDrift.g.mul(0.26));
+        const hMacro = macroDrift.g.mul(0.62).add(macroDrift.r.mul(0.38));
+        const hNow = hLocal.mul(0.72).add(hMacro.mul(0.28));
         // 2-tap sun-direction height self-shadow so wind-carved sastrugi read sculpturally even at midday.
         let selfShadow = float(1);
         if (sun) {
@@ -125,17 +136,17 @@ export function createSnowDetailNodes({
           const step2 = repeatMipTextureLoad(packMaps.drift, finalUv.add(sunDirXZ.mul(0.055)), driftDx, driftDy);
           const h1 = step1.r.mul(0.74).add(step1.g.mul(0.26));
           const h2 = step2.r.mul(0.74).add(step2.g.mul(0.26));
-          const occ = max(h1.sub(hNow).sub(rise.mul(0.065)), h2.sub(hNow).sub(rise.mul(0.17))).clamp(0, 1);
-          const shadowReach = smoothstep(45, 110, camDist).oneMinus();
-          selfShadow = float(1).sub(occ.mul(0.62).mul(shadowReach));
+          const occ = max(h1.sub(hLocal).sub(rise.mul(0.055)), h2.sub(hLocal).sub(rise.mul(0.15))).clamp(0, 1);
+          const shadowReach = smoothstep(45, 115, camDist).oneMinus();
+          selfShadow = float(1).sub(occ.mul(0.68).mul(shadowReach));
         }
         // Spherical-grain crevice cavity at mid scale (14 * 1/8 = 1.75 repeats/m, exact integer multiple for seamless chunk edges).
         const grainMidUv = point.sub(offset).mul(14);
         const grainSample = repeatMipTextureLoad(packMaps.grain, grainMidUv, dx.mul(14), dy.mul(14));
-        const grainCav = mix(float(1), grainSample.b, smoothstep(0.02, 0.34, footprint).oneMinus().mul(0.42));
-        const pillowAO = mix(float(0.80), float(1.0), smoothstep(0.16, 0.80, hNow));
-        const cavity = grainCav.mul(pillowAO).mul(selfShadow).clamp(0.56, 1.0);
-        out.assign(vec4(offset.x, offset.y, cavity, smoothstep(0.42, 0.84, hNow)));
+        const grainCav = mix(float(1), grainSample.b, smoothstep(0.02, 0.34, footprint).oneMinus().mul(0.45));
+        const pillowAO = mix(float(0.76), float(1.0), smoothstep(0.14, 0.82, hNow));
+        const cavity = grainCav.mul(pillowAO).mul(selfShadow).clamp(0.50, 1.0);
+        out.assign(vec4(offset.x, offset.y, cavity, smoothstep(0.40, 0.84, hNow)));
       }
     });
     return out;
@@ -153,6 +164,17 @@ export function createSnowDetailNodes({
     return out;
   })().toVar('snowSparkleMask');
 
+  // Three physically distinct snow states driven by wind exposure & compaction:
+  // fresh loose powder (sheltered hollows), wind-packed sastrugi crust, and icy
+  // wind-scoured glaze on exposed crests (`icyCrust`, 0..1).
+  const icyCrust = smoothstep(0.68, 0.94, state.exposure)
+    .mul(pomState.w.smoothstep(0.35, 0.82))
+    .mul(state.compressed.oneMinus())
+    .mul(planar)
+    .mul(packReady)
+    .toVar('snowIcyCrust');
+  const freshPowder = state.exposure.smoothstep(0.55, 0.18).mul(state.compressed.oneMinus()).mul(planar);
+
   const pomPoint = point.sub(pomState.xy);
   const detail = Fn(() => {
     const result = vec4(1, 1, 1, 0).toVar();
@@ -166,14 +188,19 @@ export function createSnowDetailNodes({
       const cavityStrength = stormSnowFallUniform.mul(settings.cavityStrength * STORM_CAVITY_GAIN).add(settings.cavityStrength);
       const cavity = mix(float(1), packed.r.div(0.944).mul(hollow),
         state.detailScale.mul(cavityStrength).mul(planar).mul(broadFade));
-      const tint = mix(vec3(1), vec3(0.52, 0.72, 1), cavity.oneMinus().max(0).mul(0.8));
-      // Subtle crest brilliance + smoother wind-packed sastrugi crests vs powdery troughs.
-      const crestLift = pomState.w.mul(0.045).mul(packReady).mul(planar).add(1);
-      const crestSmooth = pomState.w.sub(0.45).mul(-0.12).mul(packReady).mul(planar);
+      const tint = mix(vec3(1), vec3(0.50, 0.71, 1), cavity.oneMinus().max(0).mul(0.88));
+      // Warm sunlit crest brilliance vs cool blue icy wind-scoured glaze vs soft powdery hollows.
+      const crestWarmth = mix(vec3(0.965, 0.985, 1.02), vec3(1.035, 1.015, 0.98), pomState.w);
+      const stateTint = mix(crestWarmth, vec3(0.86, 0.93, 1.02), icyCrust.mul(0.65));
+      const crestLift = pomState.w.mul(0.055).mul(packReady).mul(planar).add(0.985);
+      // Roughness differentiation: fresh powder matte (+0.05), wind-packed crests firmer (-0.14), icy crust glossy (-0.36).
+      const stateRough = freshPowder.mul(0.05)
+        .add(pomState.w.sub(0.45).mul(-0.14).mul(packReady).mul(planar))
+        .sub(icyCrust.mul(0.36));
       result.assign(vec4(
         mix(vec3(1), pigment, state.detailScale.mul(settings.cavityStrength * 0.65).mul(planar).mul(broadFade))
-          .mul(cavity).mul(tint).mul(crestLift),
-        packed.g.sub(0.714).mul(0.28).mul(state.detailScale).mul(broadFade).add(crestSmooth),
+          .mul(cavity).mul(tint).mul(stateTint).mul(crestLift),
+        packed.g.sub(0.714).mul(0.28).mul(state.detailScale).mul(broadFade).add(stateRough),
       ));
     });
     return result;
@@ -273,6 +300,7 @@ export function createSnowDetailNodes({
     cavity: snowCavity,
     crest: pomState.w.mul(packReady),
     sparkleMask,
+    icyCrust,
     color(base) {
       const value = base.mul(mix(vec3(1), detail.rgb, amount));
       return mix(relief ? relief.color(value) : value, color(settings.pathColor), state.compressed.mul(snow));

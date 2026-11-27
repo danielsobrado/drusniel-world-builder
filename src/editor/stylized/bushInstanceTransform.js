@@ -82,8 +82,9 @@ export function composeBushMatrix(placement) {
     BUSH_SCRATCH.quaternion.premultiply(BUSH_SCRATCH.slopeQuat);
   }
 
+  const snowBurial = Math.max(0, Number(placement.snowBurial) || 0);
   return new THREE.Matrix4().compose(
-    BUSH_SCRATCH.position.set(placement.x, placement.groundFitHeight ?? placement.height, placement.z),
+    BUSH_SCRATCH.position.set(placement.x, (placement.groundFitHeight ?? placement.height) - snowBurial, placement.z),
     BUSH_SCRATCH.quaternion,
     BUSH_SCRATCH.scale.set(xzScale, yScale, xzScale),
   );

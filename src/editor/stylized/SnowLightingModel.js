@@ -2,7 +2,7 @@ import { PhysicalLightingModel } from 'three/webgpu';
 import { diffuseColor, float, max, mix, normalView, vec3 } from 'three/tsl';
 
 /** Snowflow (MIT) deep snow scattering tint: light reaching a snow hollow loses red first. */
-const CAVE_BLUE_TINT = vec3(0.52, 0.72, 1.0);
+const CAVE_BLUE_TINT = vec3(0.48, 0.70, 1.0);
 /** Snow wrap diffuse width (softer terminator than Lambert while preserving crisp drift modeling). */
 const SNOW_WRAP = 0.48;
 const INV_WRAP_DENOM = 1 / ((1 + SNOW_WRAP) * (1 + SNOW_WRAP));

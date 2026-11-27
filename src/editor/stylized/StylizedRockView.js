@@ -28,7 +28,7 @@ import { resolveForestSeed } from './forest/ForestRuntimeConfig.js';
 import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
 import { bakeSnowNormal } from './snowDeposition.js';
-import { buildFracturedAlpineRockPrototypes } from './fracturedRockPrototypes.js';
+import { buildFracturedBiomeRockPrototypes } from './fracturedRockPrototypes.js';
 import { createRockSnowCapGeometry } from './snow/RockSnowCapGeometry.js';
 import { createRockSnowCapMaterial } from './snow/RockSnowCapMaterial.js';
 
@@ -298,18 +298,18 @@ export class StylizedRockView {
         variants.length,
       );
     }
-    // Install procedural fractured alpine/snow rock prototypes once so tundra & glacier
-    // boulders/formations have sharp cleavage silhouettes instead of flat-shaded wedges.
+    // Install procedural fractured geological rock family prototypes once so alpine,
+    // desert/badlands, and limestone biomes carry distinct natural fracture silhouettes.
     if (!this.proceduralAlpineInstalled) {
       this.proceduralAlpineInstalled = true;
       const alpineFirstIndex = firstNewPrototype + extracted.length;
-      const alpinePrototypes = buildFracturedAlpineRockPrototypes();
-      for (const alpine of alpinePrototypes) {
-        extracted.push({ geometry: alpine.geometry, source: null, flatShading: false });
-        proxyOverrides.push(alpine.proxyGeometry);
+      const biomePrototypes = buildFracturedBiomeRockPrototypes();
+      for (const proto of biomePrototypes) {
+        extracted.push({ geometry: proto.geometry, source: null, flatShading: false });
+        proxyOverrides.push(proto.proxyGeometry);
         this.prototypeBiomeRules.push({
-          tileIds: alpine.tileIds,
-          weight: alpine.weight,
+          tileIds: proto.tileIds,
+          weight: proto.weight,
           character: null,
           characterStrength: undefined,
           canopy: undefined,
@@ -317,9 +317,9 @@ export class StylizedRockView {
       }
       registerPrototypeIndices(
         this.prototypeIndicesByAsset,
-        'procedural-alpine-fractured',
+        'procedural-biome-fractured',
         alpineFirstIndex,
-        alpinePrototypes.length,
+        biomePrototypes.length,
       );
     }
     this.prototypeIndexForRoll = createBiomePrototypeSelector({

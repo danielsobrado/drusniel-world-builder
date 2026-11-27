@@ -114,9 +114,15 @@ export function biomeUnderstoryColor(color) {
   // mixed 13% white into dark leaves, which in linear light doubled their value
   // and drew every shrub, plant and log there pale blue (2026-11-12 captures).
   const depth = snowSteps.div(LOOK_SNOW_STEPS);
-  const cap = smoothstep(0.15, 0.55, normalWorld.y.add(clumps.sub(0.5).mul(0.5)))
-    .mul(depth.mul(1.2).clamp(0, 1)).mul(depth.smoothstep(0.14, 0.38));
-  return mix(tinted, vec3(0.9, 0.93, 0.97), cap.mul(0.9));
+  // Shift remaining summer foliage on deep snow toward dormant winter umber/bark
+  // so bushes never read as green summer shrubs spray-painted white.
+  const dormant = depth.smoothstep(0.32, 0.85);
+  const luma = dot(tinted, vec3(0.2126, 0.7152, 0.0722));
+  const winterBark = vec3(0.34, 0.25, 0.19).mul(luma.mul(1.85).clamp(0.45, 1.35));
+  const seasonal = mix(tinted, winterBark, dormant.mul(0.82));
+  const cap = smoothstep(0.22, 0.62, normalWorld.y.add(clumps.sub(0.5).mul(0.45)))
+    .mul(depth.mul(1.15).clamp(0, 1)).mul(depth.smoothstep(0.16, 0.42));
+  return mix(seasonal, vec3(0.90, 0.94, 0.98), cap.mul(0.88));
 }
 
 /**
