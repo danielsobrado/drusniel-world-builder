@@ -44,3 +44,7 @@ TODO: isolate deterministic authored density operations into a serializable gene
 TODO: incremental lighting bake with global occlusion and bounce dependencies preserved.
 TODO: entry-prioritized chunk readiness, navigation gating and staged geometry publication before allowing exploration of unprepared regions.
 TODO: benchmark worker memory overhead and main-thread latency; measure the synchronous rolling-slice path for regressions before broad rollout.
+
+## Lifecycle follow-up
+
+Pending snapshot copying, cooperative extraction and worker execution now accept an AbortSignal owned by the location runtime. Disposing the runtime aborts preparation, terminates the worker without fallback, and prevents a stale prepared scene from activating. This does not interrupt synchronous generator or lighting code. Three cancellation regression cases are added; they have not been executed in the connector environment.

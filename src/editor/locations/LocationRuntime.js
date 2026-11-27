@@ -98,7 +98,7 @@ export class LocationRuntime {
    * wherever they were).
    */
   async enter(siteId, { spawnId = 'entry' } = {}) {
-    if (this.state === TRANSITION) return false;
+    if (this.disposed || this.state === TRANSITION) return false;
     const site = this.catalog.site(siteId);
     const generator = this.generators[site.generatorKey];
     const returnTo = this.state;
@@ -117,14 +117,21 @@ export class LocationRuntime {
       title: site.title, steps: this.catalog.policy.phases, presentation: 'cinematic', theme: this.#themeFor(site),
     });
     let failed = null;
+    const preparation = new AbortController();
+    this.preparation = preparation;
     try {
       session.start('resolve-manifest');
       await nextPaint();
       const next = await LocationScene.prepare({
         site, generator, quality: this.catalog.quality, baseUrl: this.baseUrl, renderer: this.renderer,
         camera: player.camera, decorationBudget: this.decorationBudget, structureBudget: this.structureBudget, atmosphericBudget: this.atmosphericBudget,
-        progress: async (stepId) => { session.start(stepId); await nextPaint(); },
+        signal: preparation.signal,
+        progress: async (stepId) => { preparation.signal.throwIfAborted(); session.start(stepId); await nextPaint(); },
       });
+      if (preparation.signal.aborted) {
+        next.dispose();
+        preparation.signal.throwIfAborted();
+      }
       const spawn = next.spawns[spawnId] ?? next.spawns.entry;
       session.start('activate');
       // The swap: no await from here until the player stands in the new scene.
@@ -148,10 +155,15 @@ export class LocationRuntime {
       this.state = INSIDE;
     } catch (error) {
       failed = error;
+      if (preparation.signal.aborted) {
+        session.finish();
+        return false;
+      }
       console.error(`Entering location "${siteId}" failed; staying put.`, error);
       session.fail(error);
       this.state = returnTo;
     } finally {
+      if (this.preparation === preparation) this.preparation = null;
       player.cutBlocked = false;
     }
     if (failed) await new Promise((resolve) => { setTimeout(resolve, FAILURE_NOTICE_MS); });
@@ -273,6 +285,8 @@ export class LocationRuntime {
   }
 
   dispose() {
+    this.disposed = true;
+    this.preparation?.abort();
     this.current?.dispose();
     this.current = null;
     this.playerController.groundOverride = null;

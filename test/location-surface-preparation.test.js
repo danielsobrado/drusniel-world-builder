@@ -111,3 +111,32 @@ test('incremental generation is opt-in and validates budgets', () => {
   assert.equal(options.generationWorker, false);
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { generationMaxCopyBytes: 1.5 } }), RangeError);
 });
+
+test('aborted cooperative extraction rejects before publishing a surface', async () => {
+  const grid = fixture(), controller = new AbortController();
+  let tick = 0;
+  await assert.rejects(extractSurfaceCooperatively(grid, 1, {
+    signal: controller.signal, clock: () => ++tick,
+    pause: async () => controller.abort(),
+  }), { name: 'AbortError' });
+});
+
+test('abort during worker execution terminates it without cooperative fallback', async () => {
+  const grid = fixture(), controller = new AbortController();
+  let terminated = 0, posted;
+  const ready = new Promise(resolve => { posted = resolve; });
+  const worker = { addEventListener() {}, postMessage() { posted(); }, terminate() { terminated++; } };
+  const pending = prepareLocationSurface(grid, settings, { signal: controller.signal, workerFactory: () => worker });
+  await ready;
+  controller.abort();
+  await assert.rejects(pending, { name: 'AbortError' });
+  assert.equal(terminated, 1);
+});
+
+test('already aborted preparation never starts a worker', async () => {
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(prepareLocationSurface(fixture(), settings, {
+    signal: controller.signal, workerFactory: () => assert.fail('worker must not start'),
+  }), { name: 'AbortError' });
+});

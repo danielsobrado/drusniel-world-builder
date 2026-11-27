@@ -35,7 +35,7 @@ export class LocationScene {
    * @param {THREE.Camera} options.camera for shader warm-up
    * @param {(stepId: string) => Promise<void>} options.progress marks a loading step and yields a frame
    */
-  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null, structureBudget = null, atmosphericBudget = null }) {
+  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null, structureBudget = null, atmosphericBudget = null, signal }) {
     const location = new LocationScene(site);
     const isIceSite = site.materials?.terrain?.kind === 'ice';
     const isStoneholdSite = Boolean(site.archetypeKey?.startsWith('stonehold') || site.id?.includes('stonehold'));
@@ -53,13 +53,15 @@ export class LocationScene {
       });
 
       await progress('build-geometry');
+      signal?.throwIfAborted();
       const builder = generateLocation(site, generator);
       if (!builder.spawns.entry) throw new Error(`Location "${site.id}" generated no entry spawn.`);
       if (builder.exits.length === 0) throw new Error(`Location "${site.id}" generated no exit.`);
 
       const structure = !builder.grid.open && !site.lighting.sky && !builder.reflectors.length ? structureBudget : null;
-      const preparedSurface = structure?.generationEnabled ? await prepareLocationSurface(builder.grid, structure) : null;
+      const preparedSurface = structure?.generationEnabled ? await prepareLocationSurface(builder.grid, structure, { signal }) : null;
       await progress('bake-lighting');
+      signal?.throwIfAborted();
       const crystalScale = quality.crystalScale ?? 1;
       const rawCrystalField = site.params?.crystalField ?? null;
       const crystalField = rawCrystalField && crystalScale > 0
@@ -154,6 +156,7 @@ export class LocationScene {
       } else {
         await renderer.compileAsync(location.scene, camera);
       }
+      signal?.throwIfAborted();
       return location;
     } catch (error) {
       location.dispose();
