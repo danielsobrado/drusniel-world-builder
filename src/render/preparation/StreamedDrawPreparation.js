@@ -62,9 +62,12 @@ export class StreamedDrawPreparation {
         const mesh = this.pending.values().next().value;
         const attributes = this.initialUploadAttributes.get(mesh);
         const sliced = attributes && this.attributeInitialization.supported;
-        const estimate = this.uploadEstimate.estimate(mesh, new Set(), sliced ? attributes : []);
+        const excluded = sliced ? [...attributes] : [];
+        const staging = this.initialInstanceBudget && this.geometryUploads.supported
+          ? this.geometryUploads.entries(mesh).map(entry => entry.attribute) : [];
+        const estimate = this.uploadEstimate.estimate(mesh, new Set(), [...excluded, ...staging]);
         const initial = this.initialUploadBytes.get(mesh) ?? 0;
-        const bytes = sliced ? this.uploadSliceBytes + estimate.bytes : Math.max(initial, estimate.bytes);
+        const bytes = sliced || staging.length ? this.uploadSliceBytes + estimate.bytes : Math.max(initial, estimate.bytes);
         this.releaseUpload = budget.reserveUpload?.(bytes);
       }
     }
@@ -231,7 +234,7 @@ export class StreamedDrawPreparation {
         this.pending.delete(mesh);
         uploadBytes += bytes;
         targets.push(mesh);
-        if (isolated || targets.length >= targetLimit || uploadBytes >= byteLimit) break;
+        if (isolated || (this.initialInstanceBudget && staged.attributes.length) || targets.length >= targetLimit || uploadBytes >= byteLimit) break;
       }
       PerfCounters.inc('streamedInitialUploadCpuMs', performance.now() - uploadStarted);
       PerfCounters.set('meadowInitialGpuUploadMaxFrameBytes',
