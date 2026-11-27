@@ -352,7 +352,7 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
         mesh.count = writableCount;
         // Empty pools should not reach object/material binding work every frame.
         mesh.visible = writableCount > 0;
-        if (writableCount > 0) registerInitialInstanceDraw(mesh);
+        registerInitialInstanceDraw(mesh);
       };
       if (!stage) publishCount();
       const dither = mesh.geometry.getAttribute('instanceDither');
