@@ -1,5 +1,6 @@
 import { REVISION } from 'three/webgpu';
 import { AttributeType } from 'three/src/renderers/common/Constants.js';
+import { collectLocationSceneryAttributes } from './LocationSceneryResidency.js';
 import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
@@ -53,7 +54,8 @@ export class LocationSurfaceResidency {
     for (const slot of this.surface.waterSlots) {
       add(slot, WATER_TEXTURES, slot.terrainSlot.descriptor, slot.terrainSlot.loading || pending?.has(slot.mesh));
     }
-    for (const entry of collectLocationMeadowAttributes(this.surface, this.renderer, anchor, this.settings)) {
+    for (const entry of [...collectLocationMeadowAttributes(this.surface, this.renderer, anchor, this.settings),
+      ...collectLocationSceneryAttributes(this.surface, this.renderer, anchor, this.settings)]) {
       const previous = candidates.get(entry.resource);
       if (previous) {
         previous.protected ||= entry.protected;
@@ -64,18 +66,18 @@ export class LocationSurfaceResidency {
   }
 
   resident(entry) {
-    return entry.kind === 'meadow' ? this.renderer._attributes.has(entry.resource) : this.renderer._textures.has(entry.resource);
+    return entry.kind !== 'texture' ? this.renderer._attributes.has(entry.resource) : this.renderer._textures.has(entry.resource);
   }
 
   retire(entry) {
-    if (entry.kind === 'meadow') this.renderer._attributes.delete(entry.resource);
+    if (entry.kind !== 'texture') this.renderer._attributes.delete(entry.resource);
     else entry.resource.dispose();
   }
 
   warm(entry) {
     const resource = entry.resource;
-    if (entry.kind === 'meadow') {
-      this.renderer._attributes.update(resource, AttributeType.VERTEX);
+    if (entry.kind !== 'texture') {
+      this.renderer._attributes.update(resource, entry.attributeType ?? AttributeType.VERTEX);
       resource.clearUpdateRanges();
     } else {
       resource.needsUpdate = true;
@@ -105,9 +107,9 @@ export class LocationSurfaceResidency {
         this.retire(entry);
         if (this.resident(entry)) continue;
         this.evicted.set(entry.resource, entry);
-        if (entry.kind === 'meadow') {
-          PerfCounters.inc('locationSurface.meadowEvictions');
-          PerfCounters.inc('locationSurface.meadowEvictedBytes', entry.size);
+        if (entry.kind !== 'texture') {
+          PerfCounters.inc(`locationSurface.${entry.kind}Evictions`);
+          PerfCounters.inc(`locationSurface.${entry.kind}EvictedBytes`, entry.size);
         }
         this.evictedBytes += entry.size;
         PerfCounters.inc('locationSurface.evictions');
@@ -123,13 +125,15 @@ export class LocationSurfaceResidency {
   }
 
   publish() {
-    let textures = 0, meadow = 0;
+    let textures = 0, meadow = 0, scenery = 0;
     for (const entry of this.evicted.values()) {
       if (entry.kind === 'meadow') meadow++;
+      else if (entry.kind === 'scenery') scenery++;
       else textures++;
     }
     PerfCounters.set('locationSurface.pendingTextures', textures);
     PerfCounters.set('locationSurface.pendingMeadowAttributes', meadow);
+    PerfCounters.set('locationSurface.pendingSceneryAttributes', scenery);
     PerfCounters.set('locationSurface.pendingBytes', this.evictedBytes);
   }
 
@@ -160,9 +164,9 @@ export class LocationSurfaceResidency {
             uploaded += live.size;
             PerfCounters.inc('locationSurface.restoredBytes', live.size);
             PerfCounters.inc('locationSurface.restores');
-            if (live.kind === 'meadow') {
-              PerfCounters.inc('locationSurface.meadowRestores');
-              PerfCounters.inc('locationSurface.meadowRestoredBytes', live.size);
+            if (live.kind !== 'texture') {
+              PerfCounters.inc(`locationSurface.${live.kind}Restores`);
+              PerfCounters.inc(`locationSurface.${live.kind}RestoredBytes`, live.size);
             }
           }
         }

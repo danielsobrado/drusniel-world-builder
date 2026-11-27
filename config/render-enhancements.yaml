@@ -35,6 +35,8 @@ locationStructureBudget:
   surfaceReclamationEnabled: false
   surfaceMeadowReclamationEnabled: false
   surfaceMeadowProtectMeters: 32
+  surfaceSceneryReclamationEnabled: false
+  surfaceSceneryProtectMeters: 64
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000
   surfaceSampleMs: 500
