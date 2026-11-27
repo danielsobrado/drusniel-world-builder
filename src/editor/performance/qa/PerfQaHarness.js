@@ -1,5 +1,6 @@
 import { FrameProfiler } from './FrameProfiler.js';
 import { PerfCounters } from './PerfCounters.js';
+import { LodBaselineDiagnostics } from './LodBaselineDiagnostics.js';
 import { GpuPassProfiler } from './GpuPassProfiler.js';
 import { PerfQaSettleGate } from './PerfQaSettleGate.js';
 import { QaRouteWalker } from './QaRouteWalker.js';
@@ -38,6 +39,7 @@ export class PerfQaHarness {
     editorConfig = null,
   }) {
     this.config = config;
+    this.lodBaseline = config.lodBaseline ? new LodBaselineDiagnostics() : null;
     this.plan = createMovementPlan(config);
     this.viewModeController = viewModeController;
     this.playerController = playerController;
@@ -260,6 +262,7 @@ export class PerfQaHarness {
     });
 
     if (frame) {
+      this.lodBaseline?.sample(this.stylizedSurface ?? this.terrainView?.stylizedSurface, frame.timestamp, frame.index);
       this.live.lastDtMs = frame.dt;
       if (frame.hitch) {
         this.live.hitchCount += 1;
@@ -348,6 +351,7 @@ export class PerfQaHarness {
     const next = this.plan.phases[this.phaseIndex];
     if (next.record && !this.profiler.recording) {
       this.profiler.start();
+      this.lodBaseline?.reset();
       this.lastCounters = PerfCounters.snapshot();
       this.preparationAtMeasureStart = this.terrainView.stylizedSurface?.getPreparationStatus?.() ?? null;
       this.samplingMisses.length = 0;
@@ -465,6 +469,7 @@ export class PerfQaHarness {
         cacheLimit: this.terrainView.preparedPlacement?.limit ?? null,
       },
     });
+    if (this.lodBaseline) this.report.lodBaseline = this.lodBaseline.report(this.profiler.getFrames());
     this.report.samplingMisses = [...this.samplingMisses];
     this.report.gpuRender = this.gpuProfiler.report();
     if (typeof window !== 'undefined') {

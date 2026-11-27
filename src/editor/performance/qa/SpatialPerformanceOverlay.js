@@ -1,5 +1,6 @@
 import './SpatialPerformanceOverlay.css';
 import { PerfCounters } from './PerfCounters.js';
+import { lodCellDiagnostics } from './LodBaselineDiagnostics.js';
 import { spatialResourceSnapshot } from './SpatialResourceSnapshot.js';
 import { spatialRendererSnapshot } from './SpatialRendererSnapshot.js';
 import { SPATIAL_LAYERS, SPATIAL_METRICS, spatialWindow, spatialCell, spatialMetricLimit, spatialExport, spatialHotspots, spatialLayerBreakdown } from './SpatialPerformanceModel.js';
@@ -175,6 +176,9 @@ export class SpatialPerformanceOverlay {
       ...cell.reasons,
     ].join('\n') : `Chunk ${key}: no sampled demand (not necessarily empty).`;
     const breakdown = spatialLayerBreakdown(sample, key);
+    const lod = lodCellDiagnostics(this.surface, key, performance.now());
+    this.details.textContent += '\nPlanned LOD (not published):\n' + Object.entries(lod).map(([layer, state]) =>
+      layer + ': ' + (state ? state.target + ' · ' + (state.pending ? 'pending data' : state.transitioning ? 'transitioning' : 'stable') + ' · ' + (state.bands.join(' / ') || 'none') : 'n/a')).join('\n');
     if (breakdown.length) this.details.textContent += '\nSelected cost by layer (estimated):\n' + breakdown.map(({ kind, selected }) =>
       `${kind}: ${cost(selected)}`).join('\n');
     const resource = this.liveResources?.cells.get(key);

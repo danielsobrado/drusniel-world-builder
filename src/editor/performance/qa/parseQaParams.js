@@ -279,6 +279,7 @@ export function parseQaParams(search = '') {
     // `wsc=0` keeps the World Surface Context window unbuilt: the A/B for its budgets.
     wsc: readBoolean(params, 'wsc', true),
     gpuTimings: readBoolean(params, 'gpuTimings', false),
+    lodBaseline: readBoolean(params, 'lodBaseline', false),
     hitchMs: Math.max(1, readNumber(params, 'hitchMs', 1000 / 30)),
     autostart: readBoolean(params, 'autostart', true),
     download: readBoolean(params, 'download', true),
