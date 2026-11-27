@@ -9,6 +9,7 @@ import { WaterReflectionResidency, nearestWaterSlots } from './WaterReflectionRe
 import { preparePlanarCamera } from './PlanarCamera.js';
 import { PlanarReprojection } from './PlanarReprojection.js';
 import { withAuxiliaryScene } from './ReflectionScene.js';
+import { appendReflectionExclusions } from '../visibility/RenderPassParticipation.js';
 import { isLandStreamingSuspended } from '../../editor/water/underwaterState.js';
 import { filteredWaterCube, filteredWaterPlanar } from './WaterReflectionFilter.js';
 import { staticWaterAt } from '../../editor/water/StaticWaterSample.js';
@@ -20,6 +21,7 @@ export class WaterReflectionController {
   constructor(terrainView, config) {
     this.view = terrainView;
     this.config = config;
+    this.layerIsolation = terrainView.stylizedConfig?.enhancements?.renderLayerIsolation === true;
     this.targets = [0, 1].map(() => new CubeRenderTarget(config.resolution, { type: HalfFloatType, minFilter: LinearFilter, generateMipmaps: false }));
     for (const target of this.targets) target.texture.name = 'WaterReflectionCubeFace';
     this.front = 0;
@@ -190,6 +192,10 @@ export class WaterReflectionController {
     for (const object of this.overlayObjects) hidden.push(object);
     const started = performance.now();
     const captureKind = this.planarPending ? 'planar' : 'cube';
+    if (this.layerIsolation && this.shadowRegistry) {
+      const excluded = appendReflectionExclusions(this.shadowRegistry, hidden, captureKind);
+      PerfCounters.inc(`reflectionLayerExcluded.${captureKind}`, excluded);
+    }
     this.capturing = true;
     try {
       withReflectionCapture(this.view.renderer, this.view.scene, hidden, () => {
@@ -211,7 +217,7 @@ export class WaterReflectionController {
         const back = this.targets[1 - this.front];
         this.view.renderer.setRenderTarget(back, this.face);
         const captureCamera = this.cubeCamera.children[this.face];
-        withAuxiliaryScene(surface, captureCamera, origin, now, () => this.view.renderer.render(this.view.scene, captureCamera));
+        withAuxiliaryScene(surface, captureCamera, origin, now, () => this.view.renderer.render(this.view.scene, captureCamera), this.layerIsolation);
         this.face += 1;
         PerfCounters.inc('waterProbeFaces');
         if (this.face === 6) {
@@ -267,7 +273,7 @@ export class WaterReflectionController {
       const virtual = preparePlanarCamera(camera, water.surfaceHeight, this.virtualCamera);
       this.virtualCamera = virtual;
       this.view.renderer.setRenderTarget(this.planarTarget);
-      withAuxiliaryScene(surface, virtual, origin, now, () => this.view.renderer.render(this.view.scene, virtual));
+      withAuxiliaryScene(surface, virtual, origin, now, () => this.view.renderer.render(this.view.scene, virtual), this.layerIsolation);
       this.reprojection.record(virtual);
       this.planarHeight.value = water.surfaceHeight;
       this.lastPlanar = now;

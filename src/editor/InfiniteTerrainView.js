@@ -477,7 +477,8 @@ export class InfiniteTerrainView {
     this.occlusion = occlusionSettings?.enabled
       ? new GpuOcclusion(
         { renderer: this.renderer, scene: this.scene, camera: null },
-        { ...occlusionSettings, depthOnlyTarget: this.stylizedConfig.enhancements?.r187?.depthOnlyOcclusion },
+        { ...occlusionSettings, depthOnlyTarget: this.stylizedConfig.enhancements?.r187?.depthOnlyOcclusion,
+          renderLayerIsolation: this.stylizedConfig.enhancements?.renderLayerIsolation === true },
       )
       : null;
     if (!this.rendererBackendStatus.webgpu && !this.rendererConfig.forceWebGL) {

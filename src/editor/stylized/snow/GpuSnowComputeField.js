@@ -1,3 +1,4 @@
+import { markTransientRenderObject } from '../../../render/visibility/RenderPassParticipation.js';
 import * as THREE from 'three/webgpu';
 import {
   Fn, If, abs, atan, cameraPosition, cameraWorldMatrix, clamp, cos, dot, float, floor, fract, hash, instancedArray,
@@ -70,6 +71,7 @@ export class GpuSnowComputeField {
     this.material = this.createMaterial({ light, sun, puffTexture });
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, count);
     this.mesh.name = 'gpu-snow-compute-field';
+    markTransientRenderObject(this.mesh);
     const identity = new THREE.Matrix4();
     for (let i = 0; i < count; i += 1) this.mesh.setMatrixAt(i, identity);
     this.mesh.instanceMatrix.needsUpdate = true;

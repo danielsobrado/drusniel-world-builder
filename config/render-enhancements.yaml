@@ -47,6 +47,7 @@ instanceSliceBudget:
   maxStagingBytes: 16777216
   maxCopyRanges: 8192
   maxWritesPerSlice: 64
+renderLayerIsolation: false
 farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false

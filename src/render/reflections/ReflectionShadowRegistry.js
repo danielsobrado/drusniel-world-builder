@@ -4,6 +4,8 @@ export class ReflectionShadowRegistry {
     this.objects = new Set();
     this.owners = new Set();
     this.overlays = new Set();
+    this.reflectionExclusions = new Set();
+    this.cubeReflectionExclusions = new Set();
     this.overlayCursor = null;
     this.added = event => this.track(event.child);
     this.removed = event => this.untrack(event.child);
@@ -16,7 +18,7 @@ export class ReflectionShadowRegistry {
       this.objects.add(object);
       // A light may replace its shadow object without changing its hierarchy.
       if (object.isLight || object.shadow) this.owners.add(object);
-      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlays.add(object);
+      this.refreshTags(object);
       object.addEventListener('childadded', this.added);
       object.addEventListener('childremoved', this.removed);
     });
@@ -27,9 +29,20 @@ export class ReflectionShadowRegistry {
       this.objects.delete(object);
       this.owners.delete(object);
       this.overlays.delete(object);
+      this.reflectionExclusions.delete(object);
+      this.cubeReflectionExclusions.delete(object);
       object.removeEventListener('childadded', this.added);
       object.removeEventListener('childremoved', this.removed);
     });
+  }
+
+  refreshTags(object) {
+    if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlays.add(object);
+    else this.overlays.delete(object);
+    if (object.userData?.excludeFromReflection === true) this.reflectionExclusions.add(object);
+    else this.reflectionExclusions.delete(object);
+    if (object.userData?.excludeFromCubeReflection === true) this.cubeReflectionExclusions.add(object);
+    else this.cubeReflectionExclusions.delete(object);
   }
 
   refreshOverlayTags(limit = 64) {
@@ -38,8 +51,7 @@ export class ReflectionShadowRegistry {
       const step = this.overlayCursor.next();
       if (step.done) { this.overlayCursor = null; return; }
       const object = step.value;
-      if (object.userData?.editorOverlay || object.name?.includes('grid-overlay')) this.overlays.add(object);
-      else this.overlays.delete(object);
+      this.refreshTags(object);
     }
   }
 
@@ -50,6 +62,7 @@ export class ReflectionShadowRegistry {
       object.removeEventListener('childremoved', this.removed);
     }
     this.objects.clear(); this.owners.clear(); this.overlays.clear();
+    this.reflectionExclusions.clear(); this.cubeReflectionExclusions.clear();
   }
 }
 

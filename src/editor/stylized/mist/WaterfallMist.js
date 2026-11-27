@@ -29,6 +29,7 @@ function createSlotMesh(site, material) {
   mesh.receiveShadow = false;
   mesh.renderOrder = MIST_RENDER_ORDER;
   mesh.userData.excludeFromReflection = true;
+  mesh.userData.excludeFromOcclusion = true;
   const faceLength = Math.hypot(site.lipX - site.x, site.lipZ - site.z);
   const drop = site.top - site.foot;
   return {

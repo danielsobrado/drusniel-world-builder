@@ -3,6 +3,7 @@ import test from 'node:test';
 import { DirectionalLight, Group, PointLight, Scene } from 'three/webgpu';
 import { ReflectionShadowRegistry } from '../src/render/reflections/ReflectionShadowRegistry.js';
 import { withReflectionCapture } from '../src/render/reflections/ReflectionCapture.js';
+import { appendReflectionExclusions, markTransientRenderObject } from '../src/render/visibility/RenderPassParticipation.js';
 
 test('reflection shadow discovery follows nested additions, reparenting and shadow replacement', () => {
   const scene = new Scene(), group = new Group(), other = new Group(), sun = new DirectionalLight();
@@ -86,4 +87,32 @@ test('overlay membership follows nested scene insertion and removal', () => {
     overlay.removeFromParent();
     assert.equal(registry.overlays.has(overlay), false);
   } finally { registry.dispose(); }
+});
+
+test('explicit pass exclusions track insertion, reparenting, late tags and retirement', () => {
+  const scene = new Scene(), group = new Group(), other = new Group();
+  const spray = markTransientRenderObject(new Group()), blades = new Group(), cards = new Group();
+  blades.userData.excludeFromCubeReflection = true;
+  group.add(spray, blades, cards); scene.add(group, other);
+  const registry = new ReflectionShadowRegistry(scene);
+  try {
+    const planar = [], cube = [spray];
+    assert.equal(appendReflectionExclusions(registry, planar, 'planar'), 1);
+    assert.deepEqual(planar, [spray]);
+    assert.equal(appendReflectionExclusions(registry, cube, 'cube'), 1);
+    assert.deepEqual(cube, [spray, blades]);
+    other.add(blades);
+    assert.ok(registry.cubeReflectionExclusions.has(blades));
+    blades.removeFromParent();
+    assert.ok(!registry.cubeReflectionExclusions.has(blades));
+    cards.userData.excludeFromReflection = true;
+    registry.refreshOverlayTags(100);
+    assert.ok(registry.reflectionExclusions.has(cards));
+    delete cards.userData.excludeFromReflection;
+    assert.equal(appendReflectionExclusions(registry, [], 'planar'), 1);
+    registry.refreshOverlayTags(100);
+    assert.ok(!registry.reflectionExclusions.has(cards));
+  } finally { registry.dispose(); }
+  assert.equal(registry.reflectionExclusions.size, 0);
+  assert.equal(registry.cubeReflectionExclusions.size, 0);
 });

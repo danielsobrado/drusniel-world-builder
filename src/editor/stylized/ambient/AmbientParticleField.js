@@ -1,3 +1,4 @@
+import { markTransientRenderObject } from '../../../render/visibility/RenderPassParticipation.js';
 import { frameUniform } from '../../../render/FrameUniforms.js';
 import * as THREE from 'three/webgpu';
 import {
@@ -97,6 +98,7 @@ export class AmbientParticleField {
     this.material = this.createMaterial({ ground, levels, light, sun, puffTexture });
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, settings.count);
     this.mesh.name = `ambient-${name}`;
+    markTransientRenderObject(this.mesh);
     this.mesh.frustumCulled = false;
     this.mesh.visible = false;
     this.mesh.castShadow = false;

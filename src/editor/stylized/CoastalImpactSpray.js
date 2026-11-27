@@ -85,6 +85,7 @@ export class CoastalImpactSpray {
     this.mesh.castShadow = false;
     this.mesh.receiveShadow = false;
     this.mesh.userData.excludeFromReflection = true;
+    this.mesh.userData.excludeFromOcclusion = true;
     this.mesh.visible = false;
     scene.add(this.mesh);
   }

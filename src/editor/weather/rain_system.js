@@ -1,3 +1,4 @@
+import { markTransientRenderObject } from '../../render/visibility/RenderPassParticipation.js';
 import { particlePrefix } from '../performance/EnvironmentalParticleBudget.js';
 import * as THREE from "three";
 import { createSplashNodeMaterial } from "./rainNodeMaterial.js";
@@ -56,6 +57,7 @@ class RainWeatherSystem {
     this.waterSplashMesh.name = "weather-rain-water-splashes";
     this.waterSplashMesh.frustumCulled = false;
     this.waterSplashMesh.renderOrder = 42;
+    for (const mesh of [this.rainMesh, this.hardSplashMesh, this.waterSplashMesh]) markTransientRenderObject(mesh);
     this.group.add(this.rainMesh, this.hardSplashMesh, this.waterSplashMesh);
     options.scene.add(this.group);
     this.applySettings(this.settings);

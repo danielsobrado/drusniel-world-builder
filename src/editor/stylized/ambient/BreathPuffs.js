@@ -1,3 +1,4 @@
+import { markTransientRenderObject } from '../../../render/visibility/RenderPassParticipation.js';
 import * as THREE from 'three/webgpu';
 import {
   attribute, cameraPosition, cameraWorldMatrix, color, dot, float, mix, normalize, positionGeometry, positionWorld,
@@ -54,6 +55,7 @@ export class BreathPuffs {
     this.material = this.createMaterial(light, sun, puffTexture);
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, SLOTS);
     this.mesh.name = 'ambient-breath';
+    markTransientRenderObject(this.mesh);
     const identity = new THREE.Matrix4();
     for (let index = 0; index < SLOTS; index += 1) this.mesh.setMatrixAt(index, identity);
     this.mesh.instanceMatrix.needsUpdate = true;

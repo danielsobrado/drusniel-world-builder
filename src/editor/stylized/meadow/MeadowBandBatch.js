@@ -52,6 +52,8 @@ export class MeadowBandBatch {
       : new MeadowPageBounds(this.geometry, template.userData.meadow.tileSize, boundsPadding);
     this.mesh = new THREE.Mesh(this.geometry, material);
     this.mesh.name = name;
+    // Fine blade detail is not needed in the low-resolution environment probe; cards remain.
+    this.mesh.userData.excludeFromCubeReflection = template.userData.meadow?.cards === false;
     this.mesh.renderOrder = renderOrder;
     // Empty pages have no spatial bounds yet. Bootstrap still compiles their
     // material through a temporary draw before the first tile is published.

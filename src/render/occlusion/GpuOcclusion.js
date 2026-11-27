@@ -4,6 +4,8 @@ import {
   MeshBasicNodeMaterial, RenderTarget, Scene, UnsignedIntType, Vector2,
 } from 'three/webgpu';
 import { isSolidOccluder, occlusionDrawRange, projectOcclusionBounds } from './occlusionBounds.js';
+import { skipsOcclusionCollection } from '../visibility/RenderPassParticipation.js';
+import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { depthCopyShader, depthReduceShader, visibilityShader } from './occlusionShaders.js';
 
 const nextPowerOfTwo = (value) => 2 ** Math.ceil(Math.log2(Math.max(1, value)));
@@ -235,8 +237,10 @@ export class GpuOcclusion {
     for (const proxy of this.proxies.values()) proxy.visible = false;
     this.active.clear();
     this.stats.occluders = 0;
+    let excluded = 0;
     scene.traverseVisible((object) => {
       if (!object.isMesh || !object.layers.test(camera.layers) || object.userData.occlusionCull === false) return;
+      if (this.settings.renderLayerIsolation && skipsOcclusionCollection(object)) { excluded++; return; }
       const bounds = this.#bounds(object);
       if (!bounds || bounds.isEmpty() || !this.frustum.intersectsBox(bounds)) return;
       const rect = projectOcclusionBounds(bounds, this.projectionView, width, height, this.settings.pixelPadding);
@@ -268,6 +272,7 @@ export class GpuOcclusion {
       this.proxies.delete(object);
     }
     this.stats.candidates = entries.length;
+    PerfCounters.set('occlusionLayerExcluded', excluded);
     return entries;
   }
 
