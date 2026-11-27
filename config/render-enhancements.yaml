@@ -4,6 +4,14 @@ detailVisibility: false
 geologyLod: false
 regionalGeologyAdmission: false
 locationDecorationAdmission: false
+locationStructureStreaming: false
+locationStructureBudget:
+  cellMeters: 28
+  minPropTriangles: 512
+  protectMeters: 56
+  idleMs: 5000
+  sampleMs: 250
+  evictionsPerSample: 2
 geologyAdmissionBudget:
   triangleBudget: 100000
   protectMeters: 64

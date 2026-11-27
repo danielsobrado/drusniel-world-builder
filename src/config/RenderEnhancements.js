@@ -7,6 +7,8 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   geologyLod: false,
   regionalGeologyAdmission: false,
   locationDecorationAdmission: false,
+  locationStructureStreaming: false,
+  locationStructureBudget: Object.freeze({ cellMeters: 28, minPropTriangles: 512, protectMeters: 56, idleMs: 5000, sampleMs: 250, evictionsPerSample: 2 }),
   geologyAdmissionBudget: Object.freeze({ triangleBudget: 100000, protectMeters: 64, minimumScaleMultiplier: 24, maxExtraDraws: 8, recoveryRatio: 0.85 }),
   locationDecorationBudget: Object.freeze({ cellMeters: 24, protectMeters: 24, maxDistanceMeters: 100, triangleBudget: 60000, drawBudget: 24, recoveryMeters: 4, boundsPaddingMeters: 1, refreshMeters: 1 }),
   regionalTerrainProfiles: false,
@@ -89,6 +91,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
       spatialWeights: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.spatialWeights, ...source.regionalBudget?.spatialWeights },
       admissionPriorities: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, ...source.regionalBudget?.admissionPriorities } },
     geologyAdmissionBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.geologyAdmissionBudget, ...source.geologyAdmissionBudget },
+    locationStructureBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.locationStructureBudget, ...source.locationStructureBudget },
     locationDecorationBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.locationDecorationBudget, ...source.locationDecorationBudget },
     initialInstanceUploadBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.initialInstanceUploadBudget, ...source.initialInstanceUploadBudget },
     instanceSliceBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.instanceSliceBudget, ...source.instanceSliceBudget },
@@ -131,11 +134,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'gpuComputeAdmission', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'locationStructureStreaming', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'gpuComputeAdmission', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'gpuComputeAdmission', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'locationStructureStreaming', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'gpuComputeAdmission', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -161,12 +164,14 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
         || !Number.isFinite(priority) || priority < 0 || priority > 100) throw new RangeError(`Invalid regionalBudget.admissionPriorities.${key}.`);
   }
   for (const [block, ranges] of Object.entries({ geologyAdmissionBudget: { triangleBudget: [1000, 10000000], protectMeters: [48, 512], minimumScaleMultiplier: [12, 45], maxExtraDraws: [0, 128], recoveryRatio: [0.1, 1] },
+    locationStructureBudget: { cellMeters: [8, 128], minPropTriangles: [1, 100000], protectMeters: [16, 512], idleMs: [1000, 60000], sampleMs: [100, 2000], evictionsPerSample: [1, 16] },
     locationDecorationBudget: { cellMeters: [8, 128], protectMeters: [8, 128], maxDistanceMeters: [24, 512], triangleBudget: [1000, 10000000], drawBudget: [1, 256], recoveryMeters: [0, 16], boundsPaddingMeters: [0.1, 8], refreshMeters: [0.25, 4] } })) {
     for (const [key, [min, max]] of Object.entries(ranges)) {
       const n = value[block][key];
       if (!Number.isFinite(n) || n < min || n > max || (['triangleBudget', 'drawBudget', 'maxExtraDraws'].includes(key) && !Number.isInteger(n))) throw new RangeError(`${block}.${key} must be in [${min}, ${max}].`);
     }
   }
+  if (value.locationStructureBudget.protectMeters < value.locationStructureBudget.cellMeters || !Number.isInteger(value.locationStructureBudget.evictionsPerSample) || !Number.isInteger(value.locationStructureBudget.minPropTriangles)) throw new RangeError('Invalid location structure protection or integer budget.');
   if (value.locationDecorationBudget.maxDistanceMeters < value.locationDecorationBudget.protectMeters + value.locationDecorationBudget.recoveryMeters + value.locationDecorationBudget.refreshMeters) throw new RangeError('Location decoration reach must cover the protected area.');
   for (const [key, min, max] of [['refreshMs', 250, 10000], ['radius', 2, 16]]) {
     const n = value.spatialOverlay[key];

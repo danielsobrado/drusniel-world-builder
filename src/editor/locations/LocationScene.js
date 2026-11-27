@@ -8,6 +8,7 @@ import { locationLight } from './materials/LocationShading.js';
 import { LocationMaterials } from './materials/LocationMaterials.js';
 import { LocationLightPool } from './LocationLightPool.js';
 import { LocationDecorationAdmission } from './LocationDecorationAdmission.js';
+import { LocationStructureResidency } from './LocationStructureResidency.js';
 
 /** Share of the gap to the target that the indoor/outdoor weather fade closes each frame. */
 const WEATHER_EASE = 0.06;
@@ -31,7 +32,7 @@ export class LocationScene {
    * @param {THREE.Camera} options.camera for shader warm-up
    * @param {(stepId: string) => Promise<void>} options.progress marks a loading step and yields a frame
    */
-  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null, atmosphericBudget = null }) {
+  static async prepare({ site, generator, quality, baseUrl, renderer, camera, progress, decorationBudget = null, structureBudget = null, atmosphericBudget = null }) {
     const location = new LocationScene(site);
     const isIceSite = site.materials?.terrain?.kind === 'ice';
     const isStoneholdSite = Boolean(site.archetypeKey?.startsWith('stonehold') || site.id?.includes('stonehold'));
@@ -74,6 +75,7 @@ export class LocationScene {
         }
         : null;
 
+      const structure = !builder.grid.open && !site.lighting.sky && !builder.reflectors.length ? structureBudget : null;
       location.scene.add(builder.build({
         materials,
         absorption: site.lighting.absorption,
@@ -83,7 +85,9 @@ export class LocationScene {
         crystalField,
         alpineUnderstory,
         decorationBudget,
+        structureBudget: structure,
       }));
+      if (structure) location.structureResidency = new LocationStructureResidency(location.scene, renderer, structure);
       if (decorationBudget) location.decorationAdmission = new LocationDecorationAdmission(location.scene, decorationBudget);
       location.lightPool = new LocationLightPool(builder.dynamicLights, {
         gain: site.lighting.dynamicGain ?? (site.lighting.indirectBounce ? 0.28 : 0.14),
@@ -177,6 +181,7 @@ export class LocationScene {
 
   /** The carried lamp sits just below the eye so it lights what is looked at without flattening it. */
   update(camera) {
+    this.structureResidency?.update(camera);
     this.decorationAdmission?.update(camera.position);
     locationLight.carriedPosition.value.copy(camera.position);
     locationLight.carriedPosition.value.y -= 0.35;
@@ -204,6 +209,8 @@ export class LocationScene {
     this.postProcessing?.dispose();
     this.postProcessing = null;
     this.lightPool?.dispose();
+    this.structureResidency?.dispose();
+    this.structureResidency = null;
     const owned = new Set();
     this.scene.traverse((object) => {
       if (object.isInstancedMesh) object.dispose();

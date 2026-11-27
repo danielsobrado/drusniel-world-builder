@@ -16,7 +16,7 @@ import { LocationDevMenu } from './ui/LocationDevMenu.js';
  */
 export function createLocationRuntime({
   renderer, loading, playerController, viewModeController, cameraCutCoordinator, floatingOrigin, walkMode, baseUrl,
-  decorationBudget = null,
+  decorationBudget = null, structureBudget = null,
   atmosphericBudget = null,
   search = window.location.search, storage = window.localStorage,
 }) {
@@ -28,7 +28,7 @@ export function createLocationRuntime({
   const prompt = new TownInteractionPrompt();
   const runtime = new LocationRuntime({
     catalog, generators: LOCATION_GENERATORS, renderer, loading, playerController, viewModeController,
-    cameraCutCoordinator, floatingOrigin, prompt, baseUrl, walkMode, storage, decorationBudget, atmosphericBudget,
+    cameraCutCoordinator, floatingOrigin, prompt, baseUrl, walkMode, storage, decorationBudget, structureBudget, atmosphericBudget,
   });
   const menu = new LocationDevMenu({
     sites: catalog.showcaseSites().map((site) => ({ id: site.id, title: site.title, subtitle: site.subtitle })),

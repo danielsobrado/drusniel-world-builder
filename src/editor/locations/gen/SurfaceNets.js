@@ -218,11 +218,21 @@ export function smoothAttribute(indices, array, size, passes = 1) {
  * @returns {Array<{ indices: Uint32Array, attributes: Record<string, { array: Float32Array, size: number }> }>}
  */
 export function splitByColumns(mesh, cell) {
+  return splitMesh(mesh, cell, false);
+}
+
+/** Preserve every triangle and baked vertex attribute; only partition ownership. */
+export function splitByCells(mesh, cell) {
+  return splitMesh(mesh, cell, true);
+}
+
+function splitMesh(mesh, cell, vertical) {
   const position = mesh.attributes.position.array;
   const buckets = new Map();
   for (let t = 0; t < mesh.indices.length; t += 3) {
     const a = mesh.indices[t] * 3;
-    const key = `${Math.floor(position[a] / cell)},${Math.floor(position[a + 2] / cell)}`;
+    const key = vertical ? `${Math.floor(position[a] / cell)},${Math.floor(position[a + 1] / cell)},${Math.floor(position[a + 2] / cell)}`
+      : `${Math.floor(position[a] / cell)},${Math.floor(position[a + 2] / cell)}`;
     let bucket = buckets.get(key);
     if (!bucket) buckets.set(key, bucket = []);
     bucket.push(mesh.indices[t], mesh.indices[t + 1], mesh.indices[t + 2]);

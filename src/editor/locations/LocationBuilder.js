@@ -7,7 +7,8 @@ import { createRng, fbm3 } from './gen/noise.js';
 import { excavatedTunnel } from './gen/excavatedTunnel.js';
 import { PropOcclusionGrid } from './gen/PropOcclusionGrid.js';
 import { chamber, tunnel } from './gen/shapes.js';
-import { extractSurface, smoothAttribute, smoothSurfaceTaubin, splitByColumns } from './gen/SurfaceNets.js';
+import { structureMesh, partitionLocationProp } from './LocationStructureMeshes.js';
+import { extractSurface, smoothAttribute, smoothSurfaceTaubin, splitByColumns, splitByCells } from './gen/SurfaceNets.js';
 import { buildLocationAlpineUnderstory } from './generators/LocationAlpineUnderstory.js';
 import { buildLocationCrystalField } from './generators/LocationCrystalField.js';
 import { LocationNav } from './LocationNav.js';
@@ -379,6 +380,7 @@ export class LocationBuilder {
     crystalField = null,
     alpineUnderstory = null,
     decorationBudget = null,
+    structureBudget = null,
   }) {
     const group = new THREE.Group();
     const preparedProps = [];
@@ -493,7 +495,8 @@ export class LocationBuilder {
         ? rawSeam[v] * 0.78 + smoothedSeam * 0.22
         : rawSeam[v] * 0.50 + smoothedSeam * 0.50;
     }
-    const chunks = splitByColumns({
+    const partition = structureBudget ? splitByCells : splitByColumns;
+    const chunks = partition({
       indices: surface.indices,
       attributes: {
         position: { array: surface.positions, size: 3 }, normal: { array: surface.normals, size: 3 },
@@ -501,7 +504,7 @@ export class LocationBuilder {
         bakeShade: { array: baked.shade, size: SHADE_SIZE },
         surfMask: { array: mask, size: 4 }, surfMask2: { array: mask2, size: 4 },
       },
-    }, CULL_COLUMN_METRES);
+    }, structureBudget?.cellMeters ?? CULL_COLUMN_METRES);
     for (const chunk of chunks) {
       const geometry = new THREE.BufferGeometry();
       for (const [name, { array, size }] of Object.entries(chunk.attributes)) {
@@ -509,7 +512,7 @@ export class LocationBuilder {
       }
       geometry.setIndex(new THREE.BufferAttribute(chunk.indices, 1));
       geometry.computeBoundingSphere();
-      group.add(new THREE.Mesh(geometry, materials.terrain.material));
+      group.add(structureBudget ? structureMesh(geometry, materials.terrain.material, 'terrain') : new THREE.Mesh(geometry, materials.terrain.material));
     }
 
     if (crystalField && (materials.iceCrystal || materials.clearIce)) {
@@ -636,7 +639,11 @@ export class LocationBuilder {
       geometry.setAttribute('bakeDir', new THREE.BufferAttribute(lit.dir, 3));
       geometry.setAttribute('bakeShade', new THREE.BufferAttribute(lit.shade, SHADE_SIZE));
       geometry.computeBoundingSphere();
-      group.add(new THREE.Mesh(geometry, entry.material));
+      const partitions = structureBudget ? partitionLocationProp(geometry, entry.material, key, structureBudget) : null;
+      if (partitions) {
+        for (const mesh of partitions) group.add(mesh);
+        geometry.dispose();
+      } else group.add(new THREE.Mesh(geometry, entry.material));
     }
     group.traverse((object) => { object.matrixAutoUpdate = false; });
     return group;
