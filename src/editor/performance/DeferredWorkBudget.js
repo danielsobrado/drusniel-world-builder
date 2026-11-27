@@ -1,4 +1,5 @@
 import { FrameSlack } from './FrameSlack.js';
+import { SlicedInstanceUploads } from '../stylized/lod/SlicedInstanceUploads.js';
 import { PerfCounters } from './qa/PerfCounters.js';
 import { PreparationPressure, hasPreparationBacklog } from './PreparationPressure.js';
 
@@ -129,6 +130,10 @@ export class DeferredWorkBudget {
     surface.shouldYieldWork = shouldYield;
     surface.hasPublicationPressure = () => this.remainingUploadBytes() < this.maxUploadBytes / 2;
     surface.publicationBudget = this;
+    const enhancements = surface.config?.enhancements;
+    if (enhancements?.slicedInstancePublication && surface.terrainView.renderer?.backend?.isWebGPUBackend) {
+      this.slicedInstanceUploads ??= new SlicedInstanceUploads(surface.terrainView.renderer, enhancements.instanceSliceBudget);
+    }
     if (surface.meadowGrass) {
       surface.meadowGrass.workRunner = this.runner;
       for (const layer of [surface.meadowGrass.blades, surface.meadowGrass.cards]) {
