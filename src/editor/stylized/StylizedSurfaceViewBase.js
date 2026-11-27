@@ -404,7 +404,7 @@ export class StylizedSurfaceView {
         debrisFootprintsProvider: () => this.forestDebrisView?.prototypeFootprints ?? null,
       })
       : null;
-    this.groundContactField = this.enabled && !this.impostorBakeMode
+    this.groundContactField = this.enabled && !this.impostorBakeMode && config.worldSurfaceContextField !== false
       ? new GroundContactField({ terrainView, config })
       : null;
     this.slots = this.enabled && !this.impostorBakeMode && !this.meadowGrass

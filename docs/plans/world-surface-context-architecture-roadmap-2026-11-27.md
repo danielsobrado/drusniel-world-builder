@@ -1,6 +1,6 @@
 # World Surface Context (WSC) — Reusable AAA Grounding & Environmental Integration Roadmap
 
-> **Date:** 2026-11-25 (updated 2026-11-26 for PR 5 and PR 6, 2026-11-27 for PR 7, PR 8 and PR 9)  
+> **Date:** 2026-11-25 (updated 2026-11-26 for PR 5 and PR 6, 2026-11-27 for PR 7, PR 8, PR 9 and the §5 closeout)  
 > **PR 0 Baseline:** `054d0d44` (auditing production commit `b7183e59` on `main`; see [PR 0 Baseline Audit](world-surface-context-pr-00-baseline-2026-11-25.md))  
 > **Engine Baseline:** Three.js `^0.187.0` (`WebGPURenderer`, TSL node materials), canonical signed world coordinates + floating render origin, `64 × 64` streamed terrain pages, Azgaar biome IDs `0–12` (plus custom `32–254`).
 
@@ -100,6 +100,13 @@ worldSurfaceContext:
 ## 5. Engineering Budgets & Acceptance Gates
 
 ### Performance Budgets (Measured Against PR 0 Baseline)
+
+**Closeout status (2026-11-27, [closeout QA](../qa/world-surface-context/closeout/README.md)):**
+CPU rebuild 0.22–0.32 ms/frame amortised and upload ~7 KiB/frame (met); zero extra samplers (met);
+each rebuild was ~10 ms on one frame, so every budgeted build is now sliced to 4 ms (pending a
+hardware re-measure); shader cost and the full `qa:wsc:pr0` rerun stay open because the shared
+machine could not hold a headed browser in focus. `qa:perf --wsc 0` is the A/B switch.
+
 - WSC CPU field rebuild: `< 0.5 ms` amortised/frame
 - WSC GPU texture upload: `< 0.25 ms` amortised/frame
 - Incremental GPU shading cost: `< 0.5 ms` typical scene (`< 1.0 ms` total GPU p95 increment)

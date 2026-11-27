@@ -239,6 +239,7 @@ export function buildPerfReport({
       speed: config.speed,
       explorationBoost: Boolean(config.explorationBoost),
       contactOcclusion: config.contactOcclusion ?? null,
+      wsc: config.wsc ?? true,
       keys: config.keys,
       hitchMs: config.hitchMs,
       buildingCount: config.buildingCount ?? null,

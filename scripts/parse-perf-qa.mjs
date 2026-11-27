@@ -92,6 +92,8 @@ const subPhases = [
   'maxQueuedCommitAgeMs',
   'attributeBytesUploaded',
   'textureBytesUploaded',
+  'wscUpdate',
+  'wscUploads',
 ];
 const reported = Object.fromEntries(
   subPhases
@@ -110,6 +112,9 @@ console.log(`post-warmup hitch count=${postWarmupHitches.length} (target 0 over 
 console.log(`maxQueuedCommitAgeMs=${counters.maxQueuedCommitAgeMs ?? 'n/a'}`);
 console.log(`attributeBytesUploaded=${counters.attributeBytesUploaded ?? 0}`);
 console.log(`textureBytesUploaded=${counters.textureBytesUploaded ?? 0}`);
+// WSC §5 budgets: CPU < 0.5 ms and upload < 0.25 ms amortised per frame (roadmap 2026-11-27).
+const perFrame = (value) => (summary.frameCount ? value / summary.frameCount : 0);
+console.log(`wsc cpu ms/frame=${perFrame(counters.wscUpdateMs ?? 0).toFixed(4)} uploads=${counters.wscUploads ?? 0}`);
 
 console.log(`source: ${inputPath}`);
 console.log(`report: ${outPath} (${fs.statSync(outPath).size} bytes)`);

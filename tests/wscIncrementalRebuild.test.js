@@ -182,3 +182,28 @@ test('a budgeted cold build after a teleport is spread over frames and lands ide
     field.dispose();
   }
 });
+
+test('a budgeted 16 m recentre is sliced too, keeping the old window shown until it lands', () => {
+  const slots = makeSlots();
+  const field = new WorldSurfaceContextField({ terrainView: { worldStore: { chunkSize, tileSize }, slots }, config });
+  const budget = { canPublish: () => true };
+  const realNow = performance.now.bind(performance);
+  let clock = 0;
+  try {
+    field.update({ x: 5, z: -3 }, { x: 0, z: 0 }, budget);
+    // A clock that ticks 1 ms per read makes the 4 ms slice cut the strip deterministically.
+    performance.now = () => (clock += 1);
+    const target = { x: 21.4, z: -3 };
+    assert.equal(field.update(target, { x: 0, z: 0 }, budget), true, 'the old window still covers the focus');
+    assert.ok(field.pendingBuild?.reuse, 'a reuse build is in flight after one slice');
+    assert.equal(field.centerX, 5, 'the old window is still the published one');
+    let frames = 1;
+    while (field.pendingBuild && frames < 400) { field.update(target, { x: 0, z: 0 }, budget); frames += 1; }
+    performance.now = realNow;
+    assert.equal(field.pendingBuild, null);
+    assertMatchesFull(slots, target, 'after a sliced recentre');
+  } finally {
+    performance.now = realNow;
+    field.dispose();
+  }
+});

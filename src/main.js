@@ -249,6 +249,7 @@ async function initializeEditor(restoreState, resources, startup) {
     if (perfQaConfig.contactOcclusion !== null) {
       config.stylizedSurface.sky.godRays.volumetric.contactOcclusion.enabled = perfQaConfig.contactOcclusion;
     }
+    if (!perfQaConfig.wsc) config.stylizedSurface.worldSurfaceContextField = false;
     if (!perfQaConfig.seaPolish) {
       config.stylizedSurface.water.sea.surf.enabled = false;
       config.stylizedSurface.water.sea.detail.enabled = false;

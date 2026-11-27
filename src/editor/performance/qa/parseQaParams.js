@@ -276,6 +276,8 @@ export function parseQaParams(search = '') {
     explorationBoost: readBoolean(params, 'explorationBoost', false),
     seaPolish: readBoolean(params, 'seaPolish', true),
     contactOcclusion: params.has('contactOcclusion') ? readBoolean(params, 'contactOcclusion', true) : null,
+    // `wsc=0` keeps the World Surface Context window unbuilt: the A/B for its budgets.
+    wsc: readBoolean(params, 'wsc', true),
     gpuTimings: readBoolean(params, 'gpuTimings', false),
     hitchMs: Math.max(1, readNumber(params, 'hitchMs', 1000 / 30)),
     autostart: readBoolean(params, 'autostart', true),

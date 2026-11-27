@@ -94,6 +94,8 @@ setOptionalQuery(query, 'buildings', buildings);
 setOptionalQuery(query, 'density', density);
 setOptionalQuery(query, 'gpuTimings', readArg('gpuTimings'));
 setOptionalQuery(query, 'contactOcclusion', readArg('contactOcclusion'));
+// `--wsc 0`: no World Surface Context window, the A/B for the WSC budgets.
+setOptionalQuery(query, 'wsc', readArg('wsc'));
 setOptionalQuery(query, 'collisionDebug', collisionDebug);
 setOptionalQuery(query, 'constructionStyle', constructionStyle);
 // settlement-approach only: visit another Eldara burg (looking at a realm's town, not the perf gate).

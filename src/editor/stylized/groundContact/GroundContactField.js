@@ -25,10 +25,11 @@ const MAX_UPLOAD_DEFERRAL_MS = 100;
 const WSC_UPLOAD_BYTES = wscGeoTexture.image.data.byteLength + wscBaseTexture.image.data.byteLength
   + wscEcoTexture.image.data.byteLength;
 const DEFAULT_SOIL_HEX = '#6e5435';
-// A cold build (nothing reusable: teleport, noise load) spends at most this much
-// of a budgeted frame, instead of ~28 ms at once. The old window stays shown
-// while it still covers the focus; otherwise WSC is off until the build lands.
-const COLD_BUILD_SLICE_MS = 4;
+// A budgeted build spends at most this much of a frame. A cold one (teleport,
+// noise load) was ~28 ms at once and a 16 m recentre ~10 ms (2026-11-27 diagonal
+// run), over half a 60 FPS frame; the old window stays shown while it still
+// covers the focus, so only a far jump leaves WSC off until the build lands.
+const BUILD_SLICE_MS = 4;
 
 function clamp01(value) {
   return value < 0 ? 0 : (value > 1 ? 1 : value);
@@ -143,6 +144,16 @@ export class GroundContactField {
    * when the focus drifts past the hysteresis band or an overlapping slot changes.
    */
   update(focusCanonical, origin, publicationBudget = null, now = performance.now()) {
+    // Amortised CPU cost of the window (rebuild + repack), the WSC §5 budget.
+    const startedAt = performance.now();
+    try {
+      return this.updateWindow(focusCanonical, origin, publicationBudget, now);
+    } finally {
+      PerfCounters.inc('wscUpdateMs', performance.now() - startedAt);
+    }
+  }
+
+  updateWindow(focusCanonical, origin, publicationBudget, now) {
     if (this.disposed || !this.terrainView?.slots) return false;
     const fx = Number(focusCanonical?.x);
     const fz = Number(focusCanonical?.z);
@@ -191,6 +202,8 @@ export class GroundContactField {
     }
 
     if (signature !== this.lastSlotSignature) {
+      // A build held back past the deferral deadline lands this frame, unsliced.
+      let overdue = false;
       if (publicationBudget && !publicationBudget.canPublish(WSC_UPLOAD_BYTES)) {
         this.uploadDeferredAt ??= now;
         if (now - this.uploadDeferredAt < MAX_UPLOAD_DEFERRAL_MS) {
@@ -200,6 +213,7 @@ export class GroundContactField {
           return this.publishPreviousIfCovering(fx, fz, ox, oz, chunkWorldSize);
         }
         PerfCounters.inc('wscUploadDeadlineOverrides');
+        overdue = true;
       }
       // A build in flight for this window continues even if a slot changed since
       // it began: restarting on every streamed chunk could starve it, and the
@@ -208,10 +222,10 @@ export class GroundContactField {
       if (!job || job.centerX !== targetX || job.centerZ !== targetZ) {
         job = this.beginBuild(targetX, targetZ, chunkSize, tileSize, chunkWorldSize, signature);
       }
-      const sliced = Boolean(publicationBudget) && !job.reuse && this.lastSlotSignature !== '';
-      if (!this.advanceBuild(job, sliced ? performance.now() + COLD_BUILD_SLICE_MS : Infinity)) {
+      const sliced = Boolean(publicationBudget) && !overdue && this.lastSlotSignature !== '';
+      if (!this.advanceBuild(job, sliced ? performance.now() + BUILD_SLICE_MS : Infinity)) {
         this.pendingBuild = job;
-        PerfCounters.inc('wscColdBuildSlices');
+        PerfCounters.inc('wscBuildSlices');
         return this.publishPreviousIfCovering(fx, fz, ox, oz, chunkWorldSize);
       }
       this.pendingBuild = null;
@@ -224,6 +238,7 @@ export class GroundContactField {
         this.publishedChunkRevisions.set(k, slot.pageRevision);
       }
       PerfCounters.inc('textureBytesUploaded', WSC_UPLOAD_BYTES);
+      PerfCounters.inc('wscUploads');
     }
     this.uploadDeferredAt = null;
     this.publishWindow(ox, oz);
