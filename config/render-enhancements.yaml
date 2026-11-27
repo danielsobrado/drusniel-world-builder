@@ -35,6 +35,12 @@ regionalAdmissionBudget: false
 rendererAdmissionBudget: false
 regionalInstancePublicationBudget: false
 slicedInstancePublication: false
+initialInstanceUploadSlicing: false
+initialInstanceUploadBudget:
+  sliceBytes: 262144
+  maxDetachedBytes: 33554432
+  maxAllocationsPerFrame: 2
+  maxRestarts: 3
 instanceSliceBudget:
   sliceBytes: 262144
   maxStagingBytes: 16777216
