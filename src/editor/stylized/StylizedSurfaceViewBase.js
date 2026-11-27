@@ -446,12 +446,14 @@ export class StylizedSurfaceView {
       const cpuPressure = (this.farShadowAdmission || this.reflectionAdmission) &&
         PerfCounters.get('frameFixedCpuMs') + PerfCounters.get('frameDeferredCpuMs') > config.enhancements.auxiliaryPassBudget.frameCpuPressureMs;
       const pressured = contended || cpuPressure;
+      const measured = this.auxiliaryGpuPressure;
+      if (this.farShadowAdmission && measured?.farShadow) PerfCounters.inc('farShadowMeasuredPressureFrames');
       if (this.farShadowAdmission) {
         const origin = terrainView.floatingOrigin.getState();
         const focus = terrainView.focusChunk;
         const revision = [terrainView.worldStore.revision ?? 0, this.revisionTracker?.revision ?? 0,
           this.objectMap?.revision ?? 0, this.shadowRevisionProvider?.() ?? 0, focus?.chunkX, focus?.chunkZ].join(':');
-        this.farShadowAdmission.begin(this.skyView?.cascades, camera, this.skyView?.directional, origin, revision, now, pressured);
+        this.farShadowAdmission.begin(this.skyView?.cascades, camera, this.skyView?.directional, origin, revision, now, pressured || measured?.farShadow === true);
       }
       const prepared = this.reflections?.prepare(camera, this) ?? null;
       this.reflectionPrepared = prepared;
@@ -465,7 +467,8 @@ export class StylizedSurfaceView {
         kind: this.reflections.planarPending ? 'planar' : 'cube', turn: captureTurn || !this.reserveDeferredWork,
         invalid: this.reflections.planarPending ? !this.reflections.planarValid.value : !this.reflections.valid.value,
         partial: this.reflections.face > 0, estimate: this.reflections.captureBudgetMs,
-        contended: pressured, gpuBusy }) : true;
+        contended: pressured, gpuBusy,
+        gpuPressured: measured?.[this.reflections.planarPending ? 'planar' : 'cube'] === true }) : true;
       if (
         prepared
         && captureTurn

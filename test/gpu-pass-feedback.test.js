@@ -3,6 +3,7 @@ import test from 'node:test';
 import { resolveRenderEnhancements } from '../src/config/RenderEnhancements.js';
 import { GpuPassFeedback, classifyGpuPass, groupGpuPasses, bindGpuFeedback, readGpuFeedback } from '../src/editor/performance/gpu/GpuPassFeedback.js';
 import { GpuPassProfiler } from '../src/editor/performance/qa/GpuPassProfiler.js';
+import { AuxiliaryGpuFeedback, auxiliaryGpuCosts } from '../src/editor/performance/gpu/AuxiliaryGpuFeedback.js';
 import { AtmosphericPassAdmission, atmosphericLayerBudget } from '../src/render/postprocessing/AtmosphericPassAdmission.js';
 
 const config = resolveRenderEnhancements();
@@ -134,4 +135,102 @@ test('configuration is independent and validates measurement settings', () => {
   assert.equal(enabled.atmosphericPassAdmission, false);
   assert.throws(() => resolveRenderEnhancements({ gpuAdmissionBudget: { recoveryRenderMs: 14 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ gpuAdmissionBudget: { passMs: { ao: -1 } } }), RangeError);
+});
+
+test('auxiliary attribution ignores all unnamed and unrelated passes', () => {
+  assert.deepEqual(auxiliaryGpuCosts({ 'ShadowMapFarCascade (context 9)': 1.5,
+    'WaterReflectionCubeFace (context 12)': 2, 'WaterReflectionPlanar (context 13)': 3,
+    'shadow/depth': 8, screen: 10, 'WaterReflectionCubeFace (context 14)': 1 }), { farShadow: 1.5, cube: 3, planar: 3 });
+});
+
+function auxiliaryFixture() {
+  const profiler = { enabled: true, error: null, latestSample: null };
+  const feedback = new AuxiliaryGpuFeedback(profiler, settings);
+  feedback.read('world', 0);
+  const sample = (timestamp, totalMs, passes, scope = 'world') => {
+    profiler.latestSample = { timestamp, totalMs: 100, passes: { screen: 100 },
+      gameplay: { scope, totalMs, passes } };
+    return feedback.read(scope, timestamp + 1);
+  };
+  return { profiler, feedback, sample };
+}
+
+test('sparse measured GPU observations independently pressure only expensive auxiliary targets', () => {
+  const { feedback, sample } = auxiliaryFixture();
+  assert.equal(sample(100, 16, { ShadowMapFarCascade: 3 }).farShadow, false);
+  for (let i = 0; i < 10; i++) assert.equal(feedback.read('world', 101 + i).farShadow, false);
+  sample(200, 16, { WaterReflectionCubeFace: 3 });
+  sample(300, 16, { ShadowMapFarCascade: 3 });
+  const reduced = sample(400, 16, { ShadowMapFarCascade: 3, WaterReflectionPlanar: 1 });
+  assert.deepEqual(reduced, { farShadow: true, cube: false, planar: false });
+  sample(500, 16, { WaterReflectionCubeFace: 3 });
+  const both = sample(600, 16, { WaterReflectionCubeFace: 3 });
+  assert.equal(both.cube, true);
+  assert.equal(both.planar, false);
+  assert.equal(sample(2001, 8, { screen: 8 }).farShadow, false, 'expired pass evidence is not retained');
+});
+
+test('recovery requires distinct low-cost observations, and scope changes reject old samples', () => {
+  const { sample, feedback } = auxiliaryFixture();
+  for (const now of [100, 200, 300]) sample(now, 16, { WaterReflectionPlanar: 4 });
+  assert.equal(sample(400, 8, { screen: 8 }).planar, true);
+  for (let i = 1; i <= 8; i++) sample(400 + i * 250, 8, { WaterReflectionPlanar: 1 });
+  assert.equal(feedback.read('world', 2401).planar, false);
+  assert.equal(feedback.read(null, 2402), null);
+  assert.equal(feedback.read('world', 2403), null);
+  assert.equal(feedback.read('world', 2404), null);
+  assert.equal(sample(2500, 8, { WaterReflectionPlanar: 1 }).planar, false);
+});
+
+test('profiler exposes only completed gameplay-window passes, not preparation or failed draws', async () => {
+  const backend = { isWebGPUBackend: true, trackTimestamp: true, beginRender() {},
+    getTimestampUID: context => context.id, getTimestamp: uid => uid, hasTimestampQuery: uid => uid !== 99 };
+  const profiler = new GpuPassProfiler({ backend, resolveTimestampsAsync: () => Promise.resolve() }, { requested: true, sampleEvery: 1 });
+  profiler.beginFrame(100);
+  backend.beginRender({ id: 10, renderTarget: { texture: { name: 'ShadowMapFarCascade' } } });
+  profiler.beginGameplay('world');
+  backend.beginRender({ id: 2, renderTarget: { texture: { name: 'ShadowMapFarCascade' } } });
+  backend.beginRender({ id: 3, renderTarget: { texture: { name: 'WaterReflectionCubeFace' } } });
+  profiler.endGameplay();
+  backend.beginRender({ id: 4 });
+  profiler.endFrame(); await profiler.pending;
+  assert.equal(profiler.latestSample.totalMs, 19);
+  assert.equal(profiler.latestSample.gameplay.totalMs, 5);
+  assert.deepEqual(auxiliaryGpuCosts(profiler.latestSample.gameplay.passes), { farShadow: 2, cube: 3 });
+  profiler.beginFrame(200); profiler.beginGameplay('world'); backend.beginRender({ id: 2 });
+  profiler.endGameplay(false); profiler.endFrame(); await profiler.pending;
+  assert.equal(profiler.latestSample.gameplay, undefined);
+  profiler.beginFrame(300); profiler.beginGameplay('world'); backend.beginRender({ id: 2 }); backend.beginRender({ id: 99 });
+  profiler.endGameplay(); profiler.endFrame(); await profiler.pending;
+  assert.equal(profiler.latestSample.gameplay, undefined);
+  profiler.dispose();
+});
+
+test('auxiliary thresholds are independently configurable and validated', () => {
+  assert.equal(resolveRenderEnhancements({ gpuAdmissionBudget: { auxiliaryPassMs: { cube: 3 } } }).gpuAdmissionBudget.auxiliaryPassMs.cube, 3);
+  assert.throws(() => resolveRenderEnhancements({ gpuAdmissionBudget: { auxiliaryPassMs: { cube: 0 } } }), RangeError);
+  assert.throws(() => resolveRenderEnhancements({ gpuAdmissionBudget: { auxiliaryPassMs: { unknown: 1 } } }), RangeError);
+});
+
+test('runtime staggering visits alternate phases without changing the QA cadence', async () => {
+  const captures = async staggerSamples => {
+    const backend = { isWebGPUBackend: true, trackTimestamp: true, beginRender() {},
+      getTimestampUID: context => context.id, getTimestamp: () => 1 };
+    const profiler = new GpuPassProfiler({ backend, resolveTimestampsAsync: () => Promise.resolve() },
+      { requested: true, sampleEvery: 4, staggerSamples });
+    const frames = [];
+    for (let frame = 0; frame < 18; frame++) {
+      profiler.beginFrame(frame * 16);
+      if (profiler.active) {
+        frames.push(frame);
+        backend.beginRender({ id: frame });
+        profiler.endFrame();
+        await profiler.pending;
+      }
+    }
+    profiler.dispose();
+    return frames;
+  };
+  assert.deepEqual(await captures(false), [0, 4, 8, 12, 16]);
+  assert.deepEqual(await captures(true), [0, 4, 9, 13]);
 });

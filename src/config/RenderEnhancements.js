@@ -32,7 +32,8 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   measuredGpuAdmission: false,
   gpuAdmissionBudget: Object.freeze({ sampleEvery: 8, maxAgeMs: 1500, targetRenderMs: 12, recoveryRenderMs: 9,
     pressureSamples: 3, recoverySamples: 8, minimumDwellMs: 2000,
-    passMs: Object.freeze({ ao: 1.2, ssr: 1.5, bloom: 1, shafts: 1.2, volumetric: 1.5 }) }),
+    passMs: Object.freeze({ ao: 1.2, ssr: 1.5, bloom: 1, shafts: 1.2, volumetric: 1.5 }),
+    auxiliaryPassMs: Object.freeze({ farShadow: 1.5, cube: 1.5, planar: 2 }) }),
   atmosphericPassAdmission: false,
   atmosphericPassBudget: Object.freeze({ targetFrameMs: 18, recoveryFrameMs: 17, pressureMs: 300, recoveryMs: 2000, minimumDwellMs: 3000, maxFrameGapMs: 250,
     ssrStepFactor: 0.65, ssrMinimumSteps: 12, shaftSampleFactor: 0.5, shaftMinimumSamples: 8,
@@ -87,7 +88,8 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     initialInstanceUploadBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.initialInstanceUploadBudget, ...source.initialInstanceUploadBudget },
     instanceSliceBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.instanceSliceBudget, ...source.instanceSliceBudget },
     gpuAdmissionBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget, ...source.gpuAdmissionBudget,
-      passMs: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.passMs, ...source.gpuAdmissionBudget?.passMs } },
+      passMs: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.passMs, ...source.gpuAdmissionBudget?.passMs },
+      auxiliaryPassMs: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.auxiliaryPassMs, ...source.gpuAdmissionBudget?.auxiliaryPassMs } },
     atmosphericPassBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.atmosphericPassBudget, ...source.atmosphericPassBudget },
     environmentalFragmentBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalFragmentBudget, ...source.environmentalFragmentBudget },
     environmentalParticleBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalParticleBudget, ...source.environmentalParticleBudget,
@@ -179,6 +181,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   }
   if (gpu.recoveryRenderMs >= gpu.targetRenderMs) throw new RangeError('GPU admission recovery must be below its target.');
   for (const [key, n] of Object.entries(gpu.passMs)) if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.passMs, key) || !Number.isFinite(n) || n < 0.1 || n > 100) throw new RangeError(`Invalid GPU pass budget: ${key}.`);
+  for (const [key, n] of Object.entries(gpu.auxiliaryPassMs)) if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.auxiliaryPassMs, key) || !Number.isFinite(n) || n < 0.1 || n > 100) throw new RangeError(`Invalid auxiliary GPU pass budget: ${key}.`);
   const atmosphere = value.atmosphericPassBudget;
   for (const [key, min, max] of [['targetFrameMs', 5, 100], ['recoveryFrameMs', 4, 100], ['pressureMs', 100, 5000], ['recoveryMs', 500, 20000], ['minimumDwellMs', 500, 30000], ['maxFrameGapMs', 100, 2000], ['ssrStepFactor', 0.25, 1], ['ssrMinimumSteps', 1, 64], ['shaftSampleFactor', 0.25, 1], ['shaftMinimumSamples', 1, 48], ['volumetricStepFactor', 0.25, 1], ['volumetricMinimumSteps', 1, 128], ['aoResolutionFactor', 0.5, 1], ['aoMinimumResolution', 0.25, 1]]) {
     if (!Number.isFinite(atmosphere[key]) || atmosphere[key] < min || atmosphere[key] > max || (['ssrMinimumSteps', 'shaftMinimumSamples', 'volumetricMinimumSteps'].includes(key) && !Number.isInteger(atmosphere[key]))) throw new RangeError(`atmosphericPassBudget.${key} must be in [${min}, ${max}].`);

@@ -161,3 +161,14 @@ test('flags default off, can be selected independently, and validate freshness o
   assert.throws(() => resolveRenderEnhancements({ auxiliaryPassBudget: { farShadowIntervalMs: 200 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ auxiliaryPassBudget: { reflectionUrgentDeferralMs: 500 } }), RangeError);
 });
+
+test('measured reflection pressure is soft and keeps urgent and ordinary deadlines', () => {
+  const admission = new ReflectionAdmission(settings);
+  assert.equal(admission.allow(request(0, { gpuPressured: true })), false);
+  assert.equal(admission.allow(request(249, { gpuPressured: true })), false);
+  assert.equal(admission.allow(request(250, { gpuPressured: true })), true);
+  admission.captured();
+  assert.equal(admission.allow(request(300, { gpuPressured: true, invalid: true })), false);
+  assert.equal(admission.allow(request(380, { gpuPressured: true, invalid: true })), true);
+  assert.equal(admission.allow(request(400, { gpuPressured: true, invalid: true, gpuBusy: true })), false);
+});

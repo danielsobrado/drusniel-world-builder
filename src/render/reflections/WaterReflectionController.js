@@ -21,12 +21,14 @@ export class WaterReflectionController {
     this.view = terrainView;
     this.config = config;
     this.targets = [0, 1].map(() => new CubeRenderTarget(config.resolution, { type: HalfFloatType, minFilter: LinearFilter, generateMipmaps: false }));
+    for (const target of this.targets) target.texture.name = 'WaterReflectionCubeFace';
     this.front = 0;
     this.cubeCamera = new CubeCamera(0.5, config.reachMeters * 3, this.targets[1]);
     this.cube = cubeTexture(this.targets[0].texture);
     this.valid = uniform(0);
     this.origin = uniform(new Vector3());
     this.planarTarget = config.planar ? new RenderTarget(config.resolution * 2, config.resolution, { type: HalfFloatType, minFilter: LinearFilter, generateMipmaps: false }) : null;
+    if (this.planarTarget) this.planarTarget.texture.name = 'WaterReflectionPlanar';
     this.planar = this.planarTarget ? texture(this.planarTarget.texture) : null;
     this.reprojection = new PlanarReprojection();
     this.planarMatrix = this.reprojection.viewProjection;

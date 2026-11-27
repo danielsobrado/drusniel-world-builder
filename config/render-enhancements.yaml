@@ -66,6 +66,10 @@ gpuAdmissionBudget:
     bloom: 1
     shafts: 1.2
     volumetric: 1.5
+  auxiliaryPassMs:
+    farShadow: 1.5
+    cube: 1.5
+    planar: 2
 atmosphericPassAdmission: false
 atmosphericPassBudget:
   targetFrameMs: 18

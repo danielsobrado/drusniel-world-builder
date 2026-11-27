@@ -138,6 +138,8 @@ import { EnvironmentalParticleBudget } from './editor/performance/EnvironmentalP
 import { SpatialPerformanceOverlay } from './editor/performance/qa/SpatialPerformanceOverlay.js';
 import { GpuPassProfiler } from './editor/performance/qa/GpuPassProfiler.js';
 import { GpuPassFeedback, bindGpuFeedback } from './editor/performance/gpu/GpuPassFeedback.js';
+import { AuxiliaryGpuFeedback } from './editor/performance/gpu/AuxiliaryGpuFeedback.js';
+import { getUnderwaterBlend } from './editor/water/underwaterState.js';
 import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
 import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
 import { withPreparationFrame } from './render/preparation/DrawPreparation.js';
@@ -1667,7 +1669,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   resources.own(perfQa);
   const gpuAdmissionSettings = terrainView.stylizedConfig?.enhancements;
   const runtimeGpuProfiler = gpuAdmissionSettings?.measuredGpuAdmission && !perfQa?.gpuProfiler?.enabled
-    ? new GpuPassProfiler(terrainView.renderer, { requested: true, sampleEvery: gpuAdmissionSettings.gpuAdmissionBudget.sampleEvery, retainHistory: false }) : null;
+    ? new GpuPassProfiler(terrainView.renderer, { requested: true, sampleEvery: gpuAdmissionSettings.gpuAdmissionBudget.sampleEvery, retainHistory: false, staggerSamples: Boolean(stylizedSurface.farShadowAdmission || stylizedSurface.reflectionAdmission) }) : null;
   if (runtimeGpuProfiler) resources.own(runtimeGpuProfiler);
   const admissionGpuProfiler = runtimeGpuProfiler ?? perfQa?.gpuProfiler;
   if (gpuAdmissionSettings?.measuredGpuAdmission && admissionGpuProfiler?.enabled) {
@@ -1675,6 +1677,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     resources.own(gpuFeedback);
     resources.defer(bindGpuFeedback(terrainView.renderer, gpuFeedback));
   }
+  const auxiliaryGpuFeedback = gpuAdmissionSettings?.measuredGpuAdmission && admissionGpuProfiler?.enabled
+    && (stylizedSurface.farShadowAdmission || stylizedSurface.reflectionAdmission)
+    ? new AuxiliaryGpuFeedback(admissionGpuProfiler, gpuAdmissionSettings.gpuAdmissionBudget) : null;
   const spatialOverlay = terrainView.stylizedConfig?.enhancements?.spatialPerformanceOverlay
     ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay, gpuProfiler: admissionGpuProfiler }) : null;
   if (spatialOverlay) resources.own(spatialOverlay);
@@ -1739,6 +1744,8 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     terrainView.renderer.setMRT?.(null);
     // Inside an instanced location the world is not drawn or advanced; it resumes where it stopped.
     if (locations.runtime.active) {
+      if (auxiliaryGpuFeedback && auxiliaryGpuFeedback.scope !== null) auxiliaryGpuFeedback.reset();
+      stylizedSurface.auxiliaryGpuPressure = null;
       spatialOverlay?.update(frameTimestamp, true);
       runtimeGpuProfiler?.beginFrame(frameTimestamp);
       try { locations.runtime.frame(frameTimestamp); }
@@ -2102,8 +2109,20 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     roadsideDetailsUi.update();
     if (import.meta.env.DEV) window.__worldVisualQa?.visualDiagnostics.syncMaterials();
     runtimeGpuProfiler?.beginFrame(frameTimestamp);
-    try { terrainView.render(viewModeController.camera); }
-    finally { runtimeGpuProfiler?.endFrame(); }
+    const diagnostics = postProcessingController.settings?.diagnostics;
+    const auxiliaryScope = auxiliaryGpuFeedback && getUnderwaterBlend() === 0
+      && !(diagnostics?.enabled && diagnostics.debugView !== 'final')
+      ? `world:${viewModeController.camera.uuid}:${terrainView.worldStore.revision ?? 0}:${terrainView.godRays.technique}:${terrainView.godRays.enabled}:${postProcessingController.settings?.enabled}` : null;
+    if (auxiliaryGpuFeedback) {
+      stylizedSurface.auxiliaryGpuPressure = auxiliaryGpuFeedback.read(auxiliaryScope, frameTimestamp);
+      admissionGpuProfiler.beginGameplay(auxiliaryScope);
+    }
+    let mainRendered = false;
+    try { terrainView.render(viewModeController.camera); mainRendered = true; }
+    finally {
+      if (auxiliaryGpuFeedback) admissionGpuProfiler.endGameplay(mainRendered);
+      runtimeGpuProfiler?.endFrame();
+    }
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();
     spatialOverlay?.update(frameTimestamp);

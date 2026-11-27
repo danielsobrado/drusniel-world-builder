@@ -9,7 +9,7 @@ export class ReflectionAdmission {
 
   reset() { this.wait = null; }
 
-  allow({ now, due, kind, invalid, partial, estimate, contended, gpuBusy, turn = true }) {
+  allow({ now, due, kind, invalid, partial, estimate, contended, gpuBusy, gpuPressured = false, turn = true }) {
     if (!due) { this.reset(); return false; }
     if (!this.wait || this.wait.kind !== kind || now < this.wait.since) this.wait = { kind, since: now };
     const age = now - this.wait.since;
@@ -23,11 +23,11 @@ export class ReflectionAdmission {
     const expensive = Number.isFinite(estimate) && estimate > limit;
     const urgent = invalid || partial;
     const maxWait = urgent ? this.settings.reflectionUrgentDeferralMs : this.settings.reflectionMaxDeferralMs;
-    if ((contended || expensive) && age < maxWait) {
-      PerfCounters.inc(contended ? 'reflectionAdmissionPressureDeferred' : 'reflectionAdmissionCostDeferred');
+    if ((contended || expensive || gpuPressured) && age < maxWait) {
+      PerfCounters.inc(gpuPressured ? 'reflectionAdmissionMeasuredGpuDeferred' : contended ? 'reflectionAdmissionPressureDeferred' : 'reflectionAdmissionCostDeferred');
       return false;
     }
-    if (contended || expensive) PerfCounters.inc('reflectionAdmissionDeadlineTurns');
+    if (contended || expensive || gpuPressured) PerfCounters.inc('reflectionAdmissionDeadlineTurns');
     PerfCounters.inc(`reflectionAdmissionEligible.${kind}`);
     return true;
   }
