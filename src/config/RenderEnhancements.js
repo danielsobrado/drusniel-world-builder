@@ -22,6 +22,8 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   rendererAdmissionBudget: false,
   regionalInstancePublicationBudget: false,
   slicedInstancePublication: false,
+  initialInstanceUploadSlicing: false,
+  initialInstanceUploadBudget: Object.freeze({ sliceBytes: 262144, maxDetachedBytes: 33554432, maxAllocationsPerFrame: 2, maxRestarts: 3 }),
   instanceSliceBudget: Object.freeze({ sliceBytes: 262144, maxStagingBytes: 16777216, maxCopyRanges: 8192, maxWritesPerSlice: 64 }),
   farShadowAdmission: false,
   reflectionAdmission: false,
@@ -82,6 +84,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
       admissionPriorities: { ...RENDER_ENHANCEMENT_DEFAULTS.regionalBudget.admissionPriorities, ...source.regionalBudget?.admissionPriorities } },
     geologyAdmissionBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.geologyAdmissionBudget, ...source.geologyAdmissionBudget },
     locationDecorationBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.locationDecorationBudget, ...source.locationDecorationBudget },
+    initialInstanceUploadBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.initialInstanceUploadBudget, ...source.initialInstanceUploadBudget },
     instanceSliceBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.instanceSliceBudget, ...source.instanceSliceBudget },
     gpuAdmissionBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget, ...source.gpuAdmissionBudget,
       passMs: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.passMs, ...source.gpuAdmissionBudget?.passMs } },
@@ -118,11 +121,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -164,6 +167,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     if (!Number.isInteger(n) || n < min || n > max || (key.endsWith('Bytes') && n % 4 !== 0)) throw new RangeError(`instanceSliceBudget.${key} must be in [${min}, ${max}].`);
   }
   if (value.instanceSliceBudget.maxStagingBytes < value.instanceSliceBudget.sliceBytes) throw new RangeError('Instance staging must accommodate one slice.');
+  for (const [key, min, max] of [['sliceBytes', 4096, 4194304], ['maxDetachedBytes', 4096, 134217728], ['maxAllocationsPerFrame', 1, 16], ['maxRestarts', 0, 16]]) {
+    const n = value.initialInstanceUploadBudget[key];
+    if (!Number.isInteger(n) || n < min || n > max || (key.endsWith('Bytes') && n % 4 !== 0)) throw new RangeError(`initialInstanceUploadBudget.${key} must be in [${min}, ${max}].`);
+  }
+  if (value.initialInstanceUploadBudget.maxDetachedBytes < value.initialInstanceUploadBudget.sliceBytes) throw new RangeError('Initial instance staging must accommodate one slice.');
   const gpu = value.gpuAdmissionBudget;
   for (const [key, min, max] of [['sampleEvery', 2, 120], ['maxAgeMs', 250, 10000], ['targetRenderMs', 2, 100], ['recoveryRenderMs', 1, 100], ['pressureSamples', 2, 20], ['recoverySamples', 2, 60], ['minimumDwellMs', 250, 30000]]) {
     const n = gpu[key];
