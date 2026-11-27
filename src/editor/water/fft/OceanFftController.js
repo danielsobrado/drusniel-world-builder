@@ -2,7 +2,8 @@ import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import { OFFSHORE_FFT_SEED, OFFSHORE_FFT_WIND } from './OceanFftConstants.js';
 import { OFFSHORE_FFT_DEFAULTS } from './OceanFftConfig.js';
 import { resolveOceanFftProfile } from './OceanFftQuality.js';
-import { OceanFftRuntime, oceanFftUnsupportedReason } from './OceanFftRuntime.js';
+import { OceanFftRuntime, OCEAN_FFT_STATE, oceanFftUnsupportedReason } from './OceanFftRuntime.js';
+import { admitCompute, cancelComputeWait } from '../../performance/gpu/GpuComputeBudget.js';
 import { OceanFftBinding } from './OceanFftSampling.js';
 import { OceanFftSpectrumState } from './OceanFftSpectrumState.js';
 import { resolveFftWind } from './OceanFftWeather.js';
@@ -51,6 +52,8 @@ export class OceanFftController {
     });
     this.weatherSeen = false;
     this.lastMs = null;
+    this.lastPreparedTime = null;
+    this.forceNextPrepare = true;
     this.runtime.configure({ size: profile.size, tileSizes: profile.tileSizes, spectra: this.spectrum.current });
     this.binding.setSpectra(this.spectrum.current);
   }
@@ -74,16 +77,28 @@ export class OceanFftController {
   /** Finish any transition now (startup, QA captures): the spectrum is exactly the current wind's. */
   settleWeather() {
     const spectra = this.spectrum.settle(this.wind);
-    if (spectra) this.upload(spectra);
+    if (spectra) { this.upload(spectra); this.forceNextPrepare = true; }
   }
 
   /** Once per frame before the main draw, with the shared water clock. */
   prepare(timeSeconds, nowMs = performance.now()) {
+    const runtime = this.runtime;
+    const ready = runtime.state === OCEAN_FFT_STATE.READY || runtime.state === OCEAN_FFT_STATE.ACTIVE;
+    const currentDevice = runtime.renderer.backend.device === runtime.device;
+    const seek = this.lastPreparedTime === null || timeSeconds < this.lastPreparedTime || timeSeconds - this.lastPreparedTime > MAX_STEP_SECONDS;
+    const mandatory = !runtime.output || this.forceNextPrepare || seek || !currentDevice;
+    if (ready && !runtime.warming && !admitCompute(runtime.renderer, this, 'fft', runtime.kernels?.dispatchCount ?? 1, mandatory)) {
+      this.binding.update(runtime.output);
+      return;
+    }
+    if (!ready || runtime.warming) cancelComputeWait(runtime.renderer, this);
     const dt = this.lastMs === null ? 0 : Math.min(MAX_STEP_SECONDS, Math.max(0, (nowMs - this.lastMs) / 1000));
     this.lastMs = nowMs;
     const spectra = this.spectrum.update(dt, this.wind);
     if (spectra) this.upload(spectra);
     this.runtime.prepare(timeSeconds);
+    this.lastPreparedTime = timeSeconds;
+    this.forceNextPrepare = false;
     this.binding.update(this.runtime.output);
     // Read the fields directly: diagnostics() builds an object, and this runs every frame.
     PerfCounters.set('oceanFftActive', this.binding.available.value);
@@ -105,6 +120,7 @@ export class OceanFftController {
   }
 
   dispose() {
+    cancelComputeWait(this.runtime.renderer, this);
     this.binding.dispose();
     this.runtime.dispose();
     PerfCounters.set('oceanFftActive', 0);

@@ -1,3 +1,4 @@
+import { admitCompute, cancelComputeWait } from '../../editor/performance/gpu/GpuComputeBudget.js';
 /* global GPUBufferUsage, GPUTextureUsage, GPUMapMode, GPUShaderStage */
 import {
   REVISION, Box3, DepthTexture, Frustum, IndirectStorageBufferAttribute, Matrix4, Mesh,
@@ -341,13 +342,18 @@ export class GpuOcclusion {
     this.active.clear();
     this.walkedScene = null;
     this.stats.collectMs = this.stats.dispatchMs = 0;
-    if (!this.enabled || this.disposed) return;
+    if (!this.enabled || this.disposed) { cancelComputeWait(this.renderer, this); return; }
     // In open views, periodically probe instead of paying for a depth pass that
     // saves almost no geometry. Bypassed frames draw everything normally; no old
     // visibility result is reused, even if the camera teleports during cooldown.
     if (this.cooldown > 0) {
       this.cooldown--;
+      cancelComputeWait(this.renderer, this);
       this.stats.culledDraws = this.stats.culledTriangles = 0;
+      return;
+    }
+    if (!admitCompute(this.renderer, this, 'occlusion')) {
+      this.stats.candidates = this.stats.occluders = this.stats.culledDraws = this.stats.culledTriangles = 0;
       return;
     }
     try {
@@ -515,6 +521,7 @@ export class GpuOcclusion {
   }
 
   dispose() {
+    cancelComputeWait(this.renderer, this);
     this.disposed = true;
     this.active.clear();
     for (const records of this.records.values()) {

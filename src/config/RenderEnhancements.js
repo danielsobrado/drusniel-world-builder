@@ -26,6 +26,10 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   initialInstanceUploadBudget: Object.freeze({ sliceBytes: 262144, maxDetachedBytes: 33554432, maxAllocationsPerFrame: 2, maxRestarts: 3, handoffTimeoutMs: 2000 }),
   instanceSliceBudget: Object.freeze({ sliceBytes: 262144, maxStagingBytes: 16777216, maxCopyRanges: 8192, maxWritesPerSlice: 64 }),
   renderLayerIsolation: false,
+  gpuComputeAdmission: false,
+  gpuComputeBudget: Object.freeze({ frameCredits: 32, mandatoryReserveCredits: 8, maxFrameGapMs: 250,
+    credits: Object.freeze({ fft: 1, snow: 3, occlusion: 8, impostor: 1, ripple: 2, swash: 2, deformation: 2 }),
+    maxDeferralMs: Object.freeze({ fft: 34, snow: 34, occlusion: 100 }) }),
   farShadowAdmission: false,
   reflectionAdmission: false,
   townDecorationAdmission: false,
@@ -93,6 +97,9 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
       auxiliaryPassMs: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.auxiliaryPassMs, ...source.gpuAdmissionBudget?.auxiliaryPassMs } },
     atmosphericPassBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.atmosphericPassBudget, ...source.atmosphericPassBudget },
     environmentalFragmentBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalFragmentBudget, ...source.environmentalFragmentBudget },
+    gpuComputeBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuComputeBudget, ...source.gpuComputeBudget,
+      credits: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuComputeBudget.credits, ...source.gpuComputeBudget?.credits },
+      maxDeferralMs: { ...RENDER_ENHANCEMENT_DEFAULTS.gpuComputeBudget.maxDeferralMs, ...source.gpuComputeBudget?.maxDeferralMs } },
     environmentalParticleBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalParticleBudget, ...source.environmentalParticleBudget,
       minimumShares: { ...RENDER_ENHANCEMENT_DEFAULTS.environmentalParticleBudget.minimumShares, ...source.environmentalParticleBudget?.minimumShares } },
     townDecorationBudget: { ...RENDER_ENHANCEMENT_DEFAULTS.townDecorationBudget, ...source.townDecorationBudget },
@@ -124,11 +131,11 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     value.roadsideLanterns = true;
   }
   if (params.has('detailVisibility')) value.detailVisibility = params.get('detailVisibility') === '1';
-  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
+  for (const key of ['snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'gpuComputeAdmission', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) if (params.has(key)) value[key] = params.get(key) === '1';
   if (params.has('waterCube')) value.waterReflections.enabled = params.get('waterCube') === '1';
   if (params.has('waterPlanar')) value.waterReflections.planar = params.get('waterPlanar') === '1';
   if (params.has('shadowCascades')) value.shadowCascades = Number(params.get('shadowCascades'));
-  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) {
+  for (const key of ['detailVisibility', 'snowRelief', 'roadsideLanterns', 'crownShadows', 'oceanFft', 'geologyLod', 'regionalGeologyAdmission', 'locationDecorationAdmission', 'regionalTerrainProfiles', 'regionalLazyTrees', 'regionalTreeSourceRelease', 'regionalResourceBudget', 'regionalDensityBudget', 'regionalSpatialBudget', 'regionalGeometryCostBudget', 'spatialPerformanceOverlay', 'regionalAdmissionBudget', 'rendererAdmissionBudget', 'regionalInstancePublicationBudget', 'slicedInstancePublication', 'initialInstanceUploadSlicing', 'renderLayerIsolation', 'gpuComputeAdmission', 'farShadowAdmission', 'reflectionAdmission', 'townDecorationAdmission', 'environmentalParticleAdmission', 'environmentalFragmentAdmission', 'coastalSprayCompaction', 'atmosphericPassAdmission', 'measuredGpuAdmission']) {
     if (typeof value[key] !== 'boolean') throw new TypeError(`${key} must be a boolean.`);
   }
   for (const key of ['enabled', 'planar', 'roughnessFiltering']) if (typeof value.waterReflections[key] !== 'boolean') throw new TypeError(`waterReflections.${key} must be a boolean.`);
@@ -183,6 +190,13 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   if (gpu.recoveryRenderMs >= gpu.targetRenderMs) throw new RangeError('GPU admission recovery must be below its target.');
   for (const [key, n] of Object.entries(gpu.passMs)) if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.passMs, key) || !Number.isFinite(n) || n < 0.1 || n > 100) throw new RangeError(`Invalid GPU pass budget: ${key}.`);
   for (const [key, n] of Object.entries(gpu.auxiliaryPassMs)) if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.gpuAdmissionBudget.auxiliaryPassMs, key) || !Number.isFinite(n) || n < 0.1 || n > 100) throw new RangeError(`Invalid auxiliary GPU pass budget: ${key}.`);
+  const compute = value.gpuComputeBudget;
+  for (const [key, min, max] of [['frameCredits', 1, 10000], ['mandatoryReserveCredits', 0, 10000], ['maxFrameGapMs', 100, 2000]]) {
+    if (!Number.isFinite(compute[key]) || compute[key] < min || compute[key] > max) throw new RangeError(`gpuComputeBudget.${key} must be in [${min}, ${max}].`);
+  }
+  if (compute.mandatoryReserveCredits > compute.frameCredits) throw new RangeError('GPU compute reserve exceeds frame credits.');
+  for (const [key, n] of Object.entries(compute.credits)) if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.gpuComputeBudget.credits, key) || !Number.isFinite(n) || n <= 0 || n > 1000) throw new RangeError(`Invalid GPU compute credits: ${key}.`);
+  for (const [key, n] of Object.entries(compute.maxDeferralMs)) if (!Object.hasOwn(RENDER_ENHANCEMENT_DEFAULTS.gpuComputeBudget.maxDeferralMs, key) || !Number.isFinite(n) || n < 0 || n > compute.maxFrameGapMs || (key === 'snow' && n > 60)) throw new RangeError(`Invalid GPU compute deferral: ${key}.`);
   const atmosphere = value.atmosphericPassBudget;
   for (const [key, min, max] of [['targetFrameMs', 5, 100], ['recoveryFrameMs', 4, 100], ['pressureMs', 100, 5000], ['recoveryMs', 500, 20000], ['minimumDwellMs', 500, 30000], ['maxFrameGapMs', 100, 2000], ['ssrStepFactor', 0.25, 1], ['ssrMinimumSteps', 1, 64], ['shaftSampleFactor', 0.25, 1], ['shaftMinimumSamples', 1, 48], ['volumetricStepFactor', 0.25, 1], ['volumetricMinimumSteps', 1, 128], ['aoResolutionFactor', 0.5, 1], ['aoMinimumResolution', 0.25, 1]]) {
     if (!Number.isFinite(atmosphere[key]) || atmosphere[key] < min || atmosphere[key] > max || (['ssrMinimumSteps', 'shaftMinimumSamples', 'volumetricMinimumSteps'].includes(key) && !Number.isInteger(atmosphere[key]))) throw new RangeError(`atmosphericPassBudget.${key} must be in [${min}, ${max}].`);

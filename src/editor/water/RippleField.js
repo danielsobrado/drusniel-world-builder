@@ -1,3 +1,4 @@
+import { admitCompute } from '../performance/gpu/GpuComputeBudget.js';
 import * as THREE from 'three/webgpu';
 import {
   Fn, Loop, exp, float, instanceIndex, int, ivec2, round, smoothstep, textureLoad, textureStore, uniformArray, vec2, vec4,
@@ -176,6 +177,7 @@ export class RippleField {
       step.widths.array[index] = Math.max(impulse.width / RIPPLE_TEXEL_METRES, 1);
     });
     this.queue.length = 0;
+    admitCompute(this.renderer, this, 'ripple', 2, true);
     this.renderer.compute(this.forward);
     this.renderer.compute(this.back);
   }

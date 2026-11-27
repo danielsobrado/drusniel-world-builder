@@ -139,6 +139,7 @@ import { SpatialPerformanceOverlay } from './editor/performance/qa/SpatialPerfor
 import { GpuPassProfiler } from './editor/performance/qa/GpuPassProfiler.js';
 import { GpuPassFeedback, bindGpuFeedback } from './editor/performance/gpu/GpuPassFeedback.js';
 import { AuxiliaryGpuFeedback } from './editor/performance/gpu/AuxiliaryGpuFeedback.js';
+import { GpuComputeBudget, bindComputeBudget } from './editor/performance/gpu/GpuComputeBudget.js';
 import { getUnderwaterBlend } from './editor/water/underwaterState.js';
 import { StreamedDrawPreparation } from './render/preparation/StreamedDrawPreparation.js';
 import { withSceneWarmup } from './render/preparation/SceneWarmup.js';
@@ -1680,6 +1681,9 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
   const auxiliaryGpuFeedback = gpuAdmissionSettings?.measuredGpuAdmission && admissionGpuProfiler?.enabled
     && (stylizedSurface.farShadowAdmission || stylizedSurface.reflectionAdmission)
     ? new AuxiliaryGpuFeedback(admissionGpuProfiler, gpuAdmissionSettings.gpuAdmissionBudget) : null;
+  const gpuComputeBudget = gpuAdmissionSettings?.gpuComputeAdmission && terrainView.renderer.backend?.isWebGPUBackend
+    ? new GpuComputeBudget(gpuAdmissionSettings.gpuComputeBudget) : null;
+  if (gpuComputeBudget) resources.defer(bindComputeBudget(terrainView.renderer, gpuComputeBudget));
   const spatialOverlay = terrainView.stylizedConfig?.enhancements?.spatialPerformanceOverlay
     ? new SpatialPerformanceOverlay({ root, surface: stylizedSurface, settings: terrainView.stylizedConfig.enhancements.spatialOverlay, gpuProfiler: admissionGpuProfiler }) : null;
   if (spatialOverlay) resources.own(spatialOverlay);
@@ -1744,6 +1748,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     terrainView.renderer.setMRT?.(null);
     // Inside an instanced location the world is not drawn or advanced; it resumes where it stopped.
     if (locations.runtime.active) {
+      gpuComputeBudget?.suspend();
       if (auxiliaryGpuFeedback && auxiliaryGpuFeedback.scope !== null) auxiliaryGpuFeedback.reset();
       stylizedSurface.auxiliaryGpuPressure = null;
       spatialOverlay?.update(frameTimestamp, true);
@@ -1758,6 +1763,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         || PerfCounters.get('framePublicationUploadBytes') > deferredWork.maxUploadBytes / 2;
       environmentalParticles.beginFrame(frameTimestamp, pressure);
     }
+    gpuComputeBudget?.beginFrame(frameTimestamp);
     deferredWork.beginFrame();
     const profiling = perfQa?.beginFrame(frameTimestamp) ?? false;
     drawPreparation.beginFrame(deferredWork);
@@ -2122,6 +2128,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     finally {
       if (auxiliaryGpuFeedback) admissionGpuProfiler.endGameplay(mainRendered);
       runtimeGpuProfiler?.endFrame();
+      gpuComputeBudget?.endFrame();
     }
     stylizedSurface.updateRendererCounters();
     deferredWork.endFrame();

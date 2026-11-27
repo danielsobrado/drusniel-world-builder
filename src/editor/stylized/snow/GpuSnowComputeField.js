@@ -1,3 +1,4 @@
+import { admitCompute, cancelComputeWait } from '../../performance/gpu/GpuComputeBudget.js';
 import { markTransientRenderObject } from '../../../render/visibility/RenderPassParticipation.js';
 import * as THREE from 'three/webgpu';
 import {
@@ -45,6 +46,7 @@ export class GpuSnowComputeField {
     this.ground = ground;
     this.count = count;
     this.initialized = false;
+    this.pendingDelta = 0;
     this.current = 0;
     this.lastPlayerPos = null;
     this.playerVelScratch = new THREE.Vector3();
@@ -281,9 +283,17 @@ export class GpuSnowComputeField {
     this.current = next < 0.006 ? 0 : next;
     this.uniforms.intensity.value = this.current;
     this.mesh.visible = this.current > 0 && this.ground.ready;
-    if (!this.mesh.visible) return;
+    if (!this.mesh.visible) { this.pendingDelta = 0; cancelComputeWait(this.renderer, this); return; }
 
-    const dt = Math.min(Math.max(Number(delta) || 0.016, 0.001), 0.08);
+    const elapsed = Math.min(Math.max(Number(delta) || 0.016, 0.001), 0.08);
+    const dt = Math.min(this.pendingDelta + elapsed, 0.08);
+    const prevFocus = this.uniforms.focus.value;
+    const movedFar = Math.hypot(focus.x - prevFocus.x, focus.y - prevFocus.y, focus.z - prevFocus.z) >= BOX_EXTENT * 0.25;
+    if (!admitCompute(this.renderer, this, 'snow', this.initialized ? 1 : 2, !this.initialized || movedFar || dt >= 0.08)) {
+      this.pendingDelta = dt;
+      return;
+    }
+    this.pendingDelta = 0;
     this.uniforms.dt.value = dt;
     this.uniforms.stormBoost.value = Math.max(0, Math.min(1, (windiness - 0.8) * 0.7));
 
@@ -344,6 +354,7 @@ export class GpuSnowComputeField {
   }
 
   dispose() {
+    cancelComputeWait(this.renderer, this);
     this.initCompute?.dispose?.();
     this.stepCompute?.dispose?.();
     this.mesh.removeFromParent();

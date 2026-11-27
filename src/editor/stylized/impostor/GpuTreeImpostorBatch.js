@@ -1,3 +1,4 @@
+import { admitCompute } from '../../performance/gpu/GpuComputeBudget.js';
 import { frameUniform } from '../../../render/FrameUniforms.js';
 import { trackInitialComputeDraw, cancelInitialInstanceDraw } from '../../../render/preparation/InitialInstancePreparation.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
@@ -165,6 +166,7 @@ export class GpuTreeImpostorBatch {
     if (this.disposed || this.initialComputePrepared || this.recordCount !== 0) return;
     // Both pipelines are prepared with zero live records. Never reset a published draw here.
     this.computeCull.dispatchSize = 1;
+    admitCompute(this.renderer, this, 'impostor', this.cullPass.length, true);
     this.renderer.compute(this.cullPass);
     this.initialComputePrepared = true;
     this.indirectNeedsReset = false;
@@ -237,14 +239,17 @@ export class GpuTreeImpostorBatch {
   /** @returns {boolean} false when the work was dropped and must be submitted again */
   submitComputes(nodes, computeQueue) {
     if (computeQueue) {
+      admitCompute(this.renderer, this, 'impostor', Array.isArray(nodes) ? nodes.length : 1, true);
       computeQueue.push(...[nodes].flat());
       return true;
     }
     if (typeof this.renderer.compute === 'function') {
+      admitCompute(this.renderer, this, 'impostor', Array.isArray(nodes) ? nodes.length : 1, true);
       this.renderer.compute(nodes);
       return true;
     }
     if (this.computePending) return false;
+    admitCompute(this.renderer, this, 'impostor', Array.isArray(nodes) ? nodes.length : 1, true);
     this.computePending = this.renderer.computeAsync(nodes).catch((error) => {
       this.cullStale = true;
       console.error('GPU impostor culling failed.', error);

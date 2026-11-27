@@ -1,3 +1,4 @@
+import { admitCompute } from '../../performance/gpu/GpuComputeBudget.js';
 import * as THREE from 'three/webgpu';
 import {
   Fn, If, Loop, abs, atan, clamp, cos, exp, float, instanceIndex, int, ivec2, length, max, min, mix, round,
@@ -290,6 +291,7 @@ export class GpuSnowDeformSim {
     }
     this.queue.length = 0;
 
+    admitCompute(this.renderer, this, 'deformation', 2, true);
     this.renderer.compute(this.stepCompute);
     this.renderer.compute(this.copyCompute);
   }

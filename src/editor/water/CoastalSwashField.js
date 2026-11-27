@@ -1,3 +1,4 @@
+import { admitCompute } from '../performance/gpu/GpuComputeBudget.js';
 import * as THREE from 'three/webgpu';
 import {
   Fn, exp, float, instanceIndex, int, ivec2, max, min, mix, oneMinus,
@@ -264,6 +265,7 @@ export class CoastalSwashField {
         this.supported = false;
       };
       try {
+        admitCompute(this.renderer, this, 'swash', 2, true);
         const forwardJob = this.renderer.compute(pass.forward);
         const backwardJob = this.renderer.compute(pass.backward);
         forwardJob?.catch?.(onFailure);

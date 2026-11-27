@@ -48,6 +48,23 @@ instanceSliceBudget:
   maxCopyRanges: 8192
   maxWritesPerSlice: 64
 renderLayerIsolation: false
+gpuComputeAdmission: false
+gpuComputeBudget:
+  frameCredits: 32
+  mandatoryReserveCredits: 8
+  maxFrameGapMs: 250
+  credits:
+    fft: 1
+    snow: 3
+    occlusion: 8
+    impostor: 1
+    ripple: 2
+    swash: 2
+    deformation: 2
+  maxDeferralMs:
+    fft: 34
+    snow: 34
+    occlusion: 100
 farShadowAdmission: false
 reflectionAdmission: false
 townDecorationAdmission: false
