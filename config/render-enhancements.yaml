@@ -51,6 +51,9 @@ locationStructureBudget:
   surfaceIdleMs: 5000
   surfaceSampleMs: 500
   surfaceEarlyLocationRetirementEnabled: false
+  surfaceTransitionGpuGateEnabled: false
+  surfaceTransitionGpuMaxWaitFrames: 8
+  surfaceTransitionGpuMaxWaitMs: 200
   surfaceOceanFftWarmupEnabled: false
   surfaceOceanFftWarmupComputeEnabled: false
   surfaceOceanFftWarmupMaxBytes: 67108864

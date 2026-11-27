@@ -47,7 +47,7 @@ export async function warmLocationWater({ surface, renderer, settings, entries, 
             await pause();
             signal?.throwIfAborted();
             if (safe() && surface.oceanFft === fft && oceanNearby()
-                && Number.isFinite(renderer.info?.memory?.total)
+                && Number.isFinite(renderer.info?.memory?.total) && renderer.info.memory.total >= 0
                 && Math.max(renderer.info.memory.total, initial + reserved + charged) <= settings.surfaceAdaptiveHighMiB * MIB) {
               if (fft.warmSurfaceTransform(waterVisualClock.value)) PerfCounters.inc('locationSurface.fftWarmupTransforms');
             }
@@ -60,6 +60,7 @@ export async function warmLocationWater({ surface, renderer, settings, entries, 
       }
     }
   }
+  if (!safe()) return charged;
   const reflection = surface.reflections;
   const reflectionEntry = entries.find(entry => entry.kind === 'reflection' && entry.resource === reflection);
   const wetNearby = () => waterNearReturn(surface, anchor, Math.min(settings.surfaceWaterWarmupMeters,

@@ -7,6 +7,7 @@ import { collectLocationSceneryAttributes } from './LocationSceneryResidency.js'
 import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
 import { warmLocationTargets } from './LocationTargetWarmup.js';
+import { LocationTransitionGpuGate } from './LocationTransitionGpuGate.js';
 import { LocationSurfaceExitWarmup } from './LocationSurfaceExitWarmup.js';
 import { LocationSurfaceMemoryPolicy } from './LocationSurfaceMemoryPolicy.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -245,10 +246,15 @@ export class LocationSurfaceResidency {
     PerfCounters.set('locationSurface.adaptiveEvictedChargeBytes', this.memoryPolicy.evictedCharge);
   }
 
-  async restore(signal) {
+  async restore(signal, { renderHeld = false } = {}) {
     if (this.phase === 'idle' || this.phase === 'disposed') return;
     this.phase = 'restoring';
+    const gate = renderHeld && this.settings.surfaceTransitionGpuGateEnabled && this.evicted.size
+      ? new LocationTransitionGpuGate({ renderer: this.renderer, settings: this.settings, pause: this.pause,
+        signal, active: () => this.phase === 'restoring' }) : null;
+    const pause = gate ? () => gate.advance() : this.pause;
     try {
+      if (gate) await pause();
       let current = new Map(this.collect(this.anchor).map(entry => [entry.resource, entry]));
       const entries = [...this.evicted.values()].sort((a, b) => a.distance - b.distance);
       let count = 0, uploaded = 0;
@@ -259,7 +265,7 @@ export class LocationSurfaceResidency {
         let live = entry.deferred ? null : current.get(entry.resource);
         if (live && !this.resident(live)) {
           if (count >= this.settings.surfaceRestoresPerFrame || uploaded + live.size > this.settings.surfaceRestoreBytesPerFrame) {
-            await this.pause();
+            await pause();
             signal?.throwIfAborted();
             if (this.phase !== 'restoring' || this.renderer._isDeviceLost) break;
             count = 0;
@@ -285,7 +291,8 @@ export class LocationSurfaceResidency {
       }
       if (this.phase === 'restoring' && !this.renderer._isDeviceLost) {
         await warmLocationTargets({ surface: this.surface, renderer: this.renderer, settings: this.settings,
-          entries, anchor: this.anchor, pause: this.pause, signal, active: () => this.phase === 'restoring' });
+          entries, anchor: this.anchor, pause, signal, active: () => this.phase === 'restoring' });
+        if (gate && !gate.closed && !this.renderer._isDeviceLost) await pause();
       }
     } catch (error) {
       if (signal?.aborted) throw error;

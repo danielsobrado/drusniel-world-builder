@@ -18,7 +18,7 @@ export function targetShape(target) {
 function sameShape(target, shape) {
   if (!target?.isRenderTarget || target.isCubeRenderTarget || target.isXRRenderTarget
       || target.isRenderTargetArray || target.isRenderTarget3D || target.multiview
-      || target.samples > 1 || !shape) return false;
+      || target.depth > 1 || target.samples > 1 || !shape) return false;
   const current = targetShape(target);
   return ['width', 'height', 'depth', 'samples', 'depthBuffer', 'stencilBuffer'].every(key => current[key] === shape[key])
     && current.textures.length === shape.textures.length
@@ -84,7 +84,8 @@ export async function warmLocationTargets({ surface, renderer, settings, entries
         || renderer._textures.has(target)) continue;
     await pause();
     signal?.throwIfAborted();
-    if (!active() || renderer._isDeviceLost) return;
+    if (!active() || renderer._isDeviceLost || renderer.getRenderTarget?.() != null
+        || renderer.getMRT?.() != null || renderer.xr?.isPresenting === true) return;
     const live = currentOwners(surface, renderer, settings).get(target);
     if (!live || live.kind !== kind || live.warmupKey !== entry.warmupKey || renderer._textures.has(target)
         || !sameShape(target, entry.targetShape)) continue;

@@ -208,7 +208,7 @@ export class LocationRuntime {
         PerfCounters.set('locationSurface.earlyRetirementAccountedBytes',
           Number.isFinite(before) && Number.isFinite(after) ? Math.max(0, before - after) : 0);
       }
-      await this.surfaceResidency?.restore(preparation.signal);
+      await this.surfaceResidency?.restore(preparation.signal, { renderHeld: early });
       preparation.signal.throwIfAborted();
       if (!early) this.#commitSurfaceReturn(anchor, leaving);
       this.surfaceReturnHold = false;
