@@ -67,6 +67,11 @@ for (const family of Object.values(GEOLOGICAL_ROCK_FAMILIES)) {
   for (const tileId of family.tileIds) FAMILY_BY_TILE.set(tileId, family);
 }
 
+/** A geological rock family by its id (`alpineGranite`, …). */
+export function geologicalRockFamily(id) {
+  return Object.values(GEOLOGICAL_ROCK_FAMILIES).find(family => family.id === id) ?? null;
+}
+
 /** Resolves the geological rock family for an Azgaar biome tile ID. */
 export function geologicalRockFamilyForTile(tileId) {
   return FAMILY_BY_TILE.get(tileId) ?? GEOLOGICAL_ROCK_FAMILIES.weatheredLimestone;

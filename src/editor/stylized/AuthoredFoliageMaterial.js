@@ -187,8 +187,9 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
     material.opacityNode = opacity;
   }
   const fillAttenuation = mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp);
-  const fill = understoryShadeEmission(groundedColor, { blossom, airRim: edge?.airRim ?? null })
+  const ownFill = understoryShadeEmission(groundedColor, { blossom, airRim: edge?.airRim ?? null })
     .mul(fillAttenuation).mul(interior);
+  const fill = contact ? contact.groundLight(ownFill, groundedColor) : ownFill;
   material.aoNode = (material.aoNode ?? materialAO).mul(interior);
   material.foliageVisibilityNode = interior;
   material.foliageTransmissionNode = (blossom

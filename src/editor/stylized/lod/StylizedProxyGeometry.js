@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { attribute, vec3 } from 'three/tsl';
+import { attribute, positionWorld, vec3 } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { treeWindTimeFor } from '../forest/TreeWindTime.js';
 import { foliageWindPosition } from '../forest/foliageWind.js';
@@ -16,6 +16,8 @@ import {
   resolveCrownProfiles,
 } from '../forest/crownProfile.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
+import { sampleWorldSurfaceContextVarying } from '../worldSurfaceContext/WorldSurfaceContextState.js';
+import { applyWorldSurfaceContact } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { inheritCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
 function unionBounds(parts, kind = null) {
@@ -93,8 +95,15 @@ function makeTreeTrunkMaterial(config) {
   const value = new THREE.Color(config.trees.barkTint);
   material.colorNode = vec3(...value.toArray());
   material.treeWetnessNode = surfaceWetnessUniform.mul(0.7);
-  material.colorNode = material.colorNode.mul(material.treeWetnessNode.mul(settings.wetStrength * 0.45).oneMinus());
-  material.emissiveNode = treeBarkEmission(material.colorNode);
+  const bark = material.colorNode.mul(material.treeWetnessNode.mul(settings.wetStrength * 0.45).oneMinus());
+  // The near trunk's foot (barkWeathering): soil collar and the ground's own light, so the LOD swap keeps it.
+  const contact = applyWorldSurfaceContact({
+    surface: { color: bark },
+    wsc: sampleWorldSurfaceContextVarying(positionWorld.xz, 'proxyBark'),
+    profile: 'tree',
+  });
+  material.colorNode = contact.color;
+  material.emissiveNode = contact.groundLight(treeBarkEmission(contact.color), contact.color);
   return applyTreeBarkWetSurface(material, settings);
 }
 

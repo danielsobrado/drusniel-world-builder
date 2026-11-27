@@ -1,6 +1,7 @@
 import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import { authoredFoliageColor, cloneAuthoredNodeMaterial } from './AuthoredFoliageMaterial.js';
 import { rockShadeEmission } from './forest/foliageLight.js';
+import { groundLitEmission } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import { completeIterator, ITERATOR_PENDING } from './ResumableIterator.js';
 import { stepViewRebuild, cancelStagedViewRebuild } from './StagedViewRebuild.js';
@@ -29,6 +30,7 @@ import { registerPrototypeIndices } from './BiomeAssetPalette.js';
 import { createBiomePrototypeSelector } from './BiomePrototypeSelector.js';
 import { bakeSnowNormal } from './snowDeposition.js';
 import { buildFracturedBiomeRockPrototypes } from './fracturedRockPrototypes.js';
+import { geologicalRockFamily } from './rockGeologicalFamilies.js';
 import { createRockSnowCapGeometry } from './snow/RockSnowCapGeometry.js';
 import { createRockSnowCapMaterial } from './snow/RockSnowCapMaterial.js';
 
@@ -97,15 +99,21 @@ function seatRockOnGround(material, ground) {
  * PBR response (roughness, metalness and flat shading); deleting the map turns
  * its warm, painted rocks into featureless silhouettes.
  */
-export function createStylizedRockMaterial(mesh, config, weathering, geometry = null, { flatShading = true } = {}) {
+export function createStylizedRockMaterial(mesh, config, weathering, geometry = null, { flatShading = true, family = null } = {}) {
   const source = mesh ? materialList(mesh)[0] : null;
   const material = source
     ? cloneAuthoredNodeMaterial(source)
     : new THREE.MeshStandardNodeMaterial({ name: 'fractured-alpine-rock' });
   if ('roughness' in material) material.roughness = 1;
   if ('metalness' in material) material.metalness = 0;
+  // A procedural rock has no painted map for `rocks.color` (white) to preserve: its
+  // albedo is its geological family's mineral, or it renders as white chalk.
+  const mineral = !source && family ? geologicalRockFamily(family) : null;
+  if (mineral && 'color' in material) {
+    material.color = new THREE.Color(mineral.mineralCool).lerp(new THREE.Color(mineral.mineralWarm), 0.5);
+  }
   if (config?.rocks?.color && 'color' in material) {
-    material.color = new THREE.Color(config.rocks.color);
+    material.color = mineral ? material.color.multiply(new THREE.Color(config.rocks.color)) : new THREE.Color(config.rocks.color);
   }
   material.flatShading = flatShading;
   const ground = geometry ? rockGroundLine(geometry, config?.rocks?.burial) : null;
@@ -124,9 +132,10 @@ export function createStylizedRockMaterial(mesh, config, weathering, geometry = 
         ? config.water.coast.rockImpact.wetness : null,
     });
   }
-  material.emissiveNode = rockShadeEmission(material.colorNode ?? authoredFoliageColor(material), {
+  const stone = material.colorNode ?? authoredFoliageColor(material);
+  material.emissiveNode = groundLitEmission(material, rockShadeEmission(stone, {
     snowCover: coatCoverageOf(material).snow ?? null,
-  });
+  }), stone);
   applyJungleMist(material, config?.ambientEffects);
   material.needsUpdate = true;
   return material;
@@ -305,7 +314,7 @@ export class StylizedRockView {
       const alpineFirstIndex = firstNewPrototype + extracted.length;
       const biomePrototypes = buildFracturedBiomeRockPrototypes();
       for (const proto of biomePrototypes) {
-        extracted.push({ geometry: proto.geometry, source: null, flatShading: false });
+        extracted.push({ geometry: proto.geometry, source: null, flatShading: false, family: proto.family });
         proxyOverrides.push(proto.proxyGeometry);
         this.prototypeBiomeRules.push({
           tileIds: proto.tileIds,
@@ -328,8 +337,8 @@ export class StylizedRockView {
     });
     this.prototypeBiomeRulesSignature = JSON.stringify(this.prototypeBiomeRules);
     const newPrototypes = [];
-    for (const { geometry, source, flatShading } of extracted) {
-      const material = createStylizedRockMaterial(source, this.config, this.rockWeathering(), geometry, { flatShading });
+    for (const { geometry, source, flatShading, family } of extracted) {
+      const material = createStylizedRockMaterial(source, this.config, this.rockWeathering(), geometry, { flatShading, family });
       newPrototypes.push({ geometry, material, kind: 'rock',
         instanceSurface: Boolean(this.rockWeatheringSettings),
         instanceBiomeLook: Boolean(this.rockWeatheringSettings) });

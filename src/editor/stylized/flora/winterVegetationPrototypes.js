@@ -410,7 +410,10 @@ export function createWinterVegetationMaterial(config, {
 
   const finalColor = mix(barkColor, tuftColor, isSnowTuft);
   material.colorNode = finalColor;
-  const fill = understoryShadeEmission(finalColor).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
+  const fill = contact.groundLight(
+    understoryShadeEmission(finalColor).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp)),
+    finalColor,
+  );
   material.emissiveNode = fill;
   material.foliageTransmissionNode = mix(float(0.04), float(0.14), isSnowTuft);
   material.foliageWrapDiffuseNode = mix(float(0.14), float(0.36), isSnowTuft);

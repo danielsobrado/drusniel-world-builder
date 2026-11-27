@@ -3,6 +3,7 @@
 // settlement-to-terrain transition, lit (D00) and unlit (D01), to read the
 // earth paving, aprons and wall feet against PR 0's static TOWN_GROUND (DEF-13).
 import { parseArgs } from 'node:util';
+import { stillmeadowPose } from './lib/stillmeadow-pose.mjs';
 import { loadWscCameras, runWscCapture, settlePose } from './lib/wsc-capture.mjs';
 
 const { values: args } = parseArgs({
@@ -23,18 +24,8 @@ await runWscCapture({
   shoot: async (page, take) => {
     // Stillmeadow's cameras are offsets along its approach, as PR 0 placed them.
     const approach = await page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
-    const yaw = (approach.yawDegrees * Math.PI) / 180;
     for (const camId of ['C05', 'C06']) {
-      const spec = CAMERAS.locations.B14.cameras[camId];
-      const pose = {
-        x: approach.settlementFixture.canonicalX - Math.sin(yaw) * spec.offsetForward,
-        z: approach.settlementFixture.canonicalZ - Math.cos(yaw) * spec.offsetForward,
-        yaw: yaw + (spec.yawOffset ?? 0),
-        pitch: spec.pitch,
-        mode: spec.mode,
-        heightAboveGround: spec.heightAboveGround,
-        fov: spec.fov,
-      };
+      const pose = stillmeadowPose(approach, CAMERAS.locations.B14.cameras[camId]);
       const settled = await settlePose(page, pose, clear);
       await take(`B14-${camId}-clear`, { pose, settled });
     }

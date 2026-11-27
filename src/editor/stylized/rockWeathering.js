@@ -41,7 +41,7 @@ import { SNOW_GROUND_COLOR, snowDeposition } from './snowDeposition.js';
 import { stormSnowCoverAt } from '../weather/storm/snowField/snowFieldState.js';
 import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
-import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
+import { applyWorldSurfaceContact, publishGroundContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { publishCoatCoverage } from './surfaceCoatings/CoatCoverage.js';
 
 /**
@@ -303,7 +303,9 @@ export function applyRockWeathering(material, {
       groundContact.validity,
     )
     : objectLevel;
-  if (ground && groundContact && settings.soil > 0) {
+  // Every grounded rock meets the ground through the contact, even without a soil collar
+  // (`soil` 0): the band also lights its foot as the ground (`groundLight`).
+  if (ground && groundContact) {
     const soilNoise = stylizedFbm2(metricPattern.xz.mul(SOIL_EDGE_PER_METRE)).sub(0.5);
     const fallbackEarth = color(settings.soilColor).mul(look ? look.rgb : vec3(1));
     // Heavy snow country grounds boulders through snowbanks & cool contact AO instead of soil mud.
@@ -321,6 +323,7 @@ export function applyRockWeathering(material, {
       mask: soilMask,
       aoMask: float(settings.soil),
     });
+    publishGroundContact(material, contact);
     weathered = contact.color;
     roughness = contact.roughness;
     normal = contact.normal;

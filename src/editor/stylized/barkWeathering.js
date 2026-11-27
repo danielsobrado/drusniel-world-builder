@@ -30,7 +30,7 @@ import { publishCoatCoverage } from './surfaceCoatings/CoatCoverage.js';
 /** Trunk snow's roughness when the snow coat is off. */
 const TRUNK_SNOW_ROUGHNESS = 0.78;
 import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
-import { applyWorldSurfaceContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
+import { applyWorldSurfaceContact, publishGroundContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 
 /**
  * Bark weathering — after grass-test's `barkWeathering`.
@@ -192,6 +192,7 @@ export function applyBarkWeathering(material, { settings }) {
     fallbackAlbedo: color(settings.soilColor),
     noiseOffset: patches.sub(0.5),
   });
+  publishGroundContact(material, contact);
   const heightAbove = contact.heightAbove;
   material.treeGroundHeightNode = heightAbove;
   const grounded = contact.color;

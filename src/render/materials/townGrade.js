@@ -127,9 +127,10 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
   let baseRoughness = material.roughnessNode ?? materialRoughness;
   const baseNormal = material.normalNode ?? materialNormal;
   let footColor = weathered.color;
+  let footing = null;
   if (slot !== 'roof') {
     // The wall's foot in the soil of the terrain it stands on (WSC PR 7), under moss and rain.
-    const footing = groundTownFoundation({ color: footColor, roughness: baseRoughness }, {
+    footing = groundTownFoundation({ color: footColor, roughness: baseRoughness }, {
       height: positionGeometry.y,
       noise: planarNoise(NOISE.patch, place.xz.mul(0.9)).sub(0.5),
     });
@@ -147,7 +148,8 @@ export function gradeTownMaterial(material, slot, { plastered = true, seed = flo
   const wet = wetTownSurface(material.colorNode, mossed.roughness, normalWorld.y, TOWN_WET_FAMILIES[familyKey]);
   material.colorNode = wet.color;
   material.roughnessNode = wet.roughness;
-  const shadeEmission = buildingShadeEmission(material.colorNode);
+  const ownShade = buildingShadeEmission(material.colorNode);
+  const shadeEmission = footing ? footing.groundLight(ownShade, material.colorNode) : ownShade;
   material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(shadeEmission) : shadeEmission;
   if (material.normalMap && !material.normalNode) {
     // Share the lit normal's sample and UV transform. A separate texture() here

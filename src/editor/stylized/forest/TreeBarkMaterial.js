@@ -5,6 +5,7 @@ import { perturbByHeight } from '../../../render/materials/surfaceLayers/PbrCoat
 import { applyBarkWeathering } from '../barkWeathering.js';
 import { gradeBark, resolveBarkGrade } from './barkGrade.js';
 import { treeBarkEmission } from './foliageLight.js';
+import { groundLitEmission } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { treeBendPosition } from './treeSway.js';
 import { addTreeEmission, createTreeSurfaceMaterial } from './TreeSurfaceMaterial.js';
 import { resolveTreeBarkSettings } from './treeSurfaceSettings.js';
@@ -54,7 +55,7 @@ function finishBark(material, { barkWeathering, barkGrade, sway, surface }) {
   material.userData.treeBarkSurface = surface;
   return addTreeEmission(
     material,
-    treeBarkEmission(material.colorNode, { height: material.treeGroundHeightNode ?? positionGeometry.y }),
+    groundLitEmission(material, treeBarkEmission(material.colorNode, { height: material.treeGroundHeightNode ?? positionGeometry.y }), material.colorNode),
   );
 }
 

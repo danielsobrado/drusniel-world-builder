@@ -140,7 +140,8 @@ export function classifySceneMesh(mesh, material) {
   if (path.includes('debris') || path.includes('deadwood') || path.includes('log') || path.includes('stump')) {
     return { family: 'debris', lod: 'rockNear' };
   }
-  if (path.includes('ground-detail') || path.includes('flora') || path.includes('tropical') || path.includes('understory')) {
+  // The ground-detail view names its meshes `stylized-groundDetail-…`.
+  if (path.includes('ground-detail') || path.includes('grounddetail') || path.includes('flora') || path.includes('tropical') || path.includes('understory')) {
     return { family: 'understory', lod: 'bushNear' };
   }
   if (matName.includes('alpine-rock') || path.includes('alpine-rock') || path.includes('crag')) {

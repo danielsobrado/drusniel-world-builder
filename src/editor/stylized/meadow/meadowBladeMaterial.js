@@ -18,7 +18,7 @@ import { assignGrassMaterialData } from '../../../render/postprocessing/PostProc
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
-import { FOREST_FLOOR_FILL, foliageSkyFill } from '../forest/foliageLight.js';
+import { groundFillLight } from '../forest/foliageLight.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { createMeadowBladePosition, meadowInstance } from './meadowBladeShape.js';
 import { applyHandoff, applyPublicationFade } from './meadowFade.js';
@@ -85,7 +85,7 @@ export function createMeadowBladeMaterial({
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
     .mul(gust).mul(height.mul(height)).mul(grassGustSheenUniforms.weight);
-  const floorFill = foliageSkyFill(albedo, FOREST_FLOOR_FILL).mul(canopy);
+  const floorFill = groundFillLight(albedo, canopy);
   const emissive = pigment.mul(bladeValue).mul(uniforms.sunColor)
     .mul(transmission).mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength)
     .mul(smoothstep(0.35, 1, height))

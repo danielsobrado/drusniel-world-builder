@@ -11,12 +11,19 @@ import {
   vec4,
 } from 'three/tsl';
 import { blendCoat } from '../../../render/materials/surfaceLayers/PbrCoatBlend.js';
+import { groundFillLight } from '../forest/foliageLight.js';
 import {
   resolveContactProfile,
   worldSurfaceContactConfig,
 } from './WorldSurfaceContactConfig.js';
 
 const LUMA_WEIGHTS = Object.freeze([0.2126, 0.7152, 0.0722]);
+
+/** The contact each material met the ground through, for its emission writer (`groundLitEmission`). */
+const groundContacts = new WeakMap();
+/** Emission nodes whose contact band is lit as the ground (`isGroundLit` finds them in a material). */
+const groundLitNodes = new WeakSet();
+const unchangedLight = (emission) => emission;
 
 /**
  * Pure generic World Surface Context (WSC) contact material blending helper (PR 4).
@@ -50,6 +57,8 @@ const LUMA_WEIGHTS = Object.freeze([0.2126, 0.7152, 0.0722]);
  * @param {object | null} [options.mask] optional caller coverage multiplier (`0..1`)
  * @param {object | null} [options.heightScale] optional multiplier on profile blend heights (e.g. object height scale)
  * @param {boolean} [options.applyAo] whether to multiply `color` by orthogonal WSC contact AO (default `true`)
+ * @param {(albedo: object, canopy: object) => object} [options.groundFill] the fill light the ground at the
+ *   foot takes (`groundFillLight`, the terrain's; town foundations stand on paving and pass its own)
  * @param {object} [options.config] resolved `worldSurfaceContext.contact` config
  */
 export function applyWorldSurfaceContact({
@@ -65,6 +74,7 @@ export function applyWorldSurfaceContact({
   aoMask: callerAoMask = null,
   heightScale = null,
   applyAo = true,
+  groundFill = groundFillLight,
   config = worldSurfaceContactConfig(),
 }) {
   const cfg = config ?? worldSurfaceContactConfig();
@@ -86,6 +96,7 @@ export function applyWorldSurfaceContact({
       contactMask: float(0),
       coverage: float(0),
       contactAo: float(1),
+      groundLight: unchangedLight,
     };
   }
 
@@ -159,6 +170,19 @@ export function applyWorldSurfaceContact({
   const contactAo = float(1).sub(aoBand.mul(aoStrength).mul(effectiveAoMask)).clamp(0.45, 1);
   const outColor = applyAo ? colorBlended.color.mul(contactAo) : colorBlended.color;
 
+  // Light continuity: every object family lights itself with its own fill (bark,
+  // stone, shrub, house), several times the floor's under a canopy, so where it meets
+  // the ground it glowed over a darkened floor. Inside the contact band its fill
+  // becomes the floor's own, so the join is lit as one surface. This follows the band,
+  // not the colour mask: a boulder in snow keeps its stone but not a brighter foot.
+  const lightCoverage = contactMask.mul(validity).clamp(0, 1);
+  const canopy = wsc.canopy ?? float(0);
+  const groundLight = (emission, albedo = outColor) => {
+    const lit = mix(emission, groundFill(albedo, canopy), lightCoverage);
+    groundLitNodes.add(lit);
+    return lit;
+  };
+
   return {
     color: outColor,
     roughness: outRoughness,
@@ -168,5 +192,40 @@ export function applyWorldSurfaceContact({
     contactMask,
     coverage: colorCoverage,
     contactAo,
+    lightCoverage,
+    groundLight,
   };
+}
+
+/** Records the contact a material meets the ground through, for `groundLitEmission`. */
+export function publishGroundContact(material, contact) {
+  groundContacts.set(material, contact);
+  return contact;
+}
+
+/**
+ * A material's fill emission with its contact band lit as the ground is, for a
+ * family whose contact is built in one place (weathering) and its fill in another.
+ */
+export function groundLitEmission(material, emission, albedo) {
+  const contact = groundContacts.get(material);
+  return contact ? contact.groundLight(emission, albedo) : emission;
+}
+
+/**
+ * Whether a material's emission lights its contact band as the ground. Every family
+ * that meets the ground through `applyWorldSurfaceContact` and adds a fill must;
+ * `tests/worldSurfaceContextGroundLight.test.js` holds each to it.
+ */
+export function isGroundLit(material) {
+  const seen = new Set();
+  const stack = material.emissiveNode ? [material.emissiveNode] : [];
+  while (stack.length) {
+    const node = stack.pop();
+    if (!node || seen.has(node)) continue;
+    if (groundLitNodes.has(node)) return true;
+    seen.add(node);
+    for (const child of node.getChildren?.() ?? []) stack.push(child);
+  }
+  return false;
 }

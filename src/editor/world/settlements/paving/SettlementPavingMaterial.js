@@ -3,7 +3,7 @@ import { attribute, color, dot, float, fract, mix, positionWorld, sin, smoothste
 import { NOISE, planarNoise } from '../../../locations/materials/locationNoise.js';
 import { treadPaving } from '../../../../render/materials/townWeathering.js';
 import { TOWN_WET_FAMILIES, wetTownSurface } from '../../../../render/materials/townWetness.js';
-import { buildingShadeEmission } from '../../../stylized/forest/foliageLight.js';
+import { PAVING_BOUNCE, PAVING_FILL, buildingShadeEmission } from '../../../stylized/forest/foliageLight.js';
 import { sampleWetnessField, wetnessFieldEnabled } from '../../../weather/wetness/wetnessField.js';
 import { TOWN_GROUND, townEarthNode } from '../../../../render/materials/townGroundContact.js';
 
@@ -89,7 +89,7 @@ export function createPavingMaterial(layer, set, stoneStyle) {
   const wet = wetTownSurface(untiledColour(set.color, set.arm, tint), texture(set.arm, uv()).g, float(1), family);
   material.colorNode = wet.color;
   material.roughnessNode = wet.roughness;
-  material.emissiveNode = buildingShadeEmission(material.colorNode, { fill: 1.35, bounce: 0.8 });
+  material.emissiveNode = buildingShadeEmission(material.colorNode, { fill: PAVING_FILL, bounce: PAVING_BOUNCE });
   material.name = `settlement-paving-${layer}-${set.name}`;
   return material;
 }

@@ -4,6 +4,7 @@
 // direct-only and D17 indirect + emissive, to split a collapse between the sun
 // and the fills.
 import { parseArgs } from 'node:util';
+import { stillmeadowPose } from './lib/stillmeadow-pose.mjs';
 import { loadWscCameras, runWscCapture, settlePose } from './lib/wsc-capture.mjs';
 
 const { values: args } = parseArgs({
@@ -41,16 +42,7 @@ await runWscCapture({
     if (!scenes.includes('woodland') && !scenes.includes('trunks')) return;
     // Stillmeadow's cameras are offsets along its approach, as PR 0 placed them.
     const approach = await page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
-    const yaw = (approach.yawDegrees * Math.PI) / 180;
-    const stillmeadow = (camId) => {
-      const spec = CAMERAS.locations.B14.cameras[camId];
-      return {
-        x: approach.settlementFixture.canonicalX - Math.sin(yaw) * spec.offsetForward,
-        z: approach.settlementFixture.canonicalZ - Math.cos(yaw) * spec.offsetForward,
-        yaw: yaw + (spec.yawOffset ?? 0), pitch: spec.pitch, mode: spec.mode,
-        heightAboveGround: spec.heightAboveGround, fov: spec.fov,
-      };
-    };
+    const stillmeadow = (camId) => stillmeadowPose(approach, CAMERAS.locations.B14.cameras[camId]);
     if (scenes.includes('woodland')) await sweep(page, take, 'B14-C01', stillmeadow('C01'));
     // DEF-10: trunk bases under the canopy at noon: lit, albedo, canopy and indirect-only,
     // so a bright trunk in D17 can be split into its albedo and its light.

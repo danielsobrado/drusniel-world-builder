@@ -147,7 +147,7 @@ locations:
       C03: { label: Tree trunk base contact, subfolder: tree-roots, offsetForward: 14, yawOffset: -0.45, pitch: -0.24, mode: fly, heightAboveGround: 1.0, fov: 60 }
       C04: { label: Understories beneath trees, subfolder: understories, offsetForward: 26, yawOffset: 0.55, pitch: -0.18, mode: fly, heightAboveGround: 1.2, fov: 64 }
       C05: { label: Terrain-to-road transition, subfolder: roads, offsetForward: 55, yawOffset: 0.05, pitch: -0.16, mode: player, heightAboveGround: 1.7, fov: 68 }
-      C06: { label: Building foundations & settlement paving, subfolder: foundations, offsetForward: 88, yawOffset: 0.12, pitch: -0.12, mode: player, heightAboveGround: 1.7, fov: 68 }
+      C06: { label: Building foundations & settlement paving, subfolder: foundations, offsetForward: 88, offsetFromTownEdge: 12, yawOffset: 0.12, pitch: -0.12, mode: player, heightAboveGround: 1.7, fov: 68 }
 
   B15:
     name: Forest-to-grassland transition

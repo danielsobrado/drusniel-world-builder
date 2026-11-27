@@ -1,6 +1,7 @@
 import { Fn, If, float, mix, positionGeometry, positionWorld, varying, vec3, vec4 } from 'three/tsl';
 import { sampleWorldSurfaceContextAt } from '../../editor/stylized/worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact } from '../../editor/stylized/worldSurfaceContext/WorldSurfaceContactNodes.js';
+import { pavingGroundFill } from '../../editor/stylized/forest/foliageLight.js';
 
 /**
  * Settlement ground from the World Surface Context (WSC PR 7): a town's earth
@@ -90,5 +91,7 @@ export function groundTownFoundation(surface, { height = positionGeometry.y, noi
     worldY: ground.w,
     profile: 'foundation',
     noiseOffset: noise,
+    // A town building stands on its paved apron, so its foot takes the paving's light.
+    groundFill: pavingGroundFill,
   });
 }

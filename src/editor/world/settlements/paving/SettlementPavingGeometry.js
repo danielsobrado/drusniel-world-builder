@@ -198,8 +198,16 @@ function* addDisc(buffer, radius, heightAt, tone, cx = 0, cz = 0) {
   }
 }
 
-/** Metres of trodden ground round a footprint, and how far it tucks under the wall. */
-const APRON = Object.freeze({ reach: 1.9, tuck: 0.35 });
+/**
+ * How far the ground layers reach in under a building, from its plot edge. A plan
+ * building's width and depth are its reserved plot (walls, eaves, wings and a hand's
+ * breadth, `SettlementBuildingCatalog`), so its walls stand 0.6–1.4 m inside that edge
+ * and further on a porch side. Tucked only 0.3 m, the apron and shade stopped short of
+ * the wall and laid a straight dark band a metre out from it, with lit ground between.
+ */
+const UNDER_WALL_TUCK = 1.6;
+/** Metres of trodden ground round a footprint. */
+const APRON = Object.freeze({ reach: 1.9, tuck: UNDER_WALL_TUCK });
 /** Rings of an apron, from under the wall outward: `[offset, edge, tone]`. */
 // Fraying from the wall outward, with no darkening of its own: the shade layer does that.
 const APRON_RINGS = Object.freeze([[-APRON.tuck, 0, 1], [0.2, 0.15, 1], [APRON.reach * 0.45, 0.55, 1], [APRON.reach, 1, 1]]);
@@ -266,8 +274,9 @@ function addApron(buffer, building, heightAt) {
 }
 
 /** How far the sky is shut out round a building, in metres, and by how much at the wall. */
-const SHADE = Object.freeze({ reach: 2.6, tuck: 0.3 });
-const SHADE_RINGS = Object.freeze([[-SHADE.tuck, 0], [0.5, 0.35], [SHADE.reach * 0.55, 0.8], [SHADE.reach, 1]]);
+const SHADE = Object.freeze({ reach: 2.6, tuck: UNDER_WALL_TUCK });
+// Dark from under the wall out to the plot edge (0.12 there, as a flush wall had), then opening.
+const SHADE_RINGS = Object.freeze([[-SHADE.tuck, 0], [0, 0.12], [0.5, 0.35], [SHADE.reach * 0.55, 0.8], [SHADE.reach, 1]]);
 
 /**
  * The ambient occlusion a building casts on the ground it stands on: darkest

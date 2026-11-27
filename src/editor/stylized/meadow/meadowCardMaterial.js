@@ -28,7 +28,7 @@ import {
 import { assignGrassMaterialData } from '../../../render/postprocessing/PostProcessingMaterialData.js';
 import { applyJungleMist } from '../ambient/jungleMistOutput.js';
 import { applyCloudShadow } from '../CloudShadow.js';
-import { FOREST_FLOOR_FILL, foliageSkyFill } from '../forest/foliageLight.js';
+import { groundFillLight } from '../forest/foliageLight.js';
 import { spellLightIrradiance, spellWorldEnabled } from '../../vfx/render/SpellWorldLight.js';
 import { sampleWorldWindCanonical, worldWindUniforms } from '../../weather/wind/worldWindState.js';
 import { grassGustSheenUniforms } from '../ambient/GrassGustSheen.js';
@@ -136,7 +136,7 @@ export function createMeadowCardMaterial({ uniforms, tuning, config, sunDirectio
   const sheen = mix(pigment, vec3(1, 1, 0.86), 0.55)
     .mul(uniforms.sunColor.add(uniforms.skyColor.mul(0.5)))
     .mul(gust).mul(height.mul(height)).mul(grassGustSheenUniforms.weight);
-  const floorFill = foliageSkyFill(albedo, FOREST_FLOOR_FILL).mul(canopy);
+  const floorFill = groundFillLight(albedo, canopy);
   const emissive = pigment.mul(uniforms.sunColor).mul(transmission)
     .mul(uniforms.appearance.backlight).mul(tuning.translucencyStrength).mul(0.85).mul(height)
     .add(albedo.mul(uniforms.skyColor).mul(uniforms.appearance.fill))

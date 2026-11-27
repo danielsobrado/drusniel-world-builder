@@ -16,6 +16,7 @@ import {
   compareRegions,
 } from './lib/wsc-color-metrics.mjs';
 import { buildContactSheet } from './lib/wsc-contact-sheets.mjs';
+import { stillmeadowPose } from './lib/stillmeadow-pose.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const outRoot = path.resolve(root, 'docs/qa/world-surface-context/pr-00');
@@ -248,16 +249,7 @@ async function runStillmeadowGroup(browser) {
 
     const stillCams = camerasConfig.locations.B14.cameras;
     for (const [camId, spec] of Object.entries(stillCams)) {
-      const dist = spec.offsetForward ?? 0;
-      const pose = {
-        x: baseX + dirX * dist,
-        z: baseZ + dirZ * dist,
-        yaw: baseYaw + (spec.yawOffset ?? 0),
-        pitch: spec.pitch,
-        mode: spec.mode,
-        heightAboveGround: spec.heightAboveGround,
-        fov: spec.fov,
-      };
+      const pose = stillmeadowPose(approach, spec);
       const relDir = `stillmeadow/${spec.subfolder}`;
       // Hero C01/C02/C03 captured under overcast (matching Stillmeadow screenshot) + clear + core diagnostics.
       const isHero = ['C01', 'C02', 'C03'].includes(camId);

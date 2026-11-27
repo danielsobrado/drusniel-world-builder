@@ -75,7 +75,7 @@ import { createMeadowGroundShading } from './stylized/meadow/MeadowGroundShading
 import { applyMeadowGroundDetail } from './stylized/meadow/meadowGroundDetail.js';
 import { periodicFbm2 } from './stylized/PeriodicNoiseNodes.js';
 import { applyCloudShadow } from './stylized/CloudShadow.js';
-import { FOREST_FLOOR_FILL, foliageSkyFill } from './stylized/forest/foliageLight.js';
+import { groundFillLight } from './stylized/forest/foliageLight.js';
 import { forestFloorUv } from './stylized/forestFloorTexture.js';
 import { spellLightIrradiance, spellWorldEnabled } from './vfx/render/SpellWorldLight.js';
 import { createRainWetnessShading } from './stylized/RainWetnessShading.js';
@@ -751,7 +751,7 @@ export function createTerrainMaterial({
       const spellLight = material.colorNode.mul(spellLightIrradiance(positionWorld, vec3(0, 1, 0)));
       material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(spellLight) : spellLight;
     }
-    const floorFill = foliageSkyFill(material.colorNode, FOREST_FLOOR_FILL).mul(forestFloor);
+    const floorFill = groundFillLight(material.colorNode, forestFloor);
     material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(floorFill) : floorFill;
     if (puddles) material.emissiveNode = material.emissiveNode ? material.emissiveNode.add(puddles.reflection) : puddles.reflection;
     // Valley mist pooling in the gorges below the view, marched against the

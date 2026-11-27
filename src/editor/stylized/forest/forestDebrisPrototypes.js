@@ -104,7 +104,7 @@ function mossSurfaceNodes({ baseUrl = '', soilColor = '#5c4a30', floorColor = '#
     colorNode,
     normalNode: mossContact.normal,
     roughnessNode: mossContact.roughness,
-    emissiveNode: understoryShadeEmission(colorNode),
+    emissiveNode: mossContact.groundLight(understoryShadeEmission(colorNode), colorNode),
   };
 }
 
@@ -344,7 +344,7 @@ export function deadwoodMaterial(
     colorNode: finalAlbedo,
     normalNode,
     roughnessNode,
-    emissiveNode: treeBarkEmission(finalAlbedo, { height: float(0.45), up: normalWorld.y }),
+    emissiveNode: debrisContact.groundLight(treeBarkEmission(finalAlbedo, { height: float(0.45), up: normalWorld.y }), finalAlbedo),
   });
 
   publishCoatCoverage(material, { moss: mossCoverage, snow: snowCover, wet });

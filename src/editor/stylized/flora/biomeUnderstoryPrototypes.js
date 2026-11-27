@@ -103,7 +103,10 @@ function createLivingPlantMaterial(entry, config, environment = {}, deadwoodNois
   const groundedColor = contact.color.mul(contactAO);
 
   const finalColor = biomeUnderstoryColor(groundedColor);
-  const fill = understoryShadeEmission(finalColor, { blossom }).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp));
+  const fill = contact.groundLight(
+    understoryShadeEmission(finalColor, { blossom }).mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp)),
+    finalColor,
+  );
 
   // Keep subtle skyward softness on green foliage tips on top of WSC contact-blended base normal.
   const groundUpView = cameraViewMatrix.mul(vec4(groundContact.normal, 0)).xyz.normalize();

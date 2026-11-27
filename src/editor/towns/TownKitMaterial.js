@@ -40,6 +40,7 @@ import { surfaceCoatings } from '../stylized/surfaceCoatings/SurfaceCoatingConfi
 import { TOWN_WET_FAMILIES, wetTownSurface } from '../../render/materials/townWetness.js';
 import { filterSpecularRoughness } from '../../render/materials/specularAntialiasing.js';
 import { buildingShadeEmission } from '../stylized/forest/foliageLight.js';
+import { groundTownFoundation } from '../../render/materials/townGroundContact.js';
 import { sampleWorldWind } from '../weather/wind/worldWindState.js';
 import { KIT_DATA_ATTRIBUTE } from './TownKitGeometry.js';
 import { RENDER_PALETTE, ROLE, surfaceOf } from './TownKitSurfaces.js';
@@ -242,10 +243,13 @@ export function createTownKitMaterial(atlas, look) {
   const strength = surface.x.mul(townKitShared.reliefScale).mul(float(1).sub(snowCover.mul(0.7)));
   const reliefNormal = normalMap(normalSample, vec2(strength));
   const dryRoughness = row.z.mul(surfaceSample.a);
+  // A grounded wall's foot meets its ground as SettlementView's houses do: soil, and the
+  // paving's light (WSC); only vertices near a grounded foot fetch the WSC.
+  const footing = groundTownFoundation({ color: weathered.color, roughness: dryRoughness }, { height });
   const mossLayer = mossCoat({ ...weathered.moss, settings: coatSettings });
-  const mossed = blendCoat({ color: weathered.color, roughness: dryRoughness, normal: reliefNormal }, {
+  const mossed = blendCoat({ color: footing.color, roughness: footing.roughness, normal: reliefNormal }, {
     color: mossLayer.color,
-    roughness: mossLayer.roughness ?? dryRoughness,
+    roughness: mossLayer.roughness ?? footing.roughness,
     normal: mossLayer.normal(reliefNormal),
   }, weathered.moss.mask);
   publishCoatCoverage(material, { moss: weathered.moss.mask });
@@ -276,7 +280,7 @@ export function createTownKitMaterial(atlas, look) {
   material.metalnessNode = snowed.metalness;
   const flameHeartBoost = vec3(1.0, 0.88, 0.56).mul(smoothstep(0.42, 0.92, luma).mul(0.42).mul(flame));
   const selfEmissive = sample.mul(tint.rgb).add(flameHeartBoost).mul(tint.w).mul(mix(float(1), flicker, flame));
-  const shadeEmissive = buildingShadeEmission(colour, { snowCover }).mul(float(1).sub(flame));
+  const shadeEmissive = footing.groundLight(buildingShadeEmission(colour, { snowCover }), colour).mul(float(1).sub(flame));
   material.emissiveNode = selfEmissive.add(shadeEmissive);
   return material;
 }

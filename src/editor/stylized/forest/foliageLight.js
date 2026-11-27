@@ -58,6 +58,9 @@ const UNDERSTORY_BOUNCE = 1.65;
 const BLOSSOM_FILL = 1.15;
 const BLOSSOM_BOUNCE = 1.4;
 const BUILDING_FILL = 2.2;
+/** Settlement paving's fill and bounce (`SettlementPavingMaterial`): the ground a town building stands on. */
+export const PAVING_FILL = 1.35;
+export const PAVING_BOUNCE = 0.8;
 const BUILDING_BOUNCE = 2.6;
 /**
  * Shared canopy-floor sky fill consumed identically by shaded forest terrain
@@ -66,6 +69,15 @@ const BUILDING_BOUNCE = 2.6;
  * in the exact same indirect light instead of inverting dark under canopy.
  */
 export const FOREST_FLOOR_FILL = 0.62;
+/**
+ * The fill light the ground itself takes at a point, `albedo · sky · FOREST_FLOOR_FILL · canopy`:
+ * the terrain, meadow blades and cards, and every object's foot inside its WSC contact band
+ * (`applyWorldSurfaceContact().groundLight`), so a join is lit as one surface.
+ */
+export function groundFillLight(albedo, canopy) {
+  return foliageSkyFill(albedo, FOREST_FLOOR_FILL).mul(canopy);
+}
+
 /** Metres up a trunk over which the bounce off the ground fades. */
 const BOUNCE_REACH = 5;
 
@@ -322,6 +334,11 @@ export function understoryShadeEmission(plant, { blossom = false, airRim = null 
  * workshop buildings and placed structures so masonry, plaster, timber and roofs
  * share the soft-shaded atmospheric integration of the terrain's boulders.
  */
+/** The light paving takes where it lies flat (no bounce faces down onto it): the ground light at a town wall's foot. */
+export function pavingGroundFill(albedo) {
+  return foliageSkyFill(albedo, PAVING_FILL).add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
+}
+
 export function buildingShadeEmission(surface, { fill = BUILDING_FILL, bounce = BUILDING_BOUNCE, snowCover = null } = {}) {
   const facing = normalWorld.y.negate().mul(0.5).add(0.5);
   const fillGain = snowCover ? mix(float(fill), float(0.45), snowCover.clamp(0, 1)) : float(fill);

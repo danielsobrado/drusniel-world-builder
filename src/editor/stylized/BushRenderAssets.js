@@ -265,8 +265,8 @@ export function createBushProxyMaterial(sourceMaterial, {
   const groundedProxy = contact.color.mul(baseAo)
     .mul(mix(float(1), interior, CROWN_SELF_SHADE));
   material.colorNode = groundedProxy;
-  material.emissiveNode = understoryShadeEmission(groundedProxy)
-    .mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp)).mul(interior);
+  material.emissiveNode = contact.groundLight(understoryShadeEmission(groundedProxy)
+    .mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp)).mul(interior), groundedProxy);
   material.aoNode = interior;
   material.foliageVisibilityNode = interior;
   material.foliageTransmissionNode = float(0.2).mul(mix(float(0.28), float(1.0), baseRamp));
