@@ -141,3 +141,21 @@ test('reconfigure and dispose release every allocation; a late warm-up cannot pu
   assert.equal(runtime.prepare(1), false);
   assert.equal(runtime.configure({ ...CONFIG, spectra: spectra() }), false);
 });
+
+test('suspension releases active FFT resources and reconfiguration regenerates at absolute time', async () => {
+  const { runtime, gpu } = await activeRuntime();
+  runtime.prepare(10);
+  assert.equal(runtime.suspend(), false, 'validation must settle first');
+  await runtime.settled();
+  assert.equal(runtime.suspend(), true);
+  assert.equal(runtime.state, S.SUSPENDED);
+  assert.equal(runtime.output, null);
+  assert.equal(gpu.live.size, 0);
+  assert.equal(runtime.prepare(20), false);
+  assert.equal(runtime.configure({ ...CONFIG, spectra: spectra() }), true);
+  runtime.prepare(20);
+  assert.equal(await runtime.settled(), S.ACTIVE);
+  assert.equal(runtime.output.timeSeconds, 20);
+  runtime.dispose();
+  assert.equal(gpu.live.size, 0);
+});

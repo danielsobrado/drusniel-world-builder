@@ -80,9 +80,33 @@ export class OceanFftController {
     if (spectra) { this.upload(spectra); this.forceNextPrepare = true; }
   }
 
+  surfaceReclaimableBytes() {
+    const runtime = this.runtime;
+    return runtime.state === OCEAN_FFT_STATE.ACTIVE && !runtime.warming
+      ? runtime.resources?.bytes?.total ?? 0 : 0;
+  }
+
+  suspendSurfaceResources() {
+    if (!this.surfaceReclaimableBytes()) return false;
+    this.binding.update(null);
+    if (!this.runtime.suspend()) return false;
+    cancelComputeWait(this.runtime.renderer, this);
+    this.lastMs = null;
+    this.lastPreparedTime = null;
+    this.forceNextPrepare = true;
+    PerfCounters.set('oceanFftActive', 0);
+    PerfCounters.set('oceanFftBytes', 0);
+    return true;
+  }
+
   /** Once per frame before the main draw, with the shared water clock. */
   prepare(timeSeconds, nowMs = performance.now()) {
     const runtime = this.runtime;
+    if (runtime.state === OCEAN_FFT_STATE.SUSPENDED) {
+      if (!runtime.configure({ size: this.profile.size, tileSizes: this.profile.tileSizes, spectra: this.spectrum.current })) return;
+      this.binding.setSpectra(this.spectrum.current);
+      PerfCounters.inc('locationSurface.fftRegenerations');
+    }
     const ready = runtime.state === OCEAN_FFT_STATE.READY || runtime.state === OCEAN_FFT_STATE.ACTIVE;
     const currentDevice = runtime.renderer.backend.device === runtime.device;
     const seek = this.lastPreparedTime === null || timeSeconds < this.lastPreparedTime || timeSeconds - this.lastPreparedTime > MAX_STEP_SECONDS;

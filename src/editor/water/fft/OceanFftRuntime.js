@@ -14,7 +14,7 @@ import { OceanFftGpuResources } from './OceanFftGpuResources.js';
 
 export const OCEAN_FFT_STATE = Object.freeze({
   DISABLED: 'disabled', UNSUPPORTED: 'unsupported', INITIALIZING: 'initializing', READY: 'ready',
-  ACTIVE: 'active', FAILED: 'failed', DISPOSED: 'disposed',
+  ACTIVE: 'active', SUSPENDED: 'suspended', FAILED: 'failed', DISPOSED: 'disposed',
 });
 const S = OCEAN_FFT_STATE;
 const LOG_PREFIX = '[ocean-fft]';
@@ -49,6 +49,7 @@ export class OceanFftRuntime {
     this.device = null;
     this.published = null;
     this.configGeneration = 0;
+    this.observedDevices = new WeakSet();
     this.spectrumRevision = 0;
     this.field = OCEAN_FFT_FIELD.SLOPE;
     this.applied = null; // { tick, spectrumRevision, field } of the last dispatched transform
@@ -62,7 +63,7 @@ export class OceanFftRuntime {
    * (new size or cascade count) releases the previous allocation first.
    */
   configure({ size, tileSizes, spectra }) {
-    if (![S.INITIALIZING, S.READY, S.ACTIVE, S.FAILED].includes(this.state)) return false;
+    if (![S.INITIALIZING, S.READY, S.ACTIVE, S.SUSPENDED, S.FAILED].includes(this.state)) return false;
     this.releaseGpu();
     const unsupported = oceanFftUnsupportedReason(this.renderer);
     if (unsupported) {
@@ -80,7 +81,11 @@ export class OceanFftRuntime {
       this.kernels = this.gpu.createKernels(this.resources);
       this.kernels.fieldMode.value = this.field;
       this.device = this.renderer.backend.device;
-      this.device.lost?.then((info) => this.handleDeviceLost(info));
+      const device = this.device;
+      if (!this.observedDevices.has(device)) {
+        this.observedDevices.add(device);
+        device.lost?.then(info => { if (this.device === device) this.handleDeviceLost(info); });
+      }
       this.configGeneration++;
       this.spectrumRevision++;
       this.state = S.READY;
@@ -134,11 +139,15 @@ export class OceanFftRuntime {
       }
       const generation = this.configGeneration;
       this.warming = Promise.resolve(this.device.popErrorScope?.()).then((error) => {
-        this.warming = null;
         if (generation !== this.configGeneration || this.state !== S.READY) return;
+        this.warming = null;
         if (error) this.fail(`GPU validation error: ${error.message}`);
         else { this.state = S.ACTIVE; this.publish(key); }
-      }, (error) => { this.warming = null; this.fail(`GPU error scope failed: ${error.message}`, error); });
+      }, (error) => {
+        if (generation !== this.configGeneration || this.state !== S.READY) return;
+        this.warming = null;
+        this.fail(`GPU error scope failed: ${error.message}`, error);
+      });
       return true;
     } catch (error) {
       this.fail(`dispatch failed: ${error.message}`, error);
@@ -197,6 +206,14 @@ export class OceanFftRuntime {
     this.reason = reason;
     this.log.error?.(`${LOG_PREFIX} ${reason}; the authored sea detail stays in use.`, error ?? '');
     this.releaseGpu();
+  }
+
+  suspend() {
+    if (this.state !== S.ACTIVE || this.warming || !this.resources) return false;
+    this.state = S.SUSPENDED;
+    this.reason = 'surface suspended';
+    this.releaseGpu();
+    return true;
   }
 
   releaseGpu() {

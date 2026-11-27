@@ -46,6 +46,9 @@ export class WaterReflectionController {
     this.sceneRevisionState = new Float64Array(4);
     this.sceneRevisionState.fill(Number.NaN);
     this.disposed = false;
+    this.surfaceFallbackCube = null;
+    this.surfaceFallbackPlanar = null;
+    this.surfaceCapturesSuspended = false;
     this.capturing = false;
     this.wetSlots = [];
     this.residency = new WaterReflectionResidency(terrainView.chunkWorldSize);
@@ -109,6 +112,35 @@ export class WaterReflectionController {
     this.planarPending = false;
   }
 
+  surfaceReclaimableBytes() {
+    const renderer = this.view.renderer, manager = renderer?._textures;
+    if (this.disposed || this.capturing || this.gpuPressure.busy || this.surfaceCapturesSuspended
+        || !renderer?.backend?.isWebGPUBackend || !manager?.has) return 0;
+    let bytes = 0;
+    for (const target of [...this.targets, this.planarTarget]) {
+      if (!target || !manager.has(target.texture)) continue;
+      const accounted = renderer.info?.memoryMap?.get(target.texture);
+      bytes += Number.isFinite(accounted) && accounted > 0 ? accounted
+        : target.width * target.height * (target.isCubeRenderTarget ? 6 : 1) * 8;
+    }
+    return bytes;
+  }
+
+  suspendSurfaceResources() {
+    if (!this.surfaceReclaimableBytes()) return false;
+    this.surfaceFallbackCube ??= new CubeRenderTarget(1, { type: HalfFloatType, minFilter: LinearFilter, depthBuffer: false, generateMipmaps: false });
+    if (this.planarTarget) this.surfaceFallbackPlanar ??= new RenderTarget(1, 1, {
+      type: HalfFloatType, minFilter: LinearFilter, depthBuffer: false, generateMipmaps: false });
+    this.invalidate();
+    this.cube.value = this.surfaceFallbackCube.texture;
+    if (this.planar) this.planar.value = this.surfaceFallbackPlanar.texture;
+    this.lastCube = -Infinity;
+    this.surfaceCapturesSuspended = true;
+    for (const target of this.targets) target.dispose();
+    this.planarTarget?.dispose();
+    return true;
+  }
+
   // Validity must follow world/camera changes even when no capture work fits.
   prepare(camera, surface) {
     if (this.disposed || this.capturing) return;
@@ -160,6 +192,10 @@ export class WaterReflectionController {
       this.preparedState.wet = wet;
     }
     if (!nearby) { this.invalidate(); return; }
+    if (this.surfaceCapturesSuspended) {
+      this.surfaceCapturesSuspended = false;
+      PerfCounters.inc('locationSurface.reflectionRegenerations');
+    }
     if (this.hasCanonicalProbe && (Math.hypot(canonical.x - this.canonicalProbe.x, canonical.z - this.canonicalProbe.z) > this.config.reachMeters * 0.5
       || Math.abs(camera.position.y - this.probeY) > this.config.reachMeters * 0.2)) this.invalidate();
     if (this.face > 0 && (Math.hypot(canonical.x - this.pendingProbe.x, canonical.z - this.pendingProbe.z) > this.config.reachMeters * 0.5
@@ -274,6 +310,7 @@ export class WaterReflectionController {
       this.virtualCamera = virtual;
       this.view.renderer.setRenderTarget(this.planarTarget);
       withAuxiliaryScene(surface, virtual, origin, now, () => this.view.renderer.render(this.view.scene, virtual), this.layerIsolation);
+      this.planar.value = this.planarTarget.texture;
       this.reprojection.record(virtual);
       this.planarHeight.value = water.surfaceHeight;
       this.lastPlanar = now;
@@ -283,7 +320,7 @@ export class WaterReflectionController {
     this.planarValid.value = 0;
   }
 
-  dispose() { this.disposed = true; this.gpuPressure.dispose(); this.invalidate(); this.residency.clear(); this.shadowRegistryLease?.release(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); }
+  dispose() { this.disposed = true; this.gpuPressure.dispose(); this.invalidate(); this.residency.clear(); this.shadowRegistryLease?.release(); for (const target of this.targets) target.dispose(); this.planarTarget?.dispose(); this.surfaceFallbackCube?.dispose(); this.surfaceFallbackPlanar?.dispose(); }
 
   prewarm(camera, surface) {
     const now = performance.now();
