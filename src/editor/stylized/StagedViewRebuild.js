@@ -2,10 +2,10 @@ import { createIteratorBuilder } from './ResumableIterator.js';
 
 /** Retain a complete publication while assembling its replacement in small units. */
 export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty = 'pendingRebuild') {
-  if (!job) { view.stagedRebuild = null; return false; }
+  if (!job) { cancelStagedViewRebuild(view); return false; }
   const focus = view.terrainView?.focusChunk;
   if (focus && job.focus && (focus.chunkX !== job.focus.chunkX || focus.chunkZ !== job.focus.chunkZ)) {
-    view.stagedRebuild = null;
+    cancelStagedViewRebuild(view);
     if (view[pendingProperty] === job) view[pendingProperty] = null;
     return false;
   }
@@ -16,6 +16,7 @@ export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty
   const moved = state?.job.focus && job.focus
     && (state.job.focus.chunkX !== job.focus.chunkX || state.job.focus.chunkZ !== job.focus.chunkZ);
   if (!state || moved || state.revision !== revision || state.prototypes !== prototypes) {
+    cancelStagedViewRebuild(view);
     state = { job, revision, prototypes, lastProgressAt: performance.now(), builder: createIteratorBuilder(() => factory(job)) };
     view.stagedRebuild = state;
   }
@@ -32,4 +33,9 @@ export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty
   view.lastUpdateKey = state.job.updateKey;
   if (view[pendingProperty]?.updateKey === state.job.updateKey) view[pendingProperty] = null;
   return true;
+}
+
+export function cancelStagedViewRebuild(view) {
+  view.stagedRebuild?.builder.cancel();
+  view.stagedRebuild = null;
 }
