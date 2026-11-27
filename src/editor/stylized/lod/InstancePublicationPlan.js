@@ -45,7 +45,15 @@ export class InstancePublicationPlan {
     return bytes;
   }
 
-  commit() {
+  *publish(getBudget, beforeCommit = null) {
+    const budget = getBudget();
+    const uploaded = budget?.slicedInstanceUploads ? yield* budget.slicedInstanceUploads.stage(this, getBudget) : false;
+    if (!uploaded) yield* admitSceneryPublication(getBudget, () => this.bytes());
+    beforeCommit?.();
+    return this.commit(uploaded);
+  }
+
+  commit(uploaded = false) {
     for (const [attribute, pages] of this.patches) {
       const { array, itemSize } = attribute;
       for (const page of pages) {
@@ -59,7 +67,7 @@ export class InstancePublicationPlan {
       }
     }
     let bytes = 0;
-    for (const span of this.spans.values()) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max, { counter: span.counter });
+    if (!uploaded) for (const span of this.spans.values()) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max, { counter: span.counter });
     for (const finalize of this.finalizers) finalize();
     this.patches.clear();
     this.spans.clear();
