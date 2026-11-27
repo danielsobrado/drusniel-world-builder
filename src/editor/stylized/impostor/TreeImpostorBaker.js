@@ -117,6 +117,10 @@ export function createTreeImpostorBakeMaterial(part, normalPass) {
     const material = createBakeSurface(part);
     const foliageMask = float(part.kind === 'leaf' ? 1 : 0);
     const source = part.material ?? {};
+    const macroBlend = source.userData?.treeFoliageSurface?.impostorNormalBlend;
+    if (part.kind === 'leaf' && Number.isFinite(macroBlend)) {
+      material.foliageNormalBlendNode = float(macroBlend);
+    }
     material.colorNode = normalView.mul(0.5).add(0.5);
     const visibility = source.userData?.canopyVisibilityNode ?? float(1);
     material.opacityNode = foliageMask.mul(visibility.mul(0.5).add(0.5));

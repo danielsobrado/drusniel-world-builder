@@ -345,6 +345,7 @@ export class StylizedTreeView {
       leafAlphaTest: primaryLeaf?.alphaTest,
       // The primary scene is the dark spruces.
       rootProfile: 'conifer',
+      species: 'conifer_evergreen',
     });
     if (primaryCount === 0) {
       throw new Error('No pine prototype contains both configured trunk and leaf materials.');
@@ -390,6 +391,8 @@ export class StylizedTreeView {
         sourceLabel: `Tree variant ${definition.scene}`,
         pivot: definition.pivot,
         rootProfile: rootProfileForSpecies(definition.species),
+        species: definition.species,
+        crownProfile: definition.crownProfile ?? null,
       });
       if (count === 0) {
         throw new Error(
@@ -476,6 +479,8 @@ export class StylizedTreeView {
       sourceLabel = 'Tree prototype',
       pivot = 'bounds',
       rootProfile = 'broadleaf',
+      species = rootProfile,
+      crownProfile = null,
     } = {},
   ) {
     scene.updateMatrixWorld(true);
@@ -551,7 +556,8 @@ export class StylizedTreeView {
               vertexColor: Boolean(part.geometry.getAttribute('color')),
               leafGain,
               canopyGrade,
-              species: rootProfile,
+              species,
+              crownProfile,
               hasCanopyVisibility: Boolean(part.geometry.getAttribute('canopyVisibility')),
               canopyBounds: unifiedCanopyBounds ?? {
                 min: part.geometry.boundingBox.min.toArray(),

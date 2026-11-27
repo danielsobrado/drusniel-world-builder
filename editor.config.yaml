@@ -2791,32 +2791,69 @@ stylizedSurface:
   trees:
     # Per-prototype sky visibility; no per-instance CPU or screen-space pass.
     canopyOcclusion: { resolution: 16, density: 0.65 }
+    crownProfiles:
+      broadleaf:
+        shape: ellipsoid
+        aspect: [1.0, 0.88, 1.0]
+        upBias: 0.18
+        puffStrength: 0.16
+      columnar:
+        shape: ellipsoid
+        aspect: [0.68, 1.18, 0.68]
+        upBias: 0.14
+        puffStrength: 0.15
+      spreading:
+        shape: ellipsoid
+        aspect: [1.22, 0.68, 1.22]
+        upBias: 0.24
+        puffStrength: 0.14
+      conifer:
+        shape: tiered-cone
+        aspect: [0.76, 1.15, 0.76]
+        upBias: 0.10
+        puffStrength: 0.11
+      sparse:
+        shape: ellipsoid
+        aspect: [0.95, 0.92, 0.95]
+        upBias: 0.16
+        puffStrength: 0.18
     foliageLighting:
       enabled: true
-      transmission: 0.82
-      thickness: 0.46
+      transmission: 0.78
+      thickness: 0.48
       absorption: 1.65
-      transmissionColor: '#eaf4b4'
-      normalBlend: 0.82
-      wrapDiffuse: 0.58
-      rimGlow: 0.34
-      puffStrength: 0.14
-      rimRuffle: 0.28
-      occlusionStrength: 0.58
+      transmissionColor: '#e8f1b8'
+      normalBlend: 0.80
+      impostorNormalBlend: 0.72
+      wrapDiffuse: 0.54
+      rimGlow: 0.28
+      puffStrength: 0.15
+      rimRuffle: 0.24
+      occlusionStrength: 0.56
       minimumVisibility: 0.38
       wetStrength: 0.55
       wetRoughness: 0.28
       needleSpecular: 0
       species:
+        broadleaf:
+          crownProfile: broadleaf
+          normalBlend: 0.82
+          impostorNormalBlend: 0.74
+          wrapDiffuse: 0.56
+          rimGlow: 0.30
+          puffStrength: 0.16
+          rimRuffle: 0.26
         conifer:
-          thickness: 0.74
-          transmission: 0.64
-          transmissionColor: '#d4e6b0'
-          normalBlend: 0.74
-          wrapDiffuse: 0.48
-          rimGlow: 0.26
-          puffStrength: 0.12
-          rimRuffle: 0.20
+          crownProfile: conifer
+          thickness: 0.76
+          transmission: 0.58
+          transmissionColor: '#d4e4b2'
+          normalBlend: 0.70
+          impostorNormalBlend: 0.64
+          wrapDiffuse: 0.44
+          rimGlow: 0.20
+          puffStrength: 0.11
+          rimRuffle: 0.16
           needleSpecular: 0.06
     barkSurface:
       enabled: true
@@ -2835,7 +2872,7 @@ stylizedSurface:
     # vertex-painted (alpine snow) crowns are left alone.
     canopyGrade:
       enabled: true
-      shadow: '#265840'
+      shadow: '#2f5236'
       light: '#8ca358'
       tint: 0.9
     enabled: true

@@ -37,9 +37,9 @@ export const AUTUMN_TILE_IDS = Object.freeze(new Set([4, 6]));
  * tropical broadleaf keep their leaves, so they list none and never turn.
  */
 const AUTUMN_TARGETS = Object.freeze({
-  // Birch: the reference image's golds through to burnt orange.
-  broadleaf_tall: Object.freeze(['#e8bc44', '#dd8f2f', '#c8592c']),
-  broadleaf_round: Object.freeze(['#d9a336', '#c87a2c', '#b84b28']),
+  // Luminance-matched gouache ochres and russets that harmonize with green canopies.
+  broadleaf_tall: Object.freeze(['#cfa23e', '#c07d2e', '#aa512b']),
+  broadleaf_round: Object.freeze(['#c49435', '#b2702a', '#9e4726']),
   // Swamp giants keep their dark leaves through the year.
   wetland_sparse: Object.freeze([]),
   tropical_tall: Object.freeze([]),

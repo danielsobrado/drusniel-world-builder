@@ -10,7 +10,11 @@ import { bakeCanopyVisibility } from '../forest/CanopyVisibility.js';
 import { treeFoliageEmission, treeBarkEmission } from '../forest/foliageLight.js';
 import { resolveCanopyGrade } from '../forest/canopyGrade.js';
 import { applyTreeBarkWetSurface } from '../forest/TreeWetSurface.js';
-import { spherifyNormals } from '../forest/proceduralGeometry.js';
+import {
+  applyCrownProfileNormals,
+  resolveCrownProfileKey,
+  resolveCrownProfiles,
+} from '../forest/crownProfile.js';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { inheritCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
 
@@ -49,7 +53,14 @@ function proxyCanopyColor(parts, fallback) {
   return count > 0 ? new THREE.Color().setRGB(sum.x / count, sum.y / count, sum.z / count) : fallback;
 }
 
-function makeTreeLeafMaterial(color, config, bounds, geometry, settings = resolveTreeFoliageSettings(config.trees)) {
+function makeTreeLeafMaterial(
+  color,
+  config,
+  bounds,
+  geometry,
+  settings = resolveTreeFoliageSettings(config.trees),
+  profile = null,
+) {
   const material = settings.enabled
     ? new (foliageMaterialClass(THREE.MeshStandardNodeMaterial))({ roughness: 0.9, metalness: 0, side: THREE.DoubleSide })
     : makeMaterial(color);
@@ -60,6 +71,7 @@ function makeTreeLeafMaterial(color, config, bounds, geometry, settings = resolv
     const surface = configureTreeFoliageSurface(material, { settings,
       visibility: attribute('canopyVisibility', 'float'), color: material.colorNode,
       bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() },
+      profile,
     });
     material.emissiveNode = treeFoliageEmission(material.colorNode, null, surface.visibility);
   }
@@ -86,6 +98,65 @@ function makeTreeTrunkMaterial(config) {
   return applyTreeBarkWetSurface(material, settings);
 }
 
+function buildConnectorLobe(crownWidth, crownHeight, leafCenter, offsetY, scale) {
+  const geometry = new THREE.IcosahedronGeometry(0.5, 0);
+  geometry.scale(crownWidth * scale, crownHeight * scale, crownWidth * scale);
+  geometry.translate(leafCenter.x, leafCenter.y + offsetY * crownHeight, leafCenter.z);
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  return geometry;
+}
+
+function buildProfileProxyLobes(profile, crownWidth, crownHeight, leafCenter) {
+  const geometries = [];
+  if (profile.shape === 'tiered-cone') {
+    for (const [offsetY, radiusScale, heightScale] of profile.tiers) {
+      const indexed = new THREE.ConeGeometry(0.5, 1, 7, 1, false);
+      const geometry = indexed.toNonIndexed();
+      indexed.dispose();
+      geometry.scale(crownWidth * radiusScale, crownHeight * heightScale, crownWidth * radiusScale);
+      geometry.translate(leafCenter.x, leafCenter.y + offsetY * crownHeight, leafCenter.z);
+      geometry.computeBoundingBox();
+      geometry.computeBoundingSphere();
+      geometries.push(geometry);
+    }
+    geometries.push(buildConnectorLobe(crownWidth, crownHeight, leafCenter, -0.24, 0.46));
+    return geometries;
+  }
+
+  const [aspectX, aspectY, aspectZ] = profile.aspect ?? [1, 1, 1];
+  for (let index = 0; index < profile.lobes.length; index += 1) {
+    const [offsetX, offsetY, offsetZ, scale] = profile.lobes[index];
+    const geometry = new THREE.IcosahedronGeometry(0.5, 0);
+    const pos = geometry.getAttribute('position');
+    for (let i = 0; i < pos.count; i += 1) {
+      const x = pos.getX(i);
+      const y = pos.getY(i);
+      const z = pos.getZ(i);
+      const wave = Math.sin(x * 8.3 + z * 6.1 + index * 1.7) * Math.cos(y * 7.9 - x * 4.7) * 0.05;
+      const scaleR = 1 + wave;
+      pos.setXYZ(i, x * scaleR, y * scaleR, z * scaleR);
+    }
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+    geometry.scale(
+      crownWidth * scale * aspectX,
+      crownHeight * scale * aspectY,
+      crownWidth * scale * aspectZ * 0.94,
+    );
+    geometry.translate(
+      leafCenter.x + offsetX * crownWidth,
+      leafCenter.y + offsetY * crownHeight,
+      leafCenter.z + offsetZ * crownWidth,
+    );
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
+    geometries.push(geometry);
+  }
+  geometries.push(buildConnectorLobe(crownWidth, crownHeight, leafCenter, -0.22, 0.5));
+  return geometries;
+}
+
 export function createTreeProxyPrototype(parts, config) {
   const combinedBounds = unionBounds(parts);
   const leafBounds = unionBounds(parts, 'leaf') ?? combinedBounds;
@@ -95,58 +166,42 @@ export function createTreeProxyPrototype(parts, config) {
   const trunkSize = trunkBounds.getSize(new THREE.Vector3());
   const trunkCenter = trunkBounds.getCenter(new THREE.Vector3());
 
+  const leafMaterial = parts.find(part => part.kind === 'leaf')?.material;
+  const leafSurface = leafMaterial?.userData?.treeFoliageSurface;
+  const profileKey = resolveCrownProfileKey(
+    leafMaterial?.userData?.crownProfileKey ?? leafSurface?.crownProfile ?? 'broadleaf',
+    leafMaterial?.userData?.crownProfileKey,
+  );
+  const profiles = resolveCrownProfiles(config.trees);
+  const profile = profiles[profileKey] ?? profiles.broadleaf;
+
   const crownWidth = Math.max(0.2, Math.max(leafSize.x, leafSize.z));
   const crownHeight = Math.max(0.2, leafSize.y);
-  const crownLobeGeometries = [
-    [-0.22, -0.08, 0.04, 0.68],
-    [0.2, -0.02, -0.08, 0.72],
-    [0, 0.24, 0.08, 0.62],
-    // A low central lobe overlaps the trunk axis. The three silhouette lobes
-    // can leave an empty pocket around that axis even when their AABBs overlap,
-    // which reads as a floating crown at proxy distance.
-    [0, -0.22, 0, 0.5],
-  ].map(([offsetX, offsetY, offsetZ, scale], index) => {
-    const geometry = new THREE.DodecahedronGeometry(0.5, index < 3 ? 1 : 0);
-    if (index < 3) {
-      const pos = geometry.getAttribute('position');
-      for (let i = 0; i < pos.count; i += 1) {
-        const x = pos.getX(i);
-        const y = pos.getY(i);
-        const z = pos.getZ(i);
-        const wave = Math.sin(x * 9.4 + z * 6.7 + index * 1.7) * Math.cos(y * 8.9 - x * 5.3) * 0.65
-          + Math.cos(z * 14.1 - y * 11.3) * 0.35;
-        const scaleR = 1 + wave * 0.07;
-        pos.setXYZ(i, x * scaleR, y * scaleR, z * scaleR);
-      }
-      pos.needsUpdate = true;
-      geometry.computeVertexNormals();
-    }
-    geometry.scale(
-      crownWidth * scale,
-      crownHeight * scale,
-      crownWidth * scale * (index === 2 ? 0.84 : 0.96),
-    );
-    geometry.translate(
-      leafCenter.x + offsetX * crownWidth,
-      leafCenter.y + offsetY * crownHeight,
-      leafCenter.z + offsetZ * crownWidth,
-    );
-    geometry.computeBoundingBox();
-    geometry.computeBoundingSphere();
-    return geometry;
-  });
+  const crownLobeGeometries = buildProfileProxyLobes(profile, crownWidth, crownHeight, leafCenter);
   const connectorBounds = crownLobeGeometries.at(-1).boundingBox.clone();
   const canopyGeometry = mergeGeometries(crownLobeGeometries, false);
   crownLobeGeometries.forEach((geometry) => geometry.dispose());
   canopyGeometry.computeBoundingBox();
   canopyGeometry.computeBoundingSphere();
-  spherifyNormals(canopyGeometry, { strength: 0.85, center: leafCenter });
+  applyCrownProfileNormals(
+    canopyGeometry,
+    { min: canopyGeometry.boundingBox.min.toArray(), max: canopyGeometry.boundingBox.max.toArray() },
+    profile,
+    { strength: 0.86 },
+  );
   canopyGeometry.userData.trunkConnectorBounds = {
     min: connectorBounds.min.toArray(),
     max: connectorBounds.max.toArray(),
   };
+  canopyGeometry.userData.crownProfileKey = profileKey;
+
+  const actualCanopyWidth = Math.max(
+    0.2,
+    canopyGeometry.boundingBox.max.x - canopyGeometry.boundingBox.min.x,
+    canopyGeometry.boundingBox.max.z - canopyGeometry.boundingBox.min.z,
+  );
   const branchInclusiveDiameter = Math.max(trunkSize.x, trunkSize.z);
-  const proxyTrunkDiameter = Math.min(branchInclusiveDiameter, crownWidth * 0.14);
+  const proxyTrunkDiameter = Math.min(branchInclusiveDiameter, actualCanopyWidth * 0.14);
   const trunkGeometry = new THREE.CylinderGeometry(
     Math.max(0.04, proxyTrunkDiameter * 0.34),
     Math.max(0.05, proxyTrunkDiameter * 0.5),
@@ -174,7 +229,8 @@ export function createTreeProxyPrototype(parts, config) {
           config,
           canopyGeometry.boundingBox,
           canopyGeometry,
-          parts.find(part => part.kind === 'leaf')?.material?.userData?.treeFoliageSurface,
+          leafSurface,
+          profile,
         ),
         kind: 'leaf',
       },

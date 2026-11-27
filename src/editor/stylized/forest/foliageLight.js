@@ -40,10 +40,10 @@ const CROWN_AIR = 0.26;
 /** Thicker air pulls the ramp in by the root of its fog scale, up to this factor. */
 const MAX_AIR_REACH = 2.5;
 /** Share of the sky fill a crown's and a trunk's shaded faces take. */
-const CROWN_FILL = 0.72;
+const CROWN_FILL = 0.48;
 const BARK_FILL = 1.05;
 /** Share of the ground's bounce light a downward/lower face takes. */
-const CROWN_BOUNCE = 1.15;
+const CROWN_BOUNCE = 1.0;
 const BARK_BOUNCE = 1.3;
 /**
  * Stone takes several times bark's share: under this scene's thin ambient a backlit
@@ -196,12 +196,10 @@ export function treeFoliageSurfaceEmission(crown, visibility = float(1), localGr
   const ground = localGround ?? foliageLight.groundColor;
   // Ground bounce lifts lower and underside puffs toward the local floor beneath the tree.
   const underside = normalWorld.y.negate().mul(0.5).add(0.5).clamp(0, 1).pow(1.6);
-  const outerSky = foliageSkyFill(crown, CROWN_FILL);
-  // Replace dark/desaturated core AO with rich, saturated cool emerald/teal atmospheric occlusion.
-  const velvetTint = crown.mul(vec3(0.52, 0.95, 1.08));
-  const coreAtmosphere = mix(foliageLight.skyColor, foliageLight.airColor, 0.35);
-  const innerAoFill = velvetTint.mul(coreAtmosphere).mul(foliageLight.fill).mul(CROWN_FILL * 0.58);
-  const skyTerm = mix(innerAoFill, outerSky, visibility);
+  // Restrained sky-fill floor preserves deep mossy interior shadows without washing into artificial cyan.
+  const skyVis = mix(float(0.28), float(1), visibility);
+  const coreTemp = mix(vec3(0.86, 0.96, 1.02), vec3(1, 1, 1), visibility);
+  const skyTerm = foliageSkyFill(crown.mul(coreTemp), CROWN_FILL).mul(skyVis);
   return skyTerm
     .add(crown.mul(ground).mul(foliageLight.fill).mul(underside).mul(CROWN_BOUNCE).mul(mix(float(0.35), float(1), visibility)));
 }
@@ -217,19 +215,19 @@ export function canopyPainterlyHarmony({
   seed,
   label = 'crown',
 }) {
-  const treeTemp = mix(vec3(0.95, 1.01, 1.03), vec3(1.05, 1.00, 0.93), fract(seed.mul(7.31)));
+  const treeTemp = mix(vec3(0.96, 1.005, 1.02), vec3(1.04, 1.00, 0.95), fract(seed.mul(7.31)));
   const macroPatch = varying(
     worldNoiseField(WORLD_NOISE_LAYERS.macro)(canonicalXZ.div(MEADOW_PATCH_METERS)).r,
     `${label}MacroPatch`,
   );
-  const landscapeHarmony = mix(vec3(0.96, 1.01, 1.02), vec3(1.05, 1.01, 0.92), macroPatch);
+  const landscapeHarmony = mix(vec3(0.97, 1.005, 1.015), vec3(1.03, 1.005, 0.955), macroPatch);
   const worldCoord = varying(vec3(canonicalXZ.x, worldPos.y, canonicalXZ.y), `${label}WorldStroke`);
   const strokeUv = worldCoord.xz.add(vec2(worldCoord.y.mul(0.37), worldCoord.y.mul(-0.29)));
   const mesoA = worldNoiseField(WORLD_NOISE_LAYERS.meso)(strokeUv.div(WORLD_NOISE_METERS.meso));
   const mesoB = worldNoiseField(WORLD_NOISE_LAYERS.meso)(strokeUv.div(11.5).add(0.41));
   const stroke = mesoA.r.mul(0.55).add(mesoB.g.mul(0.45));
-  const strokeTemp = mix(vec3(0.93, 0.99, 1.05), vec3(1.06, 1.03, 0.92), stroke);
-  const strokeWeight = smoothstep(55, 18, positionView.length());
+  const strokeTemp = mix(vec3(0.965, 0.995, 1.025), vec3(1.035, 1.015, 0.96), stroke);
+  const strokeWeight = smoothstep(50, 18, positionView.length());
   return treeTemp.mul(landscapeHarmony).mul(mix(vec3(1), strokeTemp, strokeWeight));
 }
 

@@ -2,6 +2,7 @@ import { Color } from 'three/webgpu';
 import { attribute, cos, float, materialAO, materialRoughness, mix, normalWorld, positionGeometry, positionView, sin, smoothstep, uv, vec3 } from 'three/tsl';
 import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
 import { resolveTreeFoliageSettings } from './treeSurfaceSettings.js';
+import { DEFAULT_CROWN_PROFILES, crownMacroNormalNode } from './crownProfile.js';
 import { setRuntimeUserData } from '../../../render/materials/runtimeUserData.js';
 
 /** Outward multi-lobe puff normal computed on the GPU in prototype space (no extra buffers). */
@@ -79,7 +80,7 @@ export function leafThicknessNode(settings, visibility, alpha = float(1), lumina
 
 export function configureTreeFoliageSurface(material, {
   settings = resolveTreeFoliageSettings(), visibility = float(1), alpha = float(1),
-  color = vec3(0.5), bounds = null,
+  color = vec3(0.5), bounds = null, profile = null,
 } = {}) {
   if (!settings.enabled) return { visibility: float(1) };
   const sky = canopyVisibilityNode(visibility, settings);
@@ -107,9 +108,13 @@ export function configureTreeFoliageSurface(material, {
   material.aoNode = (material.aoNode ?? materialAO).mul(sky);
   if (bounds && settings.normalBlend > 0) {
     // Normal adjustment happens before instancing; authored geometry stays intact.
-    material.foliageShapeNormalNode = crownPuffNormalNode(bounds, settings.puffStrength);
+    const resolvedProfile = profile ?? DEFAULT_CROWN_PROFILES[settings.crownProfile] ?? DEFAULT_CROWN_PROFILES.broadleaf;
+    material.foliageShapeNormalNode = crownMacroNormalNode(bounds, resolvedProfile, {
+      puffStrength: settings.puffStrength,
+      upBias: resolvedProfile.upBias,
+    });
     // Sheltered interior seams blend strongly toward the canopy-wide normal to erase cluster-on-cluster creases.
-    const interiorBlend = Math.min(0.92, settings.normalBlend + 0.08);
+    const interiorBlend = Math.min(0.90, settings.normalBlend + 0.08);
     material.foliageNormalBlendNode = mix(float(interiorBlend), float(settings.normalBlend), sky);
   }
   if (bounds && settings.rimRuffle > 0) {

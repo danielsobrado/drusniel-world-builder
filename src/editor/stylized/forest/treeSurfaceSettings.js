@@ -1,3 +1,5 @@
+import { resolveCrownProfileKey } from './crownProfile.js';
+
 const unit = (value, name) => {
   if (!Number.isFinite(value) || value < 0 || value > 1) throw new Error(`Invalid tree surface setting: ${name} must be within [0, 1].`);
   return value;
@@ -8,18 +10,21 @@ export function resolveTreeFoliageSettings(trees = {}, species = 'broadleaf') {
   const input = trees.foliageLighting ?? {};
   const family = String(Array.isArray(species) ? species[0] : species).startsWith('conifer') ? 'conifer' : 'broadleaf';
   const settings = {
-    enabled: input.enabled === true, transmission: 0.84, thickness: 0.46,
-    absorption: 1.65, transmissionColor: '#edf5b8', normalBlend: 0.80,
-    wrapDiffuse: 0.56, rimGlow: 0.34, puffStrength: 0.14, rimRuffle: 0.28,
-    occlusionStrength: 0.58, minimumVisibility: 0.38,
+    enabled: input.enabled === true, transmission: 0.78, thickness: 0.48,
+    absorption: 1.65, transmissionColor: '#e8f1b8', normalBlend: 0.80,
+    impostorNormalBlend: 0.72, wrapDiffuse: 0.54, rimGlow: 0.28,
+    puffStrength: 0.15, rimRuffle: 0.24,
+    occlusionStrength: 0.56, minimumVisibility: 0.38,
     wetStrength: 0.55, wetRoughness: 0.28, needleSpecular: 0,
     ...input, ...(input.species?.[family] ?? {}),
   };
   delete settings.species;
+  settings.crownProfile = resolveCrownProfileKey(species, settings.crownProfile);
   for (const key of [
-    'transmission', 'thickness', 'normalBlend', 'wrapDiffuse', 'rimGlow',
-    'puffStrength', 'rimRuffle', 'occlusionStrength', 'minimumVisibility',
-    'wetStrength', 'wetRoughness', 'needleSpecular',
+    'transmission', 'thickness', 'normalBlend', 'impostorNormalBlend',
+    'wrapDiffuse', 'rimGlow', 'puffStrength', 'rimRuffle',
+    'occlusionStrength', 'minimumVisibility', 'wetStrength',
+    'wetRoughness', 'needleSpecular',
   ]) unit(settings[key], `foliageLighting.${key}`);
   if (!(settings.absorption > 0) || !Number.isFinite(settings.absorption)) throw new Error('Invalid tree foliage absorption.');
   if (!/^#[\da-f]{6}$/i.test(settings.transmissionColor)) throw new Error('Invalid tree foliage transmissionColor.');

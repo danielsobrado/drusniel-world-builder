@@ -43,10 +43,14 @@ export function crownEdgeNodes(alpha, { cut, radius, height, centerXZ = null }) 
   const bristleB = cos(dot(positionGeometry.mul(91.7), vec3(39.346, 11.135, 83.155)));
   const bristle = bristleA.mul(0.6).add(bristleB.mul(0.4)).mul(0.5);
   const feather = float(1).add(bristle.mul(rim).mul(edge).mul(0.28));
+  // Distance-gated minification retention prevents cards turning sparse before proxy handoff.
+  const farMinify = smoothstep(26, 62, positionView.length());
+  const edgeThin = mix(float(EDGE_THIN), float(EDGE_THIN * 0.35), farMinify);
+  const minifyBoost = float(1).add(farMinify.mul(0.24));
   // Favour skyward outer leaves so lower flanks in front of hills or roofs keep crisp contrast.
   const skyExposure = smoothstep(-0.25, 0.55, normalWorld.y).mul(0.55).add(0.45);
   return {
-    opacity: alpha.mul(float(1).sub(edge.mul(EDGE_THIN))).mul(grazingKeep).mul(feather).clamp(0, 1),
+    opacity: alpha.mul(float(1).sub(edge.mul(edgeThin))).mul(grazingKeep).mul(feather).mul(minifyBoost).clamp(0, 1),
     sky: rim.mul(edge.mul(SKY_EDGE - SKY_INSIDE).add(SKY_INSIDE)).mul(skyExposure),
   };
 }

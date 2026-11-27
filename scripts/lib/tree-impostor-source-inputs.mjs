@@ -17,6 +17,7 @@ const SOURCES = [
   'src/editor/stylized/forest/TreeSurfaceMaterial.js',
   'src/editor/stylized/forest/FoliageNodeMaterial.js',
   'src/editor/stylized/forest/TreeFoliageSurface.js',
+  'src/editor/stylized/forest/crownProfile.js',
   'src/editor/stylized/forest/CanopyVisibility.js',
   'src/editor/stylized/forest/treeSurfaceSettings.js',
   'src/editor/stylized/forest/TreeWetSurface.js',

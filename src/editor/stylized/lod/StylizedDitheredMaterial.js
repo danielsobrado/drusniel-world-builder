@@ -146,8 +146,8 @@ export function createDitheredMaterial(sourceMaterial, {
     // Per vertex and mild; per-pixel noise on textured crowns paints camouflage.
     const clump = kind === 'leaf'
       ? mix(
-        vec3(0.87, 0.91, 0.94),
-        vec3(1.09, 1.06, 0.96),
+        vec3(0.94, 0.96, 0.97),
+        vec3(1.05, 1.04, 0.98),
         varying(worldNoiseField(WORLD_NOISE_LAYERS.macro)(positionGeometry.xz.mul(0.045).add(vec2(seed.mul(17.3), seed.mul(5.1)))).b, 'crownClump'),
       )
       : null;

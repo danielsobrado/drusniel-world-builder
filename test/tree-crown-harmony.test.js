@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import yaml from 'js-yaml';
 import * as THREE from 'three/webgpu';
-import { float, normalWorld, uniform, vec3 } from 'three/tsl';
+import { float, normalWorld, positionGeometry, uniform, vec3 } from 'three/tsl';
 import {
   crownLocalGroundBounce,
   foliageLight,
@@ -11,6 +11,13 @@ import {
   treeFoliageAtmosphereEmission,
   treeFoliageSurfaceEmission,
 } from '../src/editor/stylized/forest/foliageLight.js';
+import {
+  applyCrownProfileNormals,
+  crownMacroNormalNode,
+  resolveCrownProfileKey,
+  resolveCrownProfiles,
+} from '../src/editor/stylized/forest/crownProfile.js';
+import { createTreeProxyPrototype } from '../src/editor/stylized/lod/StylizedProxyGeometry.js';
 import { createStylizedLeafMaterial } from '../src/editor/stylized/StylizedTreeMaterials.js';
 import { createDitheredMaterial } from '../src/editor/stylized/lod/StylizedDitheredMaterial.js';
 import { createTreeImpostorBakeMaterial } from '../src/editor/stylized/impostor/TreeImpostorBaker.js';
@@ -90,4 +97,84 @@ test('tree crown materials promote Lambert donors to Standard IBL parity and sep
   material.dispose();
   geo.dispose();
   map.dispose();
+});
+
+test('shared crownProfile drives near macro normals, proxy geometry budget, and impostor normal blend', () => {
+  assert.equal(resolveCrownProfileKey('conifer_evergreen'), 'conifer');
+  assert.equal(resolveCrownProfileKey('broadleaf_tall'), 'columnar');
+  assert.equal(resolveCrownProfileKey('tropical_tall'), 'spreading');
+  assert.equal(resolveCrownProfileKey('wetland_sparse'), 'sparse');
+  assert.equal(resolveCrownProfileKey('broadleaf_round'), 'broadleaf');
+
+  const profiles = resolveCrownProfiles(config.trees);
+  const bounds = { min: [-2, 1, -2], max: [2, 9, 2] };
+  const sampleValues = new Map([[positionGeometry, [1.5, 5.2, 0.2]]]);
+  const broadleafNormal = evaluate(crownMacroNormalNode(bounds, profiles.broadleaf), { values: sampleValues });
+  const coniferNormal = evaluate(crownMacroNormalNode(bounds, profiles.conifer), { values: sampleValues });
+  const diff = Math.hypot(
+    broadleafNormal[0] - coniferNormal[0],
+    broadleafNormal[1] - coniferNormal[1],
+    broadleafNormal[2] - coniferNormal[2],
+  );
+  assert.ok(diff > 0.05, 'broadleaf ellipsoid and conifer tiered-cone compute distinct macro normals');
+
+  const box = new THREE.BoxGeometry(2, 6, 2);
+  applyCrownProfileNormals(box, bounds, profiles.conifer);
+  assert.ok(box.getAttribute('normal').count > 0);
+  box.dispose();
+
+  const makeMaterialFor = species => createStylizedLeafMaterial({
+    source: new THREE.MeshLambertMaterial(),
+    leafMap: null,
+    bounds: { minY: 1, maxY: 9 },
+    time: uniform(0),
+    config,
+    species,
+    canopyBounds: bounds,
+  });
+
+  const broadleafMat = makeMaterialFor('broadleaf_round');
+  const coniferMat = makeMaterialFor('conifer_narrow');
+  assert.equal(broadleafMat.userData.crownProfileKey, 'broadleaf');
+  assert.equal(coniferMat.userData.crownProfileKey, 'conifer');
+
+  const bakeNormalConifer = createTreeImpostorBakeMaterial({ kind: 'leaf', material: coniferMat }, true);
+  assert.equal(bakeNormalConifer.foliageNormalBlendNode.value, coniferMat.userData.treeFoliageSurface.impostorNormalBlend);
+  bakeNormalConifer.dispose();
+
+  const trunk = new THREE.CylinderGeometry(0.2, 0.3, 4);
+  trunk.translate(0, 2, 0);
+  const leafSrcBroadleaf = new THREE.BoxGeometry(4, 8, 4);
+  leafSrcBroadleaf.translate(0, 5, 0);
+  const leafSrcConifer = new THREE.ConeGeometry(2.2, 8, 8);
+  leafSrcConifer.translate(0, 5, 0);
+
+  const broadleafProxy = createTreeProxyPrototype([
+    { kind: 'leaf', geometry: leafSrcBroadleaf, material: broadleafMat },
+    { kind: 'trunk', geometry: trunk },
+  ], config);
+  const coniferProxy = createTreeProxyPrototype([
+    { kind: 'leaf', geometry: leafSrcConifer, material: coniferMat },
+    { kind: 'trunk', geometry: trunk },
+  ], config);
+
+  const broadleafLeaf = broadleafProxy.proxyParts.find(p => p.kind === 'leaf');
+  const coniferLeaf = coniferProxy.proxyParts.find(p => p.kind === 'leaf');
+  assert.equal(broadleafLeaf.geometry.userData.crownProfileKey, 'broadleaf');
+  assert.equal(coniferLeaf.geometry.userData.crownProfileKey, 'conifer');
+  // Baseline 4-dodecahedron proxy was 432 vertices; stay strictly below +20% (518 vertices).
+  assert.ok(broadleafLeaf.geometry.getAttribute('position').count <= 518, 'broadleaf proxy stays within +20% vertex budget');
+  assert.ok(coniferLeaf.geometry.getAttribute('position').count <= 518, 'conifer proxy stays within +20% vertex budget');
+
+  for (const proxy of [broadleafProxy, coniferProxy]) {
+    for (const part of proxy.proxyParts) {
+      part.geometry.dispose();
+      part.material.dispose();
+    }
+  }
+  broadleafMat.dispose();
+  coniferMat.dispose();
+  trunk.dispose();
+  leafSrcBroadleaf.dispose();
+  leafSrcConifer.dispose();
 });

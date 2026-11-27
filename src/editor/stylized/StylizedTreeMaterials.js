@@ -31,6 +31,7 @@ import {
 } from './forest/foliageLight.js';
 import { configureTreeFoliageSurface, treeGeometryVisibility } from './forest/TreeFoliageSurface.js';
 import { resolveTreeFoliageSettings } from './forest/treeSurfaceSettings.js';
+import { resolveCrownProfileKey, resolveCrownProfiles } from './forest/crownProfile.js';
 import { addTreeEmission, createTreeSurfaceMaterial } from './forest/TreeSurfaceMaterial.js';
 import { foliageWindPosition } from './forest/foliageWind.js';
 import { assignTreeFoliageMaterialData } from '../../render/postprocessing/PostProcessingMaterialData.js';
@@ -83,6 +84,7 @@ export function createStylizedLeafMaterial({
   // the swamp giants' grey moss and olive leaves are not canopy greens.
   canopyGrade = true,
   species = 'broadleaf',
+  crownProfile = null,
   hasCanopyVisibility = false,
   canopyBounds = null,
 }) {
@@ -134,6 +136,9 @@ export function createStylizedLeafMaterial({
     vec3(0),
   ).mul(paletteValue(palette, config, 'brightness'));
 
+  const profiles = resolveCrownProfiles(config.trees);
+  const profileKey = resolveCrownProfileKey(species, crownProfile);
+  const resolvedProfile = profiles[profileKey] ?? profiles.broadleaf;
   const material = createTreeSurfaceMaterial(preserveSourceColor ? source : null, { foliage: true });
   material.map = map;
   if (authoredColor) material.foliageTransmissionNode = float(0.8);
@@ -141,7 +146,9 @@ export function createStylizedLeafMaterial({
     settings: resolveTreeFoliageSettings(config.trees, species),
     visibility: treeGeometryVisibility(hasCanopyVisibility),
     alpha: map ? authoredTexture(map).a : float(1), color: baseColor, bounds: canopyBounds,
+    profile: resolvedProfile,
   });
+  material.userData.crownProfileKey = profileKey;
   material.positionNode = finalPosition;
   // Sample local WSC ground reflectance once in the vertex stage (zero extra samplers)
   // so underside crown bounce reflects cobblestone, forest duff, straw, or snow below.
@@ -153,13 +160,12 @@ export function createStylizedLeafMaterial({
     // sky fill in the shaded interior and sun through the leaves. No rim and no
     // noise variation — on a crown of flat cards both key to each card's own
     // facing and paint it in cream and dark-green camouflage patches.
-    // Graded crowns take a warm-sunlit top to cooler-shaded base & core shift so
-    // macro volume separates cleanly like the trunks, understory, and buildings.
+    // Graded crowns keep biome/grade hue ownership with gentle top-to-base warmth separation.
     const heightGrade = canopyGrade
-      ? mix(vec3(0.68, 0.88, 0.86), vec3(1.07, 1.05, 0.93), normalizedHeight)
+      ? mix(vec3(0.86, 0.92, 0.94), vec3(1.04, 1.03, 0.96), normalizedHeight)
       : vec3(1);
     const coreGrade = canopyGrade
-      ? mix(vec3(0.62, 0.89, 0.88), vec3(1, 1, 1), surface.visibility)
+      ? mix(vec3(0.84, 0.92, 0.93), vec3(1, 1, 1), surface.visibility)
       : vec3(1);
     const crown = authoredColor.mul(paletteValue(palette, config, 'brightness')).mul(heightGrade).mul(coreGrade);
     const centerXZ = canopyBounds

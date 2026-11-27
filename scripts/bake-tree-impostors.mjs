@@ -410,6 +410,8 @@ async function bakeWithPlaywright(url, downloadDirectory, diagnostics) {
     const downloadPromise = page.waitForEvent('download', {
       timeout: bakeTimeoutMs() + FILE_TIMEOUT_MS,
     });
+    // Prevent unhandledRejection masking the real navigation/bake error if we abort early.
+    downloadPromise.catch(() => {});
     await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: COMMAND_TIMEOUT_MS });
     await page.waitForFunction(
       () => ['done', 'failed'].includes(window.__treeImpostorBakeStatus),
