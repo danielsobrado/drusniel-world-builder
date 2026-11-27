@@ -1,5 +1,6 @@
 # QA evidence
 
+- [LOD transitions phase 0 baseline](lod-transitions/phase-00/README.md) — RTX 4080 off/on diagnostics matrix, static checks, vegetation LOD suite and known defects; verdict PARTIAL (2026-11-27).
 - [October 16 random biome visual audit](visual-audit-2026-10-16/README.md) — 18 fresh views, original clean/HUD screenshots, confirmed tree-atlas fallback, and a detailed [AAA look-and-feel plan](../plans/aaa-look-and-feel-plan-2026-10-16.md).
 - [Random biome visual audit](visual-audit-2026-10-13/README.md) — twelve natural land-biome screenshots, capture limitations, and a prioritized [world visual quality plan](../plans/world-visual-quality-plan-2026-10-13.md).
 - [World visual quality implementation](world-visual-quality-implementation-2026-10-14.md) — task status, retained evidence and outstanding release gates; [ocean repetition review](world-visual-quality-2026-10-14/ocean/README.md) includes the October 15 comparison and shader checks.

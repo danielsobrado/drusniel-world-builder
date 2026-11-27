@@ -1,0 +1,2 @@
+vegetation LOD QA: 124/125 checks
+FAIL configured-runtime-prototype-counts: {"id":"configured-runtime-prototype-counts","passed":false,"trees":40,"bushes":0,"missingTrees":[],"missingBushes":["/assets/bushes/stylized_bush.glb","/assets/bushes/small_bush.glb","/assets/bushes/bush2.glb","/assets/bushes/bush.glb","/assets/bushes/bush-meadow-gorse-01.glb","/assets/bushes/bush-woodland-shrub-04.glb","/assets/bushes/bush-forest-rhododen

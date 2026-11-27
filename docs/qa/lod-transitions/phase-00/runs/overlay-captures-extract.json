@@ -1,0 +1,742 @@
+[
+ {
+  "file": "bog-cross-overlay.json",
+  "generatedAt": "2026-11-27T18:47:18.815Z",
+  "href": "http://localhost:5173/?spatialPerformanceOverlay=1&qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+  "scenario": null,
+  "viewport": {
+   "width": 1280,
+   "height": 720,
+   "deviceScaleFactor": 1
+  },
+  "environment": {
+   "os": {
+    "type": "Windows_NT",
+    "release": "10.0.26300",
+    "version": "Windows 11 Pro",
+    "arch": "x64"
+   },
+   "browser": "151.0.7922.34",
+   "gpu": {
+    "vendorId": 4318,
+    "deviceId": 9988,
+    "subSysId": 4069922153,
+    "name": "NVIDIA GeForce RTX 4080",
+    "driver": "32.0.16.1714",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 (0x00002704) Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1714)"
+   }
+  },
+  "validity": {
+   "nvidiaWebGpu": true,
+   "focusPassed": true,
+   "settled": true,
+   "settleWaitedSeconds": 65,
+   "browserErrors": 0,
+   "collisionGate": true,
+   "frameBufferComplete": true,
+   "assetIntegrity": true,
+   "valid": true
+  },
+  "frames": 1879,
+  "durationMs": 19988.2,
+  "avgFps": 94.01,
+  "frameTimeMs": {
+   "p50": 10.5,
+   "p95": 13.7,
+   "p99": 27.132,
+   "p999": 34.946,
+   "max": 39.9,
+   "mean": 10.641
+  },
+  "framesOver16_67ms": 55,
+  "hitchMs": 16.667,
+  "hitchRate": 0.0293,
+  "cpuUpdateMs": {
+   "p50Ms": 10,
+   "p95Ms": 12.9
+  },
+  "renderSubmissionCpuMs": {
+   "avg": 5.562,
+   "p50": 5.3,
+   "p95": 6.6,
+   "p99": 11.3
+  },
+  "gpuTimestampMs": {
+   "source": "WebGPU timestamp queries",
+   "sampleEvery": 8,
+   "samples": 203,
+   "avg": 5.404,
+   "p50": 5.386,
+   "p95": 6.11,
+   "p99": 9.088,
+   "max": 9.535
+  },
+  "rendererPerFrame": {
+   "drawsMedian": 206,
+   "drawsMax": 351
+  },
+  "rendererAtStop": {
+   "drawCalls": 187,
+   "triangles": 44385035,
+   "geometries": 883,
+   "textures": 1163,
+   "accountedBytes": null
+  },
+  "uploadBytesMeasured": {
+   "framePublicationUploadBytes": 445272,
+   "attributeBytesUploaded": 48065756,
+   "treeImpostorAttributeBytesUploaded": 3891712,
+   "publicationCustomAttributeBytes": 3891712,
+   "sceneryPublicationQueuedBytes": null,
+   "scenerySliceUploadedBytes": null
+  },
+  "lodHandoff": {
+   "deferred": null,
+   "timeouts": null,
+   "abandoned": null,
+   "droppedByCapacity": null
+  },
+  "originSnapCount": 0,
+  "lodBaseline": {
+   "samples": 190,
+   "droppedSamples": 0,
+   "samplerCpuMsTotal": 44.4,
+   "samplerCpuMsPerSampleMean": 0.234,
+   "samplerCpuMsPerSampleMax": 2.1,
+   "samplerCpuMsPerFrameAmortized": 0.024,
+   "counters": {
+    "sceneryLodHandoffDeferred": null,
+    "sceneryLodHandoffDrawsReady": null,
+    "sceneryLodHandoffTimeouts": null,
+    "sceneryLodHandoffAbandonedDraws": null,
+    "stylizedInstancesDroppedByCapacity": null,
+    "sceneryPublicationCommits": null,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null,
+    "scenerySliceGpuCopyBytes": null,
+    "initialInstanceSlicedBytes": null,
+    "attributeBytesUploaded": 48065756,
+    "stylizedInstanceRowsCompared": 12736
+   },
+   "layers": {
+    "tree": {
+     "chunksMax": 169,
+     "transitioningMax": 17,
+     "transitioningMean": 1.3,
+     "samplesWithTransition": 40,
+     "overlappingMax": 6,
+     "overlappingMean": 0.284,
+     "pendingDataMax": 21,
+     "maxPendingDataAgeMs": 9799.3,
+     "observedReversals": 0,
+     "finalTargets": {
+      "impostor": 112,
+      "culled": 48,
+      "near": 9
+     }
+    },
+    "rock": {
+     "chunksMax": 81,
+     "transitioningMax": 14,
+     "transitioningMean": 0.442,
+     "samplesWithTransition": 6,
+     "overlappingMax": 0,
+     "overlappingMean": 0,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "near": 49,
+      "culled": 32
+     }
+    },
+    "bush": {
+     "chunksMax": 49,
+     "transitioningMax": 16,
+     "transitioningMean": 0.505,
+     "samplesWithTransition": 6,
+     "overlappingMax": 6,
+     "overlappingMean": 0.189,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "proxy": 16,
+      "near": 9,
+      "culled": 24
+     }
+    }
+   },
+   "unavailable": [
+    "transitionExtraTriangles",
+    "transitionExtraDraws",
+    "transitionPinnedBytes",
+    "fadeOnlyUploadBytes",
+    "gpuReadinessAgeMs",
+    "visibleMissingCoverage"
+   ]
+  },
+  "cameraPoseAtStop": {
+   "x": -250.5206723115407,
+   "y": 10.632231095314632,
+   "z": 343.9601461212151,
+   "yaw": 2.548180707911721,
+   "pitch": 0
+  }
+ },
+ {
+  "file": "construction-overlay.json",
+  "generatedAt": "2026-11-27T18:58:28.893Z",
+  "href": "http://localhost:5173/?spatialPerformanceOverlay=1&qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+  "scenario": null,
+  "viewport": {
+   "width": 1280,
+   "height": 720,
+   "deviceScaleFactor": 1
+  },
+  "environment": {
+   "os": {
+    "type": "Windows_NT",
+    "release": "10.0.26300",
+    "version": "Windows 11 Pro",
+    "arch": "x64"
+   },
+   "browser": "151.0.7922.34",
+   "gpu": {
+    "vendorId": 4318,
+    "deviceId": 9988,
+    "subSysId": 4069922153,
+    "name": "NVIDIA GeForce RTX 4080",
+    "driver": "32.0.16.1714",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 (0x00002704) Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1714)"
+   }
+  },
+  "validity": {
+   "nvidiaWebGpu": true,
+   "focusPassed": true,
+   "settled": false,
+   "settleWaitedSeconds": 120,
+   "browserErrors": 0,
+   "collisionGate": true,
+   "frameBufferComplete": true,
+   "assetIntegrity": true,
+   "valid": false
+  },
+  "frames": 1476,
+  "durationMs": 19981.2,
+  "avgFps": 73.87,
+  "frameTimeMs": {
+   "p50": 12.9,
+   "p95": 19.5,
+   "p99": 31.975,
+   "p999": 49.995,
+   "max": 360,
+   "mean": 13.544
+  },
+  "framesOver16_67ms": 118,
+  "hitchMs": 16.667,
+  "hitchRate": 0.0799,
+  "cpuUpdateMs": {
+   "p50Ms": 11.8,
+   "p95Ms": 16.125
+  },
+  "renderSubmissionCpuMs": {
+   "avg": 8.296,
+   "p50": 7.8,
+   "p95": 9.7,
+   "p99": 13.45
+  },
+  "gpuTimestampMs": {
+   "source": "WebGPU timestamp queries",
+   "sampleEvery": 8,
+   "samples": 164,
+   "avg": 3.97,
+   "p50": 3.985,
+   "p95": 4.37,
+   "p99": 4.523,
+   "max": 4.899
+  },
+  "rendererPerFrame": {
+   "drawsMedian": 356,
+   "drawsMax": 561
+  },
+  "rendererAtStop": {
+   "drawCalls": 233,
+   "triangles": 16135733,
+   "geometries": 1197,
+   "textures": 1106,
+   "accountedBytes": null
+  },
+  "uploadBytesMeasured": {
+   "framePublicationUploadBytes": 523768,
+   "attributeBytesUploaded": 142722236,
+   "treeImpostorAttributeBytesUploaded": 2289248,
+   "publicationCustomAttributeBytes": 2289248,
+   "sceneryPublicationQueuedBytes": null,
+   "scenerySliceUploadedBytes": null
+  },
+  "lodHandoff": {
+   "deferred": null,
+   "timeouts": null,
+   "abandoned": null,
+   "droppedByCapacity": null
+  },
+  "originSnapCount": 0,
+  "lodBaseline": {
+   "samples": 184,
+   "droppedSamples": 0,
+   "samplerCpuMsTotal": 37.3,
+   "samplerCpuMsPerSampleMean": 0.203,
+   "samplerCpuMsPerSampleMax": 1.7,
+   "samplerCpuMsPerFrameAmortized": 0.025,
+   "counters": {
+    "sceneryLodHandoffDeferred": null,
+    "sceneryLodHandoffDrawsReady": null,
+    "sceneryLodHandoffTimeouts": null,
+    "sceneryLodHandoffAbandonedDraws": null,
+    "stylizedInstancesDroppedByCapacity": null,
+    "sceneryPublicationCommits": null,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null,
+    "scenerySliceGpuCopyBytes": null,
+    "initialInstanceSlicedBytes": null,
+    "attributeBytesUploaded": 142722236,
+    "stylizedInstanceRowsCompared": 17989
+   },
+   "layers": {
+    "tree": {
+     "chunksMax": 169,
+     "transitioningMax": 13,
+     "transitioningMean": 0.663,
+     "samplesWithTransition": 30,
+     "overlappingMax": 6,
+     "overlappingMean": 0.196,
+     "pendingDataMax": 7,
+     "maxPendingDataAgeMs": 2533.7,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 120,
+      "impostor": 40,
+      "near": 9
+     }
+    },
+    "rock": {
+     "chunksMax": 81,
+     "transitioningMax": 14,
+     "transitioningMean": 0.304,
+     "samplesWithTransition": 4,
+     "overlappingMax": 0,
+     "overlappingMean": 0,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 32,
+      "near": 49
+     }
+    },
+    "bush": {
+     "chunksMax": 49,
+     "transitioningMax": 16,
+     "transitioningMean": 0.348,
+     "samplesWithTransition": 4,
+     "overlappingMax": 6,
+     "overlappingMean": 0.13,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 24,
+      "proxy": 16,
+      "near": 9
+     }
+    }
+   },
+   "unavailable": [
+    "transitionExtraTriangles",
+    "transitionExtraDraws",
+    "transitionPinnedBytes",
+    "fadeOnlyUploadBytes",
+    "gpuReadinessAgeMs",
+    "visibleMissingCoverage"
+   ]
+  },
+  "cameraPoseAtStop": {
+   "x": 0,
+   "y": 7.238052287458596,
+   "z": -342.77550000000025,
+   "yaw": 0,
+   "pitch": 0
+  }
+ },
+ {
+  "file": "grassland-overlay.json",
+  "generatedAt": "2026-11-27T18:50:43.979Z",
+  "href": "http://localhost:5173/?spatialPerformanceOverlay=1&qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+  "scenario": null,
+  "viewport": {
+   "width": 1280,
+   "height": 720,
+   "deviceScaleFactor": 1
+  },
+  "environment": {
+   "os": {
+    "type": "Windows_NT",
+    "release": "10.0.26300",
+    "version": "Windows 11 Pro",
+    "arch": "x64"
+   },
+   "browser": "151.0.7922.34",
+   "gpu": {
+    "vendorId": 4318,
+    "deviceId": 9988,
+    "subSysId": 4069922153,
+    "name": "NVIDIA GeForce RTX 4080",
+    "driver": "32.0.16.1714",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 (0x00002704) Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1714)"
+   }
+  },
+  "validity": {
+   "nvidiaWebGpu": true,
+   "focusPassed": true,
+   "settled": true,
+   "settleWaitedSeconds": 100.7,
+   "browserErrors": 0,
+   "collisionGate": true,
+   "frameBufferComplete": true,
+   "assetIntegrity": true,
+   "valid": true
+  },
+  "frames": 1407,
+  "durationMs": 19969.7,
+  "avgFps": 70.46,
+  "frameTimeMs": {
+   "p50": 12.5,
+   "p95": 27.5,
+   "p99": 33.8,
+   "p999": 220.669,
+   "max": 331.3,
+   "mean": 14.199
+  },
+  "framesOver16_67ms": 210,
+  "hitchMs": 16.667,
+  "hitchRate": 0.1493,
+  "cpuUpdateMs": {
+   "p50Ms": 11.4,
+   "p95Ms": 18.5
+  },
+  "renderSubmissionCpuMs": {
+   "avg": 7.45,
+   "p50": 6.8,
+   "p95": 10.3,
+   "p99": 14.294
+  },
+  "gpuTimestampMs": {
+   "source": "WebGPU timestamp queries",
+   "sampleEvery": 8,
+   "samples": 153,
+   "avg": 4.341,
+   "p50": 4.296,
+   "p95": 5.687,
+   "p99": 6.326,
+   "max": 8.051
+  },
+  "rendererPerFrame": {
+   "drawsMedian": 220,
+   "drawsMax": 445
+  },
+  "rendererAtStop": {
+   "drawCalls": 215,
+   "triangles": 13215009,
+   "geometries": 1040,
+   "textures": 1125,
+   "accountedBytes": null
+  },
+  "uploadBytesMeasured": {
+   "framePublicationUploadBytes": 356968,
+   "attributeBytesUploaded": 404355420,
+   "treeImpostorAttributeBytesUploaded": 1850320,
+   "publicationCustomAttributeBytes": 1850320,
+   "sceneryPublicationQueuedBytes": null,
+   "scenerySliceUploadedBytes": null
+  },
+  "lodHandoff": {
+   "deferred": null,
+   "timeouts": null,
+   "abandoned": null,
+   "droppedByCapacity": null
+  },
+  "originSnapCount": 0,
+  "lodBaseline": {
+   "samples": 181,
+   "droppedSamples": 0,
+   "samplerCpuMsTotal": 41.4,
+   "samplerCpuMsPerSampleMean": 0.229,
+   "samplerCpuMsPerSampleMax": 0.5,
+   "samplerCpuMsPerFrameAmortized": 0.029,
+   "counters": {
+    "sceneryLodHandoffDeferred": null,
+    "sceneryLodHandoffDrawsReady": null,
+    "sceneryLodHandoffTimeouts": null,
+    "sceneryLodHandoffAbandonedDraws": null,
+    "stylizedInstancesDroppedByCapacity": null,
+    "sceneryPublicationCommits": null,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null,
+    "scenerySliceGpuCopyBytes": null,
+    "initialInstanceSlicedBytes": null,
+    "attributeBytesUploaded": 404355420,
+    "stylizedInstanceRowsCompared": 10790
+   },
+   "layers": {
+    "tree": {
+     "chunksMax": 169,
+     "transitioningMax": 13,
+     "transitioningMean": 1.238,
+     "samplesWithTransition": 42,
+     "overlappingMax": 6,
+     "overlappingMean": 0.365,
+     "pendingDataMax": 13,
+     "maxPendingDataAgeMs": 3923.4,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 120,
+      "impostor": 40,
+      "near": 9
+     }
+    },
+    "rock": {
+     "chunksMax": 81,
+     "transitioningMax": 14,
+     "transitioningMean": 0.696,
+     "samplesWithTransition": 9,
+     "overlappingMax": 0,
+     "overlappingMean": 0,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "near": 49,
+      "culled": 32
+     }
+    },
+    "bush": {
+     "chunksMax": 49,
+     "transitioningMax": 16,
+     "transitioningMean": 0.796,
+     "samplesWithTransition": 9,
+     "overlappingMax": 6,
+     "overlappingMean": 0.265,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "near": 9,
+      "proxy": 16,
+      "culled": 24
+     }
+    }
+   },
+   "unavailable": [
+    "transitionExtraTriangles",
+    "transitionExtraDraws",
+    "transitionPinnedBytes",
+    "fadeOnlyUploadBytes",
+    "gpuReadinessAgeMs",
+    "visibleMissingCoverage"
+   ]
+  },
+  "cameraPoseAtStop": {
+   "x": -2058.0404534340173,
+   "y": 11.159546320496291,
+   "z": -3756.159988766102,
+   "yaw": 2.4880295060380635,
+   "pitch": -0.07999995879196328
+  }
+ },
+ {
+  "file": "settlement-overlay.json",
+  "generatedAt": "2026-11-27T18:54:44.104Z",
+  "href": "http://localhost:5173/?spatialPerformanceOverlay=1&qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+  "scenario": null,
+  "viewport": {
+   "width": 1280,
+   "height": 720,
+   "deviceScaleFactor": 1
+  },
+  "environment": {
+   "os": {
+    "type": "Windows_NT",
+    "release": "10.0.26300",
+    "version": "Windows 11 Pro",
+    "arch": "x64"
+   },
+   "browser": "151.0.7922.34",
+   "gpu": {
+    "vendorId": 4318,
+    "deviceId": 9988,
+    "subSysId": 4069922153,
+    "name": "NVIDIA GeForce RTX 4080",
+    "driver": "32.0.16.1714",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 (0x00002704) Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1714)"
+   }
+  },
+  "validity": {
+   "nvidiaWebGpu": true,
+   "focusPassed": true,
+   "settled": false,
+   "settleWaitedSeconds": 120,
+   "browserErrors": 0,
+   "collisionGate": true,
+   "frameBufferComplete": true,
+   "assetIntegrity": true,
+   "valid": false
+  },
+  "frames": 1382,
+  "durationMs": 19986.1,
+  "avgFps": 69.15,
+  "frameTimeMs": {
+   "p50": 13.2,
+   "p95": 27.48,
+   "p99": 34.519,
+   "p999": 82.293,
+   "max": 98.7,
+   "mean": 14.468
+  },
+  "framesOver16_67ms": 155,
+  "hitchMs": 16.667,
+  "hitchRate": 0.1122,
+  "cpuUpdateMs": {
+   "p50Ms": 12.6,
+   "p95Ms": 18.9
+  },
+  "renderSubmissionCpuMs": {
+   "avg": 7.998,
+   "p50": 7.7,
+   "p95": 9.2,
+   "p99": 15.838
+  },
+  "gpuTimestampMs": {
+   "source": "WebGPU timestamp queries",
+   "sampleEvery": 8,
+   "samples": 153,
+   "avg": 6.816,
+   "p50": 6.951,
+   "p95": 8.46,
+   "p99": 8.854,
+   "max": 8.855
+  },
+  "rendererPerFrame": {
+   "drawsMedian": 366,
+   "drawsMax": 417
+  },
+  "rendererAtStop": {
+   "drawCalls": 411,
+   "triangles": 40636656,
+   "geometries": 1157,
+   "textures": 962,
+   "accountedBytes": null
+  },
+  "uploadBytesMeasured": {
+   "framePublicationUploadBytes": 5560,
+   "attributeBytesUploaded": 31979772,
+   "treeImpostorAttributeBytesUploaded": 2460768,
+   "publicationCustomAttributeBytes": 2460768,
+   "sceneryPublicationQueuedBytes": null,
+   "scenerySliceUploadedBytes": null
+  },
+  "lodHandoff": {
+   "deferred": null,
+   "timeouts": null,
+   "abandoned": null,
+   "droppedByCapacity": null
+  },
+  "originSnapCount": 0,
+  "lodBaseline": {
+   "samples": 185,
+   "droppedSamples": 0,
+   "samplerCpuMsTotal": 43.2,
+   "samplerCpuMsPerSampleMean": 0.234,
+   "samplerCpuMsPerSampleMax": 1.8,
+   "samplerCpuMsPerFrameAmortized": 0.031,
+   "counters": {
+    "sceneryLodHandoffDeferred": null,
+    "sceneryLodHandoffDrawsReady": null,
+    "sceneryLodHandoffTimeouts": null,
+    "sceneryLodHandoffAbandonedDraws": null,
+    "stylizedInstancesDroppedByCapacity": null,
+    "sceneryPublicationCommits": null,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null,
+    "scenerySliceGpuCopyBytes": null,
+    "initialInstanceSlicedBytes": null,
+    "attributeBytesUploaded": 31979772,
+    "stylizedInstanceRowsCompared": 19655
+   },
+   "layers": {
+    "tree": {
+     "chunksMax": 169,
+     "transitioningMax": 17,
+     "transitioningMean": 1.222,
+     "samplesWithTransition": 44,
+     "overlappingMax": 6,
+     "overlappingMean": 0.292,
+     "pendingDataMax": 11,
+     "maxPendingDataAgeMs": 4686.9,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 48,
+      "impostor": 112,
+      "near": 9
+     }
+    },
+    "rock": {
+     "chunksMax": 81,
+     "transitioningMax": 14,
+     "transitioningMean": 0.454,
+     "samplesWithTransition": 6,
+     "overlappingMax": 0,
+     "overlappingMean": 0,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 32,
+      "near": 49
+     }
+    },
+    "bush": {
+     "chunksMax": 49,
+     "transitioningMax": 16,
+     "transitioningMean": 0.519,
+     "samplesWithTransition": 6,
+     "overlappingMax": 6,
+     "overlappingMean": 0.195,
+     "pendingDataMax": 0,
+     "maxPendingDataAgeMs": null,
+     "observedReversals": 0,
+     "finalTargets": {
+      "culled": 24,
+      "proxy": 16,
+      "near": 9
+     }
+    }
+   },
+   "unavailable": [
+    "transitionExtraTriangles",
+    "transitionExtraDraws",
+    "transitionPinnedBytes",
+    "fadeOnlyUploadBytes",
+    "gpuReadinessAgeMs",
+    "visibleMissingCoverage"
+   ]
+  },
+  "cameraPoseAtStop": {
+   "x": 14.004449335858226,
+   "y": 3.210216919462968,
+   "z": -426.0924729183316,
+   "yaw": 0.346765320258897,
+   "pitch": 0
+  }
+ }
+]

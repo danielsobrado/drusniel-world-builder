@@ -1,0 +1,5807 @@
+{
+ "schema": "lod-transitions/phase-00/metrics v1",
+ "measuredCommit": "88257dfdf270e4bff9b58fada35e9552b38e4f82",
+ "instrumentationCommit": "ff81dcbf4d85544f2f0296050da5ed52eec1a0e6",
+ "instrumentationParent": "b625625d3bd5f2c9ca6c3475af3f7aabb08e649a",
+ "phaseStatus": "PARTIAL",
+ "hardware": {
+  "gpu": "NVIDIA GeForce RTX 4080 16 GB",
+  "nvidiaDriver": "617.14 (Windows 32.0.16.1714)",
+  "cpu": "Intel Core i7-13700KF",
+  "ramGiB": 63.8,
+  "os": "Windows 11 Pro 10.0.26300 x64",
+  "browser": "Playwright Chromium 151.0.7922.34 (headed, native foreground)",
+  "node": "v22.21.1",
+  "webgpuAdapter": {
+   "vendor": "nvidia",
+   "architecture": "lovelace",
+   "fallback": false,
+   "timestampQuery": true
+  }
+ },
+ "configuration": {
+  "viewport": "1280x720",
+  "deviceScaleFactor": 1,
+  "warmupSeconds": 8,
+  "measureSeconds": 20,
+  "settle": true,
+  "settleTimeoutSeconds": 120,
+  "gpuTimings": "WebGPU timestamp queries, every 8th frame",
+  "hitchMs": 16.667,
+  "qualityPreset": "balanced",
+  "speed": "run"
+ },
+ "staticChecks": {
+  "targetedTests": {
+   "status": "pass",
+   "tests": 41,
+   "failed": 0
+  },
+  "lint": {
+   "status": "fail-preexisting",
+   "errors": 4,
+   "note": "All 4 no-unused-vars errors are on lines last changed before the instrumentation commit (054d0d44, 3aa63757, f3f136d9)."
+  },
+  "unitTests": {
+   "status": "fail",
+   "tests": 5655,
+   "passed": 5645,
+   "failed": 10,
+   "preexistingOnParent": [
+    "test/azgaar-world-guidance.test.js",
+    "test/location-extra-props.test.js",
+    "test/location-structure-prefetch.test.js",
+    "test/rock-formations.test.js",
+    "test/terrain-material-bake-lod.test.js",
+    "test/terrain-material-family-lod.test.js",
+    "test/variant-installation.test.js",
+    "tests/StylizedVariantResidency.test.js"
+   ],
+   "flakyUnderFullSuite": [
+    "tests/wscIncrementalRebuild.test.js (passes in isolation on HEAD and parent)"
+   ],
+   "newSinceInstrumentation": [
+    "test/location-surface-residency.test.js: \"adaptive pressure stops at recovery threshold and preserves anchor protection\" — added failing in 475d29db (surface GPU memory pressure), not LOD code"
+   ]
+  },
+  "build": {
+   "status": "pass"
+  },
+  "productionAssetValidation": {
+   "status": "fail-preexisting",
+   "failingStep": "validate:impostors:required — \"Tree impostor source changed: AuthoredFoliageMaterial.js. Run npm run bake:impostors.\" Also fails on parent b625625d.",
+   "otherSteps": "all pass, including validate:resident-lods"
+  }
+ },
+ "vegetationLodAcceptance": {
+  "status": "fail-preexisting",
+  "checks": 125,
+  "passed": 124,
+  "failing": "configured-runtime-prototype-counts: trees 40/40, bushes 0/22 resident in the gallery; identical on parent b625625d. Bush near/proxy galleries render empty, so bush LOD visuals are unverified."
+ },
+ "arms": {
+  "bog-cross/off": {
+   "runs": 3,
+   "validRuns": 3,
+   "rejectedRuns": [],
+   "median": {
+    "avgFps": 92.3,
+    "p50Ms": 10.7,
+    "p95Ms": 13.8,
+    "p99Ms": 28.052,
+    "p999Ms": 35.65,
+    "maxMs": 44.1,
+    "framesOver16_67ms": 51,
+    "cpuUpdateP50Ms": 10.2,
+    "renderSubmissionCpuP50Ms": 5.5,
+    "gpuTimestampP50Ms": 5.36,
+    "gpuTimestampAvgMs": 5.401,
+    "drawsPerFrameMedian": 206,
+    "attributeBytesUploaded": 48567652,
+    "samplerCpuMsPerFrameAmortized": null
+   },
+   "spread": {
+    "avgFps": {
+     "min": 90.9,
+     "max": 92.76,
+     "n": 3
+    },
+    "p95Ms": {
+     "min": 13.6,
+     "max": 14.3,
+     "n": 3
+    },
+    "gpuTimestampP50Ms": {
+     "min": 5.347,
+     "max": 5.422,
+     "n": 3
+    }
+   }
+  },
+  "bog-cross/on": {
+   "runs": 3,
+   "validRuns": 3,
+   "rejectedRuns": [],
+   "median": {
+    "avgFps": 92.69,
+    "p50Ms": 10.6,
+    "p95Ms": 14.09,
+    "p99Ms": 27.648,
+    "p999Ms": 37.445,
+    "maxMs": 51.5,
+    "framesOver16_67ms": 56,
+    "cpuUpdateP50Ms": 10.1,
+    "renderSubmissionCpuP50Ms": 5.5,
+    "gpuTimestampP50Ms": 5.391,
+    "gpuTimestampAvgMs": 5.389,
+    "drawsPerFrameMedian": 205,
+    "attributeBytesUploaded": 48150584,
+    "samplerCpuMsPerFrameAmortized": 0.024
+   },
+   "spread": {
+    "avgFps": {
+     "min": 91.28,
+     "max": 93.2,
+     "n": 3
+    },
+    "p95Ms": {
+     "min": 13.74,
+     "max": 14.48,
+     "n": 3
+    },
+    "gpuTimestampP50Ms": {
+     "min": 5.346,
+     "max": 5.414,
+     "n": 3
+    }
+   }
+  },
+  "bog-cross/ready-on": {
+   "runs": 3,
+   "validRuns": 3,
+   "rejectedRuns": [],
+   "median": {
+    "avgFps": 96.01,
+    "p50Ms": 10.4,
+    "p95Ms": 12.8,
+    "p99Ms": 26.51,
+    "p999Ms": 35.016,
+    "maxMs": 42.7,
+    "framesOver16_67ms": 53,
+    "cpuUpdateP50Ms": 9.8,
+    "renderSubmissionCpuP50Ms": 5.2,
+    "gpuTimestampP50Ms": 5.366,
+    "gpuTimestampAvgMs": 5.371,
+    "drawsPerFrameMedian": 205,
+    "attributeBytesUploaded": 47243744,
+    "samplerCpuMsPerFrameAmortized": 0.023
+   },
+   "spread": {
+    "avgFps": {
+     "min": 94.94,
+     "max": 96.25,
+     "n": 3
+    },
+    "p95Ms": {
+     "min": 12.8,
+     "max": 13.4,
+     "n": 3
+    },
+    "gpuTimestampP50Ms": {
+     "min": 5.353,
+     "max": 5.386,
+     "n": 3
+    }
+   }
+  },
+  "construction/off": {
+   "runs": 3,
+   "validRuns": 0,
+   "rejectedRuns": [
+    "construction-off-01.json",
+    "construction-off-02.json",
+    "construction-off-03.json"
+   ],
+   "median": null,
+   "spread": null
+  },
+  "construction/on": {
+   "runs": 3,
+   "validRuns": 0,
+   "rejectedRuns": [
+    "construction-on-01.json",
+    "construction-on-02.json",
+    "construction-on-03.json"
+   ],
+   "median": null,
+   "spread": null
+  },
+  "grassland/off": {
+   "runs": 3,
+   "validRuns": 3,
+   "rejectedRuns": [],
+   "median": {
+    "avgFps": 71.41,
+    "p50Ms": 12.3,
+    "p95Ms": 27.5,
+    "p99Ms": 33.874,
+    "p999Ms": 223.206,
+    "maxMs": 289.1,
+    "framesOver16_67ms": 175,
+    "cpuUpdateP50Ms": 11.4,
+    "renderSubmissionCpuP50Ms": 6.7,
+    "gpuTimestampP50Ms": 4.193,
+    "gpuTimestampAvgMs": 4.331,
+    "drawsPerFrameMedian": 220,
+    "attributeBytesUploaded": 406520908,
+    "samplerCpuMsPerFrameAmortized": null
+   },
+   "spread": {
+    "avgFps": {
+     "min": 71.13,
+     "max": 72.21,
+     "n": 3
+    },
+    "p95Ms": {
+     "min": 25.55,
+     "max": 27.6,
+     "n": 3
+    },
+    "gpuTimestampP50Ms": {
+     "min": 4.105,
+     "max": 4.313,
+     "n": 3
+    }
+   }
+  },
+  "grassland/on": {
+   "runs": 3,
+   "validRuns": 3,
+   "rejectedRuns": [],
+   "median": {
+    "avgFps": 71.19,
+    "p50Ms": 12.3,
+    "p95Ms": 26.69,
+    "p99Ms": 34.463,
+    "p999Ms": 237.168,
+    "maxMs": 306.7,
+    "framesOver16_67ms": 195,
+    "cpuUpdateP50Ms": 11.4,
+    "renderSubmissionCpuP50Ms": 6.7,
+    "gpuTimestampP50Ms": 4.149,
+    "gpuTimestampAvgMs": 4.315,
+    "drawsPerFrameMedian": 220,
+    "attributeBytesUploaded": 389432844,
+    "samplerCpuMsPerFrameAmortized": 0.03
+   },
+   "spread": {
+    "avgFps": {
+     "min": 66.96,
+     "max": 73.12,
+     "n": 3
+    },
+    "p95Ms": {
+     "min": 25.2,
+     "max": 30.915,
+     "n": 3
+    },
+    "gpuTimestampP50Ms": {
+     "min": 4.084,
+     "max": 4.539,
+     "n": 3
+    }
+   }
+  },
+  "settlement/off": {
+   "runs": 3,
+   "validRuns": 0,
+   "rejectedRuns": [
+    "settlement-off-01.json",
+    "settlement-off-02.json",
+    "settlement-off-03.json"
+   ],
+   "median": null,
+   "spread": null
+  },
+  "settlement/on": {
+   "runs": 3,
+   "validRuns": 2,
+   "rejectedRuns": [
+    "settlement-on-02.json"
+   ],
+   "median": {
+    "avgFps": 69.46,
+    "p50Ms": 13.1,
+    "p95Ms": 28.31,
+    "p99Ms": 36.773,
+    "p999Ms": 83.501,
+    "maxMs": 100.4,
+    "framesOver16_67ms": 135,
+    "cpuUpdateP50Ms": 12.45,
+    "renderSubmissionCpuP50Ms": 7.65,
+    "gpuTimestampP50Ms": 7.058,
+    "gpuTimestampAvgMs": 6.992,
+    "drawsPerFrameMedian": 376,
+    "attributeBytesUploaded": 33251370,
+    "samplerCpuMsPerFrameAmortized": 0.033
+   },
+   "spread": {
+    "avgFps": {
+     "min": 69.31,
+     "max": 69.61,
+     "n": 2
+    },
+    "p95Ms": {
+     "min": 28.2,
+     "max": 28.42,
+     "n": 2
+    },
+    "gpuTimestampP50Ms": {
+     "min": 7.056,
+     "max": 7.06,
+     "n": 2
+    }
+   }
+  },
+  "settlement/ready-on": {
+   "runs": 3,
+   "validRuns": 3,
+   "rejectedRuns": [],
+   "median": {
+    "avgFps": 71.14,
+    "p50Ms": 13,
+    "p95Ms": 25.265,
+    "p99Ms": 34.358,
+    "p999Ms": 88.776,
+    "maxMs": 98.2,
+    "framesOver16_67ms": 127,
+    "cpuUpdateP50Ms": 12.3,
+    "renderSubmissionCpuP50Ms": 7.5,
+    "gpuTimestampP50Ms": 6.871,
+    "gpuTimestampAvgMs": 6.808,
+    "drawsPerFrameMedian": 363,
+    "attributeBytesUploaded": 31423792,
+    "samplerCpuMsPerFrameAmortized": 0.03
+   },
+   "spread": {
+    "avgFps": {
+     "min": 70.49,
+     "max": 71.17,
+     "n": 3
+    },
+    "p95Ms": {
+     "min": 23.44,
+     "max": 25.48,
+     "n": 3
+    },
+    "gpuTimestampP50Ms": {
+     "min": 6.849,
+     "max": 7.049,
+     "n": 3
+    }
+   }
+  }
+ },
+ "comparisons": {
+  "bog-cross": {
+   "status": "compared",
+   "validRuns": {
+    "off": 3,
+    "on": 3
+   },
+   "onVsOff": {
+    "avgFpsPct": 0.423,
+    "p50MsPct": -0.935,
+    "p95MsPct": 2.101,
+    "p99MsPct": -1.44,
+    "gpuTimestampP50Pct": 0.578,
+    "gpuTimestampAvgPct": -0.222,
+    "samplerCpuMsPerFrameAmortized": 0.024
+   }
+  },
+  "construction": {
+   "status": "insufficient-valid-runs",
+   "validRuns": {
+    "off": 0,
+    "on": 0
+   },
+   "onVsOff": null
+  },
+  "grassland": {
+   "status": "compared",
+   "validRuns": {
+    "off": 3,
+    "on": 3
+   },
+   "onVsOff": {
+    "avgFpsPct": -0.308,
+    "p50MsPct": 0,
+    "p95MsPct": -2.945,
+    "p99MsPct": 1.739,
+    "gpuTimestampP50Pct": -1.049,
+    "gpuTimestampAvgPct": -0.369,
+    "samplerCpuMsPerFrameAmortized": 0.03
+   }
+  },
+  "settlement": {
+   "status": "insufficient-valid-runs",
+   "validRuns": {
+    "off": 0,
+    "on": 2
+   },
+   "onVsOff": null
+  }
+ },
+ "runs": [
+  {
+   "file": "bog-cross-off-01.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:58:22.412Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 66.2,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 92.3,
+   "frameTimeMs": {
+    "p50": 10.6,
+    "p95": 13.8,
+    "p99": 27.924,
+    "p999": 41.728,
+    "max": 44.8,
+    "mean": 10.838
+   },
+   "framesOver16_67ms": 51,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.1,
+    "p95Ms": 12.9
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.763,
+    "p50": 5.5,
+    "p95": 6.8,
+    "p99": 11.656
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 199,
+    "avg": 5.421,
+    "p50": 5.422,
+    "p95": 6.114,
+    "p99": 9.063,
+    "max": 9.339
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 206,
+    "drawsMax": 340
+   },
+   "rendererAtStop": {
+    "drawCalls": 187,
+    "triangles": 44390217,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 143096,
+    "attributeBytesUploaded": 48892792,
+    "treeImpostorAttributeBytesUploaded": 3751904,
+    "publicationCustomAttributeBytes": 3751904,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-off-02.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T17:28:50.759Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 65.8,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 90.9,
+   "frameTimeMs": {
+    "p50": 10.7,
+    "p95": 13.6,
+    "p99": 28.052,
+    "p999": 35.037,
+    "max": 44.1,
+    "mean": 11.004
+   },
+   "framesOver16_67ms": 52,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.2,
+    "p95Ms": 12.82
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.835,
+    "p50": 5.6,
+    "p95": 7,
+    "p99": 11.552
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 197,
+    "avg": 5.401,
+    "p50": 5.347,
+    "p95": 6.103,
+    "p99": 9.293,
+    "max": 9.676
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 206,
+    "drawsMax": 366
+   },
+   "rendererAtStop": {
+    "drawCalls": 184,
+    "triangles": 44260264,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 47211452,
+    "treeImpostorAttributeBytesUploaded": 3729664,
+    "publicationCustomAttributeBytes": 3729664,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-off-03.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T17:53:41.878Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 64.2,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 92.76,
+   "frameTimeMs": {
+    "p50": 10.7,
+    "p95": 14.3,
+    "p99": 28.847,
+    "p999": 35.65,
+    "max": 42.4,
+    "mean": 10.784
+   },
+   "framesOver16_67ms": 51,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.2,
+    "p95Ms": 13.5
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.717,
+    "p50": 5.5,
+    "p95": 7,
+    "p99": 10.547
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 198,
+    "avg": 5.379,
+    "p50": 5.36,
+    "p95": 6.2,
+    "p99": 9.118,
+    "max": 9.263
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 351
+   },
+   "rendererAtStop": {
+    "drawCalls": 185,
+    "triangles": 45269909,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 3936,
+    "attributeBytesUploaded": 48567652,
+    "treeImpostorAttributeBytesUploaded": 3764752,
+    "publicationCustomAttributeBytes": 3764752,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-on-01.json",
+   "route": "bog-cross",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:01:25.803Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 65.5,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 93.2,
+   "frameTimeMs": {
+    "p50": 10.5,
+    "p95": 14.09,
+    "p99": 27.538,
+    "p999": 41.331,
+    "max": 51.6,
+    "mean": 10.734
+   },
+   "framesOver16_67ms": 55,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10,
+    "p95Ms": 13.39
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.641,
+    "p50": 5.4,
+    "p95": 6.5,
+    "p99": 11.638
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 200,
+    "avg": 5.443,
+    "p50": 5.391,
+    "p95": 6.274,
+    "p99": 9.572,
+    "max": 9.932
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 206,
+    "drawsMax": 352
+   },
+   "rendererAtStop": {
+    "drawCalls": 187,
+    "triangles": 44373604,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 47185776,
+    "treeImpostorAttributeBytesUploaded": 3787952,
+    "publicationCustomAttributeBytes": 3787952,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 20,
+      "transitioningMean": 1.206,
+      "samplesWithTransition": 44,
+      "overlappingMax": 6,
+      "overlappingMean": 0.254,
+      "pendingDataMax": 22,
+      "maxPendingDataAgeMs": 10116,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.444,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.423,
+      "samplesWithTransition": 5,
+      "overlappingMax": 6,
+      "overlappingMean": 0.159,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 47185776,
+     "stylizedInstanceRowsCompared": 10993
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 45.6,
+    "perSampleMeanMs": 0.241,
+    "perSampleMaxMs": 1.8,
+    "amortizedPerFrameMs": 0.024
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-on-02.json",
+   "route": "bog-cross",
+   "arm": "on",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:25:49.211Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 65.7,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 92.69,
+   "frameTimeMs": {
+    "p50": 10.6,
+    "p95": 13.74,
+    "p99": 27.648,
+    "p999": 34.774,
+    "max": 42.7,
+    "mean": 10.792
+   },
+   "framesOver16_67ms": 56,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.1,
+    "p95Ms": 13.1
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.703,
+    "p50": 5.5,
+    "p95": 6.6,
+    "p99": 10.648
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 201,
+    "avg": 5.389,
+    "p50": 5.414,
+    "p95": 6.12,
+    "p99": 6.456,
+    "max": 9.717
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 365
+   },
+   "rendererAtStop": {
+    "drawCalls": 186,
+    "triangles": 44352672,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 48150584,
+    "treeImpostorAttributeBytesUploaded": 3753792,
+    "publicationCustomAttributeBytes": 3753792,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 20,
+      "transitioningMean": 1.365,
+      "samplesWithTransition": 45,
+      "overlappingMax": 6,
+      "overlappingMean": 0.286,
+      "pendingDataMax": 25,
+      "maxPendingDataAgeMs": 10499,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.593,
+      "samplesWithTransition": 8,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.508,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.159,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 48150584,
+     "stylizedInstanceRowsCompared": 11411
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 42.9,
+    "perSampleMeanMs": 0.227,
+    "perSampleMaxMs": 0.7,
+    "amortizedPerFrameMs": 0.023
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-on-03.json",
+   "route": "bog-cross",
+   "arm": "on",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:56:46.632Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 64.8,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 91.28,
+   "frameTimeMs": {
+    "p50": 10.8,
+    "p95": 14.48,
+    "p99": 29.476,
+    "p999": 37.445,
+    "max": 51.5,
+    "mean": 10.959
+   },
+   "framesOver16_67ms": 65,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.3,
+    "p95Ms": 13.38
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.779,
+    "p50": 5.6,
+    "p95": 6.8,
+    "p99": 11.052
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 195,
+    "avg": 5.337,
+    "p50": 5.346,
+    "p95": 6.064,
+    "p99": 6.285,
+    "max": 8.419
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 365
+   },
+   "rendererAtStop": {
+    "drawCalls": 187,
+    "triangles": 44384909,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 148864,
+    "attributeBytesUploaded": 48412872,
+    "treeImpostorAttributeBytesUploaded": 3701408,
+    "publicationCustomAttributeBytes": 3701408,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.291,
+      "samplesWithTransition": 41,
+      "overlappingMax": 6,
+      "overlappingMean": 0.286,
+      "pendingDataMax": 29,
+      "maxPendingDataAgeMs": 10947.4,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.444,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.508,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.19,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 48412872,
+     "stylizedInstanceRowsCompared": 10071
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 46.1,
+    "perSampleMeanMs": 0.244,
+    "perSampleMaxMs": 1.9,
+    "amortizedPerFrameMs": 0.025
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-ready-on-01.json",
+   "route": "bog-cross",
+   "arm": "ready-on",
+   "rep": "01",
+   "href": "http://localhost:5173/?initialInstanceUploadSlicing=1&slicedInstancePublication=1&rendererAdmissionBudget=1&qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:21:23.436Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 55.7,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 96.25,
+   "frameTimeMs": {
+    "p50": 10.4,
+    "p95": 12.8,
+    "p99": 27.3,
+    "p999": 35.123,
+    "max": 43.1,
+    "mean": 10.393
+   },
+   "framesOver16_67ms": 49,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 9.8,
+    "p95Ms": 12
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.421,
+    "p50": 5.2,
+    "p95": 6.3,
+    "p99": 10.877
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 206,
+    "avg": 5.343,
+    "p50": 5.386,
+    "p95": 6.088,
+    "p99": 6.311,
+    "max": 9.212
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 338
+   },
+   "rendererAtStop": {
+    "drawCalls": 187,
+    "triangles": 44310994,
+    "geometries": 748,
+    "textures": 1119,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 47121872,
+    "treeImpostorAttributeBytesUploaded": 2897792,
+    "publicationCustomAttributeBytes": 4212044,
+    "sceneryPublicationQueuedBytes": 682300,
+    "scenerySliceUploadedBytes": 1314252
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 19,
+      "transitioningMean": 1.296,
+      "samplesWithTransition": 49,
+      "overlappingMax": 6,
+      "overlappingMean": 0.286,
+      "pendingDataMax": 22,
+      "maxPendingDataAgeMs": 10488.4,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.444,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.508,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.19,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": 14,
+     "sceneryPublicationQueuedBytes": 682300,
+     "scenerySliceUploadedBytes": 1314252,
+     "scenerySliceGpuCopyBytes": 1314252,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 47121872,
+     "stylizedInstanceRowsCompared": 10041
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 39.9,
+    "perSampleMeanMs": 0.211,
+    "perSampleMaxMs": 0.6,
+    "amortizedPerFrameMs": 0.021
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-ready-on-02.json",
+   "route": "bog-cross",
+   "arm": "ready-on",
+   "rep": "02",
+   "href": "http://localhost:5173/?initialInstanceUploadSlicing=1&slicedInstancePublication=1&rendererAdmissionBudget=1&qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:27:48.937Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 55.5,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 94.94,
+   "frameTimeMs": {
+    "p50": 10.5,
+    "p95": 13.4,
+    "p99": 25.806,
+    "p999": 33.8,
+    "max": 42.7,
+    "mean": 10.536
+   },
+   "framesOver16_67ms": 57,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 9.9,
+    "p95Ms": 12.515
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.461,
+    "p50": 5.3,
+    "p95": 6.4,
+    "p99": 10.906
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 205,
+    "avg": 5.407,
+    "p50": 5.366,
+    "p95": 6.13,
+    "p99": 8.28,
+    "max": 9.386
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 337
+   },
+   "rendererAtStop": {
+    "drawCalls": 187,
+    "triangles": 44372316,
+    "geometries": 748,
+    "textures": 1119,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 48554896,
+    "treeImpostorAttributeBytesUploaded": 2540016,
+    "publicationCustomAttributeBytes": 4384036,
+    "sceneryPublicationQueuedBytes": 183148,
+    "scenerySliceUploadedBytes": 1844020
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 21,
+      "transitioningMean": 1.27,
+      "samplesWithTransition": 45,
+      "overlappingMax": 6,
+      "overlappingMean": 0.286,
+      "pendingDataMax": 22,
+      "maxPendingDataAgeMs": 10353.9,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.444,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.508,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.19,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": 14,
+     "sceneryPublicationQueuedBytes": 183148,
+     "scenerySliceUploadedBytes": 1844020,
+     "scenerySliceGpuCopyBytes": 1844020,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 48554896,
+     "stylizedInstanceRowsCompared": 9752
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 44,
+    "perSampleMeanMs": 0.233,
+    "perSampleMaxMs": 0.8,
+    "amortizedPerFrameMs": 0.023
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-ready-on-03.json",
+   "route": "bog-cross",
+   "arm": "ready-on",
+   "rep": "03",
+   "href": "http://localhost:5173/?initialInstanceUploadSlicing=1&slicedInstancePublication=1&rendererAdmissionBudget=1&qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:34:07.036Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 55.8,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 96.01,
+   "frameTimeMs": {
+    "p50": 10.3,
+    "p95": 12.8,
+    "p99": 26.51,
+    "p999": 35.016,
+    "max": 41.1,
+    "mean": 10.419
+   },
+   "framesOver16_67ms": 53,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 9.8,
+    "p95Ms": 12.11
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.437,
+    "p50": 5.2,
+    "p95": 6.2,
+    "p99": 11.01
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 207,
+    "avg": 5.371,
+    "p50": 5.353,
+    "p95": 6.084,
+    "p99": 6.335,
+    "max": 9.049
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 206,
+    "drawsMax": 338
+   },
+   "rendererAtStop": {
+    "drawCalls": 186,
+    "triangles": 44390234,
+    "geometries": 748,
+    "textures": 1119,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 47243744,
+    "treeImpostorAttributeBytesUploaded": 2533776,
+    "publicationCustomAttributeBytes": 4377796,
+    "sceneryPublicationQueuedBytes": 184892,
+    "scenerySliceUploadedBytes": 1844020
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 18,
+      "transitioningMean": 1.111,
+      "samplesWithTransition": 47,
+      "overlappingMax": 6,
+      "overlappingMean": 0.222,
+      "pendingDataMax": 21,
+      "maxPendingDataAgeMs": 10061.6,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.444,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.423,
+      "samplesWithTransition": 5,
+      "overlappingMax": 6,
+      "overlappingMean": 0.159,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": 16,
+     "sceneryPublicationQueuedBytes": 184892,
+     "scenerySliceUploadedBytes": 1844020,
+     "scenerySliceGpuCopyBytes": 1844020,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 47243744,
+     "stylizedInstanceRowsCompared": 9826
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 44,
+    "perSampleMeanMs": 0.233,
+    "perSampleMaxMs": 2.1,
+    "amortizedPerFrameMs": 0.023
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-off-01.json",
+   "route": "construction",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T17:18:58.573Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 73.28,
+   "frameTimeMs": {
+    "p50": 12.9,
+    "p95": 20.6,
+    "p99": 32.211,
+    "p999": 55.56,
+    "max": 376.2,
+    "mean": 13.654
+   },
+   "framesOver16_67ms": 133,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.9,
+    "p95Ms": 16.785
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.436,
+    "p50": 7.9,
+    "p95": 10.1,
+    "p99": 14.174
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 163,
+    "avg": 3.925,
+    "p50": 3.938,
+    "p95": 4.427,
+    "p99": 4.604,
+    "max": 5.4
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 355,
+    "drawsMax": 560
+   },
+   "rendererAtStop": {
+    "drawCalls": 234,
+    "triangles": 16059775,
+    "geometries": 1197,
+    "textures": 1106,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 757072,
+    "attributeBytesUploaded": 140013368,
+    "treeImpostorAttributeBytesUploaded": 2274992,
+    "publicationCustomAttributeBytes": 2274992,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-off-02.json",
+   "route": "construction",
+   "arm": "off",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T17:50:37.386Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 73.82,
+   "frameTimeMs": {
+    "p50": 12.8,
+    "p95": 19.76,
+    "p99": 31.034,
+    "p999": 53.309,
+    "max": 363.3,
+    "mean": 13.553
+   },
+   "framesOver16_67ms": 128,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.8,
+    "p95Ms": 16.4
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.373,
+    "p50": 7.8,
+    "p95": 9.8,
+    "p99": 14.252
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 164,
+    "avg": 3.995,
+    "p50": 3.978,
+    "p95": 4.546,
+    "p99": 6.085,
+    "max": 6.424
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 356,
+    "drawsMax": 489
+   },
+   "rendererAtStop": {
+    "drawCalls": 233,
+    "triangles": 16203379,
+    "geometries": 1197,
+    "textures": 1105,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 132440,
+    "attributeBytesUploaded": 136829092,
+    "treeImpostorAttributeBytesUploaded": 2263920,
+    "publicationCustomAttributeBytes": 2263920,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-off-03.json",
+   "route": "construction",
+   "arm": "off",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T18:14:55.619Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 71.97,
+   "frameTimeMs": {
+    "p50": 13,
+    "p95": 21.6,
+    "p99": 32.992,
+    "p999": 48.76,
+    "max": 432.4,
+    "mean": 13.902
+   },
+   "framesOver16_67ms": 141,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12,
+    "p95Ms": 16.92
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.625,
+    "p50": 8,
+    "p95": 10.32,
+    "p99": 15.22
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 160,
+    "avg": 4.016,
+    "p50": 3.966,
+    "p95": 4.595,
+    "p99": 5.335,
+    "max": 6.9
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 357,
+    "drawsMax": 559
+   },
+   "rendererAtStop": {
+    "drawCalls": 444,
+    "triangles": 32662324,
+    "geometries": 1197,
+    "textures": 1105,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 93184,
+    "attributeBytesUploaded": 139235924,
+    "treeImpostorAttributeBytesUploaded": 2227728,
+    "publicationCustomAttributeBytes": 2227728,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-on-01.json",
+   "route": "construction",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:22:45.948Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 72.72,
+   "frameTimeMs": {
+    "p50": 12.9,
+    "p95": 21.5,
+    "p99": 32.3,
+    "p999": 53.414,
+    "max": 357.3,
+    "mean": 13.759
+   },
+   "framesOver16_67ms": 125,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.9,
+    "p95Ms": 16.9
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.465,
+    "p50": 7.9,
+    "p95": 10.3,
+    "p99": 14.496
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 162,
+    "avg": 3.985,
+    "p50": 3.963,
+    "p95": 4.424,
+    "p99": 5.763,
+    "max": 7.244
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 355,
+    "drawsMax": 555
+   },
+   "rendererAtStop": {
+    "drawCalls": 233,
+    "triangles": 16141244,
+    "geometries": 1197,
+    "textures": 1105,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 659792,
+    "attributeBytesUploaded": 140604472,
+    "treeImpostorAttributeBytesUploaded": 2248288,
+    "publicationCustomAttributeBytes": 2248288,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 184,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 0.663,
+      "samplesWithTransition": 34,
+      "overlappingMax": 6,
+      "overlappingMean": 0.196,
+      "pendingDataMax": 7,
+      "maxPendingDataAgeMs": 2822.5,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.304,
+      "samplesWithTransition": 4,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.348,
+      "samplesWithTransition": 4,
+      "overlappingMax": 6,
+      "overlappingMean": 0.13,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 140604472,
+     "stylizedInstanceRowsCompared": 17952
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 37.7,
+    "perSampleMeanMs": 0.205,
+    "perSampleMaxMs": 1.6,
+    "amortizedPerFrameMs": 0.026
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-on-02.json",
+   "route": "construction",
+   "arm": "on",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:46:51.858Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 72.24,
+   "frameTimeMs": {
+    "p50": 13,
+    "p95": 21.49,
+    "p99": 33.7,
+    "p999": 49.33,
+    "max": 358.9,
+    "mean": 13.849
+   },
+   "framesOver16_67ms": 136,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12,
+    "p95Ms": 17.49
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.539,
+    "p50": 8,
+    "p95": 10.19,
+    "p99": 14.9
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 161,
+    "avg": 3.999,
+    "p50": 3.968,
+    "p95": 4.493,
+    "p99": 4.847,
+    "max": 5.019
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 356,
+    "drawsMax": 564
+   },
+   "rendererAtStop": {
+    "drawCalls": 234,
+    "triangles": 16112697,
+    "geometries": 1197,
+    "textures": 1106,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 960288,
+    "attributeBytesUploaded": 143288532,
+    "treeImpostorAttributeBytesUploaded": 2250832,
+    "publicationCustomAttributeBytes": 2250832,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 184,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 0.522,
+      "samplesWithTransition": 30,
+      "overlappingMax": 6,
+      "overlappingMean": 0.13,
+      "pendingDataMax": 7,
+      "maxPendingDataAgeMs": 2698.9,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.304,
+      "samplesWithTransition": 4,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.261,
+      "samplesWithTransition": 3,
+      "overlappingMax": 6,
+      "overlappingMean": 0.098,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 143288532,
+     "stylizedInstanceRowsCompared": 17992
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 36.5,
+    "perSampleMeanMs": 0.198,
+    "perSampleMaxMs": 0.6,
+    "amortizedPerFrameMs": 0.025
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-on-03.json",
+   "route": "construction",
+   "arm": "on",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:18:40.893Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 71.07,
+   "frameTimeMs": {
+    "p50": 13.2,
+    "p95": 23.305,
+    "p99": 33.462,
+    "p999": 59.501,
+    "max": 432.4,
+    "mean": 14.079
+   },
+   "framesOver16_67ms": 159,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.1,
+    "p95Ms": 17.305
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.685,
+    "p50": 8.1,
+    "p95": 10.105,
+    "p99": 14.786
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 158,
+    "avg": 4.076,
+    "p50": 4.035,
+    "p95": 4.802,
+    "p99": 6.146,
+    "max": 6.178
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 357,
+    "drawsMax": 565
+   },
+   "rendererAtStop": {
+    "drawCalls": 234,
+    "triangles": 16163251,
+    "geometries": 1197,
+    "textures": 1105,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1344,
+    "attributeBytesUploaded": 141313364,
+    "treeImpostorAttributeBytesUploaded": 2211552,
+    "publicationCustomAttributeBytes": 2211552,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 182,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 0.659,
+      "samplesWithTransition": 34,
+      "overlappingMax": 6,
+      "overlappingMean": 0.165,
+      "pendingDataMax": 7,
+      "maxPendingDataAgeMs": 2669.6,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.385,
+      "samplesWithTransition": 5,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.352,
+      "samplesWithTransition": 4,
+      "overlappingMax": 6,
+      "overlappingMean": 0.099,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 141313364,
+     "stylizedInstanceRowsCompared": 18011
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 36,
+    "perSampleMeanMs": 0.198,
+    "perSampleMaxMs": 1.3,
+    "amortizedPerFrameMs": 0.025
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-off-01.json",
+   "route": "grassland",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T17:04:23.240Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 72.5,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 72.21,
+   "frameTimeMs": {
+    "p50": 12,
+    "p95": 25.55,
+    "p99": 34.516,
+    "p999": 232.202,
+    "max": 312.1,
+    "mean": 13.855
+   },
+   "framesOver16_67ms": 175,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.2,
+    "p95Ms": 18.89
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.349,
+    "p50": 6.6,
+    "p95": 11,
+    "p99": 15.858
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 158,
+    "avg": 4.286,
+    "p50": 4.105,
+    "p95": 5.668,
+    "p99": 6.095,
+    "max": 7.469
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 219,
+    "drawsMax": 448
+   },
+   "rendererAtStop": {
+    "drawCalls": 185,
+    "triangles": 12185729,
+    "geometries": 1022,
+    "textures": 1109,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 864,
+    "attributeBytesUploaded": 402691360,
+    "treeImpostorAttributeBytesUploaded": 1802448,
+    "publicationCustomAttributeBytes": 1802448,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-off-02.json",
+   "route": "grassland",
+   "arm": "off",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T17:35:06.845Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 72.4,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 71.41,
+   "frameTimeMs": {
+    "p50": 12.3,
+    "p95": 27.5,
+    "p99": 33.5,
+    "p999": 220.887,
+    "max": 289.1,
+    "mean": 14.008
+   },
+   "framesOver16_67ms": 201,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.4,
+    "p95Ms": 18.44
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.368,
+    "p50": 6.7,
+    "p95": 10.37,
+    "p99": 14.522
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 155,
+    "avg": 4.331,
+    "p50": 4.193,
+    "p95": 5.612,
+    "p99": 6.001,
+    "max": 6.097
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 220,
+    "drawsMax": 408
+   },
+   "rendererAtStop": {
+    "drawCalls": 192,
+    "triangles": 13289401,
+    "geometries": 1042,
+    "textures": 1126,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 765936,
+    "attributeBytesUploaded": 406520908,
+    "treeImpostorAttributeBytesUploaded": 1737344,
+    "publicationCustomAttributeBytes": 1737344,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-off-03.json",
+   "route": "grassland",
+   "arm": "off",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T17:59:45.359Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 73.4,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 71.13,
+   "frameTimeMs": {
+    "p50": 12.5,
+    "p95": 27.6,
+    "p99": 33.874,
+    "p999": 223.206,
+    "max": 288,
+    "mean": 14.064
+   },
+   "framesOver16_67ms": 175,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.5,
+    "p95Ms": 19.2
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.509,
+    "p50": 6.9,
+    "p95": 10.9,
+    "p99": 15
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 155,
+    "avg": 4.376,
+    "p50": 4.313,
+    "p95": 5.728,
+    "p99": 6.422,
+    "max": 7.151
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 220,
+    "drawsMax": 428
+   },
+   "rendererAtStop": {
+    "drawCalls": 188,
+    "triangles": 13100493,
+    "geometries": 1039,
+    "textures": 1116,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 864,
+    "attributeBytesUploaded": 410907404,
+    "treeImpostorAttributeBytesUploaded": 1860320,
+    "publicationCustomAttributeBytes": 1860320,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-on-01.json",
+   "route": "grassland",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T17:07:21.464Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 72.6,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 66.96,
+   "frameTimeMs": {
+    "p50": 12.7,
+    "p95": 30.915,
+    "p99": 34.463,
+    "p999": 266.374,
+    "max": 306.1,
+    "mean": 14.939
+   },
+   "framesOver16_67ms": 323,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.8,
+    "p95Ms": 20.1
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.337,
+    "p50": 6.7,
+    "p95": 10.2,
+    "p99": 15.1
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 146,
+    "avg": 4.501,
+    "p50": 4.539,
+    "p95": 5.701,
+    "p99": 6.179,
+    "max": 7.517
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 220,
+    "drawsMax": 388
+   },
+   "rendererAtStop": {
+    "drawCalls": 180,
+    "triangles": 9596590,
+    "geometries": 1027,
+    "textures": 1115,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 787296,
+    "attributeBytesUploaded": 379315188,
+    "treeImpostorAttributeBytesUploaded": 1620800,
+    "publicationCustomAttributeBytes": 1620800,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 181,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 1.199,
+      "samplesWithTransition": 37,
+      "overlappingMax": 6,
+      "overlappingMean": 0.398,
+      "pendingDataMax": 13,
+      "maxPendingDataAgeMs": 3515.4,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.619,
+      "samplesWithTransition": 8,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.707,
+      "samplesWithTransition": 8,
+      "overlappingMax": 6,
+      "overlappingMean": 0.265,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 9,
+       "proxy": 16,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 379315188,
+     "stylizedInstanceRowsCompared": 11446
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 40.8,
+    "perSampleMeanMs": 0.225,
+    "perSampleMaxMs": 0.6,
+    "amortizedPerFrameMs": 0.03
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-on-02.json",
+   "route": "grassland",
+   "arm": "on",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T17:32:08.594Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 92.3,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 71.19,
+   "frameTimeMs": {
+    "p50": 12.3,
+    "p95": 26.69,
+    "p99": 34.8,
+    "p999": 237.168,
+    "max": 328.7,
+    "mean": 14.052
+   },
+   "framesOver16_67ms": 195,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.4,
+    "p95Ms": 17.8
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.336,
+    "p50": 6.7,
+    "p95": 10.49,
+    "p99": 14.446
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 154,
+    "avg": 4.272,
+    "p50": 4.084,
+    "p95": 5.544,
+    "p99": 5.855,
+    "max": 7.534
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 220,
+    "drawsMax": 468
+   },
+   "rendererAtStop": {
+    "drawCalls": 188,
+    "triangles": 10219566,
+    "geometries": 1040,
+    "textures": 1126,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 864,
+    "attributeBytesUploaded": 389432844,
+    "treeImpostorAttributeBytesUploaded": 1830080,
+    "publicationCustomAttributeBytes": 1830080,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 178,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 1.281,
+      "samplesWithTransition": 43,
+      "overlappingMax": 6,
+      "overlappingMean": 0.371,
+      "pendingDataMax": 13,
+      "maxPendingDataAgeMs": 3844.1,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.708,
+      "samplesWithTransition": 9,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.719,
+      "samplesWithTransition": 8,
+      "overlappingMax": 6,
+      "overlappingMean": 0.236,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 9,
+       "proxy": 16,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 389432844,
+     "stylizedInstanceRowsCompared": 11594
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 60.2,
+    "perSampleMeanMs": 0.338,
+    "perSampleMaxMs": 22.1,
+    "amortizedPerFrameMs": 0.042
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-on-03.json",
+   "route": "grassland",
+   "arm": "on",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T18:03:20.646Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 108.5,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 73.12,
+   "frameTimeMs": {
+    "p50": 12.2,
+    "p95": 25.2,
+    "p99": 33.34,
+    "p999": 220.184,
+    "max": 306.7,
+    "mean": 13.682
+   },
+   "framesOver16_67ms": 171,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.2,
+    "p95Ms": 17.9
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.213,
+    "p50": 6.6,
+    "p95": 10.2,
+    "p99": 13.7
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 159,
+    "avg": 4.315,
+    "p50": 4.149,
+    "p95": 5.822,
+    "p99": 6.27,
+    "max": 7.111
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 220,
+    "drawsMax": 424
+   },
+   "rendererAtStop": {
+    "drawCalls": 183,
+    "triangles": 10083708,
+    "geometries": 1036,
+    "textures": 1116,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 770976,
+    "attributeBytesUploaded": 392738528,
+    "treeImpostorAttributeBytesUploaded": 1958320,
+    "publicationCustomAttributeBytes": 1958320,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 180,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 1.311,
+      "samplesWithTransition": 41,
+      "overlappingMax": 6,
+      "overlappingMean": 0.367,
+      "pendingDataMax": 13,
+      "maxPendingDataAgeMs": 3360.3,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.778,
+      "samplesWithTransition": 10,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.8,
+      "samplesWithTransition": 9,
+      "overlappingMax": 6,
+      "overlappingMean": 0.233,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 9,
+       "proxy": 16,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 392738528,
+     "stylizedInstanceRowsCompared": 12474
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 42.8,
+    "perSampleMeanMs": 0.238,
+    "perSampleMaxMs": 2.4,
+    "amortizedPerFrameMs": 0.029
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-off-01.json",
+   "route": "settlement",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T17:11:17.966Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 67.69,
+   "frameTimeMs": {
+    "p50": 13.4,
+    "p95": 29.94,
+    "p99": 44.168,
+    "p999": 94.138,
+    "max": 100.3,
+    "mean": 14.78
+   },
+   "framesOver16_67ms": 161,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.8,
+    "p95Ms": 18.74
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.147,
+    "p50": 7.8,
+    "p95": 9.44,
+    "p99": 15.796
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 150,
+    "avg": 6.841,
+    "p50": 6.888,
+    "p95": 8.335,
+    "p99": 8.576,
+    "max": 8.682
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 365,
+    "drawsMax": 417
+   },
+   "rendererAtStop": {
+    "drawCalls": 410,
+    "triangles": 40594287,
+    "geometries": 1156,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 576,
+    "attributeBytesUploaded": 32000368,
+    "treeImpostorAttributeBytesUploaded": 2441760,
+    "publicationCustomAttributeBytes": 2441760,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-off-02.json",
+   "route": "settlement",
+   "arm": "off",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T17:43:04.255Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 69.02,
+   "frameTimeMs": {
+    "p50": 13.2,
+    "p95": 27.5,
+    "p99": 35.242,
+    "p999": 85.051,
+    "max": 102,
+    "mean": 14.494
+   },
+   "framesOver16_67ms": 143,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.6,
+    "p95Ms": 18.91
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.028,
+    "p50": 7.8,
+    "p95": 8.9,
+    "p99": 16.644
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 153,
+    "avg": 6.814,
+    "p50": 6.935,
+    "p95": 8.273,
+    "p99": 8.479,
+    "max": 8.563
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 364,
+    "drawsMax": 435
+   },
+   "rendererAtStop": {
+    "drawCalls": 405,
+    "triangles": 40572558,
+    "geometries": 1159,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 576,
+    "attributeBytesUploaded": 32252444,
+    "treeImpostorAttributeBytesUploaded": 2469936,
+    "publicationCustomAttributeBytes": 2469936,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-off-03.json",
+   "route": "settlement",
+   "arm": "off",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T18:07:17.952Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 68.49,
+   "frameTimeMs": {
+    "p50": 13.2,
+    "p95": 30,
+    "p99": 34.828,
+    "p999": 77.751,
+    "max": 101.6,
+    "mean": 14.606
+   },
+   "framesOver16_67ms": 158,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.6,
+    "p95Ms": 20.36
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.069,
+    "p50": 7.8,
+    "p95": 9,
+    "p99": 17.296
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 152,
+    "avg": 6.795,
+    "p50": 6.904,
+    "p95": 8.436,
+    "p99": 8.733,
+    "max": 8.894
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 363,
+    "drawsMax": 432
+   },
+   "rendererAtStop": {
+    "drawCalls": 403,
+    "triangles": 40645826,
+    "geometries": 1156,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 576,
+    "attributeBytesUploaded": 31446848,
+    "treeImpostorAttributeBytesUploaded": 2450976,
+    "publicationCustomAttributeBytes": 2450976,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-on-01.json",
+   "route": "settlement",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:15:13.149Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 119.4,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 69.31,
+   "frameTimeMs": {
+    "p50": 13.1,
+    "p95": 28.42,
+    "p99": 34.216,
+    "p999": 81.253,
+    "max": 101.1,
+    "mean": 14.434
+   },
+   "framesOver16_67ms": 142,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.5,
+    "p95Ms": 19.7
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.985,
+    "p50": 7.7,
+    "p95": 8.9,
+    "p99": 16.232
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 154,
+    "avg": 7.008,
+    "p50": 7.056,
+    "p95": 8.411,
+    "p99": 8.666,
+    "max": 8.961
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 374,
+    "drawsMax": 436
+   },
+   "rendererAtStop": {
+    "drawCalls": 407,
+    "triangles": 40629361,
+    "geometries": 1160,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 15192,
+    "attributeBytesUploaded": 33166032,
+    "treeImpostorAttributeBytesUploaded": 2477088,
+    "publicationCustomAttributeBytes": 2477088,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 184,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.114,
+      "samplesWithTransition": 40,
+      "overlappingMax": 6,
+      "overlappingMean": 0.261,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 5042.6,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.457,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.348,
+      "samplesWithTransition": 4,
+      "overlappingMax": 6,
+      "overlappingMean": 0.13,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 33166032,
+     "stylizedInstanceRowsCompared": 21736
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 45.4,
+    "perSampleMeanMs": 0.247,
+    "perSampleMaxMs": 3.6,
+    "amortizedPerFrameMs": 0.033
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-on-02.json",
+   "route": "settlement",
+   "arm": "on",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T17:39:07.057Z",
+   "status": "rejected",
+   "rejectionReason": "settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 68.87,
+   "frameTimeMs": {
+    "p50": 13.2,
+    "p95": 29.8,
+    "p99": 35.625,
+    "p999": 80.7,
+    "max": 88.5,
+    "mean": 14.527
+   },
+   "framesOver16_67ms": 149,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.5,
+    "p95Ms": 18.125
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.928,
+    "p50": 7.7,
+    "p95": 9,
+    "p99": 15.525
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 152,
+    "avg": 6.882,
+    "p50": 6.974,
+    "p95": 8.531,
+    "p99": 8.899,
+    "max": 9.768
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 363,
+    "drawsMax": 437
+   },
+   "rendererAtStop": {
+    "drawCalls": 407,
+    "triangles": 40651727,
+    "geometries": 1160,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 54392,
+    "attributeBytesUploaded": 32126320,
+    "treeImpostorAttributeBytesUploaded": 2463504,
+    "publicationCustomAttributeBytes": 2463504,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 186,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.22,
+      "samplesWithTransition": 40,
+      "overlappingMax": 6,
+      "overlappingMean": 0.258,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 4678.8,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.527,
+      "samplesWithTransition": 7,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.516,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.161,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 32126320,
+     "stylizedInstanceRowsCompared": 19233
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 44.9,
+    "perSampleMeanMs": 0.241,
+    "perSampleMaxMs": 2.7,
+    "amortizedPerFrameMs": 0.033
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-on-03.json",
+   "route": "settlement",
+   "arm": "on",
+   "rep": "03",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:11:08.967Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 110.9,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 69.61,
+   "frameTimeMs": {
+    "p50": 13.1,
+    "p95": 28.2,
+    "p99": 39.33,
+    "p999": 85.748,
+    "max": 99.7,
+    "mean": 14.372
+   },
+   "framesOver16_67ms": 128,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.4,
+    "p95Ms": 18.45
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.873,
+    "p50": 7.6,
+    "p95": 8.9,
+    "p99": 16.03
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 154,
+    "avg": 6.976,
+    "p50": 7.06,
+    "p95": 8.749,
+    "p99": 8.998,
+    "max": 9.058
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 378,
+    "drawsMax": 442
+   },
+   "rendererAtStop": {
+    "drawCalls": 436,
+    "triangles": 40646522,
+    "geometries": 1162,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 12584,
+    "attributeBytesUploaded": 33336708,
+    "treeImpostorAttributeBytesUploaded": 2461488,
+    "publicationCustomAttributeBytes": 2461488,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 185,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.232,
+      "samplesWithTransition": 42,
+      "overlappingMax": 6,
+      "overlappingMean": 0.259,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 4554.8,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.454,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.519,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.162,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 33336708,
+     "stylizedInstanceRowsCompared": 19565
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 44.1,
+    "perSampleMeanMs": 0.238,
+    "perSampleMaxMs": 1.5,
+    "amortizedPerFrameMs": 0.032
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-ready-on-01.json",
+   "route": "settlement",
+   "arm": "ready-on",
+   "rep": "01",
+   "href": "http://localhost:5173/?initialInstanceUploadSlicing=1&slicedInstancePublication=1&rendererAdmissionBudget=1&qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:25:07.567Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 118.3,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 71.17,
+   "frameTimeMs": {
+    "p50": 13,
+    "p95": 25.48,
+    "p99": 33.279,
+    "p999": 87.954,
+    "max": 102,
+    "mean": 14.056
+   },
+   "framesOver16_67ms": 127,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.3,
+    "p95Ms": 18.2
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.825,
+    "p50": 7.5,
+    "p95": 8.9,
+    "p99": 16.4
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 158,
+    "avg": 6.783,
+    "p50": 6.871,
+    "p95": 8.855,
+    "p99": 9.334,
+    "max": 9.597
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 363,
+    "drawsMax": 408
+   },
+   "rendererAtStop": {
+    "drawCalls": 400,
+    "triangles": 40613017,
+    "geometries": 1017,
+    "textures": 925,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 48500,
+    "attributeBytesUploaded": 31423792,
+    "treeImpostorAttributeBytesUploaded": 1220544,
+    "publicationCustomAttributeBytes": 3385028,
+    "sceneryPublicationQueuedBytes": 821904,
+    "scenerySliceUploadedBytes": 2164484
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 187,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.096,
+      "samplesWithTransition": 42,
+      "overlappingMax": 6,
+      "overlappingMean": 0.257,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 5015.1,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.449,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.513,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.193,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": 45,
+     "sceneryPublicationQueuedBytes": 821904,
+     "scenerySliceUploadedBytes": 2164484,
+     "scenerySliceGpuCopyBytes": 2164484,
+     "initialInstanceSlicedBytes": 1612824,
+     "attributeBytesUploaded": 31423792,
+     "stylizedInstanceRowsCompared": 21432
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 42.9,
+    "perSampleMeanMs": 0.229,
+    "perSampleMaxMs": 1.6,
+    "amortizedPerFrameMs": 0.03
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-ready-on-02.json",
+   "route": "settlement",
+   "arm": "ready-on",
+   "rep": "02",
+   "href": "http://localhost:5173/?initialInstanceUploadSlicing=1&slicedInstancePublication=1&rendererAdmissionBudget=1&qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:31:23.726Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 108.6,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 70.49,
+   "frameTimeMs": {
+    "p50": 13.1,
+    "p95": 23.44,
+    "p99": 34.492,
+    "p999": 88.776,
+    "max": 98,
+    "mean": 14.193
+   },
+   "framesOver16_67ms": 130,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.5,
+    "p95Ms": 18.2
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.929,
+    "p50": 7.7,
+    "p95": 9,
+    "p99": 15.2
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 156,
+    "avg": 7.112,
+    "p50": 7.049,
+    "p95": 9.351,
+    "p99": 9.674,
+    "max": 9.734
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 378,
+    "drawsMax": 431
+   },
+   "rendererAtStop": {
+    "drawCalls": 401,
+    "triangles": 40853917,
+    "geometries": 1015,
+    "textures": 925,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 14296,
+    "attributeBytesUploaded": 30968336,
+    "treeImpostorAttributeBytesUploaded": 1213056,
+    "publicationCustomAttributeBytes": 3424272,
+    "sceneryPublicationQueuedBytes": 566112,
+    "scenerySliceUploadedBytes": 2211216
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 186,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.194,
+      "samplesWithTransition": 45,
+      "overlappingMax": 6,
+      "overlappingMean": 0.29,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 5115,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.452,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.516,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.194,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": 48,
+     "sceneryPublicationQueuedBytes": 566112,
+     "scenerySliceUploadedBytes": 2211216,
+     "scenerySliceGpuCopyBytes": 2211216,
+     "initialInstanceSlicedBytes": 1611576,
+     "attributeBytesUploaded": 30968336,
+     "stylizedInstanceRowsCompared": 17835
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 43.6,
+    "perSampleMeanMs": 0.234,
+    "perSampleMaxMs": 1.9,
+    "amortizedPerFrameMs": 0.031
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-ready-on-03.json",
+   "route": "settlement",
+   "arm": "ready-on",
+   "rep": "03",
+   "href": "http://localhost:5173/?initialInstanceUploadSlicing=1&slicedInstancePublication=1&rendererAdmissionBudget=1&qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T18:37:51.853Z",
+   "status": "accepted",
+   "rejectionReason": null,
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 118.7,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 71.14,
+   "frameTimeMs": {
+    "p50": 12.9,
+    "p95": 25.265,
+    "p99": 34.358,
+    "p999": 93.079,
+    "max": 98.2,
+    "mean": 14.064
+   },
+   "framesOver16_67ms": 124,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.3,
+    "p95Ms": 18.7
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.746,
+    "p50": 7.5,
+    "p95": 8.6,
+    "p99": 15.979
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 157,
+    "avg": 6.808,
+    "p50": 6.849,
+    "p95": 9.117,
+    "p99": 9.296,
+    "max": 9.303
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 362,
+    "drawsMax": 427
+   },
+   "rendererAtStop": {
+    "drawCalls": 396,
+    "triangles": 40619976,
+    "geometries": 1016,
+    "textures": 925,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 146064,
+    "attributeBytesUploaded": 31439440,
+    "treeImpostorAttributeBytesUploaded": 1215840,
+    "publicationCustomAttributeBytes": 3421136,
+    "sceneryPublicationQueuedBytes": 561760,
+    "scenerySliceUploadedBytes": 2205296
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 187,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.187,
+      "samplesWithTransition": 45,
+      "overlappingMax": 6,
+      "overlappingMean": 0.257,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 5187.6,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.524,
+      "samplesWithTransition": 7,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.599,
+      "samplesWithTransition": 7,
+      "overlappingMax": 6,
+      "overlappingMean": 0.193,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": 48,
+     "sceneryPublicationQueuedBytes": 561760,
+     "scenerySliceUploadedBytes": 2205296,
+     "scenerySliceGpuCopyBytes": 2205296,
+     "initialInstanceSlicedBytes": 1612088,
+     "attributeBytesUploaded": 31439440,
+     "stylizedInstanceRowsCompared": 17774
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 41.3,
+    "perSampleMeanMs": 0.221,
+    "perSampleMaxMs": 0.5,
+    "amortizedPerFrameMs": 0.029
+   },
+   "originSnapCount": 0
+  }
+ ],
+ "rejectedAttempts": [
+  {
+   "file": "bog-cross-off-01.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:01:30.245Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 86.6,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 84.49,
+   "frameTimeMs": {
+    "p50": 11.6,
+    "p95": 16.1,
+    "p99": 30.396,
+    "p999": 38.491,
+    "max": 66.9,
+    "mean": 11.839
+   },
+   "framesOver16_67ms": 72,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.1,
+    "p95Ms": 14.6
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 6.405,
+    "p50": 6.2,
+    "p95": 7.9,
+    "p99": 13.424
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 181,
+    "avg": 5.429,
+    "p50": 5.406,
+    "p95": 6.249,
+    "p99": 9.288,
+    "max": 9.369
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 357
+   },
+   "rendererAtStop": {
+    "drawCalls": 182,
+    "triangles": 44330527,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 49446488,
+    "treeImpostorAttributeBytesUploaded": 3189568,
+    "publicationCustomAttributeBytes": 3189568,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-on-01.json",
+   "route": "bog-cross",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T16:06:31.753Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": true,
+    "settleWaitedSeconds": 73.7,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": true
+   },
+   "avgFps": 84.66,
+   "frameTimeMs": {
+    "p50": 11.8,
+    "p95": 15.5,
+    "p99": 30.009,
+    "p999": 35.311,
+    "max": 42.3,
+    "mean": 11.816
+   },
+   "framesOver16_67ms": 64,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.1,
+    "p95Ms": 14.645
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 6.401,
+    "p50": 6.1,
+    "p95": 8.145,
+    "p99": 12.827
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 184,
+    "avg": 5.465,
+    "p50": 5.415,
+    "p95": 6.124,
+    "p99": 9.35,
+    "max": 9.502
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 206,
+    "drawsMax": 343
+   },
+   "rendererAtStop": {
+    "drawCalls": 183,
+    "triangles": 44332089,
+    "geometries": 883,
+    "textures": 1162,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 37984,
+    "attributeBytesUploaded": 45821852,
+    "treeImpostorAttributeBytesUploaded": 3507424,
+    "publicationCustomAttributeBytes": 3507424,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 188,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 0.947,
+      "samplesWithTransition": 23,
+      "overlappingMax": 6,
+      "overlappingMean": 0.287,
+      "pendingDataMax": 31,
+      "maxPendingDataAgeMs": 14453.6,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.447,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.511,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.191,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 45821852,
+     "stylizedInstanceRowsCompared": 8564
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 50.8,
+    "perSampleMeanMs": 0.27,
+    "perSampleMaxMs": 0.7,
+    "amortizedPerFrameMs": 0.03
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-on-02.json",
+   "route": "bog-cross",
+   "arm": "on",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T16:34:09.627Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; lost native foreground focus; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 72.72,
+   "frameTimeMs": {
+    "p50": 12.2,
+    "p95": 28.58,
+    "p99": 33.848,
+    "p999": 53.708,
+    "max": 66.8,
+    "mean": 13.759
+   },
+   "framesOver16_67ms": 183,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.5,
+    "p95Ms": 20.48
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.386,
+    "p50": 6.4,
+    "p95": 13.2,
+    "p99": 24.04
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 133,
+    "avg": 6.008,
+    "p50": 5.176,
+    "p95": 13.495,
+    "p99": 13.801,
+    "max": 14.075
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 203,
+    "drawsMax": 334
+   },
+   "rendererAtStop": {
+    "drawCalls": 182,
+    "triangles": 44331008,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 148352,
+    "attributeBytesUploaded": 45444704,
+    "treeImpostorAttributeBytesUploaded": 2780048,
+    "publicationCustomAttributeBytes": 2780048,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 187,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.112,
+      "samplesWithTransition": 21,
+      "overlappingMax": 6,
+      "overlappingMean": 0.289,
+      "pendingDataMax": 31,
+      "maxPendingDataAgeMs": 16729.1,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.599,
+      "samplesWithTransition": 8,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.684,
+      "samplesWithTransition": 8,
+      "overlappingMax": 6,
+      "overlappingMean": 0.193,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 45444704,
+     "stylizedInstanceRowsCompared": 6492
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 50.4,
+    "perSampleMeanMs": 0.27,
+    "perSampleMaxMs": 0.9,
+    "amortizedPerFrameMs": 0.035
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-off-01.json",
+   "route": "construction",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:26:20.954Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 60.54,
+   "frameTimeMs": {
+    "p50": 15.2,
+    "p95": 30.31,
+    "p99": 35,
+    "p999": 51.552,
+    "max": 56.8,
+    "mean": 16.529
+   },
+   "framesOver16_67ms": 450,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 13.9,
+    "p95Ms": 19.7
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 9.237,
+    "p50": 9,
+    "p95": 11.555,
+    "p99": 17.691
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 135,
+    "avg": 3.627,
+    "p50": 3.738,
+    "p95": 4.178,
+    "p99": 4.443,
+    "max": 4.616
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 356,
+    "drawsMax": 421
+   },
+   "rendererAtStop": {
+    "drawCalls": 209,
+    "triangles": 9219353,
+    "geometries": 1197,
+    "textures": 1103,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 67424,
+    "attributeBytesUploaded": 137722216,
+    "treeImpostorAttributeBytesUploaded": 1898864,
+    "publicationCustomAttributeBytes": 1898864,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "construction-on-01.json",
+   "route": "construction",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=construction-ring&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T16:30:10.015Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 64.17,
+   "frameTimeMs": {
+    "p50": 14.4,
+    "p95": 30.895,
+    "p99": 34.495,
+    "p999": 64.253,
+    "max": 392.6,
+    "mean": 15.593
+   },
+   "framesOver16_67ms": 239,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 13.2,
+    "p95Ms": 18.9
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 9.589,
+    "p50": 8.9,
+    "p95": 12.095,
+    "p99": 16.8
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 143,
+    "avg": 3.768,
+    "p50": 3.738,
+    "p95": 4.22,
+    "p99": 4.837,
+    "max": 5.813
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 355,
+    "drawsMax": 555
+   },
+   "rendererAtStop": {
+    "drawCalls": 234,
+    "triangles": 16116439,
+    "geometries": 1197,
+    "textures": 1105,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 67424,
+    "attributeBytesUploaded": 134576156,
+    "treeImpostorAttributeBytesUploaded": 2032208,
+    "publicationCustomAttributeBytes": 2032208,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 182,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 0.67,
+      "samplesWithTransition": 38,
+      "overlappingMax": 6,
+      "overlappingMean": 0.165,
+      "pendingDataMax": 7,
+      "maxPendingDataAgeMs": 3282.2,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.308,
+      "samplesWithTransition": 4,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.352,
+      "samplesWithTransition": 4,
+      "overlappingMax": 6,
+      "overlappingMean": 0.132,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 134576156,
+     "stylizedInstanceRowsCompared": 16770
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 39.7,
+    "perSampleMeanMs": 0.218,
+    "perSampleMaxMs": 1.6,
+    "amortizedPerFrameMs": 0.031
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-off-01.json",
+   "route": "grassland",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T16:10:21.104Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 64.12,
+   "frameTimeMs": {
+    "p50": 13.3,
+    "p95": 30.3,
+    "p99": 34.62,
+    "p999": 262.96,
+    "max": 314.4,
+    "mean": 15.602
+   },
+   "framesOver16_67ms": 267,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 12.3,
+    "p95Ms": 21
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 8.287,
+    "p50": 7.6,
+    "p95": 12.5,
+    "p99": 17.62
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 140,
+    "avg": 4.246,
+    "p50": 4.244,
+    "p95": 5.658,
+    "p99": 6.105,
+    "max": 6.209
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 221,
+    "drawsMax": 428
+   },
+   "rendererAtStop": {
+    "drawCalls": 184,
+    "triangles": 7261510,
+    "geometries": 1042,
+    "textures": 1126,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 864,
+    "attributeBytesUploaded": 372156956,
+    "treeImpostorAttributeBytesUploaded": 1754864,
+    "publicationCustomAttributeBytes": 1754864,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-on-01.json",
+   "route": "grassland",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T16:14:32.482Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; lost native foreground focus; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 44.48,
+   "frameTimeMs": {
+    "p50": 12.8,
+    "p95": 35.7,
+    "p99": 240.556,
+    "p999": 369.482,
+    "max": 385.2,
+    "mean": 22.495
+   },
+   "framesOver16_67ms": 276,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.6,
+    "p95Ms": 30.3
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 13.046,
+    "p50": 6,
+    "p95": 17.96,
+    "p99": 208.696
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 82,
+    "avg": 3.446,
+    "p50": 2.546,
+    "p95": 7.602,
+    "p99": 30.623,
+    "max": 30.623
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 161,
+    "drawsMax": 286
+   },
+   "rendererAtStop": {
+    "drawCalls": 157,
+    "triangles": 5096806,
+    "geometries": 1006,
+    "textures": 1105,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": -467836,
+    "attributeBytesUploaded": 201491208,
+    "treeImpostorAttributeBytesUploaded": 1200368,
+    "publicationCustomAttributeBytes": 1200368,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 141,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 14,
+      "transitioningMean": 1.078,
+      "samplesWithTransition": 59,
+      "overlappingMax": 6,
+      "overlappingMean": 0.213,
+      "pendingDataMax": 33,
+      "maxPendingDataAgeMs": 117757.9,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.596,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.681,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.255,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 201491208,
+     "stylizedInstanceRowsCompared": 7579
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 41.1,
+    "perSampleMeanMs": 0.291,
+    "perSampleMaxMs": 2.3,
+    "amortizedPerFrameMs": 0.046
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-off-01.json",
+   "route": "settlement",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:18:34.348Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": true,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 59.5,
+   "frameTimeMs": {
+    "p50": 14.9,
+    "p95": 33.06,
+    "p99": 49.536,
+    "p999": 89.593,
+    "max": 93.7,
+    "mean": 16.816
+   },
+   "framesOver16_67ms": 294,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 14.1,
+    "p95Ms": 23.78
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 9.389,
+    "p50": 8.8,
+    "p95": 12.6,
+    "p99": 21.1
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 131,
+    "avg": 6.767,
+    "p50": 6.868,
+    "p95": 8.4,
+    "p99": 8.617,
+    "max": 8.832
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 363,
+    "drawsMax": 412
+   },
+   "rendererAtStop": {
+    "drawCalls": 383,
+    "triangles": 26508347,
+    "geometries": 1154,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 50752,
+    "attributeBytesUploaded": 30407048,
+    "treeImpostorAttributeBytesUploaded": 2343744,
+    "publicationCustomAttributeBytes": 2343744,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "settlement-on-01.json",
+   "route": "settlement",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=settlement-approach&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T16:22:31.346Z",
+   "status": "rejected",
+   "rejectionReason": "pass 1: another session's Playwright browser (run-wsc-ground-continuity-qa) rendered concurrently; whole pass discarded; lost native foreground focus; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 59.28,
+   "frameTimeMs": {
+    "p50": 14.6,
+    "p95": 33.495,
+    "p99": 49.7,
+    "p999": 87.871,
+    "max": 133.7,
+    "mean": 16.905
+   },
+   "framesOver16_67ms": 265,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 13.8,
+    "p95Ms": 27.68
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 9.307,
+    "p50": 8.5,
+    "p95": 15,
+    "p99": 23.295
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 131,
+    "avg": 7.078,
+    "p50": 7.037,
+    "p95": 9.611,
+    "p99": 10.388,
+    "max": 15.664
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 363,
+    "drawsMax": 411
+   },
+   "rendererAtStop": {
+    "drawCalls": 380,
+    "triangles": 24461856,
+    "geometries": 1155,
+    "textures": 962,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 15064,
+    "attributeBytesUploaded": 29650372,
+    "treeImpostorAttributeBytesUploaded": 1955376,
+    "publicationCustomAttributeBytes": 1955376,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 181,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.215,
+      "samplesWithTransition": 46,
+      "overlappingMax": 6,
+      "overlappingMean": 0.265,
+      "pendingDataMax": 11,
+      "maxPendingDataAgeMs": 6625.4,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 48,
+       "impostor": 112,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.464,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 32,
+       "near": 49
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.53,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.166,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 24,
+       "proxy": 16,
+       "near": 9
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 29650372,
+     "stylizedInstanceRowsCompared": 7000
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 58,
+    "perSampleMeanMs": 0.32,
+    "perSampleMaxMs": 2.6,
+    "amortizedPerFrameMs": 0.049
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-off-01.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:42:52.207Z",
+   "status": "rejected",
+   "rejectionReason": "pass 2: two matrix loops ran concurrently after an incomplete stop; whole pass discarded; lost native foreground focus",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": true,
+    "settleWaitedSeconds": 70.3,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 86.98,
+   "frameTimeMs": {
+    "p50": 11.2,
+    "p95": 15.13,
+    "p99": 28.878,
+    "p999": 35.189,
+    "max": 42.1,
+    "mean": 11.503
+   },
+   "framesOver16_67ms": 65,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.65,
+    "p95Ms": 14.515
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 6.169,
+    "p50": 5.9,
+    "p95": 7.9,
+    "p99": 13.441
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 191,
+    "avg": 5.439,
+    "p50": 5.405,
+    "p95": 6.307,
+    "p99": 8.999,
+    "max": 9.16
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 337
+   },
+   "rendererAtStop": {
+    "drawCalls": 187,
+    "triangles": 44384627,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 2592,
+    "attributeBytesUploaded": 47410008,
+    "treeImpostorAttributeBytesUploaded": 3580976,
+    "publicationCustomAttributeBytes": 3580976,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "grassland-on-02.json",
+   "route": "grassland",
+   "arm": "on",
+   "rep": "02",
+   "href": "http://localhost:5173/?qa=chunk-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1&x=-1869&z=-4003&yaw=142.55359&pitch=-4.58366",
+   "generatedAt": "2026-11-27T16:39:43.903Z",
+   "status": "rejected",
+   "rejectionReason": "pass 2: two matrix loops ran concurrently after an incomplete stop; whole pass discarded; lost native foreground focus; settle gate timed out after 120s (blocker: vegetation preparation)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": false,
+    "settleWaitedSeconds": 120,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 67.39,
+   "frameTimeMs": {
+    "p50": 12.7,
+    "p95": 29.37,
+    "p99": 33.854,
+    "p999": 233.222,
+    "max": 327.8,
+    "mean": 14.845
+   },
+   "framesOver16_67ms": 238,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 11.7,
+    "p95Ms": 20.54
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 7.838,
+    "p50": 7,
+    "p95": 12.1,
+    "p99": 16.554
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 146,
+    "avg": 4.365,
+    "p50": 4.225,
+    "p95": 5.566,
+    "p99": 6.157,
+    "max": 8.124
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 220,
+    "drawsMax": 436
+   },
+   "rendererAtStop": {
+    "drawCalls": 189,
+    "triangles": 10421087,
+    "geometries": 1041,
+    "textures": 1126,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 76296,
+    "attributeBytesUploaded": 395847084,
+    "treeImpostorAttributeBytesUploaded": 1754976,
+    "publicationCustomAttributeBytes": 1754976,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 177,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 13,
+      "transitioningMean": 1.232,
+      "samplesWithTransition": 43,
+      "overlappingMax": 6,
+      "overlappingMean": 0.373,
+      "pendingDataMax": 13,
+      "maxPendingDataAgeMs": 4196.4,
+      "observedReversals": 0,
+      "finalTargets": {
+       "culled": 120,
+       "impostor": 40,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.633,
+      "samplesWithTransition": 8,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.723,
+      "samplesWithTransition": 8,
+      "overlappingMax": 6,
+      "overlappingMean": 0.237,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 9,
+       "proxy": 16,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 395847084,
+     "stylizedInstanceRowsCompared": 10438
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 46.4,
+    "perSampleMeanMs": 0.262,
+    "perSampleMaxMs": 1.9,
+    "amortizedPerFrameMs": 0.034
+   },
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-off-01-attempt1-focus.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:46:53.462Z",
+   "status": "rejected",
+   "rejectionReason": "lost native foreground focus (focus taken by the Claude desktop app; re-run)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": true,
+    "settleWaitedSeconds": 69.9,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 89.19,
+   "frameTimeMs": {
+    "p50": 11,
+    "p95": 14.69,
+    "p99": 28.014,
+    "p999": 34.709,
+    "max": 42,
+    "mean": 11.217
+   },
+   "framesOver16_67ms": 65,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.5,
+    "p95Ms": 14.085
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.985,
+    "p50": 5.8,
+    "p95": 7.2,
+    "p99": 11.738
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 195,
+    "avg": 5.385,
+    "p50": 5.368,
+    "p95": 6.148,
+    "p99": 9.389,
+    "max": 9.452
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 338
+   },
+   "rendererAtStop": {
+    "drawCalls": 186,
+    "triangles": 44384742,
+    "geometries": 883,
+    "textures": 1162,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 2760,
+    "attributeBytesUploaded": 48285292,
+    "treeImpostorAttributeBytesUploaded": 3636832,
+    "publicationCustomAttributeBytes": 3636832,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-off-01-attempt1.json",
+   "route": "bog-cross",
+   "arm": "off",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=0&settle=1",
+   "generatedAt": "2026-11-27T16:55:18.539Z",
+   "status": "rejected",
+   "rejectionReason": "lost native foreground focus (focus taken by the Claude desktop app; re-run)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": true,
+    "settleWaitedSeconds": 117.1,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 92.41,
+   "frameTimeMs": {
+    "p50": 10.7,
+    "p95": 13.67,
+    "p99": 27.216,
+    "p999": 35.346,
+    "max": 42.3,
+    "mean": 10.826
+   },
+   "framesOver16_67ms": 52,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.1,
+    "p95Ms": 12.87
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 5.712,
+    "p50": 5.5,
+    "p95": 6.9,
+    "p99": 11.054
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 202,
+    "avg": 5.349,
+    "p50": 5.356,
+    "p95": 6.139,
+    "p99": 6.308,
+    "max": 9.565
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 205,
+    "drawsMax": 365
+   },
+   "rendererAtStop": {
+    "drawCalls": 185,
+    "triangles": 42049739,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 370456,
+    "attributeBytesUploaded": 47833356,
+    "treeImpostorAttributeBytesUploaded": 3780896,
+    "publicationCustomAttributeBytes": 3780896,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": null,
+   "samplerCpu": null,
+   "originSnapCount": 0
+  },
+  {
+   "file": "bog-cross-on-01-attempt1-focus.json",
+   "route": "bog-cross",
+   "arm": "on",
+   "rep": "01",
+   "href": "http://localhost:5173/?qa=bog-cross&duration=20&warmup=8&speed=run&hitchMs=16.667&download=0&autostart=1&gpuTimings=1&lodBaseline=1&settle=1",
+   "generatedAt": "2026-11-27T16:50:00.291Z",
+   "status": "rejected",
+   "rejectionReason": "lost native foreground focus (focus taken by the Claude desktop app; re-run)",
+   "validity": {
+    "nvidiaWebGpu": true,
+    "focusPassed": false,
+    "settled": true,
+    "settleWaitedSeconds": 69.5,
+    "browserErrors": 0,
+    "collisionGate": true,
+    "frameBufferComplete": true,
+    "assetIntegrity": true,
+    "valid": false
+   },
+   "avgFps": 88.29,
+   "frameTimeMs": {
+    "p50": 11,
+    "p95": 15.5,
+    "p99": 29.136,
+    "p999": 35.032,
+    "max": 40.9,
+    "mean": 11.33
+   },
+   "framesOver16_67ms": 77,
+   "cpuFrameUpdateMs": {
+    "p50Ms": 10.5,
+    "p95Ms": 14.18
+   },
+   "renderSubmissionCpuMs": {
+    "avg": 6.028,
+    "p50": 5.7,
+    "p95": 7.6,
+    "p99": 11.9
+   },
+   "gpuTimestampMs": {
+    "source": "WebGPU timestamp queries",
+    "sampleEvery": 8,
+    "samples": 193,
+    "avg": 5.402,
+    "p50": 5.417,
+    "p95": 6.133,
+    "p99": 9.111,
+    "max": 9.464
+   },
+   "rendererDrawsPerFrame": {
+    "drawsMedian": 206,
+    "drawsMax": 339
+   },
+   "rendererAtStop": {
+    "drawCalls": 184,
+    "triangles": 44333405,
+    "geometries": 883,
+    "textures": 1163,
+    "accountedBytes": null
+   },
+   "rendererAccountedMemoryBytes": null,
+   "uploadBytesMeasured": {
+    "framePublicationUploadBytes": 1248,
+    "attributeBytesUploaded": 46583988,
+    "treeImpostorAttributeBytesUploaded": 3630608,
+    "publicationCustomAttributeBytes": 3630608,
+    "sceneryPublicationQueuedBytes": null,
+    "scenerySliceUploadedBytes": null
+   },
+   "lodHandoffCounters": {
+    "deferred": null,
+    "timeouts": null,
+    "abandoned": null,
+    "droppedByCapacity": null
+   },
+   "plannedLod": {
+    "samples": 189,
+    "droppedSamples": 0,
+    "layers": {
+     "tree": {
+      "chunksMax": 169,
+      "transitioningMax": 17,
+      "transitioningMean": 1.016,
+      "samplesWithTransition": 29,
+      "overlappingMax": 6,
+      "overlappingMean": 0.254,
+      "pendingDataMax": 31,
+      "maxPendingDataAgeMs": 12728.1,
+      "observedReversals": 0,
+      "finalTargets": {
+       "impostor": 112,
+       "culled": 48,
+       "near": 9
+      }
+     },
+     "rock": {
+      "chunksMax": 81,
+      "transitioningMax": 14,
+      "transitioningMean": 0.444,
+      "samplesWithTransition": 6,
+      "overlappingMax": 0,
+      "overlappingMean": 0,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "near": 49,
+       "culled": 32
+      }
+     },
+     "bush": {
+      "chunksMax": 49,
+      "transitioningMax": 16,
+      "transitioningMean": 0.508,
+      "samplesWithTransition": 6,
+      "overlappingMax": 6,
+      "overlappingMean": 0.19,
+      "pendingDataMax": 0,
+      "maxPendingDataAgeMs": null,
+      "observedReversals": 0,
+      "finalTargets": {
+       "proxy": 16,
+       "near": 9,
+       "culled": 24
+      }
+     }
+    },
+    "counters": {
+     "sceneryLodHandoffDeferred": null,
+     "sceneryLodHandoffDrawsReady": null,
+     "sceneryLodHandoffTimeouts": null,
+     "sceneryLodHandoffAbandonedDraws": null,
+     "stylizedInstancesDroppedByCapacity": null,
+     "sceneryPublicationCommits": null,
+     "sceneryPublicationQueuedBytes": null,
+     "scenerySliceUploadedBytes": null,
+     "scenerySliceGpuCopyBytes": null,
+     "initialInstanceSlicedBytes": null,
+     "attributeBytesUploaded": 46583988,
+     "stylizedInstanceRowsCompared": 8656
+    }
+   },
+   "samplerCpu": {
+    "totalMs": 45.7,
+    "perSampleMeanMs": 0.242,
+    "perSampleMaxMs": 1,
+    "amortizedPerFrameMs": 0.026
+   },
+   "originSnapCount": 0
+  }
+ ],
+ "missingMeasurements": {
+  "rendererAccountedMemoryBytes": "regionalRendererAccountedBytes is only published when regionalResourceBudget is enabled; renderer.info memory totals are not in the qa:perf report. Geometry/texture object counts at stop are recorded instead.",
+  "rendererTrianglesPerFrame": "rendererTriangles is a gauge; only the value at stop is reported (whole renderer, includes shadow/aux passes).",
+  "transitionExtraTriangles": "uninstrumented (LodBaselineDiagnostics.unavailable)",
+  "transitionExtraDraws": "uninstrumented",
+  "transitionPinnedBytes": "uninstrumented",
+  "fadeOnlyUploadBytes": "uninstrumented; attributeBytesUploaded is aggregate queued bytes, not fade-only",
+  "gpuReadinessAgeMs": "uninstrumented; maxPendingDataAgeMs is data wait, not GPU handoff wait",
+  "visibleMissingCoverage": "uninstrumented; no automated hole detector",
+  "lodHandoffDeferralsTimeouts": "counters sceneryLodHandoff* and stylizedInstancesDroppedByCapacity had no observed delta in any run (null = not observed, not proven zero)",
+  "publishedRepresentations": "sampler observes planned chunk states, not submitted draws",
+  "gpuValidationErrors": "no WebGPU validation/uncaptured errors reached the page error monitor (browserErrors = 0 in every accepted run); a dedicated device.onuncapturederror audit was not run",
+  "perPassGpuForLodLayers": "gpuRender reports render-context passes, not per-LOD-layer GPU cost",
+  "settlementAndConstructionComparisons": "settlement off 0/3 and construction 0/6 runs settled within 120 s; no like-for-like off/on comparison possible"
+ },
+ "scenariosNotExecuted": [
+  "rapid approach and retreat across LOD boundaries",
+  "repeated camera direction changes",
+  "high-speed flight",
+  "mountain ascent and descent",
+  "snow-covered vegetation and rocks",
+  "coastal rock transitions",
+  "cold region entry and revisit",
+  "floating-origin rebasing (originSnapCount = 0 in every run)"
+ ],
+ "scenariosPartial": {
+  "tree mesh-to-impostor / impostor-to-canopy": "planner transitions observed in every forest route; static near/proxy galleries captured; no motion capture of the visible transition"
+ },
+ "acceptance": {
+  "noNewUnitTestFailures": {
+   "status": "fail",
+   "note": "one new failure since instrumentation, from 475d29db (location surface residency), unrelated to LOD; none from the instrumentation"
+  },
+  "noNewLintOrBuildFailures": {
+   "status": "pass",
+   "note": "lint errors pre-existing; build passes"
+  },
+  "noNewGpuValidationErrors": {
+   "status": "pass-limited",
+   "note": "browserErrors = 0 in all accepted runs; no dedicated validation audit"
+  },
+  "validWebGpuMeasurements": {
+   "status": "pass",
+   "note": "native NVIDIA Lovelace adapter, timestamp queries, native foreground verified per run"
+  },
+  "comparableSettledRuns": {
+   "status": "partial",
+   "note": "bog-cross and grassland 3/3 per arm; settlement 0/3 off, 2/3 on; construction 0/3 per arm"
+  },
+  "lodTransitionsExercised": {
+   "status": "pass",
+   "note": "tree, rock and bush planned transitions sampled in every instrumented route"
+  },
+  "diagnosticOverheadUnder0_25msPerFrame": {
+   "status": "pass",
+   "note": "amortized sampler CPU 0.021–0.042 ms/frame; single-sample max 22.1 ms once (grassland-on-02)"
+  },
+  "gpuRegressionUnder2Percent": {
+   "status": "pass-investigated",
+   "note": "median GPU timestamp p50 on vs off: bog +0.58%, grassland −1.05%; run-to-run spread is comparable, so not proof of equivalence"
+  },
+  "invalidRunsIdentified": {
+   "status": "pass"
+  },
+  "visualDefectsDocumented": {
+   "status": "partial",
+   "note": "end-of-route stills and static galleries only; no motion recordings"
+  },
+  "missingMeasurementsDocumented": {
+   "status": "pass"
+  },
+  "hardwareAcceptanceComplete": false
+ }
+}
