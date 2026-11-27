@@ -5,8 +5,11 @@ import { CpuTreeImpostorBatch } from '../src/editor/stylized/impostor/CpuTreeImp
 import { GpuTreeImpostorBatch } from '../src/editor/stylized/impostor/GpuTreeImpostorBatch.js';
 import { TreeImpostorBatch } from '../src/editor/stylized/impostor/TreeImpostorBatch.js';
 import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
+import { InstancePublicationPlan } from '../src/editor/stylized/lod/InstancePublicationPlan.js';
+import { completeIterator } from '../src/editor/stylized/ResumableIterator.js';
+import { initialComputeDraw } from '../src/render/preparation/InitialInstancePreparation.js';
 
-function createFixture(Batch, capacity = 4) {
+function createFixture(Batch, capacity = 4, initialUploadSlicing = false) {
   const scene = new THREE.Scene();
   const atlas = {
     width: 4, height: 8, columns: 8, rows: 2, tileSize: 128,
@@ -15,7 +18,7 @@ function createFixture(Batch, capacity = 4) {
   };
   const computes = [];
   const batch = new Batch({
-    scene, atlas, capacity, name: 'test tree impostors',
+    scene, atlas, capacity, name: 'test tree impostors', initialUploadSlicing,
     renderer: { backend: { isWebGPUBackend: true }, compute: (...args) => computes.push(args) },
   });
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
@@ -241,5 +244,33 @@ test('CPU impostor batches leave render traversal when empty or entirely culled'
     batch.dispose();
     atlas.albedo.dispose();
     atlas.normal.dispose();
+  }
+});
+
+test('opt-in GPU impostor prewarm never dispatches live records or exposes the replacement', () => {
+  const { batch, atlas, computes } = createFixture(GpuTreeImpostorBatch, 4, true);
+  try {
+    const draw = initialComputeDraw(batch.mesh);
+    assert.ok(draw.isDormant());
+    assert.equal(batch.mesh.visible, false);
+    assert.equal(draw.storageAttributes.length, 5);
+    const stage = new InstancePublicationPlan();
+    completeIterator(batch.iterateRecordPublication([record], stage));
+    assert.ok(stage.replacementDraws.has(batch.mesh));
+    assert.equal(batch.recordCount, 0);
+    assert.equal(batch.countUniform.value, 0);
+    draw.prepare(); draw.prepare();
+    assert.equal(computes.length, 1);
+    assert.equal(batch.computeCull.dispatchSize, 1);
+    assert.equal(batch.mesh.visible, false);
+    stage.commit();
+    assert.equal(batch.recordCount, 1);
+    assert.equal(batch.mesh.visible, true);
+    draw.prepare();
+    assert.equal(computes.length, 1);
+  } finally {
+    batch.dispose();
+    assert.equal(initialComputeDraw(batch.mesh), undefined);
+    atlas.albedo.dispose(); atlas.normal.dispose();
   }
 });

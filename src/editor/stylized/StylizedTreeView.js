@@ -839,6 +839,7 @@ export class StylizedTreeView {
       name: `stylized-pine-impostor-${atlas.prototypeIndex}`,
       ambientEffects: this.config.ambientEffects,
       gpuCulling: this.config.lod?.gpuCulling?.enabled !== false,
+      initialUploadSlicing: this.config.enhancements?.initialInstanceUploadSlicing === true,
       auxiliaryViews: this.config.enhancements?.waterReflections?.enabled === true,
     });
     applyCloudShadow(batch.batch.material, this.config.sky);
@@ -949,6 +950,11 @@ export class StylizedTreeView {
       };
     }
 
+    if (this.config.enhancements?.initialInstanceUploadSlicing) this.impostorView = { camera, timestamp };
+    this.updateImpostorVisibility(camera, origin, timestamp);
+  }
+
+  updateImpostorVisibility(camera, origin, timestamp) {
     const submitted = { cpu: 0, gpu: 0 };
     const known = { cpu: true, gpu: true };
     // One encoder for every species; each `compute` call otherwise costs its own.
@@ -1001,7 +1007,14 @@ export class StylizedTreeView {
       resolveLeafSnow: (record) => this.resolveLeafSnow(record),
       resolvePrototypeIndex: (placement) => this.resolvePalettePrototypeIndex(placement),
     }), 'pendingLodRebuild');
-    if (completed) this.lastLodRebuildAt = performance.now();
+    if (completed) {
+      this.lastLodRebuildAt = performance.now();
+      // Deferred scenery commits can run after the normal camera cull for this frame.
+      if (this.impostorView) {
+        const { camera, timestamp } = this.impostorView;
+        this.updateImpostorVisibility(camera, this.terrainView.floatingOrigin.getState(), timestamp);
+      }
+    }
     return completed;
   }
 

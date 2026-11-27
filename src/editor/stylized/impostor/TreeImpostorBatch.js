@@ -3,13 +3,13 @@ import { GpuTreeImpostorBatch } from './GpuTreeImpostorBatch.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 
 export class TreeImpostorBatch {
-  constructor({ renderer, scene, atlas, capacity, name, gpuCulling, auxiliaryViews = false, ambientEffects = null }) {
+  constructor({ renderer, scene, atlas, capacity, name, gpuCulling, auxiliaryViews = false, ambientEffects = null, initialUploadSlicing = false }) {
     this.mode = 'cpu';
     this.batch = null;
     this.acceptedRecords = 0;
     if (gpuCulling && renderer.backend?.isWebGPUBackend) {
       try {
-        this.batch = new GpuTreeImpostorBatch({ renderer, scene, atlas, capacity, name, ambientEffects });
+        this.batch = new GpuTreeImpostorBatch({ renderer, scene, atlas, capacity, name, ambientEffects, initialUploadSlicing });
         this.mode = 'gpu';
       } catch (error) {
         console.warn('GPU tree impostor batch unavailable; using CPU culling.', error);

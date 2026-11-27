@@ -1,3 +1,5 @@
+import { initialComputeDraw } from './InitialInstancePreparation.js';
+
 function storage(attribute) {
   return attribute?.isInterleavedBufferAttribute ? attribute.data : attribute;
 }
@@ -5,7 +7,8 @@ function storage(attribute) {
 function buffersFor(mesh) {
   const geometry = mesh.geometry;
   const attributes = [...Object.values(geometry?.attributes ?? {}), geometry?.index,
-    mesh.instanceMatrix, mesh.instanceColor, ...Object.values(geometry?.morphAttributes ?? {}).flat()];
+    mesh.instanceMatrix, mesh.instanceColor, ...Object.values(geometry?.morphAttributes ?? {}).flat(),
+    ...(initialComputeDraw(mesh)?.allAttributes ?? [])];
   return new Set(attributes.map(storage).filter(buffer => buffer?.array));
 }
 

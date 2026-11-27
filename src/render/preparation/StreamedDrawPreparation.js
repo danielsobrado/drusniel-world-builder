@@ -3,7 +3,7 @@ import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
 import { BudgetedAttributeInitialization } from './BudgetedAttributeInitialization.js';
 import { acquireReflectionShadowRegistry } from '../reflections/ReflectionShadowRegistry.js';
 import { DrawUploadEstimate } from './DrawUploadEstimate.js';
-import { isDirectInstanceMesh, bindInitialInstancePreparation } from './InitialInstancePreparation.js';
+import { isDirectInstanceMesh, bindInitialInstancePreparation, initialComputeDraw, isDormantInitialDraw } from './InitialInstancePreparation.js';
 import { StagedGeometryUploads } from './StagedGeometryUploads.js';
 import { DrawPreparationPriority } from './DrawPreparationPriority.js';
 import { StreamedTextureWarmup } from './StreamedTextureWarmup.js';
@@ -106,7 +106,7 @@ export class StreamedDrawPreparation {
   /** A zero-count replacement may use the isolated preparation pass without entering gameplay. */
   acquireInitialInstanceHandoff(mesh) {
     if (!this.initialInstanceBudget || !this.settings.enabled || this.disposed
-      || !isDirectInstanceMesh(mesh) || mesh.count !== 0 || !mesh.parent
+      || !isDormantInitialDraw(mesh) || !mesh.parent
       || this.isMaterialReady(mesh, mesh.material)) return null;
     let request = this.handoffRequests.get(mesh);
     if (!request) {
@@ -133,7 +133,7 @@ export class StreamedDrawPreparation {
         released = true;
         if (--request.users !== 0 || this.handoffRequests.get(mesh) !== request) return;
         this.handoffRequests.delete(mesh);
-        if (request.owned && mesh.count === 0 && !this.stagedMaterials.has(mesh)
+        if (request.owned && isDormantInitialDraw(mesh) && !this.stagedMaterials.has(mesh)
           && this.pending.has(mesh)) this.cancel(mesh);
       },
     };
@@ -160,6 +160,7 @@ export class StreamedDrawPreparation {
     // Called after a variant/actor is installed, never scans the scene per frame.
     root.traverse(object => {
       if (!object.isMesh || this.prepared.has(object) || this.isMaterialReady(object, object.material) || object.userData.skipWarmup) return;
+      if (this.initialInstanceBudget && initialComputeDraw(object)?.isDormant()) return;
       if (this.initialInstanceBudget && isDirectInstanceMesh(object)) {
         this.registerInitialInstance(object);
         return;
@@ -170,6 +171,7 @@ export class StreamedDrawPreparation {
   markInitialScene() {
     this.scene.traverse(object => {
       if (!object.isMesh || object.userData.deferInitialPreparation) return;
+      if (this.initialInstanceBudget && initialComputeDraw(object)?.isDormant()) return;
       if (this.initialInstanceBudget && isDirectInstanceMesh(object) && this.geometryUploads.needsInitialInstanceUpload(object)) {
         this.registerInitialInstance(object);
         return;
@@ -248,7 +250,7 @@ export class StreamedDrawPreparation {
         || budget.slack.strictAvailable() >= this.preparationCostMs * (targets.length + 1);
       for (const mesh of order) {
         if (shouldYield?.() || inspected++ >= 64) break;
-        const isolated = this.isolated.has(mesh);
+        const isolated = this.isolated.has(mesh) || Boolean(this.initialInstanceBudget && initialComputeDraw(mesh)?.isDormant());
         if (isolated && targets.length) break;
         let root = mesh;
         while (root.parent) root = root.parent;
@@ -312,6 +314,10 @@ export class StreamedDrawPreparation {
       }
       const prepared = withPreparationFrame(this.renderer, null, () => {
         try {
+          if (this.initialInstanceBudget) for (const target of targets) {
+            const compute = initialComputeDraw(target);
+            if (compute?.isDormant()) compute.prepare();
+          }
           withDrawPreparation(this.scene, targets, () => this.render(camera), this.hierarchy.owners);
           return true;
         } catch (error) {

@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BufferAttribute, BufferGeometry, InstancedBufferAttribute, InstancedMesh, Mesh, MeshBasicMaterial, StorageInstancedBufferAttribute } from 'three/webgpu';
+import { BufferAttribute, BufferGeometry, InstancedBufferAttribute, InstancedMesh, Mesh, MeshBasicMaterial, StorageInstancedBufferAttribute, StorageBufferAttribute, IndirectStorageBufferAttribute } from 'three/webgpu';
 import { AttributeType } from 'three/src/renderers/common/Constants.js';
 import { StagedGeometryUploads, stagedGeometryAttributes } from '../src/render/preparation/StagedGeometryUploads.js';
+import { trackInitialComputeDraw, cancelInitialInstanceDraw } from '../src/render/preparation/InitialInstancePreparation.js';
+import { DrawUploadEstimate } from '../src/render/preparation/DrawUploadEstimate.js';
 
 function fixture(t, settings = null) {
   const previous = globalThis.GPUBufferUsage;
@@ -190,4 +192,38 @@ test('geometry replacement releases obsolete detached jobs', t => {
   stage.cancel(mesh);
   assert.equal(stage.detachedBytes, 0);
   assert.ok(buffers.every(buffer => buffer.destroyed));
+});
+
+test('explicit compute storage shares the geometry slice and excludes indirect ownership', t => {
+  const { stage, backend, managerData, writes } = fixture(t, firstUseSettings);
+  const mesh = new Mesh(new BufferGeometry(), new MeshBasicMaterial());
+  const records = new StorageBufferAttribute(new Float32Array(64).fill(1), 4);
+  const visible = new StorageBufferAttribute(new Uint32Array(16), 1);
+  const indirect = new IndirectStorageBufferAttribute(new Uint32Array([6, 0, 0, 0, 0]), 5);
+  let dormant = true;
+  trackInitialComputeDraw(mesh, stage.renderer, {
+    storageAttributes: [records, visible, indirect],
+    allAttributes: [records, visible, indirect],
+    isDormant: () => dormant,
+  });
+  t.after(() => { cancelInitialInstanceDraw(mesh); mesh.geometry.dispose(); mesh.material.dispose(); });
+  assert.deepEqual(stage.entries(mesh).map(entry => entry.attribute), [records, visible]);
+  const estimate = new DrawUploadEstimate();
+  assert.equal(estimate.estimate(mesh, new Set(), [records, visible]).bytes, indirect.array.byteLength);
+  let ready = false;
+  for (let i = 0; i < 20 && !ready; i++) {
+    stage.beginFrame();
+    const start = writes.length;
+    ({ ready } = stage.advance(mesh, 64, () => false));
+    assert.ok(writes.slice(start).reduce((a, b) => a + b, 0) <= 64);
+    assert.equal(backend.get(records).buffer, undefined);
+  }
+  assert.ok(ready);
+  stage.adopt(mesh);
+  assert.equal(managerData.get(records), AttributeType.STORAGE);
+  assert.equal(managerData.get(visible), AttributeType.STORAGE);
+  assert.equal(managerData.has(indirect), false);
+  assert.deepEqual(backend.get(records).buffer.bytes, new Uint8Array(records.array.buffer));
+  dormant = false;
+  assert.equal(stage.entries(mesh).length, 0);
 });

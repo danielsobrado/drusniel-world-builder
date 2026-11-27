@@ -1,4 +1,6 @@
 import { frameUniform } from '../../../render/FrameUniforms.js';
+import { trackInitialComputeDraw, cancelInitialInstanceDraw } from '../../../render/preparation/InitialInstancePreparation.js';
+import { PerfCounters } from '../../performance/qa/PerfCounters.js';
 import * as THREE from 'three/webgpu';
 import {
   Fn,
@@ -44,7 +46,7 @@ function createGeometry() {
 }
 
 export class GpuTreeImpostorBatch {
-  constructor({ renderer, scene, atlas, capacity, name, ambientEffects = null }) {
+  constructor({ renderer, scene, atlas, capacity, name, ambientEffects = null, initialUploadSlicing = false }) {
     if (!renderer.backend?.isWebGPUBackend) {
       throw new Error('GPU impostor culling requires the WebGPU backend.');
     }
@@ -146,6 +148,27 @@ export class GpuTreeImpostorBatch {
     this.computeReset = computeReset;
     this.computeCull = computeCull;
     this.cullPass = [computeReset, computeCull];
+    this.initialComputePrepared = false;
+    if (initialUploadSlicing && typeof renderer.compute === 'function') {
+      mesh.visible = false;
+      const storageAttributes = [transformBuffer, parameterBuffer, appearanceBuffer, visibleBuffer, planeBuffer];
+      trackInitialComputeDraw(mesh, renderer, {
+        storageAttributes,
+        allAttributes: [...storageAttributes, drawBuffer],
+        isDormant: () => !this.disposed && this.recordCount === 0,
+        prepare: () => this.prepareInitialCompute(),
+      });
+    }
+  }
+
+  prepareInitialCompute() {
+    if (this.disposed || this.initialComputePrepared || this.recordCount !== 0) return;
+    // Both pipelines are prepared with zero live records. Never reset a published draw here.
+    this.computeCull.dispatchSize = 1;
+    this.renderer.compute(this.cullPass);
+    this.initialComputePrepared = true;
+    this.indirectNeedsReset = false;
+    PerfCounters.inc('treeImpostorInitialComputePrepared');
   }
 
   setRecords(records) {
@@ -155,6 +178,7 @@ export class GpuTreeImpostorBatch {
   *iterateRecordPublication(records, stage = null) {
     const previousCount = this.recordCount;
     const count = Math.min(records.length, this.capacity);
+    if (stage && count > 0 && previousCount === 0) stage.replacementDraws.add(this.mesh);
     const transforms = { min: Infinity, max: -1 };
     const parameters = { min: Infinity, max: -1 };
     const appearances = { min: Infinity, max: -1 };
@@ -272,6 +296,7 @@ export class GpuTreeImpostorBatch {
 
   dispose() {
     if (this.disposed) return;
+    cancelInitialInstanceDraw(this.mesh);
     this.disposed = true;
     this.scene.remove(this.mesh);
     this.geometry.dispose();

@@ -1,16 +1,17 @@
 import { AttributeType } from 'three/src/renderers/common/Constants.js';
 import { PerfCounters } from '../../editor/performance/qa/PerfCounters.js';
-import { isDirectInstanceMesh } from './InitialInstancePreparation.js';
+import { isDirectInstanceMesh, initialComputeDraw } from './InitialInstancePreparation.js';
 
 const MIN_STAGED_BYTES = 256 * 1024;
 const WORD_BYTES = 4;
 
-function descriptor(attribute, index = false, minBytes = MIN_STAGED_BYTES) {
+function descriptor(attribute, index = false, minBytes = MIN_STAGED_BYTES, explicitStorage = false) {
   if (!attribute?.isBufferAttribute || attribute.isInterleavedBufferAttribute || !attribute.array) return null;
   const storage = attribute.isStorageBufferAttribute || attribute.isStorageInstancedBufferAttribute;
   const array = attribute.array;
   if (index ? storage || !(array instanceof Uint16Array || array instanceof Uint32Array)
-    : !(array instanceof Float32Array) || (storage ? attribute.itemSize === 3 : attribute.itemSize > 4)) return null;
+    : (!(array instanceof Float32Array) && !(explicitStorage && storage && array instanceof Uint32Array && attribute.itemSize === 1))
+      || (storage ? attribute.itemSize === 3 : attribute.itemSize > 4)) return null;
   if (array.byteLength === 0 || array.byteLength < minBytes) return null;
   const type = index ? AttributeType.INDEX : storage ? AttributeType.STORAGE : AttributeType.VERTEX;
   return { attribute, type };
@@ -48,7 +49,16 @@ export class StagedGeometryUploads {
   beginFrame() { this.allocations = 0; }
 
   entries(mesh) {
-    return stagedGeometryAttributes(mesh, Boolean(this.settings && isDirectInstanceMesh(mesh)));
+    const entries = stagedGeometryAttributes(mesh, Boolean(this.settings && isDirectInstanceMesh(mesh)));
+    const compute = this.settings && initialComputeDraw(mesh);
+    if (compute?.isDormant()) {
+      for (const attribute of compute.storageAttributes) {
+        if (!attribute.isStorageBufferAttribute || attribute.isIndirectStorageBufferAttribute) continue;
+        const entry = descriptor(attribute, false, WORD_BYTES, true);
+        if (entry) entries.push(entry);
+      }
+    }
+    return [...new Map(entries.map(entry => [entry.attribute, entry])).values()];
   }
 
   needsInitialInstanceUpload(mesh) {

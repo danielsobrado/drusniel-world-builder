@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { resolveRenderEnhancements } from '../src/config/RenderEnhancements.js';
 import { StreamedDrawPreparation } from '../src/render/preparation/StreamedDrawPreparation.js';
-import { trackInitialInstanceMesh, registerInitialInstanceDraw, cancelInitialInstanceDraw } from '../src/render/preparation/InitialInstancePreparation.js';
+import { trackInitialInstanceMesh, registerInitialInstanceDraw, cancelInitialInstanceDraw, trackInitialComputeDraw } from '../src/render/preparation/InitialInstancePreparation.js';
 
 const budget = resolveRenderEnhancements().initialInstanceUploadBudget;
 function fixture({ enabled = true, supported = true, optIn = true } = {}) {
@@ -184,5 +184,25 @@ test('handoff restarts after a different variant consumes its queued draw', () =
   assert.equal(preparation.pending.has(replacement), true);
   lease.release();
   assert.equal(preparation.pending.has(replacement), false);
+  preparation.dispose();
+});
+
+test('dormant compute draws are not implicitly marked ready and leases cancel on abandonment', () => {
+  const { preparation, mesh, renderer } = fixture();
+  const target = mesh({ direct: false });
+  let dormant = true;
+  trackInitialComputeDraw(target, renderer, { storageAttributes: [], allAttributes: [], isDormant: () => dormant });
+  preparation.markInitialScene();
+  preparation.discover(target);
+  assert.equal(preparation.pending.size, 0);
+  assert.equal(preparation.isMaterialReady(target, target.material), false);
+  const lease = preparation.acquireInitialInstanceHandoff(target);
+  assert.ok(lease);
+  assert.equal(lease.ready(), false);
+  lease.release();
+  assert.equal(preparation.pending.size, 0);
+  dormant = false;
+  assert.equal(preparation.acquireInitialInstanceHandoff(target), null);
+  cancelInitialInstanceDraw(target);
   preparation.dispose();
 });
