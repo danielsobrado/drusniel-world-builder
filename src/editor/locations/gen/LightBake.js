@@ -1,3 +1,5 @@
+import { finishLocationSteps } from './LocationWorkSteps.js';
+
 /**
  * Bakes a location's lights into its vertices.
  *
@@ -53,7 +55,11 @@ export const SHADE_SIZE = 4;
  * @param {{ rock: number[], ice: number[] }} options.absorption per-metre rgb extinction
  * @param {number} [options.wrapIce] how far light wraps around an ice surface
  */
-export function bakeLighting({
+export function bakeLighting(options) {
+  return finishLocationSteps(bakeLightingSteps(options));
+}
+
+export function* bakeLightingSteps({
   grid,
   propGrid = null,
   propShadows = null,
@@ -80,6 +86,7 @@ export function bakeLighting({
   const contactStrength = propShadows?.contactStrength ?? 0.72;
 
   for (let v = 0; v < count; v += 1) {
+    if (v % 16 === 0) yield;
     const px = positions[v * 3], py = positions[v * 3 + 1], pz = positions[v * 3 + 2];
     const nx = normals[v * 3], ny = normals[v * 3 + 1], nz = normals[v * 3 + 2];
     const ice = iceAt(v);

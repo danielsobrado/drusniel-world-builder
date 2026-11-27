@@ -216,12 +216,17 @@ function* faceTowardNormalsSteps({ positions: p, normals: n, indices }) {
  * this it shows as a single bright triangle fan.
  */
 export function smoothAttribute(indices, array, size, passes = 1) {
+  return finish(smoothAttributeSteps(indices, array, size, passes));
+}
+
+export function* smoothAttributeSteps(indices, array, size, passes = 1) {
   const count = array.length / size;
   const sum = new Float32Array(array.length), weight = new Float32Array(count);
   for (let pass = 0; pass < passes; pass += 1) {
     sum.set(array);
     weight.fill(1);
     for (let t = 0; t < indices.length; t += 3) {
+      if (t % TRIANGLE_BATCH === 0) yield;
       for (let corner = 0; corner < 3; corner += 1) {
         const a = indices[t + corner], b = indices[t + (corner + 1) % 3];
         for (let c = 0; c < size; c += 1) {
@@ -232,6 +237,7 @@ export function smoothAttribute(indices, array, size, passes = 1) {
       }
     }
     for (let v = 0; v < count; v += 1) {
+      if (v % VERTEX_BATCH === 0) yield;
       for (let c = 0; c < size; c += 1) array[v * size + c] = sum[v * size + c] / weight[v];
     }
   }

@@ -59,7 +59,8 @@ export class LocationScene {
       if (builder.exits.length === 0) throw new Error(`Location "${site.id}" generated no exit.`);
 
       const structure = !builder.grid.open && !site.lighting.sky && !builder.reflectors.length ? structureBudget : null;
-      const preparedSurface = structure?.generationEnabled ? await prepareLocationSurface(builder.grid, structure, { signal }) : null;
+      const preparedSurface = structure?.generationEnabled || structure?.lightingEnabled
+        ? await prepareLocationSurface(builder.grid, structure, { signal }) : null;
       await progress('bake-lighting');
       signal?.throwIfAborted();
       const crystalScale = quality.crystalScale ?? 1;
@@ -82,7 +83,7 @@ export class LocationScene {
         }
         : null;
 
-      location.scene.add(builder.build({
+      const buildOptions = {
         materials,
         absorption: site.lighting.absorption,
         bakeGain: site.lighting.bakeGain ?? 1,
@@ -93,7 +94,12 @@ export class LocationScene {
         decorationBudget,
         structureBudget: structure,
         preparedSurface,
-      }));
+      };
+      const group = structure?.lightingEnabled
+        ? await builder.buildCooperatively(buildOptions, { signal, sliceMs: structure.lightingSliceMs })
+        : builder.build(buildOptions);
+      location.scene.add(group);
+      signal?.throwIfAborted();
       if (structure?.portalEnabled && !enableLocationPost && !materials.terrain?.ice
           && !materials.terrain.material.transparent && !materials.terrain.material.transmission
           && !materials.terrain.material.positionNode && !materials.terrain.material.vertexNode

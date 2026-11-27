@@ -30,6 +30,8 @@ locationStructureBudget:
   generationSliceMs: 4
   generationMaxCopyBytes: 67108864
   generationWorkerTimeoutMs: 120000
+  lightingEnabled: false
+  lightingSliceMs: 4
 geologyAdmissionBudget:
   triangleBudget: 100000
   protectMeters: 64

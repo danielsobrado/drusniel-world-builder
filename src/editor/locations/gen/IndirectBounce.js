@@ -1,3 +1,5 @@
+import { finishLocationSteps } from './LocationWorkSteps.js';
+
 /**
  * Deterministic low-frequency indirect bounce illumination for baked underground
  * geometry (`LightBake.js`).
@@ -29,7 +31,11 @@ function cellKey(ix, iy, iz) {
  * @param {number} [options.radius=9.5]
  * @param {number} [options.maxEnergy=2.2]
  */
-export function createBounceField({
+export function createBounceField(options) {
+  return finishLocationSteps(createBounceFieldSteps(options));
+}
+
+export function* createBounceFieldSteps({
   grid,
   positions,
   normals,
@@ -43,6 +49,7 @@ export function createBounceField({
   const count = positions.length / 3;
 
   for (let v = 0; v < count; v += 1) {
+    if (v % 1024 === 0) yield;
     const r = directLight[v * 3];
     const g = directLight[v * 3 + 1];
     const b = directLight[v * 3 + 2];
@@ -70,7 +77,9 @@ export function createBounceField({
   const invBin = 1 / binSize;
   const nudge = grid.voxel * 0.65;
 
+  let processed = 0;
   for (const entry of buckets.values()) {
+    if (processed++ % 256 === 0) yield;
     const inv = 1 / entry.n;
     const nLen = Math.hypot(entry.nx, entry.ny, entry.nz);
     if (nLen < 1e-4) continue;
@@ -113,7 +122,11 @@ export function createBounceField({
  * @param {number} [target.strength=0.44]
  * @param {number} [target.wrap=0.52]
  */
-export function gatherBounceLight(field, {
+export function gatherBounceLight(field, target) {
+  return finishLocationSteps(gatherBounceLightSteps(field, target));
+}
+
+export function* gatherBounceLightSteps(field, {
   positions,
   normals,
   light,
@@ -133,6 +146,7 @@ export function gatherBounceLight(field, {
   const count = positions.length / 3;
 
   for (let v = 0; v < count; v += 1) {
+    if (v % 8 === 0) yield;
     const px = positions[v * 3], py = positions[v * 3 + 1], pz = positions[v * 3 + 2];
     const nx = normals[v * 3], ny = normals[v * 3 + 1], nz = normals[v * 3 + 2];
     const sx = px + nx * (grid.voxel * 0.72);

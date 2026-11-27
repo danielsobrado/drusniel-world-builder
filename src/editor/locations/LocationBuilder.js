@@ -1,16 +1,18 @@
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { DensityGrid } from './gen/DensityGrid.js';
-import { createBounceField, gatherBounceLight } from './gen/IndirectBounce.js';
-import { bakeLighting, SHADE_SIZE } from './gen/LightBake.js';
+import { createBounceFieldSteps, gatherBounceLightSteps } from './gen/IndirectBounce.js';
+import { bakeLightingSteps, SHADE_SIZE } from './gen/LightBake.js';
 import { createRng, fbm3 } from './gen/noise.js';
 import { excavatedTunnel } from './gen/excavatedTunnel.js';
 import { PropOcclusionGrid } from './gen/PropOcclusionGrid.js';
 import { chamber, tunnel } from './gen/shapes.js';
 import { structureMesh, partitionLocationProp } from './LocationStructureMeshes.js';
-import { extractSurface, smoothAttribute, smoothSurfaceTaubin, splitByColumns, splitByCells } from './gen/SurfaceNets.js';
+import { extractSurface, smoothAttributeSteps, smoothSurfaceTaubin, splitByColumns, splitByCells } from './gen/SurfaceNets.js';
 import { buildLocationAlpineUnderstory } from './generators/LocationAlpineUnderstory.js';
 import { buildLocationCrystalField } from './generators/LocationCrystalField.js';
+import { finishLocationSteps, runLocationSteps } from './gen/LocationWorkSteps.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { LocationNav } from './LocationNav.js';
 
 const CULL_COLUMN_METRES = 28;
@@ -371,7 +373,22 @@ export class LocationBuilder {
    * @param {{ resolution?: number, minTransmit?: number, contactStrength?: number }|null} [options.propShadows]
    * @returns {THREE.Group}
    */
-  build({
+  build(options) {
+    return finishLocationSteps(this.buildSteps(options));
+  }
+
+  async buildCooperatively(options, { signal, sliceMs }) {
+    const started = performance.now();
+    try {
+      return await runLocationSteps(this.buildSteps(options), sliceMs, {
+        signal, onYield: () => PerfCounters.inc('locationLighting.yields'),
+      });
+    } finally {
+      PerfCounters.inc('locationLighting.buildMs', performance.now() - started);
+    }
+  }
+
+  *buildSteps({
     materials,
     absorption,
     bakeGain = 1,
@@ -385,268 +402,298 @@ export class LocationBuilder {
   }) {
     const group = new THREE.Group();
     const preparedProps = [];
-    const propGrid = new PropOcclusionGrid(propShadows?.resolution ?? 0.16);
-    const pointLights = this.lights.filter((light) => !light.direction && !light.flat);
+    const pending = new Set();
+    let completed = false;
+    try {
+      const propGrid = new PropOcclusionGrid(propShadows?.resolution ?? 0.16);
+      const pointLights = this.lights.filter((light) => !light.direction && !light.flat);
 
-    for (const [key, parts] of this.props) {
-      const entry = materials[key];
-      if (!entry) throw new Error(`Location prop material "${key}" is not in the generator's material set.`);
-      const needWood = Boolean(entry.woodGrain) || parts.some((part) => part.attributes.woodMask);
-      const needCloth = Boolean(entry.cloth) || parts.some((part) => part.attributes.clothData);
-      const needUv = needWood || needCloth || parts.some((part) => part.attributes.uv);
-      for (const part of parts) {
-        const vCount = part.attributes.position.count;
-        if (needUv && !part.attributes.uv) {
-          part.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(vCount * 2), 2));
-        } else if (!needUv && part.attributes.uv) {
-          part.deleteAttribute('uv');
+      for (const [key, parts] of this.props) {
+        const entry = materials[key];
+        if (!entry) throw new Error(`Location prop material "${key}" is not in the generator's material set.`);
+        const needWood = Boolean(entry.woodGrain) || parts.some((part) => part.attributes.woodMask);
+        const needCloth = Boolean(entry.cloth) || parts.some((part) => part.attributes.clothData);
+        const needUv = needWood || needCloth || parts.some((part) => part.attributes.uv);
+        for (const part of parts) {
+          const vCount = part.attributes.position.count;
+          if (needUv && !part.attributes.uv) {
+            part.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(vCount * 2), 2));
+          } else if (!needUv && part.attributes.uv) {
+            part.deleteAttribute('uv');
+          }
+          if (needWood && !part.attributes.woodMask) {
+            part.setAttribute('woodMask', new THREE.BufferAttribute(new Float32Array(vCount * 4), 4));
+          }
+          if (needCloth && !part.attributes.clothData) {
+            part.setAttribute('clothData', new THREE.BufferAttribute(new Float32Array(vCount * 4), 4));
+          }
         }
-        if (needWood && !part.attributes.woodMask) {
-          part.setAttribute('woodMask', new THREE.BufferAttribute(new Float32Array(vCount * 4), 4));
-        }
-        if (needCloth && !part.attributes.clothData) {
-          part.setAttribute('clothData', new THREE.BufferAttribute(new Float32Array(vCount * 4), 4));
-        }
-      }
-      const geometry = mergeGeometries(parts);
-      for (const part of parts) part.dispose();
-      if (key !== 'glow' && key !== 'water' && key !== 'waterfall' && key !== 'cloth' && key !== 'pelt') {
-        propGrid.addTriangles(geometry.attributes.position.array, {
-          excludeLights: pointLights,
-          excludeRadius: propShadows?.excludeRadius ?? 0.3,
-        });
-      }
-      preparedProps.push({ key, entry, geometry });
-    }
-
-    const surface = preparedSurface ?? extractSurface(this.grid);
-    if (materials.terrain?.ice > 0) {
-      // Feature-preserving Taubin smoothing removes 0.5 m voxel quad faceting on curved ice walls & pillars.
-      smoothSurfaceTaubin(surface, this.grid, { passes: 2, lambda: 0.42, mu: -0.44, creaseCos: 0.72 });
-    }
-    const count = surface.positions.length / 3;
-    const mask = new Float32Array(count * 4), mask2 = new Float32Array(count * 4), ice = new Float32Array(count);
-    const p = { x: 0, y: 0, z: 0 }, n = { x: 0, y: 0, z: 0 };
-    const m = new Float32Array(4), m2 = new Float32Array(4);
-    for (let v = 0; v < count; v += 1) {
-      p.x = surface.positions[v * 3]; p.y = surface.positions[v * 3 + 1]; p.z = surface.positions[v * 3 + 2];
-      n.x = surface.normals[v * 3]; n.y = surface.normals[v * 3 + 1]; n.z = surface.normals[v * 3 + 2];
-      m.fill(0); m2.fill(0);
-      ice[v] = this.classify(p, n, m, m2);
-      mask.set(m, v * 4); mask2.set(m2, v * 4);
-    }
-    // What the place is made of at any point, for light that has to pass through it.
-    const level = { x: 0, y: 0, z: 0 };
-    const mediumAt = (x, y, z) => {
-      p.x = x; p.y = y; p.z = z;
-      return this.classify(p, level, m, m2);
-    };
-    const baked = bakeLighting({
-      grid: this.grid,
-      propGrid,
-      propShadows,
-      positions: surface.positions,
-      normals: surface.normals,
-      lights: this.lights,
-      iceAt: (v) => ice[v],
-      mediumAt,
-      absorption,
-    });
-    for (let i = 0; i < baked.light.length; i += 1) baked.light[i] *= bakeGain;
-
-    let bounceField = null;
-    if (indirectBounce && indirectBounce.strength > 0) {
-      bounceField = createBounceField({
-        grid: this.grid,
-        positions: surface.positions,
-        normals: surface.normals,
-        directLight: baked.light,
-        cellSize: indirectBounce.cellSize ?? 1.25,
-        radius: indirectBounce.radius ?? 9.5,
-        maxEnergy: indirectBounce.maxEnergy ?? 2.2,
-      });
-      gatherBounceLight(bounceField, {
-        positions: surface.positions,
-        normals: surface.normals,
-        light: baked.light,
-        dir: baked.dir,
-        shade: baked.shade,
-        shadeSize: SHADE_SIZE,
-        strength: indirectBounce.strength,
-        wrap: indirectBounce.wrap ?? 0.52,
-      });
-    }
-
-    smoothAttribute(surface.indices, baked.light, 3, 1);
-    const rawAO = new Float32Array(count);
-    const rawSeam = new Float32Array(count);
-    for (let v = 0; v < count; v += 1) {
-      rawAO[v] = baked.shade[v * SHADE_SIZE];
-      rawSeam[v] = baked.shade[v * SHADE_SIZE + 3];
-    }
-    smoothAttribute(surface.indices, baked.shade, SHADE_SIZE, 1);
-    for (let v = 0; v < count; v += 1) {
-      const smoothed = baked.shade[v * SHADE_SIZE];
-      // Preserve crisp dark timber/rock contact AO while gently damping isolated voxel spikes.
-      baked.shade[v * SHADE_SIZE] = rawAO[v] < smoothed
-        ? rawAO[v] * 0.82 + smoothed * 0.18
-        : rawAO[v] * 0.55 + smoothed * 0.45;
-      const smoothedSeam = baked.shade[v * SHADE_SIZE + 3];
-      baked.shade[v * SHADE_SIZE + 3] = rawSeam[v] < smoothedSeam
-        ? rawSeam[v] * 0.78 + smoothedSeam * 0.22
-        : rawSeam[v] * 0.50 + smoothedSeam * 0.50;
-    }
-    const partition = structureBudget ? splitByCells : splitByColumns;
-    const chunks = partition({
-      indices: surface.indices,
-      attributes: {
-        position: { array: surface.positions, size: 3 }, normal: { array: surface.normals, size: 3 },
-        bakeLight: { array: baked.light, size: 3 }, bakeDir: { array: baked.dir, size: 3 },
-        bakeShade: { array: baked.shade, size: SHADE_SIZE },
-        surfMask: { array: mask, size: 4 }, surfMask2: { array: mask2, size: 4 },
-      },
-    }, structureBudget?.cellMeters ?? CULL_COLUMN_METRES);
-    for (const chunk of chunks) {
-      const geometry = new THREE.BufferGeometry();
-      for (const [name, { array, size }] of Object.entries(chunk.attributes)) {
-        geometry.setAttribute(name, new THREE.BufferAttribute(array, size));
-      }
-      geometry.setIndex(new THREE.BufferAttribute(chunk.indices, 1));
-      geometry.computeBoundingSphere();
-      group.add(structureBudget ? structureMesh(geometry, materials.terrain.material, 'terrain') : new THREE.Mesh(geometry, materials.terrain.material));
-    }
-
-    if (crystalField && (materials.iceCrystal || materials.clearIce)) {
-      const crystalMat = (materials.iceCrystal ?? materials.clearIce).material;
-      const crystalMeshes = buildLocationCrystalField({
-        surface,
-        baked,
-        mask,
-        nav: this.nav,
-        crystalMaterial: crystalMat,
-        seed: this.seed,
-        maxClusters: crystalField.maxClusters ?? 0,
-        maxNeedles: crystalField.maxNeedles ?? 0,
-        decorationBudget,
-      });
-      for (const mesh of crystalMeshes) {
-        mesh.renderOrder = 1;
-        group.add(mesh);
-      }
-    }
-
-    if (alpineUnderstory) {
-      const understoryMeshes = buildLocationAlpineUnderstory({
-        surface,
-        baked,
-        mask,
-        mask2,
-        nav: this.nav,
-        isStoneTerrain: !(materials.terrain?.ice > 0),
-        rockMaterial: materials.rock?.material ?? null,
-        crystalMaterial: materials.iceCrystal?.material ?? materials.clearIce?.material ?? null,
-        wind: alpineUnderstory.wind ?? [0.6, 0.8],
-        seed: this.seed + 31,
-        maxCobbles: alpineUnderstory.cobbles ?? 0,
-        maxIceShards: alpineUnderstory.iceShards ?? 0,
-        maxTundraSedge: alpineUnderstory.tundraSedge ?? 0,
-        maxTundraLichen: alpineUnderstory.tundraLichen ?? 0,
-        decorationBudget,
-      });
-      for (const mesh of understoryMeshes) group.add(mesh);
-    }
-
-    for (const { key, entry, geometry } of preparedProps) {
-      const at = geometry.attributes.position.array, facing = geometry.attributes.normal.array;
-      const vCount = at.length / 3;
-      const iceFn = () => entry.ice ?? 0;
-      const bucketLights = key === 'glow' ? [] : this.lights;
-      const pShadows = { ...(propShadows ?? {}), isProp: true };
-      const pGrid = key === 'glow' || key === 'waterfall' ? null : propGrid;
-
-      const runBake = (posArr, normArr) => {
-        const res = bakeLighting({
-          grid: this.grid,
-          propGrid: pGrid,
-          propShadows: pShadows,
-          positions: posArr,
-          normals: normArr,
-          // Glow is unlit (createGlowMaterial reads only `tint`): its bake just fills the shared attributes.
-          lights: bucketLights,
-          iceAt: iceFn,
-          mediumAt,
-          absorption,
-        });
-        for (let i = 0; i < res.light.length; i += 1) res.light[i] *= bakeGain;
-        if (bounceField && key !== 'glow') {
-          gatherBounceLight(bounceField, {
-            positions: posArr,
-            normals: normArr,
-            light: res.light,
-            dir: res.dir,
-            shade: res.shade,
-            shadeSize: SHADE_SIZE,
-            strength: indirectBounce.strength,
-            wrap: indirectBounce.wrap ?? 0.52,
+        const geometry = mergeGeometries(parts);
+        pending.add(geometry);
+        for (const part of parts) part.dispose();
+        if (key !== 'glow' && key !== 'water' && key !== 'waterfall' && key !== 'cloth' && key !== 'pelt') {
+          propGrid.addTriangles(geometry.attributes.position.array, {
+            excludeLights: pointLights,
+            excludeRadius: propShadows?.excludeRadius ?? 0.3,
           });
         }
-        return res;
-      };
+        preparedProps.push({ key, entry, geometry });
+        yield;
+      }
 
-      let lit;
-      if (vCount > 4000) {
-        // Spatial + normal-octant cache keeps high-poly >=15k props fast to light-bake.
-        const map = new Map();
-        const vertToSample = new Int32Array(vCount);
-        const sPos = [];
-        const sNorm = [];
-        for (let i = 0; i < vCount; i += 1) {
-          const p3 = i * 3;
-          const x = at[p3], y = at[p3 + 1], z = at[p3 + 2];
-          const nx = facing[p3], ny = facing[p3 + 1], nz = facing[p3 + 2];
-          const hKey = `${Math.round(x * 12)},${Math.round(y * 12)},${Math.round(z * 12)},`
-            + `${Math.round(nx * 1.4) + 2},${Math.round(ny * 1.4) + 2},${Math.round(nz * 1.4) + 2}`;
-          let sIdx = map.get(hKey);
-          if (sIdx === undefined) {
-            sIdx = sPos.length / 3;
-            map.set(hKey, sIdx);
-            sPos.push(x, y, z);
-            sNorm.push(nx, ny, nz);
+      const surface = preparedSurface ?? extractSurface(this.grid);
+      if (materials.terrain?.ice > 0) {
+        // Feature-preserving Taubin smoothing removes 0.5 m voxel quad faceting on curved ice walls & pillars.
+        smoothSurfaceTaubin(surface, this.grid, { passes: 2, lambda: 0.42, mu: -0.44, creaseCos: 0.72 });
+      }
+      const count = surface.positions.length / 3;
+      const mask = new Float32Array(count * 4), mask2 = new Float32Array(count * 4), ice = new Float32Array(count);
+      const p = { x: 0, y: 0, z: 0 }, n = { x: 0, y: 0, z: 0 };
+      const m = new Float32Array(4), m2 = new Float32Array(4);
+      for (let v = 0; v < count; v += 1) {
+        if (v % 1024 === 0) yield;
+        p.x = surface.positions[v * 3]; p.y = surface.positions[v * 3 + 1]; p.z = surface.positions[v * 3 + 2];
+        n.x = surface.normals[v * 3]; n.y = surface.normals[v * 3 + 1]; n.z = surface.normals[v * 3 + 2];
+        m.fill(0); m2.fill(0);
+        ice[v] = this.classify(p, n, m, m2);
+        mask.set(m, v * 4); mask2.set(m2, v * 4);
+      }
+      // What the place is made of at any point, for light that has to pass through it.
+      const level = { x: 0, y: 0, z: 0 };
+      const mediumAt = (x, y, z) => {
+        p.x = x; p.y = y; p.z = z;
+        return this.classify(p, level, m, m2);
+      };
+      const baked = yield* bakeLightingSteps({
+        grid: this.grid,
+        propGrid,
+        propShadows,
+        positions: surface.positions,
+        normals: surface.normals,
+        lights: this.lights,
+        iceAt: (v) => ice[v],
+        mediumAt,
+        absorption,
+      });
+      for (let i = 0; i < baked.light.length; i += 1) {
+        if (i % 4096 === 0) yield;
+        baked.light[i] *= bakeGain;
+      }
+
+      let bounceField = null;
+      if (indirectBounce && indirectBounce.strength > 0) {
+        bounceField = yield* createBounceFieldSteps({
+          grid: this.grid,
+          positions: surface.positions,
+          normals: surface.normals,
+          directLight: baked.light,
+          cellSize: indirectBounce.cellSize ?? 1.25,
+          radius: indirectBounce.radius ?? 9.5,
+          maxEnergy: indirectBounce.maxEnergy ?? 2.2,
+        });
+        yield* gatherBounceLightSteps(bounceField, {
+          positions: surface.positions,
+          normals: surface.normals,
+          light: baked.light,
+          dir: baked.dir,
+          shade: baked.shade,
+          shadeSize: SHADE_SIZE,
+          strength: indirectBounce.strength,
+          wrap: indirectBounce.wrap ?? 0.52,
+        });
+      }
+
+      yield* smoothAttributeSteps(surface.indices, baked.light, 3, 1);
+      const rawAO = new Float32Array(count);
+      const rawSeam = new Float32Array(count);
+      for (let v = 0; v < count; v += 1) {
+        if (v % 1024 === 0) yield;
+        rawAO[v] = baked.shade[v * SHADE_SIZE];
+        rawSeam[v] = baked.shade[v * SHADE_SIZE + 3];
+      }
+      yield* smoothAttributeSteps(surface.indices, baked.shade, SHADE_SIZE, 1);
+      for (let v = 0; v < count; v += 1) {
+        if (v % 1024 === 0) yield;
+        const smoothed = baked.shade[v * SHADE_SIZE];
+        // Preserve crisp dark timber/rock contact AO while gently damping isolated voxel spikes.
+        baked.shade[v * SHADE_SIZE] = rawAO[v] < smoothed
+          ? rawAO[v] * 0.82 + smoothed * 0.18
+          : rawAO[v] * 0.55 + smoothed * 0.45;
+        const smoothedSeam = baked.shade[v * SHADE_SIZE + 3];
+        baked.shade[v * SHADE_SIZE + 3] = rawSeam[v] < smoothedSeam
+          ? rawSeam[v] * 0.78 + smoothedSeam * 0.22
+          : rawSeam[v] * 0.50 + smoothedSeam * 0.50;
+      }
+      const partition = structureBudget ? splitByCells : splitByColumns;
+      const chunks = partition({
+        indices: surface.indices,
+        attributes: {
+          position: { array: surface.positions, size: 3 }, normal: { array: surface.normals, size: 3 },
+          bakeLight: { array: baked.light, size: 3 }, bakeDir: { array: baked.dir, size: 3 },
+          bakeShade: { array: baked.shade, size: SHADE_SIZE },
+          surfMask: { array: mask, size: 4 }, surfMask2: { array: mask2, size: 4 },
+        },
+      }, structureBudget?.cellMeters ?? CULL_COLUMN_METRES);
+      for (const chunk of chunks) {
+        const geometry = new THREE.BufferGeometry();
+        for (const [name, { array, size }] of Object.entries(chunk.attributes)) {
+          geometry.setAttribute(name, new THREE.BufferAttribute(array, size));
+        }
+        geometry.setIndex(new THREE.BufferAttribute(chunk.indices, 1));
+        geometry.computeBoundingSphere();
+        group.add(structureBudget ? structureMesh(geometry, materials.terrain.material, 'terrain') : new THREE.Mesh(geometry, materials.terrain.material));
+        yield;
+      }
+
+      if (crystalField && (materials.iceCrystal || materials.clearIce)) {
+        const crystalMat = (materials.iceCrystal ?? materials.clearIce).material;
+        const crystalMeshes = buildLocationCrystalField({
+          surface,
+          baked,
+          mask,
+          nav: this.nav,
+          crystalMaterial: crystalMat,
+          seed: this.seed,
+          maxClusters: crystalField.maxClusters ?? 0,
+          maxNeedles: crystalField.maxNeedles ?? 0,
+          decorationBudget,
+        });
+        for (const mesh of crystalMeshes) {
+          mesh.renderOrder = 1;
+          group.add(mesh);
+        }
+      }
+
+      if (alpineUnderstory) {
+        const understoryMeshes = buildLocationAlpineUnderstory({
+          surface,
+          baked,
+          mask,
+          mask2,
+          nav: this.nav,
+          isStoneTerrain: !(materials.terrain?.ice > 0),
+          rockMaterial: materials.rock?.material ?? null,
+          crystalMaterial: materials.iceCrystal?.material ?? materials.clearIce?.material ?? null,
+          wind: alpineUnderstory.wind ?? [0.6, 0.8],
+          seed: this.seed + 31,
+          maxCobbles: alpineUnderstory.cobbles ?? 0,
+          maxIceShards: alpineUnderstory.iceShards ?? 0,
+          maxTundraSedge: alpineUnderstory.tundraSedge ?? 0,
+          maxTundraLichen: alpineUnderstory.tundraLichen ?? 0,
+          decorationBudget,
+        });
+        for (const mesh of understoryMeshes) group.add(mesh);
+      }
+
+      for (const { key, entry, geometry } of preparedProps) {
+        const at = geometry.attributes.position.array, facing = geometry.attributes.normal.array;
+        const vCount = at.length / 3;
+        const iceFn = () => entry.ice ?? 0;
+        const bucketLights = key === 'glow' ? [] : this.lights;
+        const pShadows = { ...(propShadows ?? {}), isProp: true };
+        const pGrid = key === 'glow' || key === 'waterfall' ? null : propGrid;
+
+        const grid = this.grid;
+        const runBake = function* (posArr, normArr) {
+          const res = yield* bakeLightingSteps({
+            grid,
+            propGrid: pGrid,
+            propShadows: pShadows,
+            positions: posArr,
+            normals: normArr,
+            // Glow is unlit (createGlowMaterial reads only `tint`): its bake just fills the shared attributes.
+            lights: bucketLights,
+            iceAt: iceFn,
+            mediumAt,
+            absorption,
+          });
+          for (let i = 0; i < res.light.length; i += 1) {
+            if (i % 4096 === 0) yield;
+            res.light[i] *= bakeGain;
           }
-          vertToSample[i] = sIdx;
-        }
-        const sLit = runBake(new Float32Array(sPos), new Float32Array(sNorm));
-        lit = {
-          light: new Float32Array(vCount * 3),
-          dir: new Float32Array(vCount * 3),
-          shade: new Float32Array(vCount * SHADE_SIZE),
+          if (bounceField && key !== 'glow') {
+            yield* gatherBounceLightSteps(bounceField, {
+              positions: posArr,
+              normals: normArr,
+              light: res.light,
+              dir: res.dir,
+              shade: res.shade,
+              shadeSize: SHADE_SIZE,
+              strength: indirectBounce.strength,
+              wrap: indirectBounce.wrap ?? 0.52,
+            });
+          }
+          return res;
         };
-        for (let i = 0; i < vCount; i += 1) {
-          const s = vertToSample[i];
-          const d3 = i * 3, s3 = s * 3;
-          lit.light[d3] = sLit.light[s3]; lit.light[d3 + 1] = sLit.light[s3 + 1]; lit.light[d3 + 2] = sLit.light[s3 + 2];
-          lit.dir[d3] = sLit.dir[s3]; lit.dir[d3 + 1] = sLit.dir[s3 + 1]; lit.dir[d3 + 2] = sLit.dir[s3 + 2];
-          const ds = i * SHADE_SIZE, ss = s * SHADE_SIZE;
-          for (let c = 0; c < SHADE_SIZE; c += 1) lit.shade[ds + c] = sLit.shade[ss + c];
+
+        let lit;
+        if (vCount > 4000) {
+          // Spatial + normal-octant cache keeps high-poly >=15k props fast to light-bake.
+          const map = new Map();
+          const vertToSample = new Int32Array(vCount);
+          const sPos = [];
+          const sNorm = [];
+          for (let i = 0; i < vCount; i += 1) {
+            if (i % 1024 === 0) yield;
+            const p3 = i * 3;
+            const x = at[p3], y = at[p3 + 1], z = at[p3 + 2];
+            const nx = facing[p3], ny = facing[p3 + 1], nz = facing[p3 + 2];
+            const hKey = `${Math.round(x * 12)},${Math.round(y * 12)},${Math.round(z * 12)},`
+              + `${Math.round(nx * 1.4) + 2},${Math.round(ny * 1.4) + 2},${Math.round(nz * 1.4) + 2}`;
+            let sIdx = map.get(hKey);
+            if (sIdx === undefined) {
+              sIdx = sPos.length / 3;
+              map.set(hKey, sIdx);
+              sPos.push(x, y, z);
+              sNorm.push(nx, ny, nz);
+            }
+            vertToSample[i] = sIdx;
+          }
+          const sLit = yield* runBake(new Float32Array(sPos), new Float32Array(sNorm));
+          lit = {
+            light: new Float32Array(vCount * 3),
+            dir: new Float32Array(vCount * 3),
+            shade: new Float32Array(vCount * SHADE_SIZE),
+          };
+          for (let i = 0; i < vCount; i += 1) {
+            if (i % 1024 === 0) yield;
+            const s = vertToSample[i];
+            const d3 = i * 3, s3 = s * 3;
+            lit.light[d3] = sLit.light[s3]; lit.light[d3 + 1] = sLit.light[s3 + 1]; lit.light[d3 + 2] = sLit.light[s3 + 2];
+            lit.dir[d3] = sLit.dir[s3]; lit.dir[d3 + 1] = sLit.dir[s3 + 1]; lit.dir[d3 + 2] = sLit.dir[s3 + 2];
+            const ds = i * SHADE_SIZE, ss = s * SHADE_SIZE;
+            for (let c = 0; c < SHADE_SIZE; c += 1) lit.shade[ds + c] = sLit.shade[ss + c];
+          }
+        } else {
+          lit = yield* runBake(at, facing);
         }
-      } else {
-        lit = runBake(at, facing);
+        // An icicle is as thick as itself, not as the roof it hangs from.
+        if (entry.ice) {
+          for (let v = 1; v < lit.shade.length; v += SHADE_SIZE) lit.shade[v] = Math.min(lit.shade[v], PROP_ICE_THICKNESS);
+        }
+        geometry.setAttribute('bakeLight', new THREE.BufferAttribute(lit.light, 3));
+        geometry.setAttribute('bakeDir', new THREE.BufferAttribute(lit.dir, 3));
+        geometry.setAttribute('bakeShade', new THREE.BufferAttribute(lit.shade, SHADE_SIZE));
+        geometry.computeBoundingSphere();
+        const partitions = structureBudget ? partitionLocationProp(geometry, entry.material, key, structureBudget) : null;
+        if (partitions) {
+          for (const mesh of partitions) group.add(mesh);
+          geometry.dispose();
+        } else group.add(new THREE.Mesh(geometry, entry.material));
+        pending.delete(geometry);
+        yield;
       }
-      // An icicle is as thick as itself, not as the roof it hangs from.
-      if (entry.ice) {
-        for (let v = 1; v < lit.shade.length; v += SHADE_SIZE) lit.shade[v] = Math.min(lit.shade[v], PROP_ICE_THICKNESS);
+      group.traverse((object) => { object.matrixAutoUpdate = false; });
+      completed = true;
+      return group;
+    } finally {
+      if (!completed) {
+        group.traverse(object => {
+          if (object.isInstancedMesh) object.dispose();
+          if (object.geometry) pending.add(object.geometry);
+        });
+        for (const geometry of pending) geometry?.dispose();
       }
-      geometry.setAttribute('bakeLight', new THREE.BufferAttribute(lit.light, 3));
-      geometry.setAttribute('bakeDir', new THREE.BufferAttribute(lit.dir, 3));
-      geometry.setAttribute('bakeShade', new THREE.BufferAttribute(lit.shade, SHADE_SIZE));
-      geometry.computeBoundingSphere();
-      const partitions = structureBudget ? partitionLocationProp(geometry, entry.material, key, structureBudget) : null;
-      if (partitions) {
-        for (const mesh of partitions) group.add(mesh);
-        geometry.dispose();
-      } else group.add(new THREE.Mesh(geometry, entry.material));
     }
-    group.traverse((object) => { object.matrixAutoUpdate = false; });
-    return group;
   }
 }
