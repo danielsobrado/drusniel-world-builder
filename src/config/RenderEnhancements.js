@@ -15,6 +15,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
     generationEnabled: false, generationWorker: true, generationSliceMs: 4, generationMaxCopyBytes: 67108864, generationWorkerTimeoutMs: 120000,
     lightingEnabled: false, lightingSliceMs: 4,
     surfaceReclamationEnabled: false, surfaceMeadowReclamationEnabled: false, surfaceMeadowProtectMeters: 32, surfaceSceneryReclamationEnabled: false, surfaceGpuImpostorReclamationEnabled: false, surfaceTownReclamationEnabled: false, surfaceTerrainBakeReclamationEnabled: false, surfaceOceanFftReclamationEnabled: false, surfaceReflectionReclamationEnabled: false, surfacePostReclamationEnabled: false, surfaceAtmosphereReclamationEnabled: false, surfaceShadowReclamationEnabled: false, surfaceEnvironmentReclamationEnabled: false, surfaceTownProtectMeters: 96, surfaceSceneryProtectMeters: 64, surfaceProtectMeters: 192, surfaceIdleMs: 5000, surfaceSampleMs: 500,
+    surfaceShadowWarmupEnabled: false, surfaceShadowWarmupMaxBytes: 134217728, surfaceShadowWarmupMaxTargetBytes: 67108864,
     surfaceExitWarmupEnabled: false, surfaceExitWarmupMeters: 12, surfaceExitWarmupSampleMs: 250, surfaceExitWarmupMaxBytes: 33554432,
     surfaceAdaptiveReclamationEnabled: false, surfaceAdaptiveHighMiB: 4096, surfaceAdaptiveLowMiB: 3584, surfaceAdaptiveMaxMiB: 512, surfaceAdaptiveDeferredCost: 4, surfaceAdaptiveImpostorCost: 2,
     surfaceEvictionsPerSample: 4, surfaceMaxEvictedBytes: 33554432, surfaceRestoreBytesPerFrame: 2097152, surfaceRestoresPerFrame: 4 }),
@@ -147,6 +148,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     ['locationSurfaceReflectionReclamation', 'surfaceReflectionReclamationEnabled'],
     ['locationSurfaceAdaptiveReclamation', 'surfaceAdaptiveReclamationEnabled'],
     ['locationSurfaceExitWarmup', 'surfaceExitWarmupEnabled'],
+    ['locationSurfaceShadowWarmup', 'surfaceShadowWarmupEnabled'],
     ['locationSurfacePostReclamation', 'surfacePostReclamationEnabled'],
     ['locationSurfaceAtmosphereReclamation', 'surfaceAtmosphereReclamationEnabled'],
     ['locationSurfaceShadowReclamation', 'surfaceShadowReclamationEnabled'],
@@ -201,6 +203,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
       portalCellMeters: [4, 64], portalMaxCells: [1, 65536], portalMaxSampleReads: [1000, 64000000],
       generationSliceMs: [0.5, 16], generationMaxCopyBytes: [0, 268435456], generationWorkerTimeoutMs: [1000, 300000], lightingSliceMs: [0.5, 16],
       surfaceMeadowProtectMeters: [0, 2048], surfaceSceneryProtectMeters: [0, 2048], surfaceTownProtectMeters: [0, 2048], surfaceProtectMeters: [0, 2048], surfaceIdleMs: [1000, 60000], surfaceSampleMs: [100, 5000],
+      surfaceShadowWarmupMaxBytes: [0, 536870912], surfaceShadowWarmupMaxTargetBytes: [0, 268435456],
       surfaceExitWarmupMeters: [1, 128], surfaceExitWarmupSampleMs: [100, 5000], surfaceExitWarmupMaxBytes: [0, 268435456],
       surfaceAdaptiveHighMiB: [64, 32768], surfaceAdaptiveLowMiB: [32, 32768], surfaceAdaptiveMaxMiB: [1, 4096], surfaceAdaptiveDeferredCost: [1, 32], surfaceAdaptiveImpostorCost: [1, 32],
       surfaceEvictionsPerSample: [1, 32], surfaceMaxEvictedBytes: [0, 268435456], surfaceRestoreBytesPerFrame: [4096, 16777216], surfaceRestoresPerFrame: [1, 32] },
@@ -212,8 +215,8 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
   }
   if (value.locationStructureBudget.protectMeters < value.locationStructureBudget.cellMeters || !Number.isInteger(value.locationStructureBudget.evictionsPerSample) || !Number.isInteger(value.locationStructureBudget.minPropTriangles)) throw new RangeError('Invalid location structure protection or integer budget.');
   const structure = value.locationStructureBudget;
-  for (const key of ['portalEnabled', 'portalCull', 'generationEnabled', 'generationWorker', 'lightingEnabled', 'surfaceReclamationEnabled', 'surfaceMeadowReclamationEnabled', 'surfaceSceneryReclamationEnabled', 'surfaceGpuImpostorReclamationEnabled', 'surfaceTownReclamationEnabled', 'surfaceTerrainBakeReclamationEnabled', 'surfaceOceanFftReclamationEnabled', 'surfaceReflectionReclamationEnabled', 'surfacePostReclamationEnabled', 'surfaceAtmosphereReclamationEnabled', 'surfaceShadowReclamationEnabled', 'surfaceEnvironmentReclamationEnabled', 'surfaceAdaptiveReclamationEnabled', 'surfaceExitWarmupEnabled']) if (typeof structure[key] !== 'boolean') throw new TypeError(`locationStructureBudget.${key} must be a boolean.`);
-  for (const key of ['portalMaxCells', 'portalMaxSampleReads', 'generationMaxCopyBytes', 'generationWorkerTimeoutMs', 'surfaceEvictionsPerSample', 'surfaceMaxEvictedBytes', 'surfaceRestoreBytesPerFrame', 'surfaceRestoresPerFrame', 'surfaceExitWarmupMaxBytes']) if (!Number.isInteger(structure[key])) throw new RangeError(`locationStructureBudget.${key} must be an integer.`);
+  for (const key of ['portalEnabled', 'portalCull', 'generationEnabled', 'generationWorker', 'lightingEnabled', 'surfaceReclamationEnabled', 'surfaceMeadowReclamationEnabled', 'surfaceSceneryReclamationEnabled', 'surfaceGpuImpostorReclamationEnabled', 'surfaceTownReclamationEnabled', 'surfaceTerrainBakeReclamationEnabled', 'surfaceOceanFftReclamationEnabled', 'surfaceReflectionReclamationEnabled', 'surfacePostReclamationEnabled', 'surfaceAtmosphereReclamationEnabled', 'surfaceShadowReclamationEnabled', 'surfaceEnvironmentReclamationEnabled', 'surfaceAdaptiveReclamationEnabled', 'surfaceExitWarmupEnabled', 'surfaceShadowWarmupEnabled']) if (typeof structure[key] !== 'boolean') throw new TypeError(`locationStructureBudget.${key} must be a boolean.`);
+  for (const key of ['portalMaxCells', 'portalMaxSampleReads', 'generationMaxCopyBytes', 'generationWorkerTimeoutMs', 'surfaceEvictionsPerSample', 'surfaceMaxEvictedBytes', 'surfaceRestoreBytesPerFrame', 'surfaceRestoresPerFrame', 'surfaceExitWarmupMaxBytes', 'surfaceShadowWarmupMaxBytes', 'surfaceShadowWarmupMaxTargetBytes']) if (!Number.isInteger(structure[key])) throw new RangeError(`locationStructureBudget.${key} must be an integer.`);
   if (structure.surfaceAdaptiveLowMiB >= structure.surfaceAdaptiveHighMiB) throw new RangeError('Adaptive surface recovery threshold must be below the pressure threshold.');
   if (typeof structure.prefetchEnabled !== 'boolean') throw new TypeError('locationStructureBudget.prefetchEnabled must be a boolean.');
   if (!Number.isInteger(structure.prefetchSliceBytes) || structure.prefetchSliceBytes % 4 !== 0

@@ -1,4 +1,4 @@
-import { VSMShadowMap } from 'three/webgpu';
+import { surfaceShadowOwners, shadowTargetShape } from './LocationShadowWarmup.js';
 
 function targetBytes(renderer, target) {
   const manager = renderer._textures;
@@ -29,7 +29,8 @@ export function collectLocationAtmosphereTargets(surface, renderer, settings) {
       return;
     }
     entries.set(target, { resource: target, kind, size, distance: Infinity, protected: false,
-      deferred: true, target: true, invalidations: new Set([invalidate]) });
+      deferred: true, target: true, invalidations: new Set([invalidate]),
+      ...(kind === 'shadow' ? { shadowShape: shadowTargetShape(target) } : {}) });
   };
   const terrain = surface.terrainView;
   const post = terrain.postProcessing;
@@ -70,13 +71,8 @@ export function collectLocationAtmosphereTargets(surface, renderer, settings) {
     }
   }
   const sky = surface.skyView;
-  if (settings.surfaceShadowReclamationEnabled && sky && renderer.shadowMap?.type !== VSMShadowMap
-      && !surface.farShadowAdmission?.pending) {
-    for (const light of [sky.directional, ...(sky.cascades?.node?.lights ?? [])]) {
-      const shadow = light?.shadow;
-      if (!shadow?.map || !light.castShadow) continue;
-      add(shadow.map, 'shadow', () => { shadow.needsUpdate = true; });
-    }
+  for (const shadow of surfaceShadowOwners(surface, renderer, settings)) {
+    add(shadow.map, 'shadow', () => { shadow.needsUpdate = true; });
   }
   // HDRLoader owns this source exclusively; r187 PMREMNode listens for its disposal.
   const texture = settings.surfaceEnvironmentReclamationEnabled && sky?.environment?.surfaceTexture;

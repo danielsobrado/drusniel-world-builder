@@ -50,6 +50,9 @@ locationStructureBudget:
   surfaceProtectMeters: 192
   surfaceIdleMs: 5000
   surfaceSampleMs: 500
+  surfaceShadowWarmupEnabled: false
+  surfaceShadowWarmupMaxBytes: 134217728
+  surfaceShadowWarmupMaxTargetBytes: 67108864
   surfaceExitWarmupEnabled: false
   surfaceExitWarmupMeters: 12
   surfaceExitWarmupSampleMs: 250

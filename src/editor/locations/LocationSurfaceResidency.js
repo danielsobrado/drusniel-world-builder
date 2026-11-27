@@ -6,6 +6,7 @@ import { collectLocationGpuImpostorAttributes } from './LocationGpuImpostorResid
 import { collectLocationSceneryAttributes } from './LocationSceneryResidency.js';
 import { collectLocationMeadowAttributes } from './LocationMeadowResidency.js';
 import { getTerrainMaterialBakeGpuState } from '../materials/TerrainMaterialBakeGpu.js';
+import { warmLocationShadows } from './LocationShadowWarmup.js';
 import { LocationSurfaceExitWarmup } from './LocationSurfaceExitWarmup.js';
 import { LocationSurfaceMemoryPolicy } from './LocationSurfaceMemoryPolicy.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
@@ -281,6 +282,10 @@ export class LocationSurfaceResidency {
         this.evicted.delete(entry.resource);
         this.evictedBytes -= entry.size;
         this.publish();
+      }
+      if (this.phase === 'restoring' && !this.renderer._isDeviceLost) {
+        await warmLocationShadows({ surface: this.surface, renderer: this.renderer, settings: this.settings,
+          entries, pause: this.pause, signal, active: () => this.phase === 'restoring' });
       }
     } catch (error) {
       if (signal?.aborted) throw error;
