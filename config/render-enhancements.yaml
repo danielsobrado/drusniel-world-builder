@@ -41,6 +41,7 @@ initialInstanceUploadBudget:
   maxDetachedBytes: 33554432
   maxAllocationsPerFrame: 2
   maxRestarts: 3
+  handoffTimeoutMs: 2000
 instanceSliceBudget:
   sliceBytes: 262144
   maxStagingBytes: 16777216

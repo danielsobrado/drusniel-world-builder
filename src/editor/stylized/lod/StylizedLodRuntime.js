@@ -347,6 +347,7 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
       const writableCount = Math.min(instances.length, capacity);
       const dropped = instances.length - writableCount;
       const previousCount = mesh.count;
+      if (stage && writableCount > 0 && previousCount === 0) stage.replacementDraws.add(mesh);
       const publishCount = () => {
         if (dropped > 0) PerfCounters.inc('stylizedInstancesDroppedByCapacity', dropped);
         mesh.count = writableCount;

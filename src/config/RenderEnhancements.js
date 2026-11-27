@@ -23,7 +23,7 @@ export const RENDER_ENHANCEMENT_DEFAULTS = Object.freeze({
   regionalInstancePublicationBudget: false,
   slicedInstancePublication: false,
   initialInstanceUploadSlicing: false,
-  initialInstanceUploadBudget: Object.freeze({ sliceBytes: 262144, maxDetachedBytes: 33554432, maxAllocationsPerFrame: 2, maxRestarts: 3 }),
+  initialInstanceUploadBudget: Object.freeze({ sliceBytes: 262144, maxDetachedBytes: 33554432, maxAllocationsPerFrame: 2, maxRestarts: 3, handoffTimeoutMs: 2000 }),
   instanceSliceBudget: Object.freeze({ sliceBytes: 262144, maxStagingBytes: 16777216, maxCopyRanges: 8192, maxWritesPerSlice: 64 }),
   farShadowAdmission: false,
   reflectionAdmission: false,
@@ -167,7 +167,7 @@ export function resolveRenderEnhancements(source = {}, search = '', { mobile = f
     if (!Number.isInteger(n) || n < min || n > max || (key.endsWith('Bytes') && n % 4 !== 0)) throw new RangeError(`instanceSliceBudget.${key} must be in [${min}, ${max}].`);
   }
   if (value.instanceSliceBudget.maxStagingBytes < value.instanceSliceBudget.sliceBytes) throw new RangeError('Instance staging must accommodate one slice.');
-  for (const [key, min, max] of [['sliceBytes', 4096, 4194304], ['maxDetachedBytes', 4096, 134217728], ['maxAllocationsPerFrame', 1, 16], ['maxRestarts', 0, 16]]) {
+  for (const [key, min, max] of [['sliceBytes', 4096, 4194304], ['maxDetachedBytes', 4096, 134217728], ['maxAllocationsPerFrame', 1, 16], ['maxRestarts', 0, 16], ['handoffTimeoutMs', 1, 30000]]) {
     const n = value.initialInstanceUploadBudget[key];
     if (!Number.isInteger(n) || n < min || n > max || (key.endsWith('Bytes') && n % 4 !== 0)) throw new RangeError(`initialInstanceUploadBudget.${key} must be in [${min}, ${max}].`);
   }

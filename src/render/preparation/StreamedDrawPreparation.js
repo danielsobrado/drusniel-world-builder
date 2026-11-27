@@ -21,6 +21,7 @@ export class StreamedDrawPreparation {
     this.stagedMaterials = new Map();
     this.pending = new Set();
     this.firstUsePending = new WeakSet();
+    this.handoffRequests = new WeakMap();
     this.isolated = new WeakSet();
     this.enqueuedAt = diagnostics ? new Map() : null;
     this.initialUploadBytes = new Map();
@@ -90,7 +91,7 @@ export class StreamedDrawPreparation {
   registerInitialInstance(mesh) {
     if (!this.initialInstanceBudget || !this.settings.enabled || this.disposed || !isDirectInstanceMesh(mesh)) return;
     if (mesh.count <= 0) {
-      if (this.firstUsePending.has(mesh) && !this.stagedMaterials.has(mesh)) {
+      if (this.firstUsePending.has(mesh) && !this.stagedMaterials.has(mesh) && !this.handoffRequests.has(mesh)) {
         this.cancel(mesh);
         mesh.visible = false;
         PerfCounters.inc('initialInstanceDormantCancellations');
@@ -100,6 +101,42 @@ export class StreamedDrawPreparation {
     if (this.isMaterialReady(mesh, mesh.material)) return;
     this.firstUsePending.add(mesh);
     this.enqueue(mesh);
+  }
+
+  /** A zero-count replacement may use the isolated preparation pass without entering gameplay. */
+  acquireInitialInstanceHandoff(mesh) {
+    if (!this.initialInstanceBudget || !this.settings.enabled || this.disposed
+      || !isDirectInstanceMesh(mesh) || mesh.count !== 0 || !mesh.parent
+      || this.isMaterialReady(mesh, mesh.material)) return null;
+    let request = this.handoffRequests.get(mesh);
+    if (!request) {
+      request = { users: 0, owned: !this.pending.has(mesh) };
+      this.handoffRequests.set(mesh, request);
+    }
+    request.users++;
+    this.enqueue(mesh);
+    let released = false;
+    return {
+      timeoutMs: this.initialInstanceBudget.handoffTimeoutMs,
+      ready: () => {
+        if (released || this.disposed || !this.settings.enabled || !mesh.parent
+          || this.isMaterialReady(mesh, mesh.material)) return true;
+        // A different staged material or external cancellation may have consumed the job.
+        if (!this.pending.has(mesh)) {
+          request.owned = true;
+          this.enqueue(mesh);
+        }
+        return false;
+      },
+      release: () => {
+        if (released) return;
+        released = true;
+        if (--request.users !== 0 || this.handoffRequests.get(mesh) !== request) return;
+        this.handoffRequests.delete(mesh);
+        if (request.owned && mesh.count === 0 && !this.stagedMaterials.has(mesh)
+          && this.pending.has(mesh)) this.cancel(mesh);
+      },
+    };
   }
 
   enqueue(mesh) {

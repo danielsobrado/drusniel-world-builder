@@ -1,6 +1,7 @@
 import { estimateAttributeSubrangeBytes, markAttributeSubrangeUpdated } from '../attributeUpload.js';
 import { ITERATOR_PENDING } from '../ResumableIterator.js';
 import { PerfCounters } from '../../performance/qa/PerfCounters.js';
+import { waitForInitialInstanceDraws } from './InstanceLodHandoff.js';
 
 const PATCH_PAGE_ROWS = 64;
 
@@ -10,6 +11,7 @@ export class InstancePublicationPlan {
     this.patches = new Map();
     this.spans = new Map();
     this.finalizers = [];
+    this.replacementDraws = new Set();
     this.stagedRows = 0;
   }
 
@@ -46,6 +48,7 @@ export class InstancePublicationPlan {
   }
 
   *publish(getBudget, beforeCommit = null) {
+    yield* waitForInitialInstanceDraws(this.replacementDraws);
     const budget = getBudget();
     const uploaded = budget?.slicedInstanceUploads ? yield* budget.slicedInstanceUploads.stage(this, getBudget) : false;
     if (!uploaded) yield* admitSceneryPublication(getBudget, () => this.bytes());
@@ -72,6 +75,7 @@ export class InstancePublicationPlan {
     this.patches.clear();
     this.spans.clear();
     this.finalizers.length = 0;
+    this.replacementDraws.clear();
     PerfCounters.inc('sceneryPublicationCommits');
     PerfCounters.inc('sceneryPublicationQueuedBytes', bytes);
     PerfCounters.inc('sceneryPublicationStagedAttributeRows', this.stagedRows);

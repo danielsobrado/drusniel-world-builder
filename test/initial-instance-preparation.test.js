@@ -117,3 +117,72 @@ test('first-use settings are independently opt-in and enforce aligned bounded va
   assert.throws(() => resolveRenderEnhancements({ initialInstanceUploadBudget: { maxAllocationsPerFrame: 0 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ initialInstanceUploadBudget: { maxDetachedBytes: 4096 } }), RangeError);
 });
+
+test('zero-count replacement preparation leaves the old LOD visible until the lease is ready', () => {
+  const { preparation, mesh } = fixture();
+  const old = mesh({ resident: true, count: 1 }), replacement = mesh();
+  preparation.markInitialScene();
+  const lease = preparation.acquireInitialInstanceHandoff(replacement);
+  assert.ok(lease);
+  assert.equal(lease.ready(), false);
+  assert.equal(preparation.pending.has(replacement), true);
+  preparation.hidePending();
+  assert.equal(old.visible, true);
+  assert.equal(replacement.visible, false);
+  assert.equal(replacement.count, 0);
+  preparation.pending.delete(replacement);
+  preparation.markPrepared(replacement, replacement.material);
+  assert.equal(lease.ready(), true);
+  lease.release();
+  assert.equal(replacement.count, 0);
+  assert.equal(replacement.visible, false);
+  replacement.count = 1;
+  registerInitialInstanceDraw(replacement);
+  assert.equal(preparation.pending.size, 0);
+  preparation.dispose();
+});
+
+test('handoff cancellation is reference counted and preserves explicit material requests', () => {
+  const { preparation, mesh } = fixture();
+  const replacement = mesh();
+  const first = preparation.acquireInitialInstanceHandoff(replacement);
+  const second = preparation.acquireInitialInstanceHandoff(replacement);
+  first.release();
+  first.release();
+  assert.equal(preparation.pending.has(replacement), true);
+  second.release();
+  assert.equal(preparation.pending.has(replacement), false);
+  const lease = preparation.acquireInitialInstanceHandoff(replacement);
+  preparation.requestMaterial(replacement, {});
+  lease.release();
+  assert.equal(preparation.pending.has(replacement), true);
+  preparation.dispose();
+});
+
+test('handoff does not claim disabled, active, warmed or unsupported meshes', () => {
+  for (const options of [{ enabled: false }, { supported: false }, { optIn: false }]) {
+    const { preparation, mesh } = fixture(options);
+    assert.equal(preparation.acquireInitialInstanceHandoff(mesh()), null);
+    preparation.dispose();
+  }
+  const { preparation, mesh } = fixture();
+  const warmed = mesh({ resident: true });
+  preparation.markInitialScene();
+  assert.equal(preparation.acquireInitialInstanceHandoff(warmed), null);
+  assert.equal(preparation.acquireInitialInstanceHandoff(mesh({ count: 1 })), null);
+  assert.equal(preparation.acquireInitialInstanceHandoff(mesh({ direct: false })), null);
+  preparation.dispose();
+});
+
+test('handoff restarts after a different variant consumes its queued draw', () => {
+  const { preparation, mesh } = fixture();
+  const replacement = mesh();
+  const lease = preparation.acquireInitialInstanceHandoff(replacement);
+  preparation.pending.delete(replacement);
+  preparation.markPrepared(replacement, {});
+  assert.equal(lease.ready(), false);
+  assert.equal(preparation.pending.has(replacement), true);
+  lease.release();
+  assert.equal(preparation.pending.has(replacement), false);
+  preparation.dispose();
+});
