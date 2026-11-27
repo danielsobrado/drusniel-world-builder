@@ -1,6 +1,6 @@
 import { drainJob } from '../world/settlements/SettlementArrayJobs.js';
 import { townBoundsJob } from './TownBoundsJob.js';
-import { estimateTownPublicationBytes, WAIT_FOR_TOWN_PUBLICATION, writeTownInstanceRows } from './TownInstancePublication.js';
+import { estimateTownPublicationBytes, WAIT_FOR_TOWN_PUBLICATION, writeTownInstanceRows, publishTownSelections } from './TownInstancePublication.js';
 import * as THREE from 'three/webgpu';
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 
@@ -97,6 +97,7 @@ export class TownModuleInstances {
    */
   constructor({ module, values, seeds, near, far, interior = false, farReach = Infinity, createMesh, deferred = false }) {
     this.values = values;
+    this.allowSlicedPublication = module !== 'Door_Leaf';
     this.farReach = farReach;
     this.count = values.length / 4;
     this.interior = interior;
@@ -178,10 +179,8 @@ export class TownModuleInstances {
       if (previous.indices[k] !== indices[k] || k >= previous.count) dirty.push(k);
       if (k % 64 === 63) yield;
     }
-    if (budget?.canPublish) {
-      while (!budget.canPublish(estimateTownPublicationBytes(meshes, dirty))) yield WAIT_FOR_TOWN_PUBLICATION;
-    }
-    writeTownInstanceRows(meshes, this.matrices, this.colours, indices, count, dirty);
+    yield* publishTownSelections([{ meshes, indices, count, dirty }], this.matrices, this.colours,
+      budget, undefined, this.allowSlicedPublication);
     for (const slot of dirty) previous.indices[slot] = indices[slot];
     previous.count = count;
     this.shown.set(meshes, previous);
@@ -205,16 +204,11 @@ export class TownModuleInstances {
         if (previous ? i >= previous.count || previous.indices[i] !== indices[i] : indices[i] !== i) dirty.push(i);
         if ((i & 63) === 63) yield;
       }
-      selections.push({ meshes, indices, dirty });
+      selections.push({ meshes, indices, count: indices.length, dirty });
     }
-    if (budget?.canPublish) {
-      while (isCurrent() && !budget.canPublish(selections.reduce((bytes, item) => bytes + estimateTownPublicationBytes(item.meshes, item.dirty), 0))) yield WAIT_FOR_TOWN_PUBLICATION;
-    }
-    if (!isCurrent()) return false;
-    for (const { meshes, indices, dirty } of selections) {
-      writeTownInstanceRows(meshes, this.matrices, this.colours, indices, indices.length, dirty);
-      this.shown.set(meshes, { indices, count: indices.length });
-    }
+    if (!(yield* publishTownSelections(selections, this.matrices, this.colours, budget, isCurrent,
+      this.allowSlicedPublication))) return false;
+    for (const { meshes, indices } of selections) this.shown.set(meshes, { indices, count: indices.length });
     this.decorationTiers = tiers;
     this.setLod(TOWN_LOD_SPLIT);
     return true;

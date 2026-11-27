@@ -33,8 +33,9 @@ function simplerFar(near, far) {
  * are their own instances so a door can swing without touching anything else.
  */
 export class TownMesh {
-  constructor({ assets, palette, layout, climate = {}, deferred = false, decorationSettings = null }) {
+  constructor({ assets, palette, layout, climate = {}, deferred = false, decorationSettings = null, renderer = null, directInstanceUploads = false }) {
     this.layout = layout;
+    this.directInstanceUploads = directInstanceUploads && renderer?.backend?.isWebGPUBackend === true;
     this.group = new THREE.Group();
     this.group.name = `Town ${layout.name || layout.settlementId}`;
     this.doors = null;
@@ -139,6 +140,7 @@ export class TownMesh {
 
   instanced(geometry, material, count, glass) {
     const mesh = new THREE.InstancedMesh(geometry, material, count);
+    if (this.directInstanceUploads) mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
     // Streamed draw preparation hides what it has not reached and only runs on
     // spare frame time: below its target FPS it hid whole towns. Every module
     // shares one kit material, so its first draw compiles once.

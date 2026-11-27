@@ -1,5 +1,7 @@
 import { markAttributeSubrangeUpdated } from '../stylized/attributeUpload.js';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
+import { InstancePublicationPlan } from '../stylized/lod/InstancePublicationPlan.js';
+import { ITERATOR_PENDING } from '../stylized/ResumableIterator.js';
 
 /** Dirty slots are sorted and unique; pending ranges survive until the draw uploads them. */
 export function writeTownInstanceRows(meshes, matrices, colours, placementAt, count, dirty) {
@@ -54,4 +56,55 @@ export function estimateTownPublicationBytes(meshes, dirty) {
     }
   }
   return bytes;
+}
+
+/** Keep resident selections unchanged until all their sliced GPU copies can publish together. */
+export function* publishTownSelections(selections, matrices, colours, budget = null, isCurrent = () => true, allowSlicing = true) {
+  const bytesFor = () => selections.reduce((bytes, item) => bytes + estimateTownPublicationBytes(item.meshes, item.dirty), 0);
+  const uploader = allowSlicing && budget?.slicedInstanceUploads;
+  if (uploader && budget.settings?.enabled && bytesFor() > uploader.settings.sliceBytes) {
+    const publication = new InstancePublicationPlan();
+    for (const { meshes, indices, dirty } of selections) {
+      if (!dirty.length) continue;
+      for (const mesh of meshes) {
+        let units = 0;
+        for (const slot of dirty) {
+          if (!isCurrent()) return false;
+          const index = indices[slot];
+          publication.record(mesh.instanceMatrix, slot, matrices.subarray(index * 16, index * 16 + 16));
+          if (mesh.instanceColor) publication.record(mesh.instanceColor, slot, colours.subarray(index * 3, index * 3 + 3));
+          if (++units % 64 === 0) yield;
+        }
+        const range = { min: dirty[0], max: dirty[dirty.length - 1] };
+        publication.span(mesh.instanceMatrix, range);
+        if (mesh.instanceColor) publication.span(mesh.instanceColor, range);
+      }
+    }
+    const iterator = uploader.stage(publication, () => budget, isCurrent);
+    try {
+      let step = iterator.next();
+      while (!step.done) {
+        if (!isCurrent()) return false;
+        yield step.value === ITERATOR_PENDING ? WAIT_FOR_TOWN_PUBLICATION : step.value;
+        step = iterator.next();
+      }
+      if (step.value) {
+        publication.commit(true);
+        for (const { meshes, count, dirty } of selections) for (const mesh of meshes) {
+          mesh.count = count;
+          PerfCounters.inc('townInstanceRowsCopied', dirty.length);
+        }
+        PerfCounters.inc('townSlicedPublicationCommits');
+        return true;
+      }
+    } finally { iterator.return(); }
+    if (!isCurrent()) return false;
+    PerfCounters.inc('townSlicedPublicationFallbacks');
+  }
+  if (budget?.canPublish) {
+    while (isCurrent() && !budget.canPublish(bytesFor())) yield WAIT_FOR_TOWN_PUBLICATION;
+  }
+  if (!isCurrent()) return false;
+  for (const { meshes, indices, count, dirty } of selections) writeTownInstanceRows(meshes, matrices, colours, indices, count, dirty);
+  return true;
 }

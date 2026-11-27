@@ -227,3 +227,22 @@ test('explicit compute storage shares the geometry slice and excludes indirect o
   dormant = false;
   assert.equal(stage.entries(mesh).length, 0);
 });
+
+test('direct town matrices and ordinary packed instance colors stage with shared ownership', t => {
+  const { stage, backend, managerData } = fixture(t, firstUseSettings);
+  const mesh = directMesh();
+  mesh.instanceColor = new InstancedBufferAttribute(new Float32Array(24).fill(0.75), 3);
+  t.after(() => { mesh.dispose(); mesh.geometry.dispose(); mesh.material.dispose(); });
+  assert.equal(stage.entries(mesh).find(entry => entry.attribute === mesh.instanceColor).type, AttributeType.VERTEX);
+  assert.equal(stagedGeometryAttributes(mesh).some(entry => entry.attribute === mesh.instanceColor), false);
+  let ready = false;
+  for (let i = 0; i < 30 && !ready; i++) {
+    stage.beginFrame();
+    ({ ready } = stage.advance(mesh, 64, () => false));
+  }
+  assert.ok(ready);
+  stage.adopt(mesh);
+  assert.equal(managerData.get(mesh.instanceMatrix), AttributeType.STORAGE);
+  assert.equal(managerData.get(mesh.instanceColor), AttributeType.VERTEX);
+  assert.deepEqual(backend.get(mesh.instanceColor).buffer.bytes, new Uint8Array(mesh.instanceColor.array.buffer));
+});

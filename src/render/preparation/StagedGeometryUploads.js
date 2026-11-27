@@ -27,6 +27,8 @@ export function stagedGeometryAttributes(mesh, includeSmallInstances = false) {
   candidates.push(descriptor(geometry?.index, true));
   if (mesh.instanceMatrix?.isStorageInstancedBufferAttribute) {
     candidates.push(descriptor(mesh.instanceMatrix, false, includeSmallInstances ? WORD_BYTES : MIN_STAGED_BYTES));
+    if (includeSmallInstances && mesh.instanceColor?.isInstancedBufferAttribute
+        && !mesh.instanceColor.isStorageInstancedBufferAttribute) candidates.push(descriptor(mesh.instanceColor, false, WORD_BYTES));
   }
   return [...new Map(candidates.filter(Boolean).map(entry => [entry.attribute, entry])).values()];
 }

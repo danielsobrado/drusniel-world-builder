@@ -59,6 +59,8 @@ export function createTownRuntime({
     sampleSnow,
     getDrawPreparation: () => terrainView.drawPreparation,
     decorationSettings,
+    renderer: terrainView.renderer,
+    directInstanceUploads: regional?.initialInstanceUploadSlicing === true || regional?.slicedInstancePublication === true,
   });
   const doors = new TownDoorController({ streamer, collisionSource: townCollisionSource });
   const atmosphere = new TownInteriorAtmosphere({

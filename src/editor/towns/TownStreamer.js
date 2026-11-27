@@ -39,6 +39,8 @@ export class TownStreamer {
     queryIntervalMs = 700,
     lod = TOWN_LOD_DEFAULTS,
     decorationSettings = null,
+    renderer = null,
+    directInstanceUploads = false,
   }) {
     this.scene = scene;
     this.getGenerator = getGenerator;
@@ -55,6 +57,8 @@ export class TownStreamer {
     this.queryIntervalMs = queryIntervalMs;
     this.lod = lod;
     this.decorationSettings = decorationSettings;
+    this.renderer = renderer;
+    this.directInstanceUploads = directInstanceUploads;
     this.decorationPoints = [];
     this.towns = new Map();
     this.lodCursor = null;
@@ -284,7 +288,8 @@ export class TownStreamer {
       sampleHeight: (x, z) => generator.sampleHeight(x / this.tileSize, -z / this.tileSize),
     }).buildJob();
     const climate = this.climateAt(generator, best.settlement);
-    const mesh = new TownMesh({ assets: this.assets, palette: this.palette, layout, climate, deferred: true, decorationSettings: this.decorationSettings });
+    const mesh = new TownMesh({ assets: this.assets, palette: this.palette, layout, climate, deferred: true,
+      decorationSettings: this.decorationSettings, renderer: this.renderer, directInstanceUploads: this.directInstanceUploads });
     this.buildJob.mesh = mesh;
     yield* mesh.preparation;
     mesh.preparation = null;

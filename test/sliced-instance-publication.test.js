@@ -7,6 +7,7 @@ import { ITERATOR_PENDING, createIteratorBuilder } from '../src/editor/stylized/
 import { InstancePublicationPlan } from '../src/editor/stylized/lod/InstancePublicationPlan.js';
 import { SlicedInstanceUploads, residentInstanceTarget, prepareInstanceCopyPlan } from '../src/editor/stylized/lod/SlicedInstanceUploads.js';
 import { stepViewRebuild } from '../src/editor/stylized/StagedViewRebuild.js';
+import { publishTownSelections, WAIT_FOR_TOWN_PUBLICATION } from '../src/editor/towns/TownInstancePublication.js';
 
 const settings = { sliceBytes: 32, maxStagingBytes: 4096, maxCopyRanges: 128, maxWritesPerSlice: 64 };
 function buffer(size, usage) {
@@ -183,4 +184,66 @@ test('flag is opt-in and staging limits are validated', () => {
   assert.equal(resolveRenderEnhancements({}, '?slicedInstancePublication=1').slicedInstancePublication, true);
   assert.throws(() => resolveRenderEnhancements({ instanceSliceBudget: { sliceBytes: 4097 } }), RangeError);
   assert.throws(() => resolveRenderEnhancements({ instanceSliceBudget: { maxStagingBytes: 4096 } }), RangeError);
+});
+
+function townSelection(f) {
+  const matrix = f.attribute(16, 8), color = f.attribute(3, 8);
+  const mesh = { instanceMatrix: matrix.a, instanceColor: color.a, count: 8 };
+  const matrices = Float32Array.from({ length: 128 }, (_, i) => i + 1);
+  const colours = Float32Array.from({ length: 24 }, (_, i) => i + 1);
+  const selections = [{ meshes: [mesh], indices: [5, 2], count: 2, dirty: [0, 1] }];
+  return { matrix, color, mesh, matrices, colours, selections };
+}
+
+test('town bulk matrices and colors slice on the shared uploader and publish counts atomically', () => {
+  const f = fixture(), { matrix, color, mesh, matrices, colours, selections } = townSelection(f);
+  const task = publishTownSelections(selections, matrices, colours, f.budget);
+  let waits = 0, done = false;
+  for (let i = 0; i < 200; i++) {
+    const step = task.next();
+    if (step.done) { assert.equal(step.value, true); done = true; break; }
+    assert.equal(mesh.count, 8);
+    assert.ok(matrix.a.array.every(v => v === 0) && matrix.gpu.values.every(v => v === 0));
+    assert.ok(color.a.array.every(v => v === 0) && color.gpu.values.every(v => v === 0));
+    if (step.value === WAIT_FOR_TOWN_PUBLICATION) { f.budget.slack.frameId++; waits++; }
+  }
+  assert.ok(done && waits > 0);
+  assert.equal(mesh.count, 2);
+  assert.deepEqual(matrix.a.array.subarray(0, 16), matrices.subarray(80, 96));
+  assert.deepEqual(color.a.array.subarray(0, 3), colours.subarray(15, 18));
+  assert.deepEqual(matrix.a.array, matrix.gpu.values);
+  assert.deepEqual(color.a.array, color.gpu.values);
+  assert.equal(f.submissions.length, 1);
+  assert.equal(matrix.a.updateRanges.length, 0);
+});
+
+test('stale town selection abandons scratch without publishing either tier or GPU data', () => {
+  const f = fixture(), { matrix, mesh, matrices, colours, selections } = townSelection(f);
+  let current = true;
+  const task = publishTownSelections(selections, matrices, colours, f.budget, () => current);
+  for (let i = 0; i < 200; i++) {
+    const step = task.next();
+    assert.equal(step.done, false);
+    if (step.value === WAIT_FOR_TOWN_PUBLICATION) break;
+  }
+  assert.ok(f.scratch.length > 0);
+  current = false;
+  assert.deepEqual(task.next(), { done: true, value: false });
+  assert.equal(mesh.count, 8);
+  assert.ok(matrix.a.array.every(v => v === 0) && matrix.gpu.values.every(v => v === 0));
+  assert.equal(f.submissions.length, 0);
+  assert.equal(f.scratch[0].destroyed, true);
+  assert.equal(f.adapter.owner, null);
+});
+
+test('town fallback retains the original sparse dirty range and animated modules can opt out', () => {
+  for (const enabled of [true, false]) {
+    const f = fixture(), { matrix, mesh, matrices, colours, selections } = townSelection(f);
+    if (enabled) f.attributes.delete(matrix.a);
+    const result = drain(publishTownSelections(selections, matrices, colours, f.budget, () => true, enabled), f.budget);
+    assert.equal(result, true);
+    assert.equal(mesh.count, 2);
+    assert.deepEqual(matrix.a.updateRanges, [{ start: 0, count: 32 }]);
+    assert.equal(f.submissions.length, 0);
+  }
 });

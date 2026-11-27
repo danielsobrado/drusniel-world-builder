@@ -69,20 +69,21 @@ export class SlicedInstanceUploads {
     this.failed = false;
   }
 
-  *stage(publication, getBudget) {
+  *stage(publication, getBudget, isCurrent = () => true) {
     const budget = getBudget();
     const device = this.renderer?.backend?.device;
-    if (this.failed || !device || !budget?.settings?.enabled || publication.bytes() <= this.settings.sliceBytes) return false;
+    if (!isCurrent() || this.failed || !device || !budget?.settings?.enabled || publication.bytes() <= this.settings.sliceBytes) return false;
     const plan = yield* prepareInstanceCopyPlan(this.renderer, publication, this.settings);
+    if (!isCurrent()) return false;
     if (!plan || plan.bytes > (device.limits?.maxBufferSize ?? Infinity)) {
       PerfCounters.inc('scenerySliceFallbacks');
       return false;
     }
     while (this.owner) {
-      if (getBudget() !== budget || this.failed) return false;
+      if (!isCurrent() || getBudget() !== budget || this.failed) return false;
       yield ITERATOR_PENDING;
     }
-    if (getBudget() !== budget || !budget.settings.enabled || this.renderer.backend.device !== device
+    if (!isCurrent() || getBudget() !== budget || !budget.settings.enabled || this.renderer.backend.device !== device
       || !plan.targets.every(target => sameTarget(this.renderer, target))) return false;
     const token = {};
     this.owner = token;
@@ -94,7 +95,7 @@ export class SlicedInstanceUploads {
       for (const page of plan.pages) {
         let offset = 0;
         while (offset < page.elements) {
-          if (getBudget() !== budget || !budget.settings.enabled || this.renderer.backend.device !== device) return false;
+          if (!isCurrent() || getBudget() !== budget || !budget.settings.enabled || this.renderer.backend.device !== device) return false;
           const frame = budget.slack.frameId;
           if (frame !== this.frameId) {
             this.frameId = frame;
@@ -118,7 +119,7 @@ export class SlicedInstanceUploads {
           yield;
         }
       }
-      if (getBudget() !== budget || !budget.settings.enabled || !plan.targets.every(target => sameTarget(this.renderer, target)) || this.renderer.backend.device !== device) {
+      if (!isCurrent() || getBudget() !== budget || !budget.settings.enabled || !plan.targets.every(target => sameTarget(this.renderer, target)) || this.renderer.backend.device !== device) {
         PerfCounters.inc('scenerySliceInvalidated');
         return false;
       }
