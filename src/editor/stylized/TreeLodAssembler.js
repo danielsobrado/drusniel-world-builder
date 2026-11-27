@@ -11,7 +11,7 @@ import {
 } from './forest/TreeAppearance.js';
 import { aggregateCanopyClusters } from './lod/canopyCluster.js';
 import { iterateInstanceWrites, prepareLazyInstancedRenderers, writeInstances } from './lod/StylizedLodRuntime.js';
-import { InstancePublicationPlan, admitSceneryPublication } from './lod/InstancePublicationPlan.js';
+import { InstancePublicationPlan } from './lod/InstancePublicationPlan.js';
 
 const UNTINTED = Object.freeze([1, 1, 1]);
 
@@ -387,10 +387,10 @@ export function* iterateTreeLod({
       if (batch) preparedImpostors.set(index, yield* batch.prepareRecords(impostors[index] ?? [], publication));
       yield;
     }
-    yield* admitSceneryPublication(getPublicationBudget, () => publication.bytes());
-    beforePublish?.(proposed);
-    manifestStore.setActive(active);
-    publication.commit();
+    yield* publication.publish(getPublicationBudget, () => {
+      beforePublish?.(proposed);
+      manifestStore.setActive(active);
+    });
   } else {
     beforePublish?.();
     manifestStore.setActive(active);
