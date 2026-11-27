@@ -9,10 +9,10 @@ const COPY_DST = 8;
 export function residentInstanceTarget(renderer, attribute) {
   const backend = renderer?.backend;
   const attributes = renderer?._attributes;
-  if (!backend?.isWebGPUBackend || !attributes?.has(attribute) || !backend.has(attribute)
-      || backend.getBufferAttribute(attribute) !== attribute || attribute.usage !== StaticDrawUsage
+  if (!backend?.isWebGPUBackend || !attributes?.has?.(attribute) || !backend.has?.(attribute)
+      || backend.getBufferAttribute?.(attribute) !== attribute || attribute.usage !== StaticDrawUsage
       || !(attribute.array instanceof Float32Array) || attribute.isInterleavedBufferAttribute
-      || attribute.updateRanges.length || attributes.get(attribute).version !== attribute.version) return null;
+      || !Array.isArray(attribute.updateRanges) || attribute.updateRanges.length || attributes.get(attribute).version !== attribute.version) return null;
   const data = backend.get(attribute), buffer = data.buffer;
   if (!buffer || data._paddedItemSize !== undefined || buffer.size !== attribute.array.byteLength
       || !(buffer.usage & COPY_DST) || buffer.mapState !== 'unmapped') return null;
@@ -82,7 +82,8 @@ export class SlicedInstanceUploads {
       if (getBudget() !== budget || this.failed) return false;
       yield ITERATOR_PENDING;
     }
-    if (getBudget() !== budget || !plan.targets.every(target => sameTarget(this.renderer, target))) return false;
+    if (getBudget() !== budget || !budget.settings.enabled || this.renderer.backend.device !== device
+      || !plan.targets.every(target => sameTarget(this.renderer, target))) return false;
     const token = {};
     this.owner = token;
     let scratch = null;
@@ -93,7 +94,7 @@ export class SlicedInstanceUploads {
       for (const page of plan.pages) {
         let offset = 0;
         while (offset < page.elements) {
-          if (getBudget() !== budget || this.renderer.backend.device !== device) return false;
+          if (getBudget() !== budget || !budget.settings.enabled || this.renderer.backend.device !== device) return false;
           const frame = budget.slack.frameId;
           if (frame !== this.frameId) {
             this.frameId = frame;
@@ -117,7 +118,7 @@ export class SlicedInstanceUploads {
           yield;
         }
       }
-      if (!plan.targets.every(target => sameTarget(this.renderer, target)) || this.renderer.backend.device !== device) {
+      if (getBudget() !== budget || !budget.settings.enabled || !plan.targets.every(target => sameTarget(this.renderer, target)) || this.renderer.backend.device !== device) {
         PerfCounters.inc('scenerySliceInvalidated');
         return false;
       }
