@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { LocationScene } from './LocationScene.js';
+import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
 const STORAGE_KEY = 'drusniel_instanced_locations';
 const IDLE = 'idle', TRANSITION = 'transition', INSIDE = 'inside';
@@ -15,9 +16,9 @@ const nextPaint = () => new Promise((resolve) => {
  * Three things stay separate: the world (which keeps its state and simply is
  * not drawn while the player is inside), the persisted record (which site is
  * active, the surface anchor to return to, per-site history), and the one
- * prepared `LocationScene`. A transition builds the destination completely
- * behind the loading screen and only then swaps, in one synchronous block — so
- * a failure at any stage leaves the player standing where they were.
+ * prepared `LocationScene`. Entry swaps only after preparation. An opt-in
+ * surface return commits before warmup, so the outgoing scene can retire
+ * without drawing either scene until the restoration stage completes.
  */
 export class LocationRuntime {
   /**
@@ -42,12 +43,13 @@ export class LocationRuntime {
     this.current = null;
     this.anchor = null;
     this.worldRenderer = null;
+    this.surfaceReturnHold = false;
     this.record = this.#read();
   }
 
-  /** True while a location is what should be drawn instead of the world. */
+  /** Keep the world frame suspended until the surface return can draw. */
   get active() {
-    return this.current !== null;
+    return this.current !== null || this.surfaceReturnHold;
   }
 
   get activeSiteId() {
@@ -174,7 +176,7 @@ export class LocationRuntime {
 
   /** Leaves the active location for the surface anchor recorded on the way in. */
   async exit() {
-    if (this.state !== INSIDE) return false;
+    if (this.disposed || this.state !== INSIDE) return false;
     this.state = TRANSITION;
     const player = this.playerController, anchor = this.anchor, leaving = this.current;
     player.cutBlocked = true;
@@ -190,19 +192,26 @@ export class LocationRuntime {
     try {
       session.start('release');
       await nextPaint();
+      preparation.signal.throwIfAborted();
+      const early = this.surfaceResidency?.enabled
+        && this.surfaceResidency.settings.surfaceEarlyLocationRetirementEnabled
+        && this.surfaceResidency.evicted.size > 0;
+      if (early) {
+        // Commit the return before disposing the outgoing scene. Neither scene draws during restoration.
+        this.surfaceReturnHold = true;
+        const before = this.renderer.info?.memory?.total;
+        this.#commitSurfaceReturn(anchor, leaving);
+        PerfCounters.inc('locationSurface.earlyLocationRetirements');
+        await nextPaint();
+        preparation.signal.throwIfAborted();
+        const after = this.renderer.info?.memory?.total;
+        PerfCounters.set('locationSurface.earlyRetirementAccountedBytes',
+          Number.isFinite(before) && Number.isFinite(after) ? Math.max(0, before - after) : 0);
+      }
       await this.surfaceResidency?.restore(preparation.signal);
       preparation.signal.throwIfAborted();
-      // Swap back to the world before anything can fail: its frame loop must be running for the cut.
-      this.current = null;
-      this.anchor = null;
-      player.groundOverride = null;
-      delete document.body.dataset.location;
-      this.#returnRenderer();
-      const render = this.floatingOrigin.toRender(anchor.x, anchor.z);
-      player.placeAt({ x: render.x, z: render.z, y: player.getGroundHeight(render.x, render.z), yaw: anchor.yaw, pitch: anchor.pitch });
-      this.record.active = null;
-      this.#write();
-      leaving.dispose();
+      if (!early) this.#commitSurfaceReturn(anchor, leaving);
+      this.surfaceReturnHold = false;
       session.start('return');
       if (anchor.mode === this.walkMode) {
         await this.cameraCutCoordinator.cut({ x: anchor.x, z: anchor.z, yaw: anchor.yaw, pitch: anchor.pitch, mode: 'player' });
@@ -219,12 +228,30 @@ export class LocationRuntime {
       session.fail(error);
     } finally {
       if (this.preparation === preparation) this.preparation = null;
+      this.surfaceReturnHold = false;
       player.cutBlocked = false;
       this.state = this.current ? INSIDE : IDLE;
     }
     if (failed) await new Promise((resolve) => { setTimeout(resolve, FAILURE_NOTICE_MS); });
     session.finish();
     return !failed;
+  }
+
+  #commitSurfaceReturn(anchor, leaving) {
+    const player = this.playerController;
+    this.current = null;
+    this.anchor = null;
+    player.groundOverride = null;
+    delete document.body.dataset.location;
+    this.record.active = null;
+    this.#write();
+    try {
+      this.#returnRenderer();
+      const render = this.floatingOrigin.toRender(anchor.x, anchor.z);
+      player.placeAt({ x: render.x, z: render.z, y: player.getGroundHeight(render.x, render.z), yaw: anchor.yaw, pitch: anchor.pitch });
+    } finally {
+      leaving.dispose();
+    }
   }
 
   /** The world's post chain owns tone mapping; a location with its own post chain does too, otherwise direct ACES. */
@@ -244,6 +271,7 @@ export class LocationRuntime {
 
   /** One frame of the active location, in place of the world's. */
   frame(timestamp) {
+    if (this.surfaceReturnHold || !this.current) return;
     const view = this.viewModeController;
     view.update(timestamp);
     const camera = view.camera;
@@ -298,6 +326,7 @@ export class LocationRuntime {
   dispose() {
     this.disposed = true;
     this.preparation?.abort();
+    this.surfaceReturnHold = false;
     this.surfaceResidency?.dispose();
     this.current?.dispose();
     this.current = null;
