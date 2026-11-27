@@ -3,6 +3,7 @@ import {
   clamp,
   dot,
   float,
+  min,
   mix,
   normalize,
   positionWorld,
@@ -175,10 +176,19 @@ export function applyWorldSurfaceContact({
   // the ground it glowed over a darkened floor. Inside the contact band its fill
   // becomes the floor's own, so the join is lit as one surface. This follows the band,
   // not the colour mask: a boulder in snow keeps its stone but not a brighter foot.
+  //
+  // Under a canopy no object's fill may be brighter than the floor's around it: a
+  // family's fill is tuned for open ground (stone's is 3.5x bark's, so a backlit boulder
+  // is not a black lump), and under the crowns it kept a woodland boulder lit ~3x its
+  // floor (2026-11-27 ground-continuity QA). Weighted by canopy, the fill is capped at
+  // what the floor would take with this albedo; a fill already below it is untouched.
   const lightCoverage = contactMask.mul(validity).clamp(0, 1);
   const canopy = wsc.canopy ?? float(0);
+  const underCanopy = canopy.mul(validity).clamp(0, 1);
   const groundLight = (emission, albedo = outColor) => {
-    const lit = mix(emission, groundFill(albedo, canopy), lightCoverage);
+    const ground = groundFill(albedo, canopy);
+    const shaded = mix(emission, min(emission, ground), underCanopy);
+    const lit = mix(shaded, ground, lightCoverage);
     groundLitNodes.add(lit);
     return lit;
   };

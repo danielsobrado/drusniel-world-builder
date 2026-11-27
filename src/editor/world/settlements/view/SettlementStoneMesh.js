@@ -24,6 +24,7 @@ export function createSettlementStoneParts(entry) {
   const { archetype } = SETTLEMENT_STONES[entry.kind];
   const { mesh } = generateStone({ archetype, seed: stoneSeed(entry.kind, entry.variant) });
   const palette = STONE_PALETTES[entry.style.style] ?? STONE_PALETTES.granite;
+  const linearBase = new THREE.Color().setRGB(...palette.base.map(v => v / 255), THREE.SRGBColorSpace).toArray();
   const count = mesh.positions.length / 3;
   const colors = new Float32Array(count * 3);
   const uvs = new Float32Array(count * 2);
@@ -34,7 +35,10 @@ export function createSettlementStoneParts(entry) {
     const shade = (0.46 + mesh.tones[vertex] * 0.42) * (1 - mesh.cavities[vertex] * 1.6);
     const moss = Math.min(1, mesh.mosses[vertex] * 0.9);
     for (let channel = 0; channel < 3; channel += 1) {
-      const stone = palette.base[channel] / 255 * shade;
+      // The palette is sRGB. A loose stone stands among the scattered boulders, not in
+      // a wall, so it takes the natural rock's linear albedo (granite ~0.25): read as
+      // linear the byte drew field stones near-white beside them (2026-11-27 QA).
+      const stone = linearBase[channel] * shade;
       colors[offset + channel] = Math.max(0, stone + (MOSS[channel] - stone) * moss);
     }
     projectedUvAt(uvs, vertex * 2, mesh.positions[offset], mesh.positions[offset + 1], mesh.positions[offset + 2],

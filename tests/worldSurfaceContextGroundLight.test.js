@@ -37,11 +37,24 @@ test('an object foot inside its contact band takes exactly the ground fill; abov
   const ground = evaluate(groundFillLight(albedo, floor.canopy));
   // 10 cm under the ground line, below the band's start: the whole of the floor's light.
   assert.ok(close(evaluate(at(9.9).groundLight(own, albedo)), ground), 'at the foot: the floor\'s light');
-  assert.ok(close(evaluate(at(12).groundLight(own, albedo)), evaluate(own)), 'above the band: its own');
+  assert.ok(close(evaluate(at(12, { ...floor, canopy: float(0) }).groundLight(own, albedo)), evaluate(own)),
+    'above the band, in the open: its own');
   assert.ok(close(evaluate(at(9.9, { ...floor, validity: float(0) }).groundLight(own, albedo)), evaluate(own)),
     'outside the WSC window: its own');
   assert.ok(close(evaluate(at(9.9, floor, { mask: float(0) }).groundLight(own, albedo)), ground),
     'a colour mask (snow-country rock, no soil collar) does not exempt the foot from the ground light');
+});
+
+test('under a canopy no object is lit by fill brighter than the floor; in the open it keeps its own', () => {
+  const above = (canopy) => applyWorldSurfaceContact({
+    surface: { color: albedo }, wsc: { ...floor, canopy: float(canopy) }, profile: 'rock', worldY: float(12),
+  });
+  const bright = vec3(2, 2, 2);
+  const dim = vec3(0.001, 0.001, 0.001);
+  assert.ok(close(evaluate(above(1).groundLight(bright, albedo)), evaluate(groundFillLight(albedo, float(1)))),
+    'full canopy: a bright fill is capped at the floor fill');
+  assert.ok(close(evaluate(above(1).groundLight(dim, albedo)), evaluate(dim)), 'a fill below the floor fill is untouched');
+  assert.ok(close(evaluate(above(0).groundLight(bright, albedo)), evaluate(bright)), 'open ground: its own fill');
 });
 
 test('every family that meets the ground through the contact lights its foot as the ground', () => {

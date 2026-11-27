@@ -20,8 +20,6 @@ const WET_LEAF_ROUGHNESS = 0.34;
 
 /** Share of the sky fill a plant's foot keeps (was 0.42: on top of the AO it drew a black base). */
 export const UNDERSTORY_FOOT_FILL = 0.7;
-/** Share of a crown's interior visibility that also dims its albedo, standing in for self-shadow. */
-export const CROWN_SELF_SHADE = 0.5;
 
 /**
  * Foot darkening and canopy shade for a plant, as the grass takes them
@@ -157,6 +155,8 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
   const baseAo = understoryFootShade(baseRamp, groundContact);
   // Shrubs cast no shadow on themselves: inner and underside leaves lose part of
   // the sun here and their sky light below, or the crown reads as one flat sheet.
+  // Once per light path (sun visibility, AO, fill), never in the albedo: dimming the
+  // albedo too squared it, and shrubs on open ground read as black holes (2026-11-27).
   const interiorFloor = crownInteriorFloor(spanY);
   const interior = bounds && !blossom && interiorFloor < 1 ? crownInteriorVisibilityNode(bounds, interiorFloor) : float(1);
   const contact = !blossom
@@ -171,7 +171,7 @@ export function applyUnderstoryPalette(material, config, tileId = null, role = '
     : null;
   const groundedColor = blossom
     ? color.mul(mix(float(0.82), float(1.0), baseRamp))
-    : contact.color.mul(baseAo).mul(mix(float(1), interior, CROWN_SELF_SHADE));
+    : contact.color.mul(baseAo);
   // Cutout shrub/understory cards get GPU edge-on grazing fade + soft horizon-air fringe.
   const edge = softEdges && material.map && !blossom
     ? understoryEdgeNodes(authoredTexture(material.map).a, {

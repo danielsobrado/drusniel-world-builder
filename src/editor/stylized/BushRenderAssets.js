@@ -17,7 +17,6 @@ import {
   authoredFoliageColor,
   biomeUnderstoryColor,
   cloneAuthoredNodeMaterial,
-  CROWN_SELF_SHADE,
   seatPlantNormal,
   UNDERSTORY_FOOT_FILL,
   understoryFootShade,
@@ -260,10 +259,10 @@ export function createBushProxyMaterial(sourceMaterial, {
     fallbackHeight: localHeightM,
     applyAo: false,
   });
-  // The same crown interior shade as the near bush, so the LOD swap keeps its depth.
+  // The same crown interior shade as the near bush, so the LOD swap keeps its depth:
+  // in the light (AO, sun visibility, fill), not in the albedo.
   const interior = bounds ? crownInteriorVisibilityNode(bounds) : float(1);
-  const groundedProxy = contact.color.mul(baseAo)
-    .mul(mix(float(1), interior, CROWN_SELF_SHADE));
+  const groundedProxy = contact.color.mul(baseAo);
   material.colorNode = groundedProxy;
   material.emissiveNode = contact.groundLight(understoryShadeEmission(groundedProxy)
     .mul(mix(float(UNDERSTORY_FOOT_FILL), float(1.0), baseRamp)).mul(interior), groundedProxy);
