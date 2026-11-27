@@ -53,7 +53,7 @@ export class StagedGeometryUploads {
 
   needsInitialInstanceUpload(mesh) {
     if (!this.supported || !isDirectInstanceMesh(mesh)) return false;
-    return this.entries(mesh).some(({ attribute }) => !this.renderer.backend.get(attribute).buffer);
+    return !this.renderer.backend.get(mesh.instanceMatrix).buffer;
   }
 
   drop(jobs, attribute, destroy = true) {
@@ -93,11 +93,13 @@ export class StagedGeometryUploads {
       if (this.settings && (manager.has(attribute) || (backend.getBufferAttribute && backend.getBufferAttribute(attribute) !== attribute))) {
         return this.fallback(mesh, bytes, 'layout');
       }
-      if (job && (job.version !== attribute.version || job.array !== attribute.array)) {
-        if (this.settings && job.array === attribute.array && job.size === Math.ceil(attribute.array.byteLength / WORD_BYTES) * WORD_BYTES) {
-          if (job.restarts >= this.settings.maxRestarts) return this.fallback(mesh, bytes, 'mutation');
+      if (job && (job.version !== attribute.version || job.array !== attribute.array || job.type !== entry.type)) {
+        if (this.settings) {
+          if (job.restarts >= this.settings.maxRestarts || job.type !== entry.type
+              || job.size !== Math.ceil(attribute.array.byteLength / WORD_BYTES) * WORD_BYTES) return this.fallback(mesh, bytes, 'mutation');
           job.restarts++;
           job.version = attribute.version;
+          job.array = attribute.array;
           job.offset = 0;
           PerfCounters.inc('initialInstanceRestarts');
         } else {
