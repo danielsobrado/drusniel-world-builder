@@ -161,17 +161,18 @@ export class ScatterInstanceRows {
     const publication = new InstancePublicationPlan();
     const nearCount = yield* iterateInstanceWrites(nearRenderers, near, anchor, rebased || forceFull ? null : nearRows, publication);
     const proxyCount = yield* iterateInstanceWrites(proxyRenderers, proxy, anchor, rebased || forceFull ? null : proxyRows, publication);
-    return {
-      bytes: () => publication.bytes(),
-      commit: () => {
-        publication.commit();
+    const finish = () => {
         this.anchorX = anchor.x;
         this.anchorZ = anchor.z;
         this.storage = nextStorage;
         this.chunks = job.chunks;
         PerfCounters.inc(`${this.name}RowsChanged`, changedRows);
         return { near: nearCount, proxy: proxyCount, manifestsChanged: job.manifestsChanged };
-      },
+    };
+    return {
+      bytes: () => publication.bytes(),
+      commit: () => { publication.commit(); return finish(); },
+      *publish(getBudget) { yield* publication.publish(getBudget); return finish(); },
     };
   }
 
