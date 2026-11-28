@@ -159,6 +159,7 @@ export class FrameProfiler {
       droppedFrameCount: this.droppedFrameCount,
       frameBufferComplete: this.droppedFrameCount === 0,
       durationMs,
+      durationBasis: 'sum-of-retained-positive-frame-deltas',
       avgFps: durationMs > 0 ? (measured.length * 1000) / durationMs : null,
       dt: {
         minMs: dts[0] ?? null,

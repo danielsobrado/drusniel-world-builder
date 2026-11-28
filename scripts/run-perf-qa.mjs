@@ -471,8 +471,8 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
     report.capture.focus = await captureFocus();
     report.capture.environment = environment;
     fs.writeFileSync(${JSON.stringify(outPath.replace(/\\/g, '/'))}, JSON.stringify(report, null, 2) + '\\n');
-    const { perfPreparationFailures } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-preparation-gates.mjs')).href)});
-    for (const failure of perfPreparationFailures(report, ${hasFlag('settle')})) {
+    const { perfPreparationFailures, perfMeasurementFailures } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-preparation-gates.mjs')).href)});
+    for (const failure of [...perfPreparationFailures(report, ${hasFlag('settle')}), ...perfMeasurementFailures(report)]) {
       console.error('Perf QA invalid: ' + failure + '; inspect the saved report.');
       process.exitCode = 1;
     }

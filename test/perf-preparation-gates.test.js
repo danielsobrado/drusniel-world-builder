@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { perfPreparationFailures } from '../scripts/lib/perf-preparation-gates.mjs';
+import { perfMeasurementFailures, perfPreparationFailures } from '../scripts/lib/perf-preparation-gates.mjs';
 
 test('direct performance runner rejects initial and revisit settling timeouts', () => {
   const report = { scenario: { settle: { settled: false } },
@@ -17,4 +17,15 @@ test('direct performance runner rejects initial and revisit settling timeouts', 
 test('an explicitly requested settle cannot pass with missing evidence', () => {
   assert.equal(perfPreparationFailures({}, true).length, 1);
   assert.deepEqual(perfPreparationFailures({ scenario: { settle: null } }), []);
+});
+
+
+test('measurement gate rejects incomplete frame buffers and active unready collision', () => {
+  const report = { summary: { frameCount: 200, frameBufferComplete: true },
+    collision: { enabled: true, gate: { readinessPassed: true, timingPassed: false } } };
+  assert.deepEqual(perfMeasurementFailures(report), []);
+  report.revisit = { summary: { frameCount: 0, frameBufferComplete: false },
+    collision: { enabled: true, gate: { readinessPassed: false } } };
+  assert.deepEqual(perfMeasurementFailures(report), ['revisit: missing or incomplete frame history', 'revisit: collision readiness failed']);
+  assert.equal(perfMeasurementFailures({}).length, 1);
 });

@@ -178,3 +178,17 @@ test('buildPerfReport includes scenario and hitch frames', () => {
   assert.equal(report.hitchFrames[0].streaming.focusChunk, '0:0');
   assert.equal(report.config.player.walkSpeed, 9);
 });
+
+
+test('FrameProfiler summary uses the entire retained interval even after truncation', () => {
+  const profiler = new FrameProfiler({ maxFrames: 2 });
+  profiler.start();
+  for (const timestamp of [0, 16, 60, 80]) {
+    profiler.beginFrame(timestamp);
+    profiler.endFrame();
+  }
+  const summary = profiler.summarize();
+  assert.equal(summary.durationMs, 64);
+  assert.equal(summary.avgFps, 2000 / 64);
+  assert.equal(summary.frameBufferComplete, false);
+});

@@ -1,14 +1,11 @@
 /** Runs in the page. Compare object identities without keeping disposed GPU resources alive. */
 export function observeLodRevisitResources() {
   const phases = new Set(['first-visit', 'cold-region', 'revisit-hold']);
-  const snapshots = window.__lodRevisitResources = [];
+  const snapshots = window.__lodRevisitResources = [...phases].map(phase => ({ phase, unavailable: 'checkpoint not observed' }));
   let initialKeys, initialManifests, initialGpuResources, initialRenderer;
   const observe = () => {
     const qa = window.__perfQa;
-    if (qa?.status === 'done') {
-      for (const phase of phases) snapshots.push({ phase, unavailable: 'checkpoint not observed' });
-      return;
-    }
+    if (qa?.status === 'done') return;
     const { phase, elapsedSeconds } = qa?.live ?? {};
     if (qa?.recording && phases.has(phase) && elapsedSeconds >= qa.config.durationSeconds / 5) {
       phases.delete(phase);
@@ -42,7 +39,7 @@ export function observeLodRevisitResources() {
           else if (!memory.has(resource)) unaccounted++;
         }
       }
-      snapshots.push({
+      snapshots[snapshots.findIndex(snapshot => snapshot.phase === phase)] = {
         phase, elapsedSeconds, origin: terrainView.floatingOrigin.getState(),
         visibleTerrainKeys: keys.size,
         firstVisitTerrainKeysAbsent: initialKeys ? [...initialKeys].filter(key => !keys.has(key)).length : null,
@@ -53,7 +50,7 @@ export function observeLodRevisitResources() {
         sameRenderer,
         firstVisitGpuResourcesUnaccounted: unaccounted,
         firstVisitGpuResourcesCollected: collected,
-      });
+      };
     }
     if (phases.size) requestAnimationFrame(observe);
   };
