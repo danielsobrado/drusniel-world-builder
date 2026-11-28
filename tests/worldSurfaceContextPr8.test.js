@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import yaml from 'js-yaml';
 import * as THREE from 'three/webgpu';
-import { float } from 'three/tsl';
+import { float, vec3 } from 'three/tsl';
+import { rainOnObject, wetCoat } from '../src/editor/stylized/surfaceCoatings/WetCoat.js';
+import { surfaceWetnessUniform } from '../src/editor/weather/surfaceWetness.js';
+import { evaluateShaderNode as evaluate } from '../test/helpers/evaluateShaderNode.js';
 import { coatCoverageOf, inheritCoatCoverage, publishCoatCoverage } from '../src/editor/stylized/surfaceCoatings/CoatCoverage.js';
 import { SURFACE_COATING_DEFAULTS, resolveSurfaceCoatings } from '../src/editor/stylized/surfaceCoatings/SurfaceCoatingConfig.js';
 import { applyBarkWeathering, resolveBarkWeathering } from '../src/editor/stylized/barkWeathering.js';
@@ -52,7 +55,7 @@ test('PR 8 every coated surface publishes the coats it lays', () => {
     biomeLook: true,
     ground: { groundY: 0.1, height: 1.2, centre: [0, 0.5, 0] },
   });
-  assert.ok(coatCoverageOf(rock).moss && coatCoverageOf(rock).snow, 'rock: moss and snow');
+  assert.ok(coatCoverageOf(rock).moss && coatCoverageOf(rock).snow && coatCoverageOf(rock).wet, 'rock: moss, snow and rain');
 
   const bark = new THREE.MeshStandardNodeMaterial();
   applyBarkWeathering(bark, { settings: resolveBarkWeathering(surface, { snow: band }) });
@@ -80,4 +83,45 @@ test('PR 8 one moss palette, validated, and D22 reads real coverage', () => {
     assert.doesNotMatch(source, /#5e7f2f|#8fae4b|MOSS_(DEEP|DARK|LIGHT)\b/, file);
   }
   assert.equal(WSC_DIAGNOSTIC_MODES.D22.supported, true);
+});
+
+test('PR 8 the wet coat: one rule for every surface, floored, glossier only, optional film', () => {
+  const coats = resolveSurfaceCoatings({}, { canopyShelter: 0.5 });
+  assert.equal(coats.wet.canopyShelter, 0.5, 'objects share the canopy shelter of the terrain');
+  const base = { color: vec3(0.5, 0.4, 0.3), roughness: float(0.9) };
+  const at = (amount, extra = {}, settings = coats) => wetCoat(base, { amount: float(amount), darkening: 0.3, roughness: 0.3, ...extra }, settings);
+  assert.deepEqual(evaluate(at(0).color), evaluate(base.color), 'dry: untouched');
+  const soaked = at(1);
+  assert.ok(Math.abs(evaluate(soaked.color)[0] - 0.35) < 1e-6, 'darkens by porosity');
+  assert.ok(Math.abs(evaluate(soaked.roughness) - 0.3) < 1e-6, 'takes the film roughness');
+  const floored = at(1, { soak: float(0.6) });
+  assert.ok(Math.abs(evaluate(floored.color)[0] - 0.5 * coats.wet.albedoFloor) < 1e-6, 'never below the floor');
+  const glossy = wetCoat({ color: base.color, roughness: float(0.1) }, { amount: float(1), darkening: 0.5, roughness: 0.3 }, coats);
+  assert.ok(Math.abs(evaluate(glossy.roughness) - 0.1) < 1e-6, 'roughness only falls');
+  assert.equal(at(1, { roughness: null }).roughness, base.roughness, 'no film: roughness left to a later pass');
+  const off = { ...coats, wet: { ...coats.wet, enabled: false } };
+  assert.equal(at(1, {}, off), base, 'disabled: the surface as it was');
+});
+
+test('PR 8 rain reaches an object as it reaches the floor under the same canopy', () => {
+  const coats = resolveSurfaceCoatings({}, { canopyShelter: 0.7 });
+  const previous = surfaceWetnessUniform.value;
+  surfaceWetnessUniform.value = 1;
+  try {
+    assert.ok(Math.abs(evaluate(rainOnObject(float(0), coats)) - 1) < 1e-6, 'in the open: all the rain');
+    assert.ok(Math.abs(evaluate(rainOnObject(float(1), coats)) - 0.3) < 1e-6, 'under a closed canopy: what the floor gets');
+  } finally {
+    surfaceWetnessUniform.value = previous;
+  }
+});
+
+test('PR 8 no surface keeps a wet model of its own', () => {
+  // Each still decides where it is wet; how wet looks is WetCoat.js.
+  for (const file of ['editor/stylized/rockWeathering.js', 'editor/stylized/barkWeathering.js',
+    'editor/stylized/forest/forestDebrisPrototypes.js', 'editor/stylized/lod/StylizedProxyGeometry.js',
+    'editor/stylized/RainWetnessShading.js', 'render/materials/townWetness.js']) {
+    const source = readFileSync(new URL(`../src/${file}`, import.meta.url), 'utf8');
+    assert.match(source, /wetCoat\(/, `${file} soaks through the wet coat`);
+    assert.doesNotMatch(source, /surfaceWetnessUniform\.mul/, `${file}: objects take rain through rainOnObject`);
+  }
 });

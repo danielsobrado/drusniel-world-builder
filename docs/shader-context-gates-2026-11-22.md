@@ -39,7 +39,7 @@ byte-identical shaders, wherever that is proven.
 | `weatherEffects.snowField.enabled`, `?snowField` | storm-snow readers sample the field (terrain, rocks, crags, trees, meadow) | on | [storm-snow-field](plans/storm-snow-field-2026-11-21.md) §4 |
 | `weatherEffects.sandField.enabled`, `?sandField` | terrain sand drift; sandstorm dust lee fetch; field alpha | on | [desert-sand-field](plans/desert-sand-field-2026-11-22.md) §3 |
 | `stylizedSurface.wetness.field`, `?wetnessField` | ground wetness readers | on | [wetness-field](plans/wetness-field-2026-11-22.md) |
-| `surfaceCoatings` (`registerSurfaceCoatings`) | snow and moss coats on rocks, towns, trunks | per config | [surface coatings](surface-coatings-2026-11-27.md) |
+| `surfaceCoatings` (`registerSurfaceCoatings`) | snow and moss coats on rocks, towns, trunks | per config | [surface coatings](surface-coatings-2026-11-28.md) |
 | `render-enhancements.yaml`: `snowRelief`, `crownShadows`, `shadowCascades`, `waterReflections`, `detailVisibility`, `oceanFft` (each with a `?` override; `?enhancements=high`) | terrain snow relief, crown shadow casters, cascades, reflection probes, the offshore FFT | see file | not hashed |
 | `water-visual.yaml` `qualityTier` → `resolveWaterQualityFeatures` | water depth optics, foam, refraction, intersection foam | high | not hashed |
 | Post-processing preset (off, low, balanced, high, ultra) | GTAO, bloom, DOF, grain, vignette in the graph | per preset | [post-processing](rendering/post-processing.md) |

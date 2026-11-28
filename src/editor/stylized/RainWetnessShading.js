@@ -1,14 +1,16 @@
-import { float, min, mix, oneMinus, positionWorld } from 'three/tsl';
+import { oneMinus, positionWorld } from 'three/tsl';
 
 import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
 import { sampleWetnessField, wetnessFieldEnabled } from '../weather/wetness/wetnessField.js';
+import { SURFACE_COATING_DEFAULTS } from './surfaceCoatings/SurfaceCoatingConfig.js';
+import { wetCoat } from './surfaceCoatings/WetCoat.js';
 
 /**
  * Share of its albedo soaked ground keeps, rain film and standing water
- * together. Stacked on the bog's peat and the shore's damp band, the uncapped
- * product took wetland and wet sand to near black.
+ * together (the wet coat's floor). Stacked on the bog's peat and the shore's damp
+ * band, the uncapped product took wetland and wet sand to near black.
  */
-export const WET_ALBEDO_FLOOR = 0.6;
+export const WET_ALBEDO_FLOOR = SURFACE_COATING_DEFAULTS.wet.albedoFloor;
 /** Extra darkening of standing water over the rain film, before the floor. */
 const PUDDLE_DARKENING = 0.25;
 
@@ -34,12 +36,12 @@ export function createRainWetnessShading({ snow, canopy, config }) {
     /** 0..1 open to the rain: not snowed over, not under a canopy. */
     exposure,
     /** @param {Node} [puddle] 0..1 standing water, which darkens a little further */
-    apply(color, roughness, puddle = float(0)) {
-      const albedo = float(1).sub(wet.mul(config.darkening)).sub(puddle.mul(PUDDLE_DARKENING)).max(WET_ALBEDO_FLOOR);
-      return {
-        color: color.mul(albedo),
-        roughness: min(roughness, mix(roughness, float(config.wetRoughness), wet)),
-      };
+    apply(color, roughness, puddle = null) {
+      // The shared wet coat (WetCoat.js), as on towns, bark, deadwood and rocks.
+      return wetCoat({ color, roughness }, {
+        amount: wet, darkening: config.darkening, roughness: config.wetRoughness,
+        soak: puddle ? puddle.mul(PUDDLE_DARKENING) : null,
+      });
     },
   };
 }

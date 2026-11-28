@@ -93,7 +93,7 @@ export function loadEditorConfig() {
   config.stylizedSurface.wetness = resolveSurfaceWetnessConfig(config.stylizedSurface.wetness, runtimeSearch());
   registerWetnessField(config.stylizedSurface.wetness.field);
   config.stylizedSurface.snowCover = resolveSnowCoverConfig(config.stylizedSurface.snowCover);
-  config.stylizedSurface.surfaceCoatings = resolveSurfaceCoatings(config.stylizedSurface.surfaceCoatings);
+  config.stylizedSurface.surfaceCoatings = resolveSurfaceCoatings(config.stylizedSurface.surfaceCoatings, config.stylizedSurface.wetness);
   registerSurfaceCoatings(config.stylizedSurface.surfaceCoatings);
   config.stylizedSurface.worldSurfaceContact = Object.freeze({
     contact: resolveWorldSurfaceContactConfig(structuredClone(wscContactConfigSource)),

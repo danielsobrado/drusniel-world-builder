@@ -1,13 +1,13 @@
-# Surface coatings: snow and moss
+# Surface coatings: snow, moss and wet
 
-Snow and moss are drawn as **coats**: a second material with its own albedo,
+Snow, moss and rain are drawn as **coats**: a second material with its own albedo,
 normal and roughness, laid over the surface beneath by a coverage mask. They are
 not tints. Three responsibilities stay apart:
 
 | Responsibility | Decided by | Where |
 | --- | --- | --- |
 | Coverage — where a coat lies | Each surface's existing masks | `snowDeposition()`, the snowline, storm snow, `instanceBiomeLook`, moss masks |
-| Appearance — what a coat looks like | The coat | `src/editor/stylized/surfaceCoatings/SnowCoat.js`, `MossCoat.js` |
+| Appearance — what a coat looks like | The coat | `src/editor/stylized/surfaceCoatings/SnowCoat.js`, `MossCoat.js`, `WetCoat.js` |
 | Composition — laying it over the base | One pure function | `src/render/materials/surfaceLayers/PbrCoatBlend.js` |
 
 Do not add a second snow or moss coverage system. To change where a coat lies,
@@ -65,16 +65,41 @@ potential grows nothing, so `rock.moss: 0` biomes stay bare. Take orientation
 from `normalWorldGeometry`, not the shaded normal, or normal-map bumps speckle
 the edge.
 
+## Wet coat (`WetCoat.js`)
+
+`wetCoat(base, { amount, darkening, roughness, soak, flatNormal })` is what rain
+does to any surface: albedo darkens by the surface's porosity (`darkening`) but
+never below `wet.albedoFloor` of itself, roughness only falls toward the film's,
+and with `flatNormal` the film levels fine relief by `wet.flatten`. Leave
+`roughness` out where a later pass lays the film (bark: `TreeWetSurface.js`).
+Terrain (`RainWetnessShading.js`), towns and paving (`townWetness.js`), trunks,
+proxy trunks, deadwood and rocks (rain, waterline and coastal splash) all soak
+through it; `tests/worldSurfaceContextPr8.test.js` fails if a surface grows a wet
+model of its own.
+
+`rainOnObject(canopy)` is the rain reaching an object: the world's wetness less
+what the canopy over it catches, by the terrain's own `canopyShelter`. Pass the
+contact's `canopy` (`applyWorldSurfaceContact`), which is the WSC canopy the
+floor under it uses, so a trunk in a closed wood is as dry as its floor. The
+terrain keeps its own sample (the wetness field, where it is on).
+
+**Dust and mud.** Mud at an object's foot is the contact's soil collar
+(`applyWorldSurfaceContact`), already shared by every family. Dust settling on a
+stone's top takes the bare ground's colour round it from the WSC (sand in a
+desert, grit on scree) and the neutral dust where that ground is grassed. Town
+ledge dust stays the town family's (`townWeathering.js`): a wall's upper courses
+are outside the WSC band the kit samples.
+
 ## Where the coats are applied
 
 | Surface | File | Order |
 | --- | --- | --- |
-| Authored rocks | `stylized/rockWeathering.js` | stone → moss coat → dust/soil/water → snow coat |
+| Authored rocks | `stylized/rockWeathering.js` | stone → moss coat → dust → ground contact → waterline/splash/rain wet coat → snow coat |
 | Alpine crags | `stylized/alpine/AlpineRockMaterial.js` | cold stone → snow coat |
 | Workshop houses in settlements | `render/materials/townGrade.js`, then `world/settlements/view/SettlementSnow.js` | graded surface → moss coat → wet film → snow coat |
 | Medieval town kit | `towns/TownKitMaterial.js` | atlas → weathering → moss coat → wet film → snow coat |
-| Tree trunks | `stylized/barkWeathering.js` | bark → moss coat → soil/wet → snow coat |
-| Fallen logs, stumps, deadwood flora | `stylized/forest/forestDebrisPrototypes.js` (`deadwoodMaterial`) | graded wood → moss coat → ground contact → snow coat → wet |
+| Tree trunks | `stylized/barkWeathering.js` | bark → moss coat → ground contact → wet coat (albedo; film in `TreeWetSurface.js`) → snow coat |
+| Fallen logs, stumps, deadwood flora | `stylized/forest/forestDebrisPrototypes.js` (`deadwoodMaterial`) | graded wood → moss coat → ground contact → snow coat → wet coat (not on the snow) |
 
 `weatherTownLayers` in `render/materials/townWeathering.js` returns the
 weathered colour **without** moss, plus the moss layer
@@ -106,7 +131,10 @@ only. It is resolved and validated by `resolveSurfaceCoatings` when
 
 | Key | Meaning |
 | --- | --- |
-| `snow.enabled`, `moss.enabled` | `false` compiles that coat's surfaces as they were before coats |
+| `snow.enabled`, `moss.enabled`, `wet.enabled` | `false` compiles that coat's surfaces as they were before coats (`wet`: dry) |
+| `wet.albedoFloor` | Share of its albedo a soaked surface keeps |
+| `wet.flatten` | How far a full film levels relief toward the surface's flat normal |
+| `wet.canopyShelter` | Not set here: copied from `stylizedSurface.wetness.canopyShelter`, the terrain's |
 | `snow.normalStrength` | Share of Snow007C's normal kept |
 | `snow.roughness`, `moss.roughness` | Coat roughness, 0..1 |
 | `moss.pillowHeight`, `moss.tuftHeight` | Relief in metres (≤ 0.1) |

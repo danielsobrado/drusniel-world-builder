@@ -18,7 +18,7 @@ import {
   vec3,
 } from 'three/tsl';
 import { stylizedFbm2 } from './StylizedNoiseNodes.js';
-import { surfaceWetnessUniform } from '../weather/surfaceWetness.js';
+import { rainOnObject, wetCoat } from './surfaceCoatings/WetCoat.js';
 import { worldNoiseField } from './worldNoise.js';
 import { WORLD_NOISE_LAYERS } from './worldNoiseLayout.js';
 import { blendCoat } from '../../render/materials/surfaceLayers/PbrCoatBlend.js';
@@ -203,8 +203,10 @@ export function applyBarkWeathering(material, { settings }) {
   // flat soak.
   const runs = stylizedFbm2(vec2(around.mul(2.4), local.y.mul(0.18)).add(seed.mul(7)))
     .smoothstep(-0.4, 0.4).mul(0.6).add(0.4);
-  const wet = surfaceWetnessUniform.mul(settings.wet).mul(runs).mul(contact.coverage.mul(0.7).oneMinus());
-  const soaked = grounded.mul(wet.mul(WET_DARKENING).oneMinus());
+  // Rain reaches a trunk as it reaches the floor under the same canopy (WetCoat.js);
+  // the film's roughness and normal are laid later, in TreeWetSurface.
+  const wet = rainOnObject(contact.canopy).mul(settings.wet).mul(runs).mul(contact.coverage.mul(0.7).oneMinus());
+  const soaked = wetCoat({ color: grounded }, { amount: wet, darkening: WET_DARKENING }).color;
 
   if (!settings.snowBand) {
     material.treeWetnessNode = wet;

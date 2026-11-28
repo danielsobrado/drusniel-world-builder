@@ -97,6 +97,7 @@ export function applyWorldSurfaceContact({
       contactMask: float(0),
       coverage: float(0),
       contactAo: float(1),
+      canopy: float(0),
       groundLight: unchangedLight,
     };
   }
@@ -202,6 +203,8 @@ export function applyWorldSurfaceContact({
     contactMask,
     coverage: colorCoverage,
     contactAo,
+    /** 0..1 canopy over the object (0 outside the WSC window), e.g. for rain shelter. */
+    canopy: underCanopy,
     lightCoverage,
     groundLight,
   };

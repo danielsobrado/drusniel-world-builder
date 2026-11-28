@@ -43,6 +43,7 @@ import { sampleCoastalRockImpactState } from './CoastalRockImpactStateNodes.js';
 import { sampleWorldSurfaceContextVarying } from './worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact, publishGroundContact } from './worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { publishCoatCoverage } from './surfaceCoatings/CoatCoverage.js';
+import { rainOnObject, wetCoat } from './surfaceCoatings/WetCoat.js';
 
 /**
  * Weathering for the authored rock pack — after grass-test's `rockWeathering`.
@@ -94,6 +95,11 @@ function metricPatternPosition(rootNode, fallback) {
 }
 
 const DUST = '#a89a80';
+/** Share of the dust's colour the bare ground round a stone gives it. */
+const DUST_FROM_GROUND = 0.75;
+/** A rain film on stone: as the town's stone walls (townWetness). */
+const STONE_WET_DARKENING = 0.22;
+const STONE_WET_ROUGHNESS = 0.32;
 const ALGAE = '#4a5a2a';
 const ROCK_SNOW = '#eef3f8';
 /** How far snow country turns a boulder to fractured alpine stone, and how much macro shading it keeps. */
@@ -279,16 +285,23 @@ export function applyRockWeathering(material, {
   let roughness = mossed.roughness;
   let normal = mossed.normal;
 
-  // Dust settles on the bare tops the moss has not claimed.
+  // Generic WSC contact material blending (PR 4): tracks sloped terrain height,
+  // resolved linear terrain albedo, roughness, slope normal, and orthogonal contact AO.
+  const groundContact = (ground || look) ? sampleWorldSurfaceContextVarying(world.xz, 'rock') : null;
+
+  // Dust settles on the bare tops the moss has not claimed. It is blown off the
+  // ground around the stone (PR 8): sand in a desert, grey grit on scree; where the
+  // ground is grassed it is the neutral dust, not green.
+  const dustColor = groundContact
+    ? mix(color(DUST), groundContact.albedo, groundContact.validity
+      .mul(groundContact.vegetationCoverage.oneMinus()).mul(DUST_FROM_GROUND))
+    : color(DUST);
   const dust = up.smoothstep(0.55, 0.95)
     .mul(mossCoatMask.oneMinus())
     .mul(macroPatch.oneMinus())
     .mul(settings.dust);
-  weathered = mix(weathered, color(DUST).mul(shade), dust);
-
-  // Generic WSC contact material blending (PR 4): tracks sloped terrain height,
-  // resolved linear terrain albedo, roughness, slope normal, and orthogonal contact AO.
-  const groundContact = (ground || look) ? sampleWorldSurfaceContextVarying(world.xz, 'rock') : null;
+  weathered = mix(weathered, dustColor.mul(shade), dust);
+  let objectCanopy = float(0);
   const objectLevel = ground
     ? varying(positionGeometry.y.sub(ground.groundY).div(Math.max(1e-3, ground.height)))
     : null;
@@ -323,6 +336,7 @@ export function applyRockWeathering(material, {
       aoMask: float(settings.soil),
     });
     publishGroundContact(material, contact);
+    objectCanopy = contact.canopy;
     weathered = contact.color;
     roughness = contact.roughness;
     normal = contact.normal;
@@ -343,8 +357,8 @@ export function applyRockWeathering(material, {
       .mul(eligible)
       .mul(settings.waterline);
     baselineWet = wet;
-    weathered = weathered.mul(wet.mul(settings.wetDarkening).oneMinus());
-    roughness = mix(roughness, float(0.25), wet);
+    ({ color: weathered, roughness } = wetCoat({ color: weathered, roughness }, {
+      amount: wet, darkening: settings.wetDarkening, roughness: 0.25 }));
     // Algae sits in the upper, drier half of the band — it needs the water but
     // does not live under it — so it fades in above the wet line rather than with
     // it, and is broken up by the same noise the splash line is.
@@ -367,9 +381,20 @@ export function applyRockWeathering(material, {
     const vertical = height.smoothstep(wetReach.mul(0.45), wetReach.add(0.15)).oneMinus();
     const damp = dynamic.wetness.mul(vertical).mul(contact.y).clamp(0, 1);
     const additionalWet = damp.mul(baselineWet.oneMinus());
-    weathered = weathered.mul(additionalWet.mul(impactSettings.darkeningStrength).oneMinus());
-    roughness = mix(roughness, float(impactSettings.freshRoughness), additionalWet.mul(0.8));
+    ({ color: weathered, roughness } = wetCoat({ color: weathered, roughness }, {
+      amount: additionalWet.mul(0.8), darkening: impactSettings.darkeningStrength / 0.8,
+      roughness: impactSettings.freshRoughness }));
+    baselineWet = baselineWet.max(damp);
   }
+
+  // Rain (PR 8): stones darken and glint in a shower with the ground around them,
+  // ledges and tops first, sheltered by the same canopy; on top of any waterline soak.
+  const rain = rainOnObject(objectCanopy)
+    .mul(smoothstep(-0.3, 0.1, up).mul(mix(float(0.45), float(1), up.max(0))))
+    .mul(baselineWet.oneMinus());
+  ({ color: weathered, roughness, normal } = wetCoat({ color: weathered, roughness, normal }, {
+    amount: rain, darkening: STONE_WET_DARKENING, roughness: STONE_WET_ROUGHNESS, flatNormal: stoneNormal }));
+  publishCoatCoverage(material, { wet: rain.max(baselineWet) });
 
   // Snow country: fractured alpine cold stone with basalt normal/roughness relief,
   // frost rime in horizontal strata cracks, crevice-filling height-blended snow,

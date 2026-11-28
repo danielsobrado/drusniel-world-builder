@@ -19,7 +19,7 @@ import {
 import { LOOK_SNOW_STEPS } from '../../biomes/BiomeLooks.js';
 import { stylizedFbm2 } from '../StylizedNoiseNodes.js';
 import { meadowPatchOnPlant } from '../understoryPatch.js';
-import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
+import { rainOnObject, wetCoat } from '../surfaceCoatings/WetCoat.js';
 import { sampleWorldSurfaceContextVarying } from '../worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { gradeBark, resolveBarkGrade } from './barkGrade.js';
@@ -46,6 +46,9 @@ import { mossCoat } from '../surfaceCoatings/MossCoat.js';
 import { snowCoat } from '../surfaceCoatings/SnowCoat.js';
 import { surfaceCoatings } from '../surfaceCoatings/SurfaceCoatingConfig.js';
 import { publishCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
+
+/** Albedo a full soak takes from deadwood: punky wood drinks in less than living bark. */
+const DEADWOOD_WET_DARKENING = 0.26;
 
 const BARK_UNDERTONES = Object.freeze({
   beech: '#7a654e',
@@ -280,9 +283,7 @@ export function deadwoodMaterial(
   const bumpNormal = barkBumpNormal(heightRelief.mul(bumpScale).add(crackBump));
   const combinedNormal = softenedBarkNormal.add(bumpNormal.sub(normalViewGeometry)).normalize();
   const creviceWet = albedoHeight.a.oneMinus().mul(0.45).add(0.55);
-  const wet = surfaceWetnessUniform.mul(creviceWet).clamp(0, 1);
-  const wetNormal = mix(combinedNormal, normalViewGeometry, wet.mul(0.22)).normalize();
-  const baseWoodNormal = mix(wetNormal, normalViewGeometry, exposedMask.mul(0.42)).normalize();
+  const baseWoodNormal = mix(combinedNormal, normalViewGeometry, exposedMask.mul(0.42)).normalize();
 
   const baseWoodRoughness = mix(normalRoughness.b.max(0.72), float(0.92), exposedMask.mul(0.5))
     .max(rotAmount.mul(0.98))
@@ -330,9 +331,13 @@ export function deadwoodMaterial(
     roughness: float(coatSettings.snow.enabled ? coatSettings.snow.roughness : 0.78).add(snowLayer?.roughness ?? 0),
     normal: snowLayer?.normal() ?? undefined,
   }, snowCover);
-  const finalAlbedo = mix(snowed.color, snowed.color.mul(vec3(0.52, 0.53, 0.56)), wet.mul(0.55));
-  const normalNode = snowed.normal;
-  const roughnessNode = mix(snowed.roughness, snowed.roughness.min(0.32), wet.mul(0.65));
+  // The wet coat last (WetCoat.js), as on trunks: rain as the floor under the same canopy
+  // gets it, soaking crevices first, never the snow lying on the wood.
+  const wet = rainOnObject(debrisContact.canopy).mul(creviceWet).mul(snowCover.oneMinus()).clamp(0, 1);
+  const soaked = wetCoat(snowed, { amount: wet, darkening: DEADWOOD_WET_DARKENING, roughness: 0.32, flatNormal: normalViewGeometry });
+  const finalAlbedo = soaked.color;
+  const normalNode = soaked.normal;
+  const roughnessNode = soaked.roughness;
 
   // Deadwood and moss already fold `attribute('color')` into their custom colorNodes; keeping
   // `vertexColors: false` avoids Three.js NodeMaterial multiplying diffuseColor by `vColor` twice.

@@ -22,6 +22,12 @@ export const SURFACE_COATING_DEFAULTS = Object.freeze({
      */
     palette: Object.freeze({ deep: '#2f3d21', dark: '#42522d', light: '#5d6e3e' }),
   }),
+  /**
+   * The wet coat (`WetCoat.js`): rain's albedo floor and how far a full film levels
+   * fine relief. Darkening and film roughness are each surface's porosity; canopy
+   * shelter is `stylizedSurface.wetness.canopyShelter`, the terrain's, passed in.
+   */
+  wet: Object.freeze({ enabled: true, albedoFloor: 0.6, flatten: 0.22, canopyShelter: 0.7 }),
   /** Metres from the eye: full coat micro-detail before `near`, none past `far`. */
   detail: Object.freeze({ nearDistance: 20, farDistance: 65 }),
 });
@@ -29,6 +35,7 @@ export const SURFACE_COATING_DEFAULTS = Object.freeze({
 const UNIT = Object.freeze({
   snow: ['normalStrength', 'roughness'],
   moss: ['roughness', 'recessShade'],
+  wet: ['albedoFloor', 'flatten', 'canopyShelter'],
 });
 
 function section(source, key) {
@@ -39,11 +46,15 @@ function section(source, key) {
   return { ...SURFACE_COATING_DEFAULTS[key], ...value };
 }
 
-export function resolveSurfaceCoatings(source = {}) {
+/** @param {object} [wetness] `stylizedSurface.wetness`, whose canopy shelter objects share with the terrain */
+export function resolveSurfaceCoatings(source = {}, wetness = null) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) {
     throw new TypeError('stylizedSurface.surfaceCoatings must be an object.');
   }
-  const value = { snow: section(source, 'snow'), moss: section(source, 'moss'), detail: section(source, 'detail') };
+  const value = {
+    snow: section(source, 'snow'), moss: section(source, 'moss'), wet: section(source, 'wet'), detail: section(source, 'detail'),
+  };
+  if (Number.isFinite(wetness?.canopyShelter)) value.wet.canopyShelter = wetness.canopyShelter;
   for (const [key, fields] of Object.entries(UNIT)) {
     if (typeof value[key].enabled !== 'boolean') {
       throw new TypeError(`stylizedSurface.surfaceCoatings.${key}.enabled must be a boolean.`);

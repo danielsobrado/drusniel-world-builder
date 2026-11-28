@@ -15,7 +15,7 @@ import {
   resolveCrownProfileKey,
   resolveCrownProfiles,
 } from '../forest/crownProfile.js';
-import { surfaceWetnessUniform } from '../../weather/surfaceWetness.js';
+import { rainOnObject, wetCoat } from '../surfaceCoatings/WetCoat.js';
 import { sampleWorldSurfaceContextVarying } from '../worldSurfaceContext/WorldSurfaceContextState.js';
 import { applyWorldSurfaceContact } from '../worldSurfaceContext/WorldSurfaceContactNodes.js';
 import { inheritCoatCoverage } from '../surfaceCoatings/CoatCoverage.js';
@@ -94,15 +94,16 @@ function makeTreeTrunkMaterial(config) {
   const material = new (foliageMaterialClass(THREE.MeshStandardNodeMaterial))({ roughness: settings.roughness });
   const value = new THREE.Color(config.trees.barkTint);
   material.colorNode = vec3(...value.toArray());
-  material.treeWetnessNode = surfaceWetnessUniform.mul(0.7);
-  const bark = material.colorNode.mul(material.treeWetnessNode.mul(settings.wetStrength * 0.45).oneMinus());
   // The near trunk's foot (barkWeathering): soil collar and the ground's own light, so the LOD swap keeps it.
   const contact = applyWorldSurfaceContact({
-    surface: { color: bark },
+    surface: { color: material.colorNode },
     wsc: sampleWorldSurfaceContextVarying(positionWorld.xz, 'proxyBark'),
     profile: 'tree',
   });
-  material.colorNode = contact.color;
+  // The near trunk's soak, sheltered by the same canopy (WetCoat.js).
+  material.treeWetnessNode = rainOnObject(contact.canopy).mul(0.7);
+  material.colorNode = wetCoat({ color: contact.color },
+    { amount: material.treeWetnessNode.mul(settings.wetStrength), darkening: 0.45 }).color;
   material.emissiveNode = contact.groundLight(treeBarkEmission(contact.color), contact.color);
   return applyTreeBarkWetSurface(material, settings);
 }
