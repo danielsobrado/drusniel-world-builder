@@ -130,9 +130,7 @@ export class FrameProfiler {
     const measured = this.frames.filter((frame) => frame.dt > 0);
     const dts = measured.map((frame) => frame.dt).sort((a, b) => a - b);
     const hitches = measured.filter((frame) => frame.hitch);
-    const durationMs = measured.length === 0
-      ? 0
-      : measured.at(-1).timestamp - measured[0].timestamp;
+    const durationMs = measured.reduce((sum, frame) => sum + frame.dt, 0);
     const phaseNames = new Set();
     for (const frame of measured) {
       for (const name of Object.keys(frame.phases)) {

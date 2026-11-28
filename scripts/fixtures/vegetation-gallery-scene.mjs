@@ -29,7 +29,6 @@ function configureInstance(mesh, matrix, seed) {
     ['instanceBiomeLook', [1, 1, 1, 1]],
     ['instanceSurface', [0, 0, 0]],
     ['instancePlantRoot', [0, 0, 0]],
-    ['instanceRootPlane', [0, 0, 0]],
   ]) {
     const attribute = mesh.geometry.getAttribute(name);
     if (!attribute) continue;

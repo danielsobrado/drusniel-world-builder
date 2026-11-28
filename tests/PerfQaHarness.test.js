@@ -100,6 +100,8 @@ test('FrameProfiler records hitch stats and phase timings', () => {
   const summary = profiler.summarize();
   assert.equal(profiler.getLiveAverageFps(), 2000 / 60);
   assert.equal(summary.frameCount, 2);
+  assert.equal(summary.durationMs, 60);
+  assert.equal(summary.avgFps, profiler.getLiveAverageFps());
   assert.equal(summary.hitchCount, 1);
   assert.equal(summary.originSnapCount, 1);
   assert.ok(summary.dt.maxMs >= 40);

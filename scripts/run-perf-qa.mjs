@@ -105,6 +105,9 @@ setOptionalQuery(query, 'constructionStyle', constructionStyle);
 setOptionalQuery(query, 'burg', readArg('burg'));
 if (hasFlag('settle')) query.set('settle', '1');
 setOptionalQuery(query, 'settleTimeout', readArg('settleTimeout'));
+for (const key of ['warmupFrames', 'measureFrames', 'originThreshold', 'explorationBoost']) {
+  setOptionalQuery(query, key, readArg(key));
+}
 setOptionalQuery(query, 'x', spawnX);
 setOptionalQuery(query, 'z', spawnZ);
 setOptionalQuery(query, 'yaw', yaw);
@@ -112,7 +115,7 @@ setOptionalQuery(query, 'pitch', pitch);
 const target = new URL(baseUrl);
 for (const [key, value] of query) target.searchParams.set(key, value);
 const targetUrl = target.href;
-const timeoutMs = positiveNumber('timeoutMs', defaultPerfQaTimeoutMs(query));
+const timeoutMs = positiveNumber('timeoutMs', defaultPerfQaTimeoutMs(target.searchParams));
 
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -450,6 +453,7 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
       screenshot: ${JSON.stringify(screenshotReportPath)},
       video: page.video() ? await page.video().path() : null,
       visualOnly: ${videoDir !== null},
+      diagnosticOnly: ${videoDir !== null || cpuProfilePath !== null || heapProfilePath !== null || (hasFlag('resources') && scenario === 'lod-revisit')},
       cpuProfile: ${JSON.stringify(cpuProfileReportPath)},
       heapProfile: ${JSON.stringify(heapProfilePath === null ? null : path.relative(root, heapProfilePath).replaceAll('\\', '/'))},
     };

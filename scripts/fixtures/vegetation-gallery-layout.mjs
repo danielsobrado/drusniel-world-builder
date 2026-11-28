@@ -14,6 +14,8 @@ export function galleryFrame(min, max) {
 
 /** Alpha-based occupancy catches blank, tiny or clipped captures, not silhouette equivalence. */
 export function galleryCoverage(pixels, width, height) {
+  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width <= 0 || height <= 0
+      || pixels.length !== width * height * 4) throw new RangeError('Invalid gallery pixel buffer.');
   let occupied = 0, minX = width, minY = height, maxX = -1, maxY = -1;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {

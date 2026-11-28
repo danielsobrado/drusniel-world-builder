@@ -18,3 +18,8 @@ test('performance timeout uses the same normalized timing values as the browser'
   assert.equal(defaultPerfQaTimeoutMs('qa=move&warmup=-1&duration=0&settle=1&settleTimeout=0'), 91500);
   assert.equal(defaultPerfQaTimeoutMs('qa=move&warmup=bad&duration=bad&settle=1&settleTimeout=bad'), 224000);
 });
+
+
+test('timeout includes explicit frame-budget phases rather than only seconds', () => {
+  assert.equal(defaultPerfQaTimeoutMs('qa=move&warmupFrames=600&measureFrames=6000&settle=1'), 320000);
+});

@@ -52,3 +52,24 @@ test('hitch attribution uses the preceding callback and its LOD sampler', () => 
     precedingPhases: { stylized: 208 }, precedingSamplerMs: report.samples[0].samplingCpuMs }]);
   assert.equal(report.handoffMeanReadyWaitMs, null);
 });
+
+
+test('reused planner maps discard removed chunks and preserve layer identity', () => {
+  const diagnostics = new LodBaselineDiagnostics();
+  const world = surface([['0:0', state('near', 'proxy')]]);
+  diagnostics.sample(world, 0, 0);
+  world.treeView.chunkLodStates.clear();
+  diagnostics.sample(world, 100, 1);
+  world.treeView.chunkLodStates.set('0:0', state('proxy', 'near'));
+  diagnostics.sample(world, 200, 2);
+  assert.equal(diagnostics.report([]).samples[2].layers.tree.observedReversals, 0);
+});
+
+test('missing lease duration and nonadjacent callbacks remain unknown', () => {
+  const report = new LodBaselineDiagnostics().report([
+    { index: 2, dt: 10, countersDelta: { sceneryLodHandoffDrawsReady: 1 } },
+    { index: 4, dt: 40, hitch: true },
+  ]);
+  assert.equal(report.handoffMeanReadyWaitMs, null);
+  assert.equal(report.hitchCallbackFrames[0].precedingFrame, null);
+});

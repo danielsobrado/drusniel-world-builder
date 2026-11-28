@@ -20,3 +20,9 @@ test('gallery coverage rejects blank, tiny and clipped captures', () => {
   fill(0, 15);
   assert.equal(galleryCoverage(pixels, 32, 32).passed, false);
 });
+
+
+test('truncated RGBA readback is rejected rather than counted as occupied', () => {
+  assert.throws(() => galleryCoverage(new Uint8Array(3), 1, 1), RangeError);
+  assert.throws(() => galleryCoverage(new Uint8Array(0), 0, 0), RangeError);
+});

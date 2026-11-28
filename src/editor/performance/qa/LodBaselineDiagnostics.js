@@ -30,19 +30,22 @@ export function lodCellDiagnostics(surface, key, now) {
   }));
 }
 
-export function sampleLodPlans(surface, now, previous = new Map()) {
-  const layers = {}, next = new Map();
+export function sampleLodPlans(surface, now, previous = new Map(), next = new Map()) {
+  const layers = {};
   for (const [layer, property] of Object.entries(LAYERS)) {
     const states = surface?.[property]?.chunkLodStates;
+    let nextLayer = next.get(layer);
+    if (!nextLayer) { nextLayer = new Map(); next.set(layer, nextLayer); }
+    nextLayer.clear();
     if (!(states instanceof Map)) { layers[layer] = null; continue; }
+    const previousLayer = previous.get(layer);
     const result = { chunks: states.size, transitioning: 0, overlapping: 0, pendingData: 0,
       maxPendingDataAgeMs: null, observedReversals: 0, targets: {} };
     for (const [key, state] of states) {
-      const id = layer + ':' + key;
-      const old = previous.get(id);
+      const old = previousLayer?.get(key);
       if (old && !old.complete && !old.waitingForData && old.from !== old.target
         && state.target === old.from && state.target !== old.target) result.observedReversals++;
-      next.set(id, state);
+      nextLayer.set(key, state);
       result.targets[state.target] = (result.targets[state.target] ?? 0) + 1;
       if (!state.complete && !state.waitingForData) result.transitioning++;
       let visibleBands = 0;
@@ -73,6 +76,7 @@ export class LodBaselineDiagnostics {
   constructor() { this.reset(); }
   reset() {
     this.previous = new Map();
+    this.scratch = new Map();
     this.samples = [];
     this.nextAt = -Infinity;
     this.dropped = 0;
@@ -82,7 +86,8 @@ export class LodBaselineDiagnostics {
     this.nextAt = now + INTERVAL_MS;
     if (this.samples.length >= MAX_SAMPLES) { this.dropped++; return; }
     const start = performance.now();
-    const { layers, next } = sampleLodPlans(surface, now, this.previous);
+    const { layers, next } = sampleLodPlans(surface, now, this.previous, this.scratch);
+    this.scratch = this.previous;
     this.previous = next;
     const info = surface?.terrainView?.renderer?.info;
     const sample = { frameIndex, timestampMs: now, layers,
@@ -104,15 +109,16 @@ export class LodBaselineDiagnostics {
     const hitchCallbackFrames = frames.flatMap((frame, index) => {
       if (!frame.hitch || frame.dt <= 0) return [];
       // RAF dt ends at this callback, so the prior callback is the one that could have delayed it.
-      const preceding = frames[index - 1];
+      const candidate = frames[index - 1];
+      const preceding = candidate?.index === frame.index - 1 ? candidate : null;
       return [{ hitchFrame: frame.index, precedingFrame: preceding?.index ?? null,
         precedingPhases: preceding?.phases ?? null,
         precedingSamplerMs: preceding ? sampleCpuByFrame.get(preceding.index) ?? null : null }];
     });
-    return { version: 2, sampleIntervalMs: INTERVAL_MS, droppedSamples: this.dropped,
+    return { version: 3, sampleIntervalMs: INTERVAL_MS, droppedSamples: this.dropped,
       scope: 'planned exterior scenery chunks; not published geometry', counters,
-      handoffMeanReadyWaitMs: counters.sceneryLodHandoffDrawsReady > 0
-        ? (counters.sceneryLodHandoffReadyWaitMs ?? 0) / counters.sceneryLodHandoffDrawsReady : null,
+      handoffMeanReadyWaitMs: counters.sceneryLodHandoffDrawsReady > 0 && counters.sceneryLodHandoffReadyWaitMs !== null
+        ? counters.sceneryLodHandoffReadyWaitMs / counters.sceneryLodHandoffDrawsReady : null,
       hitchCallbackFrames,
       unavailable: ['transitionExtraTriangles', 'transitionExtraDraws', 'transitionPinnedBytes',
         'fadeOnlyUploadBytes', 'gpuReadinessAgeMs', 'visibleMissingCoverage'],

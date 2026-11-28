@@ -134,6 +134,7 @@ export class PerfQaHarness {
   }
 
   start() {
+    this.plan = createMovementPlan(this.config);
     if (this.config.spawn !== this.configuredSpawn) {
       this.configuredSpawn = this.config.spawn;
       this.canonicalSpawn = this.terrainView?.floatingOrigin?.toCanonical?.(this.config.spawn.x, this.config.spawn.z)
@@ -195,6 +196,7 @@ export class PerfQaHarness {
       world.setTile(8192, -8192, 9);
     }
     this.log(`Started ${this.config.scenarioId} at canonical (${this.canonicalSpawn.x}, ${this.canonicalSpawn.z})`);
+    this.publishApi();
     this.renderOverlay();
   }
 
@@ -372,25 +374,25 @@ export class PerfQaHarness {
   }
 
   /** Readiness checks the settle gate waits on; a missing system counts as ready. */
-  settleReadiness() {
+  settleReadiness(preparation = this.terrainView?.stylizedSurface?.getPreparationStatus?.() ?? null) {
     const collision = collisionStatus(this.playerController, { lightweight: true });
     const streaming = this.terrainView?.getStreamingStatus?.() ?? null;
     return {
       collision: collision ? Boolean(collision.ready) : true,
       streaming: streaming ? streaming.loading === 0 : true,
       construction: !(PerfCounters.get('constructionQueueDepth') > 0),
-      vegetation: this.terrainView?.stylizedSurface?.getPreparationStatus?.().ready ?? true,
+      vegetation: preparation?.ready ?? true,
     };
   }
 
   /** @returns {boolean} whether the warmup may end now */
   settlePhase(waitedSeconds) {
-    const readiness = this.settleReadiness();
+    const preparation = this.terrainView?.stylizedSurface?.getPreparationStatus?.() ?? null;
+    const readiness = this.settleReadiness(preparation);
     const verdict = this.settleGate.update(readiness, waitedSeconds);
     if (this.config.lodBaseline && waitedSeconds >= this.nextSettleSampleAt) {
       this.nextSettleSampleAt = waitedSeconds + 1;
-      if (this.settleSamples.length < 600) this.settleSamples.push({ waitedSeconds, readiness,
-        preparation: this.terrainView?.stylizedSurface?.getPreparationStatus?.() ?? null });
+      if (this.settleSamples.length < 600) this.settleSamples.push({ waitedSeconds, readiness, preparation });
     }
     if (verdict === 'waiting') {
       this.live.phase = `Warmup (settling: ${this.settleGate.blockers.join(', ') || 'holding'})`;
@@ -418,6 +420,8 @@ export class PerfQaHarness {
       this.applyPhaseKeys();
       return;
     }
+    this.live.phase = phase.label;
+    this.live.elapsedSeconds = 0;
     if (phase.teleport || phase.canonicalOffset) {
       const status = this.playerController.getStatus();
       const origin = this.terrainView.floatingOrigin?.getState?.() ?? { x: 0, z: 0 };
@@ -580,12 +584,12 @@ export class PerfQaHarness {
     }
     const harness = this;
     window.__perfQa = {
-      status: this.status,
+      get status() { return harness.status; },
       get recording() { return harness.recording; },
       setKeys: (codes) => this.setKeys(codes),
       freezeRoute: () => { this.routeFrozen = true; },
-      config: this.config,
-      live: this.live,
+      get config() { return harness.config; },
+      get live() { return harness.live; },
       getReport: () => this.report,
       download: () => this.download(),
       restart: () => this.start(),
