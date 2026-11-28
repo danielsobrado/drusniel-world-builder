@@ -59,6 +59,15 @@ export function sampleLodPlans(surface, now, previous = new Map()) {
   return { layers, next };
 }
 
+const finite = value => Number.isFinite(value) ? value : null;
+
+/** Whole-renderer accounting at the end of a frame, not incremental LOD cost. */
+export function lodRendererFrame(renderer) {
+  const info = renderer?.info;
+  return { draws: finite(info?.render?.drawCalls ?? info?.render?.calls),
+    triangles: finite(info?.render?.triangles), bytes: finite(info?.memory?.total) };
+}
+
 export class LodBaselineDiagnostics {
   constructor() { this.reset(); }
   reset() {
@@ -94,6 +103,9 @@ export class LodBaselineDiagnostics {
       scope: 'planned exterior scenery chunks; not published geometry', counters,
       unavailable: ['transitionExtraTriangles', 'transitionExtraDraws', 'transitionPinnedBytes',
         'fadeOnlyUploadBytes', 'gpuReadinessAgeMs', 'visibleMissingCoverage'],
+      rendererFrames: frames.filter(frame => frame.dt > 0 && frame.counters).map(frame => ({
+        frameIndex: frame.index, dtMs: frame.dt, ...frame.counters,
+      })),
       samples: this.samples.slice() };
   }
 }

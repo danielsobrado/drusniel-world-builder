@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LodBaselineDiagnostics, lodCellDiagnostics, sampleLodPlans } from '../src/editor/performance/qa/LodBaselineDiagnostics.js';
+import { LodBaselineDiagnostics, lodCellDiagnostics, lodRendererFrame, sampleLodPlans } from '../src/editor/performance/qa/LodBaselineDiagnostics.js';
 
 const state = (from, target, extra = {}) => ({ from, target, complete: false, startedAt: 10,
   representations: [{ band: from, fade: 0.6 }, { band: target, fade: 0.4 }], ...extra });
@@ -31,4 +31,12 @@ test('sampling is throttled, resettable and missing counters are not zero', () =
   assert.equal(report.counters.sceneryLodHandoffDeferred, null);
   diagnostics.reset();
   assert.equal(diagnostics.report([]).samples.length, 0);
+});
+
+
+test('whole renderer frame accounting preserves zero and missing measurements', () => {
+  const frame = lodRendererFrame({ info: { render: { calls: 0, triangles: 30 }, memory: {} } });
+  assert.deepEqual(frame, { draws: 0, triangles: 30, bytes: null });
+  const report = new LodBaselineDiagnostics().report([{ index: 2, dt: 12, counters: frame }]);
+  assert.deepEqual(report.rendererFrames, [{ frameIndex: 2, dtMs: 12, draws: 0, triangles: 30, bytes: null }]);
 });

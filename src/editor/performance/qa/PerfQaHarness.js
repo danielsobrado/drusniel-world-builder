@@ -1,6 +1,6 @@
 import { FrameProfiler } from './FrameProfiler.js';
 import { PerfCounters } from './PerfCounters.js';
-import { LodBaselineDiagnostics } from './LodBaselineDiagnostics.js';
+import { LodBaselineDiagnostics, lodRendererFrame } from './LodBaselineDiagnostics.js';
 import { GpuPassProfiler } from './GpuPassProfiler.js';
 import { PerfQaSettleGate } from './PerfQaSettleGate.js';
 import { QaRouteWalker } from './QaRouteWalker.js';
@@ -247,6 +247,7 @@ export class PerfQaHarness {
     const countersDelta = PerfCounters.advance(this.lastCounters);
     const playerStatus = this.playerController.getStatus();
     const frame = this.profiler.endFrame({
+      counters: this.lodBaseline ? lodRendererFrame(this.terrainView?.renderer) : null,
       countersDelta,
       streaming,
       voxel,

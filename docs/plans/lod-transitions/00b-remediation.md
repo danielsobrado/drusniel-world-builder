@@ -9,7 +9,7 @@ Starting main: c1f7419ccefa2f82472161f8587c5d5e9f93e088. Original evidence: docs
 - Settle reports distinguish current blockers, last blockers, streak and per-check counts. Opt-in sampler records preparation detail at one-second intervals. Do not relax readiness to pass tests.
 - Cancel queued tree manifests outside the requested visible representation set, retaining the existing cache and shared scheduler. Measure tree-manifest completed-job latency and queue age.
 - Conifer proxy horizontal envelope expands to authored leaf dimensions without adding geometry or changing the vertical connector. This is a candidate silhouette fix; confirm actual views and material/lighting match.
-- Reduce diagnostic allocations; stop sampling after the existing storage cap, expose renderer-accounted bytes when available. Counters track queued packed dither bytes (not fade-only actual transfers), successful sliced GPU copies and lease time (not full GPU-readiness latency).
+- Reduce diagnostic allocations; stop sampling after the existing storage cap, expose per-frame renderer-reported draw, triangle and memory gauges when available (whole renderer; not incremental LOD cost). Counters track queued packed dither bytes (not fade-only actual transfers), successful sliced GPU copies and lease time (not full GPU-readiness latency).
 - Add lod-reversal and lod-revisit routes; construction corridor faces its length. Separate optional video captures from official timing.
 - Existing grass page allocation/upload and staged geometry paths are already budgeted experimentally. The baseline hitches occur outside CPU phase timers; do not assume their source or alter production defaults without A/B evidence.
 

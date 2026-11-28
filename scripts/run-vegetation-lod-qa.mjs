@@ -145,7 +145,8 @@ try {
       if (typeof result?.next === 'function') {
         let step;
         do {
-          step = result.next();
+          const started = performance.now();
+          do { step = result.next(); } while (!step.done && performance.now() - started < 4);
           if (!step.done) await new Promise(resolve => requestAnimationFrame(resolve));
         } while (!step.done);
         installed = step.value;
