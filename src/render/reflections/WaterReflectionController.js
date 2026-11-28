@@ -103,6 +103,7 @@ export class WaterReflectionController {
   }
 
   invalidate() {
+    this.cycleCompile = null;
     this.valid.value = 0;
     this.planarValid.value = 0;
     this.face = 0;
@@ -241,6 +242,11 @@ export class WaterReflectionController {
     for (const slot of this.residencyReady ? this.residency.slots : surface.waterSlots) hidden.push(slot.mesh);
     this.refreshOverlayObjects();
     for (const object of this.overlayObjects) hidden.push(object);
+    if (budgetReserved && !this.planarPending && this.face === 0 && this.cycleCompile !== 'ready'
+        && typeof this.view.renderer.compileAsync === 'function') {
+      if (!this.cycleCompile) this.compileCycle(camera, surface, origin, now, hidden);
+      return;
+    }
     const started = performance.now();
     const captureKind = this.planarPending ? 'planar' : 'cube';
     if (this.layerIsolation && this.shadowRegistry) {
@@ -294,6 +300,37 @@ export class WaterReflectionController {
       PerfCounters.inc('waterReflectionCpuMs', this.lastCaptureCpuMs);
       PerfCounters.set('waterReflectionBudgetEstimateMs', this.captureBudgetMs);
     }
+  }
+
+  /**
+   * A material's first draw into the half-float capture target compiles its pipeline synchronously inside
+   * the face render: the stylized rock shader alone stalled a frame 250–340 ms on RTX 4080 D3D12 (LOD Phase 0B).
+   * Compile all six views asynchronously after each invalidation, then capture. Fixtures and the startup
+   * prewarm (no reserved budget) keep capturing synchronously.
+   */
+  compileCycle(camera, surface, origin, now, hidden) {
+    const renderer = this.view.renderer, started = performance.now(), pending = [];
+    const token = this.cycleCompile = {};
+    this.cubeCamera.position.set(camera.position.x, camera.position.y, camera.position.z);
+    this.cubeCamera.coordinateSystem = renderer.coordinateSystem;
+    this.cubeCamera.updateCoordinateSystem();
+    this.cubeCamera.updateMatrixWorld();
+    try {
+      withReflectionCapture(renderer, this.view.scene, hidden, () => {
+        const back = this.targets[1 - this.front];
+        for (let face = 0; face < 6; face++) {
+          renderer.setRenderTarget(back, face);
+          const view = this.cubeCamera.children[face];
+          withAuxiliaryScene(surface, view, origin, now, () => pending.push(renderer.compileAsync(this.view.scene, view)), this.layerIsolation);
+        }
+      }, this.captureScratch);
+    } catch (error) {
+      pending.push(Promise.reject(error));
+    }
+    PerfCounters.inc('waterReflectionCompiles');
+    PerfCounters.inc('waterReflectionCompileCpuMs', performance.now() - started);
+    // A failed compile falls back to the synchronous first-use path rather than stopping captures.
+    Promise.allSettled(pending).then(() => { if (this.cycleCompile === token && !this.disposed) this.cycleCompile = 'ready'; });
   }
 
   refreshOverlayObjects() {

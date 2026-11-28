@@ -8,27 +8,27 @@ from world_sim.reports.builder import build_reports
 from world_sim.world.model import build_world_model
 
 
-def test_search_reproduces_the_pinned_pilot(eldara, config):
-    searched = select_pilot(audit=eldara.audit, connectivity=eldara.connectivity, budget=eldara.budget,
+def test_search_reproduces_the_pinned_pilot(astalor, config):
+    searched = select_pilot(audit=astalor.audit, connectivity=astalor.connectivity, budget=astalor.budget,
                             pilot_config={**config.pilot, "pinnedSourceIds": []})
     assert searched["mode"] == "search"
     assert [r["sourceId"] for r in searched["roles"]] == config.pilot["pinnedSourceIds"]
-    assert eldara.pilot["mode"] == "pinned"
-    assert eldara.pilot["roles"] == searched["roles"]
+    assert astalor.pilot["mode"] == "pinned"
+    assert astalor.pilot["roles"] == searched["roles"]
     limit = config.pilot["constraints"]["maxRouteDistance"]
-    assert all(0 < p["distancePx"] <= limit for p in eldara.pilot["pairwiseRoutes"])
-    assert all(r["roleStatus"] == "hypothesis" and r["evidence"] for r in eldara.pilot["roles"])
-    assert eldara.pilot["totalNpcs"] == sum(r["npcs"] for r in eldara.pilot["roles"])
+    assert all(0 < p["distancePx"] <= limit for p in astalor.pilot["pairwiseRoutes"])
+    assert all(r["roleStatus"] == "hypothesis" and r["evidence"] for r in astalor.pilot["roles"])
+    assert astalor.pilot["totalNpcs"] == sum(r["npcs"] for r in astalor.pilot["roles"])
 
 
-def test_unknown_pinned_ids_fail_loudly(eldara, config):
+def test_unknown_pinned_ids_fail_loudly(astalor, config):
     with pytest.raises(ValueError, match="99999"):
-        select_pilot(audit=eldara.audit, connectivity=eldara.connectivity, budget=eldara.budget,
+        select_pilot(audit=astalor.audit, connectivity=astalor.connectivity, budget=astalor.budget,
                      pilot_config={**config.pilot, "pinnedSourceIds": [1, 2, 99999]})
 
 
-def test_reports_are_byte_identical_across_runs(eldara, config):
-    first, second = build_reports(eldara), build_reports(build_world_model(config))
+def test_reports_are_byte_identical_across_runs(astalor, config):
+    first, second = build_reports(astalor), build_reports(build_world_model(config))
     assert sorted(first) == ["connectivity.json", "npc-budget-comparison.json", "pilot-settlements.json",
                              "settlements.json", "world-summary.json"]
     for name, report in first.items():

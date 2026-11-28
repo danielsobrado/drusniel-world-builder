@@ -101,7 +101,7 @@ setOptionalQuery(query, 'contactOcclusion', readArg('contactOcclusion'));
 setOptionalQuery(query, 'wsc', readArg('wsc'));
 setOptionalQuery(query, 'collisionDebug', collisionDebug);
 setOptionalQuery(query, 'constructionStyle', constructionStyle);
-// settlement-approach only: visit another Eldara burg (looking at a realm's town, not the perf gate).
+// settlement-approach only: visit another Astalor burg (looking at a realm's town, not the perf gate).
 setOptionalQuery(query, 'burg', readArg('burg'));
 if (hasFlag('settle')) query.set('settle', '1');
 setOptionalQuery(query, 'settleTimeout', readArg('settleTimeout'));

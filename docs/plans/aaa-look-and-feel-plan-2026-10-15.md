@@ -21,7 +21,7 @@ as prior evidence or a follow-up hypothesis.
   candidate cells in `[-8000,8000)` on each axis; yaw is also randomized.
   Generator seed `918273`, version 1, height scale 24 m. These are stratified
   samples, not an area-weighted survey or selected beauty shots.
-- Two targeted coastal views supplement those samples. Four Eldara views are
+- Two targeted coastal views supplement those samples. Four Astalor views are
   seeded choices among the existing imported forest, taiga, glacier and wetland
   fixtures; their coordinates are not newly randomized. The coastal camera
   remains on grassland ID 4, so this is not a camera-pose test of marine ID 0.
@@ -65,10 +65,10 @@ labels describe the camera's cell; neighboring biomes can be visible.
 | [12 · Wetland](../qa/visual-audit-2026-10-15/random-12.png) | 11495, 9197 | A convincing leafy canopy, but the facing ground reads as green woodland rather than a damp habitat; no open water appears in this direction. |
 | [Coast · eye level](../qa/visual-audit-2026-10-15/marine-coast.png) | −2077, 1731 | Broad dark bands, hard polygonal boundaries and repeated upright spray shapes are conspicuous in the water. The bright shoreline is visually thick. |
 | [Coast · overview](../qa/visual-audit-2026-10-15/marine-coast-overview.png) | −2077, 1731 | Depth gradient, submerged rocks and wave shading read more coherently from above. The eye-level problems need their own acceptance view. |
-| [Eldara · forest](../qa/visual-audit-2026-10-15/eldara-forest-reverse.png) | −7134127, 1081563 | Strong close crowns and a pale winding bare strip; repeated grass wedges and bright ground remain visible under the trees. |
-| [Eldara · taiga](../qa/visual-audit-2026-10-15/eldara-taiga.png) | −982683, 371387 | A recognizable conifer horizon, but very sparse narrow foreground crowns and low grass repeat across an open, weakly layered floor. |
-| [Eldara · glacier](../qa/visual-audit-2026-10-15/eldara-glacier.png) | −2747061, 316061 | Fine snow texture is visible, but this direction has little large-scale relief or middle-distance structure. No mountain panorama is established by this view. |
-| [Eldara · wetland](../qa/visual-audit-2026-10-15/eldara-wetland-reverse.png) | 993673, 1701497 | Darker dense reeds and heavier cloud distinguish it from the procedural wetland; the growth still forms a broad uniform field. |
+| [Astalor · forest](../qa/visual-audit-2026-10-15/astalor-forest-reverse.png) | −7134127, 1081563 | Strong close crowns and a pale winding bare strip; repeated grass wedges and bright ground remain visible under the trees. |
+| [Astalor · taiga](../qa/visual-audit-2026-10-15/astalor-taiga.png) | −982683, 371387 | A recognizable conifer horizon, but very sparse narrow foreground crowns and low grass repeat across an open, weakly layered floor. |
+| [Astalor · glacier](../qa/visual-audit-2026-10-15/astalor-glacier.png) | −2747061, 316061 | Fine snow texture is visible, but this direction has little large-scale relief or middle-distance structure. No mountain panorama is established by this view. |
+| [Astalor · wetland](../qa/visual-audit-2026-10-15/astalor-wetland-reverse.png) | 993673, 1701497 | Darker dense reeds and heavier cloud distinguish it from the procedural wetland; the growth still forms a broad uniform field. |
 
 The desert shots no longer show the conspicuous white streaks documented in the
 [October 13 review](world-visual-quality-plan-2026-10-13.md). This is a qualitative

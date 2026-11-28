@@ -37,7 +37,7 @@ await runWscCapture({
   modes: ['D00'],
   sheetColumns: 7,
   shoot: async (page, take) => {
-    // The procedural world is the page's own; Stillmeadow loads the Eldara map after it.
+    // The procedural world is the page's own; Stillmeadow loads the Astalor map after it.
     if (scenes.includes('grassland')) await sweep(page, take, 'B01-C01', CAMERAS.locations.B01.cameras.C01);
     if (!scenes.includes('woodland') && !scenes.includes('trunks')) return;
     // Stillmeadow's cameras are offsets along its approach, as PR 0 placed them.

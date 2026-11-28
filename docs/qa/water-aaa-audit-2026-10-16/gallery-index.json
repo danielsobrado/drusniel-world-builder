@@ -98,7 +98,7 @@
   {
     "id": "river-09",
     "name": "Taiga river",
-    "world": "eldara",
+    "world": "astalor",
     "x": 6362854.228104901,
     "z": -1019611.2209823765,
     "biome": 9,
@@ -110,7 +110,7 @@
   {
     "id": "river-08",
     "name": "Temperate rainforest river",
-    "world": "eldara",
+    "world": "astalor",
     "x": -4269925.294875607,
     "z": 2359551.9412070587,
     "biome": 8,
@@ -122,7 +122,7 @@
   {
     "id": "river-12",
     "name": "Wetland river",
-    "world": "eldara",
+    "world": "astalor",
     "x": 4265001.52159005,
     "z": -2345997.682012069,
     "biome": 12,
@@ -134,7 +134,7 @@
   {
     "id": "river-06",
     "name": "Temperate deciduous forest river",
-    "world": "eldara",
+    "world": "astalor",
     "x": -6524344.318419896,
     "z": 1768763.1104439783,
     "biome": 6,
@@ -146,7 +146,7 @@
   {
     "id": "lake-bank",
     "name": "Wetland lake bank",
-    "world": "eldara",
+    "world": "astalor",
     "x": -228759.45315351838,
     "z": 629070.1560534821,
     "biome": 12,

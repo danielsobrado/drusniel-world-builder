@@ -262,7 +262,7 @@
       "selection": "existing coast fixture"
     },
     {
-      "id": "eldara-forest-reverse",
+      "id": "astalor-forest-reverse",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -271,12 +271,12 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Temperate deciduous forest",
+      "world": "astalor",
+      "name": "Astalor Temperate deciduous forest",
       "selection": "seeded choice of existing imported biome views"
     },
     {
-      "id": "eldara-taiga",
+      "id": "astalor-taiga",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -285,12 +285,12 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Taiga",
+      "world": "astalor",
+      "name": "Astalor Taiga",
       "selection": "seeded choice of existing imported biome views"
     },
     {
-      "id": "eldara-glacier",
+      "id": "astalor-glacier",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -299,12 +299,12 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Glacier",
+      "world": "astalor",
+      "name": "Astalor Glacier",
       "selection": "seeded choice of existing imported biome views"
     },
     {
-      "id": "eldara-wetland-reverse",
+      "id": "astalor-wetland-reverse",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -313,8 +313,8 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Wetland",
+      "world": "astalor",
+      "name": "Astalor Wetland",
       "selection": "seeded choice of existing imported biome views"
     }
   ],
@@ -6248,7 +6248,7 @@
       }
     },
     {
-      "id": "eldara-forest-reverse",
+      "id": "astalor-forest-reverse",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -6257,8 +6257,8 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Temperate deciduous forest",
+      "world": "astalor",
+      "name": "Astalor Temperate deciduous forest",
       "selection": "seeded choice of existing imported biome views",
       "canonical": {
         "x": -7134127,
@@ -6664,7 +6664,7 @@
       }
     },
     {
-      "id": "eldara-taiga",
+      "id": "astalor-taiga",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -6673,8 +6673,8 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Taiga",
+      "world": "astalor",
+      "name": "Astalor Taiga",
       "selection": "seeded choice of existing imported biome views",
       "canonical": {
         "x": -982683,
@@ -7080,7 +7080,7 @@
       }
     },
     {
-      "id": "eldara-glacier",
+      "id": "astalor-glacier",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -7089,8 +7089,8 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Glacier",
+      "world": "astalor",
+      "name": "Astalor Glacier",
       "selection": "seeded choice of existing imported biome views",
       "canonical": {
         "x": -2747061,
@@ -7496,7 +7496,7 @@
       }
     },
     {
-      "id": "eldara-wetland-reverse",
+      "id": "astalor-wetland-reverse",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -7505,8 +7505,8 @@
       "mode": "player",
       "heightAboveGround": 1.7,
       "fov": 68,
-      "world": "eldara",
-      "name": "Eldara Wetland",
+      "world": "astalor",
+      "name": "Astalor Wetland",
       "selection": "seeded choice of existing imported biome views",
       "canonical": {
         "x": 993673,
@@ -8027,35 +8027,35 @@
       "sha256": "69b17205134ef886f194a2261ba3ef341b0fa310b03a4ff51f2fc7683b8ec45c"
     },
     {
-      "path": "eldara-forest-reverse.png",
+      "path": "astalor-forest-reverse.png",
       "sha256": "b7475e126affc732f6b837b8dfab2273d16ba32954ae91046d8cfac6819226f2"
     },
     {
-      "path": "eldara-forest-reverse-hud.png",
+      "path": "astalor-forest-reverse-hud.png",
       "sha256": "c23f4cbaeb38c96df27a4de719c341b7f189c8278b62e1077a9e4c73bf3d8823"
     },
     {
-      "path": "eldara-taiga.png",
+      "path": "astalor-taiga.png",
       "sha256": "0171574a0c6b31934c8307fd05f0744c1f7baab7b8aefbf22934770b288d284b"
     },
     {
-      "path": "eldara-taiga-hud.png",
+      "path": "astalor-taiga-hud.png",
       "sha256": "be57946dad25974ad8a0efe8a039d26c7296748e7407bf6fb606330366be656e"
     },
     {
-      "path": "eldara-glacier.png",
+      "path": "astalor-glacier.png",
       "sha256": "910334f641ee1ecb8e5a8ca4a2c47e4175b234ecd6f86c442cc16fe51f9513c6"
     },
     {
-      "path": "eldara-glacier-hud.png",
+      "path": "astalor-glacier-hud.png",
       "sha256": "b09ba5964fe8c12266f1d187512a790cf16da321a4a3af6d9f0076fec6267dc4"
     },
     {
-      "path": "eldara-wetland-reverse.png",
+      "path": "astalor-wetland-reverse.png",
       "sha256": "0de054ea94e039d4575fe3a234559b2254756af1f2314582280642662f3070df"
     },
     {
-      "path": "eldara-wetland-reverse-hud.png",
+      "path": "astalor-wetland-reverse-hud.png",
       "sha256": "36069eb7220fa6205fb46c57f166e651f35abe52767118a5fde1e4284f50c11e"
     }
   ],

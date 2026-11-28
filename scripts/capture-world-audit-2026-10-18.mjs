@@ -52,7 +52,7 @@ while (!replay && found.size < 12 && sampled < 1000000) {
     yaw: next() * Math.PI * 2, pitch: -.08, mode: 'player', heightAboveGround: 1.7, fov: 68 });
 }
 if (!replay && found.size !== 12) throw new Error(`Only found ${found.size} land biomes after ${sampled} candidates.`);
-const shore = replay ? { map: replay.map ?? 'maps/Eldara Full 2026-07-23-20-37.json' }
+const shore = replay ? { map: replay.map ?? 'maps/Astalor Full 2026-07-23-20-37.json' }
   : JSON.parse(await readFile(path.join(root, 'docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json'), 'utf8'));
 let poses = replay ? replay.requestedPoses.map(pose => ({ ...pose }))
   : [...found.values()].sort((a, b) => a.expectedBiomeId - b.expectedBiomeId);
@@ -61,7 +61,7 @@ poses.push(...shore.marine.map(p => ({ ...p, world: 'procedural', name: 'Marine 
 for (const biome of [6, 9, 11, 12]) {
   const choices = shore.imported.filter(p => p.expectedBiomeId === biome);
   const pose = choices[Math.floor(next() * choices.length)];
-  poses.push({ ...pose, fov: pose.fov ?? 68, world: 'eldara', name: `Eldara ${names[biome]}`,
+  poses.push({ ...pose, fov: pose.fov ?? 68, world: 'astalor', name: `Astalor ${names[biome]}`,
     selection: 'seeded choice of existing imported biome views' });
 }
 }

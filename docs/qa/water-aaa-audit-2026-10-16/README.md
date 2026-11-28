@@ -26,7 +26,7 @@ Coordinates are canonical camera X/Z in meters, rounded for display; use the man
 | Forest river | Temperate deciduous forest `6` | -6524344.3, 1768763.1 | River / 6.012 | [Clean](river-06.png) · [HUD](river-06-hud.png) |
 | Lake bank | Wetland `12` | -228759.5, 629070.2 | Lake / 1.672 | [Clean](lake-bank.png) · [HUD](lake-bank-hud.png) |
 
-The first eight views use the procedural world; the last five use `maps/Eldara Full 2026-07-23-20-37.json`. Several procedural ocean inlets look like ponds in these compositions. They remain ocean-kind water; the imported captures provide actual rivers and a lake. Distant land is visible in the deep-sea view.
+The first eight views use the procedural world; the last five use `maps/Astalor Full 2026-07-23-20-37.json`. Several procedural ocean inlets look like ponds in these compositions. They remain ocean-kind water; the imported captures provide actual rivers and a lake. Distant land is visible in the deep-sea view.
 
 ## What to improve first
 

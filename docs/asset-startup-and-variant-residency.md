@@ -9,7 +9,7 @@ dimension.
 ## The regression
 
 Startup had grown slow enough to be reported as "loading a map takes a very
-long time". The map load itself was not the cause. Measured against the Eldara
+long time". The map load itself was not the cause. Measured against the Astalor
 Azgaar export (7.3 MB) in the running editor:
 
 | phase | ms |

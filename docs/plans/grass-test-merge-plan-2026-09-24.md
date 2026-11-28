@@ -55,7 +55,7 @@ deterministic per-page hashing in the chunk worker.
    never whole-world.
 3. **Coordinates.** Shader noise, wave clocks and flow phases use canonical world coordinates
    with the same floating-origin offset contract as `sky.cloudWorldScale`. Anything periodic
-   is wrapped (`mod` of tile size) so precision holds at planet scale (Eldara ≈ 16,600 km).
+   is wrapped (`mod` of tile size) so precision holds at planet scale (Astalor ≈ 16,600 km).
 4. **Regional effects are weights, not bounds.** grass-test gates snow country, jungle and coast
    by map regions. Here, those weights come from a camera-local sample of biome ID,
    elevation and shore distance, smoothed over time (e.g. `SnowRegionTracker`).
@@ -268,7 +268,7 @@ visible through canopy; `CharacterView` perf unchanged when the drow is selected
 7. **Mouth handover:** blend river → ocean kind over the last 2.5 m of fall and sink
    near-sea apron ground 0.35 m (shoal) in `WaterTerrainModel`, so estuaries don't end in a sand bar.
 
-Acceptance: the tallest fall in Eldara reads as falling water from 300 m; mist ≤ 0.1 ms GPU
+Acceptance: the tallest fall in Astalor reads as falling water from 300 m; mist ≤ 0.1 ms GPU
 up close; no chunk-border seams in fall shading; hitch count A/B unchanged.
 
 ### 5.3 Phase 3: Lakes (≈4–6 days; requires a decision)
@@ -430,7 +430,7 @@ P0 foundations ──► P1 characters
 - **Milestone A, "walk the world":** P0 + P1 + P9 footsteps. You pick a hero, they're grounded
   and audible.
 - **Milestone B, "water you remember":** P2 + P4 (+ P3 if approved).
-- **Milestone C, "seasons of Eldara":** P5 + P7 + P8.
+- **Milestone C, "seasons of Astalor":** P5 + P7 + P8.
 - ~~**Milestone D, "living towns":** P6.~~ Dropped 2026-09-27 with the NPC phase.
 
 ## 7. Decisions (resolved 2026-09-24)
@@ -591,29 +591,29 @@ reasoned, not measured, because this pass had no GPU machine.
   yet: their `positionNode` has no per-tree world position to sample with.
 - **2026-09-24, water domain v3: falls and lakes (P2 + P3).** Worlds must be re-imported.
   - *River levels and falls:* Azgaar river points sit about 100 km apart. A straight
-    surface between them floated over the valleys in between: 21 % of Eldara's river
+    surface between them floated over the valleys in between: 21 % of Astalor's river
     length was more than 2 m above the ground, and up to 411 m. Levels are now traced
     along the terrain every `river.profileStepMeters` (100 m) as a running minimum, and
     a lake a river runs through caps its level (`RiverReachProfile`). Now 1.2 % floats,
     by at most 5 m. Where the trace drops at least `falls.minimumHeight` within one step,
     that drop becomes a waterfall, split into a cascade above `maximumHeight`. The
-    carved bed follows the falls, so each face is a real cliff. On Eldara that gives 721
+    carved bed follows the falls, so each face is a real cliff. On Astalor that gives 721
     falls on 57 reaches, median 5 m and at most 22 m. Building the traced profile adds
     no measurable time. `RiverChannel` now indexes only the blocks its channel crosses.
-    The old bounding-box enumeration overflowed a `Map` on Eldara.
+    The old bounding-box enumeration overflowed a `Map` on Astalor.
   - *Gorges (2026-09-25):* where an Azgaar path crosses a ridge, the river used to cut a
     slot only as wide as its channel. 11 % of river length ran more than 50 m below the
     ground. `RiverValley` now holds the ground beside every channel under a slope ceiling
     (`river.valleySlope`, 0.7). Its reach follows the cut on the centre line (up to
     `valleyReachMeters`), so walls climb all the way out before the terrain takes over. A
     levee (`leveeHeight`, `leveeWidthMeters`) keeps low ground beside the channel above the
-    water. Lakes and valleys share `BankProfile`. On Eldara the deepest gorges (≈630 m)
+    water. Lakes and valleys share `BankProfile`. On Astalor the deepest gorges (≈630 m)
     now have walls of exactly 0.7, where the worst slope used to be 3.7. The coarse 512 m
     valley index holds 495 k keys, and model build time is unchanged.
   - *Lakes:* Azgaar stores lakes as low marine cells, which rasterized as sea-level pits.
     The import now rasterizes lake cells as land at the lake's level, in the biome around
     them (`AzgaarLakes`), and keeps each lake's height and outline. `LakeBodies`:
-    - fills each lake at the level its Azgaar height maps to (Eldara: 0.3–54 m), with
+    - fills each lake at the level its Azgaar height maps to (Astalor: 0.3–54 m), with
       noise applied to the shoreline;
     - carves a bed up to 18 m deep and raises a 1.5 m bank so a lake cannot spill;
     - holds nearby hills to `shoreSlope` (0.3). Azgaar outlines follow cells, not the
@@ -632,7 +632,7 @@ reasoned, not measured, because this pass had no GPU machine.
     importer now stamps the active domain.
   - *Lake inflow:* where a river still stands above a lake's level, the river owns the
     water, so a fall at the shore runs down into the lake unbroken.
-  - *Verified in the app* (a private Chromium on Eldara, re-imported):
+  - *Verified in the app* (a private Chromium on Astalor, re-imported):
     - A 15.5 m fall on open river shows its whitewater face across the channel, with
       spray at its foot. Six mist slots were live, four of them in view.
     - The flow textures around it carry the fall and plunge weights: 1,159 fall texels
@@ -704,7 +704,7 @@ reasoned, not measured, because this pass had no GPU machine.
     the case with the swell off. It is flagged as its own task.
 - **2026-09-25, P5 snow: accumulation, grass gate, and a culling bug.**
   - *Snow cover (`SnowAccumulation`):* replaces the 26 m snow line, which whitened
-    most of Eldara (land median 74 m). Snow now follows altitude (from 700 m, full by
+    most of Astalor (land median 74 m). Snow now follows altitude (from 700 m, full by
     950 m), biome (glacier full, tundra 0.7 by tile id, which is the Azgaar biome id),
     slope, and wind (windward faces scoured, lee faces loaded). Hollows hold more, and
     noise breaks the edge into drifts. The near bake and the far terrain use the same
@@ -762,7 +762,7 @@ reasoned, not measured, because this pass had no GPU machine.
 
 \n    This stands in for `RegionalWeights` (§4.3). Tile sampling is synchronous on
     cached generator blocks.
-  - Verified in the app (Eldara, own Chromium):
+  - Verified in the app (Astalor, own Chromium):
     - forest bed at 0.35; heavy rain at 0.9 intensity, with the birds cut to 0.1;
     - 72 m from a 22 m fall: roar 0.41, shore bed 0.25, pan −0.77 after turning
       around;
@@ -772,7 +772,7 @@ reasoned, not measured, because this pass had no GPU machine.
 \n    Not done: true 3D (HRTF) emitters. Stereo pan is enough for an ambient layer.
 - **2026-09-25, P7 cloud shadows and a sky precision fix.**
   - *Sky (pre-existing bug):* the dome sampled its cloud noise at canonical camera
-    metres ÷ 180. On Eldara that is around 90,000 units, where the noise hash
+    metres ÷ 180. On Astalor that is around 90,000 units, where the noise hash
     (`fract(p × 127.1)`) has no float32 bits left, so clouds collapsed into radial
     streaks or vanished. The camera coordinate is now wrapped in double precision
     every 512 cloud units (92 km; crossing a wrap shifts the field once), and the
@@ -914,7 +914,7 @@ reasoned, not measured, because this pass had no GPU machine.
     0.25 µs, about 0.4 ms more per 65×65-vertex chunk off the main thread; lowland
     is unchanged. `qa:perf` scenarios don't use an imported world, so a direct
     benchmark stood in for the A/B.
-  - Verified by importing Eldara with and without ridges and standing at the same
+  - Verified by importing Astalor with and without ridges and standing at the same
     1,240 m spot: a crest now cuts the skyline where the smooth import is a
     plateau.
   - *Couloirs and crest notches (2026-09-28, §11 item 11):* both ported onto the
@@ -953,7 +953,7 @@ reasoned, not measured, because this pass had no GPU machine.
   - Verified on the glacier: light regional snow with the weather off, no line grid
     looking down, and heavy snow at 1.2.
 - **2026-09-25, P8 graded trails (terrain change, re-import).** Azgaar's land routes
-  (Eldara: 310 trails and 4 roads, points about 70 km apart; sea routes left out)
+  (Astalor: 310 trails and 4 roads, points about 70 km apart; sea routes left out)
   are imported into the macro source (`import/AzgaarRoutes.js`) and graded into
   the ground by `world/TrailGrading.js`.
   - Each route is smoothed with a Catmull-Rom spline, then split into 1 km arcs,
@@ -990,7 +990,7 @@ reasoned, not measured, because this pass had no GPU machine.
     parrots, cicadas, frogs and mosquitoes.
   - Water kinds are sampled on rings out to 200 m. Waves and gulls come in on low
     ground by the sea and pan toward the sea's bearing.
-  - Verified on an Eldara beach: surf bed at 0.39, waves and gulls calling from the
+  - Verified on an Astalor beach: surf bed at 0.39, waves and gulls calling from the
     sea side, and 24 sample requests, all 200.
 - **2026-09-27, entering player mode: 17 s → 1 s.** The first walk-mode frame took
   about 17 s, and the terrain policy made every later orbit/walk switch cost the same.
@@ -1014,7 +1014,7 @@ reasoned, not measured, because this pass had no GPU machine.
     data as a grey sheet.
   - A background prewarm of the walk path was tried and removed. It froze orbit for
     about 20 s and saved nothing.
-  - Measured on Eldara: first walk frame 16.5 s → 0.8–1.1 s (one terrain build,
+  - Measured on Astalor: first walk frame 16.5 s → 0.8–1.1 s (one terrain build,
     ~0.6 s; other slots 0 ms). Verified all 49 slots bind their own data by swapping
     every slot's height texture and seeing every chunk move.
   - Follow-up: after an import, the far-terrain ring job samples forest habitat and
@@ -1534,7 +1534,7 @@ reasoned, not measured, because this pass had no GPU machine.
     lit output of the terrain, grass and tree materials (`jungleMistOutput.js`) so
     nothing standing in it stays crisp; the shimmer warps the sky dome's low band. Both
     are driven from `AmbientEffectsSystem` (jungle / inland-desert weight × preset ×
-    strength; the mist's ground eases under the view). Eldara has neither jungle (5,
+    strength; the mist's ground eases under the view). Astalor has neither jungle (5,
     7) nor hot desert (1), so neither switches on there by itself; forced on in a
     temperate rainforest they render as intended, 63.6 → 62.2 fps with mist on and no
     change for the shimmer (vsync-bound, so an upper bound on the cost, not a figure).
@@ -1726,7 +1726,7 @@ fold's visual weight (and the `bladeHeight × width` transfer factor) is reasone
     blades the player wades through fold over and stand back up.
   - *Hi-Z occlusion* (render/occlusion, three 0.186.1 — already in the tree): the
     donor's GpuOcclusion, with the terrain occluding through per-chunk proxies of
-    its hills. It works — 5–7 draws / ~57k triangles hidden in an Eldara valley —
+    its hills. It works — 5–7 draws / ~57k triangles hidden in an Astalor valley —
     but costs 1–9% frame rate there and ~5% on open ground, because the costly draws
     (meadow batches, wind-displaced instanced trees and rocks) are not candidates.
     Shipped `enabled: false` with those numbers in the config comment.
@@ -1736,7 +1736,7 @@ fold's visual weight (and the `bladeHeight × width` transfer factor) is reasone
 
 - **2026-09-28 — minimap relief; the meadow trail confirmed on screen.**
   - The minimap was shaded by absolute altitude (1 + height × 0.025, clamped at
-    1.25), so on Eldara — land hundreds of metres up — every pixel saturated to one
+    1.25), so on Astalor — land hundreds of metres up — every pixel saturated to one
     brightness and the dial read as a flat biome disc. It now takes grass-test's
     relief (map/minimapRelief.js): land lit from the north-west by its slope (0.62
     shadowed … 1.12 lit), faint contours every 20 m, biome colours settled 18%
@@ -1783,13 +1783,13 @@ fold's visual weight (and the `bladeHeight × width` transfer factor) is reasone
   terrain applies it after the footprints (`stylizedSurface.snowWake.enabled`).
   - Two fixes on first sight, both in the shader. The triangular per-sample
     kernel dipped to half strength between samples and drew a dashed row; it is
-    now full strength for half a step either side. And Eldara's canonical
+    now full strength for half a step either side. And Astalor's canonical
     coordinates reach ~800 km, where float32 steps by 6 cm — the trench edges
     would stair-step — so samples are stored relative to a whole-metre anchor and
     the fragment is taken against it as whole-minus-whole, which is exact.
   - The 24-sample loop runs only on baked snow, with a trail that has moved, and
     inside a circle around the trail; everywhere else it is one compare. Verified
-    on an Eldara glacier (a continuous banked trench behind a sprint, gone with the
+    on an Astalor glacier (a continuous banked trench behind a sprint, gone with the
     wake zeroed). chunk-cross A/B, warmup 8: 77.9 fps on, 74.4 off — noise.
   - Item 5 (trampling) is met by the meadow's interaction map for the default
     grass system; `stylized/trample/` stays staged for the clump system, which is
@@ -1920,7 +1920,7 @@ fold's visual weight (and the `bladeHeight × width` transfer factor) is reasone
   - *River water.* config/water-visual.yaml takes the donor's inland constants:
     teal `#246d70`/`#164e52`, its absorption (0.62/0.24/0.17 per metre), its foam
     colour `#d6e7db`, no cell pattern and no caustics. Still open: its flow-mapped
-    detail normals, sun glint and shore/bank foam placement. Eldara has no brook at
+    detail normals, sun glint and shore/bank foam placement. Astalor has no brook at
     the donor's scale (every river ≥ 6 m deep), and long teleports in walk mode stall
     on "Preparing the ground… 1 chunk left" at 0 fps, so a river close-up could not
     yet be verified on screen.
@@ -1957,7 +1957,7 @@ fold's visual weight (and the `bladeHeight × width` transfer factor) is reasone
   - *Budget.* Water fragment shaders are 44–56 KB with 5–6 samplers (one more:
     the shared detail texture). No viewport-texture nodes were added. The largest
     shader is still the terrain's, 268 KB and 16 samplers.
-  - *Verified on screen* on an Eldara river (cell −2094883, −350032, temperate
+  - *Verified on screen* on an Astalor river (cell −2094883, −350032, temperate
     rainforest), from its bank: fine glitter on the current, foam along the
     shallows. Still visible and not from this change: the carved valley walls
     between grass and river render as a flat blue-grey band (also in the
@@ -2032,7 +2032,7 @@ fold's visual weight (and the `bladeHeight × width` transfer factor) is reasone
   - *The "donor stones don't draw" blocker was a false negative.* At the spawn all
     eleven `SM_Rocks` prototypes have valid geometry (57–860 vertices, position,
     normal and uv only — well under the vertex-buffer ceiling) and draw 38–68
-    instances each; the tall slab is on screen beside the spawn. The Eldara spot
+    instances each; the tall slab is on screen beside the spawn. The Astalor spot
     where it looked invisible most likely showed a buried or proxy-band stone.
   - *Ground-detail wind:* the tuft height is now a uniform. Baked in as a
     constant, every prototype's shader text differed and each compiled its own

@@ -294,15 +294,15 @@ mud, damp ground and the existing aquatic-plant layer:
 
 ### Imported regression poses and unreviewed landscape scope
 
-Use these fixed canonical Eldara seed points, import hash recorded by VQ-03:
+Use these fixed canonical Astalor seed points, import hash recorded by VQ-03:
 
 | ID | X, Z | Purpose |
 | --- | --- | --- |
-| `eldara-forest` | -7134127, 1081563 | woodland and long-coordinate materials |
-| `eldara-taiga` | -982683, 371387 | conifers and treeline |
-| `eldara-tundra` | -4995717, 970835 | tundra material and elevation snow |
-| `eldara-glacier` | -2747061, 316061 | imported ID 11 and near/far terrain seam |
-| `eldara-wetland` | 993673, 1701497 | wet surface and shore-facing vegetation |
+| `astalor-forest` | -7134127, 1081563 | woodland and long-coordinate materials |
+| `astalor-taiga` | -982683, 371387 | conifers and treeline |
+| `astalor-tundra` | -4995717, 970835 | tundra material and elevation snow |
+| `astalor-glacier` | -2747061, 316061 | imported ID 11 and near/far terrain seam |
+| `astalor-wetland` | 993673, 1701497 | wet surface and shore-facing vegetation |
 
 At each point first capture yaw 0 and π, pitch -0.08 at ground+1.7 m. Then
 capture a fly overview at the same X/Z, ground+80 m, yaw 0, pitch -0.45,
@@ -310,7 +310,7 @@ FOV 60°. Do not replace uninteresting or awkward views. Record biome IDs;
 if the checked-in map no longer matches the expected ID, fail provenance and
 regenerate an explicitly versioned manifest rather than silently relabeling.
 
-For shore-facing views at original 05/12 and `eldara-wetland`, sample the
+For shore-facing views at original 05/12 and `astalor-wetland`, sample the
 existing water field on an 8 m grid in a 1024 m radius, find the nearest water
 point with depth≥0.5 m, and aim toward it (same standing position). Ties sort
 by squared distance, then canonical Z, then X. If no such point exists, retain

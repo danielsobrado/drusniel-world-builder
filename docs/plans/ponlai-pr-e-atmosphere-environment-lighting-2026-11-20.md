@@ -638,7 +638,7 @@ Do **not** “repair” blown out snow by changing all post tone curves or addin
 
 ### 9.5 Regional sky diversity
 
-The physical clear-air medium can be reused worldwide, but **look adaptation** must preserve regional character: humid rainforest, dry desert, windy coast, bog, taiga, glacier and imported Eldara backgrounds. A single global aerosol coefficient is physically plausible as a baseline but may flatten climate differences. Model an **authored bounded weather/region medium multiplier**, updated from [D6] regional climate. A physical aerosol **medium** change requires careful LUT invalidation and rate limiting; do not rebake for every metre traveled across a streaming boundary. Smooth/bucket the parameter with the existing `SkyLookController` transition times.
+The physical clear-air medium can be reused worldwide, but **look adaptation** must preserve regional character: humid rainforest, dry desert, windy coast, bog, taiga, glacier and imported Astalor backgrounds. A single global aerosol coefficient is physically plausible as a baseline but may flatten climate differences. Model an **authored bounded weather/region medium multiplier**, updated from [D6] regional climate. A physical aerosol **medium** change requires careful LUT invalidation and rate limiting; do not rebake for every metre traveled across a streaming boundary. Smooth/bucket the parameter with the existing `SkyLookController` transition times.
 
 ## 10. YAML configuration — one owner, no duplicate registry
 

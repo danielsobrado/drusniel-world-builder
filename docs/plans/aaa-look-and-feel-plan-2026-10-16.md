@@ -29,7 +29,7 @@ more consistent material scale, habitat structure and visual hierarchy.
   1–12. LCG seed `20261016`; first occurrence of each ID among 13,438 candidate
   cell pairs in `[-8000,8000)` on each axis. Accepted points also consume a
   random yaw. This is biome-stratified sampling, not an area-weighted survey.
-- Two existing coastal fixtures and four seeded choices of existing Eldara
+- Two existing coastal fixtures and four seeded choices of existing Astalor
   fixtures supplement those positions. These six are freshly rendered images
   at known coordinates, not six newly randomized locations. The coast camera
   stands on grassland ID 4; marine water is visible, but this is not an ID 0
@@ -113,14 +113,14 @@ Use the linked native PNGs below for fine detail; the sheet is a browsing aid.
 | [12 · Wetland](../qa/visual-audit-2026-10-16/random-12.png) · 15809, 8475 | Large orange/gold crowns and useful trunk framing over bright green short grass. No open water is visible in this heading. | Q2, Q3. Add damp-floor/hydrology cues where supported, with deliberate canopy palette. |
 | [Coast · eye level](../qa/visual-audit-2026-10-16/marine-coast.png) · −2077, 1731 | Broad dark wave planes, angular shallow edges, very cyan water and a thick bright bank band; repeated upright spray puffs. | Q3. Resolve geometry/normal/foam/spray contributions individually. |
 | [Coast · overview](../qa/visual-audit-2026-10-16/marine-coast-overview.png) · −2077, 1731 | More coherent depth and wave shading, visible submerged rocks and soft foam patches. Far shore trees are strongly washed out. | Q3, Q6. Preserve these strengths while fixing the eye-level failure. |
-| [Eldara · forest](../qa/visual-audit-2026-10-16/eldara-forest-reverse.png) · −7134127, 1081563 | Strong broad crowns and a winding bare strip. Short grass dominates the floor; faceted distant crowns remain obvious between near trees. | Q0, Q1, Q2. Validate at large canonical coordinates. |
-| [Eldara · taiga](../qa/visual-audit-2026-10-16/eldara-taiga.png) · −982683, 371387 | Sparse thin nearby crowns against a dense band of pointed proxy shapes; short grass and exposed ground repeat across a flat field. | Q0 first, then Q2. This is a strong near/far representation comparison. |
-| [Eldara · glacier](../qa/visual-audit-2026-10-16/eldara-glacier.png) · −2747061, 316061 | Treeless snow, visible surface relief and active snowfall, but very little middle-distance or horizon structure in this direction. | Q5, Q6. Inspect actual surrounding relief before proposing landform changes. |
-| [Eldara · wetland](../qa/visual-audit-2026-10-16/eldara-wetland-reverse.png) · 993673, 1701497 | Darker, taller growth under a distinct heavy gray sky. The scene remains a broad continuous sward with isolated stones and a pale bare strip. | Q2, Q3. Preserve mood; add habitat-shaped openings and damp-ground cues. |
+| [Astalor · forest](../qa/visual-audit-2026-10-16/astalor-forest-reverse.png) · −7134127, 1081563 | Strong broad crowns and a winding bare strip. Short grass dominates the floor; faceted distant crowns remain obvious between near trees. | Q0, Q1, Q2. Validate at large canonical coordinates. |
+| [Astalor · taiga](../qa/visual-audit-2026-10-16/astalor-taiga.png) · −982683, 371387 | Sparse thin nearby crowns against a dense band of pointed proxy shapes; short grass and exposed ground repeat across a flat field. | Q0 first, then Q2. This is a strong near/far representation comparison. |
+| [Astalor · glacier](../qa/visual-audit-2026-10-16/astalor-glacier.png) · −2747061, 316061 | Treeless snow, visible surface relief and active snowfall, but very little middle-distance or horizon structure in this direction. | Q5, Q6. Inspect actual surrounding relief before proposing landform changes. |
+| [Astalor · wetland](../qa/visual-audit-2026-10-16/astalor-wetland-reverse.png) · 993673, 1701497 | Darker, taller growth under a distinct heavy gray sky. The scene remains a broad continuous sward with isolated stones and a pale bare strip. | Q2, Q3. Preserve mood; add habitat-shaped openings and damp-ground cues. |
 
 The selection deliberately accepts the first matching cell, including edges.
 Use these views to discover problems; add interior samples before claiming an
-entire biome has the same appearance. The paired Eldara fixtures are useful
+entire biome has the same appearance. The paired Astalor fixtures are useful
 for revisiting older observations, but this task is not a controlled historical
 A/B: runtime, assets and live wind/particle frames have changed.
 
@@ -186,7 +186,7 @@ the signatures diverge, or prove that every visible tree issue has that cause.
 **Implementation steps:**
 
 1. Compare the runtime prototype signature and shipped manifest signature on
-   both procedural and Eldara loads. Record prototype count, atlas count,
+   both procedural and Astalor loads. Record prototype count, atlas count,
    compression/source, source/config hashes and any warnings. Separate an
    invalidated bake from asset-loader/configuration nondeterminism.
 2. Fix the actual signature/input mismatch. If a valid asset change requires
@@ -299,7 +299,7 @@ not proof that the biome classifier or all forest coverage is wrong.
    temperate rainforest moss and cooler shade; taiga conifer cohorts and
    needle/moss openings. Derive exceptional orange/dry crowns from defined
    species/season/region rules rather than arbitrary per-tree hue noise.
-6. Replay far-origin Eldara fixtures and eviction/revisit routes. Material
+6. Replay far-origin Astalor fixtures and eviction/revisit routes. Material
    features and placement identity must survive floating-origin changes.
 
 **Owners:** [ForestBiomeProfiles.js](../../src/editor/stylized/forest/ForestBiomeProfiles.js),
@@ -319,7 +319,7 @@ uniform tree-age field, detached roots or new full-resident rebuild path.
 
 **Evidence:** the eye-level coast contains large dark surface planes, angular
 nearshore contours, repeated pale spray puffs and a broad bright bank stripe.
-The overview communicates depth and submerged rocks more successfully. Eldara
+The overview communicates depth and submerged rocks more successfully. Astalor
 wetland has a stronger damp atmosphere than procedural 12, but both directions
 need closer ground/hydrology inspection before prescribing new water features.
 

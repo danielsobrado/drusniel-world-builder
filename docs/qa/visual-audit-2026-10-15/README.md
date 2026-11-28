@@ -23,13 +23,13 @@ in the plan and remain unresolved by this review.
 - Procedural world seed `918273`, generator version 1, height scale 24 m.
 - Two targeted views reuse the established marine-coast fixture, with the camera
   on grassland ID 4. Four more use the same random stream to select an existing
-  Eldara forest, taiga, glacier and wetland view. These six are supplements, not
+  Astalor forest, taiga, glacier and wetland view. These six are supplements, not
   newly randomized map coordinates.
 - Frozen runtime `a0c9b11c0fdea6c14ea6c58e6e3951713c53c313`, served on local port
   5176 using the existing immutable-source server. Runtime source, configuration
   and tree-atlas hashes are retained in [source-snapshot.json](source-snapshot.json).
   That server freezes its declared files; other assets are served from the
-  checkout. No asset files were edited during this audit. The Eldara map hash
+  checkout. No asset files were edited during this audit. The Astalor map hash
   and configuration hash are also recorded separately.
 - Windows headed Chromium, NVIDIA Lovelace hardware WebGPU, fallback false;
   viewport 1600 × 900, DPR 1. Player FOV 68°, pitch −0.08 radians. The coast

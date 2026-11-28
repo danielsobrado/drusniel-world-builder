@@ -27,7 +27,7 @@ test('neighbouring chunks carry the pattern straight across, except where it wra
 });
 
 test('strand coordinates keep centimetres at planet scale, where canonical metres do not', () => {
-  // A chunk millions of metres out on Eldara, and points inside it.
+  // A chunk millions of metres out on Astalor, and points inside it.
   const [centreX, centreZ] = [centre(-55_740), centre(18_331)];
   const [originX, originZ] = waterfallPatternOrigin(centreX, centreZ);
   let worst = 0;

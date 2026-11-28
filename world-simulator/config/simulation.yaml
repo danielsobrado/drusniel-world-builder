@@ -6,7 +6,7 @@ storage: data/scenarios            # one folder per scenario; git-ignored
 calendar:
   daysPerMonth: 30
   monthsPerYear: 12
-  startYear: source                # "source" = Azgaar settings.options.year (1212 on Eldara)
+  startYear: source                # "source" = Azgaar settings.options.year (1212 on Astalor)
 
 stepSizes: { day: 1, week: 7, month: 30, year: 360 }
 speeds: [1, 7, 30, 120]            # simulated days per real second while running

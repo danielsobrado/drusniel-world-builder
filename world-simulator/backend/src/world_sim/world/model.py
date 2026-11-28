@@ -24,6 +24,7 @@ class WorldModel:
     connectivity_by_id: dict[str, dict[str, Any]]
     npcs_by_id: dict[str, int]
     pilot_ids: frozenset[str]
+    renamed_from: dict[str, str] | None = None
 
 
 def _budget_for(audit: dict[str, Any], npc: dict[str, Any], target: int) -> dict[str, Any]:
@@ -58,4 +59,5 @@ def build_world_model(config: Config) -> WorldModel:
         connectivity_by_id={c["settlementId"]: c for c in connectivity["settlements"]},
         npcs_by_id={a["settlementId"]: a["npcs"] for a in budget["allocations"]},
         pilot_ids=frozenset(r["settlementId"] for r in pilot["roles"]),
+        renamed_from=source["renamedFrom"],
     )

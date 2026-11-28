@@ -1,12 +1,12 @@
-# Lore authority and Astalor ↔ Eldara crosswalk
+# Lore authority and Astalor ↔ Astalor crosswalk
 
-This document prevents **narrative geography** (the Astalor setting on drusniel.com) from being silently conflated with **map/import geography** (Azgaar map `Eldara`). A playable imported map may implement these places, but the names are not automatically interchangeable.
+This document prevents **narrative geography** (the Astalor setting on drusniel.com) from being silently conflated with **map/import geography** (Azgaar map `Astalor`). A playable imported map may implement these places, but the names are not automatically interchangeable.
 
 ## Authority hierarchy
 
 1. **Published narrative lore:** https://www.drusniel.com/ and specific nation articles below; canonical **names, themes, broad relationships**, not technical cell IDs.
 2. **Game's authored canonical cultural definitions:** `config/cultures.yaml`, including material, form, economy, rites, and ancestry/culture/polity separations.
-3. **Eldara map data:** `maps/Eldara Full 2026-07-23-20-37.json` and `docs/reference/eldara-local-cultures-populations.md`. Owns state/province/burg/cell positions and source culture mapping, NOT fantasy-world lore claims.
+3. **Astalor map data:** `maps/Astalor Full 2026-07-23-20-37.json` and `docs/reference/astalor-local-cultures-populations.md`. Owns state/province/burg/cell positions and source culture mapping, NOT fantasy-world lore claims.
 4. **New visual briefs here:** concrete asset proposals consistent with 1–3, but **not canon** until approved.
 
 ## Realm mapping

@@ -15,6 +15,13 @@
       "port": 5174
     },
     {
+      "name": "lod-0b",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "F:/drusniel-cache/lod-phase-0b-a3ddd517", "run", "dev", "--", "--port", "5173", "--strictPort"],
+      "port": 5173,
+      "autoPort": false
+    },
+    {
       "name": "dev-frozen",
       "runtimeExecutable": "npm",
       "runtimeArgs": [

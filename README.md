@@ -173,7 +173,7 @@ land elevation into dramatic, walkable mountains without shrinking the world or
 altering coastlines:
 
 - `import.azgaarVerticalExaggeration` multiplies land height (default `1`; at
-  `48`, Eldara's peaks reach roughly 2 km).
+  `48`, Astalor's peaks reach roughly 2 km).
 - `import.azgaarReliefExponent` (default `1`) concentrates height into peaks
   when greater than `1`, so plains stay flat while summits tower.
 

@@ -34,7 +34,7 @@ two-second scenery/grass recovery gate are reported separately.
 | Grassland | `chunk-cross`, x −1869, z −4003, yaw 142.55359°, pitch −4.58366° |
 | Closed rainforest | `chunk-cross`, x 12991, z −1419, yaw −44.97719°, pitch −4.58366°; the capture fixture has canopy coverage 0.9065 |
 | Forest | Documented `chunk-cross` benchmark, x 2005, z 2941 |
-| Town | Documented `settlement-approach`, imported Eldara burg 18 |
+| Town | Documented `settlement-approach`, imported Astalor burg 18 |
 
 The +0.25 ms render CPU / +0.20 ms GPU stage budgets are compared with the
 baseline mean, retaining both individual current samples. The user's 60 FPS

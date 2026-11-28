@@ -4,7 +4,7 @@ catalogId: drusniel-visual-identity-proposal-v1
 status: proposal-not-runtime-consumed
 authority:
   publishedLore: https://www.drusniel.com/the-regions-of-astalor/
-  map: maps/Eldara Full 2026-07-23-20-37.json
+  map: maps/Astalor Full 2026-07-23-20-37.json
   cultures: config/cultures.yaml
 independentDimensions:
 - narrativeRealm

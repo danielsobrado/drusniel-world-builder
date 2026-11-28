@@ -3,7 +3,7 @@
 ## Separation of dimensions (do not collapse)
 
 ```text
-worldLore       Astalor [narrative label] / worldMap Eldara [data label]
+worldLore       Astalor [narrative label] / worldMap Astalor [data label]
   └ realm       Lumeshire, Contia, Frostgard, Stonehold*, Elenoria, Grukmar, Umbra'kor, Wyrmreach
      └ stateId  Azgaar immutable state ID; lore/display alias separate
         └ provinceId / cellId / burgId / deterministic generated-village ID
@@ -34,8 +34,8 @@ worldLore       Astalor [narrative label] / worldMap Eldara [data label]
 ## Configuration record (proposal, NOT implemented)
 
 ```yaml
-id: place/eldara/42/1204
-source: { map: Eldara, azgaarStateId: 4, provinceId: 42, burgId: 1204 }
+id: place/astalor/42/1204
+source: { map: Astalor, azgaarStateId: 4, provinceId: 42, burgId: 1204 }
 lore: { realm: lumeshire, displayRealm: Lumeshire }
 society: { polity: lumeshire, culture: zuraldarr, localBranch: pass-wardens, faith: local-grove-rites }
 land: { biome: temperate-deciduous-forest, feature: mountain-pass, elevationBand: highland }

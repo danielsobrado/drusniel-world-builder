@@ -13,8 +13,8 @@ def pilot(model, seed=1212):
     return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212)
 
 
-def test_openings_hold_unemployment_and_traders_invest(eldara):
-    state, months = advance(pilot(eldara), 3600, eldara.config.rules)
+def test_openings_hold_unemployment_and_traders_invest(astalor):
+    state, months = advance(pilot(astalor), 3600, astalor.config.rules)
     assert months[-1]["unemployed"] < 400, "without openings the pilot reached about 1,200 people without work"
     opened = [b for s in state.settlements for b in s.society.businesses if b.openedDay is not None]
     assert opened and all(b.id.split(":")[-1].startswith("o") for b in opened)
@@ -26,9 +26,9 @@ def test_openings_hold_unemployment_and_traders_invest(eldara):
         assert t.scorecard.dividends > 0 and t.scorecard.invested > 0
 
 
-def test_a_traders_purse_accounts_for_every_flow(eldara):
-    start = pilot(eldara)
-    state, _ = advance(start, 1800, eldara.config.rules)
+def test_a_traders_purse_accounts_for_every_flow(astalor):
+    start = pilot(astalor)
+    state, _ = advance(start, 1800, astalor.config.rules)
     before = {t.id: t for t in start.trade.traders}
     for t in state.trade.traders:
         if t.id not in before:
@@ -39,9 +39,9 @@ def test_a_traders_purse_accounts_for_every_flow(eldara):
         assert c.livingCosts > 0, "every household lives off its purse"
 
 
-def test_debt_pushes_an_honest_enough_trader_to_smuggle(eldara):
-    cfg = eldara.config.economy
-    [market] = pilot(eldara).trade.markets
+def test_debt_pushes_an_honest_enough_trader_to_smuggle(astalor):
+    cfg = astalor.config.economy
+    [market] = pilot(astalor).trade.markets
     caravan = Caravan(id="caravan:1", kind="sale", marketId=15, fromId="a", fromName="A", toId="b", toName="B",
                       cargo={"Amber": 6.0}, value=46.0, departDay=0, arriveDay=7)
 
@@ -57,16 +57,16 @@ def test_debt_pushes_an_honest_enough_trader_to_smuggle(eldara):
     assert hidden(-100.0) > 0, "deep debt tips the same trader into hiding cargo"
 
 
-def test_unstaffed_businesses_without_evidence_close(eldara):
-    state = pilot(eldara)
+def test_unstaffed_businesses_without_evidence_close(astalor):
+    state = pilot(astalor)
     s = state.settlements[0]
     idle = Business(id="business:azgaar-burg:1:tavern:o9", settlementId=s.settlementId, kind="tavern", name="Idle tavern",
                     sector="services", profession="innkeeper", staff=4, wage=3, filled=0, idleMonths=5)
     proven = idle.model_copy(update={"id": "business:azgaar-burg:1:workshop-x:1", "evidence": "Azgaar records crafting of X"})
     society = s.society.model_copy(update={"businesses": [*s.society.businesses, idle, proven]})
     home = {"id": s.settlementId, "sourceId": s.sourceId, "name": s.name, "class": s.economy.settlementClass}
-    after, econ, _, incidents, restaff = turnover(society, s.economy, [], settlement=home, day=30, cfg=eldara.config.economy,
-                                                  society_cfg=eldara.config.society)
+    after, econ, _, incidents, restaff = turnover(society, s.economy, [], settlement=home, day=30, cfg=astalor.config.economy,
+                                                  society_cfg=astalor.config.society)
     ids = {b.id for b in after.businesses}
     assert idle.id not in ids and proven.id in ids, "Azgaar-evidenced businesses never close"
     assert restaff and econ.closed == 1 and incidents[0]["kind"] == "closed"

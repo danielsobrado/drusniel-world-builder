@@ -212,7 +212,7 @@ biomeLooks:
       water: { tint: '#b0a68c', desaturate: 0.4 }
       ripples: { speed: 0.9, fade: 1.6, splash: 0.8, drops: 10 }
       prints: { ground: 0.8, lifetime: 200, tint: '#6e665a' }
-    # Stonehold Badlands, the first custom biome of an Eldara import
+    # Stonehold Badlands, the first custom biome of an Astalor import
     # (import.azgaarRegionalBiomes): grey mesas and canyons, pale wind-blown sand
     # on the floors, frost in the hollows of a cold realm.
     32:

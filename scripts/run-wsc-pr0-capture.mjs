@@ -237,7 +237,7 @@ async function captureShot(page, {
 }
 
 async function runStillmeadowGroup(browser) {
-  console.log('=== Group: Stillmeadow (B14) + B18 + B10/B11/B12 Eldara ===');
+  console.log('=== Group: Stillmeadow (B14) + B18 + B10/B11/B12 Astalor ===');
   const { context, page } = await openFreshPage(browser, args.url);
   try {
     const approach = await page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
@@ -301,7 +301,7 @@ async function runStillmeadowGroup(browser) {
       });
     }
 
-    // Eldara biomes: B10 Tundra, B11 Alpine Snow, B12 Rocky Mountain, B18 Settlement-to-terrain.
+    // Astalor biomes: B10 Tundra, B11 Alpine Snow, B12 Rocky Mountain, B18 Settlement-to-terrain.
     for (const locId of ['B10', 'B11', 'B12', 'B18']) {
       const loc = camerasConfig.locations[locId];
       for (const [camId, pose] of Object.entries(loc.cameras)) {
@@ -883,7 +883,7 @@ async function computeMetricsAndGalleries() {
       tile('B11-C01-clear-D00-normal', 'B11 Alpine Snow'),
       tile('B12-C01-clear-D00-normal', 'B12 Rocky Mountain / Glacier'),
       tile('B13-C01-clear-D00-normal', 'B13 Coastline'),
-      tile('B14-C01-overcast-D00-normal', 'B14 Stillmeadow (Eldara burg 18)'),
+      tile('B14-C01-overcast-D00-normal', 'B14 Stillmeadow (Astalor burg 18)'),
       tile('B15-C01-clear-D00-normal', 'B15 Forest-to-Grassland'),
       tile('B18-C01-clear-D00-normal', 'B18 Settlement-to-Terrain'),
     ],

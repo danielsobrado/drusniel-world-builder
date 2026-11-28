@@ -6,7 +6,7 @@
 
 ## Start here
 
-1. Read [00-lore-and-map-crosswalk.md](00-lore-and-map-crosswalk.md): lore from **drusniel.com** is authoritative for narrative names, while `Eldara` Azgaar geography and `config/cultures.yaml` supply simulation IDs. Do **not** equate Astalor and Eldara automatically.
+1. Read [00-lore-and-map-crosswalk.md](00-lore-and-map-crosswalk.md): lore from **drusniel.com** is authoritative for narrative names, while `Astalor` Azgaar geography and `config/cultures.yaml` supply simulation IDs. Do **not** equate Astalor and Astalor automatically.
 2. Read [01-identity-taxonomy.md](01-identity-taxonomy.md): world → realm/state → province/place → canonical culture/branch → biome/terrain → settlement role → district → asset. **Faith, ancestry and polity are independent variables.**
 3. Select one [regional brief](regions), then a matching [area overlay](areas).
 4. Run the prompts in the regional file in order: **scene mood board** → **asset hero** → **same-object orthographic views** → **tileable material references**. See [02-image-to-3d-pipeline.md](02-image-to-3d-pipeline.md).

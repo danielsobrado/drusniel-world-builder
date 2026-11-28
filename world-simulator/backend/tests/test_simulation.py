@@ -29,27 +29,27 @@ def test_initial_cohorts_sum_to_the_imported_population():
         assert initial_cohorts(population, {"children": 0.33, "adults": 0.55, "elders": 0.12}).total == population
 
 
-def test_baseline_matches_the_audit(eldara):
-    state = pilot_state(eldara)
+def test_baseline_matches_the_audit(astalor):
+    state = pilot_state(astalor)
     assert [s.name for s in state.settlements] == ["Falanenerwin", "Sshanderi", "Vhaltha"]
-    assert all(s.population == eldara.settlements_by_id[s.settlementId]["population"] for s in state.settlements)
+    assert all(s.population == astalor.settlements_by_id[s.settlementId]["population"] for s in state.settlements)
     assert state.date.label == "1212-01-01"
-    assert state.world.sourceFingerprint == eldara.audit["identity"]["sourceFingerprint"]
+    assert state.world.sourceFingerprint == astalor.audit["identity"]["sourceFingerprint"]
 
 
-def test_stepping_at_once_equals_stepping_day_by_day(eldara):
-    rules = eldara.config.rules
-    at_once, _ = advance(pilot_state(eldara), 100, rules)
-    one_by_one = pilot_state(eldara)
+def test_stepping_at_once_equals_stepping_day_by_day(astalor):
+    rules = astalor.config.rules
+    at_once, _ = advance(pilot_state(astalor), 100, rules)
+    one_by_one = pilot_state(astalor)
     for _ in range(100):
         one_by_one, _ = advance(one_by_one, 1, rules)
     assert state_checksum(at_once) == state_checksum(one_by_one)
     assert at_once.date.label == "1212-04-11"
 
 
-def test_demography_conserves_accounting_over_ten_years(eldara):
-    start = pilot_state(eldara)
-    state, months = advance(start, 3600, eldara.config.rules)
+def test_demography_conserves_accounting_over_ten_years(astalor):
+    start = pilot_state(astalor)
+    state, months = advance(start, 3600, astalor.config.rules)
     assert len(months) == 120 and len(state.history) == 121
     for before, after in zip(start.settlements, state.settlements, strict=True):
         assert after.population == after.cohorts.total
@@ -57,25 +57,25 @@ def test_demography_conserves_accounting_over_ten_years(eldara):
         assert 0.8 < after.population / before.population < 1.3, "authored rates keep a decade plausible"
 
 
-def test_seeds_change_outcomes_and_reruns_do_not(eldara):
-    rules = eldara.config.rules
-    a, _ = advance(pilot_state(eldara, 1), 360, rules)
-    b, _ = advance(pilot_state(eldara, 1), 360, rules)
-    c, _ = advance(pilot_state(eldara, 2), 360, rules)
+def test_seeds_change_outcomes_and_reruns_do_not(astalor):
+    rules = astalor.config.rules
+    a, _ = advance(pilot_state(astalor, 1), 360, rules)
+    b, _ = advance(pilot_state(astalor, 1), 360, rules)
+    c, _ = advance(pilot_state(astalor, 2), 360, rules)
     assert state_checksum(a) == state_checksum(b)
     assert state_checksum(a) != state_checksum(c)
 
 
-def test_scope_resolution(eldara):
-    vhaltha = eldara.settlements_by_id["settlement:azgaar-burg:238"]
-    state_ids = resolve_scope(eldara, Scope(type="state", id=vhaltha["stateId"]), 120)
+def test_scope_resolution(astalor):
+    vhaltha = astalor.settlements_by_id["settlement:azgaar-burg:238"]
+    state_ids = resolve_scope(astalor, Scope(type="state", id=vhaltha["stateId"]), 120)
     assert len(state_ids) == 62 and vhaltha["id"] in state_ids
     with pytest.raises(ApiError, match="limit is 10"):
-        resolve_scope(eldara, Scope(type="state", id=vhaltha["stateId"]), 10)
+        resolve_scope(astalor, Scope(type="state", id=vhaltha["stateId"]), 10)
     with pytest.raises(ApiError, match="Unknown settlement"):
-        resolve_scope(eldara, Scope(type="settlements", settlementIds=["settlement:azgaar-burg:999999"]), 10)
+        resolve_scope(astalor, Scope(type="settlements", settlementIds=["settlement:azgaar-burg:999999"]), 10)
     with pytest.raises(ApiError, match="no settlements"):
-        resolve_scope(eldara, Scope(type="province", id="region:azgaar-province:0"), 10)
+        resolve_scope(astalor, Scope(type="province", id="region:azgaar-province:0"), 10)
 
 
 def test_manager_creates_baseline_steps_snapshots_restores_and_branches(fresh_model):

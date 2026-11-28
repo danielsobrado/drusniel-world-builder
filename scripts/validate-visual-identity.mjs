@@ -38,7 +38,7 @@ export function buildVisualIdentityYamlObject() {
     authority: {
       loreSite: 'https://www.drusniel.com/',
       culturesCatalog: 'config/cultures.yaml',
-      localPopulationsRef: 'docs/reference/eldara-local-cultures-populations.md',
+      localPopulationsRef: 'docs/reference/astalor-local-cultures-populations.md',
       assetBible: 'docs/asset-bible/README.md',
     },
     azgaarCultureSourceMap: AZGAAR_CULTURE_SOURCE_MAP,

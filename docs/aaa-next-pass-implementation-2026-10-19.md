@@ -47,7 +47,7 @@ on WebGPU and WebGL.
 N1 compresses the excess contribution of climate, regional personality and humid
 air to a bounded regional multiplier. Neutral and clear air are unchanged;
 time-of-day/weather density remains relative, and local valley mist retains its
-own volume. The captured Eldara wetland's multiplier was 4.61: the configured
+own volume. The captured Astalor wetland's multiplier was 4.61: the configured
 exponential distance term alone removed 98.6% of contrast at 300 m. The bounded
 regional contribution retains over 40% transmission there. That is an analytic
 control, not a screenshot or performance result. Sky/region tests pass.

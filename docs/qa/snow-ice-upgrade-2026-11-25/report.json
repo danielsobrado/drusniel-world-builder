@@ -444,7 +444,7 @@
       "name": "tundra-off-12",
       "requestedPose": {
         "id": "tundra",
-        "world": "eldara",
+        "world": "astalor",
         "x": 151523,
         "z": -49043,
         "yaw": 0.6,
@@ -468,7 +468,7 @@
       ],
       "pose": {
         "id": "tundra",
-        "world": "eldara",
+        "world": "astalor",
         "x": 151523,
         "z": -49043,
         "yaw": 0.6,
@@ -864,7 +864,7 @@
       "name": "glacier-off-12",
       "requestedPose": {
         "id": "glacier",
-        "world": "eldara",
+        "world": "astalor",
         "x": -282505,
         "z": -389567,
         "yaw": 1.2,
@@ -888,7 +888,7 @@
       ],
       "pose": {
         "id": "glacier",
-        "world": "eldara",
+        "world": "astalor",
         "x": -282505,
         "z": -389567,
         "yaw": 1.2,
@@ -1429,7 +1429,7 @@
       "name": "snow-eye-off-12",
       "requestedPose": {
         "id": "snow-eye",
-        "world": "eldara",
+        "world": "astalor",
         "x": -3291493,
         "z": -210747,
         "yaw": 2,
@@ -1453,7 +1453,7 @@
       ],
       "pose": {
         "id": "snow-eye",
-        "world": "eldara",
+        "world": "astalor",
         "x": -3291493,
         "z": -210747,
         "yaw": 2,
@@ -1849,7 +1849,7 @@
       "name": "tundra-snow-12",
       "requestedPose": {
         "id": "tundra",
-        "world": "eldara",
+        "world": "astalor",
         "x": 151523,
         "z": -49043,
         "yaw": 0.6,
@@ -1885,7 +1885,7 @@
       ],
       "pose": {
         "id": "tundra",
-        "world": "eldara",
+        "world": "astalor",
         "x": 151523,
         "z": -49043,
         "yaw": 0.6,
@@ -2286,7 +2286,7 @@
       "name": "snow-eye-snow-12",
       "requestedPose": {
         "id": "snow-eye",
-        "world": "eldara",
+        "world": "astalor",
         "x": -3291493,
         "z": -210747,
         "yaw": 2,
@@ -2316,7 +2316,7 @@
       ],
       "pose": {
         "id": "snow-eye",
-        "world": "eldara",
+        "world": "astalor",
         "x": -3291493,
         "z": -210747,
         "yaw": 2,

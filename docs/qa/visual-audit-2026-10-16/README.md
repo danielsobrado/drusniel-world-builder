@@ -4,7 +4,7 @@
 [Clean/HUD gallery](index.html) · [Contact sheet](contact-sheet.jpg)
 
 18 freshly captured views: 12 new random procedural locations covering all
-land-biome IDs 1–12, two coastal supplements and four imported Eldara views.
+land-biome IDs 1–12, two coastal supplements and four imported Astalor views.
 Each has an unchanged 1600 × 900 clean PNG and a successive HUD PNG. The JPEG
 contact sheet resizes and labels copies for browsing. No retouching, image
 generation or extra color grading was applied.
@@ -18,7 +18,7 @@ not visual-quality or performance acceptance.
 runtime signature `tree-impostor-v7-ddf715ab` differs from the manifest's
 `tree-impostor-v7-edb495ec`. A separate read-only browser probe at the same
 revision found 29 prototypes but **zero loaded atlases and zero impostor
-batches** on both procedural and Eldara worlds. Runtime baking is disabled.
+batches** on both procedural and Astalor worlds. Runtime baking is disabled.
 The resulting simplified distant trees are part of the captured current
 appearance. The capture runner monitors errors but does not fail on console
 warnings; the separate probe retains those warnings. See
@@ -32,7 +32,7 @@ warnings; the separate probe retains those warnings. See
   a random yaw. `X=(cellX+0.5)*2`, `Z=-(cellZ+0.5)*2` metres.
 - Generator seed 918273, version 1, height scale 24 m, sea level −1.5 m.
 - Coastal views reuse the established coast fixture; the camera cell is ID 4,
-  with marine water visible. The four Eldara views are seeded choices of
+  with marine water visible. The four Astalor views are seeded choices of
   existing forest/taiga/glacier/wetland fixtures, not newly random coordinates.
 - Headed Windows Playwright Chromium, hardware NVIDIA Lovelace WebGPU,
   fallback false. Viewport 1600 × 900, DPR 1. Player FOV 68°, pitch −0.08

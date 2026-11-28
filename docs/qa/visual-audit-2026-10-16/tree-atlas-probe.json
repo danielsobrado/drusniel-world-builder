@@ -89,7 +89,7 @@
       "atlasSources": []
     },
     {
-      "world": "eldara",
+      "world": "astalor",
       "backend": "webgpu",
       "settings": {
         "enabled": true,

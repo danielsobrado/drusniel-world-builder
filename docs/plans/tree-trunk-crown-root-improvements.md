@@ -6,7 +6,7 @@ Screenshots: [`docs/qa/trees-2026-11-02/`](../qa/trees-2026-11-02/).
 
 | Shot | What it shows |
 |------|---------------|
-| `01-taiga-stand.jpg` | Eldara taiga: grass-scene spruces, sticks under tiered crowns |
+| `01-taiga-stand.jpg` | Astalor taiga: grass-scene spruces, sticks under tiered crowns |
 | `02-spruce-trunk.jpg`, `03-spruce-collar.jpg` | Spruce foot from 6 m and 3 m |
 | `04-savanna-stand.jpg` | Default world spawn: meadow `tree7/8/9` |
 | `05-meadow-trunk.jpg`, `06-meadow-roots.jpg` | Meadow tree foot, buttress roots |

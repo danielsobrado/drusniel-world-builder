@@ -7,7 +7,7 @@ import { streetRoute } from './QaRouteWalker.js';
  * realm's town in game, e.g. Frostgard 287, Ironpeak/Stonehold 118, Grukmar 199.
  */
 export async function prepareSettlementApproach({ controller, terrainView, config, fetchMap = fetch, burgId = 18 }) {
-  const response = await fetchMap('/maps/Eldara%20Full%202026-07-23-20-37.json');
+  const response = await fetchMap('/maps/Astalor%20Full%202026-07-23-20-37.json');
   if (!response.ok) throw new Error('Settlement QA could not load its frozen Azgaar map.');
   await controller.loadDocument(importAzgaarFullJson(await response.json(), config));
   const generator = terrainView.worldStore.generator;
@@ -29,7 +29,7 @@ export async function prepareSettlementApproach({ controller, terrainView, confi
     { x: canonicalX, z: canonicalZ }, toCanonical);
   return { route, spawn: { x: canonicalX - origin.x, z: canonicalZ - origin.z },
     yawDegrees: Math.atan2(endpoint[0], -endpoint[1]) * 180 / Math.PI,
-    settlementFixture: { map: 'Eldara Full 2026-07-23-20-37', burgId,
+    settlementFixture: { map: 'Astalor Full 2026-07-23-20-37', burgId,
       name: entry.settlement.name, requestedBuildings: plan.buildings.length, requestedProps: plan.props.length,
       canonicalX, canonicalZ, townEdgeForward } };
 }

@@ -48,9 +48,9 @@ def test_settlements_below_the_eligibility_floor_get_nothing():
     assert budget["eligibleSettlements"] == 1 and len(budget["allocations"]) == 1
 
 
-def test_eldara_scenarios_report_feasibility_honestly(eldara, config):
-    by_target = {s["target"]: s for s in eldara.scenarios}
+def test_astalor_scenarios_report_feasibility_honestly(astalor, config):
+    by_target = {s["target"]: s for s in astalor.scenarios}
     assert list(by_target) == config.npc["comparisonScenarios"]
     assert by_target[10040]["feasible"] and by_target[10040]["allocated"] == 10040
-    for s in eldara.scenarios:
+    for s in astalor.scenarios:
         assert s["feasible"] == (s["minimumTotal"] <= s["target"] <= s["maximumTotal"])

@@ -26,7 +26,7 @@ try {
   report.sourceSha = source.sourceSha; report.sourceSnapshotSha256 = source.sourceSnapshot?.sha256;
   report.captureScriptSha256 = await fileHash(fileURLToPath(import.meta.url));
   report.selectorSha256 = await fileHash(fileURLToPath(new URL('./select-poses.mjs', import.meta.url)));
-  report.mapSha256 = await fileHash(path.join(root, 'maps/Eldara Full 2026-07-23-20-37.json'));
+  report.mapSha256 = await fileHash(path.join(root, 'maps/Astalor Full 2026-07-23-20-37.json'));
   report.browserPolicy = 'Headed hardware capture; background/occlusion throttling disabled; reload between poses.';
   browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default',
     '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding'] });
@@ -44,8 +44,8 @@ try {
   let replay = null;
   if (option('--manifest', null)) replay = JSON.parse(await readFile(option('--manifest'), 'utf8'));
   const manifest = { schemaVersion: 1, sourceSha: report.sourceSha, selections: [], requestedPoses: [] };
-  for (const world of ['procedural', 'eldara']) {
-    if (world === 'eldara') { console.log('Loading Eldara imported map'); await page.evaluate(() => window.__worldVisualQa.loadWorld('eldara')); }
+  for (const world of ['procedural', 'astalor']) {
+    if (world === 'astalor') { console.log('Loading Astalor imported map'); await page.evaluate(() => window.__worldVisualQa.loadWorld('astalor')); }
     await page.evaluate(() => window.__worldVisualQa.setLighting());
     const selection = replay ? { poses: replay.requestedPoses.filter(p => p.world === world), replay: true }
       : await page.evaluate(world === 'procedural' ? selectProceduralWaterPoses : selectImportedWaterPoses);
@@ -57,7 +57,7 @@ try {
       if (!firstPose) {
         await page.goto(`${url}/?qaVisual=1`, { waitUntil: 'domcontentloaded' });
         await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
-        if (world === 'eldara') await page.evaluate(() => window.__worldVisualQa.loadWorld('eldara'));
+        if (world === 'astalor') await page.evaluate(() => window.__worldVisualQa.loadWorld('astalor'));
         await page.evaluate(() => window.__worldVisualQa.setLighting());
       }
       firstPose = false;

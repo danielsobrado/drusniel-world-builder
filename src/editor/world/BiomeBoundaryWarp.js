@@ -3,7 +3,7 @@ import { valueNoise } from './valueNoise2d.js';
 /**
  * Fractal domain warp for biome lookups, in cell units.
  *
- * An imported Azgaar atlas texel spans kilometres (Eldara: ~4 000 cells), so a
+ * An imported Azgaar atlas texel spans kilometres (Astalor: ~4 000 cells), so a
  * nearest-texel biome lookup draws every border as a straight staircase along
  * the atlas grid, and walking across one switches grass, ground and undergrowth
  * at a ruled line. Reading the biome through this warp instead bends each

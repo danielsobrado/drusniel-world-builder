@@ -10,7 +10,7 @@ const root=new URL('../',import.meta.url),state=repositoryState(fileURLToPath(ro
 if(state.dirtyFiles.length)throw new Error('Commit sources before freezing the shore manifest.');
 const config=yaml.load(await readFile(new URL('editor.config.yaml',root),'utf8'));
 config.import.azgaarGuidance=yaml.load(await readFile(new URL('config/azgaar-guidance.yaml',root),'utf8'));
-const map='maps/Eldara Full 2026-07-23-20-37.json';
+const map='maps/Astalor Full 2026-07-23-20-37.json';
 applyWaterDomainConfig(config,yaml.load(await readFile(new URL('config/water-domain.yaml',root),'utf8')));
 const document=importAzgaarFullJson(JSON.parse(await readFile(new URL(map,root),'utf8')),config);
 const imported=createWorldGenerator(document.world.generator,document.world.baseTerrain);
@@ -35,13 +35,13 @@ const base=[['forest',6,-7134127,1081563],['taiga',9,-982683,371387],['tundra',1
 const importedPoses=[];
 for(const [name,expectedBiomeId,x,z] of base) {
  if(tile(imported,x,z)!==expectedBiomeId)throw new Error(`Imported ${name} expected ${expectedBiomeId}, got ${tile(imported,x,z)}.`);
- const pose={id:`eldara-${name}`,expectedBiomeId,x,z,yaw:0,pitch:-.08,mode:'player',heightAboveGround:1.7};
+ const pose={id:`astalor-${name}`,expectedBiomeId,x,z,yaw:0,pitch:-.08,mode:'player',heightAboveGround:1.7};
  importedPoses.push(pose,{...pose,id:`${pose.id}-reverse`,yaw:Math.PI},{...pose,id:`${pose.id}-overview`,mode:'fly',heightAboveGround:80,pitch:-.45,fov:60});
 }
 const original=await originalVisualPoses(root),shorePoses=[];
-for(const [g,pose] of [[procedural,original[4]],[procedural,original[11]],[imported,importedPoses.find(p=>p.id==='eldara-wetland')]]) {
+for(const [g,pose] of [[procedural,original[4]],[procedural,original[11]],[imported,importedPoses.find(p=>p.id==='astalor-wetland')]]) {
  const to=target(g,pose);
- shorePoses.push({...pose,id:`${pose.id}-shore`,world:g===imported?'eldara':'procedural',expectedBiomeId:tile(g,pose.x,pose.z),shoreTarget:to,yaw:aim(pose,to)});
+ shorePoses.push({...pose,id:`${pose.id}-shore`,world:g===imported?'astalor':'procedural',expectedBiomeId:tile(g,pose.x,pose.z),shoreTarget:to,yaw:aim(pose,to)});
 }
 const start={x:-1893,z:1803};let marine=null;
 for(const offset of coastOffsets) {

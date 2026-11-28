@@ -41,7 +41,7 @@
   "captures": [
     {
       "id": "B14-C01-overcast",
-      "world": "eldara",
+      "world": "astalor",
       "pose": {
         "x": 2366324.1219881824,
         "z": -2373880.9202504624,
@@ -75,7 +75,7 @@
     },
     {
       "id": "B14-C04-clear",
-      "world": "eldara",
+      "world": "astalor",
       "pose": {
         "x": 2366315.282896519,
         "z": -2373905.3716401686,

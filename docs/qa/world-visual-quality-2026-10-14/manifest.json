@@ -211,162 +211,162 @@
       "sha256": "15187119a011900a939d21b8a861d2207ff2ff1c0f50d3110cc492f8f75bcf03"
     },
     {
-      "path": "biomes/composition-remaining/eldara-forest-hud.png",
+      "path": "biomes/composition-remaining/astalor-forest-hud.png",
       "bytes": 2599324,
       "sha256": "12e57467687e07bf870a723afef3738fcf9827eb92fea8d9184465edfe33b4c7"
     },
     {
-      "path": "biomes/composition-remaining/eldara-forest-overview-hud.png",
+      "path": "biomes/composition-remaining/astalor-forest-overview-hud.png",
       "bytes": 1788820,
       "sha256": "e5137ec40a01b5dd012efe4c2c8fa9389b2c461f06de9acf0dc72b0d77eb7850"
     },
     {
-      "path": "biomes/composition-remaining/eldara-forest-overview.png",
+      "path": "biomes/composition-remaining/astalor-forest-overview.png",
       "bytes": 1775978,
       "sha256": "1206dce3c003fdbc95763ee8de2c04e166fedeefa1b2d583e3e7789bf9a0bf59"
     },
     {
-      "path": "biomes/composition-remaining/eldara-forest-reverse-hud.png",
+      "path": "biomes/composition-remaining/astalor-forest-reverse-hud.png",
       "bytes": 2579833,
       "sha256": "d09025b06099d4a2d08a5895c62e98be786db1ad7622127cf1f9aa4751aa9c49"
     },
     {
-      "path": "biomes/composition-remaining/eldara-forest-reverse.png",
+      "path": "biomes/composition-remaining/astalor-forest-reverse.png",
       "bytes": 2655369,
       "sha256": "13606342d554efc7af268125241764499d390a01a4cc04ca5d4cc85c4aaa533e"
     },
     {
-      "path": "biomes/composition-remaining/eldara-forest.png",
+      "path": "biomes/composition-remaining/astalor-forest.png",
       "bytes": 2666939,
       "sha256": "a933132cbed0bbfba289933b03a21e9f743fc4cbe3fb96869a74dabe618b5403"
     },
     {
-      "path": "biomes/composition-remaining/eldara-glacier-hud.png",
+      "path": "biomes/composition-remaining/astalor-glacier-hud.png",
       "bytes": 1174969,
       "sha256": "feaadb257be52d288ddfef22e958b948d9862590268fdc3296fccc2d4cb0965e"
     },
     {
-      "path": "biomes/composition-remaining/eldara-glacier-overview-hud.png",
+      "path": "biomes/composition-remaining/astalor-glacier-overview-hud.png",
       "bytes": 1141770,
       "sha256": "d87ba0f8cc9e324918d6d1c8c0e3690d9384d02ed12689c9088427c220828d17"
     },
     {
-      "path": "biomes/composition-remaining/eldara-glacier-overview.png",
+      "path": "biomes/composition-remaining/astalor-glacier-overview.png",
       "bytes": 1123215,
       "sha256": "6c9e098676211dad494e0107bffa1598d4a09241733adbbef880dfab5a8131fe"
     },
     {
-      "path": "biomes/composition-remaining/eldara-glacier-reverse-hud.png",
+      "path": "biomes/composition-remaining/astalor-glacier-reverse-hud.png",
       "bytes": 1189811,
       "sha256": "200fd665c5801d351d205ed985d1f81b621e484108aedbdba83e83654943fa2e"
     },
     {
-      "path": "biomes/composition-remaining/eldara-glacier-reverse.png",
+      "path": "biomes/composition-remaining/astalor-glacier-reverse.png",
       "bytes": 1190829,
       "sha256": "73f096ac89c89d9a8dc3ba607e827425d51d7e961c2bdf357883f2dd6b30cbf2"
     },
     {
-      "path": "biomes/composition-remaining/eldara-glacier.png",
+      "path": "biomes/composition-remaining/astalor-glacier.png",
       "bytes": 1176772,
       "sha256": "6661dc00d380f3f1587dc4f1529f61f28b7949e3d7489fcee233e34a3c1a3bca"
     },
     {
-      "path": "biomes/composition-remaining/eldara-taiga-hud.png",
+      "path": "biomes/composition-remaining/astalor-taiga-hud.png",
       "bytes": 2110197,
       "sha256": "4a5b5f553b5fe8b477079b3f65a35e29e1ba45464d866ad664bec751ffd9ab74"
     },
     {
-      "path": "biomes/composition-remaining/eldara-taiga-overview-hud.png",
+      "path": "biomes/composition-remaining/astalor-taiga-overview-hud.png",
       "bytes": 1666225,
       "sha256": "586f3636360e430c247b9342e5da4a8b9fc0dd5b332687d6dceabc907c71da63"
     },
     {
-      "path": "biomes/composition-remaining/eldara-taiga-overview.png",
+      "path": "biomes/composition-remaining/astalor-taiga-overview.png",
       "bytes": 1648547,
       "sha256": "00847b4de565d42a2a6101c7f0c444f6a7175e4b6e82aea11a6a050f3c4ee051"
     },
     {
-      "path": "biomes/composition-remaining/eldara-taiga-reverse-hud.png",
+      "path": "biomes/composition-remaining/astalor-taiga-reverse-hud.png",
       "bytes": 2181245,
       "sha256": "53a8026bb7b5a308599f5b7e04013feea7a5d2b820d8f756a9119c1349859b57"
     },
     {
-      "path": "biomes/composition-remaining/eldara-taiga-reverse.png",
+      "path": "biomes/composition-remaining/astalor-taiga-reverse.png",
       "bytes": 2226088,
       "sha256": "2b8ad70a9313be05a22fc12b52ba5966b987662f3fe66a7ec44298d8e406ad83"
     },
     {
-      "path": "biomes/composition-remaining/eldara-taiga.png",
+      "path": "biomes/composition-remaining/astalor-taiga.png",
       "bytes": 2158569,
       "sha256": "3dafa28311dc0d19a9bc48729b1fba0c45df31640270a26d01869496cfc6a877"
     },
     {
-      "path": "biomes/composition-remaining/eldara-tundra-hud.png",
+      "path": "biomes/composition-remaining/astalor-tundra-hud.png",
       "bytes": 1115364,
       "sha256": "9b89ee6602294cdd93c3fbda5034df5b15469e0f79121462381cb4fe583e94b7"
     },
     {
-      "path": "biomes/composition-remaining/eldara-tundra-overview-hud.png",
+      "path": "biomes/composition-remaining/astalor-tundra-overview-hud.png",
       "bytes": 1022499,
       "sha256": "d58390a4341d573de63d1a04d90634ade6ee8e45137cb9e75b8ab0eeba8f9662"
     },
     {
-      "path": "biomes/composition-remaining/eldara-tundra-overview.png",
+      "path": "biomes/composition-remaining/astalor-tundra-overview.png",
       "bytes": 1000419,
       "sha256": "2c34294fd3d060a5bae6bfe234da0f030a44bbe8b6fb9adb6c3d1eff5ae52299"
     },
     {
-      "path": "biomes/composition-remaining/eldara-tundra-reverse-hud.png",
+      "path": "biomes/composition-remaining/astalor-tundra-reverse-hud.png",
       "bytes": 1158200,
       "sha256": "80273c78a22100fbada21635716f488dcdcfc8d24a8e68c2d5157c5c5c8add9d"
     },
     {
-      "path": "biomes/composition-remaining/eldara-tundra-reverse.png",
+      "path": "biomes/composition-remaining/astalor-tundra-reverse.png",
       "bytes": 1154886,
       "sha256": "a21745a6048507106a8875c7280c4ec7edff367bd90195f533bcc0bd3cf835f7"
     },
     {
-      "path": "biomes/composition-remaining/eldara-tundra.png",
+      "path": "biomes/composition-remaining/astalor-tundra.png",
       "bytes": 1122483,
       "sha256": "18c14d55dfb571cf057ba4ad1052136c67c892a23e8240bb46d2d463a00cde7b"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-hud.png",
+      "path": "biomes/composition-remaining/astalor-wetland-hud.png",
       "bytes": 1931378,
       "sha256": "ff8a5a9c4c2fd8db79e50a0bc55eb703075fa31824cecaf0afe27b247b713126"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-overview-hud.png",
+      "path": "biomes/composition-remaining/astalor-wetland-overview-hud.png",
       "bytes": 1479077,
       "sha256": "4d1fc29369de308e3000a9595b6d15caa88b2dbb0b406d35b8e92a79326fddcc"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-overview.png",
+      "path": "biomes/composition-remaining/astalor-wetland-overview.png",
       "bytes": 1465581,
       "sha256": "61d944b7a19c66489805200f3be833d6ddad2042142c4dcbe5910ec427bbfce4"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-reverse-hud.png",
+      "path": "biomes/composition-remaining/astalor-wetland-reverse-hud.png",
       "bytes": 1937584,
       "sha256": "ffb9e9b3087f2584b73c7bbd36ad115dd5d4c56e20d00d8f7b9200b0d7b2f64c"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-reverse.png",
+      "path": "biomes/composition-remaining/astalor-wetland-reverse.png",
       "bytes": 1984597,
       "sha256": "2eeef2f92d5a25fe45f96ae3ce9effa12638ee6d43305e5bdb422723133efe45"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-shore-hud.png",
+      "path": "biomes/composition-remaining/astalor-wetland-shore-hud.png",
       "bytes": 1947546,
       "sha256": "8d4261c9758a4b1e3e72556c7fb3c2d1a1f5852e639601da7c737e9dccdf9cb6"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland-shore.png",
+      "path": "biomes/composition-remaining/astalor-wetland-shore.png",
       "bytes": 2018634,
       "sha256": "ee4552059f11db549ab2adab35874372a603901f39263db31050c91018a37a1c"
     },
     {
-      "path": "biomes/composition-remaining/eldara-wetland.png",
+      "path": "biomes/composition-remaining/astalor-wetland.png",
       "bytes": 1993681,
       "sha256": "d53b3aafe800990f900719a705364c8e1ed2ec4ea5c14bcf1c2ed0e400a1602d"
     },
@@ -391,162 +391,162 @@
       "sha256": "bdc4f9363497ea2a793d03e87aceb1bb27407cbdcc50de76fb4bc47801a35d6c"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-forest-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-forest-hud.png",
       "bytes": 2599164,
       "sha256": "540062bbda8c0523ff960d3cea4c32ddb4fee1d07b5a03d1a250c12901318ce0"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-forest-overview-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-forest-overview-hud.png",
       "bytes": 1790787,
       "sha256": "7eae5c161f15364faca825a1c57e1e5cfb7e71741e3ce28ae5a089b047479783"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-forest-overview.png",
+      "path": "biomes/composition-source-check-failure/astalor-forest-overview.png",
       "bytes": 1777152,
       "sha256": "7557a544c38a00d1fdcaa31e132c0aacef5d9134e551e503c501ea5000b765b6"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-forest-reverse-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-forest-reverse-hud.png",
       "bytes": 2589025,
       "sha256": "5697a317675c934fc15d5c7b0b09b9ea7c703b98f6d3a0ceda5aeee5191e40fa"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-forest-reverse.png",
+      "path": "biomes/composition-source-check-failure/astalor-forest-reverse.png",
       "bytes": 2659599,
       "sha256": "64ad21e1864d56490b3f82fb356a41b93d8cb646cb1931c63746761f64326d8e"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-forest.png",
+      "path": "biomes/composition-source-check-failure/astalor-forest.png",
       "bytes": 2657243,
       "sha256": "6c600540687f50ead2e2a0582ec0122f8f406fb293b9193c6d2c360582af5281"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-glacier-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-glacier-hud.png",
       "bytes": 1171718,
       "sha256": "0f671af4d16d04851551638db39d43a90c7c70def955607046a8c1e6477a49f8"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-glacier-overview-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-glacier-overview-hud.png",
       "bytes": 1141423,
       "sha256": "5c971590303a5859a99c892eece70aee82346acd49987fd50bd378638e37439b"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-glacier-overview.png",
+      "path": "biomes/composition-source-check-failure/astalor-glacier-overview.png",
       "bytes": 1127688,
       "sha256": "d77604a4b49594b18bbd23b85f54ee5a48516b9f895de2726ca632cc0f08c3a3"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-glacier-reverse-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-glacier-reverse-hud.png",
       "bytes": 1187805,
       "sha256": "5c25aab2a95596f474161c7cd6cac3cdaa6dd4dd241c0d263a138ca8c0a66949"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-glacier-reverse.png",
+      "path": "biomes/composition-source-check-failure/astalor-glacier-reverse.png",
       "bytes": 1192582,
       "sha256": "7340ca2461b53988f8a656723d8598856a06f15e2101a0cd4e063b0d7a4ed83d"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-glacier.png",
+      "path": "biomes/composition-source-check-failure/astalor-glacier.png",
       "bytes": 1174770,
       "sha256": "bae8ab352e125ac7423364367ef012bf5a70449ffd77a6014e21f7df8f1657c5"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-taiga-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-taiga-hud.png",
       "bytes": 2114564,
       "sha256": "990e165dace12c3a05455e60a842e8eea7f959fd58aac216f86de8656829b9de"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-taiga-overview-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-taiga-overview-hud.png",
       "bytes": 1662768,
       "sha256": "0a7053ba03a3a6230d91eb1380ba17c4862b98b10161d703c8f1815e0ee29a7f"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-taiga-overview.png",
+      "path": "biomes/composition-source-check-failure/astalor-taiga-overview.png",
       "bytes": 1646025,
       "sha256": "5d891d3d82a339ccb78df245f0ca3da5b146eb7b273f6b6eb581050c06aa4216"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-taiga-reverse-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-taiga-reverse-hud.png",
       "bytes": 2178682,
       "sha256": "ee67310f27acf8b30a2a8a37c20c95fa17e84ce6332aad82173a4f8c7c6feb67"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-taiga-reverse.png",
+      "path": "biomes/composition-source-check-failure/astalor-taiga-reverse.png",
       "bytes": 2226642,
       "sha256": "c4bf549fb2b82b29afe6e5a95f4710d6b79756716f9b0055dfe366c870b20d5f"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-taiga.png",
+      "path": "biomes/composition-source-check-failure/astalor-taiga.png",
       "bytes": 2163672,
       "sha256": "fbada31ffa3e87f139d4f095793657ebf1e9f670d84951d4eb721d1f5d707774"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-tundra-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-tundra-hud.png",
       "bytes": 1120663,
       "sha256": "83aa67f9025c3ae3cb43de918b4b01b5364f64da6ab1745df48404b9968594ea"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-tundra-overview-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-tundra-overview-hud.png",
       "bytes": 1009088,
       "sha256": "ff97025dcf908e151ae5dae05c2a932160d506c7b772876f156717dc13adc7e6"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-tundra-overview.png",
+      "path": "biomes/composition-source-check-failure/astalor-tundra-overview.png",
       "bytes": 988502,
       "sha256": "4f9a8a8fb41d98204f853e05d44f9cdd3cfec39cfd9ed23dbe94188574fa1d8d"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-tundra-reverse-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-tundra-reverse-hud.png",
       "bytes": 1153664,
       "sha256": "85f5191e758f9e0b558e2654b364bcf265deda6fde982fe51aa6e4e8eafa2833"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-tundra-reverse.png",
+      "path": "biomes/composition-source-check-failure/astalor-tundra-reverse.png",
       "bytes": 1161994,
       "sha256": "3d247a960a28a7d580f7c189572c1afe3636f047b782963e9a17428e6feca564"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-tundra.png",
+      "path": "biomes/composition-source-check-failure/astalor-tundra.png",
       "bytes": 1127064,
       "sha256": "b6cf7cde9be11ebda91201c3614a702967afc692390e9d24ef58271353c43d83"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-hud.png",
       "bytes": 1922911,
       "sha256": "aba44d928d6785f7a0869770a1b65418aea3444963dce07fd208311c82e3f488"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-overview-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-overview-hud.png",
       "bytes": 1473549,
       "sha256": "56b7ac5085f462e2455d78ae8ec860841430c9457761a235bb047ed5c769fff9"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-overview.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-overview.png",
       "bytes": 1467336,
       "sha256": "83814e8053c6951a38c3b43eb17e730bf16233afef929245cb090ac4ad7f6c97"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-reverse-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-reverse-hud.png",
       "bytes": 1936698,
       "sha256": "a5d549f282cbf215d994aa637f442ff379477d2b583d6071e56d1a68c0168e99"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-reverse.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-reverse.png",
       "bytes": 1999395,
       "sha256": "0a235ee0ee165e5ec9f94bd17b65ad9c9ac3289a3927c54c9153e260ba2dfefe"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-shore-hud.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-shore-hud.png",
       "bytes": 1929591,
       "sha256": "2cfb2f220fc5aac7334ae215b74e00f32ce198257c689f940b54492264f0f8e7"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland-shore.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland-shore.png",
       "bytes": 2003942,
       "sha256": "2a02862662bf65ccf27cf97ee3270ae9858f5a4c1482b5611404f283bcfd4943"
     },
     {
-      "path": "biomes/composition-source-check-failure/eldara-wetland.png",
+      "path": "biomes/composition-source-check-failure/astalor-wetland.png",
       "bytes": 1991963,
       "sha256": "968852513f37d438c745f0849d77d1f8327b7fbe84b71d192934f22faf808a0c"
     },

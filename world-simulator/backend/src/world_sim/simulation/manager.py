@@ -18,6 +18,7 @@ from .. import log
 from ..api.errors import ApiError
 from ..canonical import checksum, state_digest
 from ..peoples.assignments import assigned_rules
+from ..peoples.catalog import map_matches
 from ..world.model import WorldModel
 from .calendar import date_for, resolve_start_year
 from .contracts import STATE_SCHEMA_VERSION, CreateScenario, Event, ParentRef, ScenarioMeta, ScenarioState, Scope, SnapshotMeta
@@ -109,6 +110,12 @@ class ScenarioManager:
     def _load(self, scenario_id: str) -> None:
         try:
             raw_meta, raw_state, raw_events, file_format = self.store.load(scenario_id)
+            canonical_state = self._rename_saved_map(raw_state)
+            renamed = canonical_state is not raw_state
+            raw_state = canonical_state
+            if renamed and raw_meta.get("rules") is not None:
+                frozen = self._rename_frozen_map(raw_meta["rules"])
+                raw_meta = {**raw_meta, "rules": frozen, "rulesFingerprint": fingerprint(frozen)}
             foreign = raw_state.get("world", {}).get("sourceFingerprint") != self.fingerprint
             rules = complete(raw_meta.get("rules") or {}, self.model.config.rules)
             state, stored_schema = migrate_state(raw_state, self.model, rules)
@@ -135,11 +142,35 @@ class ScenarioManager:
             self._event(session, "migrated", f"Upgraded saved state from schema v{stored_schema} to v{STATE_SCHEMA_VERSION}",
                         fromSchema=stored_schema)
             self._persist(session)
+        elif renamed:
+            self._persist(session)
         self.archive(scenario_id).cut(state.historySeq)    # heals a crash between appending events and saving the bundle
         if not session.read_only and self._backstory(session):
             session.meta = session.meta.model_copy(update={"journal": None})    # the past was added outside the journal
             self._persist(session)
         self.sessions[scenario_id] = session
+
+    def _rename_saved_map(self, raw: dict) -> dict:
+        previous = self.model.renamed_from
+        if previous is None or not map_matches(raw.get("world", {}), previous):
+            return raw
+        identity = self.model.audit["identity"]
+        return {**raw, "world": {"mapId": identity["mapId"], "sourceFingerprint": self.fingerprint}}
+
+    def _rename_frozen_map(self, rules: dict) -> dict:
+        previous = self.model.renamed_from
+        assert previous is not None
+        identity = self.model.audit["identity"]
+        peoples = dict(rules.get("peoples", {}))
+        for selector, old, new in (
+            ("mapNames", previous["mapName"], identity["sourceMapName"]),
+            ("mappedMapIds", previous["mapId"], identity["mapId"]),
+        ):
+            if selector in peoples:
+                peoples[selector] = [new if value == old else value for value in peoples[selector]]
+        if peoples.get("catalogId") == previous["cultureCatalogId"]:
+            peoples["catalogId"] = self.model.config.peoples["catalogId"]
+        return {**rules, "peoples": peoples}
 
     # ---- queries -------------------------------------------------------
     def session(self, scenario_id: str) -> Session:
@@ -196,7 +227,7 @@ class ScenarioManager:
             raise ApiError(500, "corrupt_snapshot", f"Snapshot {snapshot_id} does not match its checksum")
         rules = self.rules(self.session(scenario_id))
         try:
-            state, stored_schema = migrate_state(raw_state, self.model, rules)
+            state, stored_schema = migrate_state(self._rename_saved_map(raw_state), self.model, rules)
         except IncompatibleState as exc:
             raise ApiError(409, "incompatible_snapshot", str(exc), {"id": snapshot_id}) from exc
         if state.world.sourceFingerprint != self.fingerprint or state.scenarioId != scenario_id:

@@ -30,7 +30,7 @@ const SHOTS = [
   { id: 'B15-C01-noon', world: 'procedural', loc: 'B15', cam: 'C01', light: 'clear', label: 'B15-C01 · Forest Edge & LOD Transition (Noon)' },
   { id: 'B15-C01-sunset', world: 'procedural', loc: 'B15', cam: 'C01', light: 'sunset', label: 'B15-C01 · Forest Edge Backlighting (Sunset)' },
   { id: 'B05-C01-noon', world: 'procedural', loc: 'B05', cam: 'C01', light: 'clear', label: 'B05-C01 · Taiga Conifers & 0.3 Snow (Noon)' },
-  { id: 'B18-C01-noon', world: 'eldara', loc: 'B18', cam: 'C01', light: 'clear', label: 'B18-C01 · Town Stone & Edge Crowns (Noon)' },
+  { id: 'B18-C01-noon', world: 'astalor', loc: 'B18', cam: 'C01', light: 'clear', label: 'B18-C01 · Town Stone & Edge Crowns (Noon)' },
 ];
 
 async function settleShot(page, pose, minimumMs = 3500) {

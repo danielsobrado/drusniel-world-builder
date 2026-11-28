@@ -9,7 +9,7 @@ computing gzip size...
 dist/maps/manifest.json                                       0.23 kB │ gzip:     0.17 kB
 dist/settings/manifest.json                                   0.35 kB │ gzip:     0.18 kB
 dist/settings/authored-natural-world.json                     0.77 kB │ gzip:     0.37 kB
-dist/settings/eldara-authored-natural-world.json              0.89 kB │ gzip:     0.44 kB
+dist/settings/astalor-authored-natural-world.json              0.89 kB │ gzip:     0.44 kB
 dist/workshop-qa.html                                         1.00 kB │ gzip:     0.42 kB
 dist/index.html                                               1.50 kB │ gzip:     0.64 kB
 dist/assets/serpentSkin.worker-Dhr5Xf_Q.js                    9.33 kB
@@ -26,7 +26,7 @@ dist/assets/basis_transcoder-VXdx5NbI.wasm                  527.33 kB │ gzip: 
 dist/assets/worldChunk.worker-DSmdJ6gH.js                   649.09 kB
 dist/assets/draco_decoder-fzg4nYZr.js                       719.41 kB
 dist/assets/settlementMesh.worker-RA5Bt1Xh.js               983.33 kB
-dist/maps/Eldara Full 2026-07-23-20-37.json               7,609.82 kB │ gzip: 1,810.68 kB
+dist/maps/Astalor Full 2026-07-23-20-37.json               7,609.82 kB │ gzip: 1,810.68 kB
 dist/assets/ProceduralWorkshopUi-BJpgD6dq.css                30.01 kB │ gzip:     6.62 kB
 dist/assets/app-CsPqIitr.css                                101.97 kB │ gzip:    18.80 kB
 dist/assets/aquaticParts-gQ4JUE7D.js                          0.46 kB │ gzip:     0.33 kB

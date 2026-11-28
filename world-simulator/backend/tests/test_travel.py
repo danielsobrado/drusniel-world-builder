@@ -14,14 +14,14 @@ def pilot(model, rules=None):
                           start_year=1212, rules=rules)
 
 
-def test_baseline_holds_continuous_imported_routes(eldara):
-    state = pilot(eldara)
+def test_baseline_holds_continuous_imported_routes(astalor):
+    state = pilot(astalor)
     network = state.travel.routes
     route = next(r for r in network if r.fromId != r.toId and len(r.points) > 2)
     assert route.sourceRouteIds
     assert route.days > 0
-    assert route.points[0] == tuple(eldara.settlements_by_id[route.fromId][axis] for axis in ("x", "y"))
-    assert route.points[-1] == tuple(eldara.settlements_by_id[route.toId][axis] for axis in ("x", "y"))
+    assert route.points[0] == tuple(astalor.settlements_by_id[route.fromId][axis] for axis in ("x", "y"))
+    assert route.points[-1] == tuple(astalor.settlements_by_id[route.toId][axis] for axis in ("x", "y"))
 
 
 def test_five_year_pilot_conserves_population_and_replays(fresh_model):
@@ -69,11 +69,11 @@ def test_five_year_pilot_conserves_population_and_replays(fresh_model):
     assert asyncio.run(manager.replay(session.meta.id))["matches"]
 
 
-def test_one_step_and_chunked_steps_have_the_same_journeys(eldara):
-    state = pilot(eldara)
-    many, _ = advance(state, 365, eldara.config.rules)
-    first, _ = advance(state, 53, eldara.config.rules)
-    last, _ = advance(first, 312, eldara.config.rules)
+def test_one_step_and_chunked_steps_have_the_same_journeys(astalor):
+    state = pilot(astalor)
+    many, _ = advance(state, 365, astalor.config.rules)
+    first, _ = advance(state, 53, astalor.config.rules)
+    last, _ = advance(first, 312, astalor.config.rules)
     assert many.travel.routes
     assert state_checksum(many) == state_checksum(last)
 
@@ -91,13 +91,13 @@ def test_travel_endpoint(fresh_model):
 
 
 
-def test_migration_remains_in_transit_during_closure_and_returns_if_full(eldara):
+def test_migration_remains_in_transit_during_closure_and_returns_if_full(astalor):
     from world_sim.simulation.migration import TravelDay
     from world_sim.simulation.rules import ready
 
-    rules = ready(eldara.config.rules)
+    rules = ready(astalor.config.rules)
     rules["simulation"]["travel"] = {**rules["simulation"]["travel"], "closureChance": 1}
-    state = pilot(eldara, rules)
+    state = pilot(astalor, rules)
     original, *others = state.settlements
     economy = original.society.employment
     idle = economy.model_copy(update={"unemployed": economy.labourSupply // 2})
@@ -127,14 +127,14 @@ def test_migration_remains_in_transit_during_closure_and_returns_if_full(eldara)
 
 
 @pytest.mark.parametrize("kind", ["road", "sea"])
-def test_paths_never_connect_isolated_towns_by_proximity(eldara, kind):
+def test_paths_never_connect_isolated_towns_by_proximity(astalor, kind):
     from world_sim.geography.paths import RoutePlanner
 
-    available = eldara.connectivity["landGraph"] if kind == "road" else eldara.connectivity["seaGraph"]
-    other = next(t for t in eldara.audit["settlements"] if t["cell"] not in available and not t["port"]
-                 and t["cell"] not in eldara.connectivity["landGraph"])
-    origin = eldara.settlements_by_id[next(iter(sorted(eldara.pilot_ids)))]
-    planner = RoutePlanner(eldara, eldara.config.economy["caravans"])
+    available = astalor.connectivity["landGraph"] if kind == "road" else astalor.connectivity["seaGraph"]
+    other = next(t for t in astalor.audit["settlements"] if t["cell"] not in available and not t["port"]
+                 and t["cell"] not in astalor.connectivity["landGraph"])
+    origin = astalor.settlements_by_id[next(iter(sorted(astalor.pilot_ids)))]
+    planner = RoutePlanner(astalor, astalor.config.economy["caravans"])
     assert planner.route(origin, other) is None
 
 

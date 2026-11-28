@@ -14,10 +14,10 @@
     { "id": "core-temperate-rainforest", "world": "procedural", "x": 10119, "z": 5719, "yaw": 0.785, "pitch": -0.08, "mode": "player", "heightAboveGround": 1.7, "fov": 68, "tileId": 8, "canopy": true },
     { "id": "core-taiga", "world": "procedural", "x": -6951, "z": 10379, "yaw": 0.785, "pitch": -0.08, "mode": "player", "heightAboveGround": 1.7, "fov": 68, "tileId": 9, "canopy": true },
     { "id": "core-wetland", "world": "procedural", "x": -4365, "z": -7367, "yaw": 2.356, "pitch": -0.08, "mode": "player", "heightAboveGround": 1.7, "fov": 68, "tileId": 12, "canopy": true },
-    { "id": "tundra", "world": "eldara", "x": 151523, "z": -49043, "yaw": 0.6, "pitch": -0.12, "mode": "player", "heightAboveGround": 1.7 },
-    { "id": "glacier", "world": "eldara", "x": -282505, "z": -389567, "yaw": 1.2, "pitch": -0.25, "mode": "fly", "heightAboveGround": 25 },
-    { "id": "snow-eye", "world": "eldara", "x": -3291493, "z": -210747, "yaw": 2, "pitch": 0.05, "mode": "player", "heightAboveGround": 1.7 },
-    { "id": "town", "world": "eldara", "x": -6724492, "z": -347232, "yaw": 1.32, "pitch": 0.14, "mode": "player", "heightAboveGround": 1.7 }
+    { "id": "tundra", "world": "astalor", "x": 151523, "z": -49043, "yaw": 0.6, "pitch": -0.12, "mode": "player", "heightAboveGround": 1.7 },
+    { "id": "glacier", "world": "astalor", "x": -282505, "z": -389567, "yaw": 1.2, "pitch": -0.25, "mode": "fly", "heightAboveGround": 25 },
+    { "id": "snow-eye", "world": "astalor", "x": -3291493, "z": -210747, "yaw": 2, "pitch": 0.05, "mode": "player", "heightAboveGround": 1.7 },
+    { "id": "town", "world": "astalor", "x": -6724492, "z": -347232, "yaw": 1.32, "pitch": 0.14, "mode": "player", "heightAboveGround": 1.7 }
   ],
   "shots": [
     { "pose": "forest", "weather": "off", "hour": 12 },

@@ -128,7 +128,7 @@ test('instances are written relative to the anchor, exact at planet scale', asyn
     name: 'anchor',
     castShadow: false,
   });
-  // A pebble on Eldara: float32 steps by 0.25 m at x = −4 188 269.
+  // A pebble on Astalor: float32 steps by 0.25 m at x = −4 188 269.
   const pebble = { x: -4188269.4079, z: 701997.9749 };
   const instance = () => ({
     matrix: new THREE.Matrix4().makeTranslation(pebble.x, 22.2, pebble.z),

@@ -114,7 +114,7 @@ The additional 24 views combine with the frozen October 14 manifest and the new
 random set to provide at least three separated positions for each land biome.
 A biome label describes the camera cell, not every visible plant. The tundra's
 green distant band includes trees rooted in neighboring ID 4 cells. Imported
-Eldara taiga is ID 9 in all forty neighborhood samples and uses its configured
+Astalor taiga is ID 9 in all forty neighborhood samples and uses its configured
 conifer prototypes. The rainforest's pale trunk is authored
 `tree-scene/tree-02.glb`, placement `tree:101:12:21`, species `tropical_tall`.
 
@@ -126,7 +126,7 @@ surveys are directional samples, not an exhaustive terrain search. Regional mist
 and sky haze remain active in the distance-fog control.
 
 R7's optional geography extension remains a separate, conditional versioned
-stage. This pass preserves generator version 1, imported Eldara elevations and
+stage. This pass preserves generator version 1, imported Astalor elevations and
 existing saves. Snow, rocks, water, HUD and sound retain their existing owners;
 their regression evidence does not imply new mountains, new rock assets, a new
 HUD or a completed subjective sound-mix review. Automated audio checks establish

@@ -39,8 +39,8 @@ def a_couple(state, ties):
     raise AssertionError("no married couple in the pilot")
 
 
-def test_a_couple_married_this_month_finds_its_new_household_and_waits_to_have_a_child(eldara):
-    state, rules = pilot(eldara)
+def test_a_couple_married_this_month_finds_its_new_household_and_waits_to_have_a_child(astalor):
+    state, rules = pilot(astalor)
     ties = Ties(state.cast.relationships, state.cast.relSeq)
     mother, father = a_couple(state, ties)
     day = 3000
@@ -69,12 +69,12 @@ def test_a_couple_married_this_month_finds_its_new_household_and_waits_to_have_a
     assert child.family == "Newwed", "found in the month's households, not the cast's from before"
 
 
-def test_ages_spans_and_dates_follow_the_frozen_calendar(eldara, fresh_model, monkeypatch):
-    frozen = freeze(eldara.config.rules)
+def test_ages_spans_and_dates_follow_the_frozen_calendar(astalor, fresh_model, monkeypatch):
+    frozen = freeze(astalor.config.rules)
     frozen["simulation"]["calendar"] = {**frozen["simulation"]["calendar"], "daysPerMonth": 20}
-    people = complete(frozen, eldara.config.rules)["simulation"]["people"]
+    people = complete(frozen, astalor.config.rules)["simulation"]["people"]
     assert people["daysPerYear"] == 240 and people["daysPerMonth"] == 20
-    state, _ = pilot(eldara)
+    state, _ = pilot(astalor)
     p = state.cast.people[0]
     assert age_years(p, 0, people) == -p.birthDay // 240
 
@@ -87,8 +87,8 @@ def test_ages_spans_and_dates_follow_the_frozen_calendar(eldara, fresh_model, mo
     assert manager.labeller(session.state)(30) == "1212-02-01", "dated by the scenario's own calendar"
 
 
-def test_children_move_with_their_adults_and_elders_stay(eldara):
-    state, rules = pilot(eldara)
+def test_children_move_with_their_adults_and_elders_stay(astalor):
+    state, rules = pilot(astalor)
     towns = sorted(state.settlements, key=lambda s: s.settlementId)
     idle = towns[0].society.employment.model_copy(update={"unemployed": towns[0].society.employment.labourSupply // 2})
     towns[0] = towns[0].model_copy(update={"society": towns[0].society.model_copy(update={"employment": idle})})
@@ -105,8 +105,8 @@ def test_children_move_with_their_adults_and_elders_stay(eldara):
     assert sum(s.population for s in travel.result()) + travel.state.population == sum(s.population for s in towns)
 
 
-def test_rumours_arrive_with_the_caravan_not_when_it_leaves(eldara):
-    state, rules = pilot(eldara)
+def test_rumours_arrive_with_the_caravan_not_when_it_leaves(astalor):
+    state, rules = pilot(astalor)
     knowledge, travel_cfg = rules["simulation"]["people"]["knowledge"], rules["simulation"]["travel"]
     master = next(p for p in state.cast.people if p.traderId)
     trader = next(t for t in state.trade.traders if t.id == master.traderId)
@@ -133,19 +133,19 @@ def test_rumours_arrive_with_the_caravan_not_when_it_leaves(eldara):
     assert heard.how == "rumour" and heard.fromId == master.id and heard.learnedDay == 67
 
 
-def test_a_town_buys_no_more_than_it_can_pay_for_food_first(eldara):
+def test_a_town_buys_no_more_than_it_can_pay_for_food_first(astalor):
     prices = {"Rations": 1.0, "Iron": 10.0}
     assert affordable({"Rations": 50, "Iron": 10}, prices, 1000, "Rations") == {"Rations": 50, "Iron": 10}
     assert affordable({"Rations": 50, "Iron": 10}, prices, 70, "Rations") == {"Rations": 50, "Iron": 2}
     assert affordable({"Rations": 50, "Iron": 10}, prices, 30, "Rations") == {"Rations": 30}
-    state, rules = pilot(eldara)
+    state, rules = pilot(astalor)
     poor = [s.model_copy(update={"economy": s.economy.model_copy(update={"treasury": 0.0})}) for s in state.settlements]
     later, _ = advance(state.model_copy(update={"settlements": poor}), 360, rules)
     assert all(s.economy.treasury >= -rules["economy"]["market"]["credit"] - 1e-6 for s in later.settlements)
 
 
-def test_outlaws_choose_among_their_towns_routes(eldara):
-    state, rules = pilot(eldara)
+def test_outlaws_choose_among_their_towns_routes(astalor):
+    state, rules = pilot(astalor)
     route = state.trade.routes[0]
     second = Route(**{**route.model_dump(), "id": "route:second", "centerName": "Elsewhere", "bandits": route.bandits + 30})
     people = {p.id: p for p in state.cast.people}

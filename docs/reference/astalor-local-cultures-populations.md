@@ -1,9 +1,9 @@
-# Eldara Local Cultures, Sub-Peoples, Settlements, and Population Model
+# Astalor Local Cultures, Sub-Peoples, Settlements, and Population Model
 
 Status: canonical worldbuilding and simulation reference
 
 Source of truth:
-- `maps/Eldara Full 2026-07-23-20-37.json`
+- `maps/Astalor Full 2026-07-23-20-37.json`
 - `config/cultures.yaml`
 
 Map seed: `550306385`. Exported: `2026-07-23T16:37:20.939Z`. Population rate: `1000`. Urbanization: `1`.

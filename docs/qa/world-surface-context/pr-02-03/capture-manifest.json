@@ -43,7 +43,7 @@
   "captures": [
     {
       "id": "B14-C02-overcast",
-      "world": "eldara",
+      "world": "astalor",
       "pose": {
         "x": 2366321.4022676707,
         "z": -2373888.4437549873,
@@ -84,7 +84,7 @@
     },
     {
       "id": "B14-C01-overcast",
-      "world": "eldara",
+      "world": "astalor",
       "pose": {
         "x": 2366324.1219881824,
         "z": -2373880.9202504624,
@@ -125,7 +125,7 @@
     },
     {
       "id": "B14-C05-clear",
-      "world": "eldara",
+      "world": "astalor",
       "pose": {
         "x": 2366305.4239096637,
         "z": -2373932.644344072,
@@ -353,7 +353,7 @@
     }
   ],
   "browserErrors": {
-    "eldara": {
+    "astalor": {
       "count": 0,
       "errors": [],
       "truncated": false

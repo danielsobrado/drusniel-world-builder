@@ -7,9 +7,9 @@ a contact sheet are in `docs/qa/aaa-look-2026-11-09/`, which is local only becau
 `tmp/aaa-look2.mjs`, which is not tracked.
 
 Poses: procedural world for forest, grassland, rainforest, taiga, wetland,
-coast and desert (biome poses from `docs/qa/visual-audit-2026-10-15`); Eldara
+coast and desert (biome poses from `docs/qa/visual-audit-2026-10-15`); Astalor
 for tundra, glacier, snow at eye level, and the town street (poses from recent
-snow and house sessions). The old Eldara biome poses in
+snow and house sessions). The old Astalor biome poses in
 `docs/qa/world-visual-quality-2026-10-14/biomes/shore-review-poses.json` now
 put the camera in the sea or on bare snowfield. They are out of date and need
 re-selecting before anyone uses them again.

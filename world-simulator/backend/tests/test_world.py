@@ -70,8 +70,8 @@ def test_audit_keeps_valid_settlements_reports_invalid_and_removed(config, fixtu
     assert audit["population"]["rural"] == 12000
 
 
-def test_eldara_matches_the_documented_reference_counts(eldara):
-    audit = eldara.audit
+def test_astalor_matches_the_documented_reference_counts(astalor):
+    audit = astalor.audit
     assert audit["counts"] == {"settlements": 502, "provinces": 131, "states": 8, "cultures": 14}
     assert all(c["matches"] for c in audit["referenceCheck"].values())
     assert audit["invalidRecords"] == []

@@ -10,7 +10,7 @@ Execute VQ-01, VQ-02, then VQ-03 before changing appearance.
 **Problem.** `InfiniteTerrainView.calculateVelocity` interprets a teleport as
 movement. `ObjectView.residentObjectCellBounds` then unions all resident slots
 into one rectangle. The retained audit recorded an object-index bucket overflow
-on an Eldara jump. Both the predictor and the query shape need fixed contracts.
+on an Astalor jump. Both the predictor and the query shape need fixed contracts.
 
 **Owners.** `src/editor/InfiniteTerrainView.js`, `src/editor/ObjectView.js`,
 `src/editor/ObjectSpatialIndex.js`, `src/editor/player/PlayerController.js`,
@@ -228,7 +228,7 @@ is mandatory; do not offer a headless acceptance mode.
    views. There must be three valid views per current land biome: where an
    original pose no longer has its historical ID, retain it as a regression view
    and select a third current-biome pose with the same algorithm.
-5. Import `maps/Eldara Full 2026-07-23-20-37.json` through the existing import
+5. Import `maps/Astalor Full 2026-07-23-20-37.json` through the existing import
    path. Add the imported snow/coast fixtures specified in chapter 03; report
    the map hash. Never use the failed original import attempt as a baseline.
 

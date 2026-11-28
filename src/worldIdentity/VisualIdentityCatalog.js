@@ -1,8 +1,8 @@
 /**
  * Canonical Drusniel Visual Identity Catalog.
  *
- * Bridges immutable Azgaar source IDs (`config/cultures.yaml`), Eldara state and
- * province contexts (`docs/reference/eldara-local-cultures-populations.md`),
+ * Bridges immutable Azgaar source IDs (`config/cultures.yaml`), Astalor state and
+ * province contexts (`docs/reference/astalor-local-cultures-populations.md`),
  * narrative lore realms (`docs/asset-bible/00-lore-and-map-crosswalk.md`), and
  * environmental overlays (`docs/asset-bible/areas/*.md`) into worker-safe,
  * deterministic architectural and settlement grammars.
@@ -204,14 +204,14 @@ export const CULTURE_KEY_TO_SOURCE_ID = Object.freeze(
 
 /**
  * Zuraldarr upland provinces and autonomous burgs within the Lumeshire Azgaar state
- * (`docs/reference/eldara-local-cultures-populations.md` & `00-lore-and-map-crosswalk.md`).
+ * (`docs/reference/astalor-local-cultures-populations.md` & `00-lore-and-map-crosswalk.md`).
  */
 export const ZURALDI_PROVINCE_IDS = Object.freeze([34, 75, 124, 125, 131]);
 export const ZURALDI_PROVINCE_NAMES = Object.freeze(['persbury', 'westclesia', 'pyreaz', 'hatbury', 'zuraldi']);
 export const ZURALDI_BURG_NAMES = Object.freeze(['lexabusur']);
 
 /**
- * Nine canonical regional dossiers + Eldara state mappings.
+ * Nine canonical regional dossiers + Astalor state mappings.
  */
 export const LORE_REALM_CATALOG = Object.freeze({
   lumeshire: Object.freeze({
@@ -697,7 +697,7 @@ export const LORE_REALM_CATALOG = Object.freeze({
 
 /**
  * Crosswalk from normalized Azgaar state names to canonical lore realm IDs,
- * preserving secondary Eldara polities (`docs/reference/eldara-local-cultures-populations.md`).
+ * preserving secondary Astalor polities (`docs/reference/astalor-local-cultures-populations.md`).
  */
 export const STATE_NAME_TO_LORE_REALM = Object.freeze({
   lumeshire: 'lumeshire',
@@ -724,7 +724,7 @@ export const STATE_NAME_TO_LORE_REALM = Object.freeze({
 });
 
 /**
- * Local culture branches from `docs/reference/eldara-local-cultures-populations.md`.
+ * Local culture branches from `docs/reference/astalor-local-cultures-populations.md`.
  */
 export const LOCAL_CULTURE_BRANCHES = Object.freeze({
   'lumeshire-imperial': Object.freeze({

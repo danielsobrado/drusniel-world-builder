@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "selectionSourceSha": "3df8032175cf14fa27bc493283b61ca242ea4c26",
   "configSha256": "61668d09ae1317662e9b9cc1c9e57392b18e865fa8db4a7d3bd73469d5b3e341",
-  "map": "maps/Eldara Full 2026-07-23-20-37.json",
-  "mapSha256": "128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a",
+  "map": "maps/Astalor Full 2026-07-23-20-37.json",
+  "mapSha256": "c8b1ee5a87a02722d9a122bd201088ee02a4e2d1e21dc18327fe17714320c3a1",
   "gridMeters": 8,
   "tieBreak": [
     "distanceSquared",
@@ -12,7 +12,7 @@
   ],
   "imported": [
     {
-      "id": "eldara-forest",
+      "id": "astalor-forest",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -22,7 +22,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-forest-reverse",
+      "id": "astalor-forest-reverse",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -32,7 +32,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-forest-overview",
+      "id": "astalor-forest-overview",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -43,7 +43,7 @@
       "fov": 60
     },
     {
-      "id": "eldara-taiga",
+      "id": "astalor-taiga",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -53,7 +53,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-taiga-reverse",
+      "id": "astalor-taiga-reverse",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -63,7 +63,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-taiga-overview",
+      "id": "astalor-taiga-overview",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -74,7 +74,7 @@
       "fov": 60
     },
     {
-      "id": "eldara-tundra",
+      "id": "astalor-tundra",
       "expectedBiomeId": 10,
       "x": -4995717,
       "z": 970835,
@@ -84,7 +84,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-tundra-reverse",
+      "id": "astalor-tundra-reverse",
       "expectedBiomeId": 10,
       "x": -4995717,
       "z": 970835,
@@ -94,7 +94,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-tundra-overview",
+      "id": "astalor-tundra-overview",
       "expectedBiomeId": 10,
       "x": -4995717,
       "z": 970835,
@@ -105,7 +105,7 @@
       "fov": 60
     },
     {
-      "id": "eldara-glacier",
+      "id": "astalor-glacier",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -115,7 +115,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-glacier-reverse",
+      "id": "astalor-glacier-reverse",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -125,7 +125,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-glacier-overview",
+      "id": "astalor-glacier-overview",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -136,7 +136,7 @@
       "fov": 60
     },
     {
-      "id": "eldara-wetland",
+      "id": "astalor-wetland",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -146,7 +146,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-wetland-reverse",
+      "id": "astalor-wetland-reverse",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -156,7 +156,7 @@
       "heightAboveGround": 1.7
     },
     {
-      "id": "eldara-wetland-overview",
+      "id": "astalor-wetland-overview",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -203,7 +203,7 @@
       }
     },
     {
-      "id": "eldara-wetland-shore",
+      "id": "astalor-wetland-shore",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -211,7 +211,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "shoreTarget": null
     }
   ],

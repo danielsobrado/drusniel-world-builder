@@ -10,8 +10,8 @@ ENDPOINTS = ["/api/health", "/api/world", "/api/world/summary", "/api/world/sett
 
 
 @pytest.fixture(scope="module")
-def client(eldara):
-    return TestClient(create_app(eldara))
+def client(astalor):
+    return TestClient(create_app(astalor))
 
 
 @pytest.mark.parametrize("path", ENDPOINTS)
@@ -20,7 +20,7 @@ def test_every_endpoint_returns_the_versioned_envelope(client, path):
     assert res.status_code == 200
     body = res.json()
     assert body["apiVersion"] == 1
-    assert body["world"]["mapId"] == "eldara-2026"
+    assert body["world"]["mapId"] == "astalor-2026"
     assert body["world"]["sourceFingerprint"].startswith("sha256:")
     assert body["data"]
 

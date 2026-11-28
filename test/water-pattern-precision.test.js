@@ -14,7 +14,7 @@ import {
   WATER_FLOW_REFERENCE_METERS,
 } from '../src/editor/stylized/WaterPatternOrigins.js';
 
-// An Eldara beach sits near cell (-2478811, -211331); the far side of the
+// An Astalor beach sits near cell (-2478811, -211331); the far side of the
 // planet reaches past five million metres.
 const PLANET_CENTERS = Object.freeze([
   [-2478811 * 2, 211331 * 2],

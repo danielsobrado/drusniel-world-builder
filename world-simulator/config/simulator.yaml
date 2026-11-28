@@ -12,14 +12,14 @@ frontend:
 world:
   manifest: ../maps/manifest.json   # the parent repository's map library
   mapsDirectory: ../maps            # maps must resolve inside this directory
-  canonicalCultureMapIds: [eldara-2026]
-  mapId: eldara-2026                # override with WS_MAP_ID
-  # Counts documented in docs/reference/eldara-local-cultures-populations.md, checked
+  canonicalCultureMapIds: [astalor-2026]
+  mapId: astalor-2026                # override with WS_MAP_ID
+  # Counts documented in docs/reference/astalor-local-cultures-populations.md, checked
   # against the source on every audit. Keyed by map id; omit for other maps.
   referenceCounts:
-    eldara-2026: { settlements: 502, provinces: 131, states: 8, cultures: 14 }
+    astalor-2026: { settlements: 502, provinces: 131, states: 8, cultures: 14 }
 
-# Worldbuilding size classes (docs/reference/eldara-local-cultures-populations.md).
+# Worldbuilding size classes (docs/reference/astalor-local-cultures-populations.md).
 # A settlement belongs to the first class whose maxPopulation it is below.
 # These do not replace the game's rendering classes (SettlementProfile.js).
 classification:

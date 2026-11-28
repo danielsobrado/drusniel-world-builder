@@ -28,8 +28,8 @@ function config() {
 
 test('scene settings capture map, environment, biome, asset, and placement state', () => {
   const document = createSceneSettingsDocument({
-    name: 'Eldara look',
-    map: { kind: 'url', url: '../maps/eldara.json', label: 'Eldara' },
+    name: 'Astalor look',
+    map: { kind: 'url', url: '../maps/astalor.json', label: 'Astalor' },
     godRays: { enabled: true, screenIntensity: 1.4, screenDustSpeed: 0.075 },
     biomeAssets: {
       kind: 'simcity-dnd-biome-assets',
@@ -46,8 +46,8 @@ test('scene settings capture map, environment, biome, asset, and placement state
     }],
     placement: { regionSize: 512, contrast: 2.8 },
   });
-  assert.equal(document.name, 'Eldara look');
-  assert.equal(document.map.url, '../maps/eldara.json');
+  assert.equal(document.name, 'Astalor look');
+  assert.equal(document.map.url, '../maps/astalor.json');
   assert.equal(document.environment.godRays.screenIntensity, 1.4);
   assert.equal(document.environment.godRays.screenDustSpeed, 0.075);
   assert.equal(document.assets[0].id, 'granite');
@@ -106,20 +106,20 @@ test('asset settings resolve URL and browser-local GLBs into runtime variants', 
 test('embedded maps may record only a label, and references drop the source', () => {
   const inlined = createSceneSettingsDocument({
     name: 'Imported',
-    map: { kind: 'embedded', document: { info: { version: '1.99' } }, label: 'eldara.json' },
+    map: { kind: 'embedded', document: { info: { version: '1.99' } }, label: 'astalor.json' },
   });
   assert.equal(inlined.map.document.info.version, '1.99');
   assert.ok(isLoadableMap(inlined.map));
 
   const reference = toMapReference(inlined.map);
   assert.equal(reference.document, undefined);
-  assert.equal(reference.label, 'eldara.json');
+  assert.equal(reference.label, 'astalor.json');
   assert.equal(isLoadableMap(reference), false);
 
   const roundTripped = normalizeSceneSettings({ ...inlined, map: reference });
   assert.equal(roundTripped.map.kind, 'embedded');
   assert.equal(roundTripped.map.document, undefined);
-  assert.equal(roundTripped.map.label, 'eldara.json');
+  assert.equal(roundTripped.map.label, 'astalor.json');
 });
 
 test('runtime captures keep inlined map exports out of routine saves', () => {
@@ -133,11 +133,11 @@ test('runtime captures keep inlined map exports out of routine saves', () => {
     godRays: null,
     config: { stylizedSurface: { regionalPlacement: {} } },
   });
-  runtime.mapSource = { kind: 'embedded', document: mapDocument, label: 'eldara.json' };
+  runtime.mapSource = { kind: 'embedded', document: mapDocument, label: 'astalor.json' };
 
   const saved = runtime.capture('World save');
   assert.equal(saved.map.document, undefined, 'world saves must not duplicate the map export');
-  assert.equal(saved.map.label, 'eldara.json');
+  assert.equal(saved.map.label, 'astalor.json');
 
   const exported = runtime.capture('Portable', { includeMapDocument: true });
   assert.deepEqual(exported.map.document, mapDocument);

@@ -22,13 +22,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const catalogSource = yaml.load(readFileSync(path.join(root, 'config', 'cultures.yaml'), 'utf8'));
 const catalog = resolveCultureCatalog(catalogSource);
 
-function eldaraCampaign() {
+function astalorCampaign() {
   return {
     source: {
       type: 'azgaar-campaign-fixture',
-      mapId: 'eldara-test',
-      mapName: 'Eldara',
-      seed: 'eldara-culture-test',
+      mapId: 'astalor-test',
+      mapName: 'Astalor',
+      seed: 'astalor-culture-test',
       sourceWidth: 1000,
       sourceHeight: 800,
     },
@@ -49,8 +49,8 @@ function eldaraCampaign() {
   };
 }
 
-test('Eldara culture catalog preserves the Azgaar source-ID compatibility layer', () => {
-  assert.equal(catalog.catalogId, 'eldara-cultures-v1');
+test('Astalor culture catalog preserves the Azgaar source-ID compatibility layer', () => {
+  assert.equal(catalog.catalogId, 'astalor-cultures-v1');
   assert.equal(Object.keys(catalog.cultures).length, 7);
   assert.equal(catalog.sourceMappings.length, 14);
   assert.equal(Object.keys(catalog.culturalSeeds).length, 6);
@@ -73,14 +73,14 @@ test('every core culture defines a relation to every other core culture', () => 
   }
 });
 
-test('catalog only applies to configured Eldara source maps', () => {
-  assert.equal(catalogAppliesToCampaign(catalog, eldaraCampaign()), true);
+test('catalog only applies to configured Astalor source maps', () => {
+  assert.equal(catalogAppliesToCampaign(catalog, astalorCampaign()), true);
   assert.equal(catalogAppliesToCampaign(catalog, { source: { mapName: 'Another World' } }), false);
 });
 
 test('Azgaar projection enriches source cultures without replacing source identity', () => {
   const config = { ...mergeSimulationConfig(), cultureCatalog: catalog };
-  const { definition } = projectAzgaarWorld(eldaraCampaign(), { simulationConfig: config });
+  const { definition } = projectAzgaarWorld(astalorCampaign(), { simulationConfig: config });
 
   assert.equal(definition.cultureCatalog.catalogId, catalog.catalogId);
 
@@ -103,8 +103,8 @@ test('Azgaar projection enriches source cultures without replacing source identi
   assert.equal(wildlands.culturalSeedKey, null);
 });
 
-test('Eldara catalog does not leak into unrelated Azgaar worlds', () => {
-  const campaign = eldaraCampaign();
+test('Astalor catalog does not leak into unrelated Azgaar worlds', () => {
+  const campaign = astalorCampaign();
   campaign.source.mapName = 'Unrelated World';
   const config = { ...mergeSimulationConfig(), cultureCatalog: catalog };
   const { definition } = projectAzgaarWorld(campaign, { simulationConfig: config });
@@ -115,7 +115,7 @@ test('Eldara catalog does not leak into unrelated Azgaar worlds', () => {
 
 test('culture catalog survives simulation snapshot round-trip', () => {
   const config = { ...mergeSimulationConfig(), cultureCatalog: catalog };
-  const { definition, state } = projectAzgaarWorld(eldaraCampaign(), { simulationConfig: config });
+  const { definition, state } = projectAzgaarWorld(astalorCampaign(), { simulationConfig: config });
   const beforeFingerprint = fingerprintWorldDefinition(definition);
   const snapshot = serializeWorldSnapshot({ definition, state });
   const restored = restoreWorldSnapshot(snapshot);

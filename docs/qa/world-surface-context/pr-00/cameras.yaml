@@ -1,6 +1,6 @@
 # World Surface Context (WSC) — PR 0 Reproducible Camera Manifest
 # Every location uses canonical world coordinates, real Azgaar/procedural biome IDs,
-# and frozen world seed (procedural seed 918273 or Eldara Full 2026-07-23-20-37).
+# and frozen world seed (procedural seed 918273 or Astalor Full 2026-07-23-20-37).
 schemaVersion: 1
 viewport:
   width: 1920
@@ -11,8 +11,8 @@ worlds:
     generatorVersion: 1
     tileSize: 2
     chunkSize: 64
-  eldara:
-    map: /maps/Eldara Full 2026-07-23-20-37.json
+  astalor:
+    map: /maps/Astalor Full 2026-07-23-20-37.json
     stillmeadowBurgId: 18
 
 locations:
@@ -108,7 +108,7 @@ locations:
   B10:
     name: Tundra
     folder: biomes/tundra
-    world: eldara
+    world: astalor
     tileId: 10
     cameras:
       C01: { label: Wide tundra snow, x: 151523, z: -49043, yaw: 0.6, pitch: -0.12, mode: player, heightAboveGround: 1.7, fov: 68 }
@@ -117,14 +117,14 @@ locations:
   B11:
     name: Snow-covered alpine terrain
     folder: biomes/alpine-snow
-    world: eldara
+    world: astalor
     cameras:
       C01: { label: Alpine snow eye level, x: -3291493, z: -210747, yaw: 2.0, pitch: 0.05, mode: player, heightAboveGround: 1.7, fov: 68 }
 
   B12:
     name: Rocky mountain terrain
     folder: biomes/rocky-mountain
-    world: eldara
+    world: astalor
     cameras:
       C01: { label: Glacier & alpine crags, x: -282505, z: -389567, yaw: 1.2, pitch: -0.25, mode: fly, heightAboveGround: 25, fov: 60 }
 
@@ -136,9 +136,9 @@ locations:
       C01: { label: Wide coastal shore, x: -2077, z: 1731, yaw: -1.571, pitch: -0.08, mode: player, heightAboveGround: 1.7, fov: 68 }
 
   B14:
-    name: Stillmeadow settlement (Eldara burg 18)
+    name: Stillmeadow settlement (Astalor burg 18)
     folder: stillmeadow
-    world: eldara
+    world: astalor
     stillmeadow: true
     tileId: 8
     cameras:
@@ -174,7 +174,7 @@ locations:
   B18:
     name: Settlement-to-natural-terrain transition
     folder: transitions/settlement-terrain
-    world: eldara
+    world: astalor
     cameras:
       C01: { label: Town edge & paving transition, x: -6724492, z: -347232, yaw: 1.32, pitch: 0.04, mode: player, heightAboveGround: 1.7, fov: 68 }
 

@@ -4,9 +4,9 @@ PR1 of the standalone World Simulator. It reads the imported Azgaar world, check
 its facts, normalizes population, allocates a persistent-NPC budget and picks a
 three-settlement pilot. Everything here is read-only: no simulation runs yet.
 
-Source: `maps/Eldara Full 2026-07-23-20-37.json` (manifest id `eldara-2026`),
+Source: `maps/Astalor Full 2026-07-23-20-37.json` (manifest id `astalor-2026`),
 Azgaar 1.138.0, seed `550306385`, fingerprint
-`sha256:128df10c17297db18f3de1f547d74697dc4279ba7f2e6809177af988c2cc2c0a`.
+`sha256:c8b1ee5a87a02722d9a122bd201088ee02a4e2d1e21dc18327fe17714320c3a1`.
 
 ## Verified source findings
 
@@ -43,7 +43,7 @@ The game reads the same numbers two other ways, left unchanged in PR1:
 
 - `src/editor/world/settlements/SettlementProfile.js` treats `burg.population` as
   thousands. That matches inhabitants only while `populationRate × urbanization = 1000`,
-  which holds for Eldara; another map with a different rate would render wrong sizes.
+  which holds for Astalor; another map with a different rate would render wrong sizes.
 - `src/sim/import/projectAzgaarWorld.js` stores the raw points.
 
 Also noted, not fixed: `projectAzgaarWorld` reads `burg.province`, but Azgaar burgs
@@ -69,7 +69,7 @@ Capital stays a separate political flag. The game's rendering classes
 Each Azgaar route point is `[x, y, cell]`, so a route passes through a settlement
 exactly when it crosses the settlement's cell. Routes that meet at a shared
 non-settlement cell form junctions, and the road network is built over those cells.
-A coordinate tolerance (1.5 px) is only used for points with no cell id; Eldara has
+A coordinate tolerance (1.5 px) is only used for points with no cell id; Astalor has
 none, so there are 0 coordinate matches. Proximity is listed separately and is never
 counted as a connection.
 

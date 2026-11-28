@@ -97,7 +97,7 @@ test('boot settings expose the pending world handoff key', async () => {
 test('initial runtime restores a staged world without replaying a label-only map', async () => {
   const settings = createSceneSettingsDocument({
     ...customSettings(),
-    map: { kind: 'embedded', label: 'eldara.json' },
+    map: { kind: 'embedded', label: 'astalor.json' },
   });
   const stagedWorld = { world: { seed: 84 }, visualConfig: { sceneSettings: settings } };
   const loaded = [];

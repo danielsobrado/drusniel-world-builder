@@ -89,7 +89,7 @@ preset pauses the clock on that look.
 - `node --test test/sky-region.test.js`
 - In dev, `window.__editor.skyRegion.region` is the sampled region and
   `window.__editor.skyLooks.region` the eased one.
-- On Eldara:
+- On Astalor:
   - Felnesine is temperate.
   - Mugrord is boreal.
   - Grath'te is wetland, with fog around ×3.3.

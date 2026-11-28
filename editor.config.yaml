@@ -165,7 +165,7 @@ renderer:
   #
   # Off by default on measurement (2026-09-28, walking, vsync off): it works — the
   # terrain occludes through per-chunk proxies of its hills (terrainOccluderProxy)
-  # and in an Eldara valley it hid 5–7 draws / ~57k triangles behind relief — but
+  # and in an Astalor valley it hid 5–7 draws / ~57k triangles behind relief — but
   # it cost 1–9% frame rate there (255–270 fps on, 264–281 off) and ~5% on open
   # ground where it culled nothing (151–154 vs 160–162). The draws that cost the
   # most are not candidates: the meadow is one batch per band across every tile,

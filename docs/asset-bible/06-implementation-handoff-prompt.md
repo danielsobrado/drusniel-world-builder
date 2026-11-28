@@ -8,8 +8,8 @@ You are the lead engineer, technical artist and technical designer for **Drusnie
 
 ## Mandatory source material and truth hierarchy
 
-1. Public narrative canon: https://www.drusniel.com/ and especially https://www.drusniel.com/the-regions-of-astalor/ and linked realm articles. Treat **Astalor as narrative geography** and **Eldara as the current simulator map**; do not silently assume their geographies are identical.
-2. Current simulator map and population: `maps/Eldara Full 2026-07-23-20-37.json`, `docs/reference/eldara-local-cultures-populations.md`.
+1. Public narrative canon: https://www.drusniel.com/ and especially https://www.drusniel.com/the-regions-of-astalor/ and linked realm articles. Treat **Astalor as narrative geography** and **Astalor as the current simulator map**; do not silently assume their geographies are identical.
+2. Current simulator map and population: `maps/Astalor Full 2026-07-23-20-37.json`, `docs/reference/astalor-local-cultures-populations.md`.
 3. Canonical culture IDs and source mapping: `config/cultures.yaml`.
 4. Existing architectural strategy: `docs/plans/place-identity-world-differentiation-plan-2026-10-05.md` — status **Proposed**. Build on its `PlaceIdentity` concept; avoid a competing subsystem.
 5. This complete asset bible: `docs/asset-bible/README.md`, `00-lore-and-map-crosswalk.md`, `01-identity-taxonomy.md`, `02-image-to-3d-pipeline.md`, `03-production-backlog.md`, `04-runtime-integration.md`, `05-differentiation-matrix.md`, `regions/*.md`, `areas/*.md`, `templates/*.md`, `proposed-config/*.yaml`.

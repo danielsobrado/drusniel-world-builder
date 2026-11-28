@@ -95,7 +95,7 @@
     {
       "id": "river-08",
       "name": "Temperate rainforest river",
-      "world": "eldara",
+      "world": "astalor",
       "x": -4269925.294875607,
       "z": 2359551.9412070587,
       "yaw": 1.9498808872537716,
@@ -129,5 +129,5 @@
     }
   ],
   "sourceSha": "000c8126b199a1eadfe79000543d6e6e9b8df0b9",
-  "map": "maps/Eldara Full 2026-07-23-20-37.json"
+  "map": "maps/Astalor Full 2026-07-23-20-37.json"
 }

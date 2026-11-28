@@ -10,7 +10,7 @@ the look.
 ## 0. Where the swamps are (done)
 
 Commit `cbb542ab` converts low-lying (h ≤ 23), river- or water-adjacent
-Grukmar taiga to Wetland (biome 12) in both `maps/Eldara …map` and `…Full….json`.
+Grukmar taiga to Wetland (biome 12) in both `maps/Astalor …map` and `…Full….json`.
 Grukmar goes from 80 to 267 wetland cells out of 633 land cells, the most of
 any realm. Burg cells keep their biome.
 
@@ -66,7 +66,7 @@ of this route to A/B against:
 | 2 | 98.2 | 7 | 9.0 | 13.8 | 31.2 | 173.7 |
 
 The JS heap, which crashed tabs near towns, came down from 3.26 GB to 1.1 GB at
-the Eldara forest pose once the river indexes stopped bucketing every fine block
+the Astalor forest pose once the river indexes stopped bucketing every fine block
 eagerly (`water/SegmentBlockIndex.js`). `bog-cross` afterwards: 94.2 and 93.7 FPS,
 4 and 6 hitches, p95 14.4 and 14.1 ms. That is level with the baseline above.
 

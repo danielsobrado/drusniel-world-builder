@@ -1,8 +1,8 @@
 schemaVersion: 1
-catalogId: "eldara-cultures-v1"
+catalogId: "astalor-cultures-v1"
 source:
   mapNames:
-    - "Eldara"
+    - "Astalor"
   mappingPolicy: "explicit-id"
   unmatchedCulturePolicy: "passthrough"
 principles:

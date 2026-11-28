@@ -17,7 +17,7 @@ check('all requested poses retained', report.poses.length === manifest.requested
 check('frozen source matches capture', source.sourceSha === report.sourceSha && source.sourceSnapshot.sha256 === report.sourceSnapshotSha256 && report.sourceStayedFixed);
 check('capture script hash', await hash(path.join(dir, 'capture.mjs')) === report.captureScriptSha256);
 check('selector hash', await hash(path.join(dir, 'select-poses.mjs')) === report.selectorSha256);
-check('imported map hash', await hash(path.join(root, 'maps/Eldara Full 2026-07-23-20-37.json')) === report.mapSha256);
+check('imported map hash', await hash(path.join(root, 'maps/Astalor Full 2026-07-23-20-37.json')) === report.mapSha256);
 for (const pose of report.poses) {
   check(`${pose.id}: ready, biome and water kind`, pose.readiness.ready && pose.actualBiomeId === pose.expectedBiomeId && pose.targetWater.kind === pose.expectedWaterKind);
   check(`${pose.id}: 60 consecutive ready frames`, pose.preparation.readiness.readyFrames >= 60 && (!pose.preparation.groundPreparation || pose.preparation.groundPreparation.readyFrames >= 60));

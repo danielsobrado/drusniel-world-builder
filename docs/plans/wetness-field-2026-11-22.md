@@ -163,7 +163,7 @@ Not captured:
 Two more poses, same four weather states:
 
 - **desert:** (−5791, −27), flat bare sand, looking slightly down;
-- **town:** Cyvazin, burg 18 of the frozen Eldara map (the settlement perf town), standing on its main street facing the centre.
+- **town:** Cyvazin, burg 18 of the frozen Astalor map (the settlement perf town), standing on its main street facing the centre.
 
 The first field-on desert run found a bug. In heavy rain at noon the field drew **no puddles at all**, where the field-off path floods every flat into sheets of water. The cause: the sun term cut puddle capacity during the storm itself, and at noon open flat ground faces the sun squarely, so capacity fell to the noise floor. `929237ba` makes the sun act only while the ground dries (× `1 − clocks.x`, which is 0 while rain keeps the fast clock full). The same commit widens the film mottle from 0.8–1 to 0.55–1, because the film darkens albedo linearly by `darkening` (0.3), so the old range moved it by only a few percent and soaked ground looked flat. A test now pins "a noon storm still pools".
 

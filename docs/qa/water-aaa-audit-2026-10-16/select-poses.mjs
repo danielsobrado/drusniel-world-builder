@@ -64,7 +64,7 @@ export function selectImportedWaterPoses({ seed = 20261017 } = {}) {
     const x = bx * size, z = -bz * size, target = { x: cx * size, z: -cz * size, water };
     const pitch = -Math.atan2(g.sampleHeight(bx, bz) + 7 - water.surfaceHeight, Math.hypot(target.x - x, target.z - z));
     if (pitch < -.9 || pitch > -.05) continue;
-    poses.push({ id: `river-${String(biome).padStart(2, '0')}`, name: `${names[biome]} river`, world: 'eldara', x, z,
+    poses.push({ id: `river-${String(biome).padStart(2, '0')}`, name: `${names[biome]} river`, world: 'astalor', x, z,
       yaw: Math.atan2(x - target.x, z - target.z), pitch, mode: 'fly', heightAboveGround: 7, fov: 68,
       expectedBiomeId: biome, expectedWaterKind: 3, target, segmentIndex: index, radiusMeters: s.radiusCells * size,
       selection: 'Seeded random segment and longitudinal position, first qualifying bank for each distinct biome; nominal channel radius 4–150 m.' });
@@ -91,7 +91,7 @@ export function selectImportedWaterPoses({ seed = 20261017 } = {}) {
         const water = g.sampleWater(tx, tz), biome = g.sampleTile(Math.floor(bx), Math.floor(bz));
         if (water.kind !== 2 || biome === 0) break;
         const x = bx * size, z = -bz * size, target = { x: tx * size, z: -tz * size, water };
-        poses.push({ id: 'lake-bank', name: `${names[biome]} lake bank`, world: 'eldara', x, z,
+        poses.push({ id: 'lake-bank', name: `${names[biome]} lake bank`, world: 'astalor', x, z,
           yaw: Math.atan2(x - target.x, z - target.z), pitch: -.25, mode: 'fly', heightAboveGround: 5, fov: 68,
           expectedBiomeId: biome, expectedWaterKind: 2, target, lakeId: lake.id, lakeName: lake.name,
           selection: 'Seeded random lake outline segment, then a 2 m cross-section search for the resolved noisy shoreline.' });

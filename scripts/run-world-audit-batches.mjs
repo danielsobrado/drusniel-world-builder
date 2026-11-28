@@ -20,7 +20,7 @@ if ((await readdir(out)).length) throw new Error(`Refusing nonempty audit output
 const groups = [];
 for (const pose of poses) {
   // Imported cuts also prepare the macro backdrop; isolate their lifecycle.
-  const last = groups.at(-1), limit = pose.world === 'eldara' ? 1 : batchSize;
+  const last = groups.at(-1), limit = pose.world === 'astalor' ? 1 : batchSize;
   if (!last || last.length >= limit || last[0].world !== pose.world) groups.push([pose]);
   else last.push(pose);
 }

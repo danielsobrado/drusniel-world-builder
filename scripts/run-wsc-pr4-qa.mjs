@@ -268,10 +268,10 @@ async function main() {
     // 1. Stillmeadow B14-C03 (Tree Trunk Base) & B14-C04 (Understories)
     // =========================================================================
     console.log('[WSC-PR4] Session 1: Stillmeadow B14-C03 (Tree Trunks) & B14-C04 (Understories)');
-    const eldara = await openHardwareWebGpuPage(browser, targetUrl);
-    manifest.adapter = eldara.adapter;
+    const astalor = await openHardwareWebGpuPage(browser, targetUrl);
+    manifest.adapter = astalor.adapter;
     try {
-      const approach = await eldara.page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
+      const approach = await astalor.page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
       const baseX = approach.settlementFixture.canonicalX;
       const baseZ = approach.settlementFixture.canonicalZ;
       const baseYaw = (approach.yawDegrees * Math.PI) / 180;
@@ -297,15 +297,15 @@ async function main() {
       ]) {
         const pose = buildStillPose(item.camId);
         const lighting = CAMERAS.lightingConditions[item.cond];
-        const settle = await prepareAndSettleTerrain(eldara.page, pose, lighting, 6500);
+        const settle = await prepareAndSettleTerrain(astalor.page, pose, lighting, 6500);
         console.log(`[WSC-PR4] ${item.id} settled: loaded=${settle.loaded} baked=${settle.baked}`);
         const d00Path = tmpFile(`${item.id}-D00.png`);
         const d01Path = tmpFile(`${item.id}-D01.png`);
         const d24Path = tmpFile(`${item.id}-D24.png`);
-        const d00 = await captureModePng(eldara.page, 'D00', d00Path);
-        const d01 = await captureModePng(eldara.page, 'D01', d01Path);
-        const d24 = await captureModePng(eldara.page, 'D24', d24Path);
-        manifest.captures.push({ id: item.id, world: 'eldara', pose, lighting, settle });
+        const d00 = await captureModePng(astalor.page, 'D00', d00Path);
+        const d01 = await captureModePng(astalor.page, 'D01', d01Path);
+        const d24 = await captureModePng(astalor.page, 'D24', d24Path);
+        manifest.captures.push({ id: item.id, world: 'astalor', pose, lighting, settle });
 
         const terMask = buildFamilyMask({ ...d24, family: 'terrain' });
         const familiesToMeasure = item.alsoBark ? [item.family, 'treeBark'] : [item.family];
@@ -352,7 +352,7 @@ async function main() {
         );
       }
     } finally {
-      await eldara.context.close();
+      await astalor.context.close();
     }
 
     // =========================================================================

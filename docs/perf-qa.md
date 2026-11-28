@@ -134,7 +134,7 @@ When a run finishes, the report is available as:
 | `chunk-cross` | Long forward run intended to cross chunk boundaries |
 | `edited-world` | Authored biome/height patches, a distant override, and paint/sculpt every three seconds during diagonal movement |
 | `object-town` | Deterministic 64/256-building masonry town; set `buildings=64` or `256` |
-| `settlement-approach` | Frozen Eldara map, imported burg 18; approach its main street. `--revisit --turn-on-revisit` repeats in the same browser and turns the camera 180 degrees halfway through the return run. |
+| `settlement-approach` | Frozen Astalor map, imported burg 18; approach its main street. `--revisit --turn-on-revisit` repeats in the same browser and turns the camera 180 degrees halfway through the return run. |
 | `construction-ring` | Twelve deterministic 96 m wall constructions around a clear movement corridor (see the note below before using it to measure walls) |
 | `water-acceptance` | External phase driver: dry → swim → dive → surface → dry |
 
@@ -606,7 +606,7 @@ Until 2026-10-21 the editor's JS heap sat at 2.3–3.3 GB at ordinary poses, aga
 a hard 4 GB ceiling. The largest single cost was the river channel and valley
 indexes: millions of string-keyed buckets along every Azgaar river, about 450 MB.
 They now bucket coarsely and derive fine blocks on demand
-(`water/SegmentBlockIndex.js`). The heap at the Eldara forest pose fell from
+(`water/SegmentBlockIndex.js`). The heap at the Astalor forest pose fell from
 3.26 GB to 1.1 GB, with `bog-cross` frame times unchanged. Near towns and dense biomes a tab can exceed it, die and reload. A
 harness then reports this as a navigation ("Execution context was destroyed",
 or `__worldVisualQa` undefined), not as a crash. The ceiling cannot be raised:
@@ -995,17 +995,17 @@ edge terms, so that A/B also needs running on this state with baked atlases pres
 
 `TerrainLandforms.js` adds warped swells, gullies and knolls to both generators,
 about ±6 m at p1/p99 and steepest near 0.64. Rivers and beaches read the finished
-height. Eldara's far backdrop skips landforms because `heightBias` keeps it below
+height. Astalor's far backdrop skips landforms because `heightBias` keeps it below
 them. Biome 4 grass rises to 0.82 m tall in 17 m swaths, grassland bushes keep full
 cluster density and flower candidates triple. Existing settlement plans are stale,
 so `SETTLEMENT_PLAN_VERSION` is 19.
 
-Landforms use their own short coast fade in Eldara. The 10-raw-unit detail fade left
+Landforms use their own short coast fade in Astalor. The 10-raw-unit detail fade left
 them at 10% on the settlement route, because a quarter of that map's land is within
 3 units of the coast. Bringing them that close exposed a latent bug: a block build
 that threw stayed in `WaterDistanceField.pendingBlocks`, and the dead job then
 stored `undefined`. Failed builds are now dropped. The original throw was not
-identified; it did not recur over three settlement runs and one Eldara capture.
+identified; it did not recur over three settlement runs and one Astalor capture.
 
 Export of `d2ce9910` with the same two uncommitted device-limit files, against the
 change. `chunk-cross` from `original-04`, `--warmup 8 --duration 12 --settle
@@ -1289,7 +1289,7 @@ Correctness and visual checks:
   passes all three poses on hardware WebGPU, with assets ready and zero browser
   errors (`tmp/p1-world-visual/report.json`). Inspected the overview and shoreline.
 - Inspected culling-on/unculled pairs at −60°, 0° and +60° for the coast and a
-  current Eldara river: no missing water at screen edges. Water time was fixed at
+  current Astalor river: no missing water at screen edges. Water time was fixed at
   123.4 s; materials and quality were unchanged. Coast artifacts are in
   `tmp/p1-water-turns/`; valid river artifacts are in `tmp/p1-river-turns/`.
   Both reports record NVIDIA WebGPU and zero browser errors.
@@ -1612,7 +1612,7 @@ frozen phase-5 focus failures remain failures above.
 Visual checks on `42f0aa0c`, NVIDIA WebGPU, 1600×900:
 
 - Forest at hours 7 and 18.6, plus a 35 m overview at hour 7, coast at hour 12
-  and the previously verified Eldara river at hour 12 have ready assets,
+  and the previously verified Astalor river at hour 12 have ready assets,
   zero browser errors and the expected one cascade/256 px reflection settings
   (`tmp/p6-world-visual-p6-final/report.json`). Inspected the forest morning/
   evening pair, coast and river. One-cascade shadow coverage is retained;

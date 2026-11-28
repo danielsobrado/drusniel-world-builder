@@ -13,16 +13,16 @@ def config(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def eldara(config):
-    """The real Eldara model, built once per test session."""
+def astalor(config):
+    """The real Astalor model, built once per test session."""
     return build_world_model(config)
 
 
 @pytest.fixture
-def fresh_model(eldara, tmp_path):
-    """The Eldara model with its own empty scenario storage."""
-    simulation = {**eldara.config.simulation, "storage": str(tmp_path / "scenarios")}
-    return dataclasses.replace(eldara, config=dataclasses.replace(eldara.config, simulation=simulation))
+def fresh_model(astalor, tmp_path):
+    """The Astalor model with its own empty scenario storage."""
+    simulation = {**astalor.config.simulation, "storage": str(tmp_path / "scenarios")}
+    return dataclasses.replace(astalor, config=dataclasses.replace(astalor.config, simulation=simulation))
 
 
 def _cell(i):

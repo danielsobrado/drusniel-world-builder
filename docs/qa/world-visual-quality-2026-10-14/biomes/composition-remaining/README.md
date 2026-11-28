@@ -6,7 +6,7 @@ Application source: `9b768d9a`. Hardware NVIDIA Lovelace WebGPU, fallback false,
 1600×900, DPR 1, Highfield at paused noon.
 
 The run covers the aerial marine coast; ground, reverse and aerial views of
-Eldara forest (6), taiga (9), tundra (10), glacier (11) and wetland (12); and the
+Astalor forest (6), taiga (9), tundra (10), glacier (11) and wetland (12); and the
 additional wetland shore. Each view retains a clean renderer PNG and a HUD PNG,
 for **34 images**. Aerial destinations prepare real collision at the same ground
 point before the exact fly pose is applied; both preparations are recorded.

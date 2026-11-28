@@ -39,7 +39,7 @@ poses.push(...shore.marine.map(p => ({ ...p, world: 'procedural', name: 'Marine 
 for (const biome of [6, 9, 11, 12]) {
   const choices = shore.imported.filter(p => p.expectedBiomeId === biome);
   const pose = choices[Math.floor(next() * choices.length)];
-  poses.push({ ...pose, fov: pose.fov ?? 68, world: 'eldara', name: `Eldara ${names[biome]}`,
+  poses.push({ ...pose, fov: pose.fov ?? 68, world: 'astalor', name: `Astalor ${names[biome]}`,
     selection: 'seeded choice of existing imported biome views' });
 }
 const report = { schemaVersion: 1, kind: 'visual-audit', startedAt: new Date().toISOString(),

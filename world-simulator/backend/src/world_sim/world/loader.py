@@ -71,6 +71,8 @@ def load_azgaar_world(manifest_path: Path, maps_directory: Path, map_id: str) ->
         raise InvalidSource(f"JSON parse failed ({exc})") from exc
     validate_document(document)
     info = document["info"]
+    fingerprint = f"sha256:{hashlib.sha256(raw).hexdigest()}"
+    renamed_from = entry.get("renamedFrom") or {}
     return {
         "identity": {
             "mapId": entry["id"],
@@ -78,11 +80,12 @@ def load_azgaar_world(manifest_path: Path, maps_directory: Path, map_id: str) ->
             "sourceMapName": info.get("mapName"),
             "format": entry["format"],
             "fileName": entry["file"].name,
-            "sourceFingerprint": f"sha256:{hashlib.sha256(raw).hexdigest()}",
+            "sourceFingerprint": fingerprint,
             "azgaarVersion": info.get("version"),
             "seed": info.get("seed"),
             "azgaarMapId": info.get("mapId"),
             "exportedAt": info.get("exportedAt"),
         },
         "document": document,
+        "renamedFrom": renamed_from if renamed_from.get("targetFingerprint") == fingerprint else None,
     }

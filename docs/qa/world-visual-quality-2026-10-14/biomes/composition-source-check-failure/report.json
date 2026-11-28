@@ -4148,7 +4148,7 @@
       }
     },
     {
-      "id": "eldara-forest",
+      "id": "astalor-forest",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -4156,7 +4156,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -7134127,
         "z": 1081563
@@ -11212,7 +11212,7 @@
       }
     },
     {
-      "id": "eldara-forest-reverse",
+      "id": "astalor-forest-reverse",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -11220,7 +11220,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -7134127,
         "z": 1081563
@@ -18276,7 +18276,7 @@
       }
     },
     {
-      "id": "eldara-forest-overview",
+      "id": "astalor-forest-overview",
       "expectedBiomeId": 6,
       "x": -7134127,
       "z": 1081563,
@@ -18285,7 +18285,7 @@
       "mode": "fly",
       "heightAboveGround": 80,
       "fov": 60,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -7134127,
         "z": 1081563
@@ -25446,7 +25446,7 @@
       }
     },
     {
-      "id": "eldara-taiga",
+      "id": "astalor-taiga",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -25454,7 +25454,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -982683,
         "z": 371387
@@ -35869,7 +35869,7 @@
       }
     },
     {
-      "id": "eldara-taiga-reverse",
+      "id": "astalor-taiga-reverse",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -35877,7 +35877,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -982683,
         "z": 371387
@@ -46292,7 +46292,7 @@
       }
     },
     {
-      "id": "eldara-taiga-overview",
+      "id": "astalor-taiga-overview",
       "expectedBiomeId": 9,
       "x": -982683,
       "z": 371387,
@@ -46301,7 +46301,7 @@
       "mode": "fly",
       "heightAboveGround": 80,
       "fov": 60,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -982683,
         "z": 371387
@@ -56821,7 +56821,7 @@
       }
     },
     {
-      "id": "eldara-tundra",
+      "id": "astalor-tundra",
       "expectedBiomeId": 10,
       "x": -4995717,
       "z": 970835,
@@ -56829,7 +56829,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -4995717,
         "z": 970835
@@ -66170,7 +66170,7 @@
       }
     },
     {
-      "id": "eldara-tundra-reverse",
+      "id": "astalor-tundra-reverse",
       "expectedBiomeId": 10,
       "x": -4995717,
       "z": 970835,
@@ -66178,7 +66178,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -4995717,
         "z": 970835
@@ -75519,7 +75519,7 @@
       }
     },
     {
-      "id": "eldara-tundra-overview",
+      "id": "astalor-tundra-overview",
       "expectedBiomeId": 10,
       "x": -4995717,
       "z": 970835,
@@ -75528,7 +75528,7 @@
       "mode": "fly",
       "heightAboveGround": 80,
       "fov": 60,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -4995717,
         "z": 970835
@@ -84974,7 +84974,7 @@
       }
     },
     {
-      "id": "eldara-glacier",
+      "id": "astalor-glacier",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -84982,7 +84982,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -2747061,
         "z": 316061
@@ -94144,7 +94144,7 @@
       }
     },
     {
-      "id": "eldara-glacier-reverse",
+      "id": "astalor-glacier-reverse",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -94152,7 +94152,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -2747061,
         "z": 316061
@@ -103314,7 +103314,7 @@
       }
     },
     {
-      "id": "eldara-glacier-overview",
+      "id": "astalor-glacier-overview",
       "expectedBiomeId": 11,
       "x": -2747061,
       "z": 316061,
@@ -103323,7 +103323,7 @@
       "mode": "fly",
       "heightAboveGround": 80,
       "fov": 60,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": -2747061,
         "z": 316061
@@ -112590,7 +112590,7 @@
       }
     },
     {
-      "id": "eldara-wetland",
+      "id": "astalor-wetland",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -112598,7 +112598,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": 993673,
         "z": 1701497
@@ -122023,7 +122023,7 @@
       }
     },
     {
-      "id": "eldara-wetland-reverse",
+      "id": "astalor-wetland-reverse",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -122031,7 +122031,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": 993673,
         "z": 1701497
@@ -131456,7 +131456,7 @@
       }
     },
     {
-      "id": "eldara-wetland-overview",
+      "id": "astalor-wetland-overview",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -131465,7 +131465,7 @@
       "mode": "fly",
       "heightAboveGround": 80,
       "fov": 60,
-      "world": "eldara",
+      "world": "astalor",
       "canonical": {
         "x": 993673,
         "z": 1701497
@@ -140995,7 +140995,7 @@
       }
     },
     {
-      "id": "eldara-wetland-shore",
+      "id": "astalor-wetland-shore",
       "expectedBiomeId": 12,
       "x": 993673,
       "z": 1701497,
@@ -141003,7 +141003,7 @@
       "pitch": -0.08,
       "mode": "player",
       "heightAboveGround": 1.7,
-      "world": "eldara",
+      "world": "astalor",
       "shoreTarget": null,
       "canonical": {
         "x": 993673,
@@ -150440,131 +150440,131 @@
       "sha256": "8805bf4ad2ae5fa0f8487e6c8d7fe615d7b191715ec47a1fb0321de45f7dceae"
     },
     {
-      "path": "eldara-forest-hud.png",
+      "path": "astalor-forest-hud.png",
       "sha256": "540062bbda8c0523ff960d3cea4c32ddb4fee1d07b5a03d1a250c12901318ce0"
     },
     {
-      "path": "eldara-forest.png",
+      "path": "astalor-forest.png",
       "sha256": "6c600540687f50ead2e2a0582ec0122f8f406fb293b9193c6d2c360582af5281"
     },
     {
-      "path": "eldara-forest-reverse-hud.png",
+      "path": "astalor-forest-reverse-hud.png",
       "sha256": "5697a317675c934fc15d5c7b0b09b9ea7c703b98f6d3a0ceda5aeee5191e40fa"
     },
     {
-      "path": "eldara-forest-reverse.png",
+      "path": "astalor-forest-reverse.png",
       "sha256": "64ad21e1864d56490b3f82fb356a41b93d8cb646cb1931c63746761f64326d8e"
     },
     {
-      "path": "eldara-forest-overview-hud.png",
+      "path": "astalor-forest-overview-hud.png",
       "sha256": "7eae5c161f15364faca825a1c57e1e5cfb7e71741e3ce28ae5a089b047479783"
     },
     {
-      "path": "eldara-forest-overview.png",
+      "path": "astalor-forest-overview.png",
       "sha256": "7557a544c38a00d1fdcaa31e132c0aacef5d9134e551e503c501ea5000b765b6"
     },
     {
-      "path": "eldara-taiga-hud.png",
+      "path": "astalor-taiga-hud.png",
       "sha256": "990e165dace12c3a05455e60a842e8eea7f959fd58aac216f86de8656829b9de"
     },
     {
-      "path": "eldara-taiga.png",
+      "path": "astalor-taiga.png",
       "sha256": "fbada31ffa3e87f139d4f095793657ebf1e9f670d84951d4eb721d1f5d707774"
     },
     {
-      "path": "eldara-taiga-reverse-hud.png",
+      "path": "astalor-taiga-reverse-hud.png",
       "sha256": "ee67310f27acf8b30a2a8a37c20c95fa17e84ce6332aad82173a4f8c7c6feb67"
     },
     {
-      "path": "eldara-taiga-reverse.png",
+      "path": "astalor-taiga-reverse.png",
       "sha256": "c4bf549fb2b82b29afe6e5a95f4710d6b79756716f9b0055dfe366c870b20d5f"
     },
     {
-      "path": "eldara-taiga-overview-hud.png",
+      "path": "astalor-taiga-overview-hud.png",
       "sha256": "0a7053ba03a3a6230d91eb1380ba17c4862b98b10161d703c8f1815e0ee29a7f"
     },
     {
-      "path": "eldara-taiga-overview.png",
+      "path": "astalor-taiga-overview.png",
       "sha256": "5d891d3d82a339ccb78df245f0ca3da5b146eb7b273f6b6eb581050c06aa4216"
     },
     {
-      "path": "eldara-tundra-hud.png",
+      "path": "astalor-tundra-hud.png",
       "sha256": "83aa67f9025c3ae3cb43de918b4b01b5364f64da6ab1745df48404b9968594ea"
     },
     {
-      "path": "eldara-tundra.png",
+      "path": "astalor-tundra.png",
       "sha256": "b6cf7cde9be11ebda91201c3614a702967afc692390e9d24ef58271353c43d83"
     },
     {
-      "path": "eldara-tundra-reverse-hud.png",
+      "path": "astalor-tundra-reverse-hud.png",
       "sha256": "85f5191e758f9e0b558e2654b364bcf265deda6fde982fe51aa6e4e8eafa2833"
     },
     {
-      "path": "eldara-tundra-reverse.png",
+      "path": "astalor-tundra-reverse.png",
       "sha256": "3d247a960a28a7d580f7c189572c1afe3636f047b782963e9a17428e6feca564"
     },
     {
-      "path": "eldara-tundra-overview-hud.png",
+      "path": "astalor-tundra-overview-hud.png",
       "sha256": "ff97025dcf908e151ae5dae05c2a932160d506c7b772876f156717dc13adc7e6"
     },
     {
-      "path": "eldara-tundra-overview.png",
+      "path": "astalor-tundra-overview.png",
       "sha256": "4f9a8a8fb41d98204f853e05d44f9cdd3cfec39cfd9ed23dbe94188574fa1d8d"
     },
     {
-      "path": "eldara-glacier-hud.png",
+      "path": "astalor-glacier-hud.png",
       "sha256": "0f671af4d16d04851551638db39d43a90c7c70def955607046a8c1e6477a49f8"
     },
     {
-      "path": "eldara-glacier.png",
+      "path": "astalor-glacier.png",
       "sha256": "bae8ab352e125ac7423364367ef012bf5a70449ffd77a6014e21f7df8f1657c5"
     },
     {
-      "path": "eldara-glacier-reverse-hud.png",
+      "path": "astalor-glacier-reverse-hud.png",
       "sha256": "5c25aab2a95596f474161c7cd6cac3cdaa6dd4dd241c0d263a138ca8c0a66949"
     },
     {
-      "path": "eldara-glacier-reverse.png",
+      "path": "astalor-glacier-reverse.png",
       "sha256": "7340ca2461b53988f8a656723d8598856a06f15e2101a0cd4e063b0d7a4ed83d"
     },
     {
-      "path": "eldara-glacier-overview-hud.png",
+      "path": "astalor-glacier-overview-hud.png",
       "sha256": "5c971590303a5859a99c892eece70aee82346acd49987fd50bd378638e37439b"
     },
     {
-      "path": "eldara-glacier-overview.png",
+      "path": "astalor-glacier-overview.png",
       "sha256": "d77604a4b49594b18bbd23b85f54ee5a48516b9f895de2726ca632cc0f08c3a3"
     },
     {
-      "path": "eldara-wetland-hud.png",
+      "path": "astalor-wetland-hud.png",
       "sha256": "aba44d928d6785f7a0869770a1b65418aea3444963dce07fd208311c82e3f488"
     },
     {
-      "path": "eldara-wetland.png",
+      "path": "astalor-wetland.png",
       "sha256": "968852513f37d438c745f0849d77d1f8327b7fbe84b71d192934f22faf808a0c"
     },
     {
-      "path": "eldara-wetland-reverse-hud.png",
+      "path": "astalor-wetland-reverse-hud.png",
       "sha256": "a5d549f282cbf215d994aa637f442ff379477d2b583d6071e56d1a68c0168e99"
     },
     {
-      "path": "eldara-wetland-reverse.png",
+      "path": "astalor-wetland-reverse.png",
       "sha256": "0a235ee0ee165e5ec9f94bd17b65ad9c9ac3289a3927c54c9153e260ba2dfefe"
     },
     {
-      "path": "eldara-wetland-overview-hud.png",
+      "path": "astalor-wetland-overview-hud.png",
       "sha256": "56b7ac5085f462e2455d78ae8ec860841430c9457761a235bb047ed5c769fff9"
     },
     {
-      "path": "eldara-wetland-overview.png",
+      "path": "astalor-wetland-overview.png",
       "sha256": "83814e8053c6951a38c3b43eb17e730bf16233afef929245cb090ac4ad7f6c97"
     },
     {
-      "path": "eldara-wetland-shore-hud.png",
+      "path": "astalor-wetland-shore-hud.png",
       "sha256": "2cfb2f220fc5aac7334ae215b74e00f32ce198257c689f940b54492264f0f8e7"
     },
     {
-      "path": "eldara-wetland-shore.png",
+      "path": "astalor-wetland-shore.png",
       "sha256": "2a02862662bf65ccf27cf97ee3270ae9858f5a4c1482b5611404f283bcfd4943"
     }
   ],
@@ -152341,22 +152341,22 @@
   },
   "only": [
     "marine-coast-overview",
-    "eldara-forest",
-    "eldara-forest-reverse",
-    "eldara-forest-overview",
-    "eldara-taiga",
-    "eldara-taiga-reverse",
-    "eldara-taiga-overview",
-    "eldara-tundra",
-    "eldara-tundra-reverse",
-    "eldara-tundra-overview",
-    "eldara-glacier",
-    "eldara-glacier-reverse",
-    "eldara-glacier-overview",
-    "eldara-wetland",
-    "eldara-wetland-reverse",
-    "eldara-wetland-overview",
-    "eldara-wetland-shore"
+    "astalor-forest",
+    "astalor-forest-reverse",
+    "astalor-forest-overview",
+    "astalor-taiga",
+    "astalor-taiga-reverse",
+    "astalor-taiga-overview",
+    "astalor-tundra",
+    "astalor-tundra-reverse",
+    "astalor-tundra-overview",
+    "astalor-glacier",
+    "astalor-glacier-reverse",
+    "astalor-glacier-overview",
+    "astalor-wetland",
+    "astalor-wetland-reverse",
+    "astalor-wetland-overview",
+    "astalor-wetland-shore"
   ],
   "failure": "TypeError: fetch failed\n    at node:internal/deps/undici/undici:14900:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async captureVisualSource (file://wsl.localhost/Ubuntu/home/drusniel/drusniel-world-builder/scripts/lib/world-visual-source.mjs:5:17)\n    at async file://wsl.localhost/Ubuntu/home/drusniel/drusniel-world-builder/scripts/run-world-visual-qa.mjs:99:13",
   "errors": {

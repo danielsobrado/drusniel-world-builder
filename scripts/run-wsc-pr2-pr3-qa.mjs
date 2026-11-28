@@ -131,7 +131,7 @@ async function prepareAndSettleTerrain(page, pose, lighting, minimumMs = 6000) {
     await page.evaluate(() => window.__worldVisualQa.warmWeather(6));
   }
   // Wait for materialBake, forestFloor, and active WSC textures on visible slots so
-  // no scene (especially Eldara Stillmeadow) is captured mid-bake.
+  // no scene (especially Astalor Stillmeadow) is captured mid-bake.
   const deadline = Date.now() + 18000;
   let settleStats = null;
   while (Date.now() < deadline) {
@@ -315,13 +315,13 @@ async function main() {
 
   try {
     // =========================================================================
-    // SESSION 1: Stillmeadow (Eldara burg 18) — C02, C01, C05 (road)
+    // SESSION 1: Stillmeadow (Astalor burg 18) — C02, C01, C05 (road)
     // =========================================================================
-    console.log('[WSC-QA] Session 1: Eldara Stillmeadow (B14-C02, B14-C01, B14-C05)');
-    const eldara = await openHardwareWebGpuPage(browser, targetUrl);
-    manifest.adapter = eldara.adapter;
+    console.log('[WSC-QA] Session 1: Astalor Stillmeadow (B14-C02, B14-C01, B14-C05)');
+    const astalor = await openHardwareWebGpuPage(browser, targetUrl);
+    manifest.adapter = astalor.adapter;
     try {
-      const approach = await eldara.page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
+      const approach = await astalor.page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
       const baseX = approach.settlementFixture.canonicalX;
       const baseZ = approach.settlementFixture.canonicalZ;
       const baseYaw = (approach.yawDegrees * Math.PI) / 180;
@@ -342,7 +342,7 @@ async function main() {
         };
       };
 
-      // Capture C02 first so Eldara streaming & terrain bakes are completely warm before C01!
+      // Capture C02 first so Astalor streaming & terrain bakes are completely warm before C01!
       const stillScenes = [
         { id: 'B14-C02-overcast', camId: 'C02', cond: 'overcast', modes: ['D00', 'D01', 'D12', 'D15', 'D24'], pr2: true, pr3: true },
         { id: 'B14-C01-overcast', camId: 'C01', cond: 'overcast', modes: ['D00', 'D01', 'D11', 'D18', 'D24'], pr2: false, pr3: true },
@@ -352,19 +352,19 @@ async function main() {
       for (const scene of stillScenes) {
         const pose = buildStillPose(scene.camId);
         const lighting = CAMERAS.lightingConditions[scene.cond];
-        const settle = await prepareAndSettleTerrain(eldara.page, pose, lighting, 7000);
+        const settle = await prepareAndSettleTerrain(astalor.page, pose, lighting, 7000);
         console.log(`[WSC-QA] ${scene.id} settled: loaded=${settle.loaded} baked=${settle.baked} ff=${settle.forestFloor} wscValid=${settle.wscValid}`);
 
         const imgs = {};
         const paths = {};
         for (const mode of scene.modes) {
           paths[mode] = tmpFile(`${scene.id}-${mode}.png`);
-          imgs[mode] = await captureModePng(eldara.page, mode, paths[mode]);
+          imgs[mode] = await captureModePng(astalor.page, mode, paths[mode]);
         }
 
         manifest.captures.push({
           id: scene.id,
-          world: 'eldara',
+          world: 'astalor',
           pose,
           lighting,
           modes: scene.modes,
@@ -440,13 +440,13 @@ async function main() {
           }
         }
       }
-      const eldaraErrors = eldara.monitor.snapshot();
-      if (eldaraErrors.count > 0) {
-        console.warn('[WSC-QA] Session 1 browser errors:', eldaraErrors);
+      const astalorErrors = astalor.monitor.snapshot();
+      if (astalorErrors.count > 0) {
+        console.warn('[WSC-QA] Session 1 browser errors:', astalorErrors);
       }
-      manifest.browserErrors = { ...(manifest.browserErrors ?? {}), eldara: eldaraErrors };
+      manifest.browserErrors = { ...(manifest.browserErrors ?? {}), astalor: astalorErrors };
     } finally {
-      await eldara.context.close();
+      await astalor.context.close();
     }
 
     // =========================================================================

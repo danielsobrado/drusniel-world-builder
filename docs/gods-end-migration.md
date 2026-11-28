@@ -67,7 +67,7 @@ Validation on 2026-10-04:
 - `npm run verify`: production asset validation, all 3,052 tests, and the Vite
   production build passed. The existing large-bundle warning remains.
 - Hardware browser acceptance used NVIDIA Lovelace WebGPU, with no fallback
-  adapter. Residents loaded four baked geometry stages on imported Eldara burgs
+  adapter. Residents loaded four baked geometry stages on imported Astalor burgs
   around canonical coordinates (-908,103, 900,234). Serpent locomotion stayed
   finite after rebasing, and worker skins completed. The scenic route maintained
   its 18 m terrain clearance and returned the original view.

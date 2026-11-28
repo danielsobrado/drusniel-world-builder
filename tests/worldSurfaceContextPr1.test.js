@@ -275,7 +275,7 @@ test('PR 1 negative large coordinates, recentering hysteresis, and floating-orig
   clearWorldSurfaceContext();
   const chunkSize = 64;
   const tileSize = 2; // 128 m chunks (production scale)
-  // Large negative Eldara-scale canonical coordinates around (-6,724,480, -347,264).
+  // Large negative Astalor-scale canonical coordinates around (-6,724,480, -347,264).
   const baseChunkX = -52536;
   const baseChunkZ = 2712;
   const slots = [];

@@ -17,12 +17,12 @@ def pilot(model, seed=1212):
     return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212)
 
 
-def test_named_births_and_deaths_are_drawn_from_the_towns_own(eldara):
-    state = pilot(eldara)
-    cfg = ready(eldara.config.rules)["simulation"]["people"]
+def test_named_births_and_deaths_are_drawn_from_the_towns_own(astalor):
+    state = pilot(astalor)
+    cfg = ready(astalor.config.rules)["simulation"]["people"]
     for _ in range(60):
         before = {p.id: p for p in state.cast.people}
-        state, months = advance(state, 30, eldara.config.rules)
+        state, months = advance(state, 30, astalor.config.rules)
         events = months[0]["events"]
         for s in state.settlements:
             dead = Counter(band_of(age_years(before[e.participants[0].personId], state.date.day, cfg), cfg) for e in events
@@ -39,8 +39,8 @@ def test_named_births_and_deaths_are_drawn_from_the_towns_own(eldara):
                 assert age_years(mother, e.day, cfg) >= cfg["parentMinAge"], "no child before a valid age"
 
 
-def test_relationships_are_explicit_and_stay_consistent(eldara):
-    start = pilot(eldara)
+def test_relationships_are_explicit_and_stay_consistent(astalor):
+    start = pilot(astalor)
     assert check_ties(start.cast, 360) == []
     kinds = Counter(r.kind for r in start.cast.relationships)
     assert kinds["spouse"] and kinds["parent"] and kinds["employer"], kinds
@@ -49,7 +49,7 @@ def test_relationships_are_explicit_and_stay_consistent(eldara):
     for r in start.cast.relationships:
         if r.kind == "parent":
             assert people[r.b].birthDay - people[r.a].birthDay >= 16 * 360
-    state, months = advance(start, 3600, eldara.config.rules)
+    state, months = advance(start, 3600, astalor.config.rules)
     assert check_ties(state.cast, 360) == []
     events = {e.id: e for m in months for e in m["events"]}
     made = [r for r in state.cast.relationships if r.origin and r.origin.startswith("event:")]
@@ -64,8 +64,8 @@ def test_relationships_are_explicit_and_stay_consistent(eldara):
         assert len(homes) >= 1
 
 
-def test_households_move_with_the_migration_flows(eldara):
-    state = pilot(eldara)
+def test_households_move_with_the_migration_flows(astalor):
+    state = pilot(astalor)
     # Close most of Sshanderi's businesses: its unemployment jumps and people leave for the town with work.
     settlements = []
     for s in state.settlements:
@@ -75,7 +75,7 @@ def test_households_move_with_the_migration_flows(eldara):
         settlements.append(s)
     state = state.model_copy(update={"settlements": settlements})
     total = sum(s.population for s in state.settlements)
-    state, months = advance(state, 720, eldara.config.rules)
+    state, months = advance(state, 720, astalor.config.rules)
     assert sum(s.immigrants for s in state.settlements) == sum(s.emigrants for s in state.settlements) > 0
     assert sum(s.population for s in state.settlements) == total + sum(m["births"] - m["deaths"] for m in months)
     moved = [e for m in months for e in m["events"] if e.kind == "moved" and e.source == "simulation"]
@@ -103,8 +103,8 @@ def test_experience_changes_personality():
     assert after.people[0].personality.caution == 0.35 and after.people[0].personality.greed == 0.5
 
 
-def test_vacancies_are_filled_by_inhabitants_coming_into_focus(eldara):
-    _, months = advance(pilot(eldara), 3600, eldara.config.rules)
+def test_vacancies_are_filled_by_inhabitants_coming_into_focus(astalor):
+    _, months = advance(pilot(astalor), 3600, astalor.config.rules)
     focus = [e for m in months for e in m["events"] if e.kind == "promoted"]
     assert focus and all(e.source == "inferred" for e in focus)
     assert not any(e.kind == "arrived" for m in months for e in m["events"]), "nobody is invented from outside the population"

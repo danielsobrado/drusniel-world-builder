@@ -37,7 +37,7 @@ draw for yaw. The procedural world uses seed **918273**, generator version 1,
 24 m height scale and −1.5 m sea level. This is sampling stratified by biome,
 not by land area. It intentionally retains edges and awkward compositions.
 Two established coast views and four seeded selections from existing imported
-Eldara fixtures supplement the twelve new positions. Those six are labeled
+Astalor fixtures supplement the twelve new positions. Those six are labeled
 supplements, not newly discovered random locations.
 
 Every accepted view must have the expected camera-cell biome, loaded tree
@@ -81,10 +81,10 @@ finished.
 | [random-12 · Wetland **[diagnostic]**](../qa/random-world-review-2026-10-18/random-12.png) | procedural / 12 | -9575, 4745 | Tall yellow-green reed-like growth fills the foreground, with a thin glimpse of water and a broad pale strip at right. The silhouette still resembles an enlarged meadow; wet substrate and pool/colony structure are hard to read. | N2, N4, N5 |
 | [marine-coast · Marine coast (targeted supplement)](../qa/random-world-review-2026-10-18/marine-coast.png) | procedural / 4 | -2077, 1731 | The shallow bed and wet edge are readable; a broad dark water band and bright reflected sky compete with the finer shore scale. Sparse stones are isolated. | N5, N6 |
 | [marine-coast-overview · Marine coast (targeted supplement)](../qa/random-world-review-2026-10-18/marine-coast-overview.png) | procedural / 4 | -2077, 1731 | Elevated view exposes the contrast between bright cyan shallows, dark water and large cloud reflections. Use it with the player view to balance roughness and reflection scale. | N5 |
-| [eldara-forest-overview · Eldara Temperate deciduous forest](../qa/random-world-review-2026-10-18/eldara-forest-overview.png) | eldara / 6 | -7134127, 1081563 | The imported forest has useful rolling relief and clear route shapes, but heavy green-grey haze compresses tree groups and the ground into one distant value. | N1, N2, N4 |
-| [eldara-taiga-reverse · Eldara Taiga](../qa/random-world-review-2026-10-18/eldara-taiga-reverse.png) | eldara / 9 | -982683, 371387 | Dark low grass, narrow repeated trees and a broad open floor dominate; forest-floor and conifer-cohort variation would strengthen the local identity. | N3, N4 |
-| [eldara-glacier-reverse · Eldara Glacier](../qa/random-world-review-2026-10-18/eldara-glacier-reverse.png) | eldara / 11 | -2747061, 316061 | A very broad snowy slope has fine texture and active snowfall, but few intermediate-scale anchors or rock exposures in this heading. | N6; conditional N7 |
-| [eldara-wetland-reverse · Eldara Wetland](../qa/random-world-review-2026-10-18/eldara-wetland-reverse.png) | eldara / 12 | 993673, 1701497 | Dense grass fills the foreground while heavy grey-green air hides the distance. The frame gives few visible pool, wet-substrate or reed-colony cues. | N1, N4, N5 |
+| [astalor-forest-overview · Astalor Temperate deciduous forest](../qa/random-world-review-2026-10-18/astalor-forest-overview.png) | astalor / 6 | -7134127, 1081563 | The imported forest has useful rolling relief and clear route shapes, but heavy green-grey haze compresses tree groups and the ground into one distant value. | N1, N2, N4 |
+| [astalor-taiga-reverse · Astalor Taiga](../qa/random-world-review-2026-10-18/astalor-taiga-reverse.png) | astalor / 9 | -982683, 371387 | Dark low grass, narrow repeated trees and a broad open floor dominate; forest-floor and conifer-cohort variation would strengthen the local identity. | N3, N4 |
+| [astalor-glacier-reverse · Astalor Glacier](../qa/random-world-review-2026-10-18/astalor-glacier-reverse.png) | astalor / 11 | -2747061, 316061 | A very broad snowy slope has fine texture and active snowfall, but few intermediate-scale anchors or rock exposures in this heading. | N6; conditional N7 |
+| [astalor-wetland-reverse · Astalor Wetland](../qa/random-world-review-2026-10-18/astalor-wetland-reverse.png) | astalor / 12 | 993673, 1701497 | Dense grass fills the foreground while heavy grey-green air hides the distance. The frame gives few visible pool, wet-substrate or reed-colony cues. | N1, N4, N5 |
 
 ![Tree-ground and forest-floor integration](../qa/random-world-review-2026-10-18/random-06.png)
 

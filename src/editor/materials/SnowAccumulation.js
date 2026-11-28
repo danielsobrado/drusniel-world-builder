@@ -13,7 +13,7 @@
  *   patches    low-frequency noise breaks the edge into drifts
  *              (`snowPatchScale`, `snowPatchStrength`).
  *
- * The altitude band is in world metres, tuned for Eldara's relief (land median
+ * The altitude band is in world metres, tuned for Astalor's relief (land median
  * ~75 m, tundra ~400–650 m, glacier ~650–1,550 m): the old 26 m line turned
  * most of the continent white.
  */

@@ -44,7 +44,7 @@ of the local image archive.
 - Procedural generator seed `918273`, version 1, height scale 24 m. Sampling is
   stratified by biome, not proportional to area. Edges, paths and awkward views
   remain in the sample; these are not selected beauty shots.
-- Two established coast views and four seeded choices from established Eldara
+- Two established coast views and four seeded choices from established Astalor
   fixtures supplement the random positions. Those six coordinates are not new
   random samples. The coast camera is on grassland ID 4, overlooking water;
   this is not an ID 0 camera-cell test.
@@ -481,7 +481,7 @@ only global tint. New details remain batched, deterministic and locally rebuilt.
    opt-in, versioned landscape pass: connected ridges and valleys, stronger
    drainage forms, rare outcrops and clearings. Specify metre scale, frequency,
    collision, water and far-terrain representation before implementation.
-   Preserve imported Eldara geography and existing saves by default.
+   Preserve imported Astalor geography and existing saves by default.
 
 **Acceptance:** noon, low sun, overcast and night keep the same place readable.
 Atmosphere does not conceal a bad LOD transition. The player can identify useful

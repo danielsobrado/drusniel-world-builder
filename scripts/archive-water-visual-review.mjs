@@ -19,7 +19,7 @@ check('three water kinds', [1, 2, 3].every(kind => report.poses.some(p => p.targ
 check('source identity', source.sourceSha === report.sourceSha && source.sourceSnapshot.sha256 === report.sourceSnapshotSha256);
 check('capture runner identity', await fileHash('scripts/run-water-visual-review.mjs') === report.captureScriptSha256);
 check('selector identity', await fileHash('docs/qa/water-aaa-audit-2026-10-16/select-poses.mjs') === report.selectorSha256);
-check('imported map identity', await fileHash('maps/Eldara Full 2026-07-23-20-37.json') === report.mapSha256);
+check('imported map identity', await fileHash('maps/Astalor Full 2026-07-23-20-37.json') === report.mapSha256);
 for (const pose of report.poses) {
   check(`${pose.id}: ready and correct identity`, pose.readiness.ready && pose.expectedBiomeId === pose.actualBiomeId && pose.targetWater.kind === pose.expectedWaterKind);
   check(`${pose.id}: canonical pose`, Math.hypot(pose.canonical.x - pose.x, pose.canonical.z - pose.z) < .05);

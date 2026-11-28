@@ -20,12 +20,12 @@ def pilot(model, seed=1212):
     return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212)
 
 
-def test_the_cast_matches_the_npc_budget_and_the_settlements(eldara):
-    state = pilot(eldara)
+def test_the_cast_matches_the_npc_budget_and_the_settlements(astalor):
+    state = pilot(astalor)
     cast = state.cast
     counts = Counter(p.settlementId for p in cast.people)
-    assert {eldara.settlements_by_id[s]["name"]: n for s, n in counts.items()} == {"Falanenerwin": 18, "Sshanderi": 27, "Vhaltha": 41}
-    people = ready(eldara.config.rules)["simulation"]["people"]
+    assert {astalor.settlements_by_id[s]["name"]: n for s, n in counts.items()} == {"Falanenerwin": 18, "Sshanderi": 27, "Vhaltha": 41}
+    people = ready(astalor.config.rules)["simulation"]["people"]
     assert check_cast(cast, state.settlements, state.trade, people) == []
     ids = [p.id for p in cast.people]
     assert len(ids) == len(set(ids)) and all(i.startswith("npc:") for i in ids)
@@ -43,13 +43,13 @@ def test_the_cast_matches_the_npc_budget_and_the_settlements(eldara):
     assert max(households.values()) >= 3, "families, not just singles"
 
 
-def test_a_decade_keeps_the_budget_and_tells_life_stories(eldara):
-    state, months = advance(pilot(eldara), 3600, eldara.config.rules)
+def test_a_decade_keeps_the_budget_and_tells_life_stories(astalor):
+    state, months = advance(pilot(astalor), 3600, astalor.config.rules)
     cast = state.cast
-    assert check_cast(cast, state.settlements, state.trade, ready(eldara.config.rules)["simulation"]["people"]) == []
+    assert check_cast(cast, state.settlements, state.trade, ready(astalor.config.rules)["simulation"]["people"]) == []
     alive = sum(p.alive for p in cast.people)
     assert cast.deaths > 5 and cast.births + cast.arrivals - cast.deaths == alive - 86, "every named life is accounted for"
-    assert 86 <= alive <= 86 * (1 + eldara.config.simulation["people"]["maxOverBudget"])
+    assert 86 <= alive <= 86 * (1 + astalor.config.simulation["people"]["maxOverBudget"])
     kinds = Counter(e.kind for p in cast.people for e in p.events)
     assert {"died", "came-of-age", "hired"} <= set(kinds)
     assert {"born", "arrived"} & set(kinds)
@@ -58,8 +58,8 @@ def test_a_decade_keeps_the_budget_and_tells_life_stories(eldara):
     assert sum(1 for m in months for i in m["incidents"] if i["kind"] == "died") == cast.deaths
 
 
-def test_the_idle_and_dishonest_take_to_the_road(eldara):
-    state = pilot(eldara)
+def test_the_idle_and_dishonest_take_to_the_road(astalor):
+    state = pilot(astalor)
     road = state.trade.routes[0]
     # Make one Falanenerwin/Sshanderi adult a long-idle, greedy, dishonest person on a road with bandits.
     person = next(p for p in state.cast.people if p.settlementId == road.settlementId and p.role == "worker")
@@ -68,23 +68,23 @@ def test_the_idle_and_dishonest_take_to_the_road(eldara):
     routes = [road.model_copy(update={"bandits": 30}), *state.trade.routes[1:]]
     cast = state.cast.model_copy(update={"people": [person if p.id == person.id else p for p in state.cast.people]})
     state = state.model_copy(update={"cast": cast, "trade": state.trade.model_copy(update={"routes": routes})})
-    state, months = advance(state, 720, eldara.config.rules)
+    state, months = advance(state, 720, astalor.config.rules)
     after = next(p for p in state.cast.people if p.id == person.id)
     assert "outlaw" in {e.kind for e in after.events}
     assert any(i["kind"] == "outlaw" and i["person"] == person.id for m in months for i in m["incidents"])
 
 
-def test_a_new_master_is_taken_on_from_the_towns_people(eldara):
-    state = pilot(eldara)
+def test_a_new_master_is_taken_on_from_the_towns_people(astalor):
+    state = pilot(astalor)
     first = state.trade.traders[0]
     traders = [first.model_copy(update={"active": False, "dismissedDay": 0}), *state.trade.traders[1:]]
     import random
 
     from world_sim.simulation.economy.roads import new_trader
     replacement = new_trader("npc:trader:99", "Reserve", first.settlementId, first.settlementName, first.routeId,
-                             random.Random(1), eldara.config.economy)
+                             random.Random(1), astalor.config.economy)
     trade = state.trade.model_copy(update={"traders": [*traders, replacement], "traderSeq": 99})
-    state, _ = advance(state.model_copy(update={"trade": trade}), 30, eldara.config.rules)
+    state, _ = advance(state.model_copy(update={"trade": trade}), 30, astalor.config.rules)
     holder = next(p for p in state.cast.people if p.traderId == "npc:trader:99")
     assert holder.settlementId == first.settlementId and holder.role == "trader"
     master = next(t for t in state.trade.traders if t.id == "npc:trader:99")
@@ -93,13 +93,13 @@ def test_a_new_master_is_taken_on_from_the_towns_people(eldara):
     assert former.role == "unemployed" and former.traderId is None
 
 
-def test_people_round_trip_and_v4_saves_gain_a_cast(eldara):
-    state, _ = advance(pilot(eldara), 360, eldara.config.rules)
+def test_people_round_trip_and_v4_saves_gain_a_cast(astalor):
+    state, _ = advance(pilot(astalor), 360, astalor.config.rules)
     assert state_checksum(ScenarioState(**json.loads(compact_json(state.model_dump())))) == state_checksum(state)
-    raw = pilot(eldara).model_dump()
+    raw = pilot(astalor).model_dump()
     raw["schemaVersion"] = 4
     del raw["cast"]
-    migrated, stored = migrate_state(raw, eldara)
+    migrated, stored = migrate_state(raw, astalor)
     assert stored == 4 and migrated.schemaVersion == STATE_SCHEMA_VERSION and len(migrated.cast.people) == 86
 
 

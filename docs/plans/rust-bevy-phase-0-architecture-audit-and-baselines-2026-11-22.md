@@ -386,7 +386,7 @@ Generate a fixed set of chunks in different request orders, evict/recreate and c
 
 ### W05 — Azgaar projection and guidance
 
-Use test/azgaar-world-guidance.test.js small guidance fixture and **reference** maps/Eldara Full 2026-07-23-20-37.json by SHA-256. Capture source dimensions/scale, compact atlas metadata, all 13 standard biome IDs, deterministic custom biome ID allocation 32–254, sample elevation/temperature/precipitation, river channels, distances, states/provinces/cultures/religions, burgs/routes/markers and ocean transition. No duplicate giant map files.
+Use test/azgaar-world-guidance.test.js small guidance fixture and **reference** maps/Astalor Full 2026-07-23-20-37.json by SHA-256. Capture source dimensions/scale, compact atlas metadata, all 13 standard biome IDs, deterministic custom biome ID allocation 32–254, sample elevation/temperature/precipitation, river channels, distances, states/provinces/cultures/religions, burgs/routes/markers and ocean transition. No duplicate giant map files.
 
 ### W06 — chunk residency planner and worker lifecycle
 

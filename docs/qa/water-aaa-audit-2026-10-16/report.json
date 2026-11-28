@@ -8384,7 +8384,7 @@
     {
       "id": "river-09",
       "name": "Taiga river",
-      "world": "eldara",
+      "world": "astalor",
       "x": 6362854.228104901,
       "z": -1019611.2209823765,
       "yaw": -2.213149229668826,
@@ -9454,7 +9454,7 @@
     {
       "id": "river-08",
       "name": "Temperate rainforest river",
-      "world": "eldara",
+      "world": "astalor",
       "x": -4269925.294875607,
       "z": 2359551.9412070587,
       "yaw": 1.9498808872537716,
@@ -10506,7 +10506,7 @@
     {
       "id": "river-12",
       "name": "Wetland river",
-      "world": "eldara",
+      "world": "astalor",
       "x": 4265001.52159005,
       "z": -2345997.682012069,
       "yaw": 3.0831765754052656,
@@ -11565,7 +11565,7 @@
     {
       "id": "river-06",
       "name": "Temperate deciduous forest river",
-      "world": "eldara",
+      "world": "astalor",
       "x": -6524344.318419896,
       "z": 1768763.1104439783,
       "yaw": 0.7548266756385945,
@@ -12623,7 +12623,7 @@
     {
       "id": "lake-bank",
       "name": "Wetland lake bank",
-      "world": "eldara",
+      "world": "astalor",
       "x": -228759.45315351838,
       "z": 629070.1560534821,
       "yaw": -1.7359449963491072,

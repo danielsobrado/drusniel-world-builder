@@ -10,10 +10,10 @@ from world_sim.simulation.manager import ScenarioManager
 from world_sim.simulation.migrations import migrate_state
 
 
-def test_eldara_canonical_identity_and_seed_boundaries(eldara):
+def test_astalor_canonical_identity_and_seed_boundaries(astalor):
     # Crild (wetland), Khunzad (highland), Thaquasadi (forest), Vhaltha (Umbra'kori).
     ids = [f"settlement:azgaar-burg:{i}" for i in (426, 345, 213, 238)]
-    state = baseline_state(eldara, scenario_id="peoples", settlement_ids=ids, seed=42, start_year=1212)
+    state = baseline_state(astalor, scenario_id="peoples", settlement_ids=ids, seed=42, start_year=1212)
     goblin, vondari, elenori, umbra = state.settlements
     assert goblin.identity.cultureId is None and goblin.identity.cultureSeedId == "goblin-peoples"
     assert set(goblin.ancestries) == {"goblin"}
@@ -22,10 +22,10 @@ def test_eldara_canonical_identity_and_seed_boundaries(eldara):
     assert {entry.assetId for entry in goblin.infrastructure} == {"grukmar/raised-marsh-boardwalk", "grukmar/bog-stilt-dwelling"}
     assert [s.identity.cultureId for s in (vondari, elenori, umbra)] == ["vondari", "elenori", "umbra-kori"]
     assert all(sum(c.total for c in s.ancestries.values()) == s.population for s in state.settlements)
-    after, _ = advance(state, 120, eldara.config.rules)
+    after, _ = advance(state, 120, astalor.config.rules)
     assert all(sum(c.total for c in s.ancestries.values()) == s.population for s in after.settlements)
-    assert state_checksum(after) == state_checksum(advance(state, 120, eldara.config.rules)[0])
-    split = advance(advance(state, 30, eldara.config.rules)[0], 90, eldara.config.rules)[0]
+    assert state_checksum(after) == state_checksum(advance(state, 120, astalor.config.rules)[0])
+    split = advance(advance(state, 30, astalor.config.rules)[0], 90, astalor.config.rules)[0]
     assert state_checksum(after) == state_checksum(split)
 
 
@@ -46,9 +46,9 @@ def test_explicit_mixed_assignment_survives_replay_and_snapshot(fresh_model):
     assert asyncio.run(manager.replay(session.meta.id))["matches"]
 
 
-def test_unmapped_map_and_v7_migration_preserve_character_records(eldara):
-    foreign = replace(eldara, audit={**eldara.audit, "identity": {**eldara.audit["identity"], "mapId": "another-map"}})
-    sid = eldara.pilot["roles"][0]["settlementId"]
+def test_unmapped_map_and_v7_migration_preserve_character_records(astalor):
+    foreign = replace(astalor, audit={**astalor.audit, "identity": {**astalor.audit["identity"], "mapId": "another-map"}})
+    sid = astalor.pilot["roles"][0]["settlementId"]
     neutral = baseline_state(foreign, scenario_id="old", settlement_ids=[sid], seed=5, start_year=1212)
     assert neutral.settlements[0].identity.cultureId is None
     assert set(neutral.settlements[0].ancestries) == {"unspecified"}
@@ -66,10 +66,10 @@ def test_unmapped_map_and_v7_migration_preserve_character_records(eldara):
         assert migrated.upbringing.settlementId == original.birthplaceId
 
 
-def test_v7_migration_uses_recorded_birthplace_for_upbringing(eldara):
+def test_v7_migration_uses_recorded_birthplace_for_upbringing(astalor):
     origin = "settlement:azgaar-burg:345"
     birthplace = "settlement:azgaar-burg:213"
-    baseline = baseline_state(eldara, scenario_id="birthplace-migration",
+    baseline = baseline_state(astalor, scenario_id="birthplace-migration",
                               settlement_ids=[origin, birthplace], seed=7, start_year=1212)
     raw = baseline.model_dump()
     raw["schemaVersion"] = 7
@@ -80,7 +80,7 @@ def test_v7_migration_uses_recorded_birthplace_for_upbringing(eldara):
     for person in raw["cast"]["people"]:
         del person["identity"], person["upbringing"]
 
-    migrated, stored = migrate_state(raw, eldara)
+    migrated, stored = migrate_state(raw, astalor)
     updated = next(p for p in migrated.cast.people if p.id == original["id"])
     home = next(s for s in baseline.settlements if s.settlementId == origin)
     assert stored == 7
@@ -110,21 +110,21 @@ def test_peoples_api_compares_identical_opportunities_and_shows_provenance(fresh
         assert invalid.status_code == 400
 
 
-def test_ancestry_parameters_drive_births_ages_and_food_without_altering_ancestry(eldara):
+def test_ancestry_parameters_drive_births_ages_and_food_without_altering_ancestry(astalor):
     from world_sim.peoples.assignments import assigned_rules
     from world_sim.peoples.contracts import Assignment
     from world_sim.simulation.people.generate import age_years
     from world_sim.simulation.rules import ready
 
-    sid = eldara.pilot["roles"][0]["settlementId"]
-    rules = assigned_rules(eldara.config.rules, {sid: Assignment(cultureId="vondari", ancestryWeights={"goblin": 1})}, [sid])
+    sid = astalor.pilot["roles"][0]["settlementId"]
+    rules = assigned_rules(astalor.config.rules, {sid: Assignment(cultureId="vondari", ancestryWeights={"goblin": 1})}, [sid])
     peoples = rules["peoples"]
     ancestry = {**peoples["ancestries"]["goblin"], "ages": {"child": [0, 9], "adult": [10, 34], "elder": [35, 60]},
                 "birthsPerAdultPerYear": 0, "foodMultiplier": 2}
     experimental = {**rules, "peoples": {**peoples, "ancestries": {**peoples["ancestries"], "goblin": ancestry}}}
     args = {"scenario_id": "demography", "settlement_ids": [sid], "seed": 42, "start_year": 1212}
-    base = baseline_state(eldara, **args, rules=rules)
-    state = baseline_state(eldara, **args, rules=experimental)
+    base = baseline_state(astalor, **args, rules=rules)
+    state = baseline_state(astalor, **args, rules=experimental)
     assert state.settlements[0].economy.food.wanted == base.settlements[0].economy.food.wanted * 2
     people_cfg = ready(experimental)["simulation"]["people"]
     assert all(age_years(p, 0, people_cfg) < 10 for p in state.cast.people if p.role == "child")
@@ -141,19 +141,19 @@ def test_an_affordable_exclusive_patron_can_outweigh_a_preference_for_diversific
     assert rank(SCENARIOS["trade"], weights, urgency=1)[0]["id"] == "exclusive-patron"
 
 
-def test_named_migrant_retains_upbringing_and_ancestry_and_takes_local_polity(eldara):
+def test_named_migrant_retains_upbringing_and_ancestry_and_takes_local_polity(astalor):
     from world_sim.peoples.assignments import assigned_rules
     from world_sim.peoples.contracts import Assignment
     from world_sim.simulation.contracts import Cohorts, Journey
     from world_sim.simulation.people.journeys import embark, settle
     from world_sim.simulation.rules import ready
 
-    origin, destination = [role["settlementId"] for role in eldara.pilot["roles"][:2]]
-    rules = assigned_rules(eldara.config.rules, {
+    origin, destination = [role["settlementId"] for role in astalor.pilot["roles"][:2]]
+    rules = assigned_rules(astalor.config.rules, {
         origin: Assignment(cultureId="vondari", polityId="home", ancestryWeights={"goblin": 1}),
         destination: Assignment(cultureId="elenori", polityId="host", ancestryWeights={"elf": 1}),
     }, [origin, destination])
-    state = baseline_state(eldara, scenario_id="movement", settlement_ids=[origin, destination], seed=42, start_year=1212, rules=rules)
+    state = baseline_state(astalor, scenario_id="movement", settlement_ids=[origin, destination], seed=42, start_year=1212, rules=rules)
     person = next(p for p in state.cast.people if p.settlementId == origin and p.role == "worker")
     person = person.model_copy(update={"role": "unemployed", "businessId": None, "profession": None,
                                        "personality": person.personality.model_copy(update={"greed": 1.0, "caution": 0.0})})
@@ -175,7 +175,7 @@ def test_named_migrant_retains_upbringing_and_ancestry_and_takes_local_polity(el
 
 
 
-def test_live_job_choices_follow_upbringing_with_ancestry_held_fixed(eldara):
+def test_live_job_choices_follow_upbringing_with_ancestry_held_fixed(astalor):
     import random
 
     from world_sim.peoples.contracts import CivicIdentity, Identity, Upbringing
@@ -184,9 +184,9 @@ def test_live_job_choices_follow_upbringing_with_ancestry_held_fixed(eldara):
     from world_sim.simulation.people.relationships import Ties
     from world_sim.simulation.rules import ready
 
-    sid = eldara.pilot["roles"][0]["settlementId"]
-    rules = ready(eldara.config.rules)
-    state = baseline_state(eldara, scenario_id="work", settlement_ids=[sid], seed=42, start_year=1212)
+    sid = astalor.pilot["roles"][0]["settlementId"]
+    rules = ready(astalor.config.rules)
+    state = baseline_state(astalor, scenario_id="work", settlement_ids=[sid], seed=42, start_year=1212)
     settlement = state.settlements[0]
     posts = [Business(id=kind, kind=kind, sector=sector, profession=profession, settlementId=sid, name=kind, staff=1, wage=5, filled=1)
              for kind, sector, profession in (("smithy", "crafts", "smith"), ("market-stall", "trade", "merchant"))]

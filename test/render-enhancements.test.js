@@ -156,3 +156,32 @@ test('water captures publish complete probes, share reserved slack and reset cad
   yielding = false; controller.prewarm(camera, surface); assert.equal(controller.planarValid.value, 1);
   controller.dispose(); controller.update(camera, surface, 9999); assert.equal(draws, 14);
 });
+
+test('budgeted water captures compile all six probe views asynchronously before the first face', async () => {
+  let target = null, face = 0, draws = 0, release;
+  const compiled = [];
+  const camera = new PerspectiveCamera(60, 1, 0.1, 200); camera.position.set(0, 8, 0); camera.updateMatrixWorld();
+  const gate = new Promise(resolve => { release = resolve; });
+  const renderer = { coordinateSystem: WebGPUCoordinateSystem, autoClear: true,
+    getRenderTarget: () => target, setRenderTarget: (value, cubeFace = 0) => { target = value; face = cubeFace; },
+    getMRT: () => null, setMRT: () => {}, render: () => { draws++; },
+    compileAsync: () => { compiled.push([target, face]); return gate; } };
+  const view = { renderer, scene: new Scene(), floatingOrigin: { getState: () => ({ x: 0, z: 0 }) }, worldStore: { generator: {} },
+    chunkWorldSize: 32, getCanonicalWater: () => ({ kind: 2, coverage: 1, surfaceHeight: 0 }) };
+  const surface = { shouldYieldWork: () => false, waterSlots: [{ mesh: new Group(), hasWaterCoverage: true,
+    terrainSlot: { descriptor: { centerWorldX: 0, centerWorldZ: 0 } } }] };
+  const controller = new WaterReflectionController(view, { resolution: 128, reachMeters: 96, intervalMs: 100, planar: false });
+  controller.update(camera, surface, 0, { budgetReserved: true });
+  controller.update(camera, surface, 1, { budgetReserved: true });
+  assert.equal(draws, 0, 'no face renders while its pipelines compile');
+  assert.deepEqual(compiled.map(([, cubeFace]) => cubeFace), [0, 1, 2, 3, 4, 5]);
+  assert.ok(compiled.every(([value]) => value === controller.targets[1 - controller.front]), 'compiled against the capture target');
+  assert.equal(target, null, 'render target restored');
+  release();
+  await gate; await Promise.resolve();
+  for (let i = 0; i < 6; i++) controller.update(camera, surface, 2 + i, { budgetReserved: true });
+  assert.equal(draws, 6);
+  assert.equal(controller.valid.value, 1);
+  assert.equal(compiled.length, 6, 'a complete probe does not recompile');
+  controller.dispose();
+});

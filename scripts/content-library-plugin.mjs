@@ -11,7 +11,7 @@ const MIME_TYPES = Object.freeze({
 });
 
 /**
- * Turns a reference such as `/maps/Eldara Full 2026.json` or `../maps/x.json`
+ * Turns a reference such as `/maps/Astalor Full 2026.json` or `../maps/x.json`
  * into a content path, resolved the same way the browser resolves it: against
  * the document that holds the reference. External URLs and anything outside the
  * content directories return null — they are served elsewhere or a mistake.

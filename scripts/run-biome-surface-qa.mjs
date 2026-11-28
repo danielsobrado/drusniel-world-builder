@@ -1,7 +1,7 @@
 /**
  * Biome surface-response screenshots: one spot inside every biome (standard
  * Azgaar 1–12 in the procedural world, the bog and Stonehold Badlands in
- * Eldara), with prints, a spell crater, ripples and a water spell staged in
+ * Astalor), with prints, a spell crater, ripples and a water spell staged in
  * front of the camera. Shots land in docs/qa/biome-surface/<YYYY-MM-DD>/.
  *
  *   npm run dev                                  # app must already be serving
@@ -22,8 +22,8 @@ const BIOMES = Object.freeze([
     [6, 'temperate-deciduous-forest'], [7, 'tropical-rainforest'], [8, 'temperate-rainforest'], [9, 'taiga'],
     [10, 'tundra'], [11, 'glacier'], [12, 'wetland'],
   ].map(([id, name]) => ({ id, name, world: 'procedural' })),
-  { id: 12, name: 'eldara-bog', world: 'eldara' },
-  { id: 32, name: 'stonehold-badlands', world: 'eldara' },
+  { id: 12, name: 'astalor-bog', world: 'astalor' },
+  { id: 32, name: 'stonehold-badlands', world: 'astalor' },
 ]);
 /** Seconds after staging: the prints and ripples have settled, then the sphere hangs. */
 const GROUND_SHOT_S = 0.8;

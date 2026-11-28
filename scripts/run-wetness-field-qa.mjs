@@ -29,8 +29,8 @@ const POSES = [
   { id: 'grassland', world: 'procedural', x: -1869, z: -4003, yaw: 2.488, pitch: -0.12, mode: 'player', heightAboveGround: 1.7, fov: 68 },
   { id: 'grassland-air', world: 'procedural', x: -1869, z: -4003, yaw: 2.488, pitch: -0.5, mode: 'fly', heightAboveGround: 30, fov: 60 },
   { id: 'desert', world: 'procedural', x: -5791, z: -27, yaw: 5.357, pitch: -0.22, mode: 'player', heightAboveGround: 1.7, fov: 68 },
-  // Burg 18 of the frozen Eldara map (the settlement perf town): on its main street, facing the centre.
-  { id: 'town', world: 'eldara', town: 18, pitch: -0.18, mode: 'player', heightAboveGround: 1.7, fov: 68 },
+  // Burg 18 of the frozen Astalor map (the settlement perf town): on its main street, facing the centre.
+  { id: 'town', world: 'astalor', town: 18, pitch: -0.18, mode: 'player', heightAboveGround: 1.7, fov: 68 },
 ].filter((pose) => !args.poses || args.poses.split(',').includes(pose.id));
 const townPose = (page, pose) => page.evaluate(({ town, ...pose }) => {
   const e = window.__editor, tileSize = e.terrainView.worldStore.tileSize;
@@ -82,7 +82,7 @@ try {
     }
     if (pose.town) pose = await townPose(page, pose);
     await page.evaluate(() => window.__worldVisualQa.setLighting({ hour: 12, weather: 'off' }));
-    const preparation = await prepareVisualPose(page, pose, { minimumMs: 6000, timeoutMs: pose.world === 'eldara' ? 420000 : 120000 });
+    const preparation = await prepareVisualPose(page, pose, { minimumMs: 6000, timeoutMs: pose.world === 'astalor' ? 420000 : 120000 });
     for (const state of STATES) {
       const name = `${pose.id}-${state.id}`;
       console.log(`Capture ${name}`);

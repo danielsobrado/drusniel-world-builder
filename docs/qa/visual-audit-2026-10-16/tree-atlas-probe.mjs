@@ -25,8 +25,8 @@ try {
   page.on('pageerror', error => report.errors.push(error.stack));
   await page.goto(`${url}/?qaVisual=1`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !!window.__worldVisualQa, null, { timeout: 180000 });
-  for (const world of ['procedural', 'eldara']) {
-    if (world === 'eldara') await page.evaluate(() => window.__worldVisualQa.loadWorld('eldara'));
+  for (const world of ['procedural', 'astalor']) {
+    if (world === 'astalor') await page.evaluate(() => window.__worldVisualQa.loadWorld('astalor'));
     const result = await page.evaluate(async () => {
       const tree = window.__editor.stylizedSurface.treeView;
       await tree.impostorReady;

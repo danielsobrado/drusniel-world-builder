@@ -22,8 +22,8 @@ def decade(model):
     return state, events, known
 
 
-def test_every_event_is_canonical_valid_and_numbered(eldara):
-    state, events, known = decade(eldara)
+def test_every_event_is_canonical_valid_and_numbered(astalor):
+    state, events, known = decade(astalor)
     assert [e.seq for e in events] == list(range(len(events))) and state.historySeq == len(events)
     assert all(e.id == f"event:{e.seq}" for e in events)
     exact = {"raid", "smuggling", "caravan-delayed", "departed", "moved", "migration-arrived", "travel-delayed", "travel-returning",
@@ -44,18 +44,18 @@ def test_every_event_is_canonical_valid_and_numbered(eldara):
         "no cause is claimed that the simulation did not model"
 
 
-def test_one_event_is_shared_by_everyone_involved(eldara):
-    _, events, _ = decade(eldara)
+def test_one_event_is_shared_by_everyone_involved(astalor):
+    _, events, _ = decade(astalor)
     shared = [e for e in events if len({p.personId for p in e.participants}) >= 2]
     assert shared, "a raid or a birth links several people to the same event"
     for e in shared:
         assert len(e.participants) == len({(p.personId, p.role) for p in e.participants})
 
 
-def test_the_permanent_timeline_outlives_the_recent_cache(eldara):
-    rules = copy.deepcopy(eldara.config.rules)
+def test_the_permanent_timeline_outlives_the_recent_cache(astalor):
+    rules = copy.deepcopy(astalor.config.rules)
     rules["simulation"]["history"]["recentEvents"] = 2
-    state, months = advance(pilot(eldara), 3600, rules)
+    state, months = advance(pilot(astalor), 3600, rules)
     events = {e.id: e for m in months for e in m["events"]}
     for p in state.cast.people:
         assert len(p.events) <= 2
@@ -64,9 +64,9 @@ def test_the_permanent_timeline_outlives_the_recent_cache(eldara):
     assert len(long_lived.timeline) > 2, "important events stay reachable after the cache has moved on"
 
 
-def test_identical_runs_record_identical_histories(eldara):
-    a = [e.model_dump() for m in advance(pilot(eldara), 1440, eldara.config.rules)[1] for e in m["events"]]
-    b = [e.model_dump() for m in advance(pilot(eldara), 1440, eldara.config.rules)[1] for e in m["events"]]
+def test_identical_runs_record_identical_histories(astalor):
+    a = [e.model_dump() for m in advance(pilot(astalor), 1440, astalor.config.rules)[1] for e in m["events"]]
+    b = [e.model_dump() for m in advance(pilot(astalor), 1440, astalor.config.rules)[1] for e in m["events"]]
     assert a == b and a
 
 

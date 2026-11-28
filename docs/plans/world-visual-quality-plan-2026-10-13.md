@@ -47,7 +47,7 @@ population and absence claims as provisional. Browser page/console errors were
 zero during the retained procedural capture run. These are not accepted
 performance baselines; the HUD FPS numbers are not benchmark results.
 
-An initial Eldara jump failed with `Object spatial operation exceeds 262144
+An initial Astalor jump failed with `Object spatial operation exceeds 262144
 buckets`; those failed attempts are excluded from the image set. Subsequent
 capture navigation resets the terrain predictor and requests the destination
 resident set before allowing a frame at the new pose. This is a capture-harness

@@ -175,10 +175,10 @@ from `tmp/aaa-look2.mjs`.
 | `core-temperate-rainforest` | procedural | 10119 | 5719 | 0.785 | −0.08 | player | 1.7 | 68 | 8 | yes |
 | `core-taiga` | procedural | −6951 | 10379 | 0.785 | −0.08 | player | 1.7 | 68 | 9 | yes |
 | `core-wetland` | procedural | −5773 | −7687 | 2.356 | −0.08 | player | 1.7 | 68 | 12 | yes |
-| `tundra` | eldara | 151523 | −49043 | 0.6 | −0.12 | player | 1.7 | — | — | no |
-| `glacier` | eldara | −282505 | −389567 | 1.2 | −0.25 | fly | 25 | — | — | no |
-| `snow-eye` | eldara | −3291493 | −210747 | 2.0 | 0.05 | player | 1.7 | — | — | no |
-| `town` | eldara | −6724492 | −347232 | 1.32 | 0.14 | player | 1.7 | — | — | no |
+| `tundra` | astalor | 151523 | −49043 | 0.6 | −0.12 | player | 1.7 | — | — | no |
+| `glacier` | astalor | −282505 | −389567 | 1.2 | −0.25 | fly | 25 | — | — | no |
+| `snow-eye` | astalor | −3291493 | −210747 | 2.0 | 0.05 | player | 1.7 | — | — | no |
+| `town` | astalor | −6724492 | −347232 | 1.32 | 0.14 | player | 1.7 | — | — | no |
 
 The five `core-*` anchors are what `findBiomeSurfacePose(tileId)` returned on
 2026-11-10 for tiles 6, 7, 8, 9 and 12 (seed 20261103, procedural world). Each
@@ -197,7 +197,7 @@ returns `null` the shot fails with `no closed canopy within 480 m`.
 | Clear noon, procedural | `forest`, `forest-air`, `grassland`, `wetland`, `coast`, `desert`, `legacy-rainforest`, `legacy-taiga`, the five `core-*` and their five `-air` twins, all `off-12` |
 | Hours, procedural | `forest-off-7`, `forest-off-18.6`, `forest-off-21`, `grassland-off-7`, `core-rainforest-off-18.6` |
 | Weather, procedural | `forest-storm-12`, `forest-air-storm-12`, `wetland-rain-12`, `coast-storm-12`, `core-taiga-snow-12`, `core-taiga-air-snow-12` |
-| Eldara | `tundra-off-12`, `glacier-off-12`, `snow-eye-off-12`, `town-off-12`, `town-off-21`, `tundra-snow-12`, `snow-eye-snow-12`, `town-rain-12`, `town-rain-19` |
+| Astalor | `tundra-off-12`, `glacier-off-12`, `snow-eye-off-12`, `town-off-12`, `town-off-21`, `tundra-snow-12`, `snow-eye-snow-12`, `town-rain-12`, `town-rain-19` |
 
 Gates in the fixture when phase 0 is committed. "Was" is the value measured on
 the `b1c8f90f` capture set.

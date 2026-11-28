@@ -18,9 +18,9 @@ const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
 export class WorldVisualQa {
   constructor(editor) { this.editor=editor; this.disposed=false;this.weatherSimulationSeconds=0;this.motionSchemaVersion=WORLD_VISUAL_MOTION_SCHEMA_VERSION;this.layers=new WorldVisualLayerControls(editor);this.visualDiagnostics=new WorldVisualDiagnostics(editor); }
   async loadWorld(name) {
-    if(name!=='eldara')throw new Error(`Unknown visual fixture world: ${name}`);
+    if(name!=='astalor')throw new Error(`Unknown visual fixture world: ${name}`);
     const {importAzgaarFullJson}=await import('../../import/AzgaarJsonImporter.js');
-    const response=await fetch('/maps/Eldara%20Full%202026-07-23-20-37.json');
+    const response=await fetch('/maps/Astalor%20Full%202026-07-23-20-37.json');
     if(!response.ok)throw new Error('Cannot fetch the frozen imported map.');
     const document=importAzgaarFullJson(await response.json(),this.editor.config);
     await this.editor.controller.loadDocument(document);

@@ -1,11 +1,11 @@
 {
   "kind": "simcity-dnd-scene-settings",
   "version": 1,
-  "name": "Eldara · authored natural world",
+  "name": "Astalor · authored natural world",
   "map": {
     "kind": "url",
-    "url": "../maps/Eldara Full 2026-07-23-20-37.json",
-    "label": "Eldara Full (2026)"
+    "url": "../maps/Astalor Full 2026-07-23-20-37.json",
+    "label": "Astalor Full (2026)"
   },
   "environment": {
     "godRays": {

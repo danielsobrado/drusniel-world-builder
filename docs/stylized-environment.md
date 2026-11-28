@@ -55,7 +55,7 @@ stylizedSurface:
 - Flowers are streamed crossed billboards using the source alpha masks, RGB palette
   zones and base-to-tip gradients.
 - **Biome borders are ecotones, not ruled lines.** An imported Azgaar atlas texel
-  spans kilometres (Eldara ≈ 8 km), so a nearest-texel biome read drew every border
+  spans kilometres (Astalor ≈ 8 km), so a nearest-texel biome read drew every border
   as a straight staircase along the atlas grid. `world/BiomeBoundaryWarp.js` reads
   the biome through a fractal domain warp, from the texel down to ~6 m; water and
   coasts stay on the unwarped heights, and texels whose 3×3 neighbourhood shares

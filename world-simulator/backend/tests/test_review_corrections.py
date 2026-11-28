@@ -24,15 +24,15 @@ def _baseline(model, ids, rules=None):
     return baseline_state(model, scenario_id="review", settlement_ids=ids, seed=1212, start_year=1212, rules=rules)
 
 
-def test_crild_inherits_seed_ancestry_and_explicit_weights_take_priority(eldara):
-    state = _baseline(eldara, [CRILD])
+def test_crild_inherits_seed_ancestry_and_explicit_weights_take_priority(astalor):
+    state = _baseline(astalor, [CRILD])
     [town] = state.settlements
     assert town.identity.cultureSeedId == "goblin-peoples" and town.identity.cultureId is None
     assert town.ancestries == {"goblin": town.cohorts}
     assert {p.identity.ancestryId for p in state.cast.people} == {"goblin"}
 
-    rules = assigned_rules(eldara.config.rules, {CRILD: Assignment(ancestryWeights={"orc": 1})}, [CRILD])
-    [explicit] = _baseline(eldara, [CRILD], rules).settlements
+    rules = assigned_rules(astalor.config.rules, {CRILD: Assignment(ancestryWeights={"orc": 1})}, [CRILD])
+    [explicit] = _baseline(astalor, [CRILD], rules).settlements
     assert explicit.identity == town.identity
     assert explicit.ancestries == {"orc": explicit.cohorts}
 
@@ -56,10 +56,10 @@ def _v7_legacy_fixture(model):
     return raw, rules
 
 
-def test_v7_uses_original_birthplace_for_upbringing(eldara):
-    raw, rules = _v7_legacy_fixture(eldara)
+def test_v7_uses_original_birthplace_for_upbringing(astalor):
+    raw, rules = _v7_legacy_fixture(astalor)
     raw["cast"]["people"][-1]["birthplaceId"] = None
-    upgraded, version = migrate_state(raw, eldara, rules)
+    upgraded, version = migrate_state(raw, astalor, rules)
     assert version == 7 and upgraded.schemaVersion == STATE_SCHEMA_VERSION
     person = upgraded.cast.people[0]
     assert person.birthplaceId == person.upbringing.settlementId == CRILD
@@ -72,11 +72,11 @@ def test_v7_uses_original_birthplace_for_upbringing(eldara):
     assert fallback.upbringing.cultureId == "umbra-kori"
 
 
-def test_v7_allocates_named_people_within_each_resident_ancestry_age_band(eldara):
-    raw, rules = _v7_legacy_fixture(eldara)
-    first, _ = migrate_state(raw, eldara, rules)
+def test_v7_allocates_named_people_within_each_resident_ancestry_age_band(astalor):
+    raw, rules = _v7_legacy_fixture(astalor)
+    first, _ = migrate_state(raw, astalor, rules)
     raw["cast"]["people"].reverse()
-    second, _ = migrate_state(raw, eldara, rules)
+    second, _ = migrate_state(raw, astalor, rules)
     assert {p.id: p.identity for p in first.cast.people} == {p.id: p.identity for p in second.cast.people}
     cfg = ready(rules)["simulation"]["people"]
     actual = Counter((p.identity.ancestryId, band_of(age_years(p, 0, cfg), cfg)) for p in first.cast.people)
@@ -153,14 +153,14 @@ def test_older_reports_expire_without_refreshing_when_caravans_relay_them(fresh_
 
 
 
-def test_legacy_allocation_can_reassign_a_preference_to_find_an_age_compatible_slot(eldara):
+def test_legacy_allocation_can_reassign_a_preference_to_find_an_age_compatible_slot(astalor):
     from world_sim.peoples.catalog import choose_ancestry
     from world_sim.simulation.people.legacy import assign_residents
 
-    [town] = _baseline(eldara, [VHALTHA]).settlements
+    [town] = _baseline(astalor, [VHALTHA]).settlements
     town = town.model_copy(update={"ancestries": {"human": Cohorts(children=1, adults=1, elders=0),
                                                  "dwarf": Cohorts(children=1, adults=0, elders=0)}})
-    cfg = ready(eldara.config.rules)["simulation"]["people"]
+    cfg = ready(astalor.config.rules)["simulation"]["people"]
     cfg = {**cfg, "ancestries": {"dwarf": {"ages": {"child": [0, 29], "adult": [30, 59], "elder": [60, 80]}}}}
     seed = next(seed for seed in range(100) if choose_ancestry({"dwarf": 1, "human": 1}, seed, "a") == "dwarf")
     people = [{"id": pid, "birthDay": -age * cfg["daysPerYear"]} for pid, age in (("a", 10), ("b", 20), ("c", 20))]
@@ -168,10 +168,10 @@ def test_legacy_allocation_can_reassign_a_preference_to_find_an_age_compatible_s
     assert assigned["a"] == "human" and {assigned["b"], assigned["c"]} == {"dwarf", "human"}
 
 
-def test_v7_reports_a_conflicting_census_without_rewriting_the_save(eldara):
-    raw, rules = _v7_legacy_fixture(eldara)
+def test_v7_reports_a_conflicting_census_without_rewriting_the_save(astalor):
+    raw, rules = _v7_legacy_fixture(astalor)
     raw["settlements"][0]["cohorts"] = Cohorts(children=0, adults=4, elders=0).model_dump()
     checksum = state_digest(raw)
     with pytest.raises(IncompatibleState, match="cannot fit within the saved ancestry and age cohorts"):
-        migrate_state(raw, eldara, rules)
+        migrate_state(raw, astalor, rules)
     assert state_digest(raw) == checksum

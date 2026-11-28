@@ -54,7 +54,7 @@ Never treat render chunks as settlement economic regions. Never persist floating
 
 ### 3.2 Site and portal data
 
-- Site ID is stable and unique within a world; examples in documentation are schematic, not assumed to exist on Eldara.
+- Site ID is stable and unique within a world; examples in documentation are schematic, not assumed to exist on Astalor.
 - Every entrance belongs to one surface anchor or another instanced location; it points to a precise destination spawn/portal and has a reciprocal return route or a deliberately documented one-way rule.
 - A location may have many entrances (mine entrances, concealed Drow passages, glacier crevasses), multiple interior levels and exits at different surface coordinates.
 - A travel record includes sourceSceneId, sourceEntranceId, destinationSiteId, destinationSpawnId and a durable return anchor. Store this before transitioning.

@@ -23,9 +23,9 @@ def pilot(model, seed=1212):
     return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212)
 
 
-def test_baseline_society_accounts_for_every_imported_person(eldara):
-    for s in pilot(eldara).settlements:
-        assert s.population == eldara.settlements_by_id[s.settlementId]["population"]
+def test_baseline_society_accounts_for_every_imported_person(astalor):
+    for s in pilot(astalor).settlements:
+        assert s.population == astalor.settlements_by_id[s.settlementId]["population"]
         assert check_invariants(s.population, s.cohorts, s.society) == []
         housed = sum(g.children + g.adults + g.elders for g in s.society.households)
         assert housed == s.population, "households hold exactly the imported population"
@@ -43,8 +43,8 @@ def test_households_never_create_or_lose_people(config, cohorts):
         assert not g.children or g.adults or g.kind == "communal", "children live with an adult"
 
 
-def test_businesses_follow_settlement_and_source_evidence(eldara):
-    by_name = {s.name: s for s in pilot(eldara).settlements}
+def test_businesses_follow_settlement_and_source_evidence(astalor):
+    by_name = {s.name: s for s in pilot(astalor).settlements}
     for s in by_name.values():
         ids = [b.id for b in s.society.businesses]
         assert len(ids) == len(set(ids)), "business ids are unique"
@@ -69,20 +69,20 @@ def test_jobs_never_exceed_eligible_labour_and_fill_by_priority():
     assert plenty.employed == 30 and plenty.unemployed == 70
 
 
-def test_society_stays_consistent_over_a_decade_and_reproduces(eldara):
-    rules = eldara.config.rules
-    first, months = advance(pilot(eldara), 3600, rules)
-    second, _ = advance(pilot(eldara), 3600, rules)
+def test_society_stays_consistent_over_a_decade_and_reproduces(astalor):
+    rules = astalor.config.rules
+    first, months = advance(pilot(astalor), 3600, rules)
+    second, _ = advance(pilot(astalor), 3600, rules)
     assert state_checksum(first) == state_checksum(second), "same configuration and seed, same result"
     for s in first.settlements:
         assert check_invariants(s.population, s.cohorts, s.society) == []
     assert all(m["unemployed"] >= 0 for m in months)
 
 
-def test_history_is_bounded_but_keeps_the_baseline(eldara):
-    sim = eldara.config.simulation
-    rules = {**eldara.config.rules, "simulation": {**sim, "limits": {**sim["limits"], "maxHistoryPoints": 5}}}
-    state, _ = advance(pilot(eldara), 360, rules)
+def test_history_is_bounded_but_keeps_the_baseline(astalor):
+    sim = astalor.config.simulation
+    rules = {**astalor.config.rules, "simulation": {**sim, "limits": {**sim["limits"], "maxHistoryPoints": 5}}}
+    state, _ = advance(pilot(astalor), 360, rules)
     assert len(state.history) == 5
     assert state.history[0].day == 0 and state.history[-1].day == 360
 

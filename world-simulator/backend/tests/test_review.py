@@ -66,14 +66,38 @@ def test_snapshots_from_another_scenario_or_map_are_refused(fresh_model):
     assert err.value.code == "foreign_snapshot"
 
 
-def test_wages_follow_the_configured_month_length(eldara):
+def test_map_rename_keeps_scenarios_and_snapshots_usable(fresh_model):
+    manager = ScenarioManager(fresh_model)
+    scenario_id = "baseline-pilot"
+    original = manager.session(scenario_id)
+    snapshot = manager.snapshot(scenario_id, "Before the rename")
+    previous = fresh_model.renamed_from
+    assert previous is not None
+    old_world = original.state.world.model_copy(update={key: previous[key] for key in ("mapId", "sourceFingerprint")})
+    old_state = original.state.model_copy(update={"world": old_world})
+    meta, _, events, _ = manager.store.load(scenario_id)
+    meta["rules"]["peoples"].update(mapNames=[previous["mapName"]], mappedMapIds=[previous["mapId"]],
+                                    catalogId=previous["cultureCatalogId"])
+    manager.store.save(scenario_id, meta, old_state.model_dump(), events)
+    manager.store.save_snapshot(scenario_id, {**snapshot.model_dump(), "checksum": state_checksum(old_state)},
+                                old_state.model_dump())
+
+    reloaded = ScenarioManager(fresh_model)
+    current = reloaded.writable(scenario_id)
+    assert current.state.model_dump() == original.state.model_dump()
+    assert reloaded.status(current)["rulesCurrent"]
+    assert reloaded.store.load(scenario_id)[1]["world"] == original.state.world.model_dump()
+    assert reloaded.restore(scenario_id, snapshot.id).state.model_dump() == original.state.model_dump()
+
+
+def test_wages_follow_the_configured_month_length(astalor):
     business = Business(id="b", settlementId="s", kind="farm", name="Farm", sector="agriculture", profession="farmhand",
                         staff=4, wage=3, filled=0)
     _, employment, _ = fill_jobs([business], 4, ["agriculture"], 28)
     assert employment.wageBillPerMonth == 4 * 3 * 28
-    sim = copy.deepcopy(eldara.config.simulation)
+    sim = copy.deepcopy(astalor.config.simulation)
     sim["calendar"]["daysPerMonth"] = 28
-    model = with_config(eldara, simulation=sim)
+    model = with_config(astalor, simulation=sim)
     state = baseline_state(model, scenario_id="t", settlement_ids=[r["settlementId"] for r in model.pilot["roles"]], seed=1,
                            start_year=1212)
     for s in state.settlements:
@@ -81,8 +105,8 @@ def test_wages_follow_the_configured_month_length(eldara):
         assert s.economy.food.wanted == s.population * 28, "rations are counted in calendar days too"
 
 
-def test_named_households_live_in_identified_buildings(eldara):
-    state = baseline_state(eldara, scenario_id="t", settlement_ids=[r["settlementId"] for r in eldara.pilot["roles"]], seed=1,
+def test_named_households_live_in_identified_buildings(astalor):
+    state = baseline_state(astalor, scenario_id="t", settlement_ids=[r["settlementId"] for r in astalor.pilot["roles"]], seed=1,
                            start_year=1212)
     cast = state.cast
     homes = {d.id: d for d in cast.dwellings}

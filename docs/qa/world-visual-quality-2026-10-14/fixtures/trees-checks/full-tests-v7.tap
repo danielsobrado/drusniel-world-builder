@@ -20372,8 +20372,8 @@ ok 3377 - command payload cloning retains existing JSON-compatible semantics
   duration_ms: 1.207396
   type: 'test'
   ...
-# Subtest: Eldara culture catalog preserves the Azgaar source-ID compatibility layer
-ok 3378 - Eldara culture catalog preserves the Azgaar source-ID compatibility layer
+# Subtest: Astalor culture catalog preserves the Azgaar source-ID compatibility layer
+ok 3378 - Astalor culture catalog preserves the Azgaar source-ID compatibility layer
   ---
   duration_ms: 1.145191
   type: 'test'
@@ -20384,8 +20384,8 @@ ok 3379 - every core culture defines a relation to every other core culture
   duration_ms: 1.247388
   type: 'test'
   ...
-# Subtest: catalog only applies to configured Eldara source maps
-ok 3380 - catalog only applies to configured Eldara source maps
+# Subtest: catalog only applies to configured Astalor source maps
+ok 3380 - catalog only applies to configured Astalor source maps
   ---
   duration_ms: 0.379686
   type: 'test'
@@ -20396,8 +20396,8 @@ ok 3381 - Azgaar projection enriches source cultures without replacing source id
   duration_ms: 17.004597
   type: 'test'
   ...
-# Subtest: Eldara catalog does not leak into unrelated Azgaar worlds
-ok 3382 - Eldara catalog does not leak into unrelated Azgaar worlds
+# Subtest: Astalor catalog does not leak into unrelated Azgaar worlds
+ok 3382 - Astalor catalog does not leak into unrelated Azgaar worlds
   ---
   duration_ms: 7.119428
   type: 'test'

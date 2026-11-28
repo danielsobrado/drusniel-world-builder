@@ -5,7 +5,7 @@ import * as THREE from 'three/webgpu';
  *
  * Every slot draws the same flat chunk plane and displaces it by its height
  * texture in the vertex shader. Culled against that flat plane — a sphere a
- * chunk wide around y = 0 — a chunk several hundred metres up the Eldara
+ * chunk wide around y = 0 — a chunk several hundred metres up the Astalor
  * relief lies outside it, so looking toward the horizon from high ground
  * culled every chunk and only the sky showed where the ground should be.
  *

@@ -123,7 +123,7 @@ happens on the way (`economy/roads.py`, `trips.py`, `bandits.py`, `escorts.py`).
 
 **Roads.** Each settlement that trades by caravan has one road to its market centre.
 - **Founding bands:** an Azgaar `brigands` marker within 25 px of either end founds a
-  band of 24 under the marker's name, which never shrinks below 8. Eldara records two
+  band of 24 under the marker's name, which never shrinks below 8. Astalor records two
   such gangs, neither near the pilot.
 - **Growth:** a band recruits 2% a month of the people without work at both ends; the
   centre's idle are shared among its roads. Recruitment rises with hunger and with last
@@ -196,7 +196,7 @@ a starting purse of 20–80.
 - **Pirates:** an Azgaar `pirates` marker within 220 px of the lane founds a crew. It
   works like a bandit band, recruiting from the idle of both ports, and raids are
   reported as pirates on the sea lane.
-- **On Eldara:** Qeqashuth → Chix sails in 7 days instead of riding 14, past the pirates
+- **On Astalor:** Qeqashuth → Chix sails in 7 days instead of riding 14, past the pirates
   sighted at (494, 760). The pilot has no ports, so the pilot has no sea lanes.
 
 **Ten years on the pilot** (seed 1212):

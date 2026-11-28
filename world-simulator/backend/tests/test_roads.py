@@ -17,8 +17,8 @@ def pilot(model, seed=1212):
     return baseline_state(model, scenario_id="t", settlement_ids=ids, seed=seed, start_year=1212)
 
 
-def test_roads_and_traders_start_from_the_map(eldara):
-    state = pilot(eldara)
+def test_roads_and_traders_start_from_the_map(astalor):
+    state = pilot(astalor)
     assert {r.settlementName for r in state.trade.routes} == {"Falanenerwin", "Sshanderi"}, "the market centre needs no road"
     assert all(r.bandits == 0 and r.lair is None for r in state.trade.routes), "no Azgaar brigands near the pilot"
     assert len(state.trade.traders) == 6 and len({t.name for t in state.trade.traders}) == 6
@@ -29,23 +29,23 @@ def test_roads_and_traders_start_from_the_map(eldara):
     assert abs(market.taxRates["Amber"] - 6.74 / (6 * 7.02)) < 1e-3, "tax rates come from Azgaar's taxed deals"
 
 
-def test_a_brigands_marker_founds_a_band_that_never_dies_out(eldara):
-    falanenerwin = eldara.settlements_by_id["settlement:azgaar-burg:113"]
-    pack = eldara.document["pack"]
+def test_a_brigands_marker_founds_a_band_that_never_dies_out(astalor):
+    falanenerwin = astalor.settlements_by_id["settlement:azgaar-burg:113"]
+    pack = astalor.document["pack"]
     marker = {"type": "brigands", "i": 999, "x": falanenerwin["x"] + 5, "y": falanenerwin["y"], "cell": falanenerwin["cell"]}
-    document = {**eldara.document, "pack": {**pack, "markers": [*pack["markers"], marker]},
-                "notes": [*eldara.document.get("notes", []), {"id": "marker999", "name": "Grey Wolves"}]}
-    model = dataclasses.replace(eldara, document=document)
+    document = {**astalor.document, "pack": {**pack, "markers": [*pack["markers"], marker]},
+                "notes": [*astalor.document.get("notes", []), {"id": "marker999", "name": "Grey Wolves"}]}
+    model = dataclasses.replace(astalor, document=document)
     state = pilot(model)
     road = next(r for r in state.trade.routes if r.settlementName == "Falanenerwin")
     assert (road.bandits, road.lair) == (24, "Grey Wolves")
-    state, _ = advance(state, 1800, eldara.config.rules)
+    state, _ = advance(state, 1800, astalor.config.rules)
     road = next(r for r in state.trade.routes if r.settlementName == "Falanenerwin")
     assert road.bandits >= road.floor == 8 and road.raids > 0
 
 
-def test_a_decade_of_bandits_guards_and_smugglers(eldara):
-    state, months = advance(pilot(eldara), 3600, eldara.config.rules)
+def test_a_decade_of_bandits_guards_and_smugglers(astalor):
+    state, months = advance(pilot(astalor), 3600, astalor.config.rules)
     bandits = [m["bandits"] for m in months]
     assert 0 < bandits[-1] <= 20, "bands persist on the idle a town cannot employ, but no longer grow without limit"
     assert sum(m["raids"] for m in months) > 5 and sum(m["caught"] for m in months) >= 2
@@ -62,20 +62,20 @@ def test_a_decade_of_bandits_guards_and_smugglers(eldara):
     assert reckless.scorecard.guardsHired / reckless.scorecard.trips < careful.scorecard.guardsHired / careful.scorecard.trips
 
 
-def test_state_round_trips_through_json_unchanged(eldara):
-    state, _ = advance(pilot(eldara), 720, eldara.config.rules)
+def test_state_round_trips_through_json_unchanged(astalor):
+    state, _ = advance(pilot(astalor), 720, astalor.config.rules)
     back = ScenarioState(**json.loads(compact_json(state.model_dump())))
     assert state_checksum(back) == state_checksum(state), "snapshots verify after a save and load"
 
 
-def test_v3_states_gain_roads_and_traders(eldara):
-    raw = pilot(eldara).model_dump()
+def test_v3_states_gain_roads_and_traders(astalor):
+    raw = pilot(astalor).model_dump()
     raw["schemaVersion"] = 3
     for key in ("routes", "traders", "traderSeq"):
         del raw["trade"][key]
     for m in raw["trade"]["markets"]:
         del m["taxRates"], m["taxRevenue"]
-    state, stored = migrate_state(raw, eldara)
+    state, stored = migrate_state(raw, astalor)
     assert stored == 3 and state.schemaVersion == STATE_SCHEMA_VERSION
     assert len(state.trade.routes) == 2 and len(state.trade.traders) == 6
 

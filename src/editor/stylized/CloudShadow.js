@@ -8,7 +8,7 @@ import { cloudFbm2 } from './sky/cloudNoise.js';
 /**
  * Cloud units the sky's canonical sampling position wraps at. The cloud noise
  * hashes `fract(position × 127.1)`, which float32 flattens to a constant once
- * positions reach tens of thousands of units — on Eldara the sky went blank or
+ * positions reach tens of thousands of units — on Astalor the sky went blank or
  * broke into streaks. Wrapping in double precision keeps the shader's
  * coordinates small; crossing a wrap shifts the whole field once, every
  * `CLOUD_WRAP_UNITS × cloudWorldScale` metres (92 km at 180 m per unit).

@@ -91,7 +91,7 @@ test('gusts travel downwind rather than pulsing in place', () => {
 });
 
 test('planet-scale coordinates and long sessions keep a smooth field', () => {
-  // Eldara is ~16,600 km across; the field is wrapped to its lattice period, so
+  // Astalor is ~16,600 km across; the field is wrapped to its lattice period, so
   // two points a metre apart deep into the map still read as neighbours.
   for (const [x, z, time] of [[1.6e7, -8e6, 3600 * 24], [-4.2e6, 9.9e6, 3600 * 72]]) {
     const a = sample(x, z, time);

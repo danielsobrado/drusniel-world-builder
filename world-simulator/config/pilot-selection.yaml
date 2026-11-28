@@ -22,5 +22,5 @@ roles:
 
 constraints:
   requireRoadConnection: true      # every pair joined by imported roads/trails
-  maxRouteDistance: 150            # map px along roads per pilot pair (x distanceScale = 450 mi on Eldara)
+  maxRouteDistance: 150            # map px along roads per pilot pair (x distanceScale = 450 mi on Astalor)
   npcBudgetTarget: { min: 60, max: 100 }   # summed NPCs under the configured target

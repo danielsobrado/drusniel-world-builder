@@ -40,8 +40,8 @@ def test_points_without_cell_ids_use_the_coordinate_tolerance(config, fixture_do
     assert next(r for r in c["routes"] if r["routeId"] == 4)["coordinateMatches"] == 1
 
 
-def test_eldara_connectivity_is_consistent(eldara):
-    c = eldara.connectivity
+def test_astalor_connectivity_is_consistent(astalor):
+    c = astalor.connectivity
     assert c["summary"]["landRoutes"] + c["summary"]["seaRoutes"] == 433
     assert sum(comp["size"] for comp in c["components"]) + c["summary"]["isolatedSettlements"] == 502
     component = {s["settlementId"]: s["roadComponentId"] for s in c["settlements"]}

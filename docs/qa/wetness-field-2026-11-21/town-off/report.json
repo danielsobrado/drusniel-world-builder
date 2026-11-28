@@ -10,7 +10,7 @@
       "name": "town-dry",
       "pose": {
         "id": "town",
-        "world": "eldara",
+        "world": "astalor",
         "pitch": -0.18,
         "mode": "player",
         "heightAboveGround": 1.7,
@@ -39,7 +39,7 @@
       "name": "town-mid-rain",
       "pose": {
         "id": "town",
-        "world": "eldara",
+        "world": "astalor",
         "pitch": -0.18,
         "mode": "player",
         "heightAboveGround": 1.7,
@@ -74,7 +74,7 @@
       "name": "town-heavy-rain",
       "pose": {
         "id": "town",
-        "world": "eldara",
+        "world": "astalor",
         "pitch": -0.18,
         "mode": "player",
         "heightAboveGround": 1.7,
@@ -109,7 +109,7 @@
       "name": "town-drying",
       "pose": {
         "id": "town",
-        "world": "eldara",
+        "world": "astalor",
         "pitch": -0.18,
         "mode": "player",
         "heightAboveGround": 1.7,
