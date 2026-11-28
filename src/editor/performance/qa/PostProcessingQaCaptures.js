@@ -108,14 +108,15 @@ export const POST_PROCESSING_CAPTURE_LOCATIONS = Object.freeze([
 
 /**
  * Multi-phase route: forward → rotate → chunk cross → floating-origin rebase → 5s static.
- * Rebase uses a teleport near the floating-origin threshold, then a short forward push.
+ * Rebase teleports across the floating-origin threshold, then continues forward.
  */
 export function createPostProcessingRoutePhases({
   floatingOriginThreshold = 4096,
   warmupFrames = POST_PROCESSING_WARMUP_FRAMES,
   measureFrames = POST_PROCESSING_MEASURE_FRAMES,
+  settle = false,
 } = {}) {
-  const rebaseX = Math.max(64, floatingOriginThreshold - 128);
+  const rebaseX = Math.max(64, floatingOriginThreshold + 128);
   // Budget the measured phases to sum near measureFrames while keeping a 5s static hold.
   const staticFrames = 300;
   const motionBudget = Math.max(60, measureFrames - staticFrames);
@@ -132,6 +133,7 @@ export function createPostProcessingRoutePhases({
       id: 'warmup',
       label: 'Warmup (settle streaming)',
       durationFrames: warmupFrames,
+      settle,
       keys: Object.freeze([]),
       record: false,
     }),

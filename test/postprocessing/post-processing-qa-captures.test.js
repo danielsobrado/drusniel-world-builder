@@ -72,7 +72,7 @@ test('post-processing route includes rebase and static hold phases', () => {
 test('route phases honour floating-origin threshold', () => {
   const phases = createPostProcessingRoutePhases({ floatingOriginThreshold: 2048 });
   const teleport = phases.find((phase) => phase.id === 'rebase-teleport');
-  assert.equal(teleport.teleport.x, 1920);
+  assert.equal(teleport.teleport.x, 2176, 'teleport crosses the threshold before the forward push');
 });
 
 test('resolvePostProcessingCapture returns null for unknown ids', () => {

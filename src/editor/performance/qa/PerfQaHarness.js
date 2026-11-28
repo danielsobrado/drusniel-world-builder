@@ -154,6 +154,7 @@ export class PerfQaHarness {
     this.settleResult = null;
     this.settleSamples = [];
     this.nextSettleSampleAt = 0;
+    this.settleStartedAt = null;
     this.status = 'running';
     this.phaseIndex = 0;
     this.phaseStartedAt = performance.now();
@@ -323,6 +324,7 @@ export class PerfQaHarness {
 
     if (phase.record && this.routeWalker && !this.routeFrozen) this.steerRoute(timestamp);
 
+    const elapsedSeconds = (timestamp - this.phaseStartedAt) / 1000;
     const useFrames = Number.isFinite(phase.durationFrames);
     if (useFrames) {
       this.phaseFrameCount += 1;
@@ -332,15 +334,17 @@ export class PerfQaHarness {
         return;
       }
     } else {
-      const elapsedSeconds = (timestamp - this.phaseStartedAt) / 1000;
       this.live.elapsedSeconds = elapsedSeconds;
       this.live.phase = phase.label;
       if (elapsedSeconds < phase.durationSeconds) {
         return;
       }
-      if (phase.settle && !this.settlePhase(elapsedSeconds - phase.durationSeconds)) {
-        return;
-      }
+    }
+    if (phase.settle) {
+      const waitedSeconds = useFrames
+        ? (timestamp - (this.settleStartedAt ??= timestamp)) / 1000
+        : elapsedSeconds - phase.durationSeconds;
+      if (!this.settlePhase(waitedSeconds)) return;
     }
 
     this.phaseIndex += 1;

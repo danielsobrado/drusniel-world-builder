@@ -327,6 +327,7 @@ export function createMovementPlan(config) {
         floatingOriginThreshold: config.floatingOriginThreshold ?? 4096,
         warmupFrames: config.warmupFrames ?? POST_PROCESSING_WARMUP_FRAMES,
         measureFrames: config.measureFrames ?? POST_PROCESSING_MEASURE_FRAMES,
+        settle: config.settle,
       }),
     });
   }
@@ -339,6 +340,7 @@ export function createMovementPlan(config) {
           id: 'warmup',
           label: 'Warmup (settle streaming)',
           durationFrames: config.warmupFrames,
+          settle: Boolean(config.settle),
           keys: Object.freeze([]),
           record: false,
         }),
