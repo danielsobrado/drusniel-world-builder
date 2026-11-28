@@ -366,7 +366,10 @@ export class StylizedVariantResidency {
   }
 
   getPreparationStatus() {
-    return { pending: this.pendingLoads.length + this.pendingApplies.length + this.inFlight + Number(Boolean(this.activeApply)) + Number(Boolean(this.scanJob)),
+    // A periodic refresh of the window already scanned is pending only once it queues work: counting it
+    // reset readiness every 500 ms under a stationary camera, so settle never saw 60 ready frames (LOD Phase 0B).
+    const scanning = Boolean(this.scanJob) && this.scanJob.key !== this.lastScanKey;
+    return { pending: this.pendingLoads.length + this.pendingApplies.length + this.inFlight + Number(Boolean(this.activeApply)) + Number(scanning),
       errors: [...this.failed] };
   }
 

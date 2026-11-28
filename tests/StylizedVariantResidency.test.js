@@ -204,6 +204,31 @@ test('an install still advances a step each frame when the shared budget is spen
   assert.equal(residency.pendingApplies.length, 0);
 });
 
+test('a refresh scan of the settled window is not pending preparation; a new window is', async () => {
+  const terrainView = createTerrainView({ tileForChunkX: () => 7 });
+  const { layer } = createLayer({ definitions: [{ scene: '/assets/rocks/generic.glb' }] });
+  const residency = new StylizedVariantResidency({ terrainView, layers: [layer], rescanIntervalMs: 0 });
+  const exhausted = () => true;
+  let frame = 0;
+  for (; frame < 80 && (residency.lastScanKey === null || residency.getLayerState('rocks').pending > 0); frame += 1) {
+    residency.update(frame, exhausted);
+    await Promise.resolve();
+    await Promise.resolve();
+  }
+  residency.update(frame++, exhausted);
+  // Under a spent budget the refresh spans frames; it found nothing to do, so the layer stays prepared.
+  assert.ok(residency.scanJob, 'refresh scan in flight');
+  assert.equal(residency.scanJob.key, residency.lastScanKey);
+  assert.equal(residency.getPreparationStatus().pending, 0);
+
+  terrainView.focusChunk = { chunkX: 9, chunkZ: 0 };
+  terrainView.focusChunkKey = '9:0';
+  const newWindowScan = () => residency.scanJob && residency.scanJob.key !== residency.lastScanKey;
+  for (let step = 0; step < 80 && !newWindowScan(); step += 1) residency.update(frame++, exhausted);
+  assert.ok(residency.scanJob && residency.scanJob.key !== residency.lastScanKey, 'scan of the new window in flight');
+  assert.equal(residency.getPreparationStatus().pending, 1);
+});
+
 test('a variant is requested once, and a failed one is not retried', async () => {
   const terrainView = createTerrainView({ tileForChunkX: () => 7 });
   const { layer, acquired } = createLayer({ definitions: [DEFINITIONS[0]] });
