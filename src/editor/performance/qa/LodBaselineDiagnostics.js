@@ -9,7 +9,8 @@ export const LOD_BASELINE_COUNTERS = Object.freeze([
   'sceneryPublicationQueuedBytes', 'scenerySliceUploadedBytes',
   'scenerySliceGpuCopyBytes', 'initialInstanceSlicedBytes',
   'attributeBytesUploaded', 'stylizedInstanceRowsCompared', 'sceneryDitherQueuedBytes',
-  'sceneryLodHandoffLeaseMs', 'sceneryLodHandoffLeases',
+  'sceneryLodHandoffLeaseMs', 'sceneryLodHandoffLeases', 'sceneryDitherGpuCopyBytes',
+  'treeManifestReadyLatencyTotalMs', 'treeManifestReadyCount',
 ]);
 
 function describe(state, now) {

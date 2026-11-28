@@ -61,6 +61,8 @@ const viewportWidth = positiveNumber('viewportWidth', 1280, { integer: true });
 const viewportHeight = positiveNumber('viewportHeight', 720, { integer: true });
 const deviceScaleFactor = positiveNumber('deviceScaleFactor', 1);
 const outPath = path.resolve(readArg('out', path.join(outDir, 'perf-qa-latest.json')));
+const videoArg = readArg('video-dir');
+const videoDir = videoArg === null ? null : path.resolve(videoArg);
 const screenshotArg = readArg('screenshot');
 const screenshotPath = screenshotArg === null ? null : path.resolve(screenshotArg);
 const screenshotReportPath = screenshotPath === null
@@ -115,6 +117,7 @@ const timeoutMs = positiveNumber('timeoutMs', defaultPerfQaTimeoutMs(query));
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 if (screenshotPath !== null) fs.mkdirSync(path.dirname(screenshotPath), { recursive: true });
+if (videoDir !== null) fs.mkdirSync(videoDir, { recursive: true });
 if (cpuProfilePath !== null) fs.mkdirSync(path.dirname(cpuProfilePath), { recursive: true });
 
 fs.writeFileSync(
@@ -127,6 +130,7 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
 
 (async () => {
   let browser = null;
+  let context = null;
   let cdp = null;
   let cpuProfiling = false;
   try {
@@ -141,10 +145,12 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
       args: PERF_CHROMIUM_GPU_ARGS,
     });
     const environment = await readPerfEnvironment(browser).catch(() => null);
-    const page = await browser.newPage({
+    context = await browser.newContext({
       viewport: { width: ${viewportWidth}, height: ${viewportHeight} },
       deviceScaleFactor: ${deviceScaleFactor},
+      ...(${JSON.stringify(videoDir)} === null ? {} : { recordVideo: { dir: ${JSON.stringify(videoDir)}, size: { width: ${viewportWidth}, height: ${viewportHeight} } } }),
     });
+    const page = await context.newPage();
     page.setDefaultTimeout(${timeoutMs});
     const { createBrowserErrorMonitor } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/perf-browser-errors.mjs')).href)});
     const browserErrors = createBrowserErrorMonitor(page);
@@ -434,6 +440,8 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
       },
       rendererBackend,
       screenshot: ${JSON.stringify(screenshotReportPath)},
+      video: page.video() ? await page.video().path() : null,
+      visualOnly: ${videoDir !== null},
       cpuProfile: ${JSON.stringify(cpuProfileReportPath)},
       heapProfile: ${JSON.stringify(heapProfilePath === null ? null : path.relative(root, heapProfilePath).replaceAll('\\', '/'))},
     };
@@ -492,7 +500,7 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
     if (cpuProfiling) {
       await cdp?.send('Profiler.stop').catch(() => {});
     }
-    await browser?.close();
+    try { await context?.close(); } finally { await browser?.close(); }
   }
 })().catch(async (error) => {
   console.error(error);

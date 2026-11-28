@@ -27,7 +27,7 @@ function sameTarget(renderer, target) {
 /** Pack the exact changed rows, not the broad dirty span. Adjacent copy runs merge. */
 export function* prepareInstanceCopyPlan(renderer, publication, settings) {
   const pages = [], copies = [], targets = [];
-  let bytes = 0;
+  let bytes = 0, ditherBytes = 0;
   for (const [attribute, patchPages] of publication.patches) {
     const target = residentInstanceTarget(renderer, attribute);
     if (!target) return null;
@@ -51,10 +51,11 @@ export function* prepareInstanceCopyPlan(renderer, publication, settings) {
         }
       }
       bytes += size;
+      if (publication.spans.get(attribute)?.counter === 'sceneryDitherQueuedBytes') ditherBytes += size;
       yield;
     }
   }
-  return bytes ? { pages, copies, targets, bytes } : null;
+  return bytes ? { pages, copies, targets, bytes, ditherBytes } : null;
 }
 
 /** One scratch allocation at a time. Live GPU/CPU rows are unchanged until the final copy. */
@@ -129,6 +130,7 @@ export class SlicedInstanceUploads {
       submitted = true;
       PerfCounters.inc('scenerySliceCommits');
       PerfCounters.inc('scenerySliceGpuCopyBytes', plan.bytes);
+      if (plan.ditherBytes) PerfCounters.inc('sceneryDitherGpuCopyBytes', plan.ditherBytes);
       PerfCounters.inc('scenerySliceCopyRanges', plan.copies.length);
       return true;
     } catch (error) {

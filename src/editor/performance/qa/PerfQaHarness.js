@@ -404,7 +404,7 @@ export class PerfQaHarness {
     });
     this.log(verdict === 'settled'
       ? `Settled after ${this.settleResult.waitedSeconds}s more warmup`
-      : `Settle timed out waiting for ${this.settleResult.blockers.join(', ')}`);
+      : `Settle timed out waiting for ${this.settleResult.blockers.join(', ') || 'consecutive ready frames'}`);
     return true;
   }
 

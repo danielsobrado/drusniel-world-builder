@@ -953,18 +953,18 @@ export class StylizedTreeView {
 
     const rockVersion = rockSource?.manifestStore?.version;
     if (this.previousPlan !== plan || rockVersion === undefined || rockVersion !== this.previousRockVersion) {
+      const activeKeys = new Set();
       for (const entry of plan.entries) {
         const visible = entry.representations.some((value) => (
           value.band !== 'culled' && value.fade > 0
         ));
         if (!visible) continue;
+        activeKeys.add(`${entry.chunkX}:${entry.chunkZ}`);
         if (!this.manifestStore.get(entry.chunkX, entry.chunkZ, rockSource)) {
           this.manifestStore.schedule(entry.chunkX, entry.chunkZ, rockSource);
         }
       }
-      this.manifestStore.setActive(new Set(
-        plan.entries.map((entry) => `${entry.chunkX}:${entry.chunkZ}`),
-      ));
+      this.manifestStore.setActive(activeKeys);
       this.previousPlan = plan;
       this.previousRockVersion = rockVersion;
     }

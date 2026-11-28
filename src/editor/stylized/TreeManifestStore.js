@@ -589,7 +589,10 @@ export class TreeManifestStore {
         return { completed: false, advanced: progressAfter > progressBefore,
           blocked: progressAfter <= progressBefore, reason: after ? 'budget' : 'rock-manifest' };
       }
-      PerfCounters.set('treeManifestReadyLatencyMs', performance.now() - job.requestedAt);
+      const latencyMs = Math.max(0, performance.now() - job.requestedAt);
+      PerfCounters.set('treeManifestReadyLatencyMs', latencyMs);
+      PerfCounters.inc('treeManifestReadyLatencyTotalMs', latencyMs);
+      PerfCounters.inc('treeManifestReadyCount');
       this.pendingKeys.delete(job.key);
       completed++;
       this.onBuilt?.();
