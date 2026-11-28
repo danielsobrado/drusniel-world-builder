@@ -71,6 +71,12 @@ const SCENARIOS = Object.freeze({
     keys: ({ running }) => running ? ['KeyW', 'ShiftLeft'] : ['KeyW'],
     defaults: { warmup: 8, duration: 12, speed: 'run' },
   },
+  'lod-reversal': {
+    id: 'lod-reversal', label: 'LOD approach and retreat', keys: () => [],
+  },
+  'lod-revisit': {
+    id: 'lod-revisit', label: 'LOD cold region and canonical revisit', keys: () => [],
+  },
   'construction-ring': {
     id: 'construction-ring',
     label: 'Dense construction wall corridor',
@@ -80,7 +86,7 @@ const SCENARIOS = Object.freeze({
       speed: 'run',
       warmup: 10,
       spawn: { x: 0, z: -24 },
-      yawDegrees: 0,
+      yawDegrees: 180,
     },
   },
   'water-acceptance': {
@@ -295,6 +301,25 @@ export function parseQaParams(search = '') {
 }
 
 export function createMovementPlan(config) {
+  if (config.scenarioId === 'lod-reversal' || config.scenarioId === 'lod-revisit') {
+    const warmup = { id: 'warmup', label: 'Warmup', durationSeconds: config.warmupSeconds,
+      settle: config.settle, keys: [], record: false };
+    const duration = config.durationSeconds / 4;
+    const move = config.running ? ['ShiftLeft'] : [];
+    const steps = config.scenarioId === 'lod-reversal' ? [
+      { id: 'approach', keys: ['KeyW', ...move] },
+      { id: 'retreat', keys: ['KeyS', ...move] },
+      { id: 'approach-again', keys: ['KeyW', ...move] },
+      { id: 'retreat-again', keys: ['KeyS', ...move] },
+    ] : [
+      { id: 'first-visit', keys: [] },
+      { id: 'cold-region', keys: [], canonicalOffset: { x: Math.max(8192, config.floatingOriginThreshold * 2), z: 0 } },
+      { id: 'return', keys: [], canonicalOffset: { x: 0, z: 0 } },
+      { id: 'revisit-hold', keys: [] },
+    ];
+    const phases = [warmup, ...steps.map(step => ({ ...step, label: step.id, durationSeconds: duration, record: true }))];
+    return Object.freeze({ ...config, phases: Object.freeze(phases.map(phase => Object.freeze(phase))) });
+  }
   if (config.multiPhase && config.scenarioId === 'post-processing-route') {
     return Object.freeze({
       ...config,

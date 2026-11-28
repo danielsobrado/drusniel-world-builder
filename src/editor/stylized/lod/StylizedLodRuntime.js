@@ -438,7 +438,9 @@ export function* iterateInstanceWrites(renderers, instancesByPrototype, anchor =
       };
       publishRange(mesh.instanceMatrix, matrixRange);
       if (stage) stage.span(dither, ditherRange, 'sceneryDitherQueuedBytes');
-      else markAttributeSubrangeUpdated(dither, ditherRange.min, ditherRange.max, { counter: 'sceneryDitherQueuedBytes' });
+      else if (ditherRange.max >= ditherRange.min) {
+        PerfCounters.inc('sceneryDitherQueuedBytes', markAttributeSubrangeUpdated(dither, ditherRange.min, ditherRange.max));
+      }
       if (tints) publishRange(tints, tintRange);
       if (roots) publishRange(roots, morphologyRange);
       if (surfaces) publishRange(surfaces, surfaceRange);

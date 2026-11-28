@@ -413,11 +413,16 @@ export class PerfQaHarness {
       this.applyPhaseKeys();
       return;
     }
-    if (phase.teleport) {
+    if (phase.teleport || phase.canonicalOffset) {
       const status = this.playerController.getStatus();
+      const origin = this.terrainView.floatingOrigin?.getState?.() ?? { x: 0, z: 0 };
+      const destination = phase.canonicalOffset ? {
+        x: this.canonicalSpawn.x + phase.canonicalOffset.x - origin.x,
+        z: this.canonicalSpawn.z + phase.canonicalOffset.z - origin.z,
+      } : phase.teleport;
       this.playerController.setPose({
-        x: phase.teleport.x,
-        z: phase.teleport.z,
+        x: destination.x,
+        z: destination.z,
         yaw: degreesToRadians(
           Number.isFinite(phase.yawDegrees) ? phase.yawDegrees : this.config.yawDegrees,
         ),
@@ -425,7 +430,7 @@ export class PerfQaHarness {
           ? status.pitch
           : degreesToRadians(this.config.pitchDegrees),
       });
-      this.log(`Teleported to (${phase.teleport.x}, ${phase.teleport.z})`);
+      this.log(`Teleported to render pose (${destination.x}, ${destination.z})`);
     }
     this.applyPhaseKeys();
   }

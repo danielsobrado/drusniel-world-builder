@@ -36,18 +36,21 @@ export function sampleLodPlans(surface, now, previous = new Map()) {
     const result = { chunks: states.size, transitioning: 0, overlapping: 0, pendingData: 0,
       maxPendingDataAgeMs: null, observedReversals: 0, targets: {} };
     for (const [key, state] of states) {
-      const info = describe(state, now);
       const id = layer + ':' + key;
       const old = previous.get(id);
       if (old && !old.complete && !old.waitingForData && old.from !== old.target
         && state.target === old.from && state.target !== old.target) result.observedReversals++;
-      next.set(id, { from: state.from, target: state.target, complete: state.complete, waitingForData: state.waitingForData });
-      result.targets[info.target] = (result.targets[info.target] ?? 0) + 1;
-      if (info.transitioning) result.transitioning++;
-      if (info.overlap) result.overlapping++;
-      if (info.pending) {
+      next.set(id, state);
+      result.targets[state.target] = (result.targets[state.target] ?? 0) + 1;
+      if (!state.complete && !state.waitingForData) result.transitioning++;
+      let visibleBands = 0;
+      for (const rep of state.representations ?? []) {
+        if (rep.band !== 'culled' && rep.fade > Number.EPSILON) visibleBands++;
+      }
+      if (visibleBands > 1) result.overlapping++;
+      if (state.waitingForData) {
         result.pendingData++;
-        if (info.ageMs !== null) result.maxPendingDataAgeMs = Math.max(result.maxPendingDataAgeMs ?? 0, info.ageMs);
+        if (Number.isFinite(state.startedAt)) result.maxPendingDataAgeMs = Math.max(result.maxPendingDataAgeMs ?? 0, now - state.startedAt, 0);
       }
     }
     layers[layer] = result;
@@ -70,7 +73,10 @@ export class LodBaselineDiagnostics {
     const start = performance.now();
     const { layers, next } = sampleLodPlans(surface, now, this.previous);
     this.previous = next;
-    const sample = { frameIndex, timestampMs: now, layers, samplingCpuMs: performance.now() - start };
+    const info = surface?.terrainView?.renderer?.info;
+    const sample = { frameIndex, timestampMs: now, layers,
+      rendererAccountedBytes: Number.isFinite(info?.memory?.total) ? info.memory.total : null,
+      samplingCpuMs: performance.now() - start };
     this.samples.push(sample);
   }
   report(frames) {

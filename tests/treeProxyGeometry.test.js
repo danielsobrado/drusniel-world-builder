@@ -89,3 +89,21 @@ test('tree proxies keep branch extents out of the low-LOD trunk diameter', () =>
     }
   }
 });
+
+
+test('conifer proxy retains the authored horizontal crown envelope', () => {
+  const trunk = new THREE.CylinderGeometry(0.2, 0.3, 3);
+  const leaf = new THREE.ConeGeometry(3, 5, 16);
+  leaf.translate(0, 3, 0);
+  const sourceMaterial = new THREE.MeshBasicMaterial();
+  sourceMaterial.userData.crownProfileKey = 'conifer';
+  const proxy = createTreeProxyPrototype([{ kind: 'trunk', geometry: trunk },
+    { kind: 'leaf', geometry: leaf, material: sourceMaterial }], PROXY_CONFIG);
+  try {
+    leaf.computeBoundingBox();
+    const original = leaf.boundingBox.getSize(new THREE.Vector3());
+    const actual = proxy.proxyParts[0].geometry.boundingBox.getSize(new THREE.Vector3());
+    assert.ok(actual.x >= original.x - 1e-5);
+    assert.ok(actual.z >= original.z - 1e-5);
+  } finally { disposeProxy(proxy); trunk.dispose(); leaf.dispose(); sourceMaterial.dispose(); }
+});

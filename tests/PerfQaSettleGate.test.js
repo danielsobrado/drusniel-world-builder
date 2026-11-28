@@ -35,3 +35,14 @@ test('settling is opt-in and only the timed warmup waits on it', () => {
   assert.equal(settled.phases[0].settle, true);
   assert.notEqual(settled.phases[1].settle, true, 'the measured phase never waits');
 });
+
+
+test('timeout distinguishes a ready-but-incomplete streak from the last blocker', () => {
+  const gate = new PerfQaSettleGate({ requiredFrames: 3, timeoutSeconds: 2 });
+  gate.update({ ...ready, vegetation: false }, 1);
+  assert.equal(gate.update({ ...ready, vegetation: true }, 2), 'timeout');
+  assert.deepEqual(gate.blockers, []);
+  assert.deepEqual(gate.lastBlockers, ['vegetation']);
+  assert.equal(gate.maxStreak, 1);
+  assert.equal(gate.blockedChecks.vegetation, 1);
+});

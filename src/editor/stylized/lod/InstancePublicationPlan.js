@@ -70,7 +70,13 @@ export class InstancePublicationPlan {
       }
     }
     let bytes = 0;
-    if (!uploaded) for (const span of this.spans.values()) bytes += markAttributeSubrangeUpdated(span.attribute, span.min, span.max, { counter: span.counter });
+    if (!uploaded) for (const span of this.spans.values()) {
+      const dither = span.counter === 'sceneryDitherQueuedBytes';
+      const queued = markAttributeSubrangeUpdated(span.attribute, span.min, span.max,
+        { counter: dither ? 'attributeBytesUploaded' : span.counter });
+      if (dither) PerfCounters.inc(span.counter, queued);
+      bytes += queued;
+    }
     for (const finalize of this.finalizers) finalize();
     this.patches.clear();
     this.spans.clear();

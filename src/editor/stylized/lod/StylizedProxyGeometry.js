@@ -187,6 +187,19 @@ export function createTreeProxyPrototype(parts, config) {
   const crownWidth = Math.max(0.2, Math.max(leafSize.x, leafSize.z));
   const crownHeight = Math.max(0.2, leafSize.y);
   const crownLobeGeometries = buildProfileProxyLobes(profile, crownWidth, crownHeight, leafCenter);
+  if (profile.shape === 'tiered-cone') {
+    const envelope = new THREE.Box3();
+    for (const geometry of crownLobeGeometries) envelope.union(geometry.boundingBox);
+    const size = envelope.getSize(new THREE.Vector3());
+    const scaleX = Math.max(1, leafSize.x / Math.max(0.001, size.x));
+    const scaleZ = Math.max(1, leafSize.z / Math.max(0.001, size.z));
+    for (const geometry of crownLobeGeometries) {
+      geometry.translate(-leafCenter.x, 0, -leafCenter.z);
+      geometry.scale(scaleX, 1, scaleZ);
+      geometry.translate(leafCenter.x, 0, leafCenter.z);
+      geometry.computeBoundingBox();
+    }
+  }
   const connectorBounds = crownLobeGeometries.at(-1).boundingBox.clone();
   const canopyGeometry = mergeGeometries(crownLobeGeometries, false);
   crownLobeGeometries.forEach((geometry) => geometry.dispose());
