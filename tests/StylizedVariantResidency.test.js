@@ -258,3 +258,35 @@ test('a variant is requested once, and a failed one is not retried', async () =>
   assert.equal(acquired.length, 1);
   assert.equal(warnings.length, 1);
 });
+
+
+test('synchronous acquisition failure does not strand the variant load slot', () => {
+  const terrainView = createTerrainView({ tileForChunkX: () => 7 });
+  const { layer } = createLayer({ definitions: [DEFINITIONS[0]] });
+  layer.acquireLease = () => { throw new Error('fixture acquisition failure'); };
+  const residency = new StylizedVariantResidency({ terrainView, layers: [layer], manageRequests: true });
+  try {
+    residency.update(0);
+    assert.equal(residency.inFlight, 0);
+    assert.equal(residency.inFlightIds.size, 0);
+    assert.equal(residency.getPreparationStatus().pending, 0);
+    assert.equal(residency.getPreparationStatus().errors.length, 1);
+  } finally { residency.dispose(); }
+});
+
+test('a rejected custom lease is retired exactly once', async () => {
+  const terrainView = createTerrainView({ tileForChunkX: () => 7 });
+  const { layer } = createLayer({ definitions: [DEFINITIONS[0]] });
+  let releases = 0;
+  layer.acquireLease = () => ({ ready: Promise.reject(new Error('fixture rejection')),
+    release: () => { releases++; }, promote() {} });
+  const residency = new StylizedVariantResidency({ terrainView, layers: [layer], manageRequests: true });
+  try {
+    residency.update(0);
+    await Promise.resolve();
+    assert.equal(residency.inFlight, 0);
+    assert.equal(residency.getPreparationStatus().errors.length, 1);
+    assert.equal(releases, 1);
+  } finally { residency.dispose(); }
+  assert.equal(releases, 1);
+});

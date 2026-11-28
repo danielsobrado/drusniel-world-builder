@@ -265,35 +265,44 @@ export class StylizedVariantResidency {
       const job = this.pendingLoads.shift();
       this.inFlight += 1;
       this.inFlightIds.add(job.id);
-      if (this.manageRequests && job.layer.acquireLease) {
-        const priority = job.layer.urgentKeys.has(job.key) ? 'high' : 'low';
-        job.lease = job.layer.acquireLease(job.definition.scene, priority);
-        this.inFlightLeases.set(job.id, job);
-      }
-      const lease = job.lease;
       const finish = () => {
         this.inFlight -= 1;
-        if (!lease || this.inFlightLeases.get(job.id) === job) {
+        const current = this.inFlightLeases.get(job.id);
+        if (!current || current === job) {
           this.inFlightIds.delete(job.id);
           this.inFlightLeases.delete(job.id);
         }
       };
-      (lease?.ready ?? job.layer.acquire(job.definition.scene)).then(
+      const fail = error => {
+        finish();
+        this.retireInstall(job);
+        if (this.disposed || job.cancelled) return;
+        this.requested.delete(job.id);
+        this.failed.add(job.id);
+        console.warn(`Stylized variant ${job.definition.scene} failed to load.`, error);
+      };
+      let ready;
+      try {
+        if (this.manageRequests && job.layer.acquireLease) {
+          const priority = job.layer.urgentKeys.has(job.key) ? 'high' : 'low';
+          job.lease = job.layer.acquireLease(job.definition.scene, priority);
+          this.inFlightLeases.set(job.id, job);
+        }
+        ready = job.lease?.ready ?? job.layer.acquire(job.definition.scene);
+      } catch (error) {
+        fail(error);
+        continue;
+      }
+      Promise.resolve(ready).then(
         (scene) => {
           finish();
-          if (this.disposed || job.cancelled) return;
+          if (this.disposed || job.cancelled) {
+            this.retireInstall(job);
+            return;
+          }
           this.pendingApplies.push({ ...job, scene });
         },
-        (error) => {
-          finish();
-          if (this.disposed || job.cancelled) return;
-          // Marked failed rather than retried: a missing or malformed variant
-          // fails the same way every time, and retrying it each rescan would
-          // turn one bad path into a permanent fetch loop.
-          this.requested.delete(job.id);
-          this.failed.add(job.id);
-          console.warn(`Stylized variant ${job.definition.scene} failed to load.`, error);
-        },
+        fail,
       );
     }
   }
@@ -416,8 +425,8 @@ export class StylizedVariantResidency {
     this.disposed = true;
     this.scanJob?.iterator.return();
     this.scanJob = null;
-    for (const job of this.inFlightLeases.values()) job.lease?.release();
-    for (const job of this.pendingApplies) job.lease?.release();
+    for (const job of this.inFlightLeases.values()) this.retireInstall(job);
+    for (const job of this.pendingApplies) this.retireInstall(job);
     this.inFlightLeases.clear();
     this.inFlightIds.clear();
     if (this.activeApply) this.retireInstall(this.activeApply);
