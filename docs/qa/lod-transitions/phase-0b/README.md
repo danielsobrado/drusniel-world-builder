@@ -7,6 +7,9 @@ The [follow-up](follow-up.md) supersedes the gallery and hardware status in the
 initial checkpoint below. The original report and obstructed captures remain
 available for comparison.
 
+The [current candidate](current-candidate.md) records the later source
+changes, rebuild and source-integrity validation.
+
 ## Initial checkpoint
 
 **Status: BLOCKED. Phase 1 is not ready for hardware acceptance.** These
