@@ -539,6 +539,7 @@ try {
           mesh.frustumCulled = false;
         }
       }
+      window.__vegetationGalleryMeshes = layouts.flatMap(layout => active[layout.prototypeIndex] ?? []);
 
       const editorCamera = editor.controller.editorCamera;
       editorCamera.controls.enabled = false;
@@ -553,8 +554,19 @@ try {
       firstPrototype,
       prototypeCount,
     });
-    // Give WebGPU/WebGL one frame to compile a representation that was not
-    // active in the world, then another to render it.
+    // Streamed draw preparation hides a mesh until its first-use upload and
+    // pipeline are ready. Variants installed only for this fixture (most bushes)
+    // were never drawn in the world, so a fixed delay captured an empty gallery.
+    const pendingAfter = () => page.evaluate(() => {
+      const pending = window.__editor.controller.terrainView.drawPreparation?.pending;
+      return pending ? window.__vegetationGalleryMeshes.filter(mesh => pending.has(mesh)).length : 0;
+    });
+    const started = Date.now();
+    while (await pendingAfter() > 0 && Date.now() - started < 60_000) await page.waitForTimeout(250);
+    const pending = await pendingAfter();
+    report.checks.push({ id: `${layer}-${representation}-${firstPrototype}-gallery-prepared`, passed: pending === 0,
+      pendingMeshes: pending, waitedMs: Date.now() - started });
+    // Then one frame to compile any remaining representation and another to render it.
     await page.waitForTimeout(2_500);
   }
 
