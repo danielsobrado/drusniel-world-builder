@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { tightlyPackRgbaReadback } from '../../stylized/impostor/TreeImpostorAtlasPixels.js';
+import { worldWindUniforms } from '../../weather/wind/worldWindState.js';
 import { galleryFrame, galleryCoverage } from './vegetationGalleryLayout.js';
 
 const TILE_SIZE = 512;
@@ -28,6 +29,7 @@ function configureInstance(mesh, matrix, seed) {
     ['instanceBiomeLook', [1, 1, 1, 1]],
     ['instanceSurface', [0, 0, 0]],
     ['instancePlantRoot', [0, 0, 0]],
+    ['instanceRootPlane', [0, 0, 0]],
   ]) {
     const attribute = mesh.geometry.getAttribute(name);
     if (!attribute) continue;
@@ -63,8 +65,16 @@ export async function captureVegetationGallery(editor, { layer, representation, 
   const previousColor = renderer.getClearColor(new THREE.Color()).clone();
   const previousAlpha = renderer.getClearAlpha();
   const previousAutoClear = renderer.autoClear;
+  const { windowCenter, windowCenterCanonical, windowSize, prevailingStrength } = worldWindUniforms;
+  const previousWindCenter = windowCenter.value.clone();
+  const previousCanonicalCenter = windowCenterCanonical.value.clone();
+  const previousWindStrength = prevailingStrength.value;
   const slots = [];
   try {
+    // Sample zero prevailing wind outside the streamed gust field.
+    windowCenter.value.set(windowSize.value * 2, 0);
+    windowCenterCanonical.value.copy(windowCenter.value);
+    prevailingStrength.value = 0;
     renderer.autoClear = true;
     renderer.setClearColor(0x000000, 0);
     renderer.setRenderTarget(target);
@@ -106,6 +116,9 @@ export async function captureVegetationGallery(editor, { layer, representation, 
     ctx.fillRect(0, 0, output.width, output.height);
     return { png: output.toDataURL('image/png').split(',')[1], slots };
   } finally {
+    windowCenter.value.copy(previousWindCenter);
+    windowCenterCanonical.value.copy(previousCanonicalCenter);
+    prevailingStrength.value = previousWindStrength;
     renderer.setRenderTarget(previousTarget);
     renderer.setClearColor(previousColor, previousAlpha);
     renderer.autoClear = previousAutoClear;
