@@ -1,0 +1,155 @@
+{
+  "url": "http://localhost:5180/?qaRecovery=1",
+  "visualOnly": false,
+  "checks": {
+    "compressedAtlases": {
+      "total": 40,
+      "compressed": 40
+    },
+    "entry": {
+      "mode": "fly",
+      "camera": true,
+      "pausedPhysics": true,
+      "blockedEditing": true,
+      "hints": true
+    },
+    "movement": {
+      "forward": {
+        "before": [
+          150,
+          180,
+          150.00000000000003
+        ],
+        "after": [
+          149.35300336077938,
+          179.22360403293524,
+          149.3530033607794
+        ]
+      },
+      "ascend": {
+        "before": [
+          149.35300336077938,
+          179.22360403293524,
+          149.3530033607794
+        ],
+        "after": [
+          149.35300336077938,
+          180.42360403293523,
+          149.3530033607794
+        ]
+      },
+      "descend": {
+        "before": [
+          149.35300336077938,
+          180.42360403293523,
+          149.3530033607794
+        ],
+        "after": [
+          149.35300336077938,
+          179.05560403293524,
+          149.3530033607794
+        ]
+      }
+    },
+    "overlayBlocksMovement": true,
+    "rebase": {
+      "before": {
+        "x": 6149.353003360779,
+        "z": -7850.646996639221
+      },
+      "after": {
+        "x": 6149.353003360779,
+        "z": -7850.646996639221
+      },
+      "origin": {
+        "x": 6144,
+        "z": -7808
+      },
+      "old": {
+        "x": 0,
+        "z": 0
+      },
+      "focus": {
+        "chunkX": 48,
+        "chunkZ": 61
+      }
+    },
+    "return": {
+      "mode": "edit",
+      "player": {
+        "x": 0,
+        "z": 0
+      },
+      "original": {
+        "mode": "edit",
+        "pose": [
+          150,
+          180,
+          150.00000000000003
+        ],
+        "canonicalPlayer": {
+          "x": 0,
+          "z": 0
+        }
+      }
+    },
+    "pausedReturn": {
+      "mode": "player",
+      "paused": true
+    },
+    "recovery": {
+      "actual": {
+        "position": [
+          0,
+          10.729475549327192,
+          0
+        ],
+        "quaternion": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "returnState": {
+          "mode": "player",
+          "paused": true,
+          "playerEnabled": true,
+          "editorEnabled": false
+        }
+      },
+      "expected": {
+        "position": [
+          0,
+          10.729475549327192,
+          0
+        ],
+        "quaternion": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "returnState": {
+          "mode": "player",
+          "paused": true,
+          "playerEnabled": true,
+          "editorEnabled": false
+        }
+      },
+      "mode": "fly"
+    }
+  },
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "fallback": false,
+    "backend": "webgpu"
+  },
+  "errors": {
+    "count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "passed": true,
+  "video": null
+}

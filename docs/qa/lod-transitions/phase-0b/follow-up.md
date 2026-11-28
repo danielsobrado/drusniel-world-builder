@@ -75,12 +75,15 @@ default grassland interval was 372.9 ms. Phase 0 had no matched grassland
 readiness-experiment arm. The two combined experiment results in 0B are
 a separate comparison, with a 19.968 ms median p95 and 45.983 ms median p99.9.
 
-The final code commit passes all 5,689 unit tests and the production build.
+The isolated full suite passes all 5,690 tests. The production build passes.
 The 62 Phase 0B and gallery layout tests passed, and the focused rerun after
 moving the fixture passed 12 tests, including the unchanged WebGPU runtime
 contract. Lint and production asset validation pass. The earlier full run
 failed at `webGpuRuntimeContract.test.js` because the gallery readback was
 under `src/editor`. The fixture move resolves that assertion.
+The first suite after the route fix also hit the free-flight browser lock.
+That concurrent attempt was discarded and the full suite was rerun with
+no browser active.
 
 The validated 40 impostor atlases came from `18122c36`. Their KTX2 files total
 1,956,437 bytes. The manifest SHA-256 is
@@ -158,3 +161,27 @@ threshold. The route now waits when `--settle` is requested and teleports
 past the configured threshold. The first free-flight attempt also failed
 the ascent assertion after the fixed 250 ms hold. Its runner now checks
 actual displacement with a bounded hold, retaining the original 1 m gate.
+
+The corrected rotation route settled in 51.4 s and recorded one snap to an
+origin offset of (4224, 0). Native focus held and there were no browser
+errors. Its final collision gate was still false (0/9 chunks ready after
+the cold teleport) despite runner exit 0. This demonstrates the snap and
+keeps the run outside the valid pacing set.
+
+The [free-flight retest](runs/free-flight-report.json) passed all eight
+functional checks on native NVIDIA WebGPU, with zero browser errors. Ascent
+and descent moved 1.200 m and 1.368 m respectively. Rebase changed the origin
+to x 6144, z −7808 and preserved the exact canonical position. Keyboard
+return, overlay input blocking and renderer recovery also passed. The
+post-recovery still contains a streaming overlay and is kept under
+`tmp/lod-phase-0b/flight-final/` as a functional artifact.
+
+Five [separate replay recordings](runs/visual-replay-index.json) finished on
+`c6f9bc4f38bc0da61f07f0012e531d0c1944c123`. The index records each raw
+WebM path, hash, duration, and launch arguments. These are visual-only.
+The [construction corridor](captures/construction-interior.png) is visible
+at 0.7 s of measured movement. The end view was beyond the walls.
+The [rotation/rebase still](captures/rotation-rebase-incomplete.png) shows
+collision streaming in progress. The [revisit endpoint](captures/revisit-end.png)
+shows the restored grassland, but that replay emitted no resource
+checkpoints and cannot establish eviction.
