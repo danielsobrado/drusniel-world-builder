@@ -11,13 +11,17 @@ const option = (flag, fallback) => {
 };
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.resolve(option('--out', 'tmp/free-flight-qa'));
+const videoDirectory = option('--video-dir', null);
 const url = new URL(option('--url', 'http://localhost:5173')); url.searchParams.set('qaRecovery', '1');
 await mkdir(output, { recursive: true });
 const release = await waitForPerfRunLock(path.join(root, 'tmp', `perf-browser-${process.platform}.lock`));
-const report = { url: url.href, checks: {} }; let browser, errors;
+const report = { url: url.href, visualOnly: videoDirectory !== null, checks: {} };
+let browser, errors, video;
 try {
   browser = await chromium.launch({ headless: false, args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--use-angle=default'] });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 },
+    ...(videoDirectory ? { recordVideo: { dir: path.resolve(videoDirectory) } } : {}) });
+  video = page.video();
   errors = createBrowserErrorMonitor(page);
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__editor?.exploration?.lastTimestamp != null && window.__editor.captureRecoveryState,
@@ -52,18 +56,26 @@ try {
   });
   assert.ok(report.checks.entry.camera && report.checks.entry.pausedPhysics && report.checks.entry.blockedEditing && report.checks.entry.hints);
   const pose = () => page.evaluate(() => window.__editor.viewModeController.camera.position.toArray());
-  let before = await pose();
-  await page.keyboard.down('w'); await page.waitForTimeout(350); await page.keyboard.up('w');
-  let after = await pose(); assert.ok(Math.hypot(...after.map((value, i) => value - before[i])) > 1);
-  before = after;
-  await page.keyboard.down('Space'); await page.waitForTimeout(250); await page.keyboard.up('Space');
-  after = await pose(); assert.ok(after[1] > before[1] + 1);
-  before = after;
-  await page.keyboard.down('Control'); await page.waitForTimeout(250); await page.keyboard.up('Control');
-  after = await pose(); assert.ok(after[1] < before[1] - 1);
-  report.checks.movement = true;
+  const move = async (key, verticalDirection = 0) => {
+    const before = await pose();
+    await page.keyboard.down(key);
+    try {
+      // Cold draws can outlast a short host timer without ticking the flight controller.
+      await page.waitForFunction(({ before, verticalDirection }) => {
+        const after = window.__editor.viewModeController.camera.position.toArray();
+        return verticalDirection
+          ? verticalDirection * (after[1] - before[1]) > 1
+          : Math.hypot(...after.map((value, index) => value - before[index])) > 1;
+      }, { before, verticalDirection }, { timeout: 5_000 });
+      return { before, after: await pose() };
+    } finally {
+      await page.keyboard.up(key);
+    }
+  };
+  report.checks.movement = { forward: await move('w'), ascend: await move('Space', 1), descend: await move('Control', -1) };
   await page.evaluate(() => window.__editor.gameplayOverlayController.open('inventory'));
-  before = await pose(); await page.keyboard.down('w'); await page.waitForTimeout(250); await page.keyboard.up('w');
+  const before = await pose();
+  await page.keyboard.down('w'); await page.waitForTimeout(250); await page.keyboard.up('w');
   assert.deepEqual(await pose(), before); report.checks.overlayBlocksMovement = true;
   await page.evaluate(() => window.__editor.gameplayOverlayController.closeActive());
   report.checks.rebase = await page.evaluate(async () => {
@@ -110,6 +122,8 @@ try {
 } catch (error) { report.passed = false; report.failure = error.stack; process.exitCode = 1; }
 finally {
   report.errors = errors?.snapshot() ?? null;
-  await browser?.close(); release(); await writeFile(path.join(output, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
+  await browser?.close();
+  report.video = video ? await video.path().catch(() => null) : null;
+  release(); await writeFile(path.join(output, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
   console.log(JSON.stringify({ passed: report.passed, failure: report.failure, checks: Object.keys(report.checks), output }, null, 2));
 }
