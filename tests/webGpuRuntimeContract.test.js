@@ -39,6 +39,8 @@ test('normal editor runtime has no GPU-to-CPU readback APIs', async () => {
     if (filePath === EXPLICIT_BAKER) continue;
     // Timestamp readback is restricted to explicitly requested QA captures.
     if (filePath === path.join(EDITOR_ROOT, 'performance', 'qa', 'GpuPassProfiler.js')) continue;
+    // WSC CPU/GPU parity readback, loaded only by the QA hook (`wscGpuParity`).
+    if (filePath === path.join(EDITOR_ROOT, 'performance', 'qa', 'WscGpuParity.js')) continue;
     const source = await readFile(filePath, 'utf8');
     if (READBACK_PATTERN.test(source)) {
       violations.push(path.relative(ROOT, filePath));

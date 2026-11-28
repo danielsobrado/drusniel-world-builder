@@ -45,6 +45,11 @@ export class WorldVisualQa {
   }
   setDiagnosticMode(mode='D00') { return this.visualDiagnostics.setMode(mode); }
   getDiagnosticMode() { return this.visualDiagnostics.getMode(); }
+  /** WSC PR 1 parity: the GPU sampler read back against the CPU mirror on the live window. */
+  async wscGpuParity() {
+    const {measureWscGpuParity}=await import('./WscGpuParity.js');
+    return measureWscGpuParity(this.editor.terrainView.renderer);
+  }
   sampleGroundContactField(canonicalX,canonicalZ) {
     const field=this.editor.stylizedSurface?.groundContactField;
     const res=field?.resolution??128;
