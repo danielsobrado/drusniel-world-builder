@@ -1,4 +1,13 @@
-# Phase 0B — partial execution
+# Phase 0B evidence
+
+**Current verdict: PARTIAL. Phase 1 is not ready.** The gallery passes and valid
+RTX 4080 runs are available. The first reflection capture can still stall a frame.
+
+The [follow-up](follow-up.md) supersedes the gallery and hardware status in the
+initial checkpoint below. The original report and obstructed captures remain
+available for comparison.
+
+## Initial checkpoint
 
 **Status: BLOCKED. Phase 1 is not ready for hardware acceptance.** These
 results do not establish a performance improvement over Phase 0. The required
