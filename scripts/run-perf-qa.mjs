@@ -229,6 +229,11 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
     }
     console.log('WebGPU adapter: ' + JSON.stringify(adapter));
 
+    if (${hasFlag('resources') && scenario === 'lod-revisit'}) {
+      const { observeLodRevisitResources } = await import(${JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/lod-revisit-resources.mjs')).href)});
+      await page.evaluate(observeLodRevisitResources);
+    }
+
     if (${JSON.stringify(cpuProfilePath)} !== null) {
       cdp = await page.context().newCDPSession(page);
       await cdp.send('Profiler.enable');
@@ -322,6 +327,9 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
     report.detailVisibilityAtStop = detailVisibilityAtStop;
     report.preparationQueuesDuringWarmup = await page.evaluate(() => window.__perfQaWarmupQueues);
     report.preparationQueuesAtStart = preparationQueuesAtStart;
+    if (${hasFlag('resources') && scenario === 'lod-revisit'}) {
+      report.revisitResources = await page.evaluate(() => window.__lodRevisitResources);
+    }
     async function readGrassDiagnostics(hold = false) { return page.evaluate(async hold => {
         if (!hold && Object.hasOwn(window, '__perfGrassAtStop')) return window.__perfGrassAtStop;
         const field = window.__editor.stylizedSurface.meadowGrass;
