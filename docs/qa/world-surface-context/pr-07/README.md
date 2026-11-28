@@ -44,3 +44,13 @@ Earlier runs had B low and A high in the same way A5 is low here; in every low r
 CPU timings (tile pixels, grass scatter) rose too, which no shader change can cause. The
 cost is vertex-only (fragment `textureLoad` count unchanged, `test/shader-node-build.test.js`).
 A quiet-machine A/B is still worth repeating.
+
+## B18 wall foot re-checked (2026-11-28)
+
+[B18-wall-foot-2026-11-28.png](B18-wall-foot-2026-11-28.png) (top: PR 7, bottom: after the
+under-wall tuck and shade ring, `69a93b01`). The dark brown strip along the foot is gone: lit
+luma down a column runs wall 0.40 → foot 0.38 → earth apron 0.16–0.18 → grass 0.20–0.25,
+with no step darker than the soil beside it. This capture drew the houses before their
+per-settlement surface dressings streamed in (plain plaster, grey window stand-ins), so the
+thin pale course at the very foot (luma equal to the wall's) could not be judged against
+its stone dressing; re-look at it in a capture with the dressings loaded.

@@ -1,7 +1,9 @@
 // Ground continuity QA: does every object family sit in the same light as the ground?
 // For each view it captures D00 (lit), D01 (albedo), D16 (direct), D17 (indirect) and
 // D24 (material family), then reports per family the mean linear luma in each mode and
-// its effective light, D00 / D01, against the terrain's. A family lit on its own scale
+// its effective light, D00 / D01, against the terrain's under the same canopy (D09:
+// a stone in a clearing is compared with open ground, not with the shaded floor of
+// the wood behind it). A family lit on its own scale
 // (a glowing boulder, a black shrub, a bright trunk on a dark floor) stands out as a
 // light ratio far from the terrain's.
 import { writeFile } from 'node:fs/promises';
@@ -21,7 +23,10 @@ const { values: args } = parseArgs({
     'analyse-only': { type: 'boolean', default: false },
   },
 });
-const MODES = ['D00', 'D01', 'D16', 'D17', 'D24'];
+const MODES = ['D00', 'D01', 'D16', 'D17', 'D09', 'D24'];
+const LIT = MODES.slice(0, 4);
+/** Canopy bands the comparison is made within: open, partial, closed. */
+const CANOPY_BANDS = 3;
 const CAMERAS = await loadWscCameras();
 const views = args.views.split(',');
 
@@ -51,7 +56,8 @@ const report = {};
 for (const view of views) {
   const file = (mode) => path.resolve(args.out, `${view}-${mode}.png`);
   const family = await pixels(file('D24'));
-  const modes = Object.fromEntries(await Promise.all(MODES.slice(0, 4).map(async (m) => [m, await pixels(file(m))])));
+  const modes = Object.fromEntries(await Promise.all(LIT.map(async (m) => [m, await pixels(file(m))])));
+  const canopy = await pixels(file('D09'));
   // D24 is unlit, untonemapped and drawn without the post graph, so each family reaches the
   // canvas as its exact sRGB bytes; anti-aliased edges fall outside the tolerance and are skipped.
   const palette = Object.values(WSC_MATERIAL_FAMILIES);
@@ -61,30 +67,42 @@ for (const view of views) {
     owner[i] = palette.findIndex(({ rgb }) => Math.abs(family.data[o] - rgb[0]) <= 3
       && Math.abs(family.data[o + 1] - rgb[1]) <= 3 && Math.abs(family.data[o + 2] - rgb[2]) <= 3);
   }
+  const luma = (d, o) => 0.2126 * linear(d[o] / 255) + 0.7152 * linear(d[o + 1] / 255) + 0.0722 * linear(d[o + 2] / 255);
+  // D09 draws canopy as green 0.05 → 0.92 (linear) inside the WSC window.
+  const band = (o) => Math.min(CANOPY_BANDS - 1, Math.floor(Math.max(0, Math.min(1,
+    (linear(canopy.data[o + 1] / 255) - 0.05) / 0.87)) * CANOPY_BANDS));
+  const sums = palette.map(() => Array.from({ length: CANOPY_BANDS }, () => ({ n: 0, ...Object.fromEntries(LIT.map(m => [m, 0])) })));
+  for (let i = 0; i < family.count; i += 1) {
+    if (owner[i] < 0) continue;
+    const o = i * 3;
+    const cell = sums[owner[i]][band(o)];
+    cell.n += 1;
+    for (const m of LIT) cell[m] += luma(modes[m].data, o);
+  }
+  const light = (cell) => cell.D00 / Math.max(cell.D01, 1e-4);
+  const ground = sums[palette.findIndex(({ id }) => id === 'terrain')];
   const stats = {};
   for (const [index, { id }] of palette.entries()) {
-    const sums = Object.fromEntries(MODES.slice(0, 4).map(m => [m, 0]));
-    let n = 0;
-    for (let i = 0; i < family.count; i += 1) {
-      if (owner[i] !== index) continue;
-      const o = i * 3;
-      n += 1;
-      for (const m of MODES.slice(0, 4)) {
-        const d = modes[m].data;
-        sums[m] += 0.2126 * linear(d[o] / 255) + 0.7152 * linear(d[o + 1] / 255) + 0.0722 * linear(d[o + 2] / 255);
-      }
-    }
+    const cells = sums[index];
+    const n = cells.reduce((sum, cell) => sum + cell.n, 0);
     if (n < 400) continue;
-    const mean = Object.fromEntries(Object.entries(sums).map(([m, s]) => [m, s / n]));
-    stats[id] = { pixels: n, ...mean, light: mean.D00 / Math.max(mean.D01, 1e-4) };
+    const mean = Object.fromEntries(LIT.map(m => [m, cells.reduce((sum, cell) => sum + cell[m], 0) / n]));
+    // Pixel-weighted, over the bands where the terrain itself is seen enough to compare.
+    let weight = 0;
+    let ratio = 0;
+    cells.forEach((cell, b) => {
+      if (cell.n < 100 || ground[b].n < 200) return;
+      weight += cell.n;
+      ratio += cell.n * light(cell) / light(ground[b]);
+    });
+    stats[id] = { pixels: n, ...mean, light: mean.D00 / Math.max(mean.D01, 1e-4),
+      canopyBands: cells.map(cell => cell.n), lightVsTerrain: weight ? ratio / weight : null };
   }
-  const ground = stats.terrain?.light ?? null;
-  for (const s of Object.values(stats)) s.lightVsTerrain = ground ? s.light / ground : null;
   report[view] = stats;
   console.log(`\n${view}`);
   console.table(Object.fromEntries(Object.entries(stats).map(([id, s]) => [id, {
     px: s.pixels, D00: s.D00.toFixed(4), D01: s.D01.toFixed(4), D16: s.D16.toFixed(4), D17: s.D17.toFixed(4),
-    light: s.light.toFixed(3), 'vs terrain': s.lightVsTerrain?.toFixed(2),
+    light: s.light.toFixed(3), 'vs terrain (same canopy)': s.lightVsTerrain?.toFixed(2) ?? 'n/a',
   }])));
 }
 await writeFile(path.resolve(args.out, 'ground-continuity.json'), `${JSON.stringify(report, null, 2)}\n`);
