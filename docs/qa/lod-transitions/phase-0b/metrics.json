@@ -1,0 +1,19 @@
+{
+  "status": "blocked",
+  "testedSha": "ffc77ceca793107f6df1cceb268678555b27fdfd",
+  "hardware": { "gpu": "NVIDIA GeForce RTX 4080", "driver": "617.14", "node": "v22.21.1" },
+  "checks": {
+    "npmCi": "pass",
+    "targetedTests": { "passed": 59, "failed": 0 },
+    "lint": "pass",
+    "unitTests": { "passed": 5686, "failed": 0 },
+    "build": "pass",
+    "productionAssets": "pass",
+    "vegetationLod": { "passed": 215, "failed": 0, "trees": 40, "bushes": 26, "missingTrees": 0, "missingBushes": 0, "browserErrors": 0 }
+  },
+  "performanceRuns": [],
+  "rejectedPerformanceRuns": [],
+  "baselineImprovement": null,
+  "visualAcceptance": "blocked: gallery captures obstructed and too distant",
+  "missingMetrics": ["performance matrix", "grassland stall attribution", "settle delay attribution", "diagnostic spikes", "incremental GPU transition draws and triangles", "pinned transition bytes", "automated missing-pixel coverage"]
+}
