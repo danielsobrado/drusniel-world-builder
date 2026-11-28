@@ -20,7 +20,8 @@ function fixture(t, overrides = {}) {
         buffers.push(buffer);
         return buffer;
       },
-      queue: { writeBuffer(buffer, offset, source, start, count) {
+      // GPUQueue.writeBuffer defaults: dataOffset 0, size = rest of the data (the index tail write omits both).
+      queue: { writeBuffer(buffer, offset, source, start = 0, count = source.length - start) {
         writes.push(count);
         buffer.bytes.set(source.subarray(start, start + count), offset);
       } },

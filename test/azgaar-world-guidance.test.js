@@ -355,17 +355,24 @@ test('outside-world guidance returns explicit ocean defaults instead of edge val
   assert.equal(sample.coastDistanceMeters, null);
 });
 
-test('terrain worker source carries only canonical and morphology guidance', () => {
+test('terrain worker source carries only canonical, morphology and environmental-field climate guidance', () => {
   const source = createAzgaarMacroWorldSource(createDocument(), config);
   const workerSource = createTerrainWorkerBaseTerrain(source);
   assert.equal(workerSource.kind, 'azgaar-macro-v2');
   assert.equal(workerSource.profile, 'terrain-worker');
+  // Climate fields feed the worker-side EnvironmentalField (b7719283); population and feature ids stay on the main source.
   const expectedFields = [
+    'agriculturalPotential',
     'biomeId',
     'elevation',
+    'forestPotential',
+    'moisture',
     'mountainness',
     'ruggedness',
+    'snowPotential',
+    'temperature',
     'valleyness',
+    'wetness',
   ];
   assert.deepEqual(Object.keys(workerSource.atlas.fields).sort(), expectedFields);
   assert.equal(workerSource.atlas.fields.featureId, undefined);

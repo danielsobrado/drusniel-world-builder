@@ -29,12 +29,16 @@ function fixture(t) {
   const surface = { terrainView: { slots: [], scene: { environment: texture }, postProcessing: post,
     godRays: { cloudPass: { renderTarget: cloud }, cinematicShafts: { mask: shaftNode } } },
     waterSlots: [], skyView: { directional: { castShadow: true, shadow }, environment: { surfaceTexture: texture } } };
-  const renderer = { backend: { isWebGPUBackend: true }, _textures: records, info: { memoryMap },
-    getRenderTarget: () => cave, initTexture: () => assert.fail('deferred targets must not warm during exit') };
+  const renderer = { backend: { isWebGPUBackend: true }, _textures: records, info: { memoryMap }, bound: cave,
+    getRenderTarget: () => renderer.bound, initTexture: () => assert.fail('deferred targets must not warm during exit') };
   const settings = { ...resolveRenderEnhancements().locationStructureBudget, surfacePostReclamationEnabled: true,
     surfaceAtmosphereReclamationEnabled: true, surfaceShadowReclamationEnabled: true, surfaceEnvironmentReclamationEnabled: true,
     surfaceIdleMs: 10, surfaceSampleMs: 10, surfaceEvictionsPerSample: 16, surfaceMaxEvictedBytes: 8 * 1024 * 1024 };
   const controller = new LocationSurfaceResidency(surface, renderer, settings, async () => {});
+  // The cave target is bound while reclamation samples a frame; restoration yields between frames, where the
+  // renderer has no target bound (observed on RTX 4080 WebGPU, Phase 0B). Warmup refuses a bound target.
+  const restore = controller.restore.bind(controller);
+  controller.restore = (...args) => { if (renderer.bound === cave) renderer.bound = null; return restore(...args); };
   t.after(() => { controller.dispose(); for (const rt of [world, history, shaft, cloud, shadowTarget, cave]) rt.dispose(); texture.dispose(); });
   return { controller, surface, renderer, settings, records, memoryMap, world, history, shaft, cloud, shadowTarget, cave,
     texture, shaftNode, shadow, invalidations };
@@ -101,6 +105,27 @@ test('shadow warmup allocates only retired shadow targets on separate frames and
   assert.equal(cascade.needsUpdate, true);
   assert.equal(records.has(world), false);
   assert.equal(records.has(cave), true);
+});
+
+test('target warmup refuses a bound render target, MRT or XR session', async t => {
+  for (const mode of ['target', 'mrt', 'xr']) {
+    const { controller, renderer, settings, records, shadowTarget, cave } = fixture(t);
+    settings.surfaceShadowWarmupEnabled = true;
+    renderer.info.memory = { total: 1024 };
+    const warmed = [];
+    // Warmup catches allocation errors, so record calls rather than throwing.
+    renderer.initRenderTarget = target => { warmed.push(target); records.set(target, {}); };
+    controller.begin({ x: 0, z: 0 }, 0);
+    controller.update(10);
+    controller.pause = async () => {
+      if (mode === 'target') renderer.bound = cave;
+      if (mode === 'mrt') renderer.getMRT = () => ({});
+      if (mode === 'xr') renderer.xr = { isPresenting: true };
+    };
+    await controller.restore();
+    assert.deepEqual(warmed, [], mode);
+    assert.equal(records.has(shadowTarget), false, mode);
+  }
 });
 
 test('shadow warmup skips replaced, resized, over-budget and headroom-constrained targets', async t => {

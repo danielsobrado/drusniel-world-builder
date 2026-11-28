@@ -43,9 +43,10 @@ function terrainFields(baseTerrain) {
 }
 
 /**
- * Terrain workers receive only the guidance required by chunk morphology.
- * Climate, hydrology, population and feature ids remain on the authoritative
- * main-world source, keeping worker clones and decoded resident memory bounded.
+ * Terrain workers receive only the guidance required by chunk morphology and the
+ * worker-side environmental field (climate potentials). Hydrology, population and
+ * feature ids remain on the authoritative main-world source, keeping worker clones
+ * and decoded resident memory bounded.
  */
 export function createTerrainWorkerBaseTerrain(baseTerrain) {
   if (!baseTerrain) return null;
