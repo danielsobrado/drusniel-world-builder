@@ -64,33 +64,44 @@ export function townEarthNode(prefix = 'townEarth') {
  * @param {object} options
  * @param {object} options.height metres above the building's ground line (geometry frame)
  * @param {object} [options.noise] centred noise in [-0.5, 0.5], stable per building
+ * @param {boolean} [options.terrainRelative] the geometry has no ground line (construction walls are meshed at
+ *   the terrain's absolute height): every vertex reads the WSC, and outside its window there is no band.
+ * @param {number} [options.heightScale] multiplier on the foundation band's height
+ * @param {number} [options.contact] 0..1 contact strength for the band's AO (a paved town apron is 0)
  */
-export function groundTownFoundation(surface, { height = positionGeometry.y, noise = null } = {}) {
+export function groundTownFoundation(surface, {
+  height = positionGeometry.y, noise = null, terrainRelative = false, heightScale = null, contact = 0,
+} = {}) {
   // One vertex-stage branch packs the soil (already faded to TOWN_GROUND by WSC
   // validity) and the height above the ground (the terrain's where valid, the
   // geometry's ground line elsewhere) into one varying.
+  // Without a ground line the fallback height is the reach itself: no band where the WSC is invalid.
+  const fallback = terrainRelative ? float(FOUNDATION_REACH_METERS) : height;
   const packed = Fn(() => {
     // Hoisted: a world position first emitted inside the branch would leave other users of it unset above it.
     const world = positionWorld.toVar('townFootWorld');
-    const out = vec4(...TOWN_GROUND, height).toVar('townFootGround');
-    If(height.lessThan(FOUNDATION_REACH_METERS), () => {
+    const out = vec4(...TOWN_GROUND, fallback).toVar('townFootGround');
+    const sample = () => {
       const wsc = sampleWorldSurfaceContextAt(world.xz, { includeEco: false });
       const validity = wsc.validity.clamp(0, 1);
       out.assign(vec4(
         mix(vec3(...TOWN_GROUND), townSoilNode(wsc.albedo), validity),
-        mix(height, world.y.sub(wsc.height), validity),
+        mix(fallback, world.y.sub(wsc.height), validity),
       ));
-    });
+    };
+    if (terrainRelative) sample();
+    else If(height.lessThan(FOUNDATION_REACH_METERS), sample);
     return out;
   })();
   const ground = varying(packed, 'townFootGround');
   return applyWorldSurfaceContact({
     surface,
     // Height and soil already resolved per vertex: the helper sees a valid sample at height 0.
-    wsc: { height: float(0), validity: float(1), albedo: ground.xyz, contact: float(0) },
+    wsc: { height: float(0), validity: float(1), albedo: ground.xyz, contact: float(contact) },
     worldY: ground.w,
     profile: 'foundation',
     noiseOffset: noise,
+    heightScale,
     // A town building stands on its paved apron, so its foot takes the paving's light.
     groundFill: pavingGroundFill,
   });

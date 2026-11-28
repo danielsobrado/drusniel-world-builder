@@ -35,6 +35,16 @@ test.afterEach(() => {
   disposeConstructionMaterials();
 });
 
+test('construction walls meet the terrain through the foundation contact band', () => {
+  const { stone, stoneSelected, mortar, growth } = createConstructionMaterials(wall());
+  for (const material of [stone, stoneSelected, mortar]) {
+    assert.ok(material.colorNode?.isNode && material.roughnessNode?.isNode);
+  }
+  // Stones keep their per-stone vertex colour; the band stains it with soil.
+  assert.equal(stone.vertexColors, true);
+  assert.equal(growth.colorNode, null);
+});
+
 test('createConstructionMaterials includes a mortar slot', () => {
   const materials = createConstructionMaterials(wall());
   assert.ok(materials.mortar);

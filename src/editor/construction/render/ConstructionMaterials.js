@@ -13,6 +13,7 @@ import { constructionStyle } from '../masonry/ConstructionStyleCatalog.js';
 import { CONSTRUCTION_MATERIAL_SLOT } from './ConstructionMaterialSlots.js';
 import { mortarProfile } from './ConstructionMortarConfig.js';
 import { applyStoneFaceDetail, sharedStoneFaceDetailTexture } from './ConstructionShellDetail.js';
+import { groundConstructionFooting } from './ConstructionGroundFooting.js';
 
 const cache = new Map();
 const PRESET_TEXTURE_CACHE = new Map();
@@ -390,6 +391,8 @@ export function createConstructionMaterials(record, materialDocument = null) {
     );
     mortar.userData.constructionSlot = CONSTRUCTION_MATERIAL_SLOT.MORTAR;
   }
+
+  for (const material of [stone, stoneSelected, mortar]) groundConstructionFooting(material);
 
   const growth = new THREE.MeshStandardNodeMaterial({
     color: '#ffffff', vertexColors: true, roughness: 1, side: THREE.DoubleSide,
