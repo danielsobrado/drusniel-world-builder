@@ -43,6 +43,22 @@ test('snow-painted crowns stay pale in the loading proxy instead of becoming gre
   } finally { disposeProxy(proxy); parts.forEach(part => part.geometry.dispose()); }
 });
 
+test('textured crowns do not turn their proxy white from modulating vertex colours', () => {
+  const leaf = new THREE.ConeGeometry(1, 4);
+  leaf.translate(0, 3, 0);
+  leaf.setAttribute('color', new THREE.BufferAttribute(new Float32Array(leaf.attributes.position.count * 3).fill(1), 3));
+  const texture = new THREE.Texture();
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const parts = [{ kind: 'trunk', geometry: new THREE.CylinderGeometry(0.2, 0.3, 3) }, { kind: 'leaf', geometry: leaf, material }];
+  const proxy = createTreeProxyPrototype(parts, PROXY_CONFIG);
+  try {
+    // An unreadable map (no image here, KTX2 in the world) falls back to the canopy grade, not white.
+    const color = proxy.proxyParts.find(part => part.kind === 'leaf').material.color;
+    assert.notEqual(color.getHexString(), 'ffffff');
+    assert.ok(color.g > color.r && color.g > color.b, color.getHexString());
+  } finally { disposeProxy(proxy); parts.forEach(part => part.geometry.dispose()); material.dispose(); texture.dispose(); }
+});
+
 test('tree proxies keep branch extents out of the low-LOD trunk diameter', () => {
   const prototypes = createForestSpeciesPrototypeGeometry(FOREST_GENERATED_SPECIES);
   try {

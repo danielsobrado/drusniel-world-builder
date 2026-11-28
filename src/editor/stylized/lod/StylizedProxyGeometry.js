@@ -39,12 +39,42 @@ function makeMaterial(color, side = THREE.FrontSide) {
   return material;
 }
 
+/** Mean linear colour of a texture's opaque texels, or null when its image is not CPU-readable (e.g. KTX2). */
+function textureMeanColor(texture) {
+  const image = texture?.image;
+  if (!(image?.width > 0) || typeof OffscreenCanvas === 'undefined') return null;
+  try {
+    const context = new OffscreenCanvas(16, 16).getContext('2d', { willReadFrequently: true });
+    context.drawImage(image, 0, 0, 16, 16);
+    const data = context.getImageData(0, 0, 16, 16).data;
+    const sum = [0, 0, 0];
+    let count = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 128) continue;
+      sum[0] += data[i]; sum[1] += data[i + 1]; sum[2] += data[i + 2];
+      count++;
+    }
+    if (!count) return null;
+    const colorSpace = texture.colorSpace === THREE.SRGBColorSpace ? THREE.SRGBColorSpace : THREE.LinearSRGBColorSpace;
+    return new THREE.Color().setRGB(sum[0] / count / 255, sum[1] / count / 255, sum[2] / count / 255, colorSpace);
+  } catch {
+    return null;
+  }
+}
+
 /** Preserve the broad color of painted crowns in the cheap/loading fallback. */
 function proxyCanopyColor(parts, fallback) {
+  const leaves = parts.filter(part => part.kind === 'leaf');
+  // A textured crown's vertex colours only modulate its map (authoredFoliageColor); averaging them alone
+  // drew every textured conifer's proxy white. Use the map's opaque mean, else the canopy grade.
+  const mapped = leaves.find(part => part.material?.map);
+  if (mapped) {
+    const mean = textureMeanColor(mapped.material.map);
+    return mean ? mean.multiply(mapped.material.color ?? new THREE.Color(1, 1, 1)) : new THREE.Color(fallback);
+  }
   const sum = new THREE.Vector3();
   let count = 0;
-  for (const part of parts) {
-    if (part.kind !== 'leaf') continue;
+  for (const part of leaves) {
     const colors = part.geometry.getAttribute('color');
     if (!colors) continue;
     for (let i = 0; i < colors.count; i++) {
