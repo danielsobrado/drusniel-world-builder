@@ -21,7 +21,7 @@ function fixture() {
     surface[`${name}View`]={update:record(name),getPlacements:()=>[],[property]:{key:name},applyPendingRebuild:record(`${name} work`)};
   }
   for(const name of ['rock','tree','bush','detail','grass','flower']) {
-    surface[`${name}BuildQueue`]={size:0,flush:run=>run({key:name},()=>false),retain(){},enqueue(){}};
+    surface[`${name}BuildQueue`]={size:0,now:()=>1000,flush:run=>run({key:name},()=>false),retain(){},enqueue(){}};
   }
   surface.grassBuildQueue.flush=()=>{};surface.flowerBuildQueue.flush=()=>{};
   surface.sceneryScheduler=new SceneryWorkScheduler();surface.sceneryConsumers=createSceneryConsumers(surface);
