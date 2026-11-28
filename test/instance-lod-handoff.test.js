@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { waitForInitialInstanceDraws } from '../src/editor/stylized/lod/InstanceLodHandoff.js';
+import { PerfCounters } from '../src/editor/performance/qa/PerfCounters.js';
 import { InstancePublicationPlan } from '../src/editor/stylized/lod/InstancePublicationPlan.js';
 import { ITERATOR_PENDING } from '../src/editor/stylized/ResumableIterator.js';
 import { bindInitialInstancePreparation, trackInitialInstanceMesh } from '../src/render/preparation/InitialInstancePreparation.js';
@@ -35,6 +36,7 @@ test('cancellation releases the active lease without acquiring the next one', ()
 
 test('one timeout covers the entire publication instead of resetting for each draw', () => {
   const { state, acquire, now } = fixture();
+  const before = PerfCounters.snapshot();
   const task = waitForInitialInstanceDraws(['near', 'proxy', 'third'], mesh => {
     const lease = acquire(mesh);
     return { ...lease, ready: () => mesh === 'near' ? state.ready : false };
@@ -47,6 +49,9 @@ test('one timeout covers the entire publication instead of resetting for each dr
   assert.equal(task.next().done, true);
   assert.deepEqual(state.acquired, ['near', 'proxy']);
   assert.deepEqual(state.released, ['near', 'proxy']);
+  const measured = PerfCounters.delta(before);
+  assert.equal(measured.sceneryLodHandoffReadyWaitMs, 9);
+  assert.equal(measured.sceneryLodHandoffLeaseMs, 10);
 });
 
 test('publication does not run admission or finalizers until replacement preparation is ready', () => {

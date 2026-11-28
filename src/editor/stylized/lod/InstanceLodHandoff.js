@@ -26,6 +26,7 @@ export function* waitForInitialInstanceDraws(meshes, acquire = acquireInitialIns
       const ageMs = Math.max(0, now() - acquiredAt);
       PerfCounters.inc('sceneryLodHandoffLeaseMs', ageMs);
       PerfCounters.inc('sceneryLodHandoffLeases');
+      if (completed) PerfCounters.inc('sceneryLodHandoffReadyWaitMs', ageMs);
       PerfCounters.set('sceneryLodHandoffMaxLeaseMs', Math.max(PerfCounters.get('sceneryLodHandoffMaxLeaseMs'), ageMs));
       lease.release();
       if (!completed) PerfCounters.inc('sceneryLodHandoffAbandonedDraws');

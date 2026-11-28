@@ -10,6 +10,7 @@ export const LOD_BASELINE_COUNTERS = Object.freeze([
   'scenerySliceGpuCopyBytes', 'initialInstanceSlicedBytes',
   'attributeBytesUploaded', 'stylizedInstanceRowsCompared', 'sceneryDitherQueuedBytes',
   'sceneryLodHandoffLeaseMs', 'sceneryLodHandoffLeases', 'sceneryDitherGpuCopyBytes',
+  'sceneryLodHandoffReadyWaitMs',
   'treeManifestReadyLatencyTotalMs', 'treeManifestReadyCount',
 ]);
 
@@ -99,8 +100,20 @@ export class LodBaselineDiagnostics {
       }
       counters[key] = present ? total : null;
     }
-    return { version: 1, sampleIntervalMs: INTERVAL_MS, droppedSamples: this.dropped,
+    const sampleCpuByFrame = new Map(this.samples.map(sample => [sample.frameIndex, sample.samplingCpuMs]));
+    const hitchCallbackFrames = frames.flatMap((frame, index) => {
+      if (!frame.hitch || frame.dt <= 0) return [];
+      // RAF dt ends at this callback, so the prior callback is the one that could have delayed it.
+      const preceding = frames[index - 1];
+      return [{ hitchFrame: frame.index, precedingFrame: preceding?.index ?? null,
+        precedingPhases: preceding?.phases ?? null,
+        precedingSamplerMs: preceding ? sampleCpuByFrame.get(preceding.index) ?? null : null }];
+    });
+    return { version: 2, sampleIntervalMs: INTERVAL_MS, droppedSamples: this.dropped,
       scope: 'planned exterior scenery chunks; not published geometry', counters,
+      handoffMeanReadyWaitMs: counters.sceneryLodHandoffDrawsReady > 0
+        ? (counters.sceneryLodHandoffReadyWaitMs ?? 0) / counters.sceneryLodHandoffDrawsReady : null,
+      hitchCallbackFrames,
       unavailable: ['transitionExtraTriangles', 'transitionExtraDraws', 'transitionPinnedBytes',
         'fadeOnlyUploadBytes', 'gpuReadinessAgeMs', 'visibleMissingCoverage'],
       rendererFrames: frames.filter(frame => frame.dt > 0 && frame.counters).map(frame => ({

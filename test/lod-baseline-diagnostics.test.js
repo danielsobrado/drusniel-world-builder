@@ -40,3 +40,15 @@ test('whole renderer frame accounting preserves zero and missing measurements', 
   const report = new LodBaselineDiagnostics().report([{ index: 2, dt: 12, counters: frame }]);
   assert.deepEqual(report.rendererFrames, [{ frameIndex: 2, dtMs: 12, draws: 0, triangles: 30, bytes: null }]);
 });
+
+test('hitch attribution uses the preceding callback and its LOD sampler', () => {
+  const diagnostics = new LodBaselineDiagnostics();
+  diagnostics.sample(surface([]), 1, 20);
+  const report = diagnostics.report([
+    { index: 20, dt: 12, phases: { stylized: 208 } },
+    { index: 21, dt: 215, hitch: true, phases: { stylized: 1 } },
+  ]);
+  assert.deepEqual(report.hitchCallbackFrames, [{ hitchFrame: 21, precedingFrame: 20,
+    precedingPhases: { stylized: 208 }, precedingSamplerMs: report.samples[0].samplingCpuMs }]);
+  assert.equal(report.handoffMeanReadyWaitMs, null);
+});
