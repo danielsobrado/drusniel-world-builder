@@ -18,7 +18,8 @@ export class LocationTransitionGpuGate {
   }
 
   async advance() {
-    this.check();
+    try { this.check(); }
+    catch (error) { this.closed = true; throw error; }
     if (typeof this.queue?.onSubmittedWorkDone !== 'function') {
       this.closed = true;
       PerfCounters.inc('locationSurface.transitionGpuUnsupported');
@@ -35,12 +36,13 @@ export class LocationTransitionGpuGate {
         await this.pause();
         this.check();
         PerfCounters.inc('locationSurface.transitionGpuWaitFrames');
+        const elapsed = performance.now() - started;
+        if (elapsed > this.settings.surfaceTransitionGpuMaxWaitMs || status === 'failed') break;
         if (status === 'complete') {
           PerfCounters.inc('locationSurface.transitionGpuCompletedBatches');
-          PerfCounters.inc('locationSurface.transitionGpuWaitMs', performance.now() - started);
+          PerfCounters.inc('locationSurface.transitionGpuWaitMs', elapsed);
           return;
         }
-        if (status === 'failed' || performance.now() - started >= this.settings.surfaceTransitionGpuMaxWaitMs) break;
       }
       PerfCounters.inc(status === 'failed' ? 'locationSurface.transitionGpuFenceFailures' : 'locationSurface.transitionGpuTimeouts');
     } catch (error) {

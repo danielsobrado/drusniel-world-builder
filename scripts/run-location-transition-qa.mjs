@@ -10,6 +10,7 @@ import { chromium } from 'playwright';
 import { PERF_CHROMIUM_GPU_ARGS, readPerfEnvironment } from './lib/perf-environment.mjs';
 import { focusPerfBrowser, PERF_FOCUS_EXIT_CODE } from './lib/perf-browser-focus.mjs';
 import { createBrowserErrorMonitor } from './lib/perf-browser-errors.mjs';
+import { locationTransitionVerdict } from './lib/location-transition-evidence.mjs';
 
 const arg = (name, fallback = null) => {
   const index = process.argv.indexOf(`--${name}`);
@@ -30,33 +31,44 @@ const url = new URL(arg('url', 'http://localhost:5173/'));
 for (const [key, value] of new URLSearchParams(arg('flags', ''))) url.searchParams.set(key, value);
 
 const browser = await chromium.launch({ headless: false, args: PERF_CHROMIUM_GPU_ARGS });
-const report = { kind: 'location-transition-qa', version: 1, generatedAt: new Date().toISOString(), href: url.href,
+const report = { kind: 'location-transition-qa', version: 2, generatedAt: new Date().toISOString(), href: url.href,
   site, cycles, dwellSeconds, afterSeconds, viewport: `${width}x${height}`, environment: null, adapter: null,
   surfaceReady: null, cycleResults: [], counters: null, errors: null, focus: null };
 let exitCode = 0;
+let page, errors, focus;
 try {
   report.environment = await readPerfEnvironment(browser).catch(() => null);
-  const page = await (await browser.newContext({ viewport: { width, height } })).newPage();
+  page = await (await browser.newContext({ viewport: { width, height } })).newPage();
   page.setDefaultTimeout(300_000);
-  const errors = createBrowserErrorMonitor(page);
+  errors = createBrowserErrorMonitor(page);
   const startupFocus = await focusPerfBrowser(browser, page, { headed: true });
   if (!(await startupFocus()).passed) throw Object.assign(new Error('startup lost foreground focus'), { focus: true });
   await page.goto(url.href, { waitUntil: 'commit' });
-  const focus = await focusPerfBrowser(browser, page, { headed: true });
+  focus = await focusPerfBrowser(browser, page, { headed: true });
   await page.waitForFunction(() => window.__editor?.locations && window.__editor.terrainView?.renderer, null, { polling: 250 });
   // One rAF recorder for the whole run; the phase label is switched from Node.
   await page.evaluate(() => {
-    const state = window.__ltq = { phase: 'boot', frames: [], last: null };
+    const state = window.__ltq = { phase: 'boot', frames: [], last: null, cycle: -1, returning: false,
+      firstReturnFrames: 0, peakAccountedBytes: 0 };
     const tick = (now) => {
-      if (state.last !== null) state.frames.push([now, now - state.last, state.phase]);
+      const runtime = window.__editor.locations;
+      const total = window.__editor.terrainView.renderer.info?.memory?.total;
+      if (Number.isFinite(total)) state.peakAccountedBytes = Math.max(state.peakAccountedBytes, total);
+      let phase = state.phase;
+      if (state.returning && !runtime.active && state.firstReturnFrames < 120) {
+        state.firstReturnFrames++;
+        phase = 'first-return';
+      }
+      if (state.last !== null) state.frames.push([now, now - state.last, 'c' + state.cycle + ':' + phase, Number.isFinite(total) ? total : null]);
       state.last = now;
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
   report.adapter = await page.evaluate(() => {
-    const info = window.__editor.terrainView.renderer.backend?.adapter?.info;
-    return info ? { vendor: info.vendor, architecture: info.architecture, description: info.description,
+    const backend = window.__editor.terrainView.renderer.backend;
+    const info = backend?.adapter?.info;
+    return info ? { webgpu: backend.isWebGPUBackend === true, vendor: info.vendor, architecture: info.architecture, description: info.description,
       isFallbackAdapter: info.isFallbackAdapter ?? null } : null;
   });
   const setPhase = phase => page.evaluate(value => { window.__ltq.phase = value; }, phase);
@@ -69,53 +81,63 @@ try {
       memory: Object.fromEntries(Object.entries(memory).filter(([, value]) => typeof value === 'number')) };
   });
   const surfaceReady = () => page.waitForFunction(() => {
-    const view = window.__editor.terrainView;
-    return window.__editor.locations.state === 'idle' && (view.getStreamingStatus?.().loading ?? 0) === 0
-      && (view.stylizedSurface?.getPreparationStatus?.().ready ?? true);
+    const editor = window.__editor;
+    const streaming = editor.terrainView.getStreamingStatus?.();
+    const preparation = editor.stylizedSurface?.getPreparationStatus?.();
+    return editor.locations.state === 'idle' && !editor.locations.active && streaming?.loading === 0
+      && preparation?.ready === true;
   }, null, { polling: 250, timeout: 240_000 }).then(() => true, () => false);
 
   await setPhase('surface-boot');
   report.surfaceReady = await surfaceReady();
+  if (!report.surfaceReady) throw new Error('Initial surface readiness gate failed.');
   await setPhase('surface-steady');
   await page.waitForTimeout(5000);
   for (let cycle = 0; cycle < cycles; cycle++) {
+    await page.evaluate(index => Object.assign(window.__ltq, { cycle: index, returning: false, firstReturnFrames: 0, peakAccountedBytes: 0 }), cycle);
     const result = { cycle, before: await snapshot() };
+    report.cycleResults.push(result);
     await setPhase('enter');
     const enterStarted = Date.now();
     result.entered = await page.evaluate(id => window.__editor.locations.enter(id), site);
     result.enterSeconds = (Date.now() - enterStarted) / 1000;
+    if (!result.entered) throw new Error('Location entry failed: ' + site);
     await setPhase('inside');
     await page.waitForTimeout(dwellSeconds * 1000);
     result.inside = await snapshot();
-    await setPhase('exit');
+    await page.evaluate(() => Object.assign(window.__ltq, { phase: 'exit', returning: true }));
     const exitStarted = Date.now();
     result.exited = await page.evaluate(() => window.__editor.locations.exit());
     result.exitSeconds = (Date.now() - exitStarted) / 1000;
-    await setPhase('first-return');
-    await page.waitForFunction(() => {
-      const frames = window.__ltq.frames;
-      let count = 0;
-      for (let i = frames.length - 1; i >= 0 && frames[i][2] === 'first-return'; i--) count++;
-      return count >= 120;
-    }, null, { polling: 100 });
+    if (!result.exited) throw new Error('Location exit failed: ' + site);
+    await page.waitForFunction(() => window.__ltq.firstReturnFrames >= 120, null, { polling: 100 });
+    result.firstReturnFrames = await page.evaluate(() => window.__ltq.firstReturnFrames);
     await setPhase('after');
     await page.waitForTimeout(afterSeconds * 1000);
     result.after = await snapshot();
     result.surfaceSettled = await surfaceReady();
-    report.cycleResults.push(result);
-    // Each cycle's frames carry their own phase prefix so repeated returns can be compared.
-    await page.evaluate(index => { for (const frame of window.__ltq.frames) if (!/^c\d+:/.test(frame[2])) frame[2] = `c${index}:${frame[2]}`; }, cycle);
+    result.peakAccountedBytes = await page.evaluate(() => window.__ltq.peakAccountedBytes);
+    if (!result.surfaceSettled) throw new Error('Surface failed to settle after cycle ' + cycle);
   }
-  report.focus = await focus();
-  if (!report.focus.passed) exitCode = PERF_FOCUS_EXIT_CODE;
-  const frames = await page.evaluate(() => window.__ltq.frames);
-  report.phases = summarizePhases(frames);
-  report.frames = frames.map(([t, dt, phase]) => [Math.round(t * 10) / 10, Math.round(dt * 100) / 100, phase]);
-  report.errors = errors.snapshot();
 } catch (error) {
   report.failure = String(error?.stack ?? error);
   exitCode = error?.focus ? PERF_FOCUS_EXIT_CODE : 1;
 } finally {
+  if (focus) {
+    try { report.focus = await focus(); }
+    catch (error) { report.focus = { passed: false, error: String(error) }; }
+  }
+  if (page && !page.isClosed()) {
+    try {
+      const frames = await page.evaluate(() => window.__ltq?.frames ?? []);
+      report.phases = summarizePhases(frames);
+      report.frames = frames.map(([t, dt, phase, total]) => [Math.round(t * 10) / 10, Math.round(dt * 100) / 100, phase, total]);
+    } catch (error) { report.captureError = String(error); }
+  }
+  report.errors = errors?.snapshot() ?? null;
+  report.verdict = locationTransitionVerdict(report);
+  if (report.focus?.passed === false) exitCode = PERF_FOCUS_EXIT_CODE;
+  else if (!report.verdict.passed && exitCode === 0) exitCode = 1;
   await browser.close();
 }
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

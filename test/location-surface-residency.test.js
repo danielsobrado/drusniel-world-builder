@@ -241,3 +241,20 @@ test('predictive exit warmup is opt-in and validates the visit budget', () => {
   assert.equal(resolveRenderEnhancements({}, '?locationSurfaceExitWarmup=1').locationStructureBudget.surfaceExitWarmupEnabled, true);
   assert.throws(() => resolveRenderEnhancements({ locationStructureBudget: { surfaceExitWarmupMaxBytes: 1.5 } }), RangeError);
 });
+
+test('cancelled legacy restore retains unprocessed resources and the current anchor for retry', async () => {
+  const abort = new AbortController();
+  const { controller, restored } = fixture({}, async () => abort.abort());
+  controller.begin({ x: 0, z: 0 }, 0);
+  controller.update(10);
+  controller.update(20);
+  await assert.rejects(controller.restore(abort.signal), { name: 'AbortError' });
+  assert.equal(controller.phase, 'inside');
+  assert.deepEqual(controller.anchor, { x: 0, z: 0 });
+  assert.equal(controller.evicted.size, 2);
+  assert.equal(restored.length, 1);
+  controller.pause = async () => {};
+  await controller.restore();
+  assert.equal(controller.phase, 'idle');
+  assert.equal(restored.length, 3);
+});

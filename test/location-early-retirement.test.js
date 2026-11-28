@@ -102,3 +102,16 @@ test('early retirement is independently opt-in', () => {
   assert.equal(resolveRenderEnhancements().locationStructureBudget.surfaceEarlyLocationRetirementEnabled, false);
   assert.equal(resolveRenderEnhancements({}, '?locationSurfaceEarlyLocationRetirement=1').locationStructureBudget.surfaceEarlyLocationRetirementEnabled, true);
 });
+
+test('aborting the extra paint after commitment resets the surface residency session', async t => {
+  const { runtime, surfaceResidency, calls } = fixture(t);
+  surfaceResidency.phase = 'inside';
+  surfaceResidency.reset = () => { surfaceResidency.phase = 'idle'; surfaceResidency.evicted.clear(); calls.push('reset'); };
+  const dispose = runtime.current.dispose;
+  runtime.current.dispose = () => { dispose(); runtime.preparation.abort(); };
+  assert.equal(await runtime.exit(), false);
+  assert.equal(surfaceResidency.phase, 'idle');
+  assert.equal(surfaceResidency.evicted.size, 0);
+  assert.equal(runtime.active, false);
+  assert.deepEqual(calls, ['place', 'dispose', 'reset']);
+});

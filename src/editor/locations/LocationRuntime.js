@@ -140,6 +140,7 @@ export class LocationRuntime {
       const previous = this.current;
       this.#takeRenderer(site.lighting.exposure, Boolean(next.postProcessing));
       this.current = next;
+      this.nearExit = null;
       this.anchor = anchor;
       next.nav.lastGround = spawn.y;
       player.groundOverride = next.nav;
@@ -159,6 +160,7 @@ export class LocationRuntime {
     } catch (error) {
       failed = error;
       if (preparation.signal.aborted) {
+        this.state = this.current ? INSIDE : IDLE;
         session.finish();
         return false;
       }
@@ -176,7 +178,7 @@ export class LocationRuntime {
 
   /** Leaves the active location for the surface anchor recorded on the way in. */
   async exit() {
-    if (this.disposed || this.state !== INSIDE) return false;
+    if (this.disposed || this.state !== INSIDE || !this.current || !this.anchor) return false;
     this.state = TRANSITION;
     const player = this.playerController, anchor = this.anchor, leaving = this.current;
     player.cutBlocked = true;
@@ -229,6 +231,7 @@ export class LocationRuntime {
     } finally {
       if (this.preparation === preparation) this.preparation = null;
       this.surfaceReturnHold = false;
+      if (!this.current && this.surfaceResidency?.phase !== 'disposed') this.surfaceResidency?.reset?.();
       player.cutBlocked = false;
       this.state = this.current ? INSIDE : IDLE;
     }
@@ -240,6 +243,7 @@ export class LocationRuntime {
   #commitSurfaceReturn(anchor, leaving) {
     const player = this.playerController;
     this.current = null;
+    this.nearExit = null;
     this.anchor = null;
     player.groundOverride = null;
     delete document.body.dataset.location;
@@ -330,6 +334,8 @@ export class LocationRuntime {
     this.surfaceResidency?.dispose();
     this.current?.dispose();
     this.current = null;
+    this.nearExit = null;
+    this.state = IDLE;
     this.playerController.groundOverride = null;
     this.#returnRenderer();
   }
