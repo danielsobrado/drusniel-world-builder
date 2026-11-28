@@ -1,17 +1,16 @@
 :root {
-  --marble-base: #1b2633;
-  /* Tinted from the source library's marble-03 and marble-06 noise. */
+  --marble-base: color-mix(in srgb, var(--blue-slate) 63%, black);
+  /* Blended over Blue Slate to keep the marble detail in the shell palette. */
   --marble-texture: url('/assets/textures/world-simulator-marble.jpg');
-  --marble-sheen: linear-gradient(180deg, rgba(209, 226, 245, 0.035), rgba(11, 17, 25, 0.32));
-  --marble-muted: #b7c3d2;
-  --marble-edge: rgba(171, 193, 216, 0.24);
-  --marble-highlight: inset 0 1px 0 rgba(219, 233, 249, 0.14);
+  --marble-sheen: linear-gradient(180deg, color-mix(in srgb, var(--sand-dune) 4%, transparent), transparent);
+  --marble-edge: var(--border-strong);
+  --marble-highlight: inset 0 1px 0 color-mix(in srgb, var(--sand-dune) 14%, transparent);
 }
 
 .appbar, .workspace-bar, .rail, .statusbar {
-  --muted: var(--marble-muted);
   position: relative;
   background: var(--marble-sheen), var(--marble-texture) center / 512px, var(--marble-base);
+  background-blend-mode: normal, soft-light;
   box-shadow: var(--marble-highlight);
   z-index: 3;
 }
@@ -22,7 +21,7 @@
 
 .rail-btn { transition: background-color 0.15s, box-shadow 0.15s, color 0.15s; }
 .rail-btn.active, .icon-btn.on {
-  background: rgba(22, 29, 42, 0.55);
+  background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent-strong);
   box-shadow: var(--marble-highlight);
@@ -31,11 +30,12 @@
 .appbar select, .explorer select {
   font-size: var(--fs-sm);
   background: var(--marble-sheen), var(--marble-texture) center / 270px, var(--marble-base);
+  background-blend-mode: normal, soft-light;
   border-color: var(--marble-edge);
   box-shadow: var(--marble-highlight);
 }
 
-.explorer select { color: var(--marble-muted); }
+.explorer select { color: var(--text); }
 select option { background: var(--marble-base); color: var(--text); }
 
 @media (max-width: 900px) {

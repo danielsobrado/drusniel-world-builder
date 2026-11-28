@@ -1,25 +1,31 @@
 /* Design tokens. A theme overrides these on [data-theme]; layouts never hard-code colours. */
 :root {
   color-scheme: dark;
-  --bg: #0d0f12;            /* obsidian */
-  --surface: #14171b;        /* slate panel */
-  --surface-2: #1a1e23;
-  --surface-3: #22272d;
-  --border: #2b3037;
-  --border-strong: #3a4048;
-  --text: #e0e4eb;
-  --muted: #9ba7b5;
-  --accent: #b5afd4;
-  --accent-strong: #d8d1f0;
-  --accent-soft: rgba(181, 175, 212, 0.14);
+  --sand-dune: #eae0cc;
+  --almond-silk: #c9ada1;
+  --dry-sage: #a0a083;
+  --grey-olive: #798478;
+  --blue-slate: #4d6a6d;
+
+  --bg: color-mix(in srgb, var(--blue-slate) 23%, black);
+  --surface: color-mix(in srgb, var(--blue-slate) 31%, black);
+  --surface-2: color-mix(in srgb, var(--blue-slate) 42%, black);
+  --surface-3: color-mix(in srgb, var(--blue-slate) 50%, black);
+  --border: color-mix(in srgb, var(--grey-olive) 34%, var(--surface));
+  --border-strong: var(--grey-olive);
+  --text: var(--sand-dune);
+  --muted: color-mix(in srgb, var(--dry-sage) 75%, var(--sand-dune));
+  --accent: var(--almond-silk);
+  --accent-strong: var(--sand-dune);
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
   --good: #7fae7a;
-  --bad: #d0776a;
+  --bad: color-mix(in srgb, #d0776a 80%, var(--sand-dune));
   --warn: #d6b360;
-  --sea: #10161c;
-  --road: #c9a46a;
-  --trail: #8f7f62;
-  --sea-route: #4f7389;
-  --pilot: #e6c27a;
+  --sea: color-mix(in srgb, var(--blue-slate) 20%, black);
+  --road: var(--almond-silk);
+  --trail: var(--grey-olive);
+  --sea-route: var(--blue-slate);
+  --pilot: var(--sand-dune);
 
   --font-ui: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --font-display: "Cinzel", "Trajan Pro", Georgia, "Times New Roman", serif;

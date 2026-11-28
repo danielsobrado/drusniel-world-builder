@@ -25,7 +25,7 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .badge-warn { color: var(--warn); border-color: var(--warn); }
 
 .state { padding: 18px; color: var(--muted); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.state-error { color: var(--bad); border: 1px solid var(--bad); border-radius: var(--radius); background: rgba(208, 119, 106, 0.07); }
+.state-error { color: var(--bad); border: 1px solid var(--bad); border-radius: var(--radius); background: color-mix(in srgb, var(--bad) 7%, transparent); }
 
 /* Overview tiles */
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
@@ -43,8 +43,8 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .bars th, .bars td { padding: 4px 8px; text-align: left; font-weight: normal; border-bottom: 1px solid var(--border); }
 .bars thead th { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; }
 .bar { position: relative; height: 18px; background: var(--surface-2); border-radius: 2px; min-width: 90px; }
-.bar span { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #45415a, #655e7e); border-radius: 2px; }
-.bar-alt span { background: linear-gradient(90deg, #3e5262, #6d8fa6); }
+.bar span { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--surface-3), color-mix(in srgb, var(--almond-silk) 47%, black)); border-radius: 2px; }
+.bar-alt span { background: linear-gradient(90deg, var(--surface-3), color-mix(in srgb, var(--blue-slate) 88%, black)); }
 .bar b { position: relative; padding-left: 6px; font-weight: normal; font-size: var(--fs-sm); line-height: 18px; font-variant-numeric: tabular-nums; }
 
 /* Data grid */
@@ -75,8 +75,8 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .field dt { color: var(--muted); font-size: var(--fs-sm); display: flex; justify-content: space-between; gap: 4px; }
 .field dd { margin: 0; overflow-wrap: anywhere; }
 .prov { font-size: 9px; text-transform: uppercase; border-radius: 2px; padding: 0 3px; align-self: center; }
-.prov-imported { color: #8aa3b3; border: 1px solid #3c4e59; }
-.prov-computed { color: var(--accent); border: 1px solid #534d66; }
+.prov-imported { color: var(--dry-sage); border: 1px solid var(--grey-olive); }
+.prov-computed { color: var(--accent); border: 1px solid var(--accent); }
 .links { list-style: none; padding: 0; margin: 4px 0; display: grid; gap: 3px; }
 .links li { display: flex; justify-content: space-between; gap: 8px; font-size: var(--fs-sm); }
 .link { background: none; border: 0; padding: 0; color: var(--accent-strong); cursor: pointer; text-align: left; }
@@ -99,14 +99,14 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .route-roads { stroke: var(--road); }
 .route-trails { stroke: var(--trail); stroke-opacity: 0.8; }
-.route-searoutes { stroke: var(--sea-route); stroke-dasharray: 4 3; stroke-opacity: 0.7; }
+.route-searoutes { stroke: var(--sea-route); stroke-dasharray: 4 3; }
 .marker { cursor: pointer; }
-.marker circle:not(.pilot-ring) { stroke: #0b0d10; }
+.marker circle:not(.pilot-ring) { stroke: var(--bg); }
 .marker.dim { opacity: 0.15; }
-.marker.selected circle:not(.pilot-ring) { stroke: #fff; }
-.marker text { fill: var(--text); paint-order: stroke; stroke: #0b0d10; stroke-width: 0.25em; pointer-events: none; }
+.marker.selected circle:not(.pilot-ring) { stroke: var(--accent-strong); }
+.marker text { fill: var(--text); paint-order: stroke; stroke: var(--bg); stroke-width: 0.25em; pointer-events: none; }
 .pilot-ring { fill: none; stroke: var(--pilot); }
-.map-legend { position: absolute; left: 8px; bottom: 8px; display: flex; gap: 12px; flex-wrap: wrap; padding: 4px 8px; background: rgba(13, 15, 18, 0.85); border: 1px solid var(--border); border-radius: var(--radius); font-size: var(--fs-xs); }
+.map-legend { position: absolute; left: 8px; bottom: 8px; display: flex; gap: 12px; flex-wrap: wrap; padding: 4px 8px; background: color-mix(in srgb, var(--bg) 85%, transparent); border: 1px solid var(--border); border-radius: var(--radius); font-size: var(--fs-xs); }
 .map-legend span { display: flex; align-items: center; gap: 4px; }
 .lg { display: inline-block; width: 14px; height: 3px; }
 .lg-pilot { height: 10px; width: 10px; border: 2px solid var(--pilot); border-radius: 50%; }
@@ -145,7 +145,7 @@ code { font-family: var(--font-mono); font-size: var(--fs-xs); }
 .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--gap); }
 .cohort-bar { display: flex; gap: 2px; height: 10px; min-width: 120px; }
 .cohort { border-radius: 2px; min-width: 2px; }
-.cohort-children { background: #6da7ec; } .cohort-adults { background: #3987e5; } .cohort-elders { background: #1c5cab; }
+.cohort-children { background: var(--sand-dune); } .cohort-adults { background: var(--dry-sage); } .cohort-elders { background: var(--grey-olive); }
 .inline-form { display: flex; gap: 6px; margin-bottom: 8px; }
 .inline-form input, .new-scenario input { flex: 1; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 4px 6px; min-width: 0; }
 .new-scenario { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 8px; align-items: end; }
@@ -283,11 +283,11 @@ h5 { margin: 6px 0 4px; font-size: var(--fs-sm); }
 .travel-workspace { display: grid; gap: 12px; }
 .travel-map { display: block; width: 100%; max-height: 400px; background: var(--sea); border: 1px solid var(--border); }
 .travel-path { fill: none; stroke: var(--muted); stroke-width: 2px; cursor: pointer; }
-.travel-path.sea, .travel-path.mixed { stroke: #50899e; stroke-dasharray: 5 3; }
+.travel-path.sea, .travel-path.mixed { stroke: var(--sea-route); stroke-dasharray: 5 3; }
 .travel-path.off-road { stroke-dasharray: 3 5; }
 .travel-path.selected { stroke: var(--accent-strong); stroke-width: 4px; }
 .travel-marker { fill: var(--accent-strong); stroke: var(--surface-2); stroke-width: 1px; vector-effect: non-scaling-stroke; cursor: pointer; }
-.travel-marker.caravan { fill: #509cae; }
+.travel-marker.caravan { fill: var(--dry-sage); }
 .travel-marker.selected, .travel-marker:focus { stroke: var(--accent-strong); stroke-width: 3px; }
 .travel-town { fill: var(--text); pointer-events: none; }
 .travel-town text { paint-order: stroke; stroke: var(--sea); stroke-width: 2px; vector-effect: non-scaling-stroke; }
