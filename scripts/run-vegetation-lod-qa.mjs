@@ -386,7 +386,7 @@ try {
       for (const representation of ['near', 'proxy']) {
         const name = `${layer === 'trees' ? 'tree' : 'bush'}-${representation}-${suffix}`;
         const result = await page.evaluate(async options => {
-          const { captureVegetationGallery } = await import('/src/editor/performance/qa/VegetationGalleryScene.js');
+          const { captureVegetationGallery } = await import('/scripts/fixtures/vegetation-gallery-scene.mjs');
           return captureVegetationGallery(window.__editor, options);
         }, { layer, representation, first, last });
         const filePath = path.join(outputDirectory, `${name}.png`);

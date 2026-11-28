@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { galleryFrame, galleryCoverage } from '../src/editor/performance/qa/vegetationGalleryLayout.js';
+import { galleryFrame, galleryCoverage } from '../scripts/fixtures/vegetation-gallery-layout.mjs';
 
 test('union framing centers asymmetric geometry and reserves a margin', () => {
   const frame = galleryFrame([-1, -2, -3], [5, 8, 1]);

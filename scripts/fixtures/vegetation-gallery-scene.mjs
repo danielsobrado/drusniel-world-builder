@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
-import { tightlyPackRgbaReadback } from '../../stylized/impostor/TreeImpostorAtlasPixels.js';
-import { worldWindUniforms } from '../../weather/wind/worldWindState.js';
-import { galleryFrame, galleryCoverage } from './vegetationGalleryLayout.js';
+import { tightlyPackRgbaReadback } from '../../src/editor/stylized/impostor/TreeImpostorAtlasPixels.js';
+import { worldWindUniforms } from '../../src/editor/weather/wind/worldWindState.js';
+import { galleryFrame, galleryCoverage } from './vegetation-gallery-layout.mjs';
 
 const TILE_SIZE = 512;
 
