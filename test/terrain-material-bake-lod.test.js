@@ -41,7 +41,12 @@ test('baked terrain normal is a computed surface gradient gated on bake readines
   // displaces the geometry, decoded from the baked far-normal texture.
   assert.match(
     bakedSource,
-    /const surfaceNormal = createTerrainSurfaceNormal\(\{encodedNormal: samples\.farNormal,/,
+    /const baseSurfaceNormal = createTerrainSurfaceNormal\(\{encodedNormal: samples\.farNormal,/,
+  );
+  // Path/water microgeometry perturbs that gradient normal; it does not replace it.
+  assert.match(
+    bakedSource,
+    /const surfaceNormal = applyTerrainMicrogeometryNormal\(\{surfaceNormal: baseSurfaceNormal,/,
   );
   assert.match(
     bakedSource,

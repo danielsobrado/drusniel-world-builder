@@ -6,7 +6,8 @@ const ARRAYS = ['prototypes', 'proxyPrototypes', 'meshes', 'proxyMeshes',
   'prototypeHeightOffsets', 'prototypePlacementRules', 'prototypeWaterRules',
   'prototypeStrandRules', 'prototypeShoreRules'];
 const VALUES = ['prototypeIndexForRoll', 'prototypeBiomeRulesSignature', 'prototypeHeight',
-  'prototypeRevision', 'clusterField', 'pathClearance'];
+  'prototypeRevision', 'clusterField', 'pathClearance', 'proceduralAlpineInstalled',
+  'winterPrototypesInstalled'];
 
 /** Build against detached renderers and private registry arrays; publish together. */
 export function* installVariants(view, variants) {

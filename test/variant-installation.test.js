@@ -78,8 +78,8 @@ test('bush instance rows shade beneath canopy and retain open-ground brightness 
   assert.equal(view.instanceRows.placementRows({ ...placement }).appearance.colorVariation, 1);
 });
 
-test('cancelled installation disposes extracted geometry without changing the live view', t => {
-  const { view, variants } = fixture(t, 'rock');
+for (const kind of ['rock', 'bush']) test(`cancelled ${kind} installation disposes extracted geometry without changing the live view`, t => {
+  const { view, variants } = fixture(t, kind);
   const created = [], clone = THREE.BufferGeometry.prototype.clone;
   t.mock.method(THREE.BufferGeometry.prototype, 'clone', function () {
     const geometry = clone.call(this);
@@ -90,6 +90,8 @@ test('cancelled installation disposes extracted geometry without changing the li
   const job = installVariants(view, variants);
   for (let step = 0; step < 10; step++) job.next();
   assert.ok(created.length);
+  // Run past the procedural (fractured rock / winter flora) prototypes, which are built in-job.
+  for (let step = 0; step < 30; step++) job.next();
   job.return();
   assert.ok(created.every(record => record.disposed));
   assert.equal(view.prototypes.length, 0);
@@ -164,4 +166,14 @@ test('failed material extraction leaves the live registry and existing renderers
   assert.deepEqual(view.meshes, meshes);
   assert.deepEqual(view.prototypeIndicesByAsset, indices);
   assert.equal(view.root.children.length, meshes.flat().length);
+});
+
+for (const kind of ['rock', 'bush']) test(`${kind} procedural prototypes install once across published installs`, t => {
+  const { view, variants } = fixture(t, kind);
+  const run = list => { const job = installVariants(view, list); while (!job.next().done) { /* publish */ } };
+  run(variants);
+  const after = view.prototypes.length;
+  run([{ ...variants[0], definition: { ...variants[0].definition, id: 'second', scene: 'second.glb' } }]);
+  // The second install adds its three authored meshes only, not the procedural set again.
+  assert.equal(view.prototypes.length - after, 3);
 });

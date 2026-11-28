@@ -263,6 +263,7 @@ export class StylizedBushView {
           assetId: winter.id,
           scenePath: winter.id,
         });
+        yield winter.geometry;
         yield winter.material;
       }
       registerPrototypeIndices(

@@ -316,6 +316,9 @@ export class StylizedRockView {
       for (const proto of biomePrototypes) {
         extracted.push({ geometry: proto.geometry, source: null, flatShading: false, family: proto.family });
         proxyOverrides.push(proto.proxyGeometry);
+        // Yielded so a cancelled install disposes them (installVariants tracks yields).
+        yield proto.geometry;
+        yield proto.proxyGeometry;
         this.prototypeBiomeRules.push({
           tileIds: proto.tileIds,
           weight: proto.weight,

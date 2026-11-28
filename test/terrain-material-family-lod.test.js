@@ -132,8 +132,11 @@ test('family detail cross-blends the top two families and stays continuous acros
 
   // Detail is always a mix of the two highest-weight families, never a switch.
   assert.match(projection, /const blend = secondaryBlend\(pair,families\);/);
-  assert.match(projection, /const topDetail = mix\(topPrimary,topSecondary,blend\);/);
-  assert.match(projection, /const sideDetail = mix\(sidePrimary,sideSecondary,blend\);/);
+  // With regional branches the secondary tap is skipped only where blend is 0, where the
+  // mix would return the primary anyway.
+  assert.match(projection, /topDetail\.assign\(mix\(topDetail,secondary,blend\)\);/);
+  assert.match(projection, /sideVar\.assign\(mix\(sideVar,secondary,blend\)\);/);
+  assert.match(projection, /If\(blend\.greaterThan\(0\),addTopSecondary\)/);
   // Confidence is a function of the *sum* of the top two weights (symmetric, so
   // continuous when the two families swap places) raised to the fade power.
   assert.match(
