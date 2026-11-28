@@ -404,6 +404,7 @@ try {
   report.screenshots = screenshots;
   report.browserErrors = browserErrors;
   report.browserWarnings = [...browserWarnings];
+  report.uvAttributeQueries = await page.evaluate(() => window.__vegetationUvProbe?.snapshot() ?? null);
   report.passed = report.checks.every((check) => check.passed)
     && browserErrors.length === 0;
   fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);

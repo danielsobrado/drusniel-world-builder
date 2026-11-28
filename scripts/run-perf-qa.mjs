@@ -96,6 +96,7 @@ setOptionalQuery(query, 'buildings', buildings);
 setOptionalQuery(query, 'density', density);
 setOptionalQuery(query, 'gpuTimings', readArg('gpuTimings'));
 setOptionalQuery(query, 'lodBaseline', readArg('lodBaseline'));
+setOptionalQuery(query, 'lodSubmissionDiagnostics', readArg('lodSubmissionDiagnostics'));
 setOptionalQuery(query, 'contactOcclusion', readArg('contactOcclusion'));
 // `--wsc 0`: no World Surface Context window, the A/B for the WSC budgets.
 setOptionalQuery(query, 'wsc', readArg('wsc'));
@@ -453,7 +454,7 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
       screenshot: ${JSON.stringify(screenshotReportPath)},
       video: page.video() ? await page.video().path() : null,
       visualOnly: ${videoDir !== null},
-      diagnosticOnly: ${videoDir !== null || cpuProfilePath !== null || heapProfilePath !== null || (hasFlag('resources') && scenario === 'lod-revisit')},
+      diagnosticOnly: ${videoDir !== null || cpuProfilePath !== null || heapProfilePath !== null || (hasFlag('resources') && scenario === 'lod-revisit') || ['1', 'true'].includes(target.searchParams.get('lodSubmissionDiagnostics'))},
       cpuProfile: ${JSON.stringify(cpuProfileReportPath)},
       heapProfile: ${JSON.stringify(heapProfilePath === null ? null : path.relative(root, heapProfilePath).replaceAll('\\', '/'))},
     };

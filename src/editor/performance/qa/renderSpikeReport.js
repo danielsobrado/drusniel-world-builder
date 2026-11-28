@@ -30,7 +30,7 @@ export function renderSpikeReport(report) {
     .sort((a, b) => a.index - b.index).map(frame => {
       const counters = frame.countersDelta ?? {};
       const causes = Object.entries(counters).filter(([name, value]) => value > 0 && (
-        creationNames.has(name) || (name.startsWith('renderSceneCpuMs:')
+        creationNames.has(name) || name.startsWith('renderCreationCpuMs:') || (name.startsWith('renderSceneCpuMs:')
           && !mainTargets.has(name.slice('renderSceneCpuMs:'.length))
           && value >= frame.phases.render - p50Ms)));
       const stageExcess = Object.entries(stageP50).map(([name, median]) => [name, Math.max(0, (counters[name] ?? 0) - median)])

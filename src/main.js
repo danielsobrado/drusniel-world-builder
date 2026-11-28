@@ -9,6 +9,7 @@ import { kitTownsEnabled } from './editor/towns/townMode.js';
 import { SettlementAmbience } from './editor/audio/settlement_ambience.js';
 import { SettlementGroundBounce } from './editor/world/settlements/view/SettlementGroundBounce.js';
 import { RendererCreationDiagnostics } from './render/RendererCreationDiagnostics.js';
+import { installUvAttributeDiagnostics } from './render/UvAttributeDiagnostics.js';
 import { canCreateWebGPUDevice } from './render/deviceLimits.js';
 import './render/installViewportFramebufferSourcePatch.js';
 import './editor/performance/frameRateDisplay.css';
@@ -395,6 +396,11 @@ async function initializeEditor(restoreState, resources, startup) {
   resources.own(terrainView);
   startup.attach(terrainView.renderer);
   const creationDiagnostics = new RendererCreationDiagnostics(terrainView.renderer, assetStartupTelemetry.trace);
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('vegetationLodQa') === '1') {
+    const uvProbe = installUvAttributeDiagnostics(terrainView.renderer);
+    window.__vegetationUvProbe = uvProbe;
+    resources.defer(() => { uvProbe.dispose(); if (window.__vegetationUvProbe === uvProbe) delete window.__vegetationUvProbe; });
+  }
   resources.own(creationDiagnostics);
 
   if (window.location.search.includes('qaRecovery=1')) console.log('Recovery boot: GPU init');
@@ -1649,7 +1655,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     const reflections = stylizedSurface.reflections;
     const targets = new Map((reflections?.targets ?? []).map((target, index) => [target, `waterReflectionCube${index}`]));
     if (reflections?.planarTarget) targets.set(reflections.planarTarget, 'waterReflectionPlanar');
-    creationDiagnostics.attachPerfCounters(targets, terrainView.scene);
+    creationDiagnostics.attachPerfCounters(targets, terrainView.scene, { lodSubmission: perfQaConfig.lodSubmissionDiagnostics });
   }
   const exploration = new ExplorationRuntime({ config, terrainView, viewModeController, container: ui.viewport,
     sceneLoader: stylizedSurface.sceneAssets?.loader,

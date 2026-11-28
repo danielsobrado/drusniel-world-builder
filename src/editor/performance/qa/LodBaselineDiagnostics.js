@@ -1,3 +1,5 @@
+import { LOD_DIRECT_SUBMISSION_COUNTERS } from '../../../render/LodDirectSubmissionDiagnostics.js';
+
 const LAYERS = Object.freeze({ tree: 'treeView', rock: 'rockView', bush: 'bushView' });
 const INTERVAL_MS = 100;
 const MAX_SAMPLES = 1200;
@@ -12,6 +14,7 @@ export const LOD_BASELINE_COUNTERS = Object.freeze([
   'sceneryLodHandoffLeaseMs', 'sceneryLodHandoffLeases', 'sceneryDitherGpuCopyBytes',
   'sceneryLodHandoffReadyWaitMs',
   'treeManifestReadyLatencyTotalMs', 'treeManifestReadyCount',
+  'auxiliaryPendingDrawsHidden', ...LOD_DIRECT_SUBMISSION_COUNTERS,
 ]);
 
 function describe(state, now) {
@@ -120,6 +123,8 @@ export class LodBaselineDiagnostics {
       handoffMeanReadyWaitMs: counters.sceneryLodHandoffDrawsReady > 0 && counters.sceneryLodHandoffReadyWaitMs !== null
         ? counters.sceneryLodHandoffReadyWaitMs / counters.sceneryLodHandoffDrawsReady : null,
       hitchCallbackFrames,
+      directSubmissionScope: counters.lodDirectDraws === null ? null
+        : 'CPU-known direct instanced mesh draws across render passes; excludes indirect and compute impostor submissions; not incremental transition cost',
       unavailable: ['transitionExtraTriangles', 'transitionExtraDraws', 'transitionPinnedBytes',
         'fadeOnlyUploadBytes', 'gpuReadinessAgeMs', 'visibleMissingCoverage'],
       rendererFrames: frames.filter(frame => frame.dt > 0 && frame.counters).map(frame => ({

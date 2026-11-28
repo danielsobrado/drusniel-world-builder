@@ -1,3 +1,4 @@
+import { LodDirectSubmissionDiagnostics } from './LodDirectSubmissionDiagnostics.js';
 import { PerfCounters } from '../editor/performance/qa/PerfCounters.js';
 import { RENDER_CREATION_COUNTERS, RENDER_REFRESH_COUNTERS } from '../editor/performance/qa/renderSpikeReport.js';
 
@@ -74,7 +75,7 @@ export class RendererCreationDiagnostics {
   }
 
   /** Called once after renderer initialization, only for perf QA. */
-  attachPerfCounters(targetNames = new Map(), scene = null) {
+  attachPerfCounters(targetNames = new Map(), scene = null, { lodSubmission = false } = {}) {
     if (this.perfCountersAttached) return;
     this.perfCountersAttached = true;
     const adapter = this, renderer = this.renderer, clock = () => this.trace.clock();
@@ -89,11 +90,19 @@ export class RendererCreationDiagnostics {
         else delete target[name];
       });
     };
+    const submission = lodSubmission ? new LodDirectSubmissionDiagnostics() : null;
+    if (submission) wrap(renderer.backend, 'draw', function (original, args) {
+      const result = original.apply(this, args);
+      submission.observe(args[0]);
+      return result;
+    });
     const creation = (target, name, counter, bytes = false) => wrap(target, name, function (original, args) {
       const start = clock();
       const result = original.apply(this, args);
       PerfCounters.inc(counter);
-      PerfCounters.inc(`${counter}CpuMs`, clock() - start);
+      const elapsed = clock() - start;
+      PerfCounters.inc(`${counter}CpuMs`, elapsed);
+      if (adapter.sceneRender) PerfCounters.inc(`renderCreationCpuMs:${adapter.sceneRender.name}:${counter}`, elapsed);
       if (bytes) PerfCounters.inc(RENDER_CREATION_COUNTERS.bytes, Number(args[0].size));
       return result;
     });
@@ -146,7 +155,7 @@ export class RendererCreationDiagnostics {
       const target = this.getRenderTarget();
       const base = targetNames.get(target) || target?.texture?.name || target?.name || (target ? 'offscreen' : 'canvas');
       const name = target?.isCubeRenderTarget ? `${base}:face${this.getActiveCubeFace()}` : base;
-      const parent = adapter.sceneRender, frame = { childrenMs: 0 };
+      const parent = adapter.sceneRender, frame = { name, childrenMs: 0 };
       adapter.sceneRender = frame;
       const start = clock();
       try { return original.apply(this, args); }
