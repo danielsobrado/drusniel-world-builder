@@ -49,7 +49,7 @@ export class SettlementSkyline {
     const painted = paintedMassing(vertexColor().rgb);
     this.material.colorNode = painted;
     // Half the buildings' fill: at full fill a limewashed box glowed white beside the street.
-    this.material.emissiveNode = buildingShadeEmission(painted, { fill: 1.1, bounce: 1.3 });
+    this.material.emissiveNode = buildingShadeEmission(painted, { fill: 1.1, bounce: 1.3, ambient: false });
     this.material.name = 'settlement-skyline';
     this.towns = new Map(); this.expected = new Map(); this.jobs = new Map(); this.failed = new Map();
     this.staged = new Map();

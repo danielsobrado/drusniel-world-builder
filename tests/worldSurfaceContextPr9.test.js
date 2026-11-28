@@ -9,7 +9,7 @@ import {
   BOUNCE_ALBEDO_GAIN_MAX,
   worldSurfaceAmbientCpu,
 } from '../src/editor/stylized/worldSurfaceContext/WorldSurfaceAmbient.js';
-import { rockShadeEmission, treeBarkEmission } from '../src/editor/stylized/forest/foliageLight.js';
+import { buildingShadeEmission, rockShadeEmission, treeBarkEmission, understoryShadeEmission } from '../src/editor/stylized/forest/foliageLight.js';
 
 const GROUND = [0.06, 0.07, 0.04];
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} vs ${b}`);
@@ -56,6 +56,11 @@ test('PR 9 stones and bark read the WSC per vertex in one varying; ambient:false
   assert.doesNotMatch(rock.fragmentShader, /textureLoad/, 'no WSC fetch per fragment');
   assert.match(shader(treeBarkEmission(stone)).vertexShader, /barkAmbient/);
   assert.doesNotMatch(shader(rockShadeEmission(stone, { ambient: false })).vertexShader, /rockAmbient/);
+  // Every receiver family takes the same local ambient (understory: the bounce only, see
+  // understoryShadeEmission; buildings and paving: sky share and bounce, as stones).
+  assert.match(shader(understoryShadeEmission(stone)).vertexShader, /understoryAmbient/);
+  assert.match(shader(buildingShadeEmission(stone)).vertexShader, /buildingAmbient/);
+  assert.doesNotMatch(shader(buildingShadeEmission(stone, { ambient: false })).vertexShader, /buildingAmbient/);
 });
 
 test('PR 9 cloud turns sun into sky light: the sky fill rises while the total falls', async () => {

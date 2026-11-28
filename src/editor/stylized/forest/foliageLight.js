@@ -316,15 +316,21 @@ export function rockShadeEmission(stone, { snowCover = null, ambient = true } = 
 /**
  * Sky fill, ground-colour bounce and distance air in-scatter for understory plants,
  * shrubs and bush proxies so they sit in the same light and horizon haze as stones.
+ *
+ * The bounce is the WSC ground beside the plant (PR 9), as on stones and bark. Its
+ * sky share is not dimmed by the canopy here: a plant at knee height lives in the
+ * floor's light, and its contact's `groundLight` caps the fill at the floor's under a
+ * canopy. Dimming it as well left shrubs at a fifth of the floor's fill, black blots.
  */
-export function understoryShadeEmission(plant, { blossom = false, airRim = null } = {}) {
+export function understoryShadeEmission(plant, { blossom = false, airRim = null, ambient = true } = {}) {
   const fill = blossom ? BLOSSOM_FILL : UNDERSTORY_FILL;
   const bounce = blossom ? BLOSSOM_BOUNCE : UNDERSTORY_BOUNCE;
   const facing = normalWorld.y.negate().mul(0.5).add(0.5).clamp(0, 1);
   const edge = airRim ?? float(0);
   const rimColor = mix(foliageLight.airColor, foliageLight.skyColor, smoothstep(0.1, 0.85, normalWorld.y));
+  const { groundBounce } = receiverAmbient(ambient, 'understoryAmbient');
   return foliageSkyFill(plant, fill)
-    .add(plant.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounce))
+    .add(plant.mul(groundBounce).mul(foliageLight.fill).mul(facing).mul(bounce))
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()))
     .add(rimColor.mul(foliageLight.fill).mul(edge));
 }
@@ -339,11 +345,15 @@ export function pavingGroundFill(albedo) {
   return foliageSkyFill(albedo, PAVING_FILL).add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }
 
-export function buildingShadeEmission(surface, { fill = BUILDING_FILL, bounce = BUILDING_BOUNCE, snowCover = null } = {}) {
+/** `ambient: false` keeps the plain hemisphere, for far stand-ins outside any WSC window. */
+export function buildingShadeEmission(surface, { fill = BUILDING_FILL, bounce = BUILDING_BOUNCE, snowCover = null, ambient = true } = {}) {
   const facing = normalWorld.y.negate().mul(0.5).add(0.5);
   const fillGain = snowCover ? mix(float(fill), float(0.45), snowCover.clamp(0, 1)) : float(fill);
   const bounceGain = snowCover ? mix(float(bounce), float(0.55), snowCover.clamp(0, 1)) : float(bounce);
-  return foliageSkyFill(surface, fillGain)
-    .add(surface.mul(foliageLight.groundColor).mul(foliageLight.fill).mul(facing).mul(bounceGain))
+  // Spatial ambient as on stones (PR 9): a wall under trees loses sky, and the ground it
+  // stands on (paving, soil, snow) colours the bounce.
+  const { skyVisibility, groundBounce } = receiverAmbient(ambient, 'buildingAmbient');
+  return foliageSkyFill(surface, fillGain).mul(skyVisibility)
+    .add(surface.mul(groundBounce).mul(foliageLight.fill).mul(facing).mul(bounceGain))
     .add(foliageLight.airColor.mul(foliageLight.fill).mul(treeAir()));
 }

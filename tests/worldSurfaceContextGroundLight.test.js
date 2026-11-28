@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { buildShader } from '../test/helpers/buildShader.js';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import yaml from 'js-yaml';
@@ -109,5 +110,10 @@ test('every family that meets the ground through the contact lights its foot as 
   ];
   for (const [name, material] of families) {
     assert.ok(isGroundLit(material), `${name}: its fill must go through the contact's groundLight`);
+    // The contact and the spatial ambient (PR 9) each add varyings: stay inside the 16
+    // inter-stage slots every WebGPU device guarantees.
+    const { vertexShader } = buildShader(new THREE.Mesh(new THREE.BoxGeometry(), material));
+    const varyings = vertexShader.match(/struct VaryingsStruct \{[^}]*\}/)?.[0].match(/@location/g)?.length ?? 0;
+    assert.ok(varyings <= 16, `${name}: ${varyings} varyings`);
   }
 });
