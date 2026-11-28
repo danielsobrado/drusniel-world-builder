@@ -60,40 +60,13 @@ const browser = await chromium.launch({
 
 let context = null;
 const browserErrors = [];
+const browserWarnings = new Set();
 const screenshots = [];
 
 function relativeArtifact(filePath) {
   return path.relative(root, filePath).replaceAll('\\', '/');
 }
 
-async function captureCanvas(page, cdp, name) {
-  const canvas = page.locator(
-    'canvas[aria-label="Drusniel World infinite world editor viewport"]',
-  );
-  const clip = await canvas.boundingBox();
-  if (!clip || clip.width <= 0 || clip.height <= 0) {
-    throw new Error(`Cannot capture ${name}: editor canvas has no visible bounds.`);
-  }
-  const result = await cdp.send('Page.captureScreenshot', {
-    format: 'png',
-    fromSurface: true,
-    captureBeyondViewport: false,
-    clip: {
-      x: clip.x,
-      y: clip.y,
-      width: clip.width,
-      height: clip.height,
-      scale: 1,
-    },
-  });
-  const filePath = path.join(outputDirectory, `${name}.png`);
-  const bytes = Buffer.from(result.data, 'base64');
-  if (bytes.byteLength < 10_000) {
-    throw new Error(`${name} screenshot appears blank (${bytes.byteLength} bytes).`);
-  }
-  fs.writeFileSync(filePath, bytes);
-  screenshots.push(relativeArtifact(filePath));
-}
 
 try {
   context = await browser.newContext({
@@ -103,6 +76,7 @@ try {
   page.setDefaultTimeout(timeoutMs);
   page.on('console', (message) => {
     if (message.type() === 'error') browserErrors.push(`console: ${message.text()}`);
+    if (message.type() === 'warning') browserWarnings.add(message.text());
   });
   page.on('pageerror', (error) => browserErrors.push(`page: ${error.message}`));
 
@@ -401,212 +375,35 @@ try {
     };
   });
 
-  const cdp = await context.newCDPSession(page);
-
-  async function arrangeGallery({
-    layer,
-    representation,
-    firstPrototype,
-    prototypeCount,
-  }) {
-    await page.evaluate((options) => {
-      const editor = window.__editor;
-      const surface = editor.stylizedSurface;
-      const treeView = surface.treeView;
-      const bushView = surface.bushView;
-      const isTree = options.layer === 'trees';
-      const view = isTree ? treeView : bushView;
-      const near = isTree ? view.renderers : view.meshes;
-      const proxy = isTree ? view.proxyRenderers : view.proxyMeshes;
-      const prototypes = isTree ? view.prototypes : view.prototypes.map((part) => [part]);
-      const scene = editor.controller.terrainView.scene;
-
-      treeView.disposed = true;
-      bushView.enabled = false;
-      for (const child of scene.children) {
-        child.visible = child === view.root || child.isLight;
-      }
-      view.root.visible = true;
-      // The tree root also owns fallback, cluster, understory, and impostor
-      // renderers. Hide every previously active drawable before selecting the
-      // one representation under test.
-      view.root.traverse((object) => {
-        if (!object.isMesh) return;
-        object.visible = false;
-        if ('count' in object) object.count = 0;
-      });
-      view.root.position.set(0, 0, 0);
-      scene.background = null;
-      editor.controller.terrainView.renderer.setClearColor(0x24312a, 1);
-      const weatherPanel = document.querySelector('.weather-panel');
-      if (weatherPanel) weatherPanel.hidden = true;
-
-      const allGroups = [...near, ...proxy];
-      for (const parts of allGroups) {
-        for (const mesh of parts) {
-          mesh.visible = false;
-          mesh.count = 0;
-        }
-      }
-
-      const active = options.representation === 'near' ? near : proxy;
-      const last = Math.min(
-        prototypes.length,
-        options.firstPrototype + options.prototypeCount,
-      );
-      const targetHeight = isTree ? 5 : 3;
-      const gap = isTree ? 1.4 : 1;
-      const position = view.root.position.clone();
-      const scale = view.root.scale.clone();
-      const quaternion = view.root.quaternion.clone();
-      const layouts = [];
-      for (let prototypeIndex = options.firstPrototype;
-        prototypeIndex < last;
-        prototypeIndex += 1) {
-        const sourceParts = prototypes[prototypeIndex];
-        let minimumX = Number.POSITIVE_INFINITY;
-        let maximumX = Number.NEGATIVE_INFINITY;
-        let minimumY = Number.POSITIVE_INFINITY;
-        let maximumY = Number.NEGATIVE_INFINITY;
-        for (const part of sourceParts) {
-          part.geometry.computeBoundingBox();
-          minimumX = Math.min(minimumX, part.geometry.boundingBox.min.x);
-          maximumX = Math.max(maximumX, part.geometry.boundingBox.max.x);
-          minimumY = Math.min(minimumY, part.geometry.boundingBox.min.y);
-          maximumY = Math.max(maximumY, part.geometry.boundingBox.max.y);
-        }
-        const normalizedScale = targetHeight / Math.max(0.05, maximumY - minimumY);
-        layouts.push({
-          prototypeIndex,
-          minimumY,
-          normalizedScale,
-          width: Math.max(0.4, (maximumX - minimumX) * normalizedScale),
+  await page.evaluate(() => window.__editor.terrainView.setAnimationLoop(null));
+  report.gallery = { mode: 'isolated-offscreen', morphology: 'neutral', captures: [] };
+  for (const [layer, prototypes, pageSize] of [
+    ['bushes', report.bushPrototypes, 4], ['trees', report.treePrototypes, 4],
+  ]) {
+    for (let first = 0; first < prototypes.length; first += pageSize) {
+      const last = Math.min(first + pageSize, prototypes.length);
+      const suffix = `${String(first).padStart(2, '0')}-${String(last - 1).padStart(2, '0')}`;
+      for (const representation of ['near', 'proxy']) {
+        const name = `${layer === 'trees' ? 'tree' : 'bush'}-${representation}-${suffix}`;
+        const result = await page.evaluate(async options => {
+          const { captureVegetationGallery } = await import('/src/editor/performance/qa/VegetationGalleryScene.js');
+          return captureVegetationGallery(window.__editor, options);
+        }, { layer, representation, first, last });
+        const filePath = path.join(outputDirectory, `${name}.png`);
+        fs.writeFileSync(filePath, Buffer.from(result.png, 'base64'));
+        screenshots.push(relativeArtifact(filePath));
+        report.gallery.captures.push({ name, slots: result.slots });
+        for (const slot of result.slots) report.checks.push({
+          id: `${name}-${slot.prototypeIndex}-pixel-coverage`, passed: slot.passed, ...slot,
         });
       }
-      const totalWidth = layouts.reduce((sum, layout) => sum + layout.width, 0)
-        + Math.max(0, layouts.length - 1) * gap;
-      let cursorX = -totalWidth * 0.5;
-      for (const layout of layouts) {
-        layout.x = cursorX + layout.width * 0.5;
-        cursorX += layout.width + gap;
-      }
-
-      for (const layout of layouts) {
-        const { prototypeIndex } = layout;
-        const parts = active[prototypeIndex];
-        const sourceParts = prototypes[prototypeIndex];
-        if (!parts || !sourceParts) continue;
-        const matrix = view.root.matrixWorld.clone().identity().compose(
-          position.set(
-            layout.x,
-            -layout.minimumY * layout.normalizedScale,
-            0,
-          ),
-          quaternion.identity(),
-          scale.setScalar(layout.normalizedScale),
-        );
-        for (const mesh of parts) {
-          mesh.visible = true;
-          mesh.count = 1;
-          mesh.setMatrixAt(0, matrix);
-          mesh.instanceMatrix.needsUpdate = true;
-          const dither = mesh.geometry.getAttribute('instanceDither');
-          if (dither) {
-            dither.setXYZ(0, 1, 0.37 + prototypeIndex * 0.013, 1);
-            dither.needsUpdate = true;
-          }
-          const morphology = mesh.geometry.getAttribute('instanceMorphology');
-          if (morphology) {
-            const useStressedProxyMorphology = (
-              isTree && options.representation === 'proxy'
-            );
-            morphology.setXYZ(
-              0,
-              useStressedProxyMorphology ? 0.55 : 1,
-              1,
-              useStressedProxyMorphology ? 0.94 : 1,
-            );
-            morphology.needsUpdate = true;
-          }
-          const tint = mesh.geometry.getAttribute('instanceLeafTint');
-          if (tint) {
-            tint.setXYZ(0, 1, 1, 1);
-            tint.needsUpdate = true;
-          }
-          // Gallery matrices intentionally replace only the first active
-          // instance. Avoid scanning untouched capacity slots for a temporary
-          // aggregate bound; fixed QA framing makes culling unnecessary.
-          mesh.frustumCulled = false;
-        }
-      }
-      window.__vegetationGalleryMeshes = layouts.flatMap(layout => active[layout.prototypeIndex] ?? []);
-
-      const editorCamera = editor.controller.editorCamera;
-      editorCamera.controls.enabled = false;
-      editorCamera.camera.position.set(0, isTree ? 3.4 : 2.1, 24);
-      editorCamera.camera.zoom = isTree ? 3.1 : 5.2;
-      editorCamera.camera.updateProjectionMatrix();
-      editorCamera.camera.lookAt(0, isTree ? 2.5 : 1.5, 0);
-      editorCamera.camera.updateMatrixWorld(true);
-    }, {
-      layer,
-      representation,
-      firstPrototype,
-      prototypeCount,
-    });
-    // Streamed draw preparation hides a mesh until its first-use upload and
-    // pipeline are ready. Variants installed only for this fixture (most bushes)
-    // were never drawn in the world, so a fixed delay captured an empty gallery.
-    const pendingAfter = () => page.evaluate(() => {
-      const pending = window.__editor.controller.terrainView.drawPreparation?.pending;
-      return pending ? window.__vegetationGalleryMeshes.filter(mesh => pending.has(mesh)).length : 0;
-    });
-    const started = Date.now();
-    while (await pendingAfter() > 0 && Date.now() - started < 60_000) await page.waitForTimeout(250);
-    const pending = await pendingAfter();
-    report.checks.push({ id: `${layer}-${representation}-${firstPrototype}-gallery-prepared`, passed: pending === 0,
-      pendingMeshes: pending, waitedMs: Date.now() - started });
-    // Then one frame to compile any remaining representation and another to render it.
-    await page.waitForTimeout(2_500);
-  }
-
-  await arrangeGallery({
-    layer: 'bushes',
-    representation: 'near',
-    firstPrototype: 0,
-    prototypeCount: report.bushPrototypes.length,
-  });
-  await captureCanvas(page, cdp, 'bush-near');
-  await arrangeGallery({
-    layer: 'bushes',
-    representation: 'proxy',
-    firstPrototype: 0,
-    prototypeCount: report.bushPrototypes.length,
-  });
-  await captureCanvas(page, cdp, 'bush-proxy');
-
-  for (let firstPrototype = 0; firstPrototype < report.treePrototypes.length; firstPrototype += 9) {
-    const lastPrototype = Math.min(firstPrototype + 8, report.treePrototypes.length - 1);
-    const suffix = `${String(firstPrototype).padStart(2, '0')}-${String(lastPrototype).padStart(2, '0')}`;
-    await arrangeGallery({
-      layer: 'trees',
-      representation: 'near',
-      firstPrototype,
-      prototypeCount: 9,
-    });
-    await captureCanvas(page, cdp, `tree-near-${suffix}`);
-    await arrangeGallery({
-      layer: 'trees',
-      representation: 'proxy',
-      firstPrototype,
-      prototypeCount: 9,
-    });
-    await captureCanvas(page, cdp, `tree-proxy-${suffix}`);
+    }
   }
 
   report.url = baseUrl;
   report.screenshots = screenshots;
   report.browserErrors = browserErrors;
+  report.browserWarnings = [...browserWarnings];
   report.passed = report.checks.every((check) => check.passed)
     && browserErrors.length === 0;
   fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
