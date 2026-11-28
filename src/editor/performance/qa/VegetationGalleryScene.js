@@ -92,11 +92,7 @@ export async function captureVegetationGallery(editor, { layer, representation, 
         const pixels = tightlyPackRgbaReadback(await renderer.readRenderTargetPixelsAsync(
           target, 0, 0, TILE_SIZE, TILE_SIZE), TILE_SIZE, TILE_SIZE);
         slots.push({ prototypeIndex, ...galleryCoverage(pixels, TILE_SIZE, TILE_SIZE) });
-        const data = new Uint8ClampedArray(pixels.length);
-        for (let y = 0; y < TILE_SIZE; y++) {
-          const offset = (TILE_SIZE - 1 - y) * TILE_SIZE * 4;
-          data.set(pixels.subarray(offset, offset + TILE_SIZE * 4), y * TILE_SIZE * 4);
-        }
+        const data = new Uint8ClampedArray(pixels);
         ctx.putImageData(new ImageData(data, TILE_SIZE, TILE_SIZE), (prototypeIndex - first) * TILE_SIZE, 0);
       } finally {
         for (let i = 0; i < parts.length; i++) {
