@@ -964,6 +964,7 @@ export class StylizedTreeView {
           this.manifestStore.schedule(entry.chunkX, entry.chunkZ, rockSource);
         }
       }
+      this.requestedManifestKeys = activeKeys;
       this.manifestStore.setActive(activeKeys);
       this.previousPlan = plan;
       this.previousRockVersion = rockVersion;
@@ -1032,6 +1033,7 @@ export class StylizedTreeView {
       },
       rockSource: job.rockSource,
       manifestStore: this.manifestStore,
+      retainManifests: active => this.manifestStore.setActive(this.requestedManifestKeys ?? active),
       prototypeCount: this.prototypes.length,
       prototypeWidth: this.prototypeWidth,
       prototypeHeight: this.prototypeHeight,

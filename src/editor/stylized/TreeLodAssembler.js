@@ -214,6 +214,7 @@ export function* iterateTreeLod({
   getPublicationAnchor = null,
   getDrawPreparation = () => null,
   onImpostorDemand = null,
+  retainManifests = active => manifestStore.setActive(active),
 }) {
   PerfCounters.inc('treeRebuilds');
   const leaf = { tint: resolveLeafTint, snow: resolveLeafSnow };
@@ -389,11 +390,11 @@ export function* iterateTreeLod({
     }
     yield* publication.publish(getPublicationBudget, () => {
       beforePublish?.(proposed);
-      manifestStore.setActive(active);
+      retainManifests(active);
     });
   } else {
     beforePublish?.();
-    manifestStore.setActive(active);
+    retainManifests(active);
     nearCount = writeInstances(renderers, near, anchor);
     proxyCount = writeInstances(proxyRenderers, proxy, anchor);
     fallbackCount = writeInstances(fallbackImpostorRenderers, fallback, anchor);

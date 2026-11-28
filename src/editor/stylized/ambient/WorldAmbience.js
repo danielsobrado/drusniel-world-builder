@@ -96,8 +96,12 @@ export class WorldAmbience {
     const x = Math.round((point.x + origin.x) / snap) * snap;
     const z = Math.round((point.z + origin.z) / snap) * snap;
     const radius = this.queryRadius + snap;
-    const prepare = () => this.sampling.prepare({ minX: (x - radius) / tileSize, maxX: (x + radius) / tileSize,
-      minZ: -(z + radius) / tileSize, maxZ: -(z - radius) / tileSize }, budget?.shouldYield);
+    const prepare = (gate = budget?.shouldYield) => {
+      const ready = this.sampling.prepare({ minX: (x - radius) / tileSize, maxX: (x + radius) / tileSize,
+        minZ: -(z + radius) / tileSize, maxZ: -(z - radius) / tileSize }, gate);
+      if (ready) this.system.ground.update(point, origin, gate, budget);
+      return ready;
+    };
     this.preparing = !(budget?.runner ?? (run => run()))(prepare);
     if (this.preparing) { this.system.applyParticleBudget(particles); return; }
     if (walking || !orbitFocus) {
@@ -128,6 +132,7 @@ export class WorldAmbience {
       seaLevel: this.getGenerator()?.seaLevel ?? 0,
       player,
       budget,
+      groundPrepared: true,
       particles,
     });
     this.system.applyParticleBudget(particles);

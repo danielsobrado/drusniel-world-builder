@@ -22,12 +22,11 @@ export function stepViewRebuild(view, job, shouldYield, factory, pendingProperty
   }
   view.currentShouldYield = shouldYield;
   const progress = state.builder.progress;
+  const workBefore = view.workProgress ?? 0;
   view.blockedDependency = null;
   const result = state.builder.step({ shouldYield });
-  if (state.builder.progress > progress) {
-    state.lastProgressAt = performance.now();
-    view.workProgress = (view.workProgress ?? 0) + state.builder.progress - progress;
-  }
+  view.workProgress = (view.workProgress ?? 0) + state.builder.progress - progress;
+  if (view.workProgress > workBefore) state.lastProgressAt = performance.now();
   if (result === null) return false;
   view.stagedRebuild = null;
   view.lastUpdateKey = state.job.updateKey;

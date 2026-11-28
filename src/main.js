@@ -133,6 +133,7 @@ import { RendererRecovery } from './editor/lifecycle/RendererRecovery.js';
 import { captureEditorRecoveryState, restoreEditorRecoveryState } from './editor/lifecycle/EditorRecoveryState.js';
 import { ResourceScope } from './editor/lifecycle/ResourceScope.js';
 import { DeferredWorkBudget } from './editor/performance/DeferredWorkBudget.js';
+import { reserveEnvironmentalGroundTurn } from './editor/performance/EnvironmentalGroundTurn.js';
 import { EnvironmentalPassScheduler } from './editor/performance/EnvironmentalPassScheduler.js';
 import { EnvironmentalParticleBudget } from './editor/performance/EnvironmentalParticleBudget.js';
 import { SpatialPerformanceOverlay } from './editor/performance/qa/SpatialPerformanceOverlay.js';
@@ -1799,6 +1800,10 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
         }));
       }
     }
+    const groundTurn = reserveEnvironmentalGroundTurn(deferredWork, {
+      valley: Boolean(terrainView.valleyFog?.patch?.job),
+      ambient: Boolean(worldAmbience.preparing || worldAmbience.system.ground?.job),
+    });
     if (profiling) perfQa.mark('terrainCommit');
     ui.advanceMinimap(deferredWork);
     exploration.beforeMovement(frameTimestamp);
@@ -2076,7 +2081,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     // country anywhere fills its valleys.
     const valleyMist = skyLooks?.current?.mist ?? 0;
     terrainView.updateValleyFog({
-      budget: deferredWork,
+      budget: groundTurn.valley,
       pressured: terrainView.stylizedConfig?.enhancements?.environmentalFragmentAdmission && (
         PerfCounters.get('frameFixedCpuMs') + PerfCounters.get('frameDeferredCpuMs') > terrainView.stylizedConfig.enhancements.environmentalFragmentBudget.frameCpuPressureMs
         || PerfCounters.get('framePublicationUploadBytes') > deferredWork.maxUploadBytes / 2),
@@ -2091,7 +2096,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
     snowPowder.update(frameSeconds);
     worldAmbience.update(frameDelta, {
       particles: environmentalParticles,
-      budget: deferredWork,
+      budget: groundTurn.ambient,
       camera: viewModeController.camera,
       walking: viewModeController.mode === PLAYER_MODE_WALK,
       orbitFocus: renderFocus,
@@ -2108,6 +2113,7 @@ const settlementGroundBounce = new SettlementGroundBounce(() => stylizedSurface?
       snowCountry: snowCountryWeight,
       player: characterView,
     });
+    groundTurn.cancel();
     fallingLeaves.update(
       frameSeconds,
       frameDelta,
