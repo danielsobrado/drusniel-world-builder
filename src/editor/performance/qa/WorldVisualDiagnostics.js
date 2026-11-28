@@ -160,6 +160,10 @@ export class WorldVisualDiagnostics {
       this.editor.terrainView.postProcessing.enabled = this.savedPostEnabled;
       this.savedPostEnabled = null;
     }
+    if (this.savedToneMapping != null && this.editor?.terrainView?.renderer) {
+      this.editor.terrainView.renderer.toneMapping = this.savedToneMapping;
+      this.savedToneMapping = null;
+    }
     this.mode = WSC_DEFAULT_DIAGNOSTIC_MODE;
     return resolveWscDiagnosticMode('D00');
   }
@@ -184,6 +188,12 @@ export class WorldVisualDiagnostics {
       if (tv.postProcessing) {
         this.savedPostEnabled = tv.postProcessing.enabled;
         tv.postProcessing.enabled = false;
+      }
+      // The WebGPU renderer tone-maps the whole frame in its output pass, whatever a
+      // material's `toneMapped` says: without this every false colour came back ACES'd.
+      if (tv.renderer) {
+        this.savedToneMapping = tv.renderer.toneMapping;
+        tv.renderer.toneMapping = THREE.NoToneMapping;
       }
       this.savedFog = scene.fog ?? null;
       scene.fog = null;
@@ -315,10 +325,13 @@ export class WorldVisualDiagnostics {
     switch (modeId) {
       case 'D01': {
         // Resolved unlit albedo (exact material colorNode before lighting/emissive/fog).
-        if (source.colorNode) return clamp(source.colorNode.rgb, 0, 1);
+        // NodeMaterial multiplies vertex colours onto colorNode too: without them graded
+        // settlement stones (palette in vertex colour) read as white albedo.
+        const painted = source.vertexColors && mesh.geometry?.getAttribute?.('color');
+        if (source.colorNode) return clamp(painted ? source.colorNode.rgb.mul(vertexColor().rgb) : source.colorNode.rgb, 0, 1);
         const base = source.color ? vec3(source.color.r, source.color.g, source.color.b) : vec3(1);
         let col = source.map ? authoredTexture(source.map).rgb.mul(base) : base;
-        if (source.vertexColors && mesh.geometry?.getAttribute?.('color')) col = col.mul(vertexColor().rgb);
+        if (painted) col = col.mul(vertexColor().rgb);
         return clamp(col, 0, 1);
       }
       case 'D02': {

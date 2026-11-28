@@ -71,6 +71,21 @@ test('active diagnostics follow streamed meshes and leave newer production mater
   }
 });
 
+test('false-colour modes reach the canvas raw: no tone mapping, no post graph; D00 restores both', () => {
+  const renderer = { toneMapping: THREE.ACESFilmicToneMapping };
+  const postProcessing = { enabled: true };
+  const diagnostics = new WorldVisualDiagnostics({ terrainView: { scene: new THREE.Scene(), renderer, postProcessing } });
+  diagnostics.setMode('D24');
+  assert.equal(renderer.toneMapping, THREE.NoToneMapping, 'the renderer tone-maps the whole frame, so it is switched off');
+  assert.equal(postProcessing.enabled, false);
+  diagnostics.setMode('D01');
+  assert.equal(renderer.toneMapping, THREE.NoToneMapping, 'switching between false-colour modes keeps it off');
+  diagnostics.setMode('D00');
+  assert.equal(renderer.toneMapping, THREE.ACESFilmicToneMapping);
+  assert.equal(postProcessing.enabled, true);
+  diagnostics.dispose();
+});
+
 test('D24 material family palette colors are pairwise distinct for pixel segmentation', () => {
   const entries = Object.values(WSC_MATERIAL_FAMILIES);
   for (let i = 0; i < entries.length; i += 1) {

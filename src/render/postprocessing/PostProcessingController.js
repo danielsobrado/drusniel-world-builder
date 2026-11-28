@@ -40,6 +40,8 @@ export class PostProcessingController {
     this.settings = postProcessingStore.get();
     this.topologySignature = createPostProcessingTopologySignature(this.settings);
     this.graph = null;
+    // Runtime switch (QA false-colour diagnostics turn the pass graph off with it).
+    this.enabled = true;
     this.disposed = false;
     this.rendererState = null;
     this.failedTopologySignature = null;
@@ -89,7 +91,8 @@ export class PostProcessingController {
   }
 
   prepareRenderPath() {
-    const available = isPostProcessingEnabled(this.settings)
+    const available = this.enabled !== false
+      && isPostProcessingEnabled(this.settings)
       && !this.isBypassed()
       && !this.isCurrentTopologyFailed();
     if (!available) {

@@ -52,29 +52,14 @@ for (const view of views) {
   const file = (mode) => path.resolve(args.out, `${view}-${mode}.png`);
   const family = await pixels(file('D24'));
   const modes = Object.fromEntries(await Promise.all(MODES.slice(0, 4).map(async (m) => [m, await pixels(file(m))])));
-  // D24's flat palette does not reach the canvas raw: with fog, tone mapping and post off it
-  // still comes back shifted, and the shift varies a little across the frame (an in-air
-  // pass). A linear-space affine fit from six families identified by eye holds them within
-  // ~0.07, enough for family means.
-  // shortcut: a fixed calibration (clear noon, 2026-11-27); find the pass that shifts D24
-  // and drop this when it reads raw.
-  const D24_FIT = [[0.582, 0.026, 0.076], [0.048, 0.523, 0.089], [0.045, 0.079, 0.598]];
-  const D24_HAZE = [0.067, 0.095, 0.009];
-  const palette = Object.values(WSC_MATERIAL_FAMILIES).map((entry) => {
-    const lin = entry.rgb.map(c => linear(c / 255));
-    return { ...entry, seen: [0, 1, 2].map(j => lin[0] * D24_FIT[0][j] + lin[1] * D24_FIT[1][j] + lin[2] * D24_FIT[2][j] + D24_HAZE[j]) };
-  });
+  // D24 is unlit, untonemapped and drawn without the post graph, so each family reaches the
+  // canvas as its exact sRGB bytes; anti-aliased edges fall outside the tolerance and are skipped.
+  const palette = Object.values(WSC_MATERIAL_FAMILIES);
   const owner = new Int16Array(family.count).fill(-1);
   for (let i = 0; i < family.count; i += 1) {
     const o = i * 3;
-    const px = [linear(family.data[o] / 255), linear(family.data[o + 1] / 255), linear(family.data[o + 2] / 255)];
-    let best = -1;
-    let bestDistance = 0.08 ** 2;
-    palette.forEach(({ seen }, index) => {
-      const d = (px[0] - seen[0]) ** 2 + (px[1] - seen[1]) ** 2 + (px[2] - seen[2]) ** 2;
-      if (d < bestDistance) { bestDistance = d; best = index; }
-    });
-    owner[i] = best;
+    owner[i] = palette.findIndex(({ rgb }) => Math.abs(family.data[o] - rgb[0]) <= 3
+      && Math.abs(family.data[o + 1] - rgb[1]) <= 3 && Math.abs(family.data[o + 2] - rgb[2]) <= 3);
   }
   const stats = {};
   for (const [index, { id }] of palette.entries()) {

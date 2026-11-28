@@ -106,3 +106,18 @@ test('frame cleanup still runs when updateFrame throws', () => {
   assert.equal(finished, true);
   controller.dispose();
 });
+
+test('a disabled controller leaves the frame to the renderer and keeps its output untouched', () => {
+  const { controller, renderer } = createController();
+  let graphRendered = false;
+  controller.ensureGraph = () => { controller.graph = { topologySignature: controller.topologySignature, render() { graphRendered = true; } }; return controller.graph; };
+  controller.updateFrame = () => {};
+  controller.finishFrame = () => {};
+  controller.enabled = false;
+  assert.equal(controller.render({}), false);
+  assert.equal(graphRendered, false);
+  assert.equal(renderer.toneMapping, 7);
+  controller.enabled = true;
+  assert.equal(controller.render({}), true);
+  controller.dispose();
+});
