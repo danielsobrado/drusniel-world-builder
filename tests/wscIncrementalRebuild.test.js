@@ -160,25 +160,36 @@ test('a budgeted cold build after a teleport is spread over frames and lands ide
   const slots = makeSlots();
   const field = new WorldSurfaceContextField({ terrainView: { worldStore: { chunkSize, tileSize }, slots }, config });
   const budget = { canPublish: () => true };
+  const realNow = performance.now.bind(performance);
+  let clock = 0;
   try {
     field.update({ x: -90, z: -3 }, { x: 0, z: 0 }, budget);
+    // A clock that ticks 1 ms per read slices the build the same way on any machine or load.
+    performance.now = () => (clock += 1);
     const target = { x: 60, z: -3 }; // 150 m: nothing in the old window is reusable
     assert.equal(field.update(target, { x: 0, z: 0 }, budget), false, 'old window no longer covers the focus');
     assert.ok(field.pendingBuild, 'the cold build is still in flight after one slice');
-    // A chunk changes while the build is spread over frames.
+    // A chunk the build has already written changes while the rest is spread over frames.
+    // Rows run south to north, so chunk row 0 (z in (-64, 0]) is written by three quarters.
+    let frames = 1;
+    while (field.pendingBuild.row < field.resolution * 0.75) { field.update(target, { x: 0, z: 0 }, budget); frames += 1; }
+    assert.ok(field.pendingBuild, 'still in flight when the chunk changes');
     const index = slots.findIndex(slot => slot.descriptor.key === '2:0');
     slots[index] = makeSlot(2, 0, 3);
-    let frames = 1;
-    while (field.pendingBuild && frames < 100) { field.update(target, { x: 0, z: 0 }, budget); frames += 1; }
+    while (field.pendingBuild && frames < 2000) { field.update(target, { x: 0, z: 0 }, budget); frames += 1; }
+    performance.now = realNow;
     assert.equal(field.pendingBuild, null);
     assert.ok(frames > 2, `finished in ${frames} frames`);
-    // The chunk that changed mid-build was recorded stale; the next frame re-evaluates it.
+    // The chunk that changed mid-build was recorded stale; the next build re-evaluates it
+    // (itself sliced, the old window shown meanwhile).
     const evaluatedBefore = PerfCounters.get('wscTexelsEvaluated') ?? 0;
     assert.equal(field.update(target, { x: 0, z: 0 }, budget), true);
+    while (field.pendingBuild) assert.equal(field.update(target, { x: 0, z: 0 }, budget), true);
     const evaluated = (PerfCounters.get('wscTexelsEvaluated') ?? 0) - evaluatedBefore;
     assert.ok(evaluated > 0 && evaluated < 128 * 128, `re-evaluated ${evaluated}`);
     assertMatchesFull(slots, target, 'after a spread-out cold build');
   } finally {
+    performance.now = realNow;
     field.dispose();
   }
 });

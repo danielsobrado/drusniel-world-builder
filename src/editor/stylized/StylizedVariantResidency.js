@@ -1,5 +1,8 @@
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 
+/** Biome-scan chunks taken per frame even when the shared budget is spent. */
+const SCAN_UNITS_UNDER_LOAD = 8;
+
 /**
  * The key a variant is registered under in `prototypeIndicesByAsset`, and the
  * same key a `BiomeAssetPalette` selection names. Kept identical to the
@@ -98,7 +101,6 @@ export class StylizedVariantResidency {
     this.lastScanAt = -Infinity;
     this.lastScanKey = null;
     this.scanJob = null;
-    this.scanAge = 0;
     this.disposed = false;
   }
 
@@ -383,14 +385,15 @@ export class StylizedVariantResidency {
     } else {
       if (!this.scanJob && (scanKey !== this.lastScanKey || now - this.lastScanAt >= this.rescanIntervalMs)) {
         this.scanJob = { key: scanKey, iterator: this.rescanJob({ ...focus }, predicted ? { ...predicted } : null) };
-        this.scanAge = 0;
       }
       if (this.scanJob) {
         // Do not restart a scan on each movement update. Complete it then
-        // immediately request the newest window. One bounded step under load.
-        const force = ++this.scanAge >= 4;
+        // immediately request the newest window. Under load it still takes a few
+        // chunks (a handful of tile reads each) per frame, as pumpApplies always takes
+        // a step: one chunk every 4 frames left a cold load ~450 frames (113 chunks at
+        // the default radius) from its first request.
         let units = 0;
-        while (units < 24 && (!shouldYield() || (force && units === 0))) {
+        while (units < 24 && (units < SCAN_UNITS_UNDER_LOAD || !shouldYield())) {
           units++;
           if (this.scanJob.iterator.next().done) {
             this.lastScanKey = this.scanJob.key;
@@ -399,7 +402,6 @@ export class StylizedVariantResidency {
             break;
           }
         }
-        if (units) this.scanAge = 0;
       }
     }
     if (this.manageRequests) this.pumpApplies(shouldYield);

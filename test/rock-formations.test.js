@@ -9,7 +9,9 @@ const always = () => 1;
 test('a formation is a keystone mass crowded by smaller stones, deterministic per cell', () => {
   const formation = formationStones(3, -7, config, always);
   assert.deepEqual(formationStones(3, -7, config, always), formation, 'same cell, same stones');
-  const { stones, cx, cz, radius } = formation;
+  const { cx, cz, radius } = formation;
+  // The mass itself; its scree skirt (tests/snowRockPhases.test.js) lies past the radius.
+  const stones = formation.stones.filter((stone) => !stone.identity.includes(':s'));
   assert.ok(stones.length >= config.minStones && stones.length <= config.maxStones);
   assert.ok(stones[0].scale >= config.keystoneMinScale, 'leads with a keystone');
   for (const stone of stones) assert.ok(Math.hypot(stone.x - cx, stone.z - cz) <= radius + 1e-9, 'within its radius');

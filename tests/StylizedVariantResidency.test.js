@@ -188,12 +188,20 @@ test('an install still advances a step each frame when the shared budget is spen
   const residency = new StylizedVariantResidency({ terrainView, layers: [layer], rescanIntervalMs: 0 });
   const exhausted = () => true;
 
-  residency.update(0, exhausted);
-  await Promise.resolve();
-  await Promise.resolve();
-  for (let frame = 1; frame <= 4; frame += 1) residency.update(frame, exhausted);
+  // Spent from the first frame: the biome scan and the install each still take a step a
+  // frame, so the variant lands in a bounded number of frames rather than starving.
+  let frame = 0;
+  for (; frame < 60 && steps < 3; frame += 1) {
+    residency.update(frame, exhausted);
+    await Promise.resolve();
+    await Promise.resolve();
+  }
   assert.equal(steps, 3);
-  assert.equal(residency.getPreparationStatus().pending, 0);
+  assert.ok(frame <= 40, `installed after ${frame} frames`);
+  residency.update(frame, exhausted);
+  // Published; with rescanIntervalMs 0 a fresh scan is always in flight, so not `pending`.
+  assert.equal(residency.activeApply, null);
+  assert.equal(residency.pendingApplies.length, 0);
 });
 
 test('a variant is requested once, and a failed one is not retried', async () => {
