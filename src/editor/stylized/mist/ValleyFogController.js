@@ -68,7 +68,7 @@ export class ValleyFogController {
    */
   update(focus, origin, state = {}) {
     if (!this.enabled) return;
-    const prepare = () => this.patch.update(focus, origin, state.budget?.shouldYield);
+    const prepare = () => this.patch.update(focus, origin, state.budget?.shouldYield, state.budget);
     (state.budget?.runner ?? (run => run()))(prepare);
     if (this.stepAdmission) {
       const now = (Number(state.timeSeconds) || 0) * 1000;

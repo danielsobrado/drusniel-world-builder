@@ -183,7 +183,7 @@ export class AmbientEffectsSystem {
     const delta = Math.min(Math.max(Number(deltaSeconds) || 0, 0), MAX_STEP_SECONDS);
     this.elapsed += delta;
     this.levels.sea.value = seaLevel;
-    const prepare = () => this.ground.update(focus, origin, state.budget?.shouldYield);
+    const prepare = () => this.ground.update(focus, origin, state.budget?.shouldYield, state.budget);
     (state.budget?.runner ?? (run => run()))(prepare);
     if (!this.ground.ready) return;
 

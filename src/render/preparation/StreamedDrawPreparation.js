@@ -397,6 +397,19 @@ export class StreamedDrawPreparation {
       this.hidden.set(mesh, mesh.visible); mesh.visible = false;
     }
   }
+  /** Auxiliary visibility selection can reveal a draw withheld from the main pass. */
+  withPendingDrawsHidden(operation) {
+    const hidden = [];
+    for (const mesh of this.pending) {
+      if (this.stagedMaterials.has(mesh) && this.isMaterialReady(mesh, mesh.material)) continue;
+      if (!mesh.parent || !mesh.visible) continue;
+      hidden.push(mesh);
+      mesh.visible = false;
+    }
+    if (hidden.length) PerfCounters.inc('auxiliaryPendingDrawsHidden', hidden.length);
+    try { return operation(); }
+    finally { for (const mesh of hidden) mesh.visible = true; }
+  }
   revealPending() {
     for (const [mesh, visible] of this.hidden) mesh.visible = visible;
     this.hidden.clear();

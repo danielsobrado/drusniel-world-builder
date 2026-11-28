@@ -41,3 +41,25 @@ test('the public QA recording state follows phase changes without replacing the 
     if (before === undefined) delete globalThis.window; else globalThis.window = before;
   }
 });
+
+
+test('auxiliary rendering withholds unprepared draws and preserves ready fallback visibility', () => {
+  const scene = new Scene(), geometry = new PlaneGeometry(), material = new MeshBasicMaterial();
+  const replacement = new MeshBasicMaterial();
+  const fallback = new Mesh(geometry, material), fresh = new Mesh(geometry, material);
+  scene.add(fallback);
+  const preparation = new StreamedDrawPreparation({ scene, renderer: {}, settings: { enabled: true, meshesPerFrame: 1 } });
+  preparation.markInitialScene();
+  preparation.requestMaterial(fallback, replacement);
+  scene.add(fresh);
+  preparation.register(fresh);
+  try {
+    assert.throws(() => preparation.withPendingDrawsHidden(() => {
+      assert.equal(fallback.visible, true);
+      assert.equal(fresh.visible, false);
+      throw new Error('capture failure');
+    }), /capture failure/);
+    assert.equal(fresh.visible, true);
+    assert.equal(fallback.visible, true);
+  } finally { preparation.dispose(); geometry.dispose(); material.dispose(); replacement.dispose(); }
+});

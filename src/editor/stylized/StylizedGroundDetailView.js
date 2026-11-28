@@ -2,7 +2,8 @@ import { applyJungleMist } from './ambient/jungleMistOutput.js';
 import { valueNoise } from '../world/valueNoise2d.js';
 import { completeIterator, ITERATOR_PENDING } from './ResumableIterator.js';
 import { BudgetedDetailVisibility } from './lod/BudgetedDetailVisibility.js';
-import { stepViewRebuild } from './StagedViewRebuild.js';
+import { stepViewRebuild, cancelStagedViewRebuild } from './StagedViewRebuild.js';
+import { retainPendingScatterWindow } from './PendingScatterWindow.js';
 import * as THREE from 'three/webgpu';
 import { PerfCounters } from '../performance/qa/PerfCounters.js';
 import { materialList } from '../assets/assetUrl.js';
@@ -709,7 +710,9 @@ export class StylizedGroundDetailView {
       state = { key, builder: createStableChunkManifestBuilder(options) };
       this.pendingManifests.set(cacheKey, state);
     }
+    const before = state.builder.progress;
     const built = state.builder.step({ shouldYield });
+    this.workProgress = (this.workProgress ?? 0) + state.builder.progress - before;
     if (built === null) return null;
     const placements = this.layerName === 'groundDetail'
       ? Object.freeze(this.appendNurseLogFlora(built.slice(), chunkX, chunkZ, options))
@@ -813,6 +816,7 @@ export class StylizedGroundDetailView {
     }:o${obstacleVersion}:p${this.prototypeRevision}`;
     if (updateKey === this.lastUpdateKey && !this.pendingRebuild) return;
     if (this.pendingRebuild?.updateKey === updateKey) return;
+    retainPendingScatterWindow(this.pendingManifests, focus, radius);
     this.pendingRebuild = {
       key: `${this.layerName}:${updateKey}`,
       updateKey,
@@ -837,7 +841,10 @@ export class StylizedGroundDetailView {
         let manifest = null;
         while (manifest === null) {
           manifest = this.manifestForChunk(chunkX, chunkZ, this.currentShouldYield);
-          if (manifest === null) yield ITERATOR_PENDING;
+          if (manifest === null) {
+            this.blockedDependency = { reason: 'detail-manifest', dependencyType: 'detail-manifest', chunkKeys: [key] };
+            yield ITERATOR_PENDING;
+          }
         }
         yield* this.instanceRows.stageChunk(job, key, manifest, DETAIL_REPRESENTATIONS);
       }
@@ -845,13 +852,20 @@ export class StylizedGroundDetailView {
     yield* this.instanceRows.stageRetired(job);
     yield;
     const origin = this.terrainView.floatingOrigin.getState();
-    this.instanceAnchor.follow(origin);
-    const rebased = this.instanceAnchor.x !== this.instanceRows.anchorX
-      || this.instanceAnchor.z !== this.instanceRows.anchorZ;
+    const proposed = this.instanceAnchor.proposed(origin);
+    const rebased = proposed.x !== this.instanceRows.anchorX || proposed.z !== this.instanceRows.anchorZ;
     const changed = job.changes.some(changes => changes?.size > 0);
     if (!this.visibility || changed || rebased || job.manifestsChanged) {
-      const { near: count } = this.instanceRows.commit(job, this.meshes, [], this.instanceAnchor,
-        Boolean(this.visibility));
+      let counts;
+      if (this.sceneryPublicationBudget) {
+        const publication = yield* this.instanceRows.prepareCommit(job, this.meshes, [], proposed, Boolean(this.visibility));
+        counts = yield* publication.publish(() => this.sceneryPublicationBudget);
+      } else {
+        counts = this.instanceRows.commit(job, this.meshes, [], proposed, Boolean(this.visibility));
+      }
+      this.instanceAnchor.x = proposed.x;
+      this.instanceAnchor.z = proposed.z;
+      const count = counts.near;
       if (this.visibility) {
         this.visibility.reset(this.instanceRows.storage.map(storage => storage.buckets.near));
       }
@@ -859,7 +873,7 @@ export class StylizedGroundDetailView {
     } else {
       this.instanceRows.chunks = job.chunks;
     }
-    this.instanceAnchor.place(this.root, origin);
+    this.instanceAnchor.place(this.root, this.terrainView.floatingOrigin.getState());
     for (const key of this.manifestCache.keys()) {
       if (!activeChunks.has(key)) this.manifestCache.delete(key);
     }
@@ -869,6 +883,9 @@ export class StylizedGroundDetailView {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    cancelStagedViewRebuild(this);
+    this.pendingRebuild = null;
+    this.pendingManifests.clear();
     this.visibility?.dispose();
     this.terrainView.scene.remove(this.root);
     disposeInstancedRenderers(this.root, this.meshes);

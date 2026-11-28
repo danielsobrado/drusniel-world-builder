@@ -987,7 +987,7 @@ export class StylizedSurfaceView {
       else sample();
     }
     if (this.config.enhancements?.regionalInstancePublicationBudget || this.config.enhancements?.slicedInstancePublication) {
-      for (const view of [this.treeView, this.rockView, this.bushView]) {
+      for (const view of [this.treeView, this.rockView, this.bushView, ...this.detailViews]) {
         if (view) view.sceneryPublicationBudget = this.publicationBudget ?? null;
       }
     }

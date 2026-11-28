@@ -58,3 +58,15 @@ test('render-layer isolation is opt-in and validates the YAML boolean', () => {
   assert.equal(resolveRenderEnhancements({}, '?renderLayerIsolation=1').renderLayerIsolation, true);
   assert.throws(() => resolveRenderEnhancements({ renderLayerIsolation: 'true' }), TypeError);
 });
+
+
+test('pending-draw guard executes inside auxiliary camera visibility selection', () => {
+  const calls = [];
+  const surface = { terrainView: { drawPreparation: { withPendingDrawsHidden(next) {
+    calls.push('guard'); return next();
+  } } }, detailViews: [{ visibility: { withAuxiliaryCamera(_camera, next) {
+    calls.push('selection'); return next();
+  } } }] };
+  withAuxiliaryScene(surface, {}, {}, 0, () => calls.push('draw'));
+  assert.deepEqual(calls, ['selection', 'guard', 'draw']);
+});

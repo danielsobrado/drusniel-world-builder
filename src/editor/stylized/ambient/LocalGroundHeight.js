@@ -71,7 +71,7 @@ export class LocalGroundHeight {
    * @returns {boolean} whether the patch was rebuilt
    */
   update(focus, origin, shouldYield = () => false, publicationBudget = null) {
-    this.currentGate = shouldYield;
+    this.currentGate = typeof shouldYield === 'function' ? shouldYield : () => false;
     this.publicationBudget = publicationBudget;
     const canonical = { x: focus.x + origin.x, z: focus.z + origin.z };
     const revision = this.getRevision();
@@ -85,7 +85,7 @@ export class LocalGroundHeight {
       this.job = this.buildPatch(canonical, revision, () => this.currentGate(), () => this.publicationBudget);
     }
     const previous = this.rebuilds;
-    while (this.job && !shouldYield()) {
+    while (this.job && !this.currentGate()) {
       const step = this.job.next();
       if (step.done) this.job = null;
       else if (step.value === 'wait-ground-dependencies' || step.value === 'wait-publication-budget') break;

@@ -1,6 +1,7 @@
 import { completeIterator, ITERATOR_PENDING } from './ResumableIterator.js';
 import { cachedLodPlan } from './lod/CachedLodPlan.js';
 import { stepViewRebuild, cancelStagedViewRebuild } from './StagedViewRebuild.js';
+import { retainPendingScatterWindow } from './PendingScatterWindow.js';
 import * as THREE from 'three/webgpu';
 import { understoryLookAt } from '../biomes/understoryRampLooks.js';
 import { valueNoise } from '../world/valueNoise2d.js';
@@ -462,7 +463,9 @@ export class StylizedBushView {
       state = { key, builder: createStableChunkManifestBuilder(options) };
       this.pendingManifests.set(cacheKey, state);
     }
+    const before = state.builder.progress;
     const placements = state.builder.step({ shouldYield });
+    this.workProgress = (this.workProgress ?? 0) + state.builder.progress - before;
     if (placements === null) return null;
     this.pendingManifests.delete(cacheKey);
     this.manifestCache.set(cacheKey, { key, placements });
@@ -574,6 +577,7 @@ export class StylizedBushView {
   }
 
   *iterateRebuild(focus, placementRadius, plan, rockSource) {
+    retainPendingScatterWindow(this.pendingManifests, focus, placementRadius);
     PerfCounters.inc('bushRebuilds');
     const job = this.instanceRows.begin();
     const activeChunks = new Set();
@@ -636,6 +640,8 @@ export class StylizedBushView {
     if (this.disposed) return;
     this.disposed = true;
     cancelStagedViewRebuild(this);
+    this.pendingRebuild = null;
+    this.pendingManifests.clear();
     this.terrainView.scene.remove(this.root);
     disposeInstancedRenderers(this.root, this.meshes);
     disposeInstancedRenderers(this.root, this.proxyMeshes);
