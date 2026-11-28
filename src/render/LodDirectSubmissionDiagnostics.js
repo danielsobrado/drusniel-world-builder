@@ -7,8 +7,6 @@ export const LOD_DIRECT_SUBMISSION_COUNTERS = Object.freeze([
 
 /** Diagnostic-only logical geometry submissions, not rasterized pixels or GPU time. */
 export class LodDirectSubmissionDiagnostics {
-  constructor() { this.cache = new WeakMap(); }
-
   observe(renderObject) {
     const { object, geometry, group, material } = renderObject;
     const dither = geometry?.getAttribute?.('instanceDither');
@@ -26,25 +24,21 @@ export class LodDirectSubmissionDiagnostics {
     const end = Math.min(available, range.start + range.count, group ? group.start + group.count : Infinity);
     const triangles = Math.floor(Math.max(0, end - start) / 3);
     if (!triangles) return;
-    let row = this.cache.get(dither);
-    if (!row || row.version !== dither.version || row.count !== count) {
-      let fading = 0, zero = 0;
-      for (let i = 0; i < count; i++) {
-        const fade = Math.abs(dither.array[i * dither.itemSize]);
-        if (fade === 0) zero++;
-        else if (fade < 1) fading++;
-      }
-      row = { version: dither.version, count, fading, zero };
-      this.cache.set(dither, row);
+    // Sliced publication can change CPU rows without incrementing the attribute version.
+    let fading = 0, zero = 0;
+    for (let i = 0; i < count; i++) {
+      const fade = Math.abs(dither.array[i * dither.itemSize]);
+      if (fade === 0) zero++;
+      else if (fade < 1) fading++;
     }
     PerfCounters.inc('lodDirectDraws');
     PerfCounters.inc('lodDirectInstances', count);
     PerfCounters.inc('lodDirectTriangles', triangles * count);
-    if (row.fading || row.zero) PerfCounters.inc('lodDirectDrawsWithFade');
-    if (row.fading) {
-      PerfCounters.inc('lodDirectFadingInstances', row.fading);
-      PerfCounters.inc('lodDirectFadingTriangles', triangles * row.fading);
+    if (fading || zero) PerfCounters.inc('lodDirectDrawsWithFade');
+    if (fading) {
+      PerfCounters.inc('lodDirectFadingInstances', fading);
+      PerfCounters.inc('lodDirectFadingTriangles', triangles * fading);
     }
-    if (row.zero) PerfCounters.inc('lodDirectZeroFadeInstances', row.zero);
+    if (zero) PerfCounters.inc('lodDirectZeroFadeInstances', zero);
   }
 }

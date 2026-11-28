@@ -454,7 +454,7 @@ const environmentModule = import(${JSON.stringify(pathToFileURL(path.join(root, 
       screenshot: ${JSON.stringify(screenshotReportPath)},
       video: page.video() ? await page.video().path() : null,
       visualOnly: ${videoDir !== null},
-      diagnosticOnly: ${videoDir !== null || cpuProfilePath !== null || heapProfilePath !== null || (hasFlag('resources') && scenario === 'lod-revisit') || ['1', 'true'].includes(target.searchParams.get('lodSubmissionDiagnostics'))},
+      diagnosticOnly: ${videoDir !== null || cpuProfilePath !== null || heapProfilePath !== null || (hasFlag('resources') && scenario === 'lod-revisit') || ['', '1', 'true'].includes(target.searchParams.get('lodSubmissionDiagnostics'))},
       cpuProfile: ${JSON.stringify(cpuProfileReportPath)},
       heapProfile: ${JSON.stringify(heapProfilePath === null ? null : path.relative(root, heapProfilePath).replaceAll('\\', '/'))},
     };

@@ -4,7 +4,7 @@ const ROTATION_FRAMES = 4;
 export function reserveEnvironmentalGroundTurn(budget, pending) {
   const turn = budget.slack.frameId % ROTATION_FRAMES;
   const selected = turn === 0 && pending.valley ? 'valley' : turn === 2 && pending.ambient ? 'ambient' : null;
-  let reservation = selected ? budget.reserve(budget.maximumMs) : null;
+  let reservation = selected && budget.settings?.enabled !== false ? budget.reserve(budget.maximumMs) : null;
   const result = { valley: budget, ambient: budget, cancel() { reservation?.cancel(); reservation = null; } };
   if (reservation) result[selected] = {
     shouldYield: budget.shouldYield,
