@@ -1,6 +1,6 @@
 {
   "version": 5,
-  "generatedAt": "2026-11-28T03:24:51.167Z",
+  "generatedAt": "2026-11-28T16:18:40.541Z",
   "sourceSignature": "tree-impostor-v10-37c40d28",
   "sourceInputs": {
     "version": 1,
@@ -49,7 +49,7 @@
       "src/editor/stylized/StylizedPrototypeBake.js": "dd8d56e90551a7cd23d5677ce4e8d471ec67881e25e09b61d394659a51877c76",
       "src/editor/stylized/StylizedTreeMaterials.js": "eef2bf24db428bd26886837f0f8bb669f507d3f588dc9199d6245061e76df781",
       "src/editor/stylized/StylizedTreePrototypes.js": "f6d419b7ec207c1fda3d9060d8f6d69657b4953125f0b752afcb26ff978d9863",
-      "src/editor/stylized/StylizedTreeView.js": "846b91435398e646e0f497c6ee06bd453c64d9c9d0e71988de7f25e180faff23",
+      "src/editor/stylized/StylizedTreeView.js": "048e6c8302d01521067d967ec1a2c603c5f9bcee59899029e1093c6b37717971",
       "src/editor/stylized/barkWeathering.js": "1bfeb4bc6b970f2da99bb7df4f398503665a4bef563c8f28eb377b2237429a0f",
       "src/editor/stylized/forest/BarkParallax.js": "31e07f0250f94b9dccdacb3683d52e9a76412a619905d19be81161fdcdd08001",
       "src/editor/stylized/forest/CanopyVisibility.js": "27b045a7fff8c2d9cf1b98f3b669bd4b383ea4285fae89a2f7f3b22e3dcd1afd",
