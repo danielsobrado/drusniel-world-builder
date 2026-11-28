@@ -16,6 +16,10 @@ export class PerfQaSettleGate {
     this.timeoutSeconds = timeoutSeconds;
     this.streak = 0;
     this.blockers = [];
+    this.lastBlockers = [];
+    this.maxStreak = 0;
+    this.checks = 0;
+    this.blockedChecks = {};
   }
 
   /**
@@ -26,7 +30,11 @@ export class PerfQaSettleGate {
   update(readiness, waitedSeconds) {
     const blockers = Object.keys(readiness).filter((name) => !readiness[name]);
     this.streak = blockers.length === 0 ? this.streak + 1 : 0;
-    if (blockers.length > 0) this.blockers = blockers;
+    this.checks++;
+    this.maxStreak = Math.max(this.maxStreak, this.streak);
+    this.blockers = blockers;
+    if (blockers.length > 0) this.lastBlockers = blockers;
+    for (const name of blockers) this.blockedChecks[name] = (this.blockedChecks[name] ?? 0) + 1;
     if (this.streak >= this.requiredFrames) return 'settled';
     if (waitedSeconds >= this.timeoutSeconds) return 'timeout';
     return 'waiting';

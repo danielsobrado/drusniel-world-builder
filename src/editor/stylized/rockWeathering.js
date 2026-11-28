@@ -98,7 +98,6 @@ const ALGAE = '#4a5a2a';
 const ROCK_SNOW = '#eef3f8';
 /** How far snow country turns a boulder to fractured alpine stone, and how much macro shading it keeps. */
 const FROST_STONE = 0.92;
-const FROST_SHADING = 1.65;
 /** Rock snow's roughness when the snow coat is off. */
 const PLAIN_SNOW_ROUGHNESS = 0.78;
 /** Soil-line noise frequency: a few lobes round a metre-scale boulder. */

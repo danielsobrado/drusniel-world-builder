@@ -8,7 +8,8 @@ export const LOD_BASELINE_COUNTERS = Object.freeze([
   'stylizedInstancesDroppedByCapacity', 'sceneryPublicationCommits',
   'sceneryPublicationQueuedBytes', 'scenerySliceUploadedBytes',
   'scenerySliceGpuCopyBytes', 'initialInstanceSlicedBytes',
-  'attributeBytesUploaded', 'stylizedInstanceRowsCompared',
+  'attributeBytesUploaded', 'stylizedInstanceRowsCompared', 'sceneryDitherQueuedBytes',
+  'sceneryLodHandoffLeaseMs', 'sceneryLodHandoffLeases',
 ]);
 
 function describe(state, now) {
@@ -65,12 +66,12 @@ export class LodBaselineDiagnostics {
   sample(surface, now, frameIndex) {
     if (now < this.nextAt) return;
     this.nextAt = now + INTERVAL_MS;
+    if (this.samples.length >= MAX_SAMPLES) { this.dropped++; return; }
     const start = performance.now();
     const { layers, next } = sampleLodPlans(surface, now, this.previous);
     this.previous = next;
     const sample = { frameIndex, timestampMs: now, layers, samplingCpuMs: performance.now() - start };
-    if (this.samples.length < MAX_SAMPLES) this.samples.push(sample);
-    else this.dropped++;
+    this.samples.push(sample);
   }
   report(frames) {
     const counters = {};

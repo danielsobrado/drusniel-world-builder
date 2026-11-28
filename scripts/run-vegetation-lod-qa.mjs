@@ -36,7 +36,7 @@ function positiveInteger(name, fallback) {
   return value;
 }
 
-const baseUrl = readArg('url', 'http://127.0.0.1:5173').replace(/\/$/, '');
+const baseUrl = readArg('url', 'http://localhost:5173').replace(/\/$/, '');
 const outputDirectory = path.resolve(readArg(
   'out',
   path.join(root, 'tmp', 'vegetation-lod-qa'),
@@ -130,7 +130,7 @@ try {
     const residency = surface.variantResidency;
     const layer = residency.layers.find((entry) => entry.id === 'bushes');
     if (!layer) throw new Error('Bush variant residency layer is unavailable.');
-    residency.disposed = true;
+    residency.dispose();
     const missing = layer.definitions.filter((definition) => {
       const key = definition.id ?? definition.scene;
       return !surface.bushView.prototypeIndicesByAsset.has(key);
@@ -139,7 +139,21 @@ try {
       definition,
       scene: await layer.acquire(definition.scene),
     })));
-    if (variants.length > 0) layer.apply(variants);
+    if (variants.length > 0) {
+      const result = layer.apply(variants);
+      let installed = result;
+      if (typeof result?.next === 'function') {
+        let step;
+        do {
+          step = result.next();
+          if (!step.done) await new Promise(resolve => requestAnimationFrame(resolve));
+        } while (!step.done);
+        installed = step.value;
+      }
+      if (Array.isArray(installed)) {
+        for (const root of installed) surface.terrainView.drawPreparation?.register(root);
+      }
+    }
     await surface.treeView.impostorReady;
   });
 

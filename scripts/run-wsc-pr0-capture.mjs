@@ -243,9 +243,6 @@ async function runStillmeadowGroup(browser) {
     const approach = await page.evaluate(() => window.__worldVisualQa.loadStillmeadow(18));
     const baseX = approach.settlementFixture.canonicalX;
     const baseZ = approach.settlementFixture.canonicalZ;
-    const baseYaw = (approach.yawDegrees * Math.PI) / 180;
-    const dirX = -Math.sin(baseYaw);
-    const dirZ = -Math.cos(baseYaw);
 
     const stillCams = camerasConfig.locations.B14.cameras;
     for (const [camId, spec] of Object.entries(stillCams)) {

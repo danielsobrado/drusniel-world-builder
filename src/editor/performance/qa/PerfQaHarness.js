@@ -152,6 +152,8 @@ export class PerfQaHarness {
     this.report = null;
     this.settleGate = new PerfQaSettleGate({ timeoutSeconds: this.config.settleTimeoutSeconds });
     this.settleResult = null;
+    this.settleSamples = [];
+    this.nextSettleSampleAt = 0;
     this.status = 'running';
     this.phaseIndex = 0;
     this.phaseStartedAt = performance.now();
@@ -378,7 +380,13 @@ export class PerfQaHarness {
 
   /** @returns {boolean} whether the warmup may end now */
   settlePhase(waitedSeconds) {
-    const verdict = this.settleGate.update(this.settleReadiness(), waitedSeconds);
+    const readiness = this.settleReadiness();
+    const verdict = this.settleGate.update(readiness, waitedSeconds);
+    if (this.config.lodBaseline && waitedSeconds >= this.nextSettleSampleAt) {
+      this.nextSettleSampleAt = waitedSeconds + 1;
+      if (this.settleSamples.length < 600) this.settleSamples.push({ waitedSeconds, readiness,
+        preparation: this.terrainView?.stylizedSurface?.getPreparationStatus?.() ?? null });
+    }
     if (verdict === 'waiting') {
       this.live.phase = `Warmup (settling: ${this.settleGate.blockers.join(', ') || 'holding'})`;
       return false;
@@ -387,6 +395,12 @@ export class PerfQaHarness {
       settled: verdict === 'settled',
       waitedSeconds: Math.round(waitedSeconds * 10) / 10,
       blockers: verdict === 'settled' ? [] : [...this.settleGate.blockers],
+      lastBlockers: [...this.settleGate.lastBlockers],
+      readyStreak: this.settleGate.streak,
+      requiredFrames: this.settleGate.requiredFrames,
+      maxReadyStreak: this.settleGate.maxStreak,
+      checks: this.settleGate.checks,
+      blockedChecks: { ...this.settleGate.blockedChecks },
     });
     this.log(verdict === 'settled'
       ? `Settled after ${this.settleResult.waitedSeconds}s more warmup`
@@ -469,7 +483,10 @@ export class PerfQaHarness {
         cacheLimit: this.terrainView.preparedPlacement?.limit ?? null,
       },
     });
-    if (this.lodBaseline) this.report.lodBaseline = this.lodBaseline.report(this.profiler.getFrames());
+    if (this.lodBaseline) {
+      this.report.lodBaseline = this.lodBaseline.report(this.profiler.getFrames());
+      this.report.lodBaseline.settleSamples = this.settleSamples;
+    }
     this.report.samplingMisses = [...this.samplingMisses];
     this.report.gpuRender = this.gpuProfiler.report();
     if (typeof window !== 'undefined') {

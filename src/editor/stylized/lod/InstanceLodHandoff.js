@@ -9,6 +9,7 @@ export function* waitForInitialInstanceDraws(meshes, acquire = acquireInitialIns
     const lease = acquire(mesh);
     if (!lease) continue;
     deadline ??= now() + lease.timeoutMs;
+    const acquiredAt = now();
     let completed = false;
     try {
       while (!lease.ready()) {
@@ -22,6 +23,10 @@ export function* waitForInitialInstanceDraws(meshes, acquire = acquireInitialIns
       completed = true;
       PerfCounters.inc('sceneryLodHandoffDrawsReady');
     } finally {
+      const ageMs = Math.max(0, now() - acquiredAt);
+      PerfCounters.inc('sceneryLodHandoffLeaseMs', ageMs);
+      PerfCounters.inc('sceneryLodHandoffLeases');
+      PerfCounters.set('sceneryLodHandoffMaxLeaseMs', Math.max(PerfCounters.get('sceneryLodHandoffMaxLeaseMs'), ageMs));
       lease.release();
       if (!completed) PerfCounters.inc('sceneryLodHandoffAbandonedDraws');
     }

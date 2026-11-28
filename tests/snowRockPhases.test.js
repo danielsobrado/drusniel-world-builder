@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as THREE from 'three/webgpu';
 import { color, float, vec3 } from 'three/tsl';
 import { coldStoneSurface } from '../src/editor/stylized/rockSnowSurface.js';
 import { snowDeposition } from '../src/editor/stylized/snowDeposition.js';

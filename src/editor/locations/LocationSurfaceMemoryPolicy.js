@@ -46,7 +46,8 @@ export class LocationSurfaceMemoryPolicy {
       const cost = entry.deferred ? this.settings.surfaceAdaptiveDeferredCost
         : entry.kind === 'impostor' ? this.settings.surfaceAdaptiveImpostorCost : 1;
       return { entry, charge, score: charge * distanceWeight / cost };
-    }).sort((a, b) => b.score - a.score || b.charge - a.charge);
+    }).sort((a, b) => b.score - a.score || b.charge - a.charge
+      || (a.entry.distance === b.entry.distance ? 0 : b.entry.distance - a.entry.distance));
   }
 
   allows(charge) {
