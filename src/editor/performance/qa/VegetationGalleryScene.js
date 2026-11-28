@@ -17,10 +17,13 @@ function boundsOf(meshes) {
 function configureInstance(mesh, matrix, seed) {
   mesh.count = 1;
   mesh.setMatrixAt(0, matrix);
+  mesh.instanceMatrix.clearUpdateRanges();
+  mesh.instanceMatrix.addUpdateRange(0, 16);
   mesh.instanceMatrix.needsUpdate = true;
   for (const [name, values] of [
     ['instanceDither', [1, seed, 1]],
-    ['instanceMorphology', [1, 1, 1]],
+    ['instanceMorphology', mesh.geometry.getAttribute('instanceRootPlane') ? [0, 1, 1] : [1, 1, 1]],
+    ['instanceRootPlane', [0, 0, 0]],
     ['instanceLeafTint', [1, 1, 1, 0]],
     ['instanceBiomeLook', [1, 1, 1, 1]],
     ['instanceSurface', [0, 0, 0]],
@@ -29,6 +32,8 @@ function configureInstance(mesh, matrix, seed) {
     const attribute = mesh.geometry.getAttribute(name);
     if (!attribute) continue;
     attribute.array.set(values, 0);
+    attribute.clearUpdateRanges();
+    attribute.addUpdateRange(0, attribute.itemSize);
     attribute.needsUpdate = true;
   }
   mesh.visible = true;

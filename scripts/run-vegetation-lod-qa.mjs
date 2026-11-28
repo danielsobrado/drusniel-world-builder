@@ -375,7 +375,7 @@ try {
     };
   });
 
-  await page.evaluate(() => window.__editor.terrainView.setAnimationLoop(null));
+  await page.evaluate(() => window.__editor.terrainView.renderer.setAnimationLoop(null));
   report.gallery = { mode: 'isolated-offscreen', morphology: 'neutral', captures: [] };
   for (const [layer, prototypes, pageSize] of [
     ['bushes', report.bushPrototypes, 4], ['trees', report.treePrototypes, 4],
